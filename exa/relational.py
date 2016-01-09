@@ -333,6 +333,21 @@ class Constant(Base):
     value = Column(Float, nullable=False)
 
 
+class DimensionMeta(Meta):
+    '''
+    '''
+    def _getitem(self, key):
+        if isinstance(key, tuple):
+            return self.get_factor(key)
+
+    def get_factor(self, key):
+        f = key[0]
+        t = key[1]
+        return session.query(self).filter(and_(
+            self.from_unit == f,
+            self.to_unit == t
+        )).all()[0].factor
+
 class Dimension:
     '''
     Generic class for physical dimension conversions. Doesn't do anything
@@ -354,7 +369,8 @@ class Dimension:
     factor = Column(Float, nullable=False)
 
 
-class Length(Base, Dimension):
+
+class Length(Base, Dimension, metaclass=DimensionMeta):
     pass
 
 class Mass(Base, Dimension):
