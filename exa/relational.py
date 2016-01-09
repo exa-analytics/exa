@@ -348,6 +348,7 @@ class DimensionMeta(Meta):
             self.to_unit == t
         )).all()[0].factor
 
+
 class Dimension:
     '''
     Generic class for physical dimension conversions. Doesn't do anything
@@ -369,32 +370,31 @@ class Dimension:
     factor = Column(Float, nullable=False)
 
 
-
 class Length(Base, Dimension, metaclass=DimensionMeta):
     pass
 
-class Mass(Base, Dimension):
+class Mass(Base, Dimension, metaclass=DimensionMeta):
     pass
 
-class Time(Base, Dimension):
+class Time(Base, Dimension, metaclass=DimensionMeta):
     pass
 
-class Current(Base, Dimension):
+class Current(Base, Dimension, metaclass=DimensionMeta):
     pass
 
-class Temperature(Base, Dimension):
+class Temperature(Base, Dimension, metaclass=DimensionMeta):
     pass
 
-class Amount(Base, Dimension):
+class Amount(Base, Dimension, metaclass=DimensionMeta):
     pass
 
-class Luminosity(Base, Dimension):
+class Luminosity(Base, Dimension, metaclass=DimensionMeta):
     pass
 
-class Dose(Base, Dimension):
+class Dose(Base, Dimension, metaclass=DimensionMeta):
     pass
 
-class Acceleration(Base, Dimension):
+class Acceleration(Base, Dimension, metaclass=DimensionMeta):
     '''
     Lt^-2 conversions.
 
@@ -403,28 +403,28 @@ class Acceleration(Base, Dimension):
     '''
     pass
 
-class Angle(Base, Dimension):
+class Angle(Base, Dimension, metaclass=DimensionMeta):
     pass
 
-class Charge(Base, Dimension):
+class Charge(Base, Dimension, metaclass=DimensionMeta):
     pass
 
-class Dipole(Base, Dimension):
+class Dipole(Base, Dimension, metaclass=DimensionMeta):
     '''
     Electric dipole moment.
     '''
     pass
 
-class Energy(Base, Dimension):
+class Energy(Base, Dimension, metaclass=DimensionMeta):
     pass
 
-class Force(Base, Dimension):
+class Force(Base, Dimension, metaclass=DimensionMeta):
     pass
 
-class Frequency(Base, Dimension):
+class Frequency(Base, Dimension, metaclass=DimensionMeta):
     pass
 
-class MolarMass(Base, Dimension):
+class MolarMass(Base, Dimension, metaclass=DimensionMeta):
     pass
 
 
