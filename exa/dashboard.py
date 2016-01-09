@@ -8,8 +8,8 @@ user work. This includes :class:`~exa.relational.Program`s,
 :class:`~exa.relational.Project`s, :class:`~exa.relational.Job`s,
 :class:`~exa.relational.File`s, and :class:`~exa.relational.Container`s.
 '''
-import gc
 from exa.relational import Store
+from exa.relational import Container as DBContainer
 from exa.container import Container
 
 
@@ -23,7 +23,7 @@ class Dashboard:
     def list_containers(self):
         '''
         '''
-        return [c for c in gc.get_objects() if isinstance(c, Container)]
+        return DBContainer._get_all()
 
     def __init__(self):
         pass

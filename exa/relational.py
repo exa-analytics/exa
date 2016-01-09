@@ -33,6 +33,11 @@ class Meta(DeclarativeMeta):
         else:
             return df
 
+    def _get_all(self):
+        '''
+        '''
+        return session.query(self).all()
+
 
 @as_declarative(metaclass=Meta)
 class Base:
@@ -203,15 +208,7 @@ ContainerFile = Table(
 )
 
 
-class StoreMeta(Meta):
-    '''
-    '''
-    def _get_all(self):
-        '''
-        '''
-        return session.query(self).all()
-
-class Store(Base, metaclass=StoreMeta):
+class Store(Base):
     '''
     Database representation of the 'store' concept.
 
