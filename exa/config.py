@@ -52,11 +52,11 @@ class Config:
                     self[k] = v
 
     def relational_engine(self):
-        b = self.relational.backend
+        b = self.relational['backend']
         e = self.exa
-        d = self.relational.database
-        h = self.relational.host
-        u = self.relational.user
+        d = self.relational['database']
+        h = self.relational['host']
+        u = self.relational['user']
         if b == 'sqlite':
             return '{0}:///{1}/{2}'.format(b, e, d)
         else:
