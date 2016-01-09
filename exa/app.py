@@ -28,10 +28,10 @@ class DashboardHandler(RequestHandler):
         self.write(jinja2_loader.get_template('dashboard.html').render(**kwargs))
 
 
-def serve(host='localhost', port=8080):
+def serve(port=5000):
     '''
     '''
-    exa_web_app.listen(port)
+    web_app.listen(port)
     IOLoop.instance().start()
 
 
@@ -67,5 +67,4 @@ tornado_handlers = [
 ]
 
 jinja2_loader = Environment(loader=FileSystemLoader(searchpath=templates_path))
-
-exa_web_app = Application(tornado_handlers, **tornado_settings)
+web_app = Application(tornado_handlers, **tornado_settings)

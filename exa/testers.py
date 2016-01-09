@@ -6,13 +6,12 @@ Functionality for systematic unittests and doctests
 '''
 import unittest
 import doctest
-from exa import sys
-from exa import datetime
-from exa import get_logger
+from datetime import datetime
+from exa import _sys as sys
+from exa.log import get_logger
 
 
-DOCTESTLOG = get_logger('doctest').handlers[0].baseFilename
-UNITTESTLOG = get_logger('unittest').handlers[0].baseFilename
+testlog = get_logger('test').handlers[0].baseFilename
 
 
 def header():
@@ -97,6 +96,3 @@ def run_doctests(verbose=True, log=False):
     else:
         print(header())
         tester(modules, runner)
-
-
-del get_logger
