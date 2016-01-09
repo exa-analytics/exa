@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" ng-app>
+    <head>
+        <meta charset="utf-8">
+        <title>exa analytics dashboard</title>
+        <script src={{angular_min_js}}></script>
+        <script src={{jquery_min_js}}></script>
+        <script src={{pixi_min_js}}></script>
+        <script src={{dat_gui_min_js}}></script>
+        <script src={{three_min_js}}></script>
+        <script src={{TrackballControls_js}}></script>
+        <script src={{exa_store_js}}></script>
+    </head>
+    <body>
+        <label>Name:</label>
+        <input type="text" ng-model="yourName" placeholder="Enter a name here">
+        <hr>
+        <h1>Hello {{'{{yourName}}'}}!</h1>
+        <button type='button' id='b_click'>Click!</button>
+    </body>
+</html>

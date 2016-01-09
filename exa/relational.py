@@ -18,6 +18,7 @@ from exa import _bz as bz
 from exa import _pd as pd
 from exa.utils import gen_uid
 
+
 class Meta(DeclarativeMeta):
     '''
     Extends the default sqlalchemy table metaclass to allow for getting.
@@ -281,10 +282,15 @@ class IsotopeMeta(Meta):
         '''
         return session.query(self).filter(self.symbol == symbol).all()
 
-    def get_by_AZ(self, element):
+    def get_by_strid(self, element):
         '''
         '''
         return session.query(self).filter(self.strid == element).all()[0]
+
+    def get_szuid(self, number):
+        '''
+        '''
+        return session.query(self).filter(self.szuid == number).all()[0]
 
     def _getitem(self, key):
         if isinstance(key, str):

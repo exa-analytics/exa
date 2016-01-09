@@ -15,8 +15,22 @@ def get_args():
     Command line argument parsing and usage documentation.
     '''
     parser = argparse.ArgumentParser(description=None)
-    parser.add_argument('-p', '--port', type=str, help='port (default 5000)',
-                        required=False, default=8080)
+    parser.add_argument(
+        '-p',
+        '--port',
+        type=str,
+        help='port (default 5000)',
+        required=False,
+        default=8080
+    )
+    parser.add_argument(
+        '-b',
+        '--browser',
+        type=str,
+        help='browser (system default)',
+        required=False,
+        default=None
+    )
     return parser.parse_args()
 
 
@@ -26,6 +40,7 @@ def main():
     '''
     args = get_args()
     port = args.port
+    browser = args.browser
     link = 'http://localhost:{port}'.format(port=port)
     threading.Timer(0.5, lambda: webbrowser.get(browser).open(link)).start()
     serve(port=port)
