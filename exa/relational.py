@@ -18,6 +18,7 @@ from exa import _bz as bz
 from exa import _pd as pd
 from exa.utils import gen_uid
 
+
 class Meta(DeclarativeMeta):
     '''
     Extends the default sqlalchemy table metaclass to allow for getting.
