@@ -30,7 +30,6 @@ class Container(DOMWidget):
     - yml for metadata storage     (non-ndarray data: ids, names, descriptions, etc.)
     Auxiliary files are stored in a labeled folder.
     '''
-    # Definitions
     _view_module = Unicode('nbextensions/exa/exa.container', sync=True)
     _view_name = Unicode('ContainerView', sync=True)
     _jslog = Unicode(Config.jslog, sync=True)
@@ -39,7 +38,6 @@ class Container(DOMWidget):
     description = Unicode(sync=True, allow_none=True)
     _cid = Int(sync=True, allow_none=True)    # Container id
 
-    # Properties
     @property
     def df_dict(self):
         '''
@@ -50,7 +48,6 @@ class Container(DOMWidget):
         '''
         return dict([(k, v) for k, v in self.__dict__.items() if isinstance(v, pd.DataFrame)])
 
-    # Public methods
     def save(self, export_to=None):
         '''
         Save the current container and all associated data.
@@ -73,7 +70,6 @@ class Container(DOMWidget):
     def load(self):
         raise NotImplementedError()
 
-    # Private methods
     def _update_view(self):
         '''
         Update the javascript view.
@@ -127,7 +123,6 @@ class Container(DOMWidget):
             return self._update_view()
         self._ipython_display_()
 
-    # Internal methods
     def __getitem__(self, key):
         '''
         Decides what type of getter is needed based on the type of the key.

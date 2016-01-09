@@ -38,29 +38,172 @@ class Base:
         return '{0}({1})'.format(cls.__class__.__name__, cls.pkid)
 
 
-# class User
-# class Group
-# class Program
-# class Project
-# class Job
-
-
 # Relationships are initialized in this manner because their Python
 # class objects haven't yet been defined in the module.
-StoreFile = Table('storefile', Base.metadata,
-                  Column('store_pkid', Integer, ForeignKey('store.pkid')),
-                  Column('file_pkid', Integer, ForeignKey('file.pkid')))
+RegisterFile = Table(
+    'registerfile',
+    Base.metadata,
+    Column('register_pkid', Integer, ForeignKey('register.pkid')),
+    Column('file_pkid', Integer, ForeignKey('file.pkid'))
+)
 
 
-class Store(Base):
+RegisterProgram = Table(
+    'registerprogram',
+    Base.metadata,
+    Column('register_pkid', Integer, ForeignKey('register.pkid')),
+    Column('program_pkid', Integer, ForeignKey('program.pkid'))
+)
+
+
+RegisterProject = Table(
+    'registerproject',
+    Base.metadata,
+    Column('register_pkid', Integer, ForeignKey('register.pkid')),
+    Column('project_pkid', Integer, ForeignKey('project.pkid'))
+)
+
+
+RegisterJob = Table(
+    'registerjob',
+    Base.metadata,
+    Column('register_pkid', Integer, ForeignKey('register.pkid')),
+    Column('job_pkid', Integer, ForeignKey('job.pkid'))
+)
+
+
+RegisterContainer = Table(
+    'registercontainer',
+    Base.metadata,
+    Column('register_pkid', Integer, ForeignKey('register.pkid')),
+    Column('container_pkid', Integer, ForeignKey('container.pkid'))
+)
+
+
+ProgramProject = Table(
+    'programproject',
+    Base.metadata,
+    Column('program_pkid', Integer, ForeignKey('program.pkid')),
+    Column('project_pkid', Integer, ForeignKey('project.pkid'))
+)
+
+
+ProgramJob = Table(
+    'programjob',
+    Base.metadata,
+    Column('program_pkid', Integer, ForeignKey('program.pkid')),
+    Column('job_pkid', Integer, ForeignKey('job.pkid'))
+)
+
+
+ProgramContainer = Table(
+    'programcontainer',
+    Base.metadata,
+    Column('program_pkid', Integer, ForeignKey('program.pkid')),
+    Column('container_pkid', Integer, ForeignKey('container.pkid'))
+)
+
+
+ProgramFile = Table(
+    'programfile',
+    Base.metadata,
+    Column('program_pkid', Integer, ForeignKey('program.pkid')),
+    Column('file_pkid', Integer, ForeignKey('file.pkid'))
+)
+
+
+ProjectJob = Table(
+    'projectjob,
+    Base.metadata,
+    Column('project_pkid', Integer, ForeignKey('project.pkid')),
+    Column('job_pkid', Integer, ForeignKey('job.pkid'))
+)
+
+
+ProjectContainer = Table(
+    'projectcontainer',
+    Base.metadata,
+    Column('project_pkid', Integer, ForeignKey('project.pkid')),
+    Column('container_pkid', Integer, ForeignKey('container.pkid'))
+)
+
+
+ProjectFile = Table(
+    'projectfile',
+    Base.metadata,
+    Column('project_pkid', Integer, ForeignKey('project.pkid')),
+    Column('file_pkid', Integer, ForeignKey('file.pkid'))
+)
+
+
+JobContainer = Table(
+    'jobcontainer',
+    Base.metadata,
+    Column('job_pkid', Integer, ForeignKey('job.pkid')),
+    Column('container_pkid', Integer, ForeignKey('container.pkid'))
+)
+
+
+JobFile = Table(
+    'jobfile',
+    Base.metadata,
+    Column('job_pkid', Integer, ForeignKey('job.pkid')),
+    Column('file_pkid', Integer, ForeignKey('file.pkid'))
+)
+
+
+ContainerFile = Table(
+    'containerfile',
+    Base.metadata,
+    Column('container_pkid', Integer, ForeignKey('container.pkid')),
+    Column('file_pkid', Integer, ForeignKey('file.pkid'))
+)
+
+
+class Register(Base):
     '''
-    An object holder representation that contains information about saved
-    :class:`~exa.container.Container` objects and all of the associated
-    data that can be
+    Database representation of the 'store' concept.
+
+    See Also:
+        :class:`~exa.store.Store`
     '''
     name = Column(String)
     description = Column(String)
     uid = Column(String(32), default=gen_uid)
+
+
+class Program(Base):
+    '''
+    Long term or on-going project
+    '''
+    name - Column(String)
+    description = Column(String)
+    created = Column(DateTime, default=datetime.now)
+    modified = Column(DateTime, default=datetime.now)
+    accessed = Column(DateTime, default=datetime.now)
+
+
+class Project(Base):
+    '''
+    Carefully planned enterprise to achieve a specific aim.
+    '''
+    name - Column(String)
+    description = Column(String)
+    created = Column(DateTime, default=datetime.now)
+    modified = Column(DateTime, default=datetime.now)
+    accessed = Column(DateTime, default=datetime.now)
+
+
+class Job(Base):
+    '''
+    Specific task in a :class:`~exa.relational.Program` or
+    :class:`~exa.relational.Project`.
+    '''
+    name - Column(String)
+    description = Column(String)
+    created = Column(DateTime, default=datetime.now)
+    modified = Column(DateTime, default=datetime.now)
+    accessed = Column(DateTime, default=datetime.now)
 
 
 class File(Base):

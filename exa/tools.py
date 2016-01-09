@@ -5,11 +5,12 @@ Require internal (exa) imports.
 '''
 import shutil, os
 from notebook import install_nbextension
-from exa import Config, re
+from exa import Config
+from exa import _re as re
 from exa.utils import mkpath
 
 
-def install_widget_javascript(path=None, verbose=False):
+def install_notebook_widgets(path=None, verbose=False):
     '''
     '''
     try:
@@ -24,5 +25,13 @@ def install_widget_javascript(path=None, verbose=False):
             dest = Config.extensions
             dest += original_filepath.replace(rmprefix.group(1), '').replace(filename, '')
             mkpath(dest, mkdir=True)
-            install_nbextension(original_filepath, verbose=verbose,
-                                overwrite=True, nbextensions_dir=dest)
+            install_nbextension(
+                original_filepath,
+                verbose=verbose,
+                overwrite=True,
+                nbextensions_dir=dest
+            )
+
+
+def initialize_database():
+    pass
