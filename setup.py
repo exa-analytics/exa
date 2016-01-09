@@ -7,6 +7,7 @@ from exa import __version__
 
 
 DEPS = [req.strip() for req in open('requirements.txt').readlines()]
+DEPS += ['tables>3.2.2']
 
 
 try:
