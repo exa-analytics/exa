@@ -22,6 +22,7 @@ DEPS = [
     'seaborn>=0.6.0',
     'sphinx>=1.3',
     'blaze>=0.8.3',
+    'sqlalchemy>=1.0.0',
     'sphinx_rtd_theme>=0.1.7',
     'sphinxcontrib-autoanysrc',
     'argparse',

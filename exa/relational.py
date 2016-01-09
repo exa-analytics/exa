@@ -2,22 +2,38 @@
 '''
 Relational Database Tables
 ==================================
+Database logic for the content management system.
 
-Note
+Note:
     All database interaction is lazy. Objects are commited when
     a users attempts to query the database and on exit.
 '''
 from sqlalchemy import (Table, Column, Integer, String, DateTime, ForeignKey,
-                        Float, create_engine, and_)
-from sqlalchemy.orm import sessionmaker, relationship
-from sqlalchemy.ext.declarative import as_declarative, declared_attr
+                        Float, create_engine, and_, event)
+from sqlalchemy.orm import sessionmaker, scoped_session, mapper
+from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
 from datetime import datetime
 from exa import Config
 from exa import _bz as bz
+from exa import _pd as pd
 from exa.utils import gen_uid
 
+class Meta(DeclarativeMeta):
+    '''
+    Extends the default sqlalchemy table metaclass to allow for getting.
+    '''
+    def __getitem__(self, key):
+        return self._getitem(key)
 
-@as_declarative()
+    def df(self):
+        df = bz.odo(db[self.__tablename__], pd.DataFrame)
+        if 'pkid' in df.columns:
+            return df.set_index('pkid')
+        else:
+            return df
+
+
+@as_declarative(metaclass=Meta)
 class Base:
     '''
     Declarative base class (used by SQLAlchemy) to initialize relational tables.
@@ -30,13 +46,38 @@ class Base:
     def __tablename__(cls):
         return cls.__name__.lower()
 
-    def df(cls):
+    @classmethod
+    def _bulk_insert(cls, data):
         '''
+        Perform a bulk insert into a specific table.
+
+        Args:
+            data (list): List of dictionary objects representing rows
         '''
-        pass
+        commit()
+        session.bulk_insert_mappings(cls, data)
 
     def __repr__(cls):
         return '{0}({1})'.format(cls.__class__.__name__, cls.pkid)
+
+
+@event.listens_for(mapper, 'init')
+def auto_add(target, args, kwargs):
+    '''
+    Automatically add newly created objects to the current database session.
+    '''
+    session.add(target)
+
+
+def commit():
+    '''
+    Commit all of the objects currently in the session.
+    '''
+    try:
+        session.commit()
+    except:
+        session.rollback()
+        raise
 
 
 # Relationships are initialized in this manner because their Python
@@ -232,8 +273,34 @@ class File(Base):
     size = Column(Integer)
 
 
-class Isotope(Base):
+class IsotopeMeta(Meta):
     '''
+    '''
+    def get_by_symbol(self, symbol):
+        '''
+        '''
+        return session.query(self).filter(self.symbol == symbol).all()
+
+    def get_by_AZ(self, element):
+        '''
+        '''
+        return session.query(self).filter(self.strid == element).all()[0]
+
+    def _getitem(self, key):
+        if isinstance(key, str):
+            if key[0].isdigit():
+                return self.get_by_strid(key)
+            else:
+                return self.get_by_symbol(key)
+        elif isinstance(key, int):
+            return self.get_by_szuid(key)
+        else:
+            raise TypeError('Key type {0} not supported.'.format(type(key)))
+
+
+class Isotope(Base, metaclass=IsotopeMeta):
+    '''
+    A variant of a chemical element with a specific proton and neutron count.
     '''
     A = Column(Integer, nullable=False)
     Z = Column(Integer, nullable=False)
@@ -253,7 +320,8 @@ class Isotope(Base):
     strid = Column(Integer)
 
     def __repr__(self):
-        return 'Isotope({0}{1})'.format(self.A, self.symbol)
+        return '{0}{1}'.format(self.A, self.symbol)
+
 
 class Constant(Base):
     '''
@@ -346,5 +414,6 @@ class MolarMass(Base, Dimension):
 
 engine_name = Config.relational_engine()
 engine = create_engine(engine_name)
+session = scoped_session(sessionmaker(bind=engine))
 Base.metadata.create_all(engine)
 db = bz.Data(engine)
