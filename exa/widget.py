@@ -25,7 +25,7 @@ class Widget(DOMWidget):
         height (int): Widget height (in pixels)
         fps (int): Widget frames per second (for animation)
     '''
-    _view_module = Unicode('nbextensions/exa_new/exa.store.widget', sync=True)
+    _view_module = Unicode('nbextensions/exa/exa.store.widget', sync=True)
     _view_name = Unicode('StoreView', sync=True)
 
     def __init__(self):

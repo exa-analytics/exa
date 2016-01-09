@@ -32,6 +32,7 @@ setup()
 from exa.testers import run_unittests, run_doctests
 from exa.relational import *
 from exa.tools import install_notebook_widgets, initialize_database
+from exa.widget import Widget
 
 
 
