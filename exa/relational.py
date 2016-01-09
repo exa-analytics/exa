@@ -203,7 +203,15 @@ ContainerFile = Table(
 )
 
 
-class Store(Base):
+class StoreMeta(Meta):
+    '''
+    '''
+    def _get_all(self):
+        '''
+        '''
+        return session.query(self).all()
+
+class Store(Base, metaclass=StoreMeta):
     '''
     Database representation of the 'store' concept.
 

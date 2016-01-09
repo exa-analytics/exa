@@ -1,6 +1,6 @@
 'use strict';
 
-class Workspace {
+class Dashboard {
     constructor() {};
 
     render() {
@@ -11,11 +11,11 @@ class Workspace {
 };
 
 
-var workspace = new Workspace();
+var dashboard = new Dashboard();
 
 
 $(document).ready(function(){
     $("#b_click").click(function() {
-        workspace.render();
+        dashboard.render();
     });
 });

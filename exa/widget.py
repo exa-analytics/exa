@@ -6,7 +6,7 @@ Entry point for communication between Python and the `Jupyter`_ notebook
 `widgets`_ (JS).
 
 See Also:
-    :class:`~exa.workspace.Workspace`
+    :class:`~exa.dashboard.Dashboard`
 
 .. _Jupyter: http://jupyter.org
 .. widgets: https://ipywidgets.readthedocs.org/en/latest
@@ -15,7 +15,7 @@ from ipywidgets import DOMWidget
 from traitlets import Unicode
 
 
-class Widget(DOMWidget):
+class DashboardWidget(DOMWidget):
     '''
     Generic Javascript widget.
 
@@ -25,8 +25,8 @@ class Widget(DOMWidget):
         height (int): Widget height (in pixels)
         fps (int): Widget frames per second (for animation)
     '''
-    _view_module = Unicode('nbextensions/exa/exa.workspace.widget', sync=True)
-    _view_name = Unicode('WorkspaceView', sync=True)
+    _view_module = Unicode('nbextensions/exa/exa.dashboard.widget', sync=True)
+    _view_name = Unicode('DashboardView', sync=True)
 
     def __init__(self):
         super().__init__()
