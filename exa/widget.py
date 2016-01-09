@@ -6,7 +6,7 @@ Entry point for communication between Python and the `Jupyter`_ notebook
 `widgets`_ (JS).
 
 See Also:
-    :class:`~exa.store.Store`
+    :class:`~exa.workspace.Workspace`
 
 .. _Jupyter: http://jupyter.org
 .. widgets: https://ipywidgets.readthedocs.org/en/latest
@@ -25,8 +25,8 @@ class Widget(DOMWidget):
         height (int): Widget height (in pixels)
         fps (int): Widget frames per second (for animation)
     '''
-    _view_module = Unicode('nbextensions/exa/exa.store.widget', sync=True)
-    _view_name = Unicode('StoreView', sync=True)
+    _view_module = Unicode('nbextensions/exa/exa.workspace.widget', sync=True)
+    _view_name = Unicode('WorkspaceView', sync=True)
 
     def __init__(self):
         super().__init__()

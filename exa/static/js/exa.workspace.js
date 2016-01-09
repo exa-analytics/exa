@@ -1,6 +1,6 @@
 'use strict';
 
-class Store {
+class Workspace {
     constructor() {};
 
     render() {
@@ -11,13 +11,11 @@ class Store {
 };
 
 
-var store = new Store();
+var workspace = new Workspace();
 
 
 $(document).ready(function(){
-    //var store = new Store();
-
     $("#b_click").click(function() {
-        store.render();
+        workspace.render();
     });
 });
