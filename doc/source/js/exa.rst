@@ -1,6 +1,6 @@
 Frontend JavaScript
 =====================
 
-.. autoanysrc:: Container View
-    :src: ../../../exa/static/js/exa.container.js
+.. autoanysrc:: CMS Application
+    :src: ../../../exa/static/js/exa.store.js
     :analyzer: js

@@ -4,6 +4,7 @@ Logging
 =====================
 '''
 import logging
+from logging.handlers import RotatingFileHandler
 from textwrap import wrap
 from exa import _os as os
 from exa.config import Config
@@ -50,7 +51,7 @@ def setup():
     for handler in logging.root.handlers:     # Remove default handlers
         logging.root.removeHandler(handler)
     for name, path in log_files.items():
-        handler = logging.handlers.RotatingFileHandler(
+        handler = RotatingFileHandler(
             path,
             maxBytes=Config.maxlogbytes,
             backupCount=Config.maxlogcount
