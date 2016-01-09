@@ -20,10 +20,10 @@ class Container:
             setattr(self, name, df)
         self.name = name
         if name is None:
-            self.name = self.uid
+            self.name = self._db_entry.uid
 
     def __repr__(self):
-        return ''
+        return 'Container({0})'.format(self.name)
 
 
 

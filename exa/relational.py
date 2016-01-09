@@ -24,9 +24,11 @@ class Meta(DeclarativeMeta):
     Extends the default sqlalchemy table metaclass to allow for getting.
     '''
     def __getitem__(self, key):
+        commit()
         return self._getitem(key)
 
     def df(self):
+        commit()
         df = bz.odo(db[self.__tablename__], pd.DataFrame)
         if 'pkid' in df.columns:
             return df.set_index('pkid')
@@ -36,6 +38,7 @@ class Meta(DeclarativeMeta):
     def _get_all(self):
         '''
         '''
+        commit()
         return session.query(self).all()
 
 
@@ -230,6 +233,12 @@ class Container(Base):
     name = Column(String)
     description = Column(String)
     uid = Column(String(32), default=gen_uid)
+
+    def __repr__(self):
+        if self.name is None:
+            return 'Container({0})'.format(self.uid)
+        else:
+            return 'Container({0})'.format(self.name)
 
 
 class Program(Base):
