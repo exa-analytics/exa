@@ -24,14 +24,22 @@ class Meta(DeclarativeMeta):
     Extends the default sqlalchemy table metaclass to allow for getting.
     '''
     def __getitem__(self, key):
+        commit()
         return self._getitem(key)
 
     def df(self):
+        commit()
         df = bz.odo(db[self.__tablename__], pd.DataFrame)
         if 'pkid' in df.columns:
             return df.set_index('pkid')
         else:
             return df
+
+    def _get_all(self):
+        '''
+        '''
+        commit()
+        return session.query(self).all()
 
 
 @as_declarative(metaclass=Meta)
@@ -83,42 +91,42 @@ def commit():
 
 # Relationships are initialized in this manner because their Python
 # class objects haven't yet been defined in the module.
-RegisterFile = Table(
-    'registerfile',
+StoreFile = Table(
+    'storefile',
     Base.metadata,
-    Column('register_pkid', Integer, ForeignKey('register.pkid')),
+    Column('store_pkid', Integer, ForeignKey('store.pkid')),
     Column('file_pkid', Integer, ForeignKey('file.pkid'))
 )
 
 
-RegisterProgram = Table(
-    'registerprogram',
+StoreProgram = Table(
+    'storeprogram',
     Base.metadata,
-    Column('register_pkid', Integer, ForeignKey('register.pkid')),
+    Column('store_pkid', Integer, ForeignKey('store.pkid')),
     Column('program_pkid', Integer, ForeignKey('program.pkid'))
 )
 
 
-RegisterProject = Table(
-    'registerproject',
+StoreProject = Table(
+    'storeproject',
     Base.metadata,
-    Column('register_pkid', Integer, ForeignKey('register.pkid')),
+    Column('store_pkid', Integer, ForeignKey('store.pkid')),
     Column('project_pkid', Integer, ForeignKey('project.pkid'))
 )
 
 
-RegisterJob = Table(
-    'registerjob',
+StoreJob = Table(
+    'storejob',
     Base.metadata,
-    Column('register_pkid', Integer, ForeignKey('register.pkid')),
+    Column('store_pkid', Integer, ForeignKey('store.pkid')),
     Column('job_pkid', Integer, ForeignKey('job.pkid'))
 )
 
 
-RegisterContainer = Table(
-    'registercontainer',
+StoreContainer = Table(
+    'storecontainer',
     Base.metadata,
-    Column('register_pkid', Integer, ForeignKey('register.pkid')),
+    Column('store_pkid', Integer, ForeignKey('store.pkid')),
     Column('container_pkid', Integer, ForeignKey('container.pkid'))
 )
 
@@ -203,7 +211,7 @@ ContainerFile = Table(
 )
 
 
-class Register(Base):
+class Store(Base):
     '''
     Database representation of the 'store' concept.
 
@@ -225,6 +233,12 @@ class Container(Base):
     name = Column(String)
     description = Column(String)
     uid = Column(String(32), default=gen_uid)
+
+    def __repr__(self):
+        if self.name is None:
+            return 'Container({0})'.format(self.uid)
+        else:
+            return 'Container({0})'.format(self.name)
 
 
 class Program(Base):
