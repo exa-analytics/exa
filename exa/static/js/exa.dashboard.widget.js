@@ -3,8 +3,8 @@
 
 require.config({
     shim: {
-        'nbextensions/exa/exa.workspace': {
-            exports: 'workspace'
+        'nbextensions/exa/exa.dashboard': {
+            exports: 'dashboard'
         },
     },
 });
@@ -13,15 +13,17 @@ require.config({
 define([
     'nbextensions/widgets/widgets/js/widget',
     'nbextensions/widgets/widgets/js/manager',
-    'nbextensions/exa/exa.workspace',
+    'nbextensions/exa/exa.dashboard',
     'jquery'
 ], function(
     widget,
     manager,
-    workspace,
+    dashboard,
     $
 ) {
-    var WorkspaceView = widget.DOMWidgetView.extend(workspace);
+    var DashboardView = widget.DOMWidgetView.extend(dashboard);
 
-    return {'WorkspaceView': WorkspaceView}
+
+    manager.WidgetManager.register_widget_view('DashboardView', DashboardView);
+    return {'DashboardView': DashboardView}
 });
