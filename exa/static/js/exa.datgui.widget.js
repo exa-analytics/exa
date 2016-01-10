@@ -22,7 +22,7 @@ define([
 ], function(
     dat
 ) {
-    var DatGUIApp = function() {
+/*    var DatGUIApp = function() {
         var self = this;
         this.gui = new dat.GUI({autoPlace: false, width: 300});
         this.gui_DOM = $(this.gui.domElement);
@@ -48,10 +48,10 @@ define([
         width: 10;\
     }\
     .dg .c .slider {\
-        background: silver\
+        background: white\
     }\
     .dg .c .slider:hover {\
-        background: silver\
+        background: white\
     }\
     .dg .c input[type=text] {\
         background: white;\
@@ -96,23 +96,23 @@ define([
     }\
     .dg .cr.boolean:hover {\
         background: white;\
-        border-bottom: 1px solid silver;\
-        border-right: 1px solid silver\
+        border-bottom: 1px solid white;\
+        border-right: 1px solid white\
     }\
     .dg .cr.function:hover {\
         background: white;\
-        border-bottom: 1px solid silver;\
-        border-right: 1px solid silver\
+        border-bottom: 1px solid white;\
+        border-right: 1px solid white\
     }\
     .dg li.cr {\
         background: #fafafa;\
-        border-bottom: 1px solid silver;\
-        border-right: 1px solid silver\
+        border-bottom: 1px solid white;\
+        border-right: 1px solid white\
     }\
     .dg li.cr:hover {\
         background: white;\
-        border-bottom: 1px solid silver;\
-        border-right: 1px solid silver\
+        border-bottom: 1px solid white;\
+        border-right: 1px solid white\
     }\
     .dg li.title, .dg closed {\
         background: -moz-linear-gradient(center top, #ededed 34%, #dfdfdf 71%);\
@@ -150,7 +150,18 @@ define([
         outline-color: lightblue;\
         outline-style: solid;\
         outline-width: 1.5px\
-    }";
+    }";*/
 
-    return DatGUIApp.gui;
+    class DatGUI {
+        constructor() {
+            this.gui = new dat.GUI({autoPlace: false, width: 300});
+            $(this.gui.domElement).css('position', 'absolute');
+            $(this.gui.domElement).css('top', 0);
+            $(this.gui.domElement).css('right', 0);
+        },
+    };
+
+    var g = new DatGUI();
+
+    return g.gui.domElement;
 });
