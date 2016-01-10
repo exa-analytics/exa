@@ -11,9 +11,10 @@ user work. This includes :class:`~exa.relational.Program`s,
 from exa.relational import Store
 from exa.relational import Container as DBContainer
 from exa.container import Container
+from exa.widget import Widget
 
 
-class Dashboard:
+class Dashboard(Widget):
     def list_stores(self):
         '''
         Listing of user's stores.
@@ -26,7 +27,7 @@ class Dashboard:
         return DBContainer._get_all()
 
     def __init__(self):
-        pass
+        super().__init__()
 
     def __repr__(self):
         return 'Dashboard\n{0}'.format(self.list_stores())

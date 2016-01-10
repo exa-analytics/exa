@@ -15,7 +15,7 @@ from ipywidgets import DOMWidget
 from traitlets import Unicode
 
 
-class DashboardWidget(DOMWidget):
+class Widget(DOMWidget):
     '''
     Generic Javascript widget.
 
