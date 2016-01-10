@@ -92,42 +92,42 @@ def commit():
 
 # Relationships are initialized in this manner because their Python
 # class objects haven't yet been defined in the module.
-StoreFile = Table(
-    'storefile',
+SessionFile = Table(
+    'sessionfile',
     Base.metadata,
-    Column('store_pkid', Integer, ForeignKey('store.pkid')),
+    Column('session_pkid', Integer, ForeignKey('session.pkid')),
     Column('file_pkid', Integer, ForeignKey('file.pkid'))
 )
 
 
-StoreProgram = Table(
-    'storeprogram',
+SessionProgram = Table(
+    'sessionprogram',
     Base.metadata,
-    Column('store_pkid', Integer, ForeignKey('store.pkid')),
+    Column('session_pkid', Integer, ForeignKey('session.pkid')),
     Column('program_pkid', Integer, ForeignKey('program.pkid'))
 )
 
 
-StoreProject = Table(
-    'storeproject',
+SessionProject = Table(
+    'sessionproject',
     Base.metadata,
-    Column('store_pkid', Integer, ForeignKey('store.pkid')),
+    Column('session_pkid', Integer, ForeignKey('session.pkid')),
     Column('project_pkid', Integer, ForeignKey('project.pkid'))
 )
 
 
-StoreJob = Table(
-    'storejob',
+SessionJob = Table(
+    'sessionjob',
     Base.metadata,
-    Column('store_pkid', Integer, ForeignKey('store.pkid')),
+    Column('session_pkid', Integer, ForeignKey('session.pkid')),
     Column('job_pkid', Integer, ForeignKey('job.pkid'))
 )
 
 
-StoreContainer = Table(
-    'storecontainer',
+SessionContainer = Table(
+    'sessioncontainer',
     Base.metadata,
-    Column('store_pkid', Integer, ForeignKey('store.pkid')),
+    Column('session_pkid', Integer, ForeignKey('session.pkid')),
     Column('container_pkid', Integer, ForeignKey('container.pkid'))
 )
 
@@ -212,12 +212,12 @@ ContainerFile = Table(
 )
 
 
-class Store(Base):
+class Session(Base):
     '''
-    Database representation of the 'store' concept.
+    Database representation of the 'session' concept.
 
     See Also:
-        :class:`~exa.store.Store`
+        :class:`~exa.session.Session`
     '''
     name = Column(String)
     description = Column(String)
@@ -226,10 +226,10 @@ class Store(Base):
 
 class Container(Base):
     '''
-    Database representation of the 'store' concept.
+    Database representation of the 'session' concept.
 
     See Also:
-        :class:`~exa.store.Store`
+        :class:`~exa.session.Session`
     '''
     name = Column(String)
     description = Column(String)

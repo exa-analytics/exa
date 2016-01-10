@@ -1,6 +1,6 @@
 /*"""
-BackboneJS Based Dashboard
-````````````````````````````
+Dashboard Application (Widget)
+``````````````````````````````
 
 */
 'use strict';
@@ -12,8 +12,8 @@ require.config({
             exports: 'dashboard'
         },
 
-        'nbextensions/exa/static/js/libs/dat.gui.min': {
-            exports: 'dat'
+        'nbextensions/exa/static/js/exa.dashboard.sidebar.widget': {
+            exports: 'sidebar'
         }
     },
 });
@@ -23,17 +23,17 @@ define([
     'nbextensions/widgets/widgets/js/widget',
     'nbextensions/widgets/widgets/js/manager',
     'nbextensions/exa/static/js/exa.dashboard',
-    'nbextensions/exa/static/js/libs/dat.gui.min'
+    'nbextensions/exa/static/js/exa.dashboard.sidebar.widget'
 ], function(
     widget,
     manager,
     dashboard,
-    dat
+    sidebar
 ) {
     var DashboardView = widget.DOMWidgetView.extend({
         /*"""
-        Dashboard Application (BackboneJS)
-        `````````````````````````````````
+        Dashboard Widget Application (BackboneJS)
+        ```````````````````````````````````````````
         The following code relies on the backbone.js web framework.
         */
         initialize: function() {
@@ -45,13 +45,15 @@ define([
             var self = this;
             console.log(this);
             console.log(this.model);
-            this.container = dashboard.create_workspace();
-            this.gui = new dat.GUI({autoPlace: false, width: 300});
-            $(this.gui.domElement).css('position', 'absolute');
-            $(this.gui.domElement).css('top', 0);
-            $(this.gui.domElement).css('right', 0);
-            console.log(this.gui);
-            this.container.append(this.gui);
+            console.log(document.getElementsByTagName('*'));
+            var obj = $(document.getElementById('header-container'));
+            this.width = obj.width();
+            this.height = 500;
+            this.container = dashboard.create_workspace(this.width, this.height);
+            this.sidebar = new sidebar();
+            this.container.append(this.sidebar.gui.domElement);
+            this.container.append(this.sidebar.gui_style_element);
+            console.log(this.sidebar);
             this.setElement(this.container);
         },
     });
