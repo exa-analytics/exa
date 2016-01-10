@@ -14,6 +14,28 @@ from exa import Config
 from exa.utils import mkpath
 
 
+def build_static_path_kwargs():
+    '''
+    '''
+    kwargs = {}
+    for root, subdirs, files in os.walk(Config.static):
+        splitdir = root.split(Config.static)[1]
+        directory = 'static'
+        if splitdir:
+            directory = directory + splitdir
+        for name in files:
+            if name.endswith('js'):
+                n = name.replace('.', '_')
+                n = n.replace('-', '_')
+                kwargs[n] = '\'' + '/'.join((directory.replace('\\', '/'), name)) + '\''
+    return kwargs
+
+
+templates_path = Config.templates
+static_path = Config.static
+kwargs = build_static_path_kwargs()
+
+
 class HelloWorldHandler(RequestHandler):
     '''
     '''
@@ -28,44 +50,21 @@ class DashboardHandler(RequestHandler):
         self.write(jinja2_loader.get_template('dashboard.html').render(**kwargs))
 
 
-def serve(host='localhost', port=8080):
+def serve(port=5000):
     '''
     '''
-    exa_web_app.listen(port)
+    web_app.listen(port)
     IOLoop.instance().start()
 
 
-def build_static_path_kwargs():
-    '''
-    '''
-    kwargs = {}
-    for root, subdirs, files in os.walk(Config.static):
-        splitdir = root.split(Config.static)[1]
-        directory = 'static'
-        if splitdir:
-            directory = directory + splitdir
-        for name in files:
-            n = name.replace('.', '_')
-            n = n.replace('-', '_')
-            kwargs[n] = '\'' + mkpath(directory, name) + '\''
-    return kwargs
-
-
-templates_path = Config.templates
-static_path = Config.static
-kwargs = build_static_path_kwargs()
-print(kwargs)
 
 
 tornado_settings = {
-    'static_path': 'static'
+    'static_path': Config.static
 }
-
 tornado_handlers = [
     (r'/', DashboardHandler),
     (r'/hi', HelloWorldHandler)
 ]
-
 jinja2_loader = Environment(loader=FileSystemLoader(searchpath=templates_path))
-
-exa_web_app = Application(tornado_handlers, **tornado_settings)
+web_app = Application(tornado_handlers, **tornado_settings)

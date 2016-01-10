@@ -16,7 +16,7 @@
 import sys
 import os
 import shlex
-from recommonmark.parser import CommonMarkParser
+#from recommonmark.parser import CommonMarkParser
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 sys.path.insert(0, os.path.abspath('../../'))
 from exa import __version__
@@ -65,8 +65,9 @@ templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-source_parsers = {'.md': CommonMarkParser}
-source_suffix = ['.rst', '.md']
+#source_parsers = {'.md': CommonMarkParser}
+#source_suffix = ['.rst', '.md']
+source_suffix = ['.rst']
 
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'
@@ -257,7 +258,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   (master_doc, 'exa.tex', 'exa Documentation',
-   'Tom Duignan', 'Alex Marchenko, 'manual'),
+   'Tom Duignan', 'Alex Marchenko', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

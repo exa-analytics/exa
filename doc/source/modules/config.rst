@@ -6,6 +6,3 @@ Initialization and Configuration
 
 .. automodule:: exa.log
     :members:
-
-.. automodule:: exa.errors
-    :members:
