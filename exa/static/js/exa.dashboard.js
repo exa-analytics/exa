@@ -8,10 +8,11 @@ application.
 'use strict';
 
 var dashboard = {
-    create_workspace: function() {
-        var container = $('<div/>').width(800).height(600);
+    create_workspace: function(width, height) {
+        var container = $('<div/>').width(width).height(height).resizable();
         container.css('border', '1px solid black');
         container.css('resize', 'both');
+        container.css('width', '100%');
         return container;
     }
 };
