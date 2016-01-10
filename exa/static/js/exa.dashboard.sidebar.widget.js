@@ -1,6 +1,6 @@
 /*"""
-Widget Sidebar GUI
-``````````````````````
+Dashboard Widget Sidebar GUI
+`````````````````````````````
 
 */
 'use strict';
@@ -15,43 +15,24 @@ require.config({
 });
 
 
-
-// Imports and aliases
 define([
     'nbextensions/exa/static/js/libs/dat.gui.min'
 ], function(
     dat
 ) {
-    var DatGUIApp = function() {
-        var self = this;
-        this.gui = new dat.GUI({autoPlace: false, width: 300});
-        this.gui_DOM = $(this.gui.domElement);
-        this.gui_DOM.css('position', 'absolute');
-        this.gui_DOM.css('top', 0);
-        this.gui_DOM.css('left', 0);
-
-        // Controls
-        //
-        // Folders
-        this.afolder = this.gui.addFolder('Animate');
-        this.particles_folder = this.gui.addFolder('Particles');
-        this.bonds_folder = this.gui.addFolder('Bonds');
-    };
-
-    // Custom CSS to be injected into the page to stylize the GUI
-    DatGUIApp.prototype.stylestr = ".dg {\
+    var sidebar_css_string = ".dg {\
         color: black;\
-        font: 400 13px Verdana, Arial, sans-serif;\
+        font: 400 12px Verdana, Arial, sans-serif;\
         text-shadow: white 0 0 0;\
     }\
     .hue-field {\
         width: 10;\
     }\
     .dg .c .slider {\
-        background: silver\
+        background: white\
     }\
     .dg .c .slider:hover {\
-        background: silver\
+        background: white\
     }\
     .dg .c input[type=text] {\
         background: white;\
@@ -96,23 +77,23 @@ define([
     }\
     .dg .cr.boolean:hover {\
         background: white;\
-        border-bottom: 1px solid silver;\
-        border-right: 1px solid silver\
+        border-bottom: 1px solid white;\
+        border-right: 1px solid white\
     }\
     .dg .cr.function:hover {\
         background: white;\
-        border-bottom: 1px solid silver;\
-        border-right: 1px solid silver\
+        border-bottom: 1px solid white;\
+        border-right: 1px solid white\
     }\
     .dg li.cr {\
         background: #fafafa;\
-        border-bottom: 1px solid silver;\
-        border-right: 1px solid silver\
+        border-bottom: 1px solid white;\
+        border-right: 1px solid white\
     }\
     .dg li.cr:hover {\
         background: white;\
-        border-bottom: 1px solid silver;\
-        border-right: 1px solid silver\
+        border-bottom: 1px solid white;\
+        border-right: 1px solid white\
     }\
     .dg li.title, .dg closed {\
         background: -moz-linear-gradient(center top, #ededed 34%, #dfdfdf 71%);\
@@ -152,5 +133,20 @@ define([
         outline-width: 1.5px\
     }";
 
-    return DatGUIApp.gui;
+    var sidebar = function() {
+        /*"""
+        Dashboard Widget Sidebar
+        `````````````````````````
+        */
+        var self = this;
+        this.gui = new dat.GUI({autoPlace: false, width: 240});
+        this.gui_style_element = document.createElement('style');
+        this.gui_style_element.innerHTML = sidebar_css_string;
+        $(this.gui.domElement).css('position', 'relative');
+        $(this.gui.domElement).css('top', 0);
+        $(this.gui.domElement).css('left', 0);
+        this.gui.addFolder('Sessions');
+    };
+
+    return sidebar;
 });

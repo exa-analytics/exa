@@ -1,5 +1,5 @@
 /*"""
-AngularJS Based Dashboard
+Dashboard Application (Web)
 ````````````````````````````
 
 */
