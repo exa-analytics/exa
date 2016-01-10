@@ -311,7 +311,7 @@ class IsotopeMeta(Meta):
         '''
         '''
         obj = []
-        for g in o:
+        for g in objects:
             af = 0.0 if g.af is None else g.af
             obj.append((g, af))
         return sorted(obj, key=itemgetter(1), reverse=True)[0][0]
@@ -324,10 +324,10 @@ class IsotopeMeta(Meta):
         '''
         if by == 'symbol':
             isos = session.query(self).filter(self.symbol == key).all()
-            return self._sort(isos)
+            return self._get_element(isos)
         elif by == 'znum':
             isos = session.query(self).filter(self.Z == key).all()
-            return self._sort(isos)
+            return self._get_element(isos)
         else:
             raise NotImplementedError()
 
