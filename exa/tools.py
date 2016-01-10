@@ -25,20 +25,20 @@ def install_notebook_widgets(path=None, verbose=False):
         shutil.rmtree(Config.extensions)
     except:
         pass
-    for root, subdirs, files in os.walk(Config.js):
-        for filename in files:
-            original_filepath = mkpath(root, filename)
-            sstr = '^(.*static.js)'
-            rmprefix = re.search(sstr, original_filepath)
-            dest = Config.extensions
-            dest += original_filepath.replace(rmprefix.group(1), '').replace(filename, '')
-            mkpath(dest, mkdir=True)
-            install_nbextension(
-                original_filepath,
-                verbose=verbose,
-                overwrite=True,
-                nbextensions_dir=dest
-            )
+    for i, r in enumerate([Config.templates, Config.static]):
+        for root, subdirs, files in os.walk(r):
+            for filename in files:
+                low = filename.lower()
+                if not low.endswith('json'):
+                    subdir = root.split('exa')[-1]
+                    orig = mkpath(root, filename)
+                    dest = mkpath(Config.extensions, subdir, mkdir=True)
+                    install_nbextension(
+                        orig,
+                        verbose=verbose,
+                        overwrite=True,
+                        nbextensions_dir=dest
+                    )
 
 
 def initialize_database(force=False):

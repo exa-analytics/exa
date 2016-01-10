@@ -31,5 +31,3 @@ class Dashboard(Widget):
 
     def __repr__(self):
         return 'Dashboard\n{0}'.format(self.list_stores())
-
-Dashboard = Dashboard()

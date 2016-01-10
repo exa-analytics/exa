@@ -13,6 +13,7 @@ from sqlalchemy import (Table, Column, Integer, String, DateTime, ForeignKey,
 from sqlalchemy.orm import sessionmaker, scoped_session, mapper
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
 from datetime import datetime
+from operator import itemgetter
 from exa import Config
 from exa import _bz as bz
 from exa import _pd as pd
@@ -305,6 +306,35 @@ class IsotopeMeta(Meta):
         '''
         '''
         return session.query(self).filter(self.szuid == number).all()[0]
+
+    def _get_element(self, objects):
+        '''
+        '''
+        obj = []
+        for g in o:
+            af = 0.0 if g.af is None else g.af
+            obj.append((g, af))
+        return sorted(obj, key=itemgetter(1), reverse=True)[0][0]
+
+    def get_element(self, key, by='symbol'):
+        '''
+        Args:
+            by (str): One of 'symbol' or 'znum'
+            key: Symbol or proton number (znum)
+        '''
+        if by == 'symbol':
+            isos = session.query(self).filter(self.symbol == key).all()
+            return self._sort(isos)
+        elif by == 'znum':
+            isos = session.query(self).filter(self.Z == key).all()
+            return self._sort(isos)
+        else:
+            raise NotImplementedError()
+
+    def get_elements(self, keys, by='symbol'):
+        '''
+        '''
+        return [self.get_element(key, by=by) for key in keys]
 
     def _getitem(self, key):
         if isinstance(key, str):

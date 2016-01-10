@@ -32,7 +32,8 @@ setup()
 from exa.testers import run_unittests, run_doctests
 from exa.relational import (
     Force, Dose, Angle, Mass, Length, Frequency, Energy, Dipole, Temperature,
-    Charge, MolarMass, Luminosity, Current, Acceleration, Amount, Time
+    Charge, MolarMass, Luminosity, Current, Acceleration, Amount, Time,
+    Isotope
 )
 from exa.tools import install_notebook_widgets, initialize_database
 from exa.dashboard import Dashboard

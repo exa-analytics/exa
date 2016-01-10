@@ -1,9 +1,14 @@
+/*"""
+BackboneJS Based Dashboard
+````````````````````````````
+
+*/
 'use strict';
 
 
 require.config({
     shim: {
-        'nbextensions/exa/exa.dashboard': {
+        'nbextensions/exa/static/js/exa.dashboard': {
             exports: 'dashboard'
         },
     },
@@ -13,17 +18,29 @@ require.config({
 define([
     'nbextensions/widgets/widgets/js/widget',
     'nbextensions/widgets/widgets/js/manager',
-    'nbextensions/exa/exa.dashboard',
-    'jquery'
+    'nbextensions/exa/static/js/exa.dashboard'
 ], function(
     widget,
     manager,
-    dashboard,
-    $
+    dashboard
 ) {
-    var DashboardView = widget.DOMWidgetView.extend(dashboard);
+    var DashboardView = widget.DOMWidgetView.extend({
+        /*"""
+        Dashboard Application (BackboneJS)
+        `````````````````````````````````
+        The following code relies on the backbone.js web framework.
+        */
+        initialize: function() {
+            _.bindAll(this, 'render');    // Fixes loss of context for 'this' within methods
+            this.render();
+        },
 
+        render: function() {
+            var self = this;
+            console.log(this);
+            console.log(this.model);
+        },
+    });
 
-    manager.WidgetManager.register_widget_view('DashboardView', DashboardView);
     return {'DashboardView': DashboardView}
 });
