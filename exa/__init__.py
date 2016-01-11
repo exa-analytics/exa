@@ -8,7 +8,6 @@ import sys as _sys
 import re as _re
 import os as _os
 import atexit as _ae
-import blaze as _bz
 import numpy as _np
 import pandas as _pd
 import scipy as _sp
@@ -37,7 +36,7 @@ from exa.relational import _cleanup_anon_sessions
 from exa.relational import (
     Force, Dose, Angle, Mass, Length, Frequency, Energy, Dipole, Temperature,
     Charge, MolarMass, Luminosity, Current, Acceleration, Amount, Time,
-    Isotope, Dashboard
+    Isotope, Constant, Dashboard
 )
 _ae.register(_cleanup_anon_sessions)
 _ae.register(_commit)

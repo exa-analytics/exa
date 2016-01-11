@@ -10,6 +10,7 @@ configuration to third-party features (e.g. databases).
 from exa.tools import install_notebook_widgets, initialize_database
 
 
+# TODO: CLEAN ORIGINAL .exa and reimport old data/update sqlite?
 def initialize():
     '''
     '''

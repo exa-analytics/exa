@@ -9,7 +9,6 @@ Note:
     documentation because it is a singleton: the class object instance is
     set to an instance of itself.
 '''
-import __main__ as _m
 import os
 import getpass
 import platform
@@ -32,7 +31,7 @@ class Config:
     def update(self, other=None):
         if hasattr(other, 'items'):
             for k, v in other.items():
-                if v:                  # Updates if the value evaluates to True
+                if v and k != 'ipynb':
                     self[k] = v
 
     def relational_engine(self):
@@ -46,6 +45,15 @@ class Config:
         else:
             raise NotImplementedError('Backends other that "sqlite" are not supported yet.')
 
+    def session_args(self):
+        '''
+        Generate kwargs to load a session.
+
+        See Also:
+            :func:`~exa.relational.Dashboard.load`
+        '''
+        return (self.session, self.program, self.project, self.job, self.container)
+
     def __getitem__(self, k):
         return getattr(self, k)
 
@@ -56,12 +64,22 @@ class Config:
 
     def __init__(self):
         self.username = getpass.getuser()                  # Basic config
-        self.interactive = False if hasattr(_m, '__file__') else True
+        self.ipynb = False
+        kernel = None
+        try:
+            kernel = get_ipython().kernel
+            self.ipynb = True
+        except:
+            pass
         self.system = platform.system().lower()
         self.maxlogbytes = 10 #1024 * 1024
         self.maxlogcount = 5
         self.maxanonsessions = 5
-        self.session = [('session', None), ('program', None), ('project', None), ('job', None)]
+        self.session = None
+        self.program = None
+        self.project = None
+        self.job = None
+        self.container = None
         if self.system == 'windows':
             self.home = os.getenv('USERPROFILE')
         else:

@@ -6,8 +6,7 @@ from setuptools import setup, find_packages
 from exa import __version__
 
 
-DEPS = [req.strip() for req in open('requirements.txt').readlines()]
-DEPS += ['tables>3.2.2']
+dependencies = [req.strip() for req in open('requirements.txt').readlines()]
 
 
 try:
@@ -30,7 +29,7 @@ try:
         },
         entry_points={'console_scripts': ['exa = exa.__main__:main']},
         include_package_data=True,
-        install_requires=DEPS
+        install_requires=dependencies
     )
 finally:
     from exa.install import initialize
