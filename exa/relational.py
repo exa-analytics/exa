@@ -1,128 +1,29 @@
 # -*- coding: utf-8 -*-
 '''
-Relational Database Tables
-==================================
-Database logic for the content management system.
+Dashboard, Container, and Relational Objects
+===============================================
+Definition of the content management system (CMS) and primary working
+interfaces (graphical or terminal based).
 
-Note:
-    All database interaction is lazy. Objects are commited when
-    a users attempts to query the database and on exit.
+Dashboard
+----------------
+Dedicated Python object for performing CMS actions
+
+Container
+-------------------
+Data processing object used for manipulating data in memory as well as on
+disk. Furthermore, this object has relationship information for CMS actions.
 '''
 from sqlalchemy import (Table, Column, Integer, String, DateTime, ForeignKey,
                         Float, create_engine, and_, event)
-from sqlalchemy.orm import sessionmaker, scoped_session, mapper, relationship
-from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
 from datetime import datetime
-from operator import itemgetter
 from exa import Config
-#from exa import _bz as bz
 from exa import _pd as pd
 from exa import _json as json
 from exa.errors import MissingProgramError, MissingProjectError, MissingJobError
 from exa.utils import gen_uid
-if Config.ipynb:
+if Config.ipynb:                  # If using Jupyter notebook
     from exa.widget import Widget
-
-
-class Meta(DeclarativeMeta):
-    '''
-    Extends the default sqlalchemy table metaclass to allow for getting.
-    '''
-
-    def df(self):
-        '''
-        Display a :py:class:`~pandas.DataFrame` representation of the table.
-        '''
-        commit()
-        df = pd.read_sql(
-            'SELECT * FROM {0}'.format(self.__tablename__.upper()),
-            engine.connect()
-        )
-        if 'pkid' in df.columns:
-            return df.set_index('pkid')
-        else:
-            return df
-
-    def count(self):
-        return session.query(self).count()
-
-    def listall(self):
-        '''
-        '''
-        commit()
-        return session.query(self).all()
-
-    def _getitem(self, key):
-        '''
-        '''
-        if isinstance(key, int):
-            return session.query(self).filter(self.pkid == key).all()[0]
-        else:
-            raise NotImplementedError('Lookup by pkid only.')
-
-    def __getitem__(self, key):
-        commit()
-        return self._getitem(key)
-
-
-@as_declarative(metaclass=Meta)
-class Base:
-    '''
-    Declarative base class (used by SQLAlchemy) to initialize relational tables.
-    '''
-    # Common keys
-    pkid = Column(Integer, primary_key=True)
-
-    # By default the table name is the lowercase class name
-    @declared_attr
-    def __tablename__(cls):
-        return cls.__name__.lower()
-
-    @classmethod
-    def _bulk_insert(cls, data):
-        '''
-        Perform a bulk insert into a specific table.
-
-        Args:
-            data (list): List of dictionary objects representing rows
-        '''
-        commit()
-        session.bulk_insert_mappings(cls, data)
-
-    def __repr__(cls):
-        return '{0}({1})'.format(cls.__class__.__name__, cls.pkid)
-
-
-@event.listens_for(mapper, 'init')
-def auto_add(target, args, kwargs):
-    '''
-    Automatically add newly created objects to the current database session.
-    '''
-    session.add(target)
-
-
-def commit():
-    '''
-    Commit all of the objects currently in the session.
-    '''
-    try:
-        session.commit()
-    except:
-        session.rollback()
-        raise
-
-
-def _cleanup_anon_sessions():
-    '''
-    Keep only the n most recently accessed anonymous sessions.
-    '''
-    anons = session.query(Session).filter(
-        Session.name == 'anonymous'
-    ).order_by(Session.accessed).all()[:-5]
-    for anon in anons:
-        session.delete(anon)
-    commit()
-
 
 SessionProgram = Table(
     'sessionprogram',
@@ -156,30 +57,6 @@ SessionFile = Table(
 )
 
 
-ProgramProject = Table(
-    'programproject',
-    Base.metadata,
-    Column('program_pkid', Integer, ForeignKey('program.pkid', onupdate='CASCADE', ondelete='CASCADE')),
-    Column('project_pkid', Integer, ForeignKey('project.pkid', onupdate='CASCADE', ondelete='CASCADE'))
-)
-ProgramJob = Table(
-    'programjob',
-    Base.metadata,
-    Column('program_pkid', Integer, ForeignKey('program.pkid', onupdate='CASCADE', ondelete='CASCADE')),
-    Column('job_pkid', Integer, ForeignKey('job.pkid', onupdate='CASCADE', ondelete='CASCADE'))
-)
-ProgramContainer = Table(
-    'programcontainer',
-    Base.metadata,
-    Column('program_pkid', Integer, ForeignKey('program.pkid', onupdate='CASCADE', ondelete='CASCADE')),
-    Column('container_pkid', Integer, ForeignKey('container.pkid', onupdate='CASCADE', ondelete='CASCADE'))
-)
-ProgramFile = Table(
-    'programfile',
-    Base.metadata,
-    Column('program_pkid', Integer, ForeignKey('program.pkid', onupdate='CASCADE', ondelete='CASCADE')),
-    Column('file_pkid', Integer, ForeignKey('file.pkid', onupdate='CASCADE', ondelete='CASCADE'))
-)
 
 
 ProjectJob = Table(
@@ -201,19 +78,6 @@ ProjectFile = Table(
     Column('file_pkid', Integer, ForeignKey('file.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
 
-
-JobContainer = Table(
-    'jobcontainer',
-    Base.metadata,
-    Column('job_pkid', Integer, ForeignKey('job.pkid', onupdate='CASCADE', ondelete='CASCADE')),
-    Column('container_pkid', Integer, ForeignKey('container.pkid', onupdate='CASCADE', ondelete='CASCADE'))
-)
-JobFile = Table(
-    'jobfile',
-    Base.metadata,
-    Column('job_pkid', Integer, ForeignKey('job.pkid', onupdate='CASCADE', ondelete='CASCADE')),
-    Column('file_pkid', Integer, ForeignKey('file.pkid', onupdate='CASCADE', ondelete='CASCADE'))
-)
 ContainerFile = Table(
     'containerfile',
     Base.metadata,
@@ -221,44 +85,6 @@ ContainerFile = Table(
     Column('file_pkid', Integer, ForeignKey('file.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
 
-
-class SessionMeta(Meta):
-    '''
-    '''
-    def _getitem(self, key):
-        if isinstance(key, int):
-            return session.query(self).filter(self.pkid == key).all()[0]
-        elif isinstance(key, str):
-            return session.query(self).filter(self.name == key).all()[0]
-        else:
-            raise NotImplementedError()
-
-class Session(Base, metaclass=SessionMeta):
-    '''
-    Database representation of the 'session' concept.
-
-    See Also:
-        :class:`~exa.session.Session`
-    '''
-    name = Column(String)
-    description = Column(String)
-    created = Column(DateTime, default=datetime.now)
-    modified = Column(DateTime, default=datetime.now)
-    accessed = Column(DateTime, default=datetime.now)
-    uid = Column(String(32), default=gen_uid)
-    programs = relationship('Program', secondary=SessionProgram, backref='session', cascade='all, delete')
-    projects = relationship('Project', secondary=SessionProject, backref='session', cascade='all, delete')
-    jobs = relationship('Job', secondary=SessionJob, backref='session', cascade='all, delete')
-    containers = relationship('Container', secondary=SessionContainer, backref='session', cascade='all, delete')
-    files = relationship('File', secondary=SessionFile, backref='session', cascade='all, delete')
-
-    def __repr__(self):
-        if self.name == 'anonymous':
-            return 'Session(anon: {0})'.format(str(self.accessed).split('.')[0])
-        elif self.name is None:
-            return 'Session({0})'.format(self.uid)
-        else:
-            return 'Session({0})'.format(self.name)
 
 
 class Program(Base):
@@ -270,10 +96,10 @@ class Program(Base):
     created = Column(DateTime, default=datetime.now)
     modified = Column(DateTime, default=datetime.now)
     accessed = Column(DateTime, default=datetime.now)
-    projects = relationship('Project', secondary=ProgramProject, backref='program', cascade='all, delete')
-    jobs = relationship('Job', secondary=ProgramJob, backref='program', cascade='all, delete')
-    containers = relationship('Container', secondary=ProgramContainer, backref='program', cascade='all, delete')
-    files = relationship('File', secondary=ProgramFile, backref='program', cascade='all, delete')
+    projects = relationship('Project', secondary=ProgramProject, backref='programs', cascade='all, delete')
+    jobs = relationship('Job', secondary=ProgramJob, backref='programs', cascade='all, delete')
+    containers = relationship('Container', secondary=ProgramContainer, backref='programs', cascade='all, delete')
+    files = relationship('File', secondary=ProgramFile, backref='programs', cascade='all, delete')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -289,9 +115,9 @@ class Project(Base):
     created = Column(DateTime, default=datetime.now)
     modified = Column(DateTime, default=datetime.now)
     accessed = Column(DateTime, default=datetime.now)
-    jobs = relationship('Job', secondary=ProjectJob, backref='project', cascade='all, delete')
-    containers = relationship('Container', secondary=ProjectContainer, backref='project', cascade='all, delete')
-    files = relationship('File', secondary=ProjectFile, backref='project', cascade='all, delete')
+    jobs = relationship('Job', secondary=ProjectJob, backref='projects', cascade='all, delete')
+    containers = relationship('Container', secondary=ProjectContainer, backref='projects', cascade='all, delete')
+    files = relationship('File', secondary=ProjectFile, backref='projects', cascade='all, delete')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -309,40 +135,14 @@ class Job(Base):
     created = Column(DateTime, default=datetime.now)
     modified = Column(DateTime, default=datetime.now)
     accessed = Column(DateTime, default=datetime.now)
-    containers = relationship('Container', secondary=JobContainer, backref='job', cascade='all, delete')
-    files = relationship('File', secondary=JobFile, backref='job', cascade='all, delete')
+    containers = relationship('Container', secondary=JobContainer, backref='jobs', cascade='all, delete')
+    files = relationship('File', secondary=JobFile, backref='jobs', cascade='all, delete')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         Dashboard._add_to_session(self)
         Dashboard._add_to_program(self)
         Dashboard._add_to_project(self)
-
-
-class Container(Base):
-    '''
-    Database representation of the 'session' concept.
-
-    See Also:
-        :class:`~exa.session.Session`
-    '''
-    name = Column(String)
-    description = Column(String)
-    uid = Column(String(32), default=gen_uid)
-    files = relationship('File', secondary=ContainerFile, backref='container', cascade='all, delete')
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        Dashboard._add_to_session(self)
-        Dashboard._add_to_program(self)
-        Dashboard._add_to_project(self)
-        Dashboard._add_to_job(self)
-
-    def __repr__(self):
-        if self.name is None:
-            return 'Container({0})'.format(self.uid)
-        else:
-            return 'Container({0})'.format(self.name)
 
 
 class File(Base):
@@ -365,168 +165,7 @@ class File(Base):
         Dashboard._add_to_job(self)
 
 
-class IsotopeMeta(Meta):
-    '''
-    '''
-    def get_by_symbol(self, symbol):
-        '''
-        '''
-        commit()
-        return session.query(self).filter(self.symbol == symbol).all()
 
-    def get_by_strid(self, element):
-        '''
-        '''
-        commit()
-        return session.query(self).filter(self.strid == element).all()[0]
-
-    def get_szuid(self, number):
-        '''
-        '''
-        commit()
-        return session.query(self).filter(self.szuid == number).all()[0]
-
-    def get_element(self, key, by='symbol'):
-        '''
-        Args:
-            by (str): One of 'symbol' or 'znum' or 'asym'
-            key: Symbol or proton number (znum) or 'ASymbol' (1H, 12C, etc)
-        '''
-        commit()
-        if by == 'symbol':
-            return session.query(self).filter(self.symbol == key).order_by(self.af).all()[-1]
-        elif by == 'znum':
-            return session.query(self).filter(self.Z == key).order_by(self.af).all()[-1]
-        elif by == 'asym':
-            return session.query(self).filter(self.strid == key).all()[-1]
-        else:
-            raise NotImplementedError()
-
-    def get_elements(self, keys, by='symbol'):
-        '''
-        '''
-        commit()
-        return [self.get_element(key, by=by) for key in keys]
-
-    def _getitem(self, key):
-        commit()
-        if isinstance(key, str):
-            if key[0].isdigit():
-                return self.get_by_strid(key)
-            else:
-                return self.get_by_symbol(key)
-        elif isinstance(key, int):
-            return self.get_by_szuid(key)
-        else:
-            raise TypeError('Key type {0} not supported.'.format(type(key)))
-
-
-class Isotope(Base, metaclass=IsotopeMeta):
-    '''
-    A variant of a chemical element with a specific proton and neutron count.
-    '''
-    A = Column(Integer, nullable=False)
-    Z = Column(Integer, nullable=False)
-    af = Column(Float)
-    eaf = Column(Float)
-    color = Column(Integer)
-    radius = Column(Float)
-    gfactor = Column(Float)
-    mass = Column(Float)
-    emass = Column(Float)
-    name = Column(String(length=16))
-    eneg = Column(Float)
-    quadmom = Column(Float)
-    spin = Column(Float)
-    symbol = Column(String(length=3))
-    szuid = Column(Integer)
-    strid = Column(Integer)
-
-    def __repr__(self):
-        return '{0}{1}'.format(self.A, self.symbol)
-
-
-class Constant(Base):
-    '''
-    Physical constants.
-    '''
-    __tablename__ = 'constants'
-
-    symbol = Column(String, nullable=False)
-    value = Column(Float, nullable=False)
-
-
-class DimensionMeta(Meta):
-    '''
-    '''
-    def _getitem(self, key):
-        commit()
-        if isinstance(key, tuple):
-            return self.get_factor(key)
-
-    def get_factor(self, key):
-        commit()
-        f = key[0]
-        t = key[1]
-        return session.query(self).filter(and_(
-            self.from_unit == f,
-            self.to_unit == t
-        )).all()[0].factor
-
-
-class Dimension:
-    '''
-    Generic class for physical dimension conversions. Doesn't do anything
-    by itself but is inherited by specific dimension classes.
-
-    Attributes
-        from_unit (str): Unit to convert from
-        to_unit (str): Unit to convert to
-        factor (float): Conversion factor
-
-    Methods
-        units: Displays a list of possible units
-
-    See Also
-        :class:`~exa.relational.Length`
-    '''
-    from_unit = Column(String(8), nullable=False)
-    to_unit = Column(String(8), nullable=False)
-    factor = Column(Float, nullable=False)
-
-
-class Length(Base, Dimension, metaclass=DimensionMeta):
-    pass
-class Mass(Base, Dimension, metaclass=DimensionMeta):
-    pass
-class Time(Base, Dimension, metaclass=DimensionMeta):
-    pass
-class Current(Base, Dimension, metaclass=DimensionMeta):
-    pass
-class Temperature(Base, Dimension, metaclass=DimensionMeta):
-    pass
-class Amount(Base, Dimension, metaclass=DimensionMeta):
-    pass
-class Luminosity(Base, Dimension, metaclass=DimensionMeta):
-    pass
-class Dose(Base, Dimension, metaclass=DimensionMeta):
-    pass
-class Acceleration(Base, Dimension, metaclass=DimensionMeta):
-    pass
-class Angle(Base, Dimension, metaclass=DimensionMeta):
-    pass
-class Charge(Base, Dimension, metaclass=DimensionMeta):
-    pass
-class Dipole(Base, Dimension, metaclass=DimensionMeta):
-    pass
-class Energy(Base, Dimension, metaclass=DimensionMeta):
-    pass
-class Force(Base, Dimension, metaclass=DimensionMeta):
-    pass
-class Frequency(Base, Dimension, metaclass=DimensionMeta):
-    pass
-class MolarMass(Base, Dimension, metaclass=DimensionMeta):
-    pass
 
 
 class Dashboard:
@@ -603,7 +242,7 @@ class Dashboard:
         return Session.listall()
 
     @property
-    def info(self):
+    def active(self):
         print(self._info.format(
             self._active_session,
             self._active_program,
@@ -618,6 +257,9 @@ class Dashboard:
         '''
         commit()
         self._active_session = Session(name=name, description=None)
+
+    def import_session(self, key):
+        raise NotImplementedError()
 
     def load_session(self, key):
         self._active_session = Session[key]
@@ -642,20 +284,16 @@ class Dashboard:
         self._active_program = Program[program] if program else None
         self._active_project = Project[project] if project else None
         self._active_job = Job[job] if job else None
-        self._active_container = Container[container] if container else None
+        self._active_container = Container.load[container] if container else None
         self._widget = None
         if Config.ipynb:
             self._widget = Widget()
 
     def _repr_html_(self):
-        return self._widget
+        self._widget._ipython_display_()
 
     def __repr__(self):
         return str(self.sessions)
 
 
-engine_name = Config.relational_engine()
-engine = create_engine(engine_name)
-session = scoped_session(sessionmaker(bind=engine))
-Base.metadata.create_all(engine)
 Dashboard = Dashboard(*Config.session_args())
