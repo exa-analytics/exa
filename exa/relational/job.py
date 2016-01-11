@@ -35,9 +35,3 @@ class Job(Base):
     accessed = Column(DateTime, default=datetime.now)
     containers = relationship('Container', secondary=JobContainer, backref='jobs', cascade='all, delete')
     files = relationship('File', secondary=JobFile, backref='jobs', cascade='all, delete')
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-#        Dashboard._add_to_session(self)
-#        Dashboard._add_to_program(self)
-#        Dashboard._add_to_project(self)

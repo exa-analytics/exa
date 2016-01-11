@@ -5,6 +5,7 @@ Dashboard
 '''
 from exa import Config
 from exa.relational import Session, Program, Project, Job, Container, File
+from exa.relational.base import event, session, mapper
 if Config.ipynb:                  # If using Jupyter notebook
     from exa.widget import Widget
 
@@ -18,6 +19,14 @@ class Dashboard:
         'project': lambda pkid: Project[pkid],
         'job': lambda pkid: Job[pkid]
     }
+
+    @staticmethod
+    @event.listens_for(mapper, 'init')
+    def _add_to_relational_session(obj, args, kwargs):
+        print('autoadd')
+        print(obj)
+        print(args)
+        print(kwargs)
 
     def _add_to_session(self, obj):
         if isinstance(obj, Program):
@@ -129,8 +138,8 @@ class Dashboard:
         if Config.ipynb:
             self._widget = Widget()
 
-    def _repr_html_(self):
-        self._widget._ipython_display_()
+    #def _repr_html_(self):
+    #    self._widget._ipython_display_()
 
     def __repr__(self):
         return str(self.sessions)

@@ -48,7 +48,3 @@ class Program(Base):
     jobs = relationship('Job', secondary=ProgramJob, backref='programs', cascade='all, delete')
     containers = relationship('Container', secondary=ProgramContainer, backref='programs', cascade='all, delete')
     files = relationship('File', secondary=ProgramFile, backref='programs', cascade='all, delete')
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-#        Dashboard._add_to_session(self)

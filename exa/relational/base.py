@@ -82,12 +82,9 @@ class Base:
         return '{0}({1})'.format(cls.__class__.__name__, cls.pkid)
 
 
-@event.listens_for(mapper, 'init')
-def auto_add(target, args, kwargs):
-    '''
-    Automatically add newly created objects to the current database session.
-    '''
-    session.add(target)
+#@event.listens_for(mapper, 'init')
+#def auto_add(target, args, kwargs):
+#    session.add(target)
 
 
 def commit():

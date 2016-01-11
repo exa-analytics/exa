@@ -36,4 +36,8 @@ _ae.register(relational.commit)
 
 
 # API cleanup
-del setup, config, testers, log
+del setup, config, testers, log, dashboard, utils
+try:
+    del widget
+except:
+    pass

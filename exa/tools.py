@@ -12,9 +12,9 @@ from exa import _os as os
 from exa import _np as np
 from exa import _json as json
 from exa.utils import mkpath
-from exa.relational.isotope import Isotope
+from exa.relational import Isotope
+from exa.relational import Constant
 from exa.relational.units import Dimension
-from exa.relational.constans import Constant
 
 
 def install_notebook_widgets(path=None, verbose=False):
@@ -68,7 +68,7 @@ def initialize_database(force=False):
                 data = None
                 with open(mkpath(Config.static, 'isotopes.json')) as f:
                     data = json.load(f)
-            elif name == 'constants':
+            elif name == 'constant':
                 data = [{'symbol': k, 'value': v} for k, v in constants[name].items()]
             else:
                 data = units[name]

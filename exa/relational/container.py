@@ -48,10 +48,6 @@ class Container(Base):
         super().__init__(name=name, description=description)
         for k, v in kwargs.items():
             setattr(self, k, v)
-        Dashboard._add_to_session(self)
-        Dashboard._add_to_program(self)
-        Dashboard._add_to_project(self)
-        Dashboard._add_to_job(self)
 
     def __repr__(self):
         if self.name is None:
