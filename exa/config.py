@@ -4,22 +4,6 @@ Configuration
 ====================================
 Stores exa's working configuration.
 
-Attributes:
-    username (str): Username (OS level)
-    system (str): 'windows', 'linux', 'darwin'
-    home (str): User's exa "home" directory (e.g. ~/)
-    exa (str): The ".exa" directory (e.g. ~/.exa)
-    static (str): Static frontend data directory
-    extensions (str): Jupyter's extensions directory
-    templates (str): HTML templates directory
-    css (str): Static CSS directory
-    js (str): Static JavaScript directory
-    syslog (str): System log file (e.g. ~/.exa/system.log)
-    unitlog (str): Unittest log file (e.g. ~/.exa/unittest.log)
-    doclog (str): Doctest log file (e.g. ~/.exa/doctest.log)
-    numerical (dict): Parameters (backend, database, host, user)
-    relational (dict): See numerical
-
 Note:
     The Configuration class is called "Config" and is not visible in the
     documentation because it is a singleton: the class object instance is
@@ -72,9 +56,12 @@ class Config:
 
     def __init__(self):
         self.username = getpass.getuser()                  # Basic config
+        self.interactive = False if hasattr(_m, '__file__') else True
         self.system = platform.system().lower()
         self.maxlogbytes = 10 #1024 * 1024
         self.maxlogcount = 5
+        self.maxanonsessions = 5
+        self.session = [('session', None), ('program', None), ('project', None), ('job', None)]
         if self.system == 'windows':
             self.home = os.getenv('USERPROFILE')
         else:

@@ -53,7 +53,7 @@ class DashboardHandler(RequestHandler):
 def serve(port=5000):
     '''
     '''
-    web_app.listen(port)
+    app.listen(port)
     IOLoop.instance().start()
 
 
@@ -67,4 +67,4 @@ tornado_handlers = [
     (r'/hi', HelloWorldHandler)
 ]
 jinja2_loader = Environment(loader=FileSystemLoader(searchpath=templates_path))
-web_app = Application(tornado_handlers, **tornado_settings)
+app = Application(tornado_handlers, **tornado_settings)
