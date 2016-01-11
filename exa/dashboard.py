@@ -3,6 +3,7 @@
 Dashboard
 ==============
 '''
+from exa import Config
 from exa.relational import Session, Program, Project, Job, Container, File
 if Config.ipynb:                  # If using Jupyter notebook
     from exa.widget import Widget
@@ -135,4 +136,4 @@ class Dashboard:
         return str(self.sessions)
 
 
-Dashboard = Dashboard()
+Dashboard = Dashboard(*Config.session_args())

@@ -3,8 +3,8 @@
 Units and Dimensions
 ===============================================
 '''
-from exa.relational import Base, Meta, Column, String, Float
-from exa.relational import session, commit
+from exa.relational.base import Base, Meta, Column, String, Float
+from exa.relational.base import session, commit
 
 
 class DimensionMeta(Meta):

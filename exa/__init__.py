@@ -31,8 +31,8 @@ setup()
 from exa.testers import run_unittests, run_doctests
 from exa.relational import Container
 from exa.dashboard import Dashboard
-_ae.register(exa.relational.cleanup_anon_sessions)
-_ae.register(exa.relational.commit)
+_ae.register(relational.cleanup_anon_sessions)
+_ae.register(relational.commit)
 
 
 # API cleanup

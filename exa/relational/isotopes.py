@@ -3,8 +3,8 @@
 Isotope Data
 ===============================================
 '''
-from exa.relational import Base, Meta, Column, String, Integer, Float
-from exa.relational import session, commit
+from exa.relational.base import Base, Meta, Column, String, Integer, Float
+from exa.relational.base import session, commit
 
 
 class IsotopeMeta(Meta):

@@ -3,7 +3,7 @@
 Physical Constants
 ===============================================
 '''
-from exa.relational import Base, Column, String, Float
+from exa.relational.base import Base, Column, String, Float
 
 
 class Constant(Base):

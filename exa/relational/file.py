@@ -5,6 +5,7 @@ File
 '''
 from exa.relational.base import datetime
 from exa.relational.base import Column, Integer, String, DateTime, Base
+from exa.utils import gen_uid
 
 
 class File(Base):
