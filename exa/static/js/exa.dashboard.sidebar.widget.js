@@ -45,21 +45,21 @@ define([
     .dg .c input[type=text]:active {\
         background: white;\
         color: black;\
-        outline-color: lightblue;\
+        outline-color: black;\
         outline-style: solid;\
         outline-width: 1.5px\
     }\
     .dg .c input[type=text]:focus {\
         background: white;\
         color: black;\
-        outline-color: lightblue;\
+        outline-color: black;\
         outline-style: solid;\
         outline-width: 1.5px\
     }\
     .dg .c input[type=text]:hover {\
         background: white;\
         color: black;\
-        outline-color: lightblue;\
+        outline-color: black;\
         outline-style: solid;\
         outline-width: 1.5px\
     }\
@@ -108,7 +108,7 @@ define([
         text-shadow: 1px 0 0 white\
     }\
     .dg li.title:hover {\
-        outline-color: lightblue;\
+        outline-color: black;\
         outline-style: solid;\
         outline-width: 1.5px\
     }\
@@ -128,24 +128,25 @@ define([
         text-shadow: 1px 0 0 white\
     }\
     .dg.main .close-button:hover {\
-        outline-color: lightblue;\
+        outline-color: black;\
         outline-style: solid;\
         outline-width: 1.5px\
     }";
 
-    var sidebar = function() {
+    var sidebar = function(sidebarwidth) {
         /*"""
         Dashboard Widget Sidebar
         `````````````````````````
         */
         var self = this;
-        this.gui = new dat.GUI({autoPlace: false, width: 240});
+        this.gui = new dat.GUI({autoPlace: false, width: sidebarwidth});
         this.gui_style_element = document.createElement('style');
         this.gui_style_element.innerHTML = sidebar_css_string;
         $(this.gui.domElement).css('position', 'relative');
         $(this.gui.domElement).css('top', 0);
         $(this.gui.domElement).css('left', 0);
         this.gui.addFolder('Sessions');
+        this.gui.addFolder('Russians');
     };
 
     return sidebar;
