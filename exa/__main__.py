@@ -7,7 +7,7 @@ This is the starter for exa's standalone web application.
 import argparse
 import webbrowser
 import threading
-from exa.app import web_app, serve
+from exa.web import serve
 
 
 def get_args():
