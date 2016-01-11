@@ -14,6 +14,10 @@ require.config({
 
         'nbextensions/exa/static/js/exa.dashboard.sidebar.widget': {
             exports: 'sidebar'
+        },
+
+        'nbextensions/exa/static/js/exa.three': {
+            exports: 'threejs'
         }
     },
 });
@@ -23,12 +27,14 @@ define([
     'nbextensions/widgets/widgets/js/widget',
     'nbextensions/widgets/widgets/js/manager',
     'nbextensions/exa/static/js/exa.dashboard',
-    'nbextensions/exa/static/js/exa.dashboard.sidebar.widget'
+    'nbextensions/exa/static/js/exa.dashboard.sidebar.widget',
+    'nbextensions/exa/static/js/exa.three'
 ], function(
     widget,
     manager,
     dashboard,
-    sidebar
+    sidebar,
+    threejs
 ) {
     var DashboardView = widget.DOMWidgetView.extend({
         /*"""
@@ -38,23 +44,38 @@ define([
         */
         initialize: function() {
             _.bindAll(this, 'render');    // Fixes loss of context for 'this' within methods
-            this.render();
+            //this.render();
         },
 
         render: function() {
             var self = this;
-            console.log(this);
-            console.log(this.model);
-            console.log(document.getElementsByTagName('*'));
+            //console.log(document.getElementsByTagName('*'));
             var obj = $(document.getElementById('header-container'));
             this.width = obj.width();
             this.height = 500;
+            this.sidebarwidth = 200;
             this.container = dashboard.create_workspace(this.width, this.height);
-            this.sidebar = new sidebar();
+            this.canvas = dashboard.gen_canvas(this.width, this.height, this.sidebarwidth);
+            console.log(this.canvas.width());
+            console.log(this.canvas.height());
+            this.threejs = new threejs(this.width, this.height, this.canvas);
+            //console.log(this.threejs);
+            //console.log(this.threejs.scene);
+            //console.log(this.threejs);
+            this.sidebar = new sidebar(this.sidebarwidth);
             this.container.append(this.sidebar.gui.domElement);
             this.container.append(this.sidebar.gui_style_element);
-            console.log(this.sidebar);
+            this.container.append(this.canvas);
+            //this.threejs.render();
+            //console.log(this.canvas);
+            //console.log(this.sidebar);
             this.setElement(this.container);
+            //this.threejs.render();
+            this.on('displayed', function () {
+                this.canvas.resize();
+            //    this.threejs.animate();
+            //    this.threejs.controls.handleResize();
+            });
         },
     });
 
