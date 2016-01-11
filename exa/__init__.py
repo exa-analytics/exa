@@ -39,7 +39,7 @@ from exa.relational import (
 )
 _ae.register(_cleanup_anon_sessions)
 _ae.register(_commit)
-from exa.container import Container
+
 
 # API cleanup
 del setup, config, testers, log
