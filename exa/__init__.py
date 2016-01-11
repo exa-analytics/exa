@@ -30,7 +30,6 @@ _ae.register(Config.save)
 from exa.log import log_tail, log_head, setup
 setup()
 from exa.testers import run_unittests, run_doctests
-from exa.tools import install_notebook_widgets, initialize_database
 from exa.relational import commit as _commit
 from exa.relational import _cleanup_anon_sessions
 from exa.relational import (
