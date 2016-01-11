@@ -12,19 +12,17 @@ from exa.relational import event, session
 class Container:
     '''
     '''
-    #@event.listens_for(Entry, 'after_insert')
-    def _autosave(self, **kwargs):
+    def _autosave(self):
         '''
         '''
-        print(kwargs)
         print('autosaving...')
-
-    #event.listen(Entry, 'commit', _autosave)
 
     def __init__(self, name=None, description=None, **kwargs):
         '''
         '''
         self._entry = Entry(name=name, description=description)
+        self._obj1 = event.listen(self._entry, 'after_insert')(self._autosave)
+        self._obj2 = event.listen(self._entry, 'after_update')(self._autosave)
         for name, df in kwargs.items():
             setattr(self, name, df)
         self.name = name

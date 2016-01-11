@@ -1,6 +1,5 @@
 # exa
-A high performance, cloud-based, data management, analytics, and visualization
-application built on open-source technologies.
+Data management, processing, and visualization.
 
 
 # Installation

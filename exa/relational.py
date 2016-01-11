@@ -329,6 +329,9 @@ class Container(Base):
     name = Column(String)
     description = Column(String)
     uid = Column(String(32), default=gen_uid)
+    created = Column(DateTime, default=datetime.now)
+    modified = Column(DateTime, default=datetime.now)
+    accessed = Column(DateTime, default=datetime.now)
     files = relationship('File', secondary=ContainerFile, backref='container', cascade='all, delete')
 
     def __init__(self, **kwargs):
