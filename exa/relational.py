@@ -15,12 +15,12 @@ from sqlalchemy.ext.declarative import as_declarative, declared_attr, Declarativ
 from datetime import datetime
 from operator import itemgetter
 from exa import Config
-from exa import _bz as bz
+#from exa import _bz as bz
 from exa import _pd as pd
 from exa import _json as json
 from exa.errors import MissingProgramError, MissingProjectError, MissingJobError
 from exa.utils import gen_uid
-if Config.interactive:
+if Config.ipynb:
     from exa.widget import Widget
 
 
@@ -34,11 +34,17 @@ class Meta(DeclarativeMeta):
         Display a :py:class:`~pandas.DataFrame` representation of the table.
         '''
         commit()
-        df = bz.odo(db[self.__tablename__], pd.DataFrame)
+        df = pd.read_sql(
+            'SELECT * FROM {0}'.format(self.__tablename__.upper()),
+            engine.connect()
+        )
         if 'pkid' in df.columns:
             return df.set_index('pkid')
         else:
             return df
+
+    def count(self):
+        return session.query(self).count()
 
     def listall(self):
         '''
@@ -121,26 +127,26 @@ def _cleanup_anon_sessions():
 SessionProgram = Table(
     'sessionprogram',
     Base.metadata,
-    Column('session_pkid', Integer, ForeignKey('session.pkid')),
-    Column('program_pkid', Integer, ForeignKey('program.pkid'))
+    Column('session_pkid', Integer, ForeignKey('session.pkid', onupdate='CASCADE', ondelete='CASCADE')),
+    Column('program_pkid', Integer, ForeignKey('program.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
 SessionProject = Table(
     'sessionproject',
     Base.metadata,
-    Column('session_pkid', Integer, ForeignKey('session.pkid')),
-    Column('project_pkid', Integer, ForeignKey('project.pkid'))
+    Column('session_pkid', Integer, ForeignKey('session.pkid', onupdate='CASCADE', ondelete='CASCADE')),
+    Column('project_pkid', Integer, ForeignKey('project.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
 SessionJob = Table(
     'sessionjob',
     Base.metadata,
-    Column('session_pkid', Integer, ForeignKey('session.pkid')),
-    Column('job_pkid', Integer, ForeignKey('job.pkid'))
+    Column('session_pkid', Integer, ForeignKey('session.pkid', onupdate='CASCADE', ondelete='CASCADE')),
+    Column('job_pkid', Integer, ForeignKey('job.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
 SessionContainer = Table(
     'sessioncontainer',
     Base.metadata,
-    Column('session_pkid', Integer, ForeignKey('session.pkid')),
-    Column('container_pkid', Integer, ForeignKey('container.pkid'))
+    Column('session_pkid', Integer, ForeignKey('session.pkid', onupdate='CASCADE', ondelete='CASCADE')),
+    Column('container_pkid', Integer, ForeignKey('container.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
 SessionFile = Table(
     'sessionfile',
@@ -153,66 +159,66 @@ SessionFile = Table(
 ProgramProject = Table(
     'programproject',
     Base.metadata,
-    Column('program_pkid', Integer, ForeignKey('program.pkid')),
-    Column('project_pkid', Integer, ForeignKey('project.pkid'))
+    Column('program_pkid', Integer, ForeignKey('program.pkid', onupdate='CASCADE', ondelete='CASCADE')),
+    Column('project_pkid', Integer, ForeignKey('project.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
 ProgramJob = Table(
     'programjob',
     Base.metadata,
-    Column('program_pkid', Integer, ForeignKey('program.pkid')),
-    Column('job_pkid', Integer, ForeignKey('job.pkid'))
+    Column('program_pkid', Integer, ForeignKey('program.pkid', onupdate='CASCADE', ondelete='CASCADE')),
+    Column('job_pkid', Integer, ForeignKey('job.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
 ProgramContainer = Table(
     'programcontainer',
     Base.metadata,
-    Column('program_pkid', Integer, ForeignKey('program.pkid')),
-    Column('container_pkid', Integer, ForeignKey('container.pkid'))
+    Column('program_pkid', Integer, ForeignKey('program.pkid', onupdate='CASCADE', ondelete='CASCADE')),
+    Column('container_pkid', Integer, ForeignKey('container.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
 ProgramFile = Table(
     'programfile',
     Base.metadata,
-    Column('program_pkid', Integer, ForeignKey('program.pkid')),
-    Column('file_pkid', Integer, ForeignKey('file.pkid'))
+    Column('program_pkid', Integer, ForeignKey('program.pkid', onupdate='CASCADE', ondelete='CASCADE')),
+    Column('file_pkid', Integer, ForeignKey('file.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
 
 
 ProjectJob = Table(
     'projectjob',
     Base.metadata,
-    Column('project_pkid', Integer, ForeignKey('project.pkid')),
-    Column('job_pkid', Integer, ForeignKey('job.pkid'))
+    Column('project_pkid', Integer, ForeignKey('project.pkid', onupdate='CASCADE', ondelete='CASCADE')),
+    Column('job_pkid', Integer, ForeignKey('job.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
 ProjectContainer = Table(
     'projectcontainer',
     Base.metadata,
-    Column('project_pkid', Integer, ForeignKey('project.pkid')),
-    Column('container_pkid', Integer, ForeignKey('container.pkid'))
+    Column('project_pkid', Integer, ForeignKey('project.pkid', onupdate='CASCADE', ondelete='CASCADE')),
+    Column('container_pkid', Integer, ForeignKey('container.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
 ProjectFile = Table(
     'projectfile',
     Base.metadata,
-    Column('project_pkid', Integer, ForeignKey('project.pkid')),
-    Column('file_pkid', Integer, ForeignKey('file.pkid'))
+    Column('project_pkid', Integer, ForeignKey('project.pkid', onupdate='CASCADE', ondelete='CASCADE')),
+    Column('file_pkid', Integer, ForeignKey('file.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
 
 
 JobContainer = Table(
     'jobcontainer',
     Base.metadata,
-    Column('job_pkid', Integer, ForeignKey('job.pkid')),
-    Column('container_pkid', Integer, ForeignKey('container.pkid'))
+    Column('job_pkid', Integer, ForeignKey('job.pkid', onupdate='CASCADE', ondelete='CASCADE')),
+    Column('container_pkid', Integer, ForeignKey('container.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
 JobFile = Table(
     'jobfile',
     Base.metadata,
-    Column('job_pkid', Integer, ForeignKey('job.pkid')),
-    Column('file_pkid', Integer, ForeignKey('file.pkid'))
+    Column('job_pkid', Integer, ForeignKey('job.pkid', onupdate='CASCADE', ondelete='CASCADE')),
+    Column('file_pkid', Integer, ForeignKey('file.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
 ContainerFile = Table(
     'containerfile',
     Base.metadata,
-    Column('container_pkid', Integer, ForeignKey('container.pkid')),
-    Column('file_pkid', Integer, ForeignKey('file.pkid'))
+    Column('container_pkid', Integer, ForeignKey('container.pkid', onupdate='CASCADE', ondelete='CASCADE')),
+    Column('file_pkid', Integer, ForeignKey('file.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
 
 
@@ -537,16 +543,12 @@ class Dashboard:
     def _add_to_session(self, obj):
         if isinstance(obj, Program):
             self._active_session.programs.append(obj)
-            self._active_program = obj
         elif isinstance(obj, Project):
             self._active_session.projects.append(obj)
-            self._active_project = obj
         elif isinstance(obj, Job):
             self._active_session.jobs.append(obj)
-            self._active_job = obj
         elif isinstance(obj, Container):
             self._active_session.containers.append(obj)
-            self._containers.append(obj)
         elif isinstance(obj, File):
             self._active_session.files.append(obj)
         else:
@@ -594,6 +596,7 @@ class Dashboard:
             pass
             #raise MissingJobError()
 
+    @property
     def sessions(self):
         '''
         '''
@@ -606,46 +609,53 @@ class Dashboard:
             self._active_program,
             self._active_project,
             self._active_job,
-            self._containers
+            self._active_container
         ))
 
     def new_session(self, name='anonymous', description=None):
         '''
+        Start a new session
         '''
+        commit()
         self._active_session = Session(name=name, description=None)
 
     def load_session(self, key):
-        self._active_session = Session.load(key)
+        self._active_session = Session[key]
 
-    def __init__(self):
-        self._active_session = None
-        self._active_program = None
-        self._active_project = None
-        self._active_job = None
-        self._containers = []
+    def load_program(self, key):
+        self._active_program = Program[key]
+
+    def load_project(self, key):
+        self._active_project = Project[key]
+
+    def load_job(self, key):
+        self._active_job = Job[key]
+
+    def load_container(self, key):
+        self._active_container = Container[key]
+
+    def __init__(self, session, program, project, job, container):
+        '''
+        Load active session/program/project/job/container if defined in Config.
+        '''
+        self._active_session = Session[session] if session else Session(name='anonymous')
+        self._active_program = Program[program] if program else None
+        self._active_project = Project[project] if project else None
+        self._active_job = Job[job] if job else None
+        self._active_container = Container[container] if container else None
         self._widget = None
-        if Config.interactive:
+        if Config.ipynb:
             self._widget = Widget()
-
-    def _create_new(self, items):
-        for k, v in items:
-            name = '_active_' + k
-            if v:
-                setattr(self, name, self._load_object[k](v))
-            elif k == 'session':
-                setattr(self, name, Session(name='anonymous'))
 
     def _repr_html_(self):
         return self._widget
 
     def __repr__(self):
-        return str(self.sessions())
+        return str(self.sessions)
 
 
 engine_name = Config.relational_engine()
 engine = create_engine(engine_name)
 session = scoped_session(sessionmaker(bind=engine))
 Base.metadata.create_all(engine)
-db = bz.Data(engine)
-Dashboard = Dashboard()
-Dashboard._create_new(Config.session)
+Dashboard = Dashboard(*Config.session_args())

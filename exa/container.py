@@ -5,15 +5,26 @@ Container
 A data object or data concept
 '''
 from exa.relational import Container as Entry
+from exa.relational import event, session
+
 
 
 class Container:
     '''
     '''
-    def __init__(self, name=None, **kwargs):
+    #@event.listens_for(Entry, 'after_insert')
+    def _autosave(self, **kwargs):
         '''
         '''
-        self._entry = Entry(name=name)
+        print(kwargs)
+        print('autosaving...')
+
+    #event.listen(Entry, 'commit', _autosave)
+
+    def __init__(self, name=None, description=None, **kwargs):
+        '''
+        '''
+        self._entry = Entry(name=name, description=description)
         for name, df in kwargs.items():
             setattr(self, name, df)
         self.name = name
