@@ -4,7 +4,7 @@ Container
 ==============
 A data object or data concept
 '''
-from exa.relational import Container as container_db_entry
+from exa.relational import Container as Entry
 
 
 class Container:
@@ -13,14 +13,12 @@ class Container:
     def __init__(self, name=None, **kwargs):
         '''
         '''
-        self._db_entry = container_db_entry(
-            name=name
-        )
+        self._entry = Entry(name=name)
         for name, df in kwargs.items():
             setattr(self, name, df)
         self.name = name
         if name is None:
-            self.name = self._db_entry.uid
+            self.name = self._entry.uid
 
     def __repr__(self):
         return 'Container({0})'.format(self.name)
