@@ -4,27 +4,6 @@ Container
 ==============
 A data object or data concept
 '''
-from exa.relational import Container as Entry
-from exa.relational import event, session
-from sqlalchemy.inspection import inspect
-
-
-class Container:
-    '''
-    '''
-    def __init__(self, name=None, description=None, **kwargs):
-        '''
-        '''
-        self._entry = Entry(name=name, description=description)
-        for name, df in kwargs.items():
-            setattr(self, name, df)
-        self.name = name
-        if name is None:
-            self.name = self._entry.uid
-
-    def __repr__(self):
-        return 'Container({0})'.format(self.name)
-
 
 
 

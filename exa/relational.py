@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 '''
-Relational Database Tables
-==================================
-Database logic for the content management system.
+Dashboard, Container, and Relational Objects
+===============================================
 
-Note:
-    All database interaction is lazy. Objects are commited when
-    a users attempts to query the database and on exit.
 '''
 from sqlalchemy import (Table, Column, Integer, String, DateTime, ForeignKey,
                         Float, create_engine, and_, event)
@@ -121,7 +117,6 @@ def _cleanup_anon_sessions():
     ).order_by(Session.accessed).all()[:-5]
     for anon in anons:
         session.delete(anon)
-    commit()
 
 
 SessionProgram = Table(
@@ -246,11 +241,11 @@ class Session(Base, metaclass=SessionMeta):
     modified = Column(DateTime, default=datetime.now)
     accessed = Column(DateTime, default=datetime.now)
     uid = Column(String(32), default=gen_uid)
-    programs = relationship('Program', secondary=SessionProgram, backref='session', cascade='all, delete')
-    projects = relationship('Project', secondary=SessionProject, backref='session', cascade='all, delete')
-    jobs = relationship('Job', secondary=SessionJob, backref='session', cascade='all, delete')
-    containers = relationship('Container', secondary=SessionContainer, backref='session', cascade='all, delete')
-    files = relationship('File', secondary=SessionFile, backref='session', cascade='all, delete')
+    programs = relationship('Program', secondary=SessionProgram, backref='sessions', cascade='all, delete')
+    projects = relationship('Project', secondary=SessionProject, backref='sessions', cascade='all, delete')
+    jobs = relationship('Job', secondary=SessionJob, backref='sessions', cascade='all, delete')
+    containers = relationship('Container', secondary=SessionContainer, backref='sessions', cascade='all, delete')
+    files = relationship('File', secondary=SessionFile, backref='sessions', cascade='all, delete')
 
     def __repr__(self):
         if self.name == 'anonymous':
@@ -270,10 +265,10 @@ class Program(Base):
     created = Column(DateTime, default=datetime.now)
     modified = Column(DateTime, default=datetime.now)
     accessed = Column(DateTime, default=datetime.now)
-    projects = relationship('Project', secondary=ProgramProject, backref='program', cascade='all, delete')
-    jobs = relationship('Job', secondary=ProgramJob, backref='program', cascade='all, delete')
-    containers = relationship('Container', secondary=ProgramContainer, backref='program', cascade='all, delete')
-    files = relationship('File', secondary=ProgramFile, backref='program', cascade='all, delete')
+    projects = relationship('Project', secondary=ProgramProject, backref='programs', cascade='all, delete')
+    jobs = relationship('Job', secondary=ProgramJob, backref='programs', cascade='all, delete')
+    containers = relationship('Container', secondary=ProgramContainer, backref='programs', cascade='all, delete')
+    files = relationship('File', secondary=ProgramFile, backref='programs', cascade='all, delete')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -289,9 +284,9 @@ class Project(Base):
     created = Column(DateTime, default=datetime.now)
     modified = Column(DateTime, default=datetime.now)
     accessed = Column(DateTime, default=datetime.now)
-    jobs = relationship('Job', secondary=ProjectJob, backref='project', cascade='all, delete')
-    containers = relationship('Container', secondary=ProjectContainer, backref='project', cascade='all, delete')
-    files = relationship('File', secondary=ProjectFile, backref='project', cascade='all, delete')
+    jobs = relationship('Job', secondary=ProjectJob, backref='projects', cascade='all, delete')
+    containers = relationship('Container', secondary=ProjectContainer, backref='projects', cascade='all, delete')
+    files = relationship('File', secondary=ProjectFile, backref='projects', cascade='all, delete')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -309,43 +304,14 @@ class Job(Base):
     created = Column(DateTime, default=datetime.now)
     modified = Column(DateTime, default=datetime.now)
     accessed = Column(DateTime, default=datetime.now)
-    containers = relationship('Container', secondary=JobContainer, backref='job', cascade='all, delete')
-    files = relationship('File', secondary=JobFile, backref='job', cascade='all, delete')
+    containers = relationship('Container', secondary=JobContainer, backref='jobs', cascade='all, delete')
+    files = relationship('File', secondary=JobFile, backref='jobs', cascade='all, delete')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         Dashboard._add_to_session(self)
         Dashboard._add_to_program(self)
         Dashboard._add_to_project(self)
-
-
-class Container(Base):
-    '''
-    Database representation of the 'session' concept.
-
-    See Also:
-        :class:`~exa.session.Session`
-    '''
-    name = Column(String)
-    description = Column(String)
-    uid = Column(String(32), default=gen_uid)
-    created = Column(DateTime, default=datetime.now)
-    modified = Column(DateTime, default=datetime.now)
-    accessed = Column(DateTime, default=datetime.now)
-    files = relationship('File', secondary=ContainerFile, backref='container', cascade='all, delete')
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        Dashboard._add_to_session(self)
-        Dashboard._add_to_program(self)
-        Dashboard._add_to_project(self)
-        Dashboard._add_to_job(self)
-
-    def __repr__(self):
-        if self.name is None:
-            return 'Container({0})'.format(self.uid)
-        else:
-            return 'Container({0})'.format(self.name)
 
 
 class File(Base):
@@ -532,6 +498,44 @@ class MolarMass(Base, Dimension, metaclass=DimensionMeta):
     pass
 
 
+class Container(Base):
+    '''
+    Database representation of the 'session' concept.
+
+    See Also:
+        :class:`~exa.session.Session`
+    '''
+    name = Column(String)
+    description = Column(String)
+    uid = Column(String(32), default=gen_uid)
+    created = Column(DateTime, default=datetime.now)
+    modified = Column(DateTime, default=datetime.now)
+    accessed = Column(DateTime, default=datetime.now)
+    files = relationship('File', secondary=ContainerFile, backref='containers', cascade='all, delete')
+
+    def __getitem__(self, key):
+        raise NotImplementedError()
+
+    def __setitem__(self, key, value):
+        raise NotImplementedError()
+
+    def __init__(self, name=None, description=None, **kwargs):
+        #dfkwargs = {k: v for k, v in kwargs.items() if isinstance(v, pd.DataFrame)}
+        super().__init__(name=name, description=description)
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+        Dashboard._add_to_session(self)
+        Dashboard._add_to_program(self)
+        Dashboard._add_to_project(self)
+        Dashboard._add_to_job(self)
+
+    def __repr__(self):
+        if self.name is None:
+            return 'Container({0})'.format(self.uid)
+        else:
+            return 'Container({0})'.format(self.name)
+
+
 class Dashboard:
     '''
     '''
@@ -606,7 +610,7 @@ class Dashboard:
         return Session.listall()
 
     @property
-    def info(self):
+    def actives(self):
         print(self._info.format(
             self._active_session,
             self._active_program,
@@ -621,6 +625,9 @@ class Dashboard:
         '''
         commit()
         self._active_session = Session(name=name, description=None)
+
+    def import_session(self, key):
+        raise NotImplementedError()
 
     def load_session(self, key):
         self._active_session = Session[key]
