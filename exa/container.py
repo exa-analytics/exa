@@ -6,23 +6,16 @@ A data object or data concept
 '''
 from exa.relational import Container as Entry
 from exa.relational import event, session
-
+from sqlalchemy.inspection import inspect
 
 
 class Container:
     '''
     '''
-    def _autosave(self):
-        '''
-        '''
-        print('autosaving...')
-
     def __init__(self, name=None, description=None, **kwargs):
         '''
         '''
         self._entry = Entry(name=name, description=description)
-        self._obj1 = event.listen(self._entry, 'after_insert')(self._autosave)
-        self._obj2 = event.listen(self._entry, 'after_update')(self._autosave)
         for name, df in kwargs.items():
             setattr(self, name, df)
         self.name = name
