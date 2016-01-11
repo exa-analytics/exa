@@ -3,10 +3,8 @@
 File
 ===============================================
 '''
-from exa.relational.base import session, datetime, relationship
-from exa.relational.base import Column, Integer, String, DateTime
-from exa.relational.base import ForeignKey, Table, Base, Meta
-from exa.utils import gen_uid
+from exa.relational.base import datetime
+from exa.relational.base import Column, Integer, String, DateTime, Base
 
 
 class File(Base):
@@ -20,10 +18,3 @@ class File(Base):
     modified = Column(DateTime, default=datetime.now)
     accessed = Column(DateTime, default=datetime.now)
     size = Column(Integer)
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        Dashboard._add_to_session(self)
-        Dashboard._add_to_program(self)
-        Dashboard._add_to_project(self)
-        Dashboard._add_to_job(self)

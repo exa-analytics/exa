@@ -41,8 +41,3 @@ class Project(Base):
     jobs = relationship('Job', secondary=ProjectJob, backref='projects', cascade='all, delete')
     containers = relationship('Container', secondary=ProjectContainer, backref='projects', cascade='all, delete')
     files = relationship('File', secondary=ProjectFile, backref='projects', cascade='all, delete')
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-#        Dashboard._add_to_session(self)
-#        Dashboard._add_to_program(self)
