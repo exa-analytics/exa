@@ -30,15 +30,18 @@ _ae.register(Config.save)
 from exa.log import log_tail, log_head, setup
 setup()
 from exa.testers import run_unittests, run_doctests
-from exa.relational import commit as _commit
-from exa.relational import _cleanup_anon_sessions
-from exa.relational import (
-    Force, Dose, Angle, Mass, Length, Frequency, Energy, Dipole, Temperature,
-    Charge, MolarMass, Luminosity, Current, Acceleration, Amount, Time,
-    Isotope, Constant, Dashboard
-)
-_ae.register(_cleanup_anon_sessions)
-_ae.register(_commit)
+from exa.relational import Container
+#from exa.relational import commit as _commit
+#from exa.relational import _cleanup_anon_sessions
+#from exa.relational import (
+#    Force, Dose, Angle, Mass, Length, Frequency, Energy, Dipole, Temperature,
+#    Charge, MolarMass, Luminosity, Current, Acceleration, Amount, Time,
+#    Isotope, Constant, Dashboard
+#)
+#from exa.relational import Container, Dashboard
+#from exa.static import Length
+#_ae.register(_cleanup_anon_sessions)
+#_ae.register(_commit)
 
 
 # API cleanup
