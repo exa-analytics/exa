@@ -11,7 +11,7 @@ from exa import _re as re
 from exa import _os as os
 from exa import _np as np
 from exa import _json as json
-from exa.relational import Isotope, Constant, Dimension
+from exa.static import Isotope, Constant, Dimension
 from exa.utils import mkpath
 
 
