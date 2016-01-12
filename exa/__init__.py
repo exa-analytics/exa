@@ -33,6 +33,7 @@ from exa.relational import Container
 from exa.dashboard import Dashboard
 _ae.register(relational.cleanup_anon_sessions)
 _ae.register(relational.commit)
+from exa import tests
 
 
 # API cleanup
