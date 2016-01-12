@@ -27,6 +27,7 @@ def before_insert(mapper, connection, container):
     See Also:
         :func:`~exa.relational.container.after_insert`
     '''
+    pass
 
 
 @event.listens_for(Container, 'after_insert')
