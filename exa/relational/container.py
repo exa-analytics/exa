@@ -34,15 +34,20 @@ class Container(Base):
     file_count = Column(Integer)
     files = relationship('File', secondary=ContainerFile, backref='containers', cascade='all, delete')
 
+    def add_dataframe(self, name, df):
+        '''
+        '''
+        pass
+
     def __getitem__(self, key):
         raise NotImplementedError()
 
     def __setitem__(self, key, value):
         raise NotImplementedError()
 
-    def __init__(self, name=None, description=None, **kwargs):
+    def __init__(self, name=None, description=None, dataframes={}):
         super().__init__(name=name, description=description)
-        for k, v in kwargs.items():
+        for k, v in dataframes.items():
             setattr(self, k, v)
 
     def __repr__(self):
@@ -50,3 +55,10 @@ class Container(Base):
             return 'Container({0})'.format(self.uid)
         else:
             return 'Container({0})'.format(self.name)
+
+
+def concat(containers, axis=0, join='inner'):
+    '''
+    Concatenate a collection of containers.
+    '''
+    raise NotImplementedError()
