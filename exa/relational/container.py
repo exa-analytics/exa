@@ -40,6 +40,11 @@ class Container(Base):
     file_count = Column(Integer)
     files = relationship('File', secondary=ContainerFile, backref='containers', cascade='all, delete')
 
+    __mapper_args__ = {
+        'polymorphic_identity': 'container',   # This allows the container to
+        'polymorphic_on': container_type       # be inherited.
+    }
+
     def add_dataframe(self, name, df):
         '''
         '''
@@ -100,11 +105,6 @@ class Container(Base):
 
     def __truediv__(self, other):
         raise NotImplementedError()
-
-    def __mapper_args__ = {
-        'polymorphic_identity': 'container',   # This allows the container to
-        'polymorphic_on': container_type       # be inherited.
-    }
 
     def __init__(self, name=None, description=None, ctype='container', dataframes={}):
         super().__init__(name=name, description=description, container_type=ctype)
