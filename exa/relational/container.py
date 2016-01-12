@@ -39,10 +39,46 @@ class Container(Base):
         '''
         pass
 
+
+    def to_archive(self, path):
+        '''
+        Export this container to an archive that can be imported elsewhere.
+        '''
+        raise NotImplementedError()
+
+    @classmethod
+    def from_archive(cls, path):
+        '''
+        Import a container from an archive into the current active session.
+
+        Note:
+            This function will also create file entries and objects
+            corresponding to the data provided in the archive.
+        '''
+        raise NotImplementedError()
+
     def __getitem__(self, key):
         raise NotImplementedError()
 
     def __setitem__(self, key, value):
+        raise NotImplementedError()
+
+    def __add__(self, other):
+        raise NotImplementedError()
+
+    def __sub__(self, other):
+        raise NotImplementedError()
+
+    def __mul__(self, other):
+        raise NotImplementedError()
+
+    def __div__(self, other):
+        raise NotImplementedError()
+
+    def __rmul__(self, other):
+        raise NotImplementedError()
+
+    def __truediv__(self, other):
         raise NotImplementedError()
 
     def __init__(self, name=None, description=None, dataframes={}):
@@ -52,9 +88,9 @@ class Container(Base):
 
     def __repr__(self):
         if self.name is None:
-            return 'Container({0})'.format(self.uid)
+            return 'Container({0}: {1})'.format(self.pkid, self.uid)
         else:
-            return 'Container({0})'.format(self.name)
+            return 'Container({0}: {1})'.format(self.pkid, self.name)
 
 
 def concat(containers, axis=0, join='inner'):

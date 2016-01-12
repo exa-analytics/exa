@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-Object Based Disk IO
+Container Events and Disk I/O
 ===============================================
 This module controls reading and writing physical file objects represented
 by :class:`~exa.relational.file.File` (database entry) objects and collected
