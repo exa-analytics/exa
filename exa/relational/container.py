@@ -3,6 +3,7 @@
 Container
 ===============================================
 '''
+from exa import _pd as pd
 from exa.relational.base import session, datetime, relationship, event
 from exa.relational.base import Column, Integer, String, DateTime
 from exa.relational.base import ForeignKey, Table, Base
@@ -56,6 +57,14 @@ class Container(Base):
             corresponding to the data provided in the archive.
         '''
         raise NotImplementedError()
+
+    @property
+    def dataframes(self):
+        '''
+        Return:
+            dfs (dict): Dictionary of dataframes (key is the dataframe name)
+        '''
+        return {n: v for n, v in vars(self).items() if isinstance(v, pd.DataFrame)}
 
     def __getitem__(self, key):
         raise NotImplementedError()

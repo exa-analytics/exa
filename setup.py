@@ -28,8 +28,8 @@ try:
             ]
         },
         entry_points={'console_scripts': ['exa = exa.__main__:main']},
-        include_package_data=True,
-        install_requires=dependencies
+        include_package_data=True
+        #install_requires=dependencies
     )
 finally:
     from exa.install import initialize
