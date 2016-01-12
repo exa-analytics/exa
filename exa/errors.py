@@ -53,27 +53,3 @@ class UnsupportedFileType(ExaException):
     def __init__(self, ftype):
         self.msg = self._msg.format(ftype)
         super().__init__()
-
-
-class MissingProgramError(ExaException):
-    '''
-    Raised when attempting to add an object to a :class:`~exa.relational.Program`
-    before the Program entry has been created in the database.
-    '''
-    msg = 'Please create a Program (exa.Program(...)) first'
-
-
-class MissingProjectError(ExaException):
-    '''
-    Raised when attempting to add an object to a :class:`~exa.relational.Project`
-    before the Project entry has been created in the database.
-    '''
-    msg = 'Please create a Project (exa.Project(...)) first'
-
-
-class MissingJobError(ExaException):
-    '''
-    Raised when attempting to add an object to a :class:`~exa.relational.Job`
-    before the Job entry has been created in the database.
-    '''
-    msg = 'Please create a Job (exa.Job(...)) first'

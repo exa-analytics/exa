@@ -5,7 +5,7 @@ Session
 '''
 from exa.relational.base import session, datetime, relationship
 from exa.relational.base import Column, Integer, String, DateTime
-from exa.relational.base import ForeignKey, Table, Base, Meta
+from exa.relational.base import ForeignKey, Table, Base
 from exa.utils import gen_uid
 
 
@@ -15,24 +15,32 @@ SessionProgram = Table(
     Column('session_pkid', Integer, ForeignKey('session.pkid', onupdate='CASCADE', ondelete='CASCADE')),
     Column('program_pkid', Integer, ForeignKey('program.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
+
+
 SessionProject = Table(
     'sessionproject',
     Base.metadata,
     Column('session_pkid', Integer, ForeignKey('session.pkid', onupdate='CASCADE', ondelete='CASCADE')),
     Column('project_pkid', Integer, ForeignKey('project.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
+
+
 SessionJob = Table(
     'sessionjob',
     Base.metadata,
     Column('session_pkid', Integer, ForeignKey('session.pkid', onupdate='CASCADE', ondelete='CASCADE')),
     Column('job_pkid', Integer, ForeignKey('job.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
+
+
 SessionContainer = Table(
     'sessioncontainer',
     Base.metadata,
     Column('session_pkid', Integer, ForeignKey('session.pkid', onupdate='CASCADE', ondelete='CASCADE')),
     Column('container_pkid', Integer, ForeignKey('container.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
+
+
 SessionFile = Table(
     'sessionfile',
     Base.metadata,
@@ -41,19 +49,19 @@ SessionFile = Table(
 )
 
 
-class SessionMeta(Meta):
-    '''
-    '''
-    def _getitem(self, key):
-        if isinstance(key, int):
-            return session.query(self).filter(self.pkid == key).all()[0]
-        elif isinstance(key, str):
-            return session.query(self).filter(self.name == key).all()[0]
-        else:
-            raise NotImplementedError()
+#class SessionMeta(Meta):
+#    '''
+#    '''
+#    def _getitem(self, key):
+#        if isinstance(key, int):
+#            return session.query(self).filter(self.pkid == key).all()[0]
+#        elif isinstance(key, str):
+#            return session.query(self).filter(self.name == key).all()[0]
+#        else:
+#            raise NotImplementedError()
 
 
-class Session(Base, metaclass=SessionMeta):
+class Session(Base): #, metaclass=SessionMeta):
     '''
     Database representation of the 'session' concept.
 

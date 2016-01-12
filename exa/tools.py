@@ -59,7 +59,7 @@ def initialize_database(force=False):
         count = 0
         name = tbl.__tablename__
         try:
-            count = tbl.count()
+            count = len(tbl)
         except:
             pass
         if count == 0:

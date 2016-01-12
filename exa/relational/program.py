@@ -5,7 +5,7 @@ Program
 '''
 from exa.relational.base import session, datetime, relationship
 from exa.relational.base import Column, Integer, String, DateTime
-from exa.relational.base import ForeignKey, Table, Base, Meta
+from exa.relational.base import ForeignKey, Table, Base
 from exa.utils import gen_uid
 
 

@@ -3,13 +3,31 @@
 Isotope Data
 ===============================================
 '''
-from exa.relational.base import Base, Meta, Column, String, Integer, Float
+from exa.relational.base import Base, Column, String, Integer, Float
 from exa.relational.base import session, commit
 
 
-class IsotopeMeta(Meta):
+class Isotope(Base):
     '''
+    A variant of a chemical element with a specific proton and neutron count.
     '''
+    A = Column(Integer, nullable=False)
+    Z = Column(Integer, nullable=False)
+    af = Column(Float)
+    eaf = Column(Float)
+    color = Column(Integer)
+    radius = Column(Float)
+    gfactor = Column(Float)
+    mass = Column(Float)
+    emass = Column(Float)
+    name = Column(String(length=16))
+    eneg = Column(Float)
+    quadmom = Column(Float)
+    spin = Column(Float)
+    symbol = Column(String(length=3))
+    szuid = Column(Integer)
+    strid = Column(Integer)
+
     def get_by_symbol(self, symbol):
         '''
         '''
@@ -61,28 +79,6 @@ class IsotopeMeta(Meta):
             return self.get_by_szuid(key)
         else:
             raise TypeError('Key type {0} not supported.'.format(type(key)))
-
-
-class Isotope(Base, metaclass=IsotopeMeta):
-    '''
-    A variant of a chemical element with a specific proton and neutron count.
-    '''
-    A = Column(Integer, nullable=False)
-    Z = Column(Integer, nullable=False)
-    af = Column(Float)
-    eaf = Column(Float)
-    color = Column(Integer)
-    radius = Column(Float)
-    gfactor = Column(Float)
-    mass = Column(Float)
-    emass = Column(Float)
-    name = Column(String(length=16))
-    eneg = Column(Float)
-    quadmom = Column(Float)
-    spin = Column(Float)
-    symbol = Column(String(length=3))
-    szuid = Column(Integer)
-    strid = Column(Integer)
 
     def __repr__(self):
         return '{0}{1}'.format(self.A, self.symbol)

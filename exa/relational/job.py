@@ -5,7 +5,7 @@ Job
 '''
 from exa.relational.base import session, datetime, relationship
 from exa.relational.base import Column, Integer, String, DateTime
-from exa.relational.base import ForeignKey, Table, Base, Meta
+from exa.relational.base import ForeignKey, Table, Base
 from exa.utils import gen_uid
 
 
@@ -35,5 +35,7 @@ class Job(Base):
     created = Column(DateTime, default=datetime.now)
     modified = Column(DateTime, default=datetime.now)
     accessed = Column(DateTime, default=datetime.now)
+    size = Column(Integer)
+    file_count = Column(Integer)
     containers = relationship('Container', secondary=JobContainer, backref='jobs', cascade='all, delete')
     files = relationship('File', secondary=JobFile, backref='jobs', cascade='all, delete')

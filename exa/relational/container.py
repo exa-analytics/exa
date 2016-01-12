@@ -5,8 +5,9 @@ Container
 '''
 from exa.relational.base import session, datetime, relationship, event
 from exa.relational.base import Column, Integer, String, DateTime
-from exa.relational.base import ForeignKey, Table, Base, Meta
+from exa.relational.base import ForeignKey, Table, Base
 from exa.utils import gen_uid
+
 
 ContainerFile = Table(
     'containerfile',
@@ -32,14 +33,6 @@ class Container(Base):
     size = Column(Integer)
     file_count = Column(Integer)
     files = relationship('File', secondary=ContainerFile, backref='containers', cascade='all, delete')
-
-
-    @classmethod
-    def load(cls, key):
-        obj = cls._getitem(key)   # This function is in class Meta
-        obj.accessed = datetime.now()
-        # TODO: attach all of the df data from files
-        return obj
 
     def __getitem__(self, key):
         raise NotImplementedError()
