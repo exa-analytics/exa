@@ -35,6 +35,7 @@ class Container(Base):
     @classmethod
     def load(cls, key):
         obj = cls._getitem(key)   # This function is in class Meta
+        obj.accessed = datetime.now()
         # TODO: attach all of the df data from files
         return obj
 
@@ -57,23 +58,25 @@ class Container(Base):
 
 
 @event.listens_for(Container, 'after_insert')
-def _update_files(self, *args):
+def _create_files(mapper, connection, container):
     '''
     Write/create files on disk (represented by entries in the File
     table/instances of the File class) that are associated with the
     current Container.
     '''
     print('now we rewrite any hdf5 and other files on disk')
-    print(self)
-    print(args)
+
+@event.listens_for(Container, 'after_update')
+def _update_files(mapper, connection, container):
+    '''
+    '''
+    print('update!')
 
 @event.listens_for(Container, 'after_delete')
-def _remove_files(self, *args):
+def _delete_files(mapper, connection, container):
     '''
     Delete files on disk (represented by entries in the File
     table/instances of the File class) that are associated with the
     recently deleted Container.
     '''
     print('now we delete any hdf5 and other files on disk')
-    print(self)
-    print(args)
