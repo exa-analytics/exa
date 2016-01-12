@@ -5,8 +5,9 @@ Container
 '''
 from exa.relational.base import session, datetime, relationship, event
 from exa.relational.base import Column, Integer, String, DateTime
-from exa.relational.base import ForeignKey, Table, Base, Meta
+from exa.relational.base import ForeignKey, Table, Base
 from exa.utils import gen_uid
+
 
 ContainerFile = Table(
     'containerfile',
@@ -29,14 +30,9 @@ class Container(Base):
     created = Column(DateTime, default=datetime.now)
     modified = Column(DateTime, default=datetime.now)
     accessed = Column(DateTime, default=datetime.now)
+    size = Column(Integer)
+    file_count = Column(Integer)
     files = relationship('File', secondary=ContainerFile, backref='containers', cascade='all, delete')
-
-
-    @classmethod
-    def load(cls, key):
-        obj = cls._getitem(key)   # This function is in class Meta
-        # TODO: attach all of the df data from files
-        return obj
 
     def __getitem__(self, key):
         raise NotImplementedError()
@@ -48,10 +44,6 @@ class Container(Base):
         super().__init__(name=name, description=description)
         for k, v in kwargs.items():
             setattr(self, k, v)
-        Dashboard._add_to_session(self)
-        Dashboard._add_to_program(self)
-        Dashboard._add_to_project(self)
-        Dashboard._add_to_job(self)
 
     def __repr__(self):
         if self.name is None:
@@ -60,24 +52,39 @@ class Container(Base):
             return 'Container({0})'.format(self.name)
 
 
+@event.listens_for(Container, 'before_insert')
+def before_insert(mapper, connection, container):
+    '''
+    '''
+    print('before insert')
+
+@event.listens_for(Container, 'before_update')
+def _before_update(mapper, connection, container):
+    '''
+    Actions to perform just before commiting Containers
+    '''
+    print('just before update')
+
 @event.listens_for(Container, 'after_insert')
-def _update_files(self, *args):
+def _create_files(mapper, connection, container):
     '''
     Write/create files on disk (represented by entries in the File
     table/instances of the File class) that are associated with the
     current Container.
     '''
     print('now we rewrite any hdf5 and other files on disk')
-    print(self)
-    print(args)
+
+@event.listens_for(Container, 'after_update')
+def _update_files(mapper, connection, container):
+    '''
+    '''
+    print('update!')
 
 @event.listens_for(Container, 'after_delete')
-def _remove_files(self, *args):
+def _delete_files(mapper, connection, container):
     '''
     Delete files on disk (represented by entries in the File
     table/instances of the File class) that are associated with the
     recently deleted Container.
     '''
     print('now we delete any hdf5 and other files on disk')
-    print(self)
-    print(args)
