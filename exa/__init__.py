@@ -22,7 +22,6 @@ _sns.set_style('white')
 
 __exa_version__ = (0, 1, 0)    # Version number is defined here!
 __version__ = '.'.join((str(v) for v in __exa_version__))
-_idx = _pd.IndexSlice
 
 
 from exa.config import Config
@@ -31,18 +30,14 @@ from exa.log import log_tail, log_head, setup
 setup()
 from exa.testers import run_unittests, run_doctests
 from exa.relational import Container
-#from exa.relational import commit as _commit
-#from exa.relational import _cleanup_anon_sessions
-#from exa.relational import (
-#    Force, Dose, Angle, Mass, Length, Frequency, Energy, Dipole, Temperature,
-#    Charge, MolarMass, Luminosity, Current, Acceleration, Amount, Time,
-#    Isotope, Constant, Dashboard
-#)
-#from exa.relational import Container, Dashboard
-#from exa.static import Length
-#_ae.register(_cleanup_anon_sessions)
-#_ae.register(_commit)
+from exa.dashboard import Dashboard
+_ae.register(relational.cleanup_anon_sessions)
+_ae.register(relational.commit)
 
 
 # API cleanup
-del setup, config, testers, log
+del setup, config, testers, log, dashboard, utils
+try:
+    del widget
+except:
+    pass
