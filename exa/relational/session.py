@@ -70,6 +70,9 @@ class Session(Base): #, metaclass=SessionMeta):
     containers = relationship('Container', secondary=SessionContainer, backref='sessions', cascade='all, delete')
     files = relationship('File', secondary=SessionFile, backref='sessions', cascade='all, delete')
 
+    def __init__(self, name='anonymous', **kwargs):
+        super().__init__(name=name, **kwargs)       # Default session name
+
     def __repr__(self):
         if self.name == 'anonymous':
             return 'Session({0}: anonymous[{1}])'.format(self.pkid, str(self.accessed).split('.')[0])
@@ -77,3 +80,15 @@ class Session(Base): #, metaclass=SessionMeta):
             return 'Session({0}: {1})'.format(self.pkid, self.uid)
         else:
             return 'Session({0}: {1})'.format(self.pkid, self.name)
+
+
+def cleanup_anon_sessions():
+    '''
+    Keep only the [5] (specified in :class:`~exa.config.Config`) most recent
+    anonymous sessions.
+    '''
+    anons = session.query(Session).filter(
+        Session.name == 'anonymous'
+    ).order_by(Session.accessed).all()[:-5]
+    for anon in anons:
+        session.delete(anon)
