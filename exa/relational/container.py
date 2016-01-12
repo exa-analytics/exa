@@ -34,57 +34,74 @@ class Container(Base):
     file_count = Column(Integer)
     files = relationship('File', secondary=ContainerFile, backref='containers', cascade='all, delete')
 
+    def add_dataframe(self, name, df):
+        '''
+        '''
+        pass
+
+
+    def to_archive(self, path):
+        '''
+        Export this container to an archive that can be imported elsewhere.
+        '''
+        raise NotImplementedError()
+
+    @classmethod
+    def from_archive(cls, path):
+        '''
+        Import a container from an archive into the current active session.
+
+        Note:
+            This function will also create file entries and objects
+            corresponding to the data provided in the archive.
+        '''
+        raise NotImplementedError()
+
     def __getitem__(self, key):
         raise NotImplementedError()
 
     def __setitem__(self, key, value):
         raise NotImplementedError()
 
-    def __init__(self, name=None, description=None, **kwargs):
+    def __iter__(self):
+        raise NotImplementedError()
+
+    def __len__(self):
+        raise NotImplementedError()
+
+    def __add__(self, other):
+        raise NotImplementedError()
+
+    def __sub__(self, other):
+        raise NotImplementedError()
+
+    def __mul__(self, other):
+        raise NotImplementedError()
+
+    def __div__(self, other):
+        raise NotImplementedError()
+
+    def __rmul__(self, other):
+        raise NotImplementedError()
+
+    def __truediv__(self, other):
+        raise NotImplementedError()
+
+    def __init__(self, name=None, description=None, dataframes={}):
         super().__init__(name=name, description=description)
-        for k, v in kwargs.items():
+        for k, v in dataframes.items():
             setattr(self, k, v)
 
     def __repr__(self):
-        if self.name is None:
-            return 'Container({0})'.format(self.uid)
-        else:
-            return 'Container({0})'.format(self.name)
+        c = self.__class__.__name__
+        p = self.pkid
+        n = self.name
+        u = self.uid
+        return '{0}({1}: {2}[{3}])'.format(c, p, n, u)
 
 
-@event.listens_for(Container, 'before_insert')
-def before_insert(mapper, connection, container):
+def concat(containers, axis=0, join='inner'):
     '''
+    Concatenate a collection of containers.
     '''
-    print('before insert')
-
-@event.listens_for(Container, 'before_update')
-def _before_update(mapper, connection, container):
-    '''
-    Actions to perform just before commiting Containers
-    '''
-    print('just before update')
-
-@event.listens_for(Container, 'after_insert')
-def _create_files(mapper, connection, container):
-    '''
-    Write/create files on disk (represented by entries in the File
-    table/instances of the File class) that are associated with the
-    current Container.
-    '''
-    print('now we rewrite any hdf5 and other files on disk')
-
-@event.listens_for(Container, 'after_update')
-def _update_files(mapper, connection, container):
-    '''
-    '''
-    print('update!')
-
-@event.listens_for(Container, 'after_delete')
-def _delete_files(mapper, connection, container):
-    '''
-    Delete files on disk (represented by entries in the File
-    table/instances of the File class) that are associated with the
-    recently deleted Container.
-    '''
-    print('now we delete any hdf5 and other files on disk')
+    raise NotImplementedError()

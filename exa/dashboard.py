@@ -59,6 +59,7 @@ class Dashboard:
     def _load(self):
         '''
         '''
+        pass
 
     def __init__(self):
         '''

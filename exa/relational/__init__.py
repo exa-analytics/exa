@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from exa.relational.base import commit, cleanup_anon_sessions, Base, engine
+from exa.relational.base import commit, Base, engine
 
-from exa.relational.session import Session
+from exa.relational.session import Session, cleanup_anon_sessions
 from exa.relational.program import Program
 from exa.relational.project import Project
 from exa.relational.job import Job
