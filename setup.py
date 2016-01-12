@@ -6,9 +6,6 @@ from setuptools import setup, find_packages
 from exa import __version__
 
 
-dependencies = [req.strip() for req in open('requirements.txt').readlines()]
-
-
 try:
     setup(
         name='exa',
@@ -22,14 +19,14 @@ try:
             'exa': [
                 'templates/*',
                 'static/js/*.js',
-                'static/js/libs/*',
-                'static/css/*',
-                'static/img/*'
+                'static/js/libs/*.js',
+                'static/css/*.css',
+                'static/img/*.*'
+                'static/html/*.html'
             ]
         },
         entry_points={'console_scripts': ['exa = exa.__main__:main']},
         include_package_data=True
-        #install_requires=dependencies
     )
 finally:
     from exa.install import initialize
