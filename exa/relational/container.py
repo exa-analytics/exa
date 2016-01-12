@@ -63,6 +63,12 @@ class Container(Base):
     def __setitem__(self, key, value):
         raise NotImplementedError()
 
+    def __iter__(self):
+        raise NotImplementedError()
+
+    def __len__(self):
+        raise NotImplementedError()
+
     def __add__(self, other):
         raise NotImplementedError()
 
@@ -87,10 +93,11 @@ class Container(Base):
             setattr(self, k, v)
 
     def __repr__(self):
-        if self.name is None:
-            return 'Container({0}: {1})'.format(self.pkid, self.uid)
-        else:
-            return 'Container({0}: {1})'.format(self.pkid, self.name)
+        c = self.__class__.__name__
+        p = self.pkid
+        n = self.name
+        u = self.uid
+        return '{0}({1}: {2}[{3}])'.format(c, p, n, u)
 
 
 def concat(containers, axis=0, join='inner'):
