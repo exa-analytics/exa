@@ -49,18 +49,6 @@ SessionFile = Table(
 )
 
 
-#class SessionMeta(Meta):
-#    '''
-#    '''
-#    def _getitem(self, key):
-#        if isinstance(key, int):
-#            return session.query(self).filter(self.pkid == key).all()[0]
-#        elif isinstance(key, str):
-#            return session.query(self).filter(self.name == key).all()[0]
-#        else:
-#            raise NotImplementedError()
-
-
 class Session(Base): #, metaclass=SessionMeta):
     '''
     Database representation of the 'session' concept.

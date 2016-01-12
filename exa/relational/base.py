@@ -26,7 +26,6 @@ class Meta(DeclarativeMeta):
         for item in session.query(self).all():
             yield item
 
-
 @as_declarative(metaclass=Meta)
 class Base:
     '''
@@ -88,6 +87,10 @@ class Base:
             if hasattr(cls, '_getitem_'):
                 return cls._getitem(key)
             raise TypeError('Unsupported key type for {0}'.format(type(key)))
+
+    def __getitem__(self, key):
+        commit()
+        return self._getitem(key)
 
     def __repr__(cls):
         return '{0}({1})'.format(cls.__class__.__name__, cls.pkid)

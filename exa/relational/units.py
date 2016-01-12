@@ -5,6 +5,29 @@ Units and Dimensions
 '''
 from exa.relational.base import Base, Column, String, Float
 from exa.relational.base import session, commit
+from exa.relational.base import Meta as _Meta
+
+
+class Meta(_Meta):
+    '''
+    '''
+    def _getitem(self, key):
+        if isinstance(key, tuple):
+            return self.get_factor(key)
+        else:
+            raise TypeError('Key must be a tuple not {0}'.format(type(key)))
+
+    def get_factor(self, key):
+        f = key[0]
+        t = key[1]
+        return session.query(self).filter(and_(
+            self.from_unit == f,
+            self.to_unit == t
+        )).all()[0].factor
+
+    def __getitem__(self, key):
+        commit()
+        return self._getitem(key)
 
 
 class Dimension:
@@ -27,50 +50,36 @@ class Dimension:
     to_unit = Column(String(8), nullable=False)
     factor = Column(Float, nullable=False)
 
-    def _getitem(self, key):
-        commit()
-        if isinstance(key, tuple):
-            return self.get_factor(key)
 
-    def get_factor(self, key):
-        commit()
-        f = key[0]
-        t = key[1]
-        return session.query(self).filter(and_(
-            self.from_unit == f,
-            self.to_unit == t
-        )).all()[0].factor
-
-
-class Length(Base, Dimension):
+class Length(Base, Dimension, metaclass=Meta):
     pass
-class Mass(Base, Dimension):
+class Mass(Base, Dimension, metaclass=Meta):
     pass
-class Time(Base, Dimension):
+class Time(Base, Dimension, metaclass=Meta):
     pass
-class Current(Base, Dimension):
+class Current(Base, Dimension, metaclass=Meta):
     pass
-class Temperature(Base, Dimension):
+class Temperature(Base, Dimension, metaclass=Meta):
     pass
-class Amount(Base, Dimension):
+class Amount(Base, Dimension, metaclass=Meta):
     pass
-class Luminosity(Base, Dimension):
+class Luminosity(Base, Dimension, metaclass=Meta):
     pass
-class Dose(Base, Dimension):
+class Dose(Base, Dimension, metaclass=Meta):
     pass
-class Acceleration(Base, Dimension):
+class Acceleration(Base, Dimension, metaclass=Meta):
     pass
-class Angle(Base, Dimension):
+class Angle(Base, Dimension, metaclass=Meta):
     pass
-class Charge(Base, Dimension):
+class Charge(Base, Dimension, metaclass=Meta):
     pass
-class Dipole(Base, Dimension):
+class Dipole(Base, Dimension, metaclass=Meta):
     pass
-class Energy(Base, Dimension):
+class Energy(Base, Dimension, metaclass=Meta):
     pass
-class Force(Base, Dimension):
+class Force(Base, Dimension, metaclass=Meta):
     pass
-class Frequency(Base, Dimension):
+class Frequency(Base, Dimension, metaclass=Meta):
     pass
-class MolarMass(Base, Dimension):
+class MolarMass(Base, Dimension, metaclass=Meta):
     pass
