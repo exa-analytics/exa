@@ -38,6 +38,8 @@ class Project(Base):
     created = Column(DateTime, default=datetime.now)
     modified = Column(DateTime, default=datetime.now)
     accessed = Column(DateTime, default=datetime.now)
+    size = Column(Integer)
+    file_count = Column(Integer)
     jobs = relationship('Job', secondary=ProjectJob, backref='projects', cascade='all, delete')
     containers = relationship('Container', secondary=ProjectContainer, backref='projects', cascade='all, delete')
     files = relationship('File', secondary=ProjectFile, backref='projects', cascade='all, delete')

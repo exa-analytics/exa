@@ -14,7 +14,7 @@ class File(Base):
     name = Column(String)
     description = Column(String)
     uid = Column(String(32), default=gen_uid)
-    ext = Column(String, nullable=False)
+    extension = Column(String, nullable=False)         # Defines file's type
     created = Column(DateTime, default=datetime.now)
     modified = Column(DateTime, default=datetime.now)
     accessed = Column(DateTime, default=datetime.now)

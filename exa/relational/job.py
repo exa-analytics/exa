@@ -15,6 +15,8 @@ JobContainer = Table(
     Column('job_pkid', Integer, ForeignKey('job.pkid', onupdate='CASCADE', ondelete='CASCADE')),
     Column('container_pkid', Integer, ForeignKey('container.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
+
+
 JobFile = Table(
     'jobfile',
     Base.metadata,

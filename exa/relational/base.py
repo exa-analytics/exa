@@ -82,11 +82,6 @@ class Base:
         return '{0}({1})'.format(cls.__class__.__name__, cls.pkid)
 
 
-#@event.listens_for(mapper, 'init')
-#def auto_add(target, args, kwargs):
-#    session.add(target)
-
-
 def commit():
     '''
     Commit all of the objects currently in the session.
@@ -100,7 +95,8 @@ def commit():
 
 def cleanup_anon_sessions():
     '''
-    Keep only the n most recently accessed anonymous sessions.
+    Keep only the [5] (specified in :class:`~exa.config.Config`) most recent
+    anonymous sessions.
     '''
     anons = session.query(Session).filter(
         Session.name == 'anonymous'

@@ -29,6 +29,8 @@ class Container(Base):
     created = Column(DateTime, default=datetime.now)
     modified = Column(DateTime, default=datetime.now)
     accessed = Column(DateTime, default=datetime.now)
+    size = Column(Integer)
+    file_count = Column(Integer)
     files = relationship('File', secondary=ContainerFile, backref='containers', cascade='all, delete')
 
 
@@ -56,6 +58,19 @@ class Container(Base):
         else:
             return 'Container({0})'.format(self.name)
 
+
+@event.listens_for(Container, 'before_insert')
+def before_insert(mapper, connection, container):
+    '''
+    '''
+    print('before insert')
+
+@event.listens_for(Container, 'before_update')
+def _before_update(mapper, connection, container):
+    '''
+    Actions to perform just before commiting Containers
+    '''
+    print('just before update')
 
 @event.listens_for(Container, 'after_insert')
 def _create_files(mapper, connection, container):

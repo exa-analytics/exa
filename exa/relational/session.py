@@ -52,6 +52,7 @@ class SessionMeta(Meta):
         else:
             raise NotImplementedError()
 
+
 class Session(Base, metaclass=SessionMeta):
     '''
     Database representation of the 'session' concept.
@@ -65,6 +66,8 @@ class Session(Base, metaclass=SessionMeta):
     modified = Column(DateTime, default=datetime.now)
     accessed = Column(DateTime, default=datetime.now)
     uid = Column(String(32), default=gen_uid)
+    size = Column(Integer)
+    file_count = Column(Integer)
     programs = relationship('Program', secondary=SessionProgram, backref='sessions', cascade='all, delete')
     projects = relationship('Project', secondary=SessionProject, backref='sessions', cascade='all, delete')
     jobs = relationship('Job', secondary=SessionJob, backref='sessions', cascade='all, delete')
