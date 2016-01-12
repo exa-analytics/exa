@@ -16,17 +16,16 @@
 import sys
 import os
 import shlex
-#from recommonmark.parser import CommonMarkParser
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-#sys.path.insert(0, os.path.abspath('../../'))
-#from exa import __version__
-__version__ = '0.1.0'
+sys.path.insert(0, os.path.abspath('../../'))
+from exa import __version__
 from unittest.mock import MagicMock
 
 class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-            return Mock()
+    pass
+    #@classmethod
+    #def __getattr__(cls, name):
+    #        return cls()
 
 MOCK_MODULES = ['argparse', 'numpy', 'pandas', 'scipy', 'tables', 'seaborn']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
