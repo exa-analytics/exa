@@ -4,20 +4,31 @@
         <meta charset="utf-8">
         <title>exa analytics dashboard</title>
         <link rel='stylesheet' type='text/css', href='static/css/dashboard.css'>
+        <script src={{angular_min_js}}></script>
+        <!--script src={{exa_dashboard_js}}></script>
+        <script src={{jquery_min_js}}></script-->
     </head>
     <body>
-        <div class='dashboard' id='dashboard'></div>
+        <header>
+          <div class='buttainer' id='buttainer'>
+            <button type='button' id='mybutton' ng-model='mybutton'>Click!</button>
+          </div>
+          Exa Dashboard
+        </header>
+        <!--script>console.log(document.getElementById('mybutton'));</script-->
+        <!--div class='tree' id='tree'><h1>Road Map<br>Options<br>Russians</h1></div-->
+        <!--div class='dashboard' id='dashboard'></div-->
+        <div ng-app></div>
+        <!--script>dashboard.create_workspace(800, 600)</script-->
+        <div class='container' id='container'><input type="text" id='myinp' ng-model="yourName" placeholder="Enter a name here">
+          <script>console.log(document.getElementById('myinp'));</script>
+          <h1>Hello {{'{{yourName}}'}}!</h1></div>
+        <footer> Copyright © Exa Analytics 2016</footer>
     </body>
 </html>
 
 
-
-
-
-
-
-        <!--script src={{angular_min_js}}></script>
-        <script src={{jquery_min_js}}></script>
+        <!--script src={{jquery_min_js}}></script>
         <script src={{pixi_min_js}}></script>
         <script src={{dat_gui_min_js}}></script>
         <script src={{three_min_js}}></script>

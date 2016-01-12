@@ -25,6 +25,7 @@ def build_static_path_kwargs():
             directory = directory + splitdir
         for name in files:
             if name.endswith('js'):
+                print(name)
                 n = name.replace('.', '_')
                 n = n.replace('-', '_')
                 kwargs[n] = '\'' + '/'.join((directory.replace('\\', '/'), name)) + '\''
@@ -57,7 +58,7 @@ def serve(port=5000):
     IOLoop.instance().start()
 
 
-
+print(Config.static)
 
 tornado_settings = {
     'static_path': Config.static
