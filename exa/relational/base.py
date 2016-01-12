@@ -53,10 +53,8 @@ class Base:
         '''
         Display a :py:class:`~pandas.DataFrame` representation of the table.
         '''
-        sql = 'SELECT * FROM {0}'
-        tbl = cls.__tablename__.upper()
         commit()
-        df = pd.read_sql(sql.format(tbl), engine.connect())
+        df = pd.read_sql(session.query(cls).statement, engine.connect())
         if 'pkid' in df.columns:
             return df.set_index('pkid')
         else:
