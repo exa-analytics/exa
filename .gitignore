@@ -10,7 +10,6 @@ exa/nwchem/__pycache__/*
 *.nbi
 
 # Bower repositories
-exa/static/js/**/.*
 exa/static/js/node_modules
 exa/static/js/bower_components
 exa/static/js/test
