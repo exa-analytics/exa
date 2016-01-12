@@ -31,6 +31,7 @@ setup()
 from exa.testers import run_unittests, run_doctests
 from exa.relational import Container
 from exa.dashboard import Dashboard
+from exa.dataframe import DataFrame
 _ae.register(relational.cleanup_anon_sessions)
 _ae.register(relational.commit)
 from exa import tests
