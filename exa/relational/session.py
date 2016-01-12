@@ -72,8 +72,8 @@ class Session(Base): #, metaclass=SessionMeta):
 
     def __repr__(self):
         if self.name == 'anonymous':
-            return 'Session(anon: {0})'.format(str(self.accessed).split('.')[0])
+            return 'Session({0}: anonymous[{1}])'.format(self.pkid, str(self.accessed).split('.')[0])
         elif self.name is None:
-            return 'Session({0})'.format(self.uid)
+            return 'Session({0}: {1})'.format(self.pkid, self.uid)
         else:
-            return 'Session({0})'.format(self.name)
+            return 'Session({0}: {1})'.format(self.pkid, self.name)

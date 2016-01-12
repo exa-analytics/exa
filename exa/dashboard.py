@@ -41,16 +41,24 @@ class Dashboard:
             'file': lambda: self._active_container.files.append(obj)
         }
         tbl = obj.__tablename__
-        if self._active_session:
-            session_appenders[tbl]()
-        if self._active_program:
-            program_appenders[tbl]()
-        if self._active_project:
-            project_appenders[tbl]()
-        if self._active_job:
-            job_appenders[tbl]()
-        if self._active_container:
-            container_appenders[tbl]()
+        if not isinstance(obj, Session):
+            if self._active_session:
+                session_appenders[tbl]()
+            if self._active_program:
+                program_appenders[tbl]()
+            if self._active_project:
+                project_appenders[tbl]()
+            if self._active_job:
+                job_appenders[tbl]()
+            if self._active_container:
+                container_appenders[tbl]()
+        else:
+            self._active_session = obj
+            self._load()
+
+    def _load(self):
+        '''
+        '''
 
     def __init__(self):
         '''
@@ -73,11 +81,11 @@ class Dashboard:
         self._active_container = Container[container] if container else None
 
     def __repr__(self):
-        return str(self.sessions)
+        return str(self._active_session)
 
 
 @event.listens_for(mapper, 'init')
-def add_to_db_session(obj, args, kwargs):
+def add_to_db(obj, args, kwargs):
     '''
     All relational objects are automatically added to the database session.
     These objects' relations are also automatically instantiated here.
