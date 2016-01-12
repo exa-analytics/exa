@@ -98,25 +98,15 @@ class Base:
 
 def commit():
     '''
-    Commit all of the objects currently in the session.
+    Commit all of the objects currently in the session. Note that objects
+    are automatically added to the database session and that committing
+    these objects does not normally have to be performed manually.
     '''
     try:
         session.commit()
     except:
         session.rollback()
-        raise
-
-
-def cleanup_anon_sessions():
-    '''
-    Keep only the [5] (specified in :class:`~exa.config.Config`) most recent
-    anonymous sessions.
-    '''
-    anons = session.query(Session).filter(
-        Session.name == 'anonymous'
-    ).order_by(Session.accessed).all()[:-5]
-    for anon in anons:
-        session.delete(anon)
+        raise               # Catch and raise any and all exceptions
 
 
 engine_name = Config.relational_engine()
