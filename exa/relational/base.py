@@ -109,6 +109,13 @@ def commit():
         raise               # Catch and raise any and all exceptions
 
 
+def create_all():
+    '''
+    '''
+    session.flush()
+    Base.metadata.create_all(engine)
+
+
 engine_name = Config.relational_engine()
 engine = create_engine(engine_name)
 session = scoped_session(sessionmaker(bind=engine))

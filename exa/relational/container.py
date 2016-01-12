@@ -10,10 +10,6 @@ from exa.relational.base import ForeignKey, Table, Base
 from exa.utils import gen_uid
 
 
-pkid = Column(Integer, ForeignKey('container.pkid'), primary_key=True)
-mapper_args = {'polymorphic_identity': 'container'}
-
-
 ContainerFile = Table(
     'containerfile',
     Base.metadata,
@@ -42,7 +38,8 @@ class Container(Base):
 
     __mapper_args__ = {
         'polymorphic_identity': 'container',   # This allows the container to
-        'polymorphic_on': container_type       # be inherited.
+        'polymorphic_on': container_type,      # be inherited.
+        'with_polymorphic': '*'
     }
 
     def add_dataframe(self, name, df):
@@ -106,8 +103,8 @@ class Container(Base):
     def __truediv__(self, other):
         raise NotImplementedError()
 
-    def __init__(self, name=None, description=None, ctype='container', dataframes={}):
-        super().__init__(name=name, description=description, container_type=ctype)
+    def __init__(self, name=None, description=None, dataframes={}):
+        super().__init__(name=name, description=description)
         for k, v in dataframes.items():
             setattr(self, k, v)
 

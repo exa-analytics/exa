@@ -45,6 +45,8 @@ try:
         include_package_data=True
         #install_requires=dependencies
     )
+except:
+    raise
 finally:
     from exa.install import initialize
     initialize()

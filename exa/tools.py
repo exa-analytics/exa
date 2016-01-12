@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Tools
 ====================
@@ -12,8 +13,9 @@ from exa import _os as os
 from exa import _np as np
 from exa import _json as json
 from exa.utils import mkpath
-from exa.relational import Isotope
-from exa.relational import Constant
+from exa.relational.base import Base, engine
+from exa.relational.isotopes import Isotope
+from exa.relational.constants import Constant
 from exa.relational.units import Dimension
 
 
@@ -48,9 +50,10 @@ def initialize_database(force=False):
     Generates the static relational database tables for isotopes, constants,
     and unit conversions.
     '''
+    Base.metadata.create_all(engine)     # Create the database and tables
     constants = None
     units = None
-    isotopes = None    # Load only if needed
+    isotopes = None                      # Load only if needed
     with open(mkpath(Config.static, 'constants.json')) as f:
         constants = json.load(f)
     with open(mkpath(Config.static, 'units.json')) as f:
