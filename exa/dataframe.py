@@ -16,12 +16,13 @@ class DataFrame(pd.DataFrame):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        extra = list(set(self.__dimensions__).difference(self.index.names))     # Check index requirements
-        missing = list(set(self.index.names).difference(self.__dimensions__))
-        if extra:
-            raise DimensionError(extra=extra)
-        if missing:
-            raise DimensionError(missing=missing)
-        missing_required_columns = list(set(self.__columns__).difference(self.columns))
-        if missing_required_columns:
-            raise ColumnError(missing_required_columns)
+        if len(self) > 0:                 # Check index and column requirements
+            extra = list(set(self.__dimensions__).difference(self.index.names))
+            missing = list(set(self.index.names).difference(self.__dimensions__))
+            if extra:
+                raise DimensionError(extra=extra)
+            if missing:
+                raise DimensionError(missing=missing)
+            missing_required_columns = list(set(self.__columns__).difference(self.columns))
+            if missing_required_columns:
+                raise ColumnError(missing_required_columns)
