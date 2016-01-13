@@ -55,11 +55,25 @@ class UnsupportedFileType(ExaException):
         super().__init__()
 
 
-class IndexLabelError(ExaException):
+class DimensionError(ExaException):
     '''
+    :class:`~exa.dataframe.DataFrame` index name error.
     '''
-    _msg = 'Incorrect index labeling for table {0}. Expected values are {1}.'
+    _extra = 'Extra dimension {0}, supplied in the index.'
+    _missing = 'Missing required dimension {0}.'
 
-    def __init__(self, table, index_names):
-        self.msg = self._msg.format(table, index_names)
+    def __init__(self, extra=None, missing=None):
+        if extra is None:
+            self.msg = self._missing.format(missing)
+        else:
+            self.msg = self._extra.format(extra)
+        super().__init__()
+
+
+class ColumnError(ExaException):
+    '''
+    :class:`~exa.dataframe.DataFrame` column error.
+    '''
+    def __init__(self, columns):
+        self.msg = 'Missing required column(s): {0}'.format(columns)
         super().__init__()
