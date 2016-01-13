@@ -116,4 +116,5 @@ def create_all():
 
 engine_name = Config.relational_engine()
 engine = create_engine(engine_name)
-session = scoped_session(sessionmaker(bind=engine))
+#session = scoped_session(sessionmaker(bind=engine))
+session = sessionmaker(bind=engine)
