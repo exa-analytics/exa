@@ -28,16 +28,18 @@
     });
 
     page('/', function() {
-      app.route = 'Home';
+      app.route = 'home';
     });
 
     page(app.baseUrl, function() {
-      app.route = 'Home';
+      app.route = 'home';
     });
 
     //page('/users', function() {
-    page(app.baseUrl, function() {
-      app.route = 'Sessions';
+    page('/sessions', function() {
+      app.route = 'sessions';
+      console.log(app.baseUrl);
+      console.log(app.route);
     });
 
     //page('/users/:name', function(data) {
@@ -45,12 +47,12 @@
     //  app.params = data.params;
     //});
 
-    page(app.baseUrl, function() {
-      app.route = 'Programs';
+    page('/programs', function() {
+      app.route = 'programs';
     });
 
-    page(app.baseUrl, function() {
-      app.route = 'Projects';
+    page('/projects', function() {
+      app.route = 'projects';
     });
 
     // 404
@@ -62,7 +64,7 @@
 
     // add #! before urls
     page({
-      hashbang: true
+      'hashbang': true
     });
 
   });
