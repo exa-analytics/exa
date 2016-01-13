@@ -31,3 +31,12 @@ class NameKeyError(ExaException):
 
     def __init__(self, table):
         self.msg = self._msg.format(table)
+
+
+class FactorNotFound(ExaException):
+    '''
+    '''
+    _msg = 'Conversion factor from {0} to {1} not found: check unit names!'
+
+    def __init__(self, f, t):
+        self.msg = self._msg.format(f, t)

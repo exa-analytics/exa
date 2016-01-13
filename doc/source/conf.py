@@ -17,18 +17,9 @@ import sys
 import os
 import shlex
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-sys.path.insert(0, os.path.abspath('../../'))
+sys.path.insert(0, os.path.abspath(os.sep.join(('..', '..'))))
 from exa import __version__
-from unittest.mock import MagicMock
 
-class Mock(MagicMock):
-    pass
-    #@classmethod
-    #def __getattr__(cls, name):
-    #        return cls()
-
-MOCK_MODULES = ['argparse', 'numpy', 'pandas', 'scipy', 'tables', 'seaborn']
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

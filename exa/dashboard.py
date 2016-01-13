@@ -9,6 +9,7 @@ from exa.relational.base import event, session, mapper
 if Config.ipynb:                  # If using Jupyter notebook
     from exa.widget import Widget
 
+
 class Dashboard:
     '''
     '''
@@ -95,12 +96,13 @@ def add_to_db(obj, args, kwargs):
         :mod:`~exa.relational.base`
     '''
     session.add(obj)
-    Dashboard._add_object_relations(obj)
+#    Dashboard._add_object_relations(obj)
 
 
 
 Dashboard = Dashboard()
 Dashboard._init(*Config.session_args())
+
 
 
 #    _info = 'session: {0}\nprogram: {1}\nproject: {2}\njob: {3}\ncontainers: {4}'
