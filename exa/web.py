@@ -19,6 +19,9 @@ def build_static_path_kwargs():
     '''
     kwargs = {}
     for root, subdirs, files in os.walk(Config.static):
+        print(root)
+        print(subdirs)
+        print(files)
         splitdir = root.split(Config.static)[1]
         directory = 'static'
         if splitdir:
@@ -50,6 +53,18 @@ class DashboardHandler(RequestHandler):
     def get(self):
         self.write(jinja2_loader.get_template('dashboard.html').render(**kwargs))
 
+#class SessionHandler(RequestHandler):
+#    '''
+#    '''
+#    def get(self):
+#        self.write(jinja2_loader.get_template('dashboard.html').render(**kwargs))
+
+#class RoutingHandler(RequestHandler):
+#    '''
+#    '''
+#    def get(self):
+#        self.write(jinja2_loader.get_template('routing.html'))
+
 
 def serve(port=5000):
     '''
@@ -58,14 +73,16 @@ def serve(port=5000):
     IOLoop.instance().start()
 
 
-print(Config.static)
+#print(Config.static)
 
 tornado_settings = {
     'static_path': Config.static
 }
 tornado_handlers = [
     (r'/', DashboardHandler),
-    (r'/hi', HelloWorldHandler)
+    (r'/hi', HelloWorldHandler),
+    #(r'/routing', RoutingHandler),
+    #(r'/#!/sessions', SessionHandler),
 ]
 jinja2_loader = Environment(loader=FileSystemLoader(searchpath=templates_path))
 app = Application(tornado_handlers, **tornado_settings)

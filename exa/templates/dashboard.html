@@ -1,11 +1,34 @@
 <!DOCTYPE html>
-<html lang="en" ng-app>
+<html lang="">
     <head>
         <meta charset="utf-8">
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="generator" content="Exa Analytics dashboard" />
         <title>Exa Analytics dashboard</title>
+
+        <!-- Chrome for Android theme color -->
+        <meta name="theme-color" content="#2E3AA1">
+
+        <!-- Web Application Manifest -->
+        <link rel="manifest" href="manifest.json">
+
+        <!-- Tile color for Win8 -->
+        <meta name="msapplication-TileColor" content="#3372DF">
+
+        <!-- Add to homescreen for Chrome on Android -->
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="application-name" content="PSK">
+        <link rel="icon" sizes="192x192" href="images/touch/chrome-touch-icon-192x192.png">
+
+        <!-- Add to homescreen for Safari on iOS -->
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <meta name="apple-mobile-web-app-title" content="Polymer Starter Kit">
+        <link rel="apple-touch-icon" href="images/touch/apple-touch-icon.png">
+
+        <!-- Tile icon for Win8 (144x144) -->
+        <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
 
         <!--Imports-->
         <link rel="stylesheet" href="static/css/dashboard.css">
@@ -40,13 +63,13 @@
 
               <!-- Drawer Content -->
               <paper-menu class="list" attr-for-selected="data-route" selected="[[route]]">
-                <a data-route="Home" href="{{baseUrl}}">
+                <a data-route="home" href="{{baseUrl}}">
                   <iron-icon icon="home"></iron-icon>
                   <span>Home</span>
                 </a>
 
-                <a data-route="Sessions" href="/Sessions">
-                  <!--iron-icon icon="info"></iron-icon-->
+                <a data-route="sessions" href="{{baseUrl}}/#!/sessions">
+                  <iron-icon icon="info"></iron-icon>
                   <span>Sessions</span>
                 </a>
 
@@ -67,7 +90,7 @@
             <paper-scroll-header-panel main id="headerPanelMain" condenses keep-condensed-header>
 
               <!-- Main Toolbar -->
-              <paper-toolbar id="mainToolbar" class="tall">
+              <paper-toolbar id="mainToolbar">
                 <paper-icon-button id="paperToggle" icon="menu" paper-drawer-toggle></paper-icon-button>
                 <span class="flex"></span>
 
@@ -76,14 +99,14 @@
                 <paper-icon-button icon="search"></paper-icon-button>
 
                 <!-- Application name -->
-                <div class="middle middle-container center horizontal layout">
-                  <div class="app-name">Exa Analytics dashboard</div>
+                <div class="top top-container center horizontal layout">
+                  <div class="app-name">Exa Dashboard</div>
                 </div>
 
                 <!-- Application sub title -->
-                <div class="bottom bottom-container center horizontal layout">
+                <!--div class="bottom bottom-container center horizontal layout">
                   <div class="bottom-title paper-font-subhead">Data management, processing and visualization</div>
-                </div>
+                </div-->
 
               </paper-toolbar>
 
@@ -105,10 +128,11 @@
 
                   </section>
 
-                  <section data-route="Sessions">
+                  <section data-route="sessions">
                     <paper-material elevation="1">
-                      <!--h2 class="page-title">Sessions</h2-->
+                      <h2 class="page-title">sessions</h2>
                       <p>This is where sessions are displayed.</p>
+                      <a href$="{{baseUrl}}sessions"</a><br>
                       <!--a href$="{{baseUrl}}users/Addy">Addy</a><br>
                       <a href$="{{baseUrl}}users/Rob">Rob</a><br>
                       <a href$="{{baseUrl}}users/Chuck">Chuck</a><br>
@@ -116,15 +140,17 @@
                     </paper-material>
                   </section>
 
-                  <section data-route="Programs">
+                  <section data-route="programs">
                     <paper-material elevation="1">
-                      <!--h2 class="page-title">Contact</h2-->
+                      <h2 class="page-title">programs</h2>
+                      <a href$="{{baseUrl}}programs"</a><br>
                       <p>This is the programs section</p>
                     </paper-material>
                   </section>
 
-                  <section data-route="Projects">
+                  <section data-route="projects">
                     <paper-material elevation="1">
+                      <h2 class="page-title">projects</h2>
                       <p> View your projects here. </p>
                     </paper-material>
                   </section>

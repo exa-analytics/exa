@@ -46,5 +46,5 @@ def main():
     serve(port=port)
 
 
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+#    main()
