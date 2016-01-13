@@ -2,6 +2,7 @@
 '''
 Container
 ===============================================
+Metadata is stored as json on disk
 '''
 from exa import _pd as pd
 from exa.relational.base import session, datetime, relationship, event
@@ -103,7 +104,7 @@ class Container(Base):
     def __truediv__(self, other):
         raise NotImplementedError()
 
-    def __init__(self, name=None, description=None, dataframes={}):
+    def __init__(self, name=None, description=None, dataframes={}, metadata=None):
         super().__init__(name=name, description=description)
         for k, v in dataframes.items():
             setattr(self, k, v)

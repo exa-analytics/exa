@@ -52,7 +52,20 @@ class Dimension:
 
 
 class Length(Base, Dimension, metaclass=Meta):
-    pass
+    '''
+    Length conversions.
+    '''
+    aliases = {'bohr': 'au', 'angstrom': 'A', u'\u212B': 'A', u'\u212Bngstrom': 'A'}
+
+    def from_alias(self, source, target):
+        '''
+        Look up a source unit by alias.
+        '''
+        f = self.aliases[source]
+        return self[f, target]
+
+
+
 class Mass(Base, Dimension, metaclass=Meta):
     pass
 class Time(Base, Dimension, metaclass=Meta):
