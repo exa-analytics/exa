@@ -104,10 +104,11 @@ class Container(Base):
     def __truediv__(self, other):
         raise NotImplementedError()
 
-    def __init__(self, name=None, description=None, dataframes={}, metadata=None):
+    def __init__(self, name=None, description=None, dataframes={}, meta=None):
         super().__init__(name=name, description=description)
         for k, v in dataframes.items():
             setattr(self, k, v)
+        self.meta = meta
 
     def __repr__(self):
         c = self.__class__.__name__
