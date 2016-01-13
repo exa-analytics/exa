@@ -53,3 +53,27 @@ class UnsupportedFileType(ExaException):
     def __init__(self, ftype):
         self.msg = self._msg.format(ftype)
         super().__init__()
+
+
+class DimensionError(ExaException):
+    '''
+    :class:`~exa.dataframe.DataFrame` index name error.
+    '''
+    _extra = 'Extra dimension {0}, supplied in the index.'
+    _missing = 'Missing required dimension {0}.'
+
+    def __init__(self, extra=None, missing=None):
+        if extra is None:
+            self.msg = self._missing.format(missing)
+        else:
+            self.msg = self._extra.format(extra)
+        super().__init__()
+
+
+class ColumnError(ExaException):
+    '''
+    :class:`~exa.dataframe.DataFrame` column error.
+    '''
+    def __init__(self, columns):
+        self.msg = 'Missing required column(s): {0}'.format(columns)
+        super().__init__()

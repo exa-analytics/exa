@@ -13,6 +13,7 @@ class PrimaryKeyError(ExaException):
 
     def __init__(self, pkid, table):
         self.msg = self._msg.format(pkid, table)
+        super().__init__()
 
 
 class MultipleObjectsError(ExaException):
@@ -22,6 +23,7 @@ class MultipleObjectsError(ExaException):
 
     def __init__(self, key, table):
         self.msg = self._msg.format(key, table)
+        super().__init__()
 
 
 class NameKeyError(ExaException):
@@ -31,6 +33,7 @@ class NameKeyError(ExaException):
 
     def __init__(self, table):
         self.msg = self._msg.format(table)
+        super().__init__()
 
 
 class FactorNotFound(ExaException):
@@ -40,3 +43,4 @@ class FactorNotFound(ExaException):
 
     def __init__(self, f, t):
         self.msg = self._msg.format(f, t)
+        super().__init__()

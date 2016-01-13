@@ -36,7 +36,7 @@ class Meta(_Meta):
         '''
         Look up a source unit by alias.
         '''
-        f = cls.aliases[source]
+        f = cls.aliases[source.lower()]
         return cls[f, target]
 
 
@@ -65,7 +65,13 @@ class Length(Base, Dimension, metaclass=Meta):
     '''
     Length conversions.
     '''
-    aliases = {'bohr': 'au', 'angstrom': 'A', u'\u212B': 'A', u'\u212Bngstrom': 'A'}
+    aliases = {
+        'bohr': 'au',
+        'angstrom': 'A',
+        u'\u212B': 'A',
+        u'\u212Bngstrom': 'A',
+        'a0': 'au'
+    }
 
 
 class Mass(Base, Dimension, metaclass=Meta):
