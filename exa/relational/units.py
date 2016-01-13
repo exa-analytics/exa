@@ -3,31 +3,41 @@
 Units and Dimensions
 ===============================================
 '''
+from sqlalchemy import and_
 from exa.relational.base import Base, Column, String, Float
 from exa.relational.base import session, commit
 from exa.relational.base import Meta as _Meta
+from exa.relational.errors import FactorNotFound
 
 
 class Meta(_Meta):
     '''
     '''
-    def _getitem(self, key):
+    def _getitem(cls, key):
         if isinstance(key, tuple):
-            return self.get_factor(key)
+            return cls.get_factor(key)
         else:
             raise TypeError('Key must be a tuple not {0}'.format(type(key)))
 
-    def get_factor(self, key):
+    def get_factor(cls, key):
         f = key[0]
         t = key[1]
-        return session.query(self).filter(and_(
-            self.from_unit == f,
-            self.to_unit == t
-        )).all()[0].factor
+        factor = session.query(cls).filter(and_(cls.from_unit == f, cls.to_unit == t)).all()
+        if len(factor) == 1:
+            return factor[0].factor
+        else:
+            raise FactorNotFound(f, t)
 
-    def __getitem__(self, key):
+    def __getitem__(cls, key):
         commit()
-        return self._getitem(key)
+        return cls._getitem(key)
+
+    def from_alias(cls, source, target):
+        '''
+        Look up a source unit by alias.
+        '''
+        f = cls.aliases[source]
+        return cls[f, target]
 
 
 class Dimension:
@@ -52,7 +62,12 @@ class Dimension:
 
 
 class Length(Base, Dimension, metaclass=Meta):
-    pass
+    '''
+    Length conversions.
+    '''
+    aliases = {'bohr': 'au', 'angstrom': 'A', u'\u212B': 'A', u'\u212Bngstrom': 'A'}
+
+
 class Mass(Base, Dimension, metaclass=Meta):
     pass
 class Time(Base, Dimension, metaclass=Meta):

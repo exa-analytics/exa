@@ -2,6 +2,7 @@
 '''
 Container
 ===============================================
+Metadata is stored as json on disk
 '''
 from exa import _pd as pd
 from exa.relational.base import session, datetime, relationship, event
@@ -31,9 +32,16 @@ class Container(Base):
     created = Column(DateTime, default=datetime.now)
     modified = Column(DateTime, default=datetime.now)
     accessed = Column(DateTime, default=datetime.now)
+    container_type = Column(String(16))
     size = Column(Integer)
     file_count = Column(Integer)
     files = relationship('File', secondary=ContainerFile, backref='containers', cascade='all, delete')
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'container',   # This allows the container to
+        'polymorphic_on': container_type,      # be inherited.
+        'with_polymorphic': '*'
+    }
 
     def add_dataframe(self, name, df):
         '''
@@ -96,10 +104,11 @@ class Container(Base):
     def __truediv__(self, other):
         raise NotImplementedError()
 
-    def __init__(self, name=None, description=None, dataframes={}):
+    def __init__(self, name=None, description=None, dataframes={}, meta=None):
         super().__init__(name=name, description=description)
         for k, v in dataframes.items():
             setattr(self, k, v)
+        self.meta = meta
 
     def __repr__(self):
         c = self.__class__.__name__

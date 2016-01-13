@@ -22,7 +22,7 @@ Contents
 ****************
 License
 ****************
-:download:`License <../../LICENSE.md>`
+:download:`License <../../LICENSE>`
 
 ****************
 Indexes
