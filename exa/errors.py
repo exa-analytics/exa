@@ -53,3 +53,13 @@ class UnsupportedFileType(ExaException):
     def __init__(self, ftype):
         self.msg = self._msg.format(ftype)
         super().__init__()
+
+
+class IndexLabelError(ExaException):
+    '''
+    '''
+    _msg = 'Incorrect index labeling for table {0}. Expected values are {1}.'
+
+    def __init__(self, table, index_names):
+        self.msg = self._msg.format(table, index_names)
+        super().__init__()

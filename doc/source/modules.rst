@@ -10,3 +10,4 @@ is used for building data concept aware containers (e.g. exa.atomic).
     modules/config.rst
     modules/services.rst
     modules/misc.rst
+    modules/dataframe.rst
