@@ -65,10 +65,16 @@ class Config:
     def __init__(self):
         self.username = getpass.getuser()                  # Basic config
         self.ipynb = False
-        kernel = None
-        try:
+        kernel = None                                      # Check if using
+        try:                                               # Jupyter notebook
             kernel = get_ipython().kernel
             self.ipynb = True
+        except:
+            pass
+        self.numba = False
+        try:
+            import numba                                   # Check if numba is
+            self.numba = True                              # available
         except:
             pass
         self.system = platform.system().lower()
