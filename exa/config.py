@@ -94,6 +94,7 @@ class Config:
         self.syslog = mkpath(self.exa, 'system.log')        # Backend log
         self.testlog = mkpath(self.exa, 'test.log')         # Unit and doc tests
         self.userlog = mkpath(self.exa, 'user.log')         # Frontend log
+        self.tmp = mkpath(self.exa, 'tmp', mkdir=True)
         self.pkg = os.path.dirname(__file__)
         self.templates = mkpath(self.pkg, 'templates')
         self.static = mkpath(self.pkg, 'static')
