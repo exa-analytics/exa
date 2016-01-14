@@ -59,14 +59,14 @@ class DimensionError(ExaException):
     '''
     :class:`~exa.dataframe.DataFrame` index name error.
     '''
-    _extra = 'Extra dimension {0}, supplied in the index.'
-    _missing = 'Missing required dimension {0}.'
+    _extra = 'Extra dimension(s), {0}, supplied in the index of {1}.'
+    _missing = 'Missing required dimension(s), {0}, in class {1}.'
 
-    def __init__(self, extra=None, missing=None):
+    def __init__(self, extra=None, missing=None, name=None):
         if extra is None:
-            self.msg = self._missing.format(missing)
+            self.msg = self._missing.format(missing, name)
         else:
-            self.msg = self._extra.format(extra)
+            self.msg = self._extra.format(extra, name)
         super().__init__()
 
 
@@ -74,6 +74,6 @@ class ColumnError(ExaException):
     '''
     :class:`~exa.dataframe.DataFrame` column error.
     '''
-    def __init__(self, columns):
-        self.msg = 'Missing required column(s): {0}'.format(columns)
+    def __init__(self, columns, name):
+        self.msg = 'Missing required column(s), {0}, in class {1}.'.format(columns, name)
         super().__init__()

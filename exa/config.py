@@ -115,5 +115,4 @@ class Config:
         return json.dumps(vars(self), sort_keys=True, indent=4)
 
 
-# There is only one configuration object per exa instance
-Config = Config()
+Config = Config()    # Config is a singleton to ensure correct scope

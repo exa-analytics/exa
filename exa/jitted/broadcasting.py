@@ -3,6 +3,7 @@
 Vectorized UFuncs
 ===============================
 '''
+from exa import _np as np
 from exa.jitted import vectorize, float64, int32, int64, float32
 
 
