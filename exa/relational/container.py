@@ -43,12 +43,6 @@ class Container(Base):
         'with_polymorphic': '*'
     }
 
-    def add_dataframe(self, name, df):
-        '''
-        '''
-        pass
-
-
     def to_archive(self, path):
         '''
         Export this container to an archive that can be imported elsewhere.
