@@ -24,25 +24,35 @@ class ExaException(Exception):
             self._logger.error(msg)
 
 
-class DimensionError(ExaException):
+class RequiredIndexError(ExaException):
     '''
     :class:`~exa.dataframe.DataFrame` index name error.
     '''
-    _extra = 'Extra dimension(s), {0}, supplied in the index of {1}.'
-    _missing = 'Missing required dimension(s), {0}, in class {1}.'
+    _msg = 'Missing required index(ices), {0}, for creation of class {1} object.'
 
-    def __init__(self, extra=None, missing=None, name=None):
-        if extra is None:
-            self.msg = self._missing.format(missing, name)
-        else:
-            self.msg = self._extra.format(extra, name)
+    def __init__(self, missing, clsname):
+        self.msg = self._msg.format(missing, clsname)
         super().__init__()
 
 
-class ColumnError(ExaException):
+class RequiredColumnError(ExaException):
     '''
     :class:`~exa.dataframe.DataFrame` column error.
     '''
-    def __init__(self, columns, name):
-        self.msg = 'Missing required column(s), {0}, in class {1}.'.format(columns, name)
+    _msg = 'Missing required column(s), {0}, for creation of class {1} object.'
+
+    def __init__(self, missing, clsname):
+        self.msg = self._msg.format(missing, clsname)
         super().__init__()
+
+
+class MissingColumns(ExaException):
+    '''
+    Raised when optional columns are missing from a
+    :class:`~exa.dataframe.DataFrame` object (these columns are required to
+    perform a specific - optional - operation).
+    '''
+    _msg = 'Can\'t perform operation. Missing column(s), {0}, in class {1}.'
+
+    def __init__(self, missing, clsname):
+        self.msg = self._msg.format(missing, clsname)
