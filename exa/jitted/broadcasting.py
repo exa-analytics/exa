@@ -18,12 +18,3 @@ def mag_3d(x, y, z):
     Computation of magnitude of a three dimensional vector.
     '''
     return (x**2 + y**2 + z**2)**0.5
-
-
-@vectorize([int32(int32, int32), int64(int64, int64),
-            float32(float32, float32), float64(float64, float64)])
-def mod(x, y):
-    '''
-    Performs the modulo operation (remainder after division).
-    '''
-    return x % y
