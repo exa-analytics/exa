@@ -3,6 +3,7 @@
 Session
 ===============================================
 '''
+from exa import Config
 from exa.relational.base import session, datetime, relationship
 from exa.relational.base import Column, Integer, String, DateTime
 from exa.relational.base import ForeignKey, Table, Base
@@ -89,6 +90,6 @@ def cleanup_anon_sessions():
     '''
     anons = session.query(Session).filter(
         Session.name == 'anonymous'
-    ).order_by(Session.accessed).all()[:-5]
+    ).order_by(Session.accessed).all()[:-Config.maxanonsessions]
     for anon in anons:
         session.delete(anon)

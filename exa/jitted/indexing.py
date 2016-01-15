@@ -4,8 +4,8 @@ Indexing Recipes
 =====================
 Jitted functions related to generating indexes
 '''
-from numba import jit, int64
 from exa import _np as np
+from exa.jitted import jit, int64
 
 
 @jit(nopython=True, cache=True)
