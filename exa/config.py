@@ -94,6 +94,7 @@ class Config:
         self.syslog = mkpath(self.exa, 'system.log')        # Backend log
         self.testlog = mkpath(self.exa, 'test.log')         # Unit and doc tests
         self.userlog = mkpath(self.exa, 'user.log')         # Frontend log
+        self.tmp = mkpath(self.exa, 'tmp', mkdir=True)
         self.pkg = os.path.dirname(__file__)
         self.templates = mkpath(self.pkg, 'templates')
         self.static = mkpath(self.pkg, 'static')
@@ -114,5 +115,4 @@ class Config:
         return json.dumps(vars(self), sort_keys=True, indent=4)
 
 
-# There is only one configuration object per exa instance
-Config = Config()
+Config = Config()    # Config is a singleton to ensure correct scope

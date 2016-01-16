@@ -38,34 +38,6 @@ def mkpath(*args, mkdir=False):
     return path
 
 
-def append_path_with_sep(path):
-    '''
-    Append the file seperator to the path if it is not present.
-
-    Args
-        path (str): String directory path
-
-    Returns
-        path (str): String directory path ending with the file separator
-    '''
-    return path + os.sep if not path.endswith(os.sep) else path
-
-
-def join_row(row, on=' '):
-    '''
-    Cleans a string row in a :class:`~pandas.DataFrame` and returns the
-    concatenated sentence.
-
-    Args
-        row (:class:`~pandas.Series`): Dataframe row
-        on (str): Delimiter on which to join the row
-
-    Returns
-        sentence (str): Row concatenated into a sentence
-    '''
-    return on.join([str(obj) for obj in row[~row.isnull()].tolist()])
-
-
 def gen_uid(as_hex=True):
     '''
     Generate a unique id (uuid4).

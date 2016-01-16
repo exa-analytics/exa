@@ -36,7 +36,7 @@ def get_args():
 
 def main():
     '''
-    The main entry point for exa's web application.
+    Parse command line arguments and start the (web-based) application.
     '''
     args = get_args()
     port = args.port
@@ -44,7 +44,3 @@ def main():
     link = 'http://localhost:{port}'.format(port=port)
     threading.Timer(0.5, lambda: webbrowser.get(browser).open(link)).start()
     serve(port=port)
-
-
-#if __name__ == "__main__":
-#    main()

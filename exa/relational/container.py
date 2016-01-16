@@ -5,6 +5,7 @@ Container
 Metadata is stored as json on disk
 '''
 from exa import _pd as pd
+from exa import DataFrame
 from exa.relational.base import session, datetime, relationship, event
 from exa.relational.base import Column, Integer, String, DateTime
 from exa.relational.base import ForeignKey, Table, Base
@@ -23,6 +24,28 @@ class Container(Base):
     '''
     Database representation of the 'session' concept.
 
+    Warning:
+        The correct way to set DataFrame object is as follows:
+
+        .. code-block:: Python
+
+            c = exa.Container()
+            df = pd.DataFrame()
+            c['name'] = df
+            # or
+            setattr(c, 'name', df)
+
+        Avoid setting objects using the **__dict__** attribute as follows:
+
+        .. code-block:: Python
+
+            universe = atomic.Universe()
+            c = exa.Container()
+            df = pd.DataFrame()
+            c.name = df
+
+        (This is used in **__init__** where type control is enforced.)
+
     See Also:
         :class:`~exa.session.Session`
     '''
@@ -36,18 +59,12 @@ class Container(Base):
     size = Column(Integer)
     file_count = Column(Integer)
     files = relationship('File', secondary=ContainerFile, backref='containers', cascade='all, delete')
-
     __mapper_args__ = {
         'polymorphic_identity': 'container',   # This allows the container to
         'polymorphic_on': container_type,      # be inherited.
         'with_polymorphic': '*'
     }
-
-    def add_dataframe(self, name, df):
-        '''
-        '''
-        pass
-
+    __dfclasses__ = {}
 
     def to_archive(self, path):
         '''
@@ -74,34 +91,39 @@ class Container(Base):
         '''
         return {n: v for n, v in vars(self).items() if isinstance(v, pd.DataFrame)}
 
+    def _dfcls(self, key):
+        '''
+        '''
+        for k, v in self.__dfclasses__.items():
+            if k == key:
+                return v
+        return DataFrame
+
     def __getitem__(self, key):
         raise NotImplementedError()
 
     def __setitem__(self, key, value):
-        raise NotImplementedError()
+        '''
+        Check the value type and set :class:`~exa.dataframe.DataFrame` objects
+        by casting them to the correct type.
+
+        .. code-block:: Python
+
+            container = exa.Container()
+            print(container.__dftypes__)
+            container.name = object
+            type(container.name)
+        '''
+        print('here')
+        if isinstance(value, pd.DataFrame):
+            print('and here')
+            value = self._dfcls(key)(value)
+        setattr(self, key, value)
 
     def __iter__(self):
         raise NotImplementedError()
 
     def __len__(self):
-        raise NotImplementedError()
-
-    def __add__(self, other):
-        raise NotImplementedError()
-
-    def __sub__(self, other):
-        raise NotImplementedError()
-
-    def __mul__(self, other):
-        raise NotImplementedError()
-
-    def __div__(self, other):
-        raise NotImplementedError()
-
-    def __rmul__(self, other):
-        raise NotImplementedError()
-
-    def __truediv__(self, other):
         raise NotImplementedError()
 
     def __init__(self, name=None, description=None, dataframes={}, meta=None):
@@ -116,6 +138,9 @@ class Container(Base):
         n = self.name
         u = self.uid
         return '{0}({1}: {2}[{3}])'.format(c, p, n, u)
+
+    def __str__(self):
+        return self.__repr__()
 
 
 def concat(containers, axis=0, join='inner'):

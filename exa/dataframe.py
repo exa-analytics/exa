@@ -4,25 +4,31 @@ Custom DataFrame for exa Analytics
 ====================================
 '''
 from exa import _pd as pd
-from exa.errors import DimensionError, ColumnError
+from exa.errors import RequiredIndexError, RequiredColumnError
 
 
 class DataFrame(pd.DataFrame):
     '''
-    Should behave just like a :py:class:`~pandas.DataFrame`.
+    Behaves just like a :py:class:`~pandas.DataFrame`, but enforces minimum
+    column and index requirements.
+
     '''
-    __dimensions__ = []
+    __indices__ = []
     __columns__ = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if len(self) > 0:                 # Check index and column requirements
-            extra = list(set(self.__dimensions__).difference(self.index.names))
-            missing = list(set(self.index.names).difference(self.__dimensions__))
-            if extra:
-                raise DimensionError(extra=extra)
-            if missing:
-                raise DimensionError(missing=missing)
-            missing_required_columns = list(set(self.__columns__).difference(self.columns))
-            if missing_required_columns:
-                raise ColumnError(missing_required_columns)
+        if len(self) > 0:
+            name = self.__class__.__name__
+            missing_req_indices = set(self.__indices__).difference(self.index.names)
+            missing_req_columns = set(self.__columns__).difference(self.columns)
+            if missing_req_indices:
+                raise RequiredIndexError(missing_req_indices, name)
+            if missing_req_columns:
+                raise RequiredColumnError(missing_req_columns, name)
+
+    def __repr__(self):
+        return '{0}'.format(self.__class__.__name__)
+
+    def __str__(self):
+        return self.__class__.__name__

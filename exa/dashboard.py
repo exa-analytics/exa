@@ -100,7 +100,7 @@ def add_to_db(obj, args, kwargs):
 
 
 
-Dashboard = Dashboard()
+Dashboard = Dashboard()    # Also a singleton to ensure correct scope
 Dashboard._init(*Config.session_args())
 
 

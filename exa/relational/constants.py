@@ -16,7 +16,7 @@ class Meta(_Meta):
         '''
         obj = session.query(self).filter(self.symbol == key).all()
         if len(obj) == 1:
-            return obj[0]
+            return obj[0].value
         else:
             raise ValueError('Value {0} not found in {1}'.format(key, self.__tablename__))
 
@@ -25,7 +25,7 @@ class Meta(_Meta):
         return self._getitem(key)
 
 
-class Constant(Base):
+class Constant(Base, metaclass=Meta):
     '''
     Physical constants.
     '''

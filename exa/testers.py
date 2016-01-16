@@ -37,7 +37,7 @@ class UnitTester(unittest.TestCase):
         suite = unittest.TestLoader().loadTestsFromTestCase(cls)
         result = None
         if log:
-            with open(UNITTESTLOG, 'a') as f:
+            with open(testlog, 'a') as f:
                 result = unittest.TextTestRunner(f, verbosity=2).run(suite)
         else:
             result = unittest.TextTestRunner(verbosity=2).run(suite)
@@ -53,7 +53,7 @@ def run_unittests(log=False):
     '''
     tests = UnitTester.__subclasses__()
     if log:
-        with open(UNITTESTLOG, 'a') as f:
+        with open(testlog, 'a') as f:
             f.write(header())
     for test in tests:
         test.run_interactively(log=log)
@@ -85,12 +85,12 @@ def run_doctests(verbose=True, log=False):
                     else:
                         print('\n'.join(('-' * 80, test.name, '-' * 80)))
                         runner.run(test)
-    # Get the runner and modules to test
+
     runner = doctest.DocTestRunner(verbose=verbose)
     modules = [v for k, v in sys.modules.items() if k.startswith('exa')]
     modules.sort(key=lambda module: module.__file__)
     if log:
-        with open(DOCTESTLOG, 'a') as f:
+        with open(testlog, 'a') as f:
             f.write(header())
             tester(modules, runner, f=f)
     else:
