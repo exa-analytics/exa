@@ -4,7 +4,7 @@ Custom DataFrame for exa Analytics
 ====================================
 '''
 from exa import _pd as pd
-from exa.errors import DimensionError, ColumnError
+from exa.errors import RequiredIndexError, RequiredColumnError
 
 
 class DataFrame(pd.DataFrame):
@@ -20,12 +20,15 @@ class DataFrame(pd.DataFrame):
         super().__init__(*args, **kwargs)
         if len(self) > 0:
             name = self.__class__.__name__
-            extra = set(self.__indices__).difference(self.index.names)
-            missing = set(self.index.names).difference(self.__indices__)
-            if extra:                      # Check indices
-                raise DimensionError(extra=extra, name=name)
-            if missing:
-                raise DimensionError(missing=missing, name=name)
-            missing_required_columns = set(self.__columns__).difference(self.columns)
-            if missing_required_columns:   # Check columns
-                raise ColumnError(missing_required_columns, name=name)
+            missing_req_indices = set(self.__indices__).difference(self.index.names)
+            missing_req_columns = set(self.__columns__).difference(self.columns)
+            if missing_req_indices:
+                raise RequiredIndexError(missing_req_indices, name)
+            if missing_req_columns:
+                raise RequiredColumnError(missing_req_columns, name)
+
+    def __repr__(self):
+        return '{0}'.format(self.__class__.__name__)
+
+    def __str__(self):
+        return self.__class__.__name__
