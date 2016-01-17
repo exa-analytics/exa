@@ -42,6 +42,25 @@ def periodic_supercell(xyz, rx, ry, rz):
 
 
 @jit(nopython=True, cache=True)
+def pdist2d(xyz):
+    '''
+    '''
+    n, m = xyz.shape
+    nn = n * (n - 1) // 2
+    distances = np.empty((nn, ), dtype=float64)
+    h = 0
+    for i in range(n):
+        for j in range(i + 1, n):
+            csum = 0.0
+            for k in range(m):
+                csum += (xyz[i, k] - xyz[j, k])**2
+            distances[h] = csum**0.5
+            h += 1
+    return distances
+
+
+
+@jit(nopython=True, cache=True)
 def repeat_i8(value, n):
     '''
     '''

@@ -87,5 +87,6 @@ class Isotope(Base, metaclass=Meta):
         return '{0}{1}'.format(self.A, self.symbol)
 
 
-Z_to_symbol_map = Isotope._df().sort_values('af')[['Z', 'symbol']].set_index('Z').to_dict()['symbol']
-symbol_to_Z_map = Isotope._df()[['symbol', 'Z']].drop_duplicates().set_index('symbol').to_dict()['Z']
+Z_to_symbol = Isotope._df().sort_values('af')[['Z', 'symbol']].set_index('Z').to_dict()['symbol']
+symbol_to_Z = Isotope._df()[['symbol', 'Z']].drop_duplicates().set_index('symbol').to_dict()['Z']
+symbol_to_radius = Isotope._df()[['symbol', 'radius']].drop_duplicates().set_index('symbol').to_dict()['radius']
