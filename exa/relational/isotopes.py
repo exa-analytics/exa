@@ -10,6 +10,18 @@ from exa.relational.base import session, commit
 class Meta(_Meta):
     '''
     '''
+    @property
+    def znum_symbol(self):
+        return self._df().sort_values('af')[['Z', 'symbol']].set_index('Z').to_dict()['symbol']
+
+    @property
+    def symbol_znum(self):
+        return self._df()[['symbol', 'Z']].drop_duplicates().set_index('symbol').to_dict()['Z']
+
+    @property
+    def symbol_radius(self):
+        return self._df()[['symbol', 'radius']].drop_duplicates().set_index('symbol').to_dict()['radius']
+
     def get_by_symbol(self, symbol):
         '''
         '''
@@ -82,23 +94,6 @@ class Isotope(Base, metaclass=Meta):
     szuid = Column(Integer)
     strid = Column(Integer)
 
-    @property
-    def znum_symbol(self):
-        if not self._z_sym:
-            self._z_sym = self._df().sort_values('af')[['Z', 'symbol']].set_index('Z').to_dict()['symbol']
-        return self._z_sym
-
-    @property
-    def symbol_znum(self):
-        if not self._sym_z:
-            self._sym_z = self._df()[['symbol', 'Z']].drop_duplicates().set_index('symbol').to_dict()['Z']
-        return self._sym_z
-
-    @property
-    def symbol_radius(self):
-        if not self._sym_r:
-            self._sym_r = self._df()[['symbol', 'radius']].drop_duplicates().set_index('symbol').to_dict()['radius']
-        return self._sym_r
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
