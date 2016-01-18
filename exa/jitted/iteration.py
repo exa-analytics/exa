@@ -136,3 +136,31 @@ def repeat_f8_array2d_by_counts(array, counts):
                 result[h, k] = values[k]
             h += 1
     return result
+
+
+@jit(nopython=True, cache=True)
+def tile_i8(array, r):
+    '''
+    '''
+    n = len(array)
+    result = np.empty((n * r, ), dtype=int64)
+    h = 0
+    for i in range(r):
+        for j in range(n):
+            result[h] = array[j]
+            h += 1
+    return result
+
+
+@jit(nopython=True, cache=True)
+def tile_f8(array, r):
+    '''
+    '''
+    n = len(array)
+    result = np.empty((n * r, ), dtype=float64)
+    h = 0
+    for i in range(r):
+        for j in range(n):
+            result[h] = array[j]
+            h += 1
+    return result
