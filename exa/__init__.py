@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-'''
-exa
-==============
-This package provides the core functionality required for the
-'''
 import sys as _sys
 import re as _re
 import os as _os
@@ -24,6 +19,7 @@ __exa_version__ = (0, 1, 0)    # Version number is defined here!
 __version__ = '.'.join((str(v) for v in __exa_version__))
 
 
+from exa.utils import mkpath
 from exa.config import Config
 _ae.register(Config.save)
 from exa.log import log_tail, log_head, setup

@@ -42,6 +42,25 @@ def periodic_supercell(xyz, rx, ry, rz):
 
 
 @jit(nopython=True, cache=True)
+def pdist2d(xyz):
+    '''
+    '''
+    n, m = xyz.shape
+    nn = n * (n - 1) // 2
+    distances = np.empty((nn, ), dtype=float64)
+    h = 0
+    for i in range(n):
+        for j in range(i + 1, n):
+            csum = 0.0
+            for k in range(m):
+                csum += (xyz[i, k] - xyz[j, k])**2
+            distances[h] = csum**0.5
+            h += 1
+    return distances
+
+
+
+@jit(nopython=True, cache=True)
 def repeat_i8(value, n):
     '''
     '''
@@ -115,5 +134,33 @@ def repeat_f8_array2d_by_counts(array, counts):
         for j in range(count):
             for k in range(m):
                 result[h, k] = values[k]
+            h += 1
+    return result
+
+
+@jit(nopython=True, cache=True)
+def tile_i8(array, r):
+    '''
+    '''
+    n = len(array)
+    result = np.empty((n * r, ), dtype=int64)
+    h = 0
+    for i in range(r):
+        for j in range(n):
+            result[h] = array[j]
+            h += 1
+    return result
+
+
+@jit(nopython=True, cache=True)
+def tile_f8(array, r):
+    '''
+    '''
+    n = len(array)
+    result = np.empty((n * r, ), dtype=float64)
+    h = 0
+    for i in range(r):
+        for j in range(n):
+            result[h] = array[j]
             h += 1
     return result
