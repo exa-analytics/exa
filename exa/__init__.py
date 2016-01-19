@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-'''
-exa
-==============
-This package provides the core functionality required for the
-'''
 import sys as _sys
 import re as _re
 import os as _os
