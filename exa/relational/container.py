@@ -162,7 +162,7 @@ class Container(Base):
         if isinstance(key, int):
             return self._get_single(key)
         elif isinstance(key, list):
-            return self._get_by_list(key)
+            return self._get_by_indices(key)
         elif isinstance(key, slice):
             return self._get_by_slice(key)
         elif isinstance(key, str):

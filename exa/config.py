@@ -81,6 +81,7 @@ class Config:
         self.maxlogbytes = 10 #1024 * 1024
         self.maxlogcount = 5
         self.maxanonsessions = 5
+        self.gc = 500                                      # Custom garbage collection
         self.session = None
         self.program = None
         self.project = None
