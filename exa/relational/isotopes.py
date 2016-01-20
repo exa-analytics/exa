@@ -22,6 +22,10 @@ class Meta(_Meta):
     def symbol_radius(self):
         return self._df()[['symbol', 'radius']].drop_duplicates().set_index('symbol').to_dict()['radius']
 
+    @property
+    def symbol_mass(self):
+        return self._df()[['symbol', 'mass']].drop_duplicates('symbol').set_index('symbol').to_dict()['mass']
+
     def get_by_symbol(self, symbol):
         '''
         '''

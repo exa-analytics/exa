@@ -5,6 +5,7 @@ Container
 Metadata is stored as json on disk
 '''
 from exa import _pd as pd
+from exa import _np as np
 from exa import DataFrame
 from exa.relational.base import session, datetime, relationship, event
 from exa.relational.base import Column, Integer, String, DateTime
@@ -91,6 +92,13 @@ class Container(Base):
         '''
         return {n: v for n, v in vars(self).items() if isinstance(v, pd.DataFrame)}
 
+    def copy(self):
+        '''
+        '''
+        cls = self.__class__
+        obj = cls(name=self.name, description=self.description, meta=self.meta, **self.dataframes)
+        return obj
+
     def _dfcls(self, key):
         '''
         '''
@@ -99,8 +107,68 @@ class Container(Base):
                 return v
         return DataFrame
 
+
+    def _get_by_index(self, index):
+        '''
+        '''
+        obj = self.copy()
+        for name, df in obj.dataframes.items():
+            if len(df) > 0:
+                index_name = df.index.names[0]
+                obj[name] = df.ix[df.index.isin([index], index_name), :]
+        return obj
+
+    def _get_by_indices(self, indices):
+        '''
+        '''
+        obj = self.copy()
+        for name, df in obj.dataframes.items():
+            if len(df) > 0:
+                index_name = df.index.names[0]
+                obj[name] = df.ix[df.index.isin(indices, index_name), :]
+        return obj
+
+    def _get_by_slice(self, key):
+        '''
+        '''
+        obj = self.copy()
+        for name, df in obj.dataframes.items():
+            if len(df) > 0:
+                index_name = df.index.names[0]
+                index_values = df.index.get_level_values(index_name).unique()
+                start = index_values[0] if key.start is None else key.start
+                stop = index_values[-1] if key.stop is None else key.stop
+                step = index_values[1] - index_values[0] if key.step is None else key.step
+                stop += step            # To ensure we get the endpoint
+                indices = np.arange(start, stop, step, dtype=np.int64)
+                obj[name] = df.ix[df.index.isin(indices, index_name), :]
+        return obj
+
+    def _get_by_string(self, key):
+        '''
+        '''
+        if key in self.__dict__:
+            return self.__dict__[key]
+        elif '_' + key in self.__dict__:
+            return self.__dict__['_' + key]
+        else:
+            raise KeyError('Key {0} not found in universe {1}.'.format(key, self))
+
     def __getitem__(self, key):
-        raise NotImplementedError()
+        '''
+        Integers, slices, and lists are assumed to be values in the index (
+        for multi-indexed dataframes, corresponding to level 0).
+        '''
+        if isinstance(key, int):
+            return self._get_single(key)
+        elif isinstance(key, list):
+            return self._get_by_list(key)
+        elif isinstance(key, slice):
+            return self._get_by_slice(key)
+        elif isinstance(key, str):
+            return self._get_by_string(key)
+        else:
+            raise NotImplementedError()
 
     def __setitem__(self, key, value):
         '''
@@ -114,9 +182,7 @@ class Container(Base):
             container.name = object
             type(container.name)
         '''
-        print('here')
         if isinstance(value, pd.DataFrame):
-            print('and here')
             value = self._dfcls(key)(value)
         setattr(self, key, value)
 
@@ -126,11 +192,11 @@ class Container(Base):
     def __len__(self):
         raise NotImplementedError()
 
-    def __init__(self, name=None, description=None, dataframes={}, meta=None):
+    def __init__(self, name=None, description=None, meta=None, **kwargs):
         super().__init__(name=name, description=description)
-        for k, v in dataframes.items():
-            setattr(self, k, v)
         self.meta = meta
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
     def __repr__(self):
         c = self.__class__.__name__

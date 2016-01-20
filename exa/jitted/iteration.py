@@ -120,22 +120,22 @@ def repeat_f8_array(array, n):
     return values
 
 
-@jit(nopython=True, cache=True)
-def repeat_f8_array2d_by_counts(array, counts):
-    '''
-    '''
-    n, m = array.shape
-    nn = np.sum(counts)
-    result = np.empty((nn, m), dtype=float64)
-    h = 0
-    for i in range(n):
-        values = array[i]
-        count = counts[i]
-        for j in range(count):
-            for k in range(m):
-                result[h, k] = values[k]
-            h += 1
-    return result
+#@jit(nopython=True, cache=True)
+#def repeat_f8_array2d_by_counts(array, counts):
+#    '''
+#    '''
+#    n, m = array.shape
+#    nn = np.sum(counts)
+#    result = np.empty((nn, m), dtype=float64)
+#    h = 0
+#    for i in range(n):
+#        values = array[i]
+#        count = counts[i]
+#        for j in range(count):
+#            for k in range(m):
+#                result[h, k] = values[k]
+#            h += 1
+#    return result
 
 
 @jit(nopython=True, cache=True)
