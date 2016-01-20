@@ -12,19 +12,19 @@ class Meta(_Meta):
     '''
     @property
     def znum_symbol(self):
-        return self._df().sort_values('af')[['Z', 'symbol']].set_index('Z').to_dict()['symbol']
+        return self._df().sort_values('af', ascending=False, na_position='last').drop_duplicates('Z', keep='first').set_index('symbol')['mass'].to_dict()
 
     @property
     def symbol_znum(self):
-        return self._df()[['symbol', 'Z']].drop_duplicates().set_index('symbol').to_dict()['Z']
+        return self._df()[['symbol', 'Z']].set_index('symbol')['Z'].to_dict()
 
     @property
     def symbol_radius(self):
-        return self._df()[['symbol', 'radius']].drop_duplicates().set_index('symbol').to_dict()['radius']
+        return self._df()[['symbol', 'radius']].set_index('symbol')['radius'].to_dict()
 
     @property
     def symbol_mass(self):
-        return self._df()[['symbol', 'mass']].drop_duplicates('symbol').set_index('symbol').to_dict()['mass']
+        return self._df().sort_values('af', ascending=False, na_position='last').drop_duplicates('symbol', keep='first').set_index('symbol')['mass'].to_dict()
 
     def get_by_symbol(self, symbol):
         '''
