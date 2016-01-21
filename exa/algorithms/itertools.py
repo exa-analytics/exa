@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+'''
+No title
+===============================================
+'''
+from itertools import filterfalse
+
+
 def unique_everseen(iterable, key=None):
     "List unique elements, preserving order. Remember all elements ever seen."
     # unique_everseen('AAAABBBCCDAABBB') --> A B C D
