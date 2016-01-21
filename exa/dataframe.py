@@ -11,21 +11,19 @@ class DataFrame(pd.DataFrame):
     '''
     Behaves just like a :py:class:`~pandas.DataFrame`, but enforces minimum
     column and index requirements.
-
     '''
-    __indices__ = []
-    __columns__ = []
+    __fkeys__ = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if len(self) > 0:
-            name = self.__class__.__name__
-            missing_req_indices = set(self.__indices__).difference(self.index.names)
-            missing_req_columns = set(self.__columns__).difference(self.columns)
-            if missing_req_indices:
-                raise RequiredIndexError(missing_req_indices, name)
-            if missing_req_columns:
-                raise RequiredColumnError(missing_req_columns, name)
+#        if len(self) > 0:
+#            name = self.__class__.__name__
+#            missing_req_indices = set(self.__indices__).difference(self.index.names)
+#            missing_req_columns = set(self.__columns__).difference(self.columns)
+#            if missing_req_indices:
+#                raise RequiredIndexError(missing_req_indices, name)
+#            if missing_req_columns:
+#                raise RequiredColumnError(missing_req_columns, name)
 
     def __repr__(self):
         return '{0}'.format(self.__class__.__name__)
