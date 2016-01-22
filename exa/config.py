@@ -102,7 +102,7 @@ class Config:
         self.img = mkpath(self.static, 'img')
         self.css = mkpath(self.static, 'css')
         self.js = mkpath(self.static, 'js')
-        self.nbext = mkpath(self.js, 'nbextensions')
+        self.nbext = mkpath(self.static, 'nbextensions')
         self.extensions = mkpath(jupyter_data_dir(), 'nbextensions', 'exa')
         self.relational = {'backend': 'sqlite', 'host': None,
                            'database': 'exa.sqlite', 'user': None}

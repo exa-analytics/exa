@@ -50,12 +50,11 @@ SessionFile = Table(
 )
 
 
-class Session(Base): #, metaclass=SessionMeta):
+class Session(Base):
     '''
-    Database representation of the 'session' concept.
-
-    See Also:
-        :class:`~exa.session.Session`
+    A :class:`~exa.relational.session.Session` keeps track of the user's active
+    program, project, job, and container (active objects are not required to
+    be present).
     '''
     name = Column(String)
     description = Column(String)
@@ -73,6 +72,10 @@ class Session(Base): #, metaclass=SessionMeta):
 
     def __init__(self, name='anonymous', **kwargs):
         super().__init__(name=name, **kwargs)       # Default session name
+        self._active_program = None
+        self._active_project = None
+        self._active_job = None
+        self._active_container = None
 
     def __repr__(self):
         if self.name == 'anonymous':
@@ -88,11 +91,11 @@ def cleanup_anon_sessions():
     Keep only the [5] (specified in :class:`~exa.config.Config`) most recent
     anonymous sessions.
     '''
-    anons = session.query(Session).filter(
+    anons = dbsession.query(Session).filter(
         Session.name == 'anonymous'
-    ).order_by(Session.accessed).all()[:-Config.maxanonsessions]
+    ).order_by(Session.accessed).all()[:-Config.max_anon_sessions]
     for anon in anons:
-        session.delete(anon)
+        dbsession.delete(anon)
 
 
 @event.listens_for(mapper, 'init')
@@ -104,4 +107,4 @@ def add_to_db(obj, args, kwargs):
     See Also:
         :mod:`~exa.relational.base`
     '''
-    session.add(obj)
+    dbsession.add(obj)

@@ -5,8 +5,8 @@ Base Relational Objects
 '''
 from datetime import datetime
 from traitlets import MetaHasTraits
-from sqlalchemy import Column, Integer, create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import Column, Integer, create_engine, event
+from sqlalchemy.orm import sessionmaker, mapper
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
 from exa import Config
 from exa import _pd as pd
@@ -52,11 +52,11 @@ class Meta(MetaHasTraits, DeclarativeMeta):
     '''
     def __len__(self):
         commit()
-        return session.query(self).count()
+        return dbsession.query(self).count()
 
     def __iter__(self):
         commit()
-        for item in session.query(self).all():
+        for item in dbsession.query(self).all():
             yield item
 
     def _return(self, obj_list, key, single=True):
@@ -95,7 +95,7 @@ class Base:
             data (list): List of dictionary objects representing rows
         '''
         commit()
-        session.bulk_insert_mappings(cls, data)
+        dbsession.bulk_insert_mappings(cls, data)
 
     @classmethod
     def _df(cls):
@@ -103,7 +103,7 @@ class Base:
         Display a :py:class:`~pandas.DataFrame` representation of the table.
         '''
         commit()
-        df = pd.read_sql(session.query(cls).statement, engine.connect())
+        df = pd.read_sql(dbsession.query(cls).statement, engine.connect())
         if 'pkid' in df.columns:
             return df.set_index('pkid')
         else:
@@ -116,14 +116,14 @@ class Base:
         '''
         commit()
         if isinstance(key, int):          # Assume primary key
-            obj = session.query(cls).filter(cls.pkid == key).all()
+            obj = dbsession.query(cls).filter(cls.pkid == key).all()
             if len(obj) == 1:
                 return obj[0]
             else:
                 raise PrimaryKeyError(key, cls.__tablename__)
         elif isinstance(key, str):        # Try by name
             if hasattr(cls, 'name'):
-                obj = session.query(cls).filter(cls.name == key).all()
+                obj = dbsession.query(cls).filter(cls.name == key).all()
                 if len(obj) == 1:
                     return obj[0]
                 else:
@@ -150,17 +150,16 @@ def commit():
     these objects does not normally have to be performed manually.
     '''
     try:
-        session.commit()
+        dbsession.commit()
     except:
-        session.rollback()
+        dbsession.rollback()
         raise               # Catch and raise any and all exceptions
 
 
 def create_all():
     '''
     '''
-    session.flush()
-    DeclarativeBase.metadata.create_all(engine)
+    Base.metadata.create_all(engine)
 
 
 engine_name = Config.relational_engine()

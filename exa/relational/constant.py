@@ -3,8 +3,9 @@
 Physical Constants
 ===============================================
 '''
-from exa.relational.base import Base, Column, String, Float
-from exa.relational.base import session, commit
+from sqlalchemy import String, Float
+from exa.relational.base import Base, Column
+from exa.relational.base import dbsession, commit
 from exa.relational.base import Meta as _Meta
 
 

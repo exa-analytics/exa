@@ -15,9 +15,9 @@ from exa import _json as json
 from exa.config import Config
 from exa.utils import mkpath
 from exa.relational.base import Base, engine
-from exa.relational.isotopes import Isotope
-from exa.relational.constants import Constant
-from exa.relational.units import Dimension
+from exa.relational.isotope import Isotope
+from exa.relational.constant import Constant
+from exa.relational.unit import Dimension
 
 
 def install_notebook_widgets(path=None, verbose=False):
@@ -26,8 +26,6 @@ def install_notebook_widgets(path=None, verbose=False):
     nbextensions directory to allow use of exa's JavaScript frontend
     within the Jupyter notebook GUI.
     '''
-    print(Config.extensions)
-    print(Config.nbext)
     try:
         shutil.rmtree(Config.extensions)
     except:

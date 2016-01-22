@@ -3,9 +3,10 @@
 Container
 ===============================================
 '''
+from IPython.display import display
 from ipywidgets import DOMWidget
 from traitlets import MetaHasTraits, Unicode
-from sqlalchemy import String, DateTime, ForeignKey, Table
+from sqlalchemy import String, DateTime, ForeignKey, Table, event
 from sqlalchemy.orm import relationship
 from exa import _pd as pd
 from exa import _np as np
@@ -60,7 +61,7 @@ class Container(DOMWidget, Base):
     uid = Column(String(32), default=gen_uid)
     created = Column(DateTime, default=datetime.now)
     modified = Column(DateTime, default=datetime.now)
-    accessed = Column(DateTime, default=datetime.now)
+    accessed = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     container_type = Column(String(16))
     size = Column(Integer)
     file_count = Column(Integer)
@@ -71,6 +72,7 @@ class Container(DOMWidget, Base):
         'with_polymorphic': '*'
     }
     __dfclasses__ = {}
+    _ipy_disp = DOMWidget._ipython_display_
 
     def to_archive(self, path):
         '''
@@ -204,6 +206,16 @@ class Container(DOMWidget, Base):
         for k, v in kwargs.items():
             setattr(self, k, v)
 
+    def _ipython_display_(self):
+        '''
+        Custom HTML representation
+        '''
+        self._ipy_disp()
+        print(repr(self))
+
+    def _repr_html_(self):
+        return self._ipython_display_()
+
     def __repr__(self):
         c = self.__class__.__name__
         p = self.pkid
@@ -212,7 +224,7 @@ class Container(DOMWidget, Base):
         return '{0}({1}: {2}[{3}])'.format(c, p, n, u)
 
     def __str__(self):
-        return self.__repr__()
+        return repr(self)
 
 
 def concat(containers, axis=0, join='inner'):
@@ -220,3 +232,31 @@ def concat(containers, axis=0, join='inner'):
     Concatenate a collection of containers.
     '''
     raise NotImplementedError()
+
+
+def _update_or_create(container):
+    '''
+    This function checks whether the files associated with this dataframe
+    need to be updated (or created) and updates the relevant timestamps as
+    it does so.
+    '''
+
+@event.listens_for(Container, 'before_insert')
+def before_insert(mapper, conn, target):
+    '''
+    '''
+    _update_or_create(target)
+    print('before_insert')
+    print(mapper)
+    print(conn)
+    print(target)
+
+
+@event.listens_for(Container, 'before_update')
+def before_update(mapper, conn, target):
+    '''
+    '''
+    print('before_update')
+    print(mapper)
+    print(conn)
+    print(target)
