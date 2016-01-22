@@ -5,13 +5,13 @@ Container
 '''
 from ipywidgets import DOMWidget
 from traitlets import MetaHasTraits, Unicode
+from sqlalchemy import String, DateTime, ForeignKey, Table
+from sqlalchemy.orm import relationship
 from exa import _pd as pd
 from exa import _np as np
 from exa.frames import DataFrame
-from exa.relational.base import session, datetime, relationship, event
-from exa.relational.base import Column, Integer, String, DateTime
-from exa.relational.base import ForeignKey, Table, Base, Meta
 from exa.utils import gen_uid
+from exa.relational.base import dbsession, datetime, Column, Integer, Base, Meta
 
 
 ContainerFile = Table(
@@ -21,48 +21,8 @@ ContainerFile = Table(
     Column('file_pkid', Integer, ForeignKey('file.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
 
-class ContainerMeta(MetaHasTraits, Meta):
-    '''
-    Metaclass for :class:`~exa.relational.container.Container` objects. These
-    objects act not only as a relational table schema and table entry, via
-    `sqlalchemy`_, but also as a `Jupyter notebook`_ `widget`_.
 
-    Tip:
-        Combination of the metaclasses (like this) is required because the
-        metaclass of a derived class must be a subclass of the metaclasses of
-        all of its bases. As an example,
-
-        .. code-block:: Python
-
-            class Meta:
-                pass
-
-            class Klass(object, metaclass=Meta):
-                pass
-
-        doesn't work because the metaclass (Meta) is not a subclass of "object"'s
-        metaclass (type).
-
-        .. code-block:: Python
-
-            class Meta(type):
-                pass
-
-            class Klass(object, metaclass=Meta):
-                pass
-
-        Now that the custom metaclass (Meta) has subclassed the metaclass of
-        object, the Klass class object can be created.
-
-    .. _sqlalchemy: http://www.sqlalchemy.org/
-    .. _Jupyter notebook: http://jupyter.org/
-    .. _widget: https://ipywidgets.readthedocs.org/en/latest/
-    '''
-    _view_module = Unicode
-    _view_name = Unicode()
-
-
-class Container(DOMWidget, Base, metaclass=ContainerMeta):
+class Container(DOMWidget, Base):
     '''
     Containers control data manipulation, processing, and allow for
     visualization. This class controls
@@ -213,6 +173,8 @@ class Container(DOMWidget, Base, metaclass=ContainerMeta):
             return self._get_by_string(key)
         else:
             raise NotImplementedError()
+
+    #def __setattr__(self, key, value):
 
     def __setitem__(self, key, value):
         '''

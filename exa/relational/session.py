@@ -3,10 +3,10 @@
 Session
 ===============================================
 '''
+from sqlalchemy import event, String, DateTime, ForeignKey, Table
+from sqlalchemy.orm import mapper, relationship
 from exa import Config
-from exa.relational.base import session, datetime, relationship
-from exa.relational.base import Column, Integer, String, DateTime
-from exa.relational.base import ForeignKey, Table, Base
+from exa.relational.base import dbsession, datetime, Column, Integer, Base
 from exa.utils import gen_uid
 
 
@@ -93,3 +93,15 @@ def cleanup_anon_sessions():
     ).order_by(Session.accessed).all()[:-Config.maxanonsessions]
     for anon in anons:
         session.delete(anon)
+
+
+@event.listens_for(mapper, 'init')
+def add_to_db(obj, args, kwargs):
+    '''
+    All relational objects are automatically added to the database session.
+    These objects' relations are also automatically instantiated here.
+
+    See Also:
+        :mod:`~exa.relational.base`
+    '''
+    session.add(obj)

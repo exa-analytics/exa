@@ -26,6 +26,8 @@ def install_notebook_widgets(path=None, verbose=False):
     nbextensions directory to allow use of exa's JavaScript frontend
     within the Jupyter notebook GUI.
     '''
+    print(Config.extensions)
+    print(Config.nbext)
     try:
         shutil.rmtree(Config.extensions)
     except:

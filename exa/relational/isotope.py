@@ -4,9 +4,10 @@ Isotope Data
 ===============================================
 '''
 from itertools import product
-from exa.relational.base import Base, Column, String, Integer, Float
+from sqlalchemy import String, Float
+from exa.relational.base import Base, Column, Integer
 from exa.relational.base import Meta as _Meta
-from exa.relational.base import session, commit
+from exa.relational.base import dbsession, commit
 
 
 class Meta(_Meta):
