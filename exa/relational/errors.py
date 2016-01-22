@@ -16,6 +16,16 @@ class PrimaryKeyError(ExaException):
         super().__init__()
 
 
+class NoObjectsError(ExaException):
+    '''
+    '''
+    _msg = 'No objects found with key {0} in table {1}.'
+
+    def __init__(self, key, table):
+        self.msg = self._msg.format(key, table)
+        super().__init__()
+
+
 class MultipleObjectsError(ExaException):
     '''
     '''

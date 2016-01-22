@@ -11,7 +11,7 @@ from sqlalchemy.ext.declarative import as_declarative, declared_attr, Declarativ
 from datetime import datetime
 from exa import Config
 from exa import _pd as pd
-from exa.relational.errors import PrimaryKeyError, NameKeyError, MultipleObjectsError
+from exa.relational.errors import PrimaryKeyError, NameKeyError, MultipleObjectsError, NoObjectsError
 
 
 class Meta(DeclarativeMeta):
@@ -25,6 +25,22 @@ class Meta(DeclarativeMeta):
         commit()
         for item in session.query(self).all():
             yield item
+
+    def _return(self, obj_list, key, single=True):
+        '''
+        Checks the count of the to-be-returned object list to make sure that it
+        matches what is expected.
+        '''
+        if len(obj_list) == 0:
+            raise NoObjectsError(key, self)
+        if single:
+            if len(obj_list) > 1:
+                raise MultipleObjectsError(key, self)
+            else:
+                return obj_list[0]
+        else:
+            return obj_list
+
 
 @as_declarative(metaclass=Meta)
 class Base:
