@@ -25,7 +25,7 @@ _ae.register(Config.save)
 from exa.log import log_tail, log_head, setup
 setup()
 from exa.testers import run_unittests, run_doctests
-from exa.dataframe import DataFrame
+from exa.dataframes import DataFrame
 from exa.relational import Container
 from exa.dashboard import Dashboard
 _ae.register(relational.cleanup_anon_sessions)
@@ -34,7 +34,7 @@ from exa import tests
 
 
 # API cleanup
-del setup, config, testers, log, dashboard, utils
+del setup, config, testers, log, dashboard, utils, Config
 try:
     del widget
 except:

@@ -7,11 +7,12 @@ Require internal (exa) imports.
 import shutil
 from itertools import product
 from notebook import install_nbextension
-from exa import Config
 from exa import _re as re
 from exa import _os as os
 from exa import _np as np
+from exa import _pd as pd
 from exa import _json as json
+from exa.config import Config
 from exa.utils import mkpath
 from exa.relational.base import Base, engine
 from exa.relational.isotopes import Isotope
@@ -68,9 +69,10 @@ def initialize_database(force=False):
         if count == 0:
             print('Loading {0} data'.format(name))
             if name == 'isotope':
-                data = None
-                with open(mkpath(Config.static, 'isotopes.json')) as f:
-                    data = json.load(f)
+                data = pd.read_json(mkpath(Config.static, 'isotopes.json'))
+                data.sort_values(['Z', 'A'], inplace=True)
+                data.reset_index(drop=True, inplace=True)
+                data = data.to_dict(orient='records')
             elif name == 'constant':
                 data = [{'symbol': k, 'value': v} for k, v in constants[name].items()]
             else:

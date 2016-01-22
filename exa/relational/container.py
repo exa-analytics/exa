@@ -2,7 +2,6 @@
 '''
 Container
 ===============================================
-Metadata is stored as json on disk
 '''
 from exa import _pd as pd
 from exa import _np as np
@@ -23,7 +22,7 @@ ContainerFile = Table(
 
 class Container(Base):
     '''
-    Database representation of the 'session' concept.
+    Containers are objects that control files on disk.
 
     Warning:
         The correct way to set DataFrame object is as follows:
@@ -50,7 +49,7 @@ class Container(Base):
     See Also:
         :class:`~exa.session.Session`
     '''
-    name = Column(String)
+    name = Column(String)                             # Database columns
     description = Column(String)
     uid = Column(String(32), default=gen_uid)
     created = Column(DateTime, default=datetime.now)
@@ -85,7 +84,7 @@ class Container(Base):
         raise NotImplementedError()
 
     @property
-    def dataframes(self):
+    def get_df_dict(self):
         '''
         Return:
             dfs (dict): Dictionary of dataframes (key is the dataframe name)
@@ -106,7 +105,6 @@ class Container(Base):
             if k == key:
                 return v
         return DataFrame
-
 
     def _get_by_index(self, index):
         '''
