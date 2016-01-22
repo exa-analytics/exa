@@ -30,7 +30,7 @@ def install_notebook_widgets(path=None, verbose=False):
         shutil.rmtree(Config.extensions)
     except:
         pass
-    for i, r in enumerate([Config.templates, Config.static]):
+    for i, r in enumerate([Config.nbext]):
         for root, subdirs, files in os.walk(r):
             for filename in files:
                 low = filename.lower()

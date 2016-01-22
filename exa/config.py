@@ -78,9 +78,9 @@ class Config:
         except:
             pass
         self.system = platform.system().lower()
-        self.maxlogbytes = 10 #1024 * 1024
-        self.maxlogcount = 5
-        self.maxanonsessions = 5
+        self.max_log_bytes = 10 * 1024 * 1024
+        self.max_log_count = 5
+        self.max_anon_sessions = 5
         self.gc = 500                                      # Custom garbage collection
         self.session = None
         self.program = None
@@ -102,6 +102,7 @@ class Config:
         self.img = mkpath(self.static, 'img')
         self.css = mkpath(self.static, 'css')
         self.js = mkpath(self.static, 'js')
+        self.nbext = mkpath(self.js, 'nbextensions')
         self.extensions = mkpath(jupyter_data_dir(), 'nbextensions', 'exa')
         self.relational = {'backend': 'sqlite', 'host': None,
                            'database': 'exa.sqlite', 'user': None}

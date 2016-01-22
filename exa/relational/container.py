@@ -3,12 +3,14 @@
 Container
 ===============================================
 '''
+from ipywidgets import DOMWidget
+from traitlets import MetaHasTraits, Unicode
 from exa import _pd as pd
 from exa import _np as np
-from exa import DataFrame
+from exa.frames import DataFrame
 from exa.relational.base import session, datetime, relationship, event
 from exa.relational.base import Column, Integer, String, DateTime
-from exa.relational.base import ForeignKey, Table, Base
+from exa.relational.base import ForeignKey, Table, Base, Meta
 from exa.utils import gen_uid
 
 
@@ -19,10 +21,54 @@ ContainerFile = Table(
     Column('file_pkid', Integer, ForeignKey('file.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 )
 
-
-class Container(Base):
+class ContainerMeta(MetaHasTraits, Meta):
     '''
-    Containers are objects that control files on disk.
+    Metaclass for :class:`~exa.relational.container.Container` objects. These
+    objects act not only as a relational table schema and table entry, via
+    `sqlalchemy`_, but also as a `Jupyter notebook`_ `widget`_.
+
+    Tip:
+        Combination of the metaclasses (like this) is required because the
+        metaclass of a derived class must be a subclass of the metaclasses of
+        all of its bases. As an example,
+
+        .. code-block:: Python
+
+            class Meta:
+                pass
+
+            class Klass(object, metaclass=Meta):
+                pass
+
+        doesn't work because the metaclass (Meta) is not a subclass of "object"'s
+        metaclass (type).
+
+        .. code-block:: Python
+
+            class Meta(type):
+                pass
+
+            class Klass(object, metaclass=Meta):
+                pass
+
+        Now that the custom metaclass (Meta) has subclassed the metaclass of
+        object, the Klass class object can be created.
+
+    .. _sqlalchemy: http://www.sqlalchemy.org/
+    .. _Jupyter notebook: http://jupyter.org/
+    .. _widget: https://ipywidgets.readthedocs.org/en/latest/
+    '''
+    _view_module = Unicode
+    _view_name = Unicode()
+
+
+class Container(DOMWidget, Base, metaclass=ContainerMeta):
+    '''
+    Containers control data manipulation, processing, and allow for
+    visualization. This class controls
+
+    See Also:
+        :class:`~exa.relational.container._ContainerWidget`
 
     Warning:
         The correct way to set DataFrame object is as follows:

@@ -25,16 +25,15 @@ _ae.register(Config.save)
 from exa.log import log_tail, log_head, setup
 setup()
 from exa.testers import run_unittests, run_doctests
-from exa.dataframes import DataFrame
-from exa.relational import Container
-from exa.dashboard import Dashboard
+from exa.frames import DataFrame, Updater, ManyToMany
+from exa import relational
 _ae.register(relational.cleanup_anon_sessions)
 _ae.register(relational.commit)
 from exa import tests
 
 
 # API cleanup
-del setup, config, testers, log, dashboard, utils, Config
+del setup, config, testers, log, utils, Config, decorators, errors, tests
 try:
     del widget
 except:

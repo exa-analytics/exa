@@ -59,10 +59,9 @@ class Updater(pd.SparseDataFrame):
         return self.__class__.__name__
 
 
-class ManyToManyRelation(DataFrame):
+class ManyToMany(DataFrame):
     '''
-    A full DataFrame, but with only two columns which provide the many-to-many
-    relationship information.
+    A DataFrame with only two columns which enumerates the relationship information.
     '''
     __items__ = []
 
