@@ -6,7 +6,7 @@ Session
 from sqlalchemy import event, String, DateTime, ForeignKey, Table
 from sqlalchemy.orm import mapper, relationship
 from exa import Config
-from exa.relational.base import dbsession, datetime, Column, Integer, Base
+from exa.relational.base import db_sess, datetime, Column, Integer, Base
 from exa.utils import gen_uid
 
 
@@ -91,11 +91,11 @@ def cleanup_anon_sessions():
     Keep only the [5] (specified in :class:`~exa.config.Config`) most recent
     anonymous sessions.
     '''
-    anons = dbsession.query(Session).filter(
+    anons = db_sess.query(Session).filter(
         Session.name == 'anonymous'
     ).order_by(Session.accessed).all()[:-Config.max_anon_sessions]
     for anon in anons:
-        dbsession.delete(anon)
+        db_sess.delete(anon)
 
 
 @event.listens_for(mapper, 'init')
@@ -107,4 +107,4 @@ def add_to_db(obj, args, kwargs):
     See Also:
         :mod:`~exa.relational.base`
     '''
-    dbsession.add(obj)
+    db_sess.add(obj)

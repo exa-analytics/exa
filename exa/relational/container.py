@@ -12,7 +12,7 @@ from exa import _pd as pd
 from exa import _np as np
 from exa.frames import DataFrame
 from exa.utils import gen_uid
-from exa.relational.base import dbsession, datetime, Column, Integer, Base, Meta
+from exa.relational.base import datetime, Column, Integer, Base, Meta
 
 
 ContainerFile = Table(
@@ -234,29 +234,30 @@ def concat(containers, axis=0, join='inner'):
     raise NotImplementedError()
 
 
-def _update_or_create(container):
-    '''
-    This function checks whether the files associated with this dataframe
-    need to be updated (or created) and updates the relevant timestamps as
-    it does so.
-    '''
-
-@event.listens_for(Container, 'before_insert')
-def before_insert(mapper, conn, target):
-    '''
-    '''
-    _update_or_create(target)
-    print('before_insert')
-    print(mapper)
-    print(conn)
-    print(target)
-
-
-@event.listens_for(Container, 'before_update')
-def before_update(mapper, conn, target):
-    '''
-    '''
-    print('before_update')
-    print(mapper)
-    print(conn)
-    print(target)
+#def _update_or_create(container):
+#    '''
+#    This function checks whether the files associated with this dataframe
+#    need to be updated (or created) and updates the relevant timestamps as
+#    it does so.
+#    '''
+#
+#@event.listens_for(Container, 'before_insert')
+#def before_insert(mapper, conn, target):
+#    '''
+#    '''
+#    _update_or_create(target)
+#    print('before_insert')
+#    print(mapper)
+#    print(conn)
+#    print(target)
+#
+#
+#@event.listens_for(Container, 'before_update')
+#def before_update(mapper, conn, target):
+#    '''
+#    '''
+#    print('before_update')
+#    print(mapper)
+#    print(conn)
+#    print(target)
+#

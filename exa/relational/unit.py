@@ -5,7 +5,7 @@ Units and Dimensions
 '''
 from sqlalchemy import and_, String, Float
 from exa.relational.base import Meta as _Meta
-from exa.relational.base import Base, Column, dbsession, commit
+from exa.relational.base import Base, Column, db_sess, commit
 from exa.relational.errors import FactorNotFound
 
 
@@ -21,7 +21,7 @@ class Meta(_Meta):
     def get_factor(cls, key):
         f = key[0]
         t = key[1]
-        factor = dbsession.query(cls).filter(and_(cls.from_unit == f, cls.to_unit == t)).all()
+        factor = db_sess.query(cls).filter(and_(cls.from_unit == f, cls.to_unit == t)).all()
         if len(factor) == 1:
             return factor[0].factor
         else:

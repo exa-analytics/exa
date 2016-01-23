@@ -6,7 +6,7 @@ Project
 from sqlalchemy import String, DateTime, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from exa.utils import gen_uid
-from exa.relational.base import dbsession, datetime, Base, Column, Integer
+from exa.relational.base import datetime, Base, Column, Integer
 
 
 ProjectJob = Table(

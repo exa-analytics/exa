@@ -2,11 +2,18 @@
 '''
 Base Relational Objects
 ===============================================
+This module outlines the event-based content management system established by exa and creates
+a complex base table (schema) class, :class:`~exa.relational.base.Base`. The schema base class's
+metaclass inherits the metaclass of :py:class:`~ipywidgets.DOMWidget` in order for certain
+tables to be able to have HTML representations (within the `Jupyter notebook`_).
+
+.. _Jupyter notebook: http://jupyter.org/
 '''
 from datetime import datetime
 from traitlets import MetaHasTraits
 from sqlalchemy import Column, Integer, create_engine, event
 from sqlalchemy.orm import sessionmaker, mapper
+from sqlalchemy.orm.query import Query
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
 from exa import Config
 from exa import _pd as pd
@@ -50,29 +57,12 @@ class Meta(MetaHasTraits, DeclarativeMeta):
     .. _Jupyter notebook: http://jupyter.org/
     .. _widget: https://ipywidgets.readthedocs.org/en/latest/
     '''
-    def __len__(self):
-        commit()
-        return dbsession.query(self).count()
+    def __len__(self):                         # Length of the table (in database)
+        return db_sess.query(self).count()
 
-    def __iter__(self):
-        commit()
-        for item in dbsession.query(self).all():
+    def __iter__(self):                        # Iterate over every entry in the database
+        for item in db_sess.query(self).all():
             yield item
-
-    def _return(self, obj_list, key, single=True):
-        '''
-        Checks the count of the to-be-returned object list to make sure that it
-        matches what is expected.
-        '''
-        if len(obj_list) == 0:
-            raise NoObjectsError(key, self)
-        if single:
-            if len(obj_list) > 1:
-                raise MultipleObjectsError(key, self)
-            else:
-                return obj_list[0]
-        else:
-            return obj_list
 
 
 @as_declarative(metaclass=Meta)
@@ -83,27 +73,33 @@ class Base:
     pkid = Column(Integer, primary_key=True)
 
     @declared_attr
-    def __tablename__(cls):    # "declared_attr" makes this behave like a property
+    def __tablename__(cls):
         return cls.__name__.lower()
 
     @classmethod
-    def _bulk_insert(cls, data):
+    def bulk_insert(cls, data):
         '''
         Perform a bulk insert into a specific table.
 
+        .. code-block:: Python
+
+            [{'column1': 'foo', 'column2': 42, 'column3': 'bar'}]
+
         Args:
-            data (list): List of dictionary objects representing rows
+            data (list): List of dictionary objects (mappings - see the example above)
         '''
-        commit()
-        dbsession.bulk_insert_mappings(cls, data)
+        try:
+            db_sess.bulk_insert_mappings(cls, data)
+        except:
+            db_sess.rollback()
+            raise
 
     @classmethod
-    def _df(cls):
+    def table_dataframe(cls):
         '''
         Display a :py:class:`~pandas.DataFrame` representation of the table.
         '''
-        commit()
-        df = pd.read_sql(dbsession.query(cls).statement, engine.connect())
+        df = pd.read_sql(db_sess.query(cls).statement, engine.connect())
         if 'pkid' in df.columns:
             return df.set_index('pkid')
         else:
@@ -116,43 +112,64 @@ class Base:
         '''
         commit()
         if isinstance(key, int):          # Assume primary key
-            obj = dbsession.query(cls).filter(cls.pkid == key).all()
-            if len(obj) == 1:
-                return obj[0]
-            else:
-                raise PrimaryKeyError(key, cls.__tablename__)
+            obj = db_sess.query(cls).filter(cls.pkid == key).all()
+            return cls._return(obj, key)
         elif isinstance(key, str):        # Try by name
             if hasattr(cls, 'name'):
-                obj = dbsession.query(cls).filter(cls.name == key).all()
-                if len(obj) == 1:
-                    return obj[0]
-                else:
-                    raise MultipleObjectsError(key, cls.__tablename__)
+                obj = db_sess.query(cls).filter(cls.name == key).all()
+                return cls._return(obj, key)
             else:
                 raise NameKeyError(cls.__tablename__)
         else:
-            if hasattr(cls, '_getitem_'):
-                return cls._getitem(key)
             raise TypeError('Unsupported key type for {0}'.format(type(key)))
 
+    def _return(self, obj_list, key, single=True):
+        '''
+        Checks the count of the to-be-returned object list to make sure that it
+        matches what is expected.
+        '''
+        if len(obj_list) == 0:
+            raise NoObjectsError(key, self)
+        if single:
+            if len(obj_list) > 1:
+                raise MultipleObjectsError(key, self)
+            else:
+                obj = obj_list[0]
+                obj.__accessed__ = True
+                return obj
+        else:
+            for obj in obj_list:
+                obj.__accessed__ = True
+            return obj_list
+
     def __getitem__(self, key):
+        '''
+        By default, slicing on relational tables simply loads the entry or entries sliced
+        from the table.
+        '''
         commit()
-        return self._getitem(key)
+        return self.load(key)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__modified__ = True
+        self.__accessed__ = True
 
     def __repr__(cls):
         return '{0}({1})'.format(cls.__class__.__name__, cls.pkid)
 
 
-def commit():
+@event.listens_for(Query, 'before_compile')    # Always commit before querying (SELECT)
+def commit(*args, **kwargs):
     '''
     Commit all of the objects currently in the session. Note that objects
     are automatically added to the database session and that committing
     these objects does not normally have to be performed manually.
     '''
     try:
-        dbsession.commit()
+        db_sess.commit()
     except:
-        dbsession.rollback()
+        db_sess.rollback()
         raise               # Catch and raise any and all exceptions
 
 
@@ -167,4 +184,4 @@ engine = create_engine(engine_name)
 DBSession = sessionmaker(bind=engine)
 #TODO: SEE ISSUE #41  session = Session() vs session = scoped_session(sessionmaker(bind=engine))
 # For now, non-scoped
-dbsession = DBSession()
+db_sess = DBSession()

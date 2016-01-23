@@ -7,7 +7,7 @@ from itertools import product
 from sqlalchemy import String, Float
 from exa.relational.base import Base, Column, Integer
 from exa.relational.base import Meta as _Meta
-from exa.relational.base import dbsession, commit
+from exa.relational.base import db_sess, commit
 
 
 class Meta(_Meta):
