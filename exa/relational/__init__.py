@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from exa.relational.base import commit, Base
 
-from exa.relational.session import Session, cleanup_anon_sessions
-from exa.relational.program import Program
-from exa.relational.project import Project
-from exa.relational.job import Job
+from exa.relational.session import Session, cleanup_sessions
+#from exa.relational.program import Program
+#from exa.relational.project import Project
+#from exa.relational.job import Job
 from exa.relational.container import Container
 from exa.relational.file import File
 

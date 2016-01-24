@@ -26,8 +26,9 @@ from exa.log import log_tail, log_head, setup
 setup()
 from exa.testers import run_unittests, run_doctests
 from exa.frames import DataFrame
-from exa.relational import Container, Session, Program, Project, Job
-_ae.register(relational.cleanup_anon_sessions)
+#from exa.relational import Container, Session, Program, Project, Job
+from exa.relational import Container, Session
+_ae.register(relational.cleanup_sessions)
 _ae.register(relational.commit)
 from exa import tests
 

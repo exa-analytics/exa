@@ -7,7 +7,7 @@ from itertools import product
 from sqlalchemy import String, Float
 from exa.relational.base import Base, Column, Integer
 from exa.relational.base import Meta as _Meta
-from exa.relational.base import db_sess, commit
+from exa.relational.base import db_sess
 
 
 class Meta(_Meta):
@@ -79,8 +79,7 @@ class Meta(_Meta):
         Returns:
             isotope (:class:`~exa.relational.isotopes.Isotope`): Isotope object
         '''
-        obj_list = session.query(self).filter(self.strid == strid).all()
-        return self._return(strid, obj_list)
+        return db_sess.query(self).filter(self.strid == strid).one()
 
     def get_by_symbol(self, symbol):
         '''
@@ -92,8 +91,7 @@ class Meta(_Meta):
         Returns:
             isotopes (list): List of isotope with the given symbol
         '''
-        obj_list = session.query(self).filter(self.symbol == symbol).all()
-        return self._return(symbol, obj_list, single=False)
+        return db_sess.query(self).filter(self.symbol == symbol).all()
 
     def get_by_szuid(self, szuid):
         '''
@@ -105,8 +103,7 @@ class Meta(_Meta):
         Returns:
             isotope (:class:`~exa.relational.isotopes.Isotope`): Isotope object
         '''
-        obj_list = session.query(self).filter(self.szuid == szuid).all()
-        return self._return(szuid, obj_list)
+        return db_sess.query(self).filter(self.szuid == szuid).one()
 
     def get_by_pkid(self, pkid):
         '''
@@ -118,16 +115,14 @@ class Meta(_Meta):
         Returns:
             isotope (:class:`~exa.relational.isotopes.Isotope`): Isotope object
         '''
-        obj_list = session.query(self).filter(self.pkid == pkid).all()
-        return self._return(pkid, obj_list)
+        return db_sess.query(self).filter(self.pkid == pkid).one()
 
     def __getitem__(self, key):
         '''
-        Custom dataframe entry lookup. If string with leading digit, get by
+        Custom lookup for isotopes: if string with leading digit, get by
         istope string id, else get by symbol. If integer, try first to get by
         Szudzik id, then try to get by primary key id.
         '''
-        commit()
         if isinstance(key, str):
             if key[0].isdigit():
                 return self.get_by_strid(key)

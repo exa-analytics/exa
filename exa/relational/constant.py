@@ -5,7 +5,7 @@ Physical Constants
 '''
 from sqlalchemy import String, Float
 from exa.relational.base import Base, Column
-from exa.relational.base import db_sess, commit
+from exa.relational.base import db_sess
 from exa.relational.base import Meta as _Meta
 
 
@@ -20,10 +20,6 @@ class Meta(_Meta):
             return obj[0].value
         else:
             raise ValueError('Value {0} not found in {1}'.format(key, self.__tablename__))
-
-    def __getitem__(self, key):
-        commit()
-        return self._getitem(key)
 
 
 class Constant(Base, metaclass=Meta):

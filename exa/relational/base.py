@@ -9,15 +9,16 @@ tables to be able to have HTML representations (within the `Jupyter notebook`_).
 
 .. _Jupyter notebook: http://jupyter.org/
 '''
+from uuid import UUID
 from datetime import datetime
 from traitlets import MetaHasTraits
-from sqlalchemy import Column, Integer, create_engine, event
+from sqlalchemy import Column, Integer, String, DateTime, create_engine, event
 from sqlalchemy.orm import sessionmaker, mapper
 from sqlalchemy.orm.query import Query
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
 from exa import Config
 from exa import _pd as pd
-from exa.relational.errors import PrimaryKeyError, NameKeyError, MultipleObjectsError, NoObjectsError
+from exa.utils import gen_uid
 
 
 class Meta(MetaHasTraits, DeclarativeMeta):
@@ -64,6 +65,31 @@ class Meta(MetaHasTraits, DeclarativeMeta):
         for item in db_sess.query(self).all():
             yield item
 
+    def __getitem__(self, key):
+        '''
+        This is called when a user attempts to slice/select an entry from the
+        database table (the metaclass of the object is a representation of the
+        table). This is not the getitem function that is called when a user
+        attempts to slice an entry instance.
+
+        .. code-block:: Python
+
+            c = exa.Container[1]    # Loads the container with pkid == 1 (via this __getitem__)
+            c[1]      # Slices the first (multiindex) level of each dataframe attached to this
+            c[::4]    # container (via the :class:`~exa.relational.container.Container`'s __getitem__)
+
+        '''
+        if isinstance(key, int):
+            return db_sess.query(self).filter(self.pkid == key).one()
+        elif isinstance(key, str) and hasattr(self, 'name'):
+            return db_sess.query(self).filter(self.name == key).one()
+        elif isinstance(key, UUID) and hasattr(self, 'uid'):
+            return db_sess.query(self).filter(self.uid == key.hex).one()
+        elif hasattr(self, '_getitem'):
+            return self._getitem(key)    # Allows for custom getters specific to certain classes
+        else:
+            raise KeyError('Unknown key {0}.'.format(key))
+
 
 @as_declarative(metaclass=Meta)
 class Base:
@@ -95,9 +121,12 @@ class Base:
             raise
 
     @classmethod
-    def table_dataframe(cls):
+    def table(cls):
         '''
         Display a :py:class:`~pandas.DataFrame` representation of the table.
+
+        Returns:
+            df (:py:class:`~pandas.DataFrame`): In memory table copy
         '''
         df = pd.read_sql(db_sess.query(cls).statement, engine.connect())
         if 'pkid' in df.columns:
@@ -105,83 +134,104 @@ class Base:
         else:
             return df
 
-    @classmethod
-    def load(cls, key):
-        '''
-        Load an object entry from the database.
-        '''
-        commit()
-        if isinstance(key, int):          # Assume primary key
-            obj = db_sess.query(cls).filter(cls.pkid == key).all()
-            return cls._return(obj, key)
-        elif isinstance(key, str):        # Try by name
-            if hasattr(cls, 'name'):
-                obj = db_sess.query(cls).filter(cls.name == key).all()
-                return cls._return(obj, key)
-            else:
-                raise NameKeyError(cls.__tablename__)
-        else:
-            raise TypeError('Unsupported key type for {0}'.format(type(key)))
-
-    def _return(self, obj_list, key, single=True):
-        '''
-        Checks the count of the to-be-returned object list to make sure that it
-        matches what is expected.
-        '''
-        if len(obj_list) == 0:
-            raise NoObjectsError(key, self)
-        if single:
-            if len(obj_list) > 1:
-                raise MultipleObjectsError(key, self)
-            else:
-                obj = obj_list[0]
-                obj.__accessed__ = True
-                return obj
-        else:
-            for obj in obj_list:
-                obj.__accessed__ = True
-            return obj_list
-
-    def __getitem__(self, key):
-        '''
-        By default, slicing on relational tables simply loads the entry or entries sliced
-        from the table.
-        '''
-        commit()
-        return self.load(key)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.__modified__ = True
-        self.__accessed__ = True
-
     def __repr__(cls):
         return '{0}({1})'.format(cls.__class__.__name__, cls.pkid)
+
+
+class Name:
+    '''
+    '''
+    name = Column(String)
+    description = Column(String)
+
+
+class HexUID:
+    '''
+    Mixin when a unique ID is required.
+    '''
+    hexuid = Column(String(32), default=gen_uid)
+
+    @property
+    def uid(self):
+        return UUID(self.hexuid)
+
+
+class Time:
+    '''
+    Mixin for when date and time stamps for created, accessed, and modified
+    are required
+    '''
+    created = Column(DateTime, default=datetime.now)
+    modified = Column(DateTime, default=datetime.now)
+    accessed = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+    def update_accessed(self):
+        self.accessed = datetime.now()
+
+    def update_modified(self):
+        self.modified = datetime.now()
+
+
+class Disk:
+    '''
+    '''
+    size = Column(Integer)
+    file_count = Column(Integer)
+
+
+def create_all():
+    '''
+    Create all tables if they do not already exist in the database.
+
+    Note:
+        When this function is called only class objects loaded in the current
+        namespace will attempt to be created.
+    '''
+    Base.metadata.create_all(engine)
+
+
+@event.listens_for(mapper, 'init')             # Any time an object is created,
+def add_to_db(obj, args, kwargs):              # add it to the database session
+    '''
+    All relational objects are automatically added to the database session on
+    instantiation.
+    '''
+    db_sess.add(obj)
 
 
 @event.listens_for(Query, 'before_compile')    # Always commit before querying (SELECT)
 def commit(*args, **kwargs):
     '''
     Commit all of the objects currently in the session. Note that objects
-    are automatically added to the database session and that committing
+    are automatically added to the database session (db_sess) and that committing
     these objects does not normally have to be performed manually.
     '''
     try:
         db_sess.commit()
     except:
         db_sess.rollback()
-        raise               # Catch and raise any and all exceptions
+        raise
 
 
-def create_all():
+@event.listens_for(Base, 'before_insert')            # Before inserting a new object
+def base_before_insert(mapper, connection, target):  # update its timestamps.
     '''
+    Update timestampes and save :class:`~exa.frames.DataFrame` data to disk
+    before inserting to the database.
     '''
-    Base.metadata.create_all(engine)
+    print('before insert')
+
+
+@event.listens_for(Base, 'before_update')            # Before inserting a new object
+def base_before_update(mapper, connection, target):  # update its timestamps.
+    '''
+    Update timestampes and save :class:`~exa.frames.DataFrame` data to disk
+    before updating the database.
+    '''
+    print('before update')
 
 
 engine_name = Config.relational_engine()
 engine = create_engine(engine_name)
 DBSession = sessionmaker(bind=engine)
-#TODO: SEE ISSUE #41  session = Session() vs session = scoped_session(sessionmaker(bind=engine))
-# For now, non-scoped
-db_sess = DBSession()
+db_sess = DBSession()    # Database session (note that this is an unscoped session)

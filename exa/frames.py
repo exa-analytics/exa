@@ -15,6 +15,7 @@ class DataFrame(pd.DataFrame):
     '''
     __pk__ = []    # Must have these index names
     __fk__ = []    # Must have these column names (which are index names of corresponding DataFrames)
+    __grp_order__ = []   # Defines the index levels (in some cases the attributes can be used to form a multiindex)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

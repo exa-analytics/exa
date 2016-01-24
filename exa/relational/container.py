@@ -3,16 +3,14 @@
 Container
 ===============================================
 '''
-from IPython.display import display
 from ipywidgets import DOMWidget
-from traitlets import MetaHasTraits, Unicode
-from sqlalchemy import String, DateTime, ForeignKey, Table, event
+from traitlets import Unicode
+from sqlalchemy import Column, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from exa import _pd as pd
 from exa import _np as np
 from exa.frames import DataFrame
-from exa.utils import gen_uid
-from exa.relational.base import datetime, Column, Integer, Base, Meta
+from exa.relational.base import Column, Integer, Base, Name, HexUID, Time, Disk
 
 
 ContainerFile = Table(
@@ -23,13 +21,16 @@ ContainerFile = Table(
 )
 
 
-class Container(DOMWidget, Base):
+class Container(DOMWidget, Name, HexUID, Time, Disk, Base):
     '''
-    Containers control data manipulation, processing, and allow for
-    visualization. This class controls
+    Containers control data manipulation, processing, and provide convenient
+    visualizations.
 
-    See Also:
-        :class:`~exa.relational.container._ContainerWidget`
+    This class defines a table schema for storing metadata about data
+    processing and provides some convience methods for visualization. The
+    latter feature is especially relevant for data specific containers where,
+    knowledge about the structure of the data can provide useful, interactive,
+    2D/3D visualizations.
 
     Warning:
         The correct way to set DataFrame object is as follows:
@@ -56,15 +57,7 @@ class Container(DOMWidget, Base):
     See Also:
         :class:`~exa.session.Session`
     '''
-    name = Column(String)                             # Database columns
-    description = Column(String)
-    uid = Column(String(32), default=gen_uid)
-    created = Column(DateTime, default=datetime.now)
-    modified = Column(DateTime, default=datetime.now)
-    accessed = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     container_type = Column(String(16))
-    size = Column(Integer)
-    file_count = Column(Integer)
     files = relationship('File', secondary=ContainerFile, backref='containers', cascade='all, delete')
     __mapper_args__ = {
         'polymorphic_identity': 'container',   # This allows the container to
@@ -73,6 +66,7 @@ class Container(DOMWidget, Base):
     }
     __dfclasses__ = {}
     _ipy_disp = DOMWidget._ipython_display_
+
 
     def to_archive(self, path):
         '''
@@ -175,8 +169,6 @@ class Container(DOMWidget, Base):
             return self._get_by_string(key)
         else:
             raise NotImplementedError()
-
-    #def __setattr__(self, key, value):
 
     def __setitem__(self, key, value):
         '''

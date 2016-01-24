@@ -83,6 +83,6 @@ def initialize_database(force=False):
                 values_t = values.reshape(len(values), 1)
                 fac = (values / values_t).ravel()
                 data = [{'from_unit': cols[i][0], 'to_unit': cols[i][1], 'factor': v} for i, v in enumerate(fac)]
-            tbl._bulk_insert(data)
+            tbl.bulk_insert(data)
         elif force:
             raise NotImplementedError('Updating constants, isotopes, and unit conversions is not yet available')
