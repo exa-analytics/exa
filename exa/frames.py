@@ -15,20 +15,21 @@ class DataFrame(pd.DataFrame):
     '''
     __pk__ = []    # Must have these index names
     __fk__ = []    # Must have these column names (which are index names of corresponding DataFrames)
-    __lvl_order__ = []   # Defines the index levels (in some cases the attributes can be used to form a multiindex)
+    __slice_key__ = []   # Defines the index levels (in some cases the attributes can be used to form a multiindex)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        name = self.__class__.__name__
-        missing_pk = set(self.__pk__).difference(self.index.names)
-        missing_fk = set(self.__fk__).difference(self.columns)
-        if missing_pk:                                      # If missing the index name,
-            if list(missing_pk) == self.__pk__:             # see if it can be attached,
-                self.index.names = self.__pk__
-            else:                                           # otherwise throw error.
-                raise RequiredIndexError(missing_pk, name)
-        if missing_fk:
-            raise RequiredColumnError(missing_fk, name)
+        if len(self) > 0:
+            name = self.__class__.__name__
+            missing_pk = set(self.__pk__).difference(self.index.names)
+            missing_fk = set(self.__fk__).difference(self.columns)
+            if missing_pk:                                      # If missing the index name,
+                if list(missing_pk) == self.__pk__:             # see if it can be attached,
+                    self.index.names = self.__pk__
+                else:                                           # otherwise throw error.
+                    raise RequiredIndexError(missing_pk, name)
+            if missing_fk:
+                raise RequiredColumnError(missing_fk, name)
 
     def __repr__(self):
         return '{0}'.format(self.__class__.__name__)
@@ -61,9 +62,9 @@ class ManyToMany(DataFrame):
     '''
     A DataFrame with only two columns which enumerates the relationship information.
     '''
-    __items__ = []
+    __fks__ = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if len(self.__items__) != 2 or self.columns != self.__items__:
-            raise RequiredColumnError(self.__items__, self.__class__.__name__)
+        if len(self.__fks__) != 2 or self.columns != self.__fks__:
+            raise RequiredColumnError(self.__fks__, self.__class__.__name__)

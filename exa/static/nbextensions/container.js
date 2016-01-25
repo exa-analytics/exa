@@ -1,22 +1,12 @@
 'use strict';
 
 
-require.config({
-    shim: {
-    },
-});
-
-
-define([
-    "widgets/js/widget"
-], function(widget){
-    var HelloView = widget.DOMWidgetView.extend({
-        // Render the view.
+define(['widgets/js/widget'], function(widget){
+    var ContainerView = widget.DOMWidgetView.extend({
         render: function(){
-            this.$el.text('Hello World from container!');
+            this.$el.text('Hello World!');
         },
     });
 
-    //manager.WidgetManager.register_widget_view('HelloView', HelloView);
-    return {'HelloView': HelloView};
+    return {'ContainerView': ContainerView};
 });

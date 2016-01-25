@@ -3,8 +3,8 @@
 Container
 ===============================================
 '''
+import traitlets
 from ipywidgets import DOMWidget
-from traitlets import Unicode
 from sqlalchemy import Column, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from exa import _pd as pd
@@ -38,8 +38,10 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base):
 
     # Widget information
     _ipy_disp = DOMWidget._ipython_display_
-    _view_module = Unicode('nbextensions/exa/container').tag(sync=True)
-    _view_name = Unicode('HelloView').tag(sync=True)
+    _view_module = traitlets.Unicode('nbextensions/exa/container').tag(sync=True)
+    _view_name = traitlets.Unicode('ContainerView').tag(sync=True)
+    width = traitlets.Integer(800).tag(sync=True)
+    height = traitlets.Integer(500).tag(sync=True)
 
     def to_archive(self, path):
         '''
@@ -53,11 +55,21 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base):
         Create a copy of the current object
         '''
         cls = self.__class__
-        kwargs = {'name': self.name, 'description': self.description}
-        kwargs['dfs'] = self.get_dataframes()
-        print(kwargs)
-        obj = cls(**kwargs)
-        return obj
+        dfs = self.get_dataframes()
+        special = self.__dfclasses__.keys()
+        kwargs = {'dfs': {}}
+        for name, df in dfs.items():               # Subclasses of DataFrame are
+            if name in special:                    # passed as individual kwargs
+                name = name[1:] if name.startswith('_') else name
+                kwargs[name] = df.copy()
+            else:
+                kwargs['dfs'][name] = df.copy()
+        kwargs['name'] = self.name                 # All other table attributes (e.g. times)
+        kwargs['description'] = self.description   # will be populated automatically
+        meta = self.meta                           # Add a note about the copy
+        meta['__copy_note__'] = 'copy of container with pkid: {0}'.format(self.pkid)
+        kwargs['meta'] = meta
+        return cls(**kwargs)
 
     def get_dataframes(self):
         '''
@@ -87,6 +99,41 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base):
     def _repr_html_(self):
         return self._ipython_display_()
 
+    def _get_by_index(self, index):
+        '''
+        '''
+        raise NotImplementedError()
+
+    def _get_by_indices(self, indices):
+        '''
+        '''
+        raise NotImplementedError()
+
+    def _get_by_slice(self, key):
+        '''
+        '''
+        raise NotImplementedError()
+
+    def __iter__(self):
+        raise NotImplementedError()
+
+    def __len__(self):
+        raise NotImplementedError()
+
+    def __getitem__(self, key):
+        '''
+        Integers, slices, and lists are assumed to be values in the index (
+        for multi-indexed dataframes, corresponding to level 0).
+        '''
+        if isinstance(key, int):
+            return self._get_single(key)
+        elif isinstance(key, list):
+            return self._get_by_indices(key)
+        elif isinstance(key, slice):
+            return self._get_by_slice(key)
+        else:
+            raise NotImplementedError()
+
     def __setitem__(self, key, value):
         '''
         Custom set calls __setattr__ to enforce certain types.
@@ -97,29 +144,24 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base):
         '''
         Custom attribute setting to enforce custom dataframe types.
         '''
-        if isinstance(value, pd.DataFrame):
+        if isinstance(value, pd.DataFrame) and not isinstance(value, DataFrame):
             for name, cls in self.__dfclasses__.items():
                 if key == name:
                     super().__setattr__(key, cls(value))
-                    #setattr(self, key, cls(value))
                     return
             super().__setattr__(key, DataFrame(value))
-            #setattr(self, key, DataFrame(value))
             return
         super().__setattr__(key, value)
-        #setattr(self, key, value)
 
-    def __init__(self, name=None, description=None, meta=None, dfs=None):
-        super().__init__()
-        self.name = name
-        self.description = description
-        self.meta = meta
-        if dfs:
+    def __init__(self, meta=None, dfs=None, **kwargs):
+        super().__init__(**kwargs)
+        if dfs:                               # DataFrame attributes
             if isinstance(dfs, dict):
                 for name, df in dfs.items():
-                    self[name] = df
+                    setattr(self, name, df)
             else:
                 raise TypeError('Argument "dfs" must be of type dict.')
+        self.meta = meta
 
     def __repr__(self):
         c = self.__class__.__name__
@@ -137,80 +179,3 @@ def concat(containers, axis=0, join='inner'):
     Concatenate a collection of containers.
     '''
     raise NotImplementedError()
-
-
-#    def _get_by_index(self, index):
-#        '''
-#        '''
-#        obj = self.copy()
-#        for name, df in obj.dataframes.items():
-#            if len(df) > 0:
-#                index_name = df.index.names[0]
-#                obj[name] = df.ix[df.index.isin([index], index_name), :]
-#        return obj
-#
-#    def _get_by_indices(self, indices):
-#        '''
-#        '''
-#        obj = self.copy()
-#        for name, df in obj.dataframes.items():
-#            if len(df) > 0:
-#                index_name = df.index.names[0]
-#                obj[name] = df.ix[df.index.isin(indices, index_name), :]
-#        return obj
-#
-#    def _get_by_slice(self, key):
-#        '''
-#        '''
-#        obj = self.copy()
-#        for name, df in obj.dataframes.items():
-#            if len(df) > 0:
-#                index_name = df.index.names[0]
-#                index_values = df.index.get_level_values(index_name).unique()
-#                start = index_values[0] if key.start is None else key.start
-#                stop = index_values[-1] if key.stop is None else key.stop
-#                step = index_values[1] - index_values[0] if key.step is None else key.step
-#                stop += step            # To ensure we get the endpoint
-#                indices = np.arange(start, stop, step, dtype=np.int64)
-#                obj[name] = df.ix[df.index.isin(indices, index_name), :]
-#        return obj
-#
-#    def __getitem__(self, key):
-#        '''
-#        Integers, slices, and lists are assumed to be values in the index (
-#        for multi-indexed dataframes, corresponding to level 0).
-#        '''
-#        if isinstance(key, int):
-#            return self._get_single(key)
-#        elif isinstance(key, list):
-#            return self._get_by_indices(key)
-#        elif isinstance(key, slice):
-#            return self._get_by_slice(key)
-#        else:
-#            raise NotImplementedError()
-#
-#    def __setitem__(self, key, value):
-#        '''
-#        Custom set calls __setattr__ to enforce certain types.
-#        '''
-#        setattr(self, key, value)
-#
-#    def __setattr__(self, key, value):
-#        '''
-#        Custom attribute setting to enforce custom dataframe types.
-#        '''
-#        if isinstance(value, pd.DataFrame):
-#            for name, cls in self.__dfclasses__.items():
-#                if key == name:
-#                    self.__dict__[key] = cls(value)
-#                    return
-#            self.__dict__[key] = DataFrame(value)
-#            return
-#        self.__dict__[key] = value
-#
-#    def __iter__(self):
-#        raise NotImplementedError()
-#
-#    def __len__(self):
-#        raise NotImplementedError()
-#
