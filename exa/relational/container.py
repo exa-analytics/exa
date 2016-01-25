@@ -67,7 +67,6 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base):
     __dfclasses__ = {}
     _ipy_disp = DOMWidget._ipython_display_
 
-
     def to_archive(self, path):
         '''
         Export this container to an archive that can be imported elsewhere.
@@ -95,18 +94,12 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base):
 
     def copy(self):
         '''
+        Create a copy of the current object
         '''
         cls = self.__class__
-        obj = cls(name=self.name, description=self.description, meta=self.meta, **self.dataframes)
+        kwargs = {name: df.copy() for name, df in self.dataframes}
+        obj = cls(name=self.name, description=self.description, meta=self.meta, **kwargs)
         return obj
-
-    def _dfcls(self, key):
-        '''
-        '''
-        for k, v in self.__dfclasses__.items():
-            if k == key:
-                return v
-        return DataFrame
 
     def _get_by_index(self, index):
         '''
@@ -144,16 +137,6 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base):
                 obj[name] = df.ix[df.index.isin(indices, index_name), :]
         return obj
 
-    def _get_by_string(self, key):
-        '''
-        '''
-        if key in self.__dict__:
-            return self.__dict__[key]
-        elif '_' + key in self.__dict__:
-            return self.__dict__['_' + key]
-        else:
-            raise KeyError('Key {0} not found in universe {1}.'.format(key, self))
-
     def __getitem__(self, key):
         '''
         Integers, slices, and lists are assumed to be values in the index (
@@ -165,26 +148,24 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base):
             return self._get_by_indices(key)
         elif isinstance(key, slice):
             return self._get_by_slice(key)
-        elif isinstance(key, str):
-            return self._get_by_string(key)
         else:
             raise NotImplementedError()
 
     def __setitem__(self, key, value):
+        setattr(self, key, value)
+
+    def __setattr__(self, key, value):
         '''
-        Check the value type and set :class:`~exa.dataframe.DataFrame` objects
-        by casting them to the correct type.
-
-        .. code-block:: Python
-
-            container = exa.Container()
-            print(container.__dftypes__)
-            container.name = object
-            type(container.name)
+        Custom attribute setting to enforce custom dataframe types.
         '''
         if isinstance(value, pd.DataFrame):
-            value = self._dfcls(key)(value)
-        setattr(self, key, value)
+            for name, cls in self.__dfclasses__.items():
+                if key == name:
+                    self.__dict__[key] = cls(value)
+                    return
+            self.__dict__[key] = DataFrame(value)
+            return
+        self.__dict__[key] = value
 
     def __iter__(self):
         raise NotImplementedError()
@@ -224,32 +205,3 @@ def concat(containers, axis=0, join='inner'):
     Concatenate a collection of containers.
     '''
     raise NotImplementedError()
-
-
-#def _update_or_create(container):
-#    '''
-#    This function checks whether the files associated with this dataframe
-#    need to be updated (or created) and updates the relevant timestamps as
-#    it does so.
-#    '''
-#
-#@event.listens_for(Container, 'before_insert')
-#def before_insert(mapper, conn, target):
-#    '''
-#    '''
-#    _update_or_create(target)
-#    print('before_insert')
-#    print(mapper)
-#    print(conn)
-#    print(target)
-#
-#
-#@event.listens_for(Container, 'before_update')
-#def before_update(mapper, conn, target):
-#    '''
-#    '''
-#    print('before_update')
-#    print(mapper)
-#    print(conn)
-#    print(target)
-#

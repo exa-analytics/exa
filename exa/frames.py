@@ -15,7 +15,7 @@ class DataFrame(pd.DataFrame):
     '''
     __pk__ = []    # Must have these index names
     __fk__ = []    # Must have these column names (which are index names of corresponding DataFrames)
-    __grp_order__ = []   # Defines the index levels (in some cases the attributes can be used to form a multiindex)
+    __lvl_order__ = []   # Defines the index levels (in some cases the attributes can be used to form a multiindex)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -23,8 +23,8 @@ class DataFrame(pd.DataFrame):
         missing_pk = set(self.__pk__).difference(self.index.names)
         missing_fk = set(self.__fk__).difference(self.columns)
         if missing_pk:                                      # If missing the index name,
-            if list(missing_pk) == [None]:                  # see if it can be attached,
-                self.index.names = [self.__class__.__name__.lower()]
+            if list(missing_pk) == self.__pk__:             # see if it can be attached,
+                self.index.names = self.__pk__
             else:                                           # otherwise throw error.
                 raise RequiredIndexError(missing_pk, name)
         if missing_fk:
@@ -48,10 +48,7 @@ class Updater(pd.SparseDataFrame):
         name = self.__class__.__name__
         missing = set(self.__key__).difference(self.index.names)
         if missing:
-            if list(missing) == [None]:
-                self.index.names = [self.__class__.__name__.lower()]
-            else:
-                raise RequiredIndexError(missing_pk, name)
+            raise RequiredIndexError(missing, name)
 
     def __repr__(self):
         return '{0}'.format(self.__class__.__name__)
