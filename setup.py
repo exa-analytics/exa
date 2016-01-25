@@ -49,5 +49,5 @@ try:
 except:
     raise
 finally:
-    from exa.install import initialize
-    initialize()
+    from exa.tools import finalize_install
+    finalize_install()
