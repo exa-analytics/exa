@@ -37,7 +37,7 @@ def install_notebook_widgets(path=None, verbose=False):
                 if not low.endswith('json'):
                     subdir = root.split('exa')[-1]
                     orig = mkpath(root, filename)
-                    dest = mkpath(Config.extensions, subdir, mkdir=True)
+                    dest = mkpath(Config.extensions, mkdir=True)
                     install_nbextension(
                         orig,
                         verbose=verbose,

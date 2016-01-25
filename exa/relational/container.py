@@ -152,6 +152,9 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base):
             raise NotImplementedError()
 
     def __setitem__(self, key, value):
+        '''
+        Custom set calls __setattr__ to enforce certain types.
+        '''
         setattr(self, key, value)
 
     def __setattr__(self, key, value):
