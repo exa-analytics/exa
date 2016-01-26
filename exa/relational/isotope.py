@@ -19,6 +19,8 @@ class Meta(_Meta):
     _element_mass_map = None        # See the properties below: this pattern is
     _Z_to_symbol_map = None         # used so that we cache the result once computed.
     _symbol_to_Z_map = None         # {'H': 1, ...}
+    _symbol_to_radius_map = None
+    _symbol_to_color_map = None
 
     @property
     def symbols_to_radii_map(self):
@@ -26,7 +28,7 @@ class Meta(_Meta):
         Dictionary of symbol pair keys and sum of radii values.
         '''
         if self._symbols_to_radii_map is None:
-            df = self._df()[['symbol', 'radius']].drop_duplicates('symbol')
+            df = self.table()[['symbol', 'radius']].drop_duplicates('symbol')
             sum_radii = df['radius'].values
             sum_radii = [a + b for a, b in product(sum_radii, sum_radii)]
             symbol_pairs = df['symbol'].values
@@ -40,7 +42,7 @@ class Meta(_Meta):
         Dictionary of element keys and element mass values.
         '''
         if self._element_mass_map is None:
-            df = self._df()[['symbol', 'mass', 'af']].dropna()
+            df = self.table()[['symbol', 'mass', 'af']].dropna()
             df['fmass'] = df['mass'] * df['af']
             self._element_mass_map = df.groupby('symbol')['fmass'].sum().to_dict()
         return self._element_mass_map
@@ -52,7 +54,7 @@ class Meta(_Meta):
         '''
         if self._Z_to_symbol_map is None:
             if self._symbol_to_Z_map is None:
-                self._Z_to_symbol_map = self._df()[['symbol', 'Z']].set_index('Z')['symbol'].to_dict()
+                self._Z_to_symbol_map = self.table()[['symbol', 'Z']].set_index('Z')['symbol'].to_dict()
             else:
                 self._Z_to_symbol_map = {v: k for k, v in self._symbol_to_Z_map.items()}
         return self._Z_to_symbol_map
@@ -60,14 +62,32 @@ class Meta(_Meta):
     @property
     def symbol_to_Z_map(self):
         '''
-        Dictionary of symbol keys and proton number (Z) values
+        Dictionary of symbol keys and proton number (Z) values.
         '''
         if self._symbol_to_Z_map is None:
             if self._Z_to_symbol_map is None:
-                self._symbol_to_Z_map = self._df()[['symbol', 'Z']].set_index('symbol')['Z'].to_dict()
+                self._symbol_to_Z_map = self.table()[['symbol', 'Z']].set_index('symbol')['Z'].to_dict()
             else:
                 self._symbol_to_Z_map = {v: k for k, v in self._Z_to_symbol_map.items()}
         return self._symbol_to_Z_map
+
+    @property
+    def symbol_to_radius_map(self):
+        '''
+        Dictionary of symbol keys and covalent radii values.
+        '''
+        if self._symbol_to_radius_map is None:
+            self._symbol_to_radius_map = self.table()[['symbol', 'radius']].set_index('symbol')['radius'].to_dict()
+        return self._symbol_to_radius_map
+
+    @property
+    def symbol_to_color_map(self):
+        '''
+        Dictionary of symbol keys and isotope color values.
+        '''
+        if self._symbol_to_color_map is None:
+            self._symbol_to_color_map = self.table()[['symbol', 'color']].set_index('symbol')['color'].to_dict()
+        return self._symbol_to_color_map
 
     def get_by_strid(self, strid):
         '''
@@ -200,6 +220,20 @@ class Isotope(Base, metaclass=Meta):
         Get the element's proton number (Z) by the element's symbol.
         '''
         return cls.symbol_to_Z_map[symbol]
+
+    @classmethod
+    def lookup_radius_by_symbol(cls, symbol):
+        '''
+        Get the element's covalent radius by the element's symbol.
+        '''
+        return cls.symbol_to_radius_map[symbol]
+
+    @classmethod
+    def lookup_color_by_symbol(cls, symbol):
+        '''
+        Get the element's color by the element's symbol.
+        '''
+        return cls.symbol_to_color_map[symbol]
 
     def __repr__(self):
         return '{0}{1}'.format(self.A, self.symbol)

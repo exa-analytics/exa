@@ -10,7 +10,7 @@ from sqlalchemy.orm import relationship
 from exa import _pd as pd
 from exa import _np as np
 from exa.frames import DataFrame
-from exa.relational.base import Column, Integer, Base, Name, HexUID, Time, Disk
+from exa.relational.base import Column, Integer, Base, Name, HexUID, Time, Disk, Meta
 
 
 ContainerFile = Table(
@@ -21,7 +21,13 @@ ContainerFile = Table(
 )
 
 
-class Container(DOMWidget, Name, HexUID, Time, Disk, Base):
+class ContainerMeta(traitlets.MetaHasTraits, Meta):
+    '''
+    '''
+    pass
+
+
+class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMeta):
     '''
     Containers control data manipulation, processing, and provide convenient
     visualizations.
@@ -88,6 +94,13 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base):
             corresponding to the data provided in the archive.
         '''
         raise NotImplementedError()
+
+    def _handle_custom_msg(self, *args, **kwargs):
+        '''
+        Recieve and dispatch messages from the JavaScript frontend to the Python backend.
+        '''
+        print(args)
+        print(kwargs)
 
     def _ipython_display_(self):
         '''
@@ -167,7 +180,7 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base):
         c = self.__class__.__name__
         p = self.pkid
         n = self.name
-        u = self.uid
+        u = self.hexuid
         return '{0}({1}: {2}[{3}])'.format(c, p, n, u)
 
     def __str__(self):

@@ -11,7 +11,6 @@ tables to be able to have HTML representations (within the `Jupyter notebook`_).
 '''
 from uuid import UUID
 from datetime import datetime
-from traitlets import MetaHasTraits
 from sqlalchemy import Column, Integer, String, DateTime, create_engine, event
 from sqlalchemy.orm import sessionmaker, mapper
 from sqlalchemy.orm.query import Query
@@ -21,42 +20,8 @@ from exa import _pd as pd
 from exa.utils import gen_uid
 
 
-class Meta(MetaHasTraits, DeclarativeMeta):
+class Meta(DeclarativeMeta):
     '''
-    Metaclass for relational objects that allows certain relational objects
-    to act not only as a relational table schema and table entry, via
-    `sqlalchemy`_, but also as a `Jupyter notebook`_ `widget`_.
-
-    Tip:
-        Combination of the metaclasses (like this) is required because the
-        metaclass of a derived class must be a subclass of the metaclasses of
-        all of its bases. As an example,
-
-        .. code-block:: Python
-
-            class Meta:
-                pass
-
-            class Klass(object, metaclass=Meta):
-                pass
-
-        doesn't work because the metaclass (Meta) is not a subclass of "object"'s
-        metaclass (type).
-
-        .. code-block:: Python
-
-            class Meta(type):
-                pass
-
-            class Klass(object, metaclass=Meta):
-                pass
-
-        Now that the custom metaclass (Meta) has subclassed the metaclass of
-        object, the Klass class object can be created.
-
-    .. _sqlalchemy: http://www.sqlalchemy.org/
-    .. _Jupyter notebook: http://jupyter.org/
-    .. _widget: https://ipywidgets.readthedocs.org/en/latest/
     '''
     def __len__(self):                         # Length of the table (in database)
         return db_sess.query(self).count()
