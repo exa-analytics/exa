@@ -74,7 +74,7 @@ class DataFrame(pd.DataFrame):
         return self.__class__.__name__   # of the dataframe html.
 
 
-class Updater(pd.SparseDataFrame, ):
+class Updater(pd.SparseDataFrame):
     '''
     Sparse dataframe used to update a full :class:`~exa.dataframes.DataFrame`.
     '''

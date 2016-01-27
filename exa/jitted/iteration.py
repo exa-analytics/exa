@@ -16,29 +16,23 @@ from exa.jitted import jit, float64, int64
 
 
 @jit(nopython=True, cache=True)
-def periodic_supercell(xyz, rx, ry, rz):
+def projected_unitcell(px, py, pz, rx, ry, rz):
     '''
-    Creates a 3x3x3 (super) cell from a primitive cell.
-
-    Args:
-        xyz (:class:`~numpy.ndarray`): Array of xyz values
-        rx (float): Cell magnitude in x
-        ry (float): Cell magnitude in y
-        rz (float): Cell magnitude in z
+    Create a 3x3x3 supercell from the coordinates of a unit cell.
     '''
-    multipliers = [-1, 0, 1]
-    n = len(xyz)
-    periodic = np.empty((n * 27, 3), dtype=float64)
+    n = len(px)
+    m = [-1, 0, 1]
+    xyz = np.empty((n * 27, 3), dtype=float64)
     h = 0
-    for i in multipliers:
-        for j in multipliers:
-            for k in multipliers:
+    for i in m:
+        for j in m:
+            for k in m:
                 for l in range(n):
-                    periodic[h, 0] = xyz[l, 0] + i * rx
-                    periodic[h, 1] = xyz[l, 1] + j * ry
-                    periodic[h, 2] = xyz[l, 2] + k * rz
+                    xyz[h, 0] = px[l] + i * rx
+                    xyz[h, 1] = py[l] + j * ry
+                    xyz[h, 2] = pz[l] + k * rz
                     h += 1
-    return periodic
+    return xyz
 
 
 @jit(nopython=True, cache=True)
