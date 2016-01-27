@@ -3,6 +3,7 @@
 Custom DataFrame for exa Analytics
 ====================================
 '''
+from traitlets import Unicode, Dict
 from exa import _pd as pd
 from exa.errors import RequiredIndexError, RequiredColumnError
 
@@ -15,7 +16,42 @@ class DataFrame(pd.DataFrame):
     '''
     __pk__ = []    # Must have these index names
     __fk__ = []    # Must have these column names (which are index names of corresponding DataFrames)
-    __slice_key__ = []   # Defines the index levels (in some cases the attributes can be used to form a multiindex)
+    __traits__ = []
+    __groupby__ = None   # Defines the index levels (in some cases the attributes can be used to form a multiindex)
+
+    def _prep_trait_values(self):
+        '''
+        Placeholder or subclasses to use when logic is required before getting
+        traits.
+        '''
+        pass
+
+    def _post_trait_values(self):
+        '''
+        '''
+        pass
+
+    def get_trait_values(self):
+        '''
+        Returns:
+            traits (dict): Traits to be added to the DOMWidget (:class:`~exa.relational.container.Container`)
+        '''
+        self._prep_trait_values()
+        traits = {}
+        grps = None
+        if self.__groupby__:
+            grps = self.groupby(self.__groupby__)
+        for trait in self.__traits__:
+            name = '_'.join(('', self.__class__.__name__.lower(), trait))
+            if trait in self.columns:
+                if self.__groupby__:
+                    traits[name] = groups_to_json(grps, trait)
+                else:
+                    traits[name] = self[trait].to_json(orient='values')
+            else:
+                traits[name] = ''
+        self._post_trait_values()
+        return traits
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -68,3 +104,17 @@ class ManyToMany(DataFrame):
         super().__init__(*args, **kwargs)
         if len(self.__fks__) != 2 or self.columns != self.__fks__:
             raise RequiredColumnError(self.__fks__, self.__class__.__name__)
+
+
+def groups_to_json(groups, column):
+    '''
+    Create a json string from a :py:class:`~pandas.core.groupby.DataFrameGroupBy`
+    object.
+    '''
+    json_string = '{'
+    for index, group in groups:
+        key = '"{0}":'.format(index)
+        values = group[column].to_json(orient='values')
+        json_string = ''.join((json_string, key, values, ','))
+    json_string = ''.join((json_string[:-1], '}'))
+    return json_string

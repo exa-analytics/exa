@@ -95,9 +95,32 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
         '''
         raise NotImplementedError()
 
+    def add_unicode_traits(self, **values):
+        '''
+        Custom trait addition to workaround multiple metaclasses.
+
+        Warning:
+            Only supports Unicode!
+        '''
+        for name, value in values.items():
+            obj = traitlets.Unicode().tag(sync=True)
+            obj.class_init(self.__class__, name)
+            setattr(self.__class__, name, obj)
+            obj.instance_init(self)
+            self[name] = value
+            self.send_state(name)
+
+    def _update_all_traits(self):
+        '''
+        '''
+        for name in self.__dfclasses__.keys():
+            values = self[name].get_trait_values()
+            self.add_unicode_traits(**values)
+
     def _handle_custom_msg(self, *args, **kwargs):
         '''
-        Recieve and dispatch messages from the JavaScript frontend to the Python backend.
+        Recieve and dispatch messages from the JavaScript frontend to the
+        Python backend.
         '''
         print(args)
         print(kwargs)
@@ -144,6 +167,8 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
             return self._get_by_indices(key)
         elif isinstance(key, slice):
             return self._get_by_slice(key)
+        elif isinstance(key, str):
+            return self.__dict__[key]
         else:
             raise NotImplementedError()
 
