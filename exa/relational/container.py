@@ -46,8 +46,8 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
     _ipy_disp = DOMWidget._ipython_display_
     _view_module = traitlets.Unicode('nbextensions/exa/container').tag(sync=True)
     _view_name = traitlets.Unicode('ContainerView').tag(sync=True)
-    width = traitlets.Integer(800).tag(sync=True)
-    height = traitlets.Integer(500).tag(sync=True)
+    _width = traitlets.Integer(800).tag(sync=True)
+    _height = traitlets.Integer(500).tag(sync=True)
 
     def to_archive(self, path):
         '''
@@ -114,8 +114,10 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
         '''
         '''
         for name in self.__dfclasses__.keys():
-            values = self[name].get_trait_values()
-            self.add_unicode_traits(**values)
+            value = self[name]
+            if isinstance(value, DataFrame):
+                values = self[name].get_trait_values()
+                self.add_unicode_traits(**values)
 
     def _handle_custom_msg(self, *args, **kwargs):
         '''

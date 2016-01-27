@@ -74,7 +74,7 @@ class DataFrame(pd.DataFrame):
         return self.__class__.__name__   # of the dataframe html.
 
 
-class Updater(pd.SparseDataFrame):
+class Updater(pd.SparseDataFrame, ):
     '''
     Sparse dataframe used to update a full :class:`~exa.dataframes.DataFrame`.
     '''
@@ -82,10 +82,11 @@ class Updater(pd.SparseDataFrame):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        name = self.__class__.__name__
-        missing = set(self.__key__).difference(self.index.names)
-        if missing:
-            raise RequiredIndexError(missing, name)
+        if len(self) > 0:
+            name = self.__class__.__name__
+            missing = set(self.__key__).difference(self.index.names)
+            if missing:
+                raise RequiredIndexError(missing, name)
 
     def __repr__(self):
         return '{0}'.format(self.__class__.__name__)
