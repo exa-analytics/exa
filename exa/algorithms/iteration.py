@@ -6,6 +6,25 @@ Loop Intensive Algorithms
 from exa import _np as np
 
 
+def projected_unitcell(px, py, pz, rx, ry, rz):
+    '''
+    Create a 3x3x3 supercell from the coordinates of a unit cell.
+    '''
+    n = len(px)
+    m = [-1, 0, 1]
+    xyz = np.empty((n * 27, 3), dtype=float64)
+    h = 0
+    for i in m:
+        for j in m:
+            for k in m:
+                for l in range(n):
+                    xyz[h, 0] = px[l] + i * rx
+                    xyz[h, 1] = py[l] + j * ry
+                    xyz[h, 2] = pz[l] + k * rz
+                    h += 1
+    return xyz
+
+
 def periodic_supercell(xyz, rx, ry, rz):
     '''
     Creates a 3x3x3 (super) cell from a primitive cell.
