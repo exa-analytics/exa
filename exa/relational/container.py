@@ -48,6 +48,8 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
     _view_name = traitlets.Unicode('ContainerView').tag(sync=True)
     width = traitlets.Integer(800).tag(sync=True)
     height = traitlets.Integer(500).tag(sync=True)
+    _gui_width = traitlets.Integer(300).tag(sync=True)
+    _fps = traitlets.Integer(24).tag(sync=True)
 
     def to_archive(self, path):
         '''
@@ -95,9 +97,9 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
         '''
         raise NotImplementedError()
 
-    def add_unicode_traits(self, **values):
+    def _add_unicode_traits(self, **values):
         '''
-        Custom trait addition to workaround multiple metaclasses.
+        Add custom traits from DataFrame json strings.
 
         Warning:
             Only supports Unicode!
@@ -117,7 +119,7 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
             value = self[name]
             if isinstance(value, DataFrame):
                 values = self[name].get_trait_values()
-                self.add_unicode_traits(**values)
+                self._add_unicode_traits(**values)
 
     def _handle_custom_msg(self, *args, **kwargs):
         '''
