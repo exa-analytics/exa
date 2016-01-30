@@ -120,7 +120,7 @@ class Updater(pd.SparseDataFrame):
         return self.__class__.__name__
 
 
-class ManyToMany(DataFrame):
+class ManyToMany(pd.DataFrame):
     '''
     A DataFrame with only two columns which enumerates the relationship information.
     '''
