@@ -6,13 +6,39 @@ Loop Intensive Algorithms
 from exa import _np as np
 
 
+def project_coordinates(xyz, rxyz):
+    '''
+    Generate a 3x3x3 super cell given unit coordinates.
+
+    Args:
+        xyz (array): Matrix of unit coordinates
+        rxyz (array): Magnitudes by which to project
+    '''
+    n = xyz.shape[0]
+    m = [-1, 0, 1]
+    projected = np.empty((n * 27, 3), dtype='f8')
+    rx = rxyz[0]
+    ry = rxyz[1]
+    rz = rxyz[2]
+    h = 0
+    for i in m:
+        for j in m:
+            for k in m:
+                for l in range(n):
+                    projected[h, 0] = xyz[l, 0] + i * rx
+                    projected[h, 1] = xyz[l, 1] + j * ry
+                    projected[h, 2] = xyz[l, 2] + k * rz
+                    h += 1
+    return projected
+
+
 def projected_unitcell(px, py, pz, rx, ry, rz):
     '''
     Create a 3x3x3 supercell from the coordinates of a unit cell.
     '''
     n = len(px)
     m = [-1, 0, 1]
-    xyz = np.empty((n * 27, 3), dtype=float64)
+    xyz = np.empty((n * 27, 3), dtype='f8')
     h = 0
     for i in m:
         for j in m:

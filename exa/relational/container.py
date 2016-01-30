@@ -48,7 +48,7 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
     _view_name = traitlets.Unicode('ContainerView').tag(sync=True)
     width = traitlets.Integer(800).tag(sync=True)
     height = traitlets.Integer(500).tag(sync=True)
-    _gui_width = traitlets.Integer(300).tag(sync=True)
+    _gui_width = traitlets.Integer(250).tag(sync=True)
     _fps = traitlets.Integer(24).tag(sync=True)
 
     def to_archive(self, path):
