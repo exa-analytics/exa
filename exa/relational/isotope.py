@@ -5,6 +5,7 @@ Isotope Data
 '''
 from itertools import product
 from sqlalchemy import String, Float
+from exa import _pd as pd
 from exa.relational.base import Base, Column, Integer
 from exa.relational.base import Meta as _Meta
 from exa.relational.base import db_sess
@@ -24,16 +25,16 @@ class Meta(_Meta):
 
     @property
     def symbols_to_radii_map(self):
-        '''
-        Dictionary of symbol pair keys and sum of radii values.
-        '''
         if self._symbols_to_radii_map is None:
             df = self.table()[['symbol', 'radius']].drop_duplicates('symbol')
             sum_radii = df['radius'].values
             sum_radii = [a + b for a, b in product(sum_radii, sum_radii)]
             symbol_pairs = df['symbol'].values
             symbol_pairs = [''.join(pair) for pair in product(symbol_pairs, symbol_pairs)]
-            self._symbols_to_radii_map = dict([(symbol_pairs[i], radii) for i, radii in enumerate(sum_radii)])
+            df = pd.DataFrame.from_dict({'symbols': symbol_pairs, 'radius': sum_radii})
+            df.set_index('symbols', inplace=True)
+            df.index.names = [None]
+            self._symbols_to_radii_map = df['radius']
         return self._symbols_to_radii_map
 
     @property
@@ -44,7 +45,7 @@ class Meta(_Meta):
         if self._element_mass_map is None:
             df = self.table()[['symbol', 'mass', 'af']].dropna()
             df['fmass'] = df['mass'] * df['af']
-            self._element_mass_map = df.groupby('symbol')['fmass'].sum().to_dict()
+            self._element_mass_map = df.groupby('symbol')['fmass'].sum()
         return self._element_mass_map
 
     @property
@@ -53,10 +54,7 @@ class Meta(_Meta):
         Dictionary of proton number (Z) keys and symbol values.
         '''
         if self._Z_to_symbol_map is None:
-            if self._symbol_to_Z_map is None:
-                self._Z_to_symbol_map = self.table()[['symbol', 'Z']].set_index('Z')['symbol'].to_dict()
-            else:
-                self._Z_to_symbol_map = {v: k for k, v in self._symbol_to_Z_map.items()}
+            self._Z_to_symbol_map = self.table()[['symbol', 'Z']].set_index('Z')['symbol']
         return self._Z_to_symbol_map
 
     @property
@@ -65,10 +63,7 @@ class Meta(_Meta):
         Dictionary of symbol keys and proton number (Z) values.
         '''
         if self._symbol_to_Z_map is None:
-            if self._Z_to_symbol_map is None:
-                self._symbol_to_Z_map = self.table()[['symbol', 'Z']].set_index('symbol')['Z'].to_dict()
-            else:
-                self._symbol_to_Z_map = {v: k for k, v in self._Z_to_symbol_map.items()}
+            self._symbol_to_Z_map = self.table()[['symbol', 'Z']].set_index('symbol')['Z']
         return self._symbol_to_Z_map
 
     @property
@@ -77,7 +72,8 @@ class Meta(_Meta):
         Dictionary of symbol keys and covalent radii values.
         '''
         if self._symbol_to_radius_map is None:
-            self._symbol_to_radius_map = self.table()[['symbol', 'radius']].set_index('symbol')['radius'].to_dict()
+            df = self.table()[['symbol', 'radius']].drop_duplicates('symbol').set_index('symbol')['radius']
+            self._symbol_to_radius_map = df
         return self._symbol_to_radius_map
 
     @property
@@ -86,7 +82,8 @@ class Meta(_Meta):
         Dictionary of symbol keys and isotope color values.
         '''
         if self._symbol_to_color_map is None:
-            self._symbol_to_color_map = self.table()[['symbol', 'color']].set_index('symbol')['color'].to_dict()
+            df = self.table()[['symbol', 'color']].drop_duplicates('symbol').set_index('symbol')['color']
+            self._symbol_to_color_map = df
         return self._symbol_to_color_map
 
     def get_by_strid(self, strid):
@@ -177,63 +174,6 @@ class Isotope(Base, metaclass=Meta):
     symbol = Column(String(length=3))
     szuid = Column(Integer)
     strid = Column(Integer)
-
-    @classmethod
-    def lookup_sum_radii_by_symbols(cls, symbols):
-        '''
-        Given a pair of symbols look up the sum of their covalent radii.
-
-        Args:
-            symbols (str): Symbol pair (e.g. 'OH')
-
-        Returns:
-            r (float): Sum of covalent radii
-
-        See Also:
-            :attribute:`~exa.relational.isotopes.Meta.symbols_to_radii_map`
-        '''
-        return cls.symbols_to_radii_map[symbols]
-
-    @classmethod
-    def lookup_mass_by_element(cls, element):
-        '''
-        Get the element's mass (abundance fraction times isotope mass).
-
-        Args:
-            element (str): Element symbol
-
-        Returns:
-            mass (float): Element's mass in atomic units (au).
-        '''
-        return cls.element_mass_map[element]
-
-    @classmethod
-    def lookup_symbol_by_Z(cls, Z):
-        '''
-        Get the element's symbol by the element's proton number (Z).
-        '''
-        return cls.Z_to_symbol_map[Z]
-
-    @classmethod
-    def lookup_Z_by_symbol(cls, symbol):
-        '''
-        Get the element's proton number (Z) by the element's symbol.
-        '''
-        return cls.symbol_to_Z_map[symbol]
-
-    @classmethod
-    def lookup_radius_by_symbol(cls, symbol):
-        '''
-        Get the element's covalent radius by the element's symbol.
-        '''
-        return cls.symbol_to_radius_map[symbol]
-
-    @classmethod
-    def lookup_color_by_symbol(cls, symbol):
-        '''
-        Get the element's color by the element's symbol.
-        '''
-        return cls.symbol_to_color_map[symbol]
 
     def __repr__(self):
         return '{0}{1}'.format(self.A, self.symbol)
