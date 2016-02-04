@@ -175,5 +175,9 @@ class Isotope(Base, metaclass=Meta):
     szuid = Column(Integer)
     strid = Column(Integer)
 
+    @classmethod
+    def symbol_to_mass(cls):
+        return cls.element_mass_map
+
     def __repr__(self):
         return '{0}{1}'.format(self.A, self.symbol)
