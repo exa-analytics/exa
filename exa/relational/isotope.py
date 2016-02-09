@@ -179,5 +179,9 @@ class Isotope(Base, metaclass=Meta):
     def symbol_to_mass(cls):
         return cls.element_mass_map
 
+    @classmethod
+    def symbols_to_radii(cls):
+        return cls.symbols_to_radii
+
     def __repr__(self):
         return '{0}{1}'.format(self.A, self.symbol)

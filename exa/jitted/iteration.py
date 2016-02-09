@@ -41,43 +41,27 @@ def project_coordinates(xyz, rxyz):
                     h += 1
     return projected
 
-@jit(nopython=True, cache=True)
-def projected_unitcell(px, py, pz, rx, ry, rz):
-    '''
-    Create a 3x3x3 supercell from the coordinates of a unit cell.
-    '''
-    n = len(px)
-    m = [-1, 0, 1]
-    xyz = np.empty((n * 27, 3), dtype=float64)
-    h = 0
-    for i in m:
-        for j in m:
-            for k in m:
-                for l in range(n):
-                    xyz[h, 0] = px[l] + i * rx
-                    xyz[h, 1] = py[l] + j * ry
-                    xyz[h, 2] = pz[l] + k * rz
-                    h += 1
-    return xyz
 
-
-@jit(nopython=True, cache=True)
-def pdist2d(xyz):
+@jit(nopython=False, cache=True)
+def pdist(array):
     '''
     '''
-    n, m = xyz.shape
+    n, m = array.shape
     nn = n * (n - 1) // 2
     distances = np.empty((nn, ), dtype=float64)
+    index1 = np.empty((nn, ), dtype=int64)
+    index2 = np.empty((nn, ), dtype=int64)
     h = 0
     for i in range(n):
         for j in range(i + 1, n):
-            csum = 0.0
+            dist = 0.0
             for k in range(m):
-                csum += (xyz[i, k] - xyz[j, k])**2
-            distances[h] = csum**0.5
+                dist += (array[i][k] - array[j][k])**2
+            distances[h] = dist**0.5
+            index1[h] = i
+            index2[h] = j
             h += 1
-    return distances
-
+    return distances, index1, index2
 
 
 @jit(nopython=True, cache=True)
