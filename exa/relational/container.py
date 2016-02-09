@@ -9,7 +9,7 @@ from sqlalchemy import Column, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from exa import _pd as pd
 from exa import _np as np
-from exa.frames import DataFrame
+from exa.frames import DataFrame, Updater, ManyToMany
 from exa.relational.base import Column, Integer, Base, Name, HexUID, Time, Disk, Meta
 
 
@@ -48,7 +48,7 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
     _view_name = traitlets.Unicode('ContainerView').tag(sync=True)
     width = traitlets.Integer(800).tag(sync=True)
     height = traitlets.Integer(500).tag(sync=True)
-    _gui_width = traitlets.Integer(300).tag(sync=True)
+    _gui_width = traitlets.Integer(250).tag(sync=True)
     _fps = traitlets.Integer(24).tag(sync=True)
 
     def to_archive(self, path):
@@ -67,11 +67,12 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
         special = self.__dfclasses__.keys()
         kwargs = {'dfs': {}}
         for name, df in dfs.items():               # Subclasses of DataFrame are
+            dfcls = df.__class__
             if name in special:                    # passed as individual kwargs
                 name = name[1:] if name.startswith('_') else name
-                kwargs[name] = df.copy()
+                kwargs[name] = dfcls(df.copy())
             else:
-                kwargs['dfs'][name] = df.copy()
+                kwargs['dfs'][name] = dfcls(df.copy())
         kwargs['name'] = self.name                 # All other table attributes (e.g. times)
         kwargs['description'] = self.description   # will be populated automatically
         meta = self.meta                           # Add a note about the copy
@@ -84,7 +85,7 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
         Get a dictionary of dataframes. Keys are the dataframe variable name
         and values are the dataframe itself.
         '''
-        return {name: df for name, df in vars(self).items() if isinstance(df, DataFrame)}
+        return {name: obj for name, obj in vars(self).items() if isinstance(obj, DataFrame) or isinstance(obj, Updater) or isinstance(obj, ManyToMany)}
 
     @classmethod
     def from_archive(cls, path):
@@ -96,6 +97,12 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
             corresponding to the data provided in the archive.
         '''
         raise NotImplementedError()
+
+    def _update_traits(self):
+        '''
+        Overwritten when containers require complexe trait updating logic.
+        '''
+        self._update_df_traits()
 
     def _add_unicode_traits(self, **values):
         '''
@@ -112,7 +119,7 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
             self[name] = value
             self.send_state(name)
 
-    def _update_all_traits(self):
+    def _update_df_traits(self):
         '''
         '''
         for name in self.__dfclasses__.keys():
@@ -141,18 +148,34 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
 
     def _get_by_index(self, index):
         '''
+        Positional getter.
         '''
-        raise NotImplementedError()
+        cp = self.copy()
+        for name, df in cp.get_dataframes().items():
+            if isinstance(df, DataFrame):
+                cp[name] = df._get_by_index(index)
+        cp._update_traits()
+        return cp
 
     def _get_by_indices(self, indices):
         '''
         '''
-        raise NotImplementedError()
+        cp = self.copy()
+        for name, df in cp.get_dataframes().items():
+            if isinstance(df, DataFrame):
+                cp[name] = df._get_by_indices(indices)
+        cp._update_traits()
+        return cp
 
     def _get_by_slice(self, key):
         '''
         '''
-        raise NotImplementedError()
+        cp = self.copy()
+        for name, df in cp.get_dataframes().items():
+            if isinstance(df, DataFrame):
+                cp[name] = df._get_by_slice(key)
+        cp._update_traits()
+        return cp
 
     def __iter__(self):
         raise NotImplementedError()
@@ -166,7 +189,7 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
         for multi-indexed dataframes, corresponding to level 0).
         '''
         if isinstance(key, int):
-            return self._get_single(key)
+            return self._get_by_index(key)
         elif isinstance(key, list):
             return self._get_by_indices(key)
         elif isinstance(key, slice):

@@ -4,6 +4,7 @@ Custom DataFrame for exa Analytics
 ====================================
 '''
 from traitlets import Unicode, Dict
+from exa import _np as np
 from exa import _pd as pd
 from exa.errors import RequiredIndexError, RequiredColumnError
 
@@ -19,6 +20,53 @@ class DataFrame(pd.DataFrame):
     __traits__ = []
     __groupby__ = None   # Defines the index levels (in some cases the attributes can be used to form a multiindex)
 
+    def get_trait_values(self):
+        '''
+        Returns:
+            traits (dict): Traits to be added to the DOMWidget (:class:`~exa.relational.container.Container`)
+        '''
+        traits = {}
+        if len(self) > 0:
+            self._prep_trait_values()
+            groups = None
+            if self.__groupby__:
+                groups = self.groupby(self.__groupby__)
+            for trait in self.__traits__:
+                name = '_'.join(('', self.__class__.__name__.lower(), trait))
+                if trait in self.columns:
+                    if self.__groupby__:
+                        traits[name] = groups.apply(lambda group: group[trait].values).to_json()
+                    else:
+                        traits[name] = self[trait].to_json(orient='values')
+                else:
+                    traits[name] = ''
+            self._post_trait_values()
+        return traits
+
+    def _get_column_values(self, *columns, dtype='f8'):
+        '''
+        '''
+        data = np.empty((len(columns), ), dtype='O')
+        for i, column in enumerate(columns):
+            data[i] = self[column]
+        return np.vstack(data).T.astype(dtype)
+
+    def _get_max_values(self, *columns, dtype='f8'):
+        '''
+        '''
+        data = np.empty((len(columns), ), dtype=dtype)
+        for i, column in enumerate(columns):
+            data[i] = self[column].max()
+        return data
+
+    def _get_min_values(self, *columns, dtype='f8'):
+        '''
+        '''
+        data = np.empty((len(columns), ), dtype=dtype)
+        for i, column in enumerate(columns):
+            data[i] = self[column].min()
+        return data
+
     def _prep_trait_values(self):
         '''
         Placeholder or subclasses to use when logic is required before getting
@@ -31,27 +79,49 @@ class DataFrame(pd.DataFrame):
         '''
         pass
 
-    def get_trait_values(self):
+    def _get_by_index(self, index):
         '''
-        Returns:
-            traits (dict): Traits to be added to the DOMWidget (:class:`~exa.relational.container.Container`)
         '''
-        self._prep_trait_values()
-        traits = {}
-        grps = None
-        if self.__groupby__:
-            grps = self.groupby(self.__groupby__)
-        for trait in self.__traits__:
-            name = '_'.join(('', self.__class__.__name__.lower(), trait))
-            if trait in self.columns:
-                if self.__groupby__:
-                    traits[name] = groups_to_json(grps, trait)
-                else:
-                    traits[name] = self[trait].to_json(orient='values')
+        if len(self) > 0:
+            cls = self.__class__
+            if self.__groupby__:
+                getter = self[self.__groupby__].unique()[index]
+                return cls(self.groupby(self.__groupby__).get_group(getter))
             else:
-                traits[name] = ''
-        self._post_trait_values()
-        return traits
+                return cls(self.ix[index:index, :])
+        else:
+            return self
+
+    def _get_by_indices(self, indices):
+        '''
+        '''
+        if len(self) > 0:
+            cls = self.__class__
+            if self.__groupby__:
+                getters = self[self.__groupby__].unique()[indices]
+                return cls(self[self[self.__groupby__].isin(getters)])
+            else:
+                return cls(self.ix[indices, :])
+        else:
+            return self
+
+    def _get_by_slice(self, s):
+        '''
+        '''
+        if len(self) > 0:
+            cls = self.__class__
+            indices = self.index
+            if self.__groupby__:
+                indices = self[self.__groupby__].unique()
+            start = indices[0] if s.start is None else indices[s.start]
+            stop = indices[-1] if s.stop is None else indices[s.stop]
+            step = s.step
+            indices = indices[start:stop:step]
+            if self.__groupby__:
+                return cls(self.ix[self[self.__groupby__].isin(indices)])
+            return cls(self.ix[indices, :])
+        else:
+            return self
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -95,7 +165,7 @@ class Updater(pd.SparseDataFrame):
         return self.__class__.__name__
 
 
-class ManyToMany(DataFrame):
+class ManyToMany(pd.DataFrame):
     '''
     A DataFrame with only two columns which enumerates the relationship information.
     '''
@@ -103,19 +173,12 @@ class ManyToMany(DataFrame):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if len(self.__fks__) != 2 or self.columns != self.__fks__:
-            raise RequiredColumnError(self.__fks__, self.__class__.__name__)
+        if len(self) > 0:
+            if len(self.__fks__) != 2 or  not np.all([col in self.__fks__ for col in self.columns]):
+                raise RequiredColumnError(self.__fks__, self.__class__.__name__)
 
+    def __repr__(self):
+        return '{0}'.format(self.__class__.__name__)
 
-def groups_to_json(groups, column):
-    '''
-    Create a json string from a :py:class:`~pandas.core.groupby.DataFrameGroupBy`
-    object.
-    '''
-    json_string = '{'
-    for index, group in groups:
-        key = '"{0}":'.format(index)
-        values = group[column].to_json(orient='values')
-        json_string = ''.join((json_string, key, values, ','))
-    json_string = ''.join((json_string[:-1], '}'))
-    return json_string
+    def __str__(self):
+        return self.__class__.__name__
