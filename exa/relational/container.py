@@ -80,6 +80,12 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
         kwargs['meta'] = meta
         return cls(**kwargs)
 
+    def info(self):
+        '''
+        Get information about the container.
+        '''
+        raise NotImplementedError()
+
     def get_dataframes(self):
         '''
         Get a dictionary of dataframes. Keys are the dataframe variable name
