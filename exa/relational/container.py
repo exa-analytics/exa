@@ -7,6 +7,7 @@ import traitlets
 from ipywidgets import DOMWidget
 from sqlalchemy import Column, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
+from exa import _sys as sys
 from exa import _pd as pd
 from exa import _np as np
 from exa.frames import DataFrame, Updater, ManyToMany
@@ -32,6 +33,7 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
     Containers control data manipulation, processing, and provide convenient
     visualizations.
     '''
+    __slots__ = ['meta']
     # Relational information
     container_type = Column(String(16))
     files = relationship('File', secondary=ContainerFile, backref='containers', cascade='all, delete')
@@ -70,7 +72,10 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
             dfcls = df.__class__
             if name in special:                    # passed as individual kwargs
                 name = name[1:] if name.startswith('_') else name
-                kwargs[name] = dfcls(df.copy())
+                if df is None:
+                    kwargs[name] = dfcls()
+                else:
+                    kwargs[name] = dfcls(df.copy())
             else:
                 kwargs['dfs'][name] = dfcls(df.copy())
         kwargs['name'] = self.name                 # All other table attributes (e.g. times)
@@ -82,16 +87,42 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
 
     def info(self):
         '''
-        Get information about the container.
+        Get (human readable) information about the container.
         '''
-        raise NotImplementedError()
+        n = self.nbytes()
+        sizes = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'too high..']
+        for size in sizes:
+            s = str(n).split('.')
+            if len(s) > 1:
+                if len(s[0]) <= 3 and len(s[1]) > 3:
+                    print('size ({0}): {1}'.format(size, n))
+                    break
+            elif len(s[0]) <= 3:
+                print('size ({0}): {1}'.format(size, n))
+                break
+            n /= 1024
+
+    def nbytes(self):
+        '''
+        Compute the size of the current object in bytes.
+        '''
+        csum = 0
+        for trait in self._trait_values.values():
+            csum += sys.getsizeof(trait)
+        for df in self.get_dataframes().values():
+            if df is not None:
+                csum += df.values.nbytes
+                csum += df.index.nbytes
+                csum += df.columns.nbytes
+        return csum
 
     def get_dataframes(self):
         '''
         Get a dictionary of dataframes. Keys are the dataframe variable name
         and values are the dataframe itself.
         '''
-        return {name: obj for name, obj in vars(self).items() if isinstance(obj, DataFrame) or isinstance(obj, Updater) or isinstance(obj, ManyToMany)}
+        return {name: getattr(self, name) for name in self.__dfclasses__.keys()}
+        #return {name: obj for name, obj in vars(self).items() if isinstance(obj, DataFrame) or isinstance(obj, Updater) or isinstance(obj, ManyToMany)}
 
     @classmethod
     def from_archive(cls, path):
@@ -160,7 +191,7 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
         for name, df in cp.get_dataframes().items():
             if isinstance(df, DataFrame):
                 cp[name] = df._get_by_index(index)
-        cp._update_traits()
+        #cp._update_traits()
         return cp
 
     def _get_by_indices(self, indices):
@@ -170,7 +201,7 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
         for name, df in cp.get_dataframes().items():
             if isinstance(df, DataFrame):
                 cp[name] = df._get_by_indices(indices)
-        cp._update_traits()
+        #cp._update_traits()
         return cp
 
     def _get_by_slice(self, key):
@@ -180,7 +211,7 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
         for name, df in cp.get_dataframes().items():
             if isinstance(df, DataFrame):
                 cp[name] = df._get_by_slice(key)
-        cp._update_traits()
+        #cp._update_traits()
         return cp
 
     def __iter__(self):
@@ -201,7 +232,7 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
         elif isinstance(key, slice):
             return self._get_by_slice(key)
         elif isinstance(key, str):
-            return self.__dict__[key]
+            return getattr(self, key)
         else:
             raise NotImplementedError()
 
@@ -230,6 +261,7 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
             if isinstance(dfs, dict):
                 for name, df in dfs.items():
                     setattr(self, name, df)
+                    self.__dfclasses__[name] = df.__class__
             else:
                 raise TypeError('Argument "dfs" must be of type dict.')
         self.meta = meta
