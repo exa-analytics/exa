@@ -11,7 +11,9 @@ from exa import _sys as sys
 from exa import _pd as pd
 from exa import _np as np
 from exa.frames import DataFrame, Updater, ManyToMany
-from exa.relational.base import Column, Integer, Base, Name, HexUID, Time, Disk, Meta
+from exa.relational.base import Column, Integer, Base, Name, HexUID, Time, Disk, Meta, event
+
+from datetime import datetime as dt
 
 
 ContainerFile = Table(
@@ -140,6 +142,7 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
         Overwritten when containers require complexe trait updating logic.
         '''
         self._update_df_traits()
+        self._traits_need_update = False
 
     def _add_unicode_traits(self, **values):
         '''
@@ -162,8 +165,13 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
         for name in self.__dfclasses__.keys():
             value = self[name]
             if isinstance(value, DataFrame):
+                print(name)
+                st = dt.now()
                 values = self[name].get_trait_values()
+                print('values: ', (dt.now() - st).total_seconds())
+                st = dt.now()
                 self._add_unicode_traits(**values)
+                print('add: ', (dt.now() - st).total_seconds())
 
     def _handle_custom_msg(self, *args, **kwargs):
         '''
@@ -181,6 +189,8 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
         print(repr(self))
 
     def _repr_html_(self):
+        if self._traits_need_update:
+            self._update_traits()
         return self._ipython_display_()
 
     def _get_by_index(self, index):
@@ -265,6 +275,7 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
             else:
                 raise TypeError('Argument "dfs" must be of type dict.')
         self.meta = meta
+        self._traits_need_update = True
 
     def __repr__(self):
         c = self.__class__.__name__
@@ -282,3 +293,20 @@ def concat(containers, axis=0, join='inner'):
     Concatenate a collection of containers.
     '''
     raise NotImplementedError()
+
+
+@event.listens_for(Container, 'after_insert')
+def after_insert(*args, **kwargs):
+    '''
+    '''
+    print('after_insert')
+    print(args)
+    print(kwargs)
+
+@event.listens_for(Container, 'after_update')
+def after_update(*args, **kwargs):
+    '''
+    '''
+    print('after_update')
+    print(args)
+    print(kwargs)
