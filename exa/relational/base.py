@@ -67,6 +67,10 @@ class Base:
     def __tablename__(cls):
         return cls.__name__.lower()
 
+    @declared_attr
+    def __categories__(cls):
+        return []
+
     @classmethod
     def bulk_insert(cls, data):
         '''
@@ -94,6 +98,8 @@ class Base:
             df (:py:class:`~pandas.DataFrame`): In memory table copy
         '''
         df = pd.read_sql(db_sess.query(cls).statement, engine.connect())
+        for column in cls.__categories__:
+            df[column] = df[column].astype('category')
         if 'pkid' in df.columns:
             return df.set_index('pkid')
         else:
