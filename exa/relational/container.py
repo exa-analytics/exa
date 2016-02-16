@@ -173,6 +173,11 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
                 self._add_unicode_traits(**values)
                 print('add: ', (dt.now() - st).total_seconds())
 
+    def _save(self, path):
+        '''
+        '''
+        raise NotImplementedError()
+
     def _handle_custom_msg(self, *args, **kwargs):
         '''
         Recieve and dispatch messages from the JavaScript frontend to the
@@ -185,10 +190,15 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
         '''
         Custom HTML representation
         '''
+        if self._traits_need_update:
+            self._update_traits()
         self._ipy_disp()
         print(repr(self))
 
     def _repr_html_(self):
+        '''
+        '''
+        print('HERE!!!')
         if self._traits_need_update:
             self._update_traits()
         return self._ipython_display_()
