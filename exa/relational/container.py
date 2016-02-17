@@ -7,11 +7,13 @@ import traitlets
 from ipywidgets import DOMWidget
 from sqlalchemy import Column, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
+from exa import _os as os
 from exa import _sys as sys
 from exa import _pd as pd
 from exa import _np as np
 from exa.frames import DataFrame, Updater, ManyToMany
 from exa.relational.base import Column, Integer, Base, Name, HexUID, Time, Disk, Meta, event
+from exa.utils import mkpath
 
 from datetime import datetime as dt
 
@@ -124,7 +126,6 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
         and values are the dataframe itself.
         '''
         return {name: getattr(self, name) for name in self.__dfclasses__.keys()}
-        #return {name: obj for name, obj in vars(self).items() if isinstance(obj, DataFrame) or isinstance(obj, Updater) or isinstance(obj, ManyToMany)}
 
     @classmethod
     def from_archive(cls, path):
@@ -136,6 +137,17 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
             corresponding to the data provided in the archive.
         '''
         raise NotImplementedError()
+
+    @classmethod
+    def _load(cls, path):
+        '''
+        '''
+        container = cls()
+        with pd.HDFStore(path) as store:
+            for key in store.keys():
+                name = key[1:]
+                container[name] = store[key]
+        return container
 
     def _update_traits(self):
         '''
@@ -173,6 +185,24 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
                 self._add_unicode_traits(**values)
                 print('add: ', (dt.now() - st).total_seconds())
 
+    def _save(self, path=None):
+        '''
+        '''
+        if path is None:
+            path = mkpath(os.getcwd(), self.uid.hex + '.hdf5')
+        with pd.HDFStore(path) as store:
+            for name, df in self.get_dataframes().items():
+                if isinstance(df, Updater):
+                    df = df.to_dense()       # Conversion to a Pandas DataFrame
+                else:                        # is required in order to dump the
+                    df = pd.DataFrame(df)    # data to the HDFStore.
+                dtypes = df.dtypes
+                for column in df.columns:
+                    if str(dtypes[column]) == 'category':
+                        df[column] = df[column].astype('O')
+                store[name] = df
+
+
     def _handle_custom_msg(self, *args, **kwargs):
         '''
         Recieve and dispatch messages from the JavaScript frontend to the
@@ -185,10 +215,15 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
         '''
         Custom HTML representation
         '''
+        if self._traits_need_update:
+            self._update_traits()
         self._ipy_disp()
         print(repr(self))
 
     def _repr_html_(self):
+        '''
+        '''
+        print('HERE!!!')
         if self._traits_need_update:
             self._update_traits()
         return self._ipython_display_()
