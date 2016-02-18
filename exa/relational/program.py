@@ -3,10 +3,10 @@
 Program
 ===============================================
 '''
-from exa.relational.base import session, datetime, relationship
-from exa.relational.base import Column, Integer, String, DateTime
-from exa.relational.base import ForeignKey, Table, Base
+from sqlalchemy import String, DateTime, ForeignKey, Table
+from sqlalchemy.orm import relationship
 from exa.utils import gen_uid
+from exa.relational.base import datetime, Base, Column, Integer
 
 
 ProgramProject = Table(

@@ -1,10 +1,10 @@
 {
-  "name": "js",
+  "name": "exa Dashboard",
   "homepage": "https://exa-analytics.github.io/website/",
-  "description": "",
+  "description": "Dashboard for data management, processing, and visualization",
   "main": "",
   "moduleType": [],
-  "license": "MIT",
+  "license": "Apache 2.0",
   "private": true,
   "ignore": [
     "**/.*",

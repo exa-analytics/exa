@@ -3,8 +3,9 @@
 Physical Constants
 ===============================================
 '''
-from exa.relational.base import Base, Column, String, Float
-from exa.relational.base import session, commit
+from sqlalchemy import String, Float
+from exa.relational.base import Base, Column
+from exa.relational.base import db_sess
 from exa.relational.base import Meta as _Meta
 
 
@@ -14,15 +15,11 @@ class Meta(_Meta):
     def _getitem(self, key):
         '''
         '''
-        obj = session.query(self).filter(self.symbol == key).all()
+        obj = db_sess.query(self).filter(self.symbol == key).all()
         if len(obj) == 1:
             return obj[0].value
         else:
             raise ValueError('Value {0} not found in {1}'.format(key, self.__tablename__))
-
-    def __getitem__(self, key):
-        commit()
-        return self._getitem(key)
 
 
 class Constant(Base, metaclass=Meta):

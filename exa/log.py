@@ -53,8 +53,8 @@ def setup():
     for name, path in log_files.items():
         handler = RotatingFileHandler(
             path,
-            maxBytes=Config.maxlogbytes,
-            backupCount=Config.maxlogcount
+            maxBytes=Config.max_log_bytes,
+            backupCount=Config.max_log_count
         )
         handler.setFormatter(_LogFormat())
         loggers[name].addHandler(handler)

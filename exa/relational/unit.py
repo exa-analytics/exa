@@ -3,11 +3,9 @@
 Units and Dimensions
 ===============================================
 '''
-from sqlalchemy import and_
-from exa.relational.base import Base, Column, String, Float
-from exa.relational.base import session, commit
+from sqlalchemy import and_, String, Float
 from exa.relational.base import Meta as _Meta
-from exa.relational.errors import FactorNotFound
+from exa.relational.base import Base, Column, db_sess
 
 
 class Meta(_Meta):
@@ -15,29 +13,35 @@ class Meta(_Meta):
     '''
     def _getitem(cls, key):
         if isinstance(key, tuple):
-            return cls.get_factor(key)
+            f = key[0]
+            t = key[1]
+            return db_sess.query(cls).filter(and_(cls.from_unit == f, cls.to_unit == t)).one().factor
         else:
             raise TypeError('Key must be a tuple not {0}'.format(type(key)))
 
-    def get_factor(cls, key):
-        f = key[0]
-        t = key[1]
-        factor = session.query(cls).filter(and_(cls.from_unit == f, cls.to_unit == t)).all()
-        if len(factor) == 1:
-            return factor[0].factor
-        else:
-            raise FactorNotFound(f, t)
-
-    def __getitem__(cls, key):
-        commit()
-        return cls._getitem(key)
-
     def from_alias(cls, source, target):
         '''
-        Look up a source unit by alias.
+        Attempt to find a conversion factor using alternative names.
         '''
-        f = cls.aliases[source.lower()]
-        return cls[f, target]
+        f = source
+        t = target
+        try:
+            f = cls.aliases[source]
+        except:
+            try:
+                f = cls.aliases[source.lower()]
+            except:
+                pass
+            pass
+        try:
+            t = cls.aliases[target]
+        except:
+            try:
+                t = cls.aliases[target.lower()]
+            except:
+                pass
+            pass
+        return cls[f, t]
 
 
 class Dimension:

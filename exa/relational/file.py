@@ -3,9 +3,9 @@
 File
 ===============================================
 '''
-from exa.relational.base import datetime
-from exa.relational.base import Column, Integer, String, DateTime, Base
+from sqlalchemy import String, DateTime
 from exa.utils import gen_uid
+from exa.relational.base import datetime, Column, Integer, Base
 
 
 class File(Base):

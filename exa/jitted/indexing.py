@@ -5,7 +5,7 @@ Indexing Recipes
 Jitted functions related to generating indexes
 '''
 from exa import _np as np
-from exa.jitted import jit, int64
+from exa.jitted import jit, int64, vectorize
 
 
 @jit(nopython=True, cache=True)
@@ -26,3 +26,11 @@ def idxs_from_starts_and_counts(starts, counts):
             values[h] = value
             h += 1
     return i_idx, j_idx, values
+
+
+@vectorize([int64(int64, int64)])
+def unordered_pairing_function(x, y):
+    '''
+    http://www.mattdipasquale.com/blog/2014/03/09/unique-unordered-pairing-function/
+    '''
+    return np.int64(x * y + np.trunc((np.abs(x - y) - 1)**2 / 4))

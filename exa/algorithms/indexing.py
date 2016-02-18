@@ -25,3 +25,12 @@ def idxs_from_starts_and_counts(starts, counts):
             values[h] = value
             h += 1
     return (i_idx, j_idx, values)
+
+
+def _unordered_pairing_function(x, y):
+    '''
+    http://www.mattdipasquale.com/blog/2014/03/09/unique-unordered-pairing-function/
+    '''
+    return np.int64(x * y + np.trunc((np.abs(x - y) - 1)**2 / 4))
+
+unordered_pairing_function = np.vectorize(_unordered_pairing_function)
