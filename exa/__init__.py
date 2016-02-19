@@ -30,8 +30,12 @@ from exa.frames import DataFrame
 from exa.relational import Container, Session
 _ae.register(relational.cleanup_sessions)
 _ae.register(relational.commit)
+if Config._temp:
+    _ae.register(Config.cleanup)
+    from exa.tools import finalize_install
+    finalize_install()
+    del tools
 from exa import tests
-
 
 # API cleanup
 del setup, config, testers, log, utils, Config, decorators, errors, tests
