@@ -79,10 +79,15 @@ def initialize_database(verbose=False):
     obj = Container(name='test', description='created during install...')    # This prevents FlushError for inherited containers...
 
 
-def finalize_install(verbose=False):
+def finalize_install(path=None, verbose=False):
     '''
     This function is run after successfully installing this package to install
     some extensions and initialize the database.
     '''
+    if path:
+        Config['exa'] = path
+    else:
+        Config['exa'] = mkpath(Config.home, '.exa')
+    Config.relational['database'] = 'exa.sqlite'
     initialize_database(verbose=verbose)         # Create the database and tables
     install_notebook_widgets(verbose=verbose)    # Copy widget JS to the Jupyter notebook
