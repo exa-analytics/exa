@@ -27,6 +27,7 @@ setup()
 from exa.testers import run_unittests, run_doctests
 from exa.frames import DataFrame
 from exa.relational import Container, Session
+from exa.editor import Editor
 _ae.register(relational.cleanup_sessions)
 _ae.register(relational.commit)
 if Config._temp:
