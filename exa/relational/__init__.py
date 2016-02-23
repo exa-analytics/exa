@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from exa.relational.base import commit, Base
+from exa.relational.base import commit, Base, create_all
 
 from exa.relational.session import Session, cleanup_sessions
 #from exa.relational.program import Program

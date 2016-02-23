@@ -26,9 +26,12 @@ class Config:
     '''
 
     def save(self):
-        confpath = mkpath(self.exa, 'config.json')
-        with open(confpath, 'w') as f:
-            json.dump(vars(self), f)
+        try:
+            confpath = mkpath(self.exa, 'config.json')
+            with open(confpath, 'w') as f:
+                json.dump(vars(self), f)
+        except:
+            pass
 
     def update(self, other=None):
         if hasattr(other, 'items'):
@@ -37,7 +40,10 @@ class Config:
                     self[k] = v
 
     def cleanup(self):
-        shutil.rmtree(self.exa)
+        try:
+            shutil.rmtree(self.exa)
+        except:
+            pass
 
     def relational_engine(self):
         b = self.relational['backend']
