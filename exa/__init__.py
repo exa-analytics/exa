@@ -35,5 +35,4 @@ if Config._temp:
     relational.create_all()
 
 # API cleanup
-#del setup, config, testers, log, utils, Config, decorators, errors, tests
-del utils, config, log
+del utils, config, log, Config, decorators, editor, frames, setup, testers
