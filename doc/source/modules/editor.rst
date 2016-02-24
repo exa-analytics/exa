@@ -1,4 +1,4 @@
-Programatic Text Manipulation
+Programmatic Text Manipulation
 ==============================
 
 .. automodule:: exa.editor

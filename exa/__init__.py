@@ -27,12 +27,16 @@ setup()
 from exa.testers import run_unittests, run_doctests
 from exa.frames import DataFrame
 from exa.relational import Container, Session
+from exa.editor import Editor
 _ae.register(relational.cleanup_sessions)
 _ae.register(relational.commit)
 if Config._temp:
+    from exa.tools import initialize_database
     _ae.register(Config.cleanup)
     relational.create_all()
+    initialize_database()
+    del tools, initialize_database
+    Container()
 
 # API cleanup
-#del setup, config, testers, log, utils, Config, decorators, errors, tests
-del utils, config, log
+del utils, config, log, Config, decorators, editor, frames, setup, testers
