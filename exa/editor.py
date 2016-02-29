@@ -87,10 +87,17 @@ class Editor:
             ln = line.strip()
             if ln == '':
                 to_remove.append(i)
-        k = 0
-        for i in to_remove:
+        self.del_lines(to_remove)
+
+    def del_lines(lines):
+        '''
+        Delete the given line numbers.
+
+        Args:
+            lines (list): List of integers corresponding to lines to delete
+        '''
+        for k, i in enumerate(lines):
             del self[i - k]
-            k += 1
 
     @classmethod
     def from_file(cls, path):
