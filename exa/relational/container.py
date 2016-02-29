@@ -37,7 +37,6 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
     Containers control data manipulation, processing, and provide convenient
     visualizations.
     '''
-    __slots__ = ['meta']
     # Relational information
     container_type = Column(String(16))
     files = relationship('File', secondary=ContainerFile, backref='containers', cascade='all, delete')
@@ -52,17 +51,10 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
     _ipy_disp = DOMWidget._ipython_display_
     _view_module = traitlets.Unicode('nbextensions/exa/container').tag(sync=True)
     _view_name = traitlets.Unicode('ContainerView').tag(sync=True)
-    width = traitlets.Integer(800).tag(sync=True)
+    width = traitlets.Integer(850).tag(sync=True)
     height = traitlets.Integer(500).tag(sync=True)
     _gui_width = traitlets.Integer(250).tag(sync=True)
     _fps = traitlets.Integer(24).tag(sync=True)
-
-    def to_archive(self, path):
-        '''
-        Export this container to an archive that can be imported in another
-        session (on any machine).
-        '''
-        raise NotImplementedError()
 
     def copy(self):
         '''

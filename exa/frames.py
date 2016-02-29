@@ -12,15 +12,44 @@ from exa.errors import RequiredIndexError, RequiredColumnError
 class DataFrame(pd.DataFrame):
     '''
     Behaves just like a :py:class:`~pandas.DataFrame`, but enforces minimum
-    column and index requirements and keeps track of relations to other
-    DataFrames.
+    column and index requirements and keeps track of relations (with other
+    DataFrames). Contains logic for creating "traits" for use within the a
+    JavaScript visualization system. Finally tracks physical units.
     '''
-    __pk__ = []    # Must have these index names
-    __fk__ = []    # Must have these column names (which are index names of corresponding DataFrames)
-    __traits__ = []
-    __groupby__ = None   # Defines the index levels (in some cases the attributes can be used to form a multiindex)
+    _pkeys = []         # List of required column names
+    _fkeys = []         # List of column names which correspond to another DataFrame's columns
+    _traits = []        # List of column names that are passed to JavaScript
+    _groupbys = []      # List of column names on which to group the data
+    _categories = []    # List of category name, raw type pairs
+    _column_units = {}  # Dictionary of column name, physical unit pairs
 
-    def get_trait_values(self):
+    def _as_raw(self, which=[]):
+        '''
+        Internal conversion from categories to raw types.
+
+        If no argument is provided, will convert all categories.
+
+        Args:
+            which: String or list of strings of column names to convert
+        '''
+        for name, dtype in self.__categories:
+            if which == [] or name in which or name == which:
+                self[col] = self[col].astype(dtype)
+
+    def _as_cat(self, which=[]):
+        '''
+        Internal conversion to categories from raw types.
+
+        If no argument is provided, will convert all categories.
+
+        Args:
+            which: String or list of strings of column names to convert
+        '''
+        for name, dtype in self.__categories:
+            if which == [] or name in which or name == which:
+                self[col] = self[col].astype('category')
+
+    def _get_trait_values(self):
         '''
         Returns:
             traits (dict): Traits to be added to the DOMWidget (:class:`~exa.relational.container.Container`)
@@ -46,7 +75,7 @@ class DataFrame(pd.DataFrame):
     def _get_column_values(self, *columns, dtype='f8'):
         '''
         '''
-        data = np.empty((len(columns), ), dtype='O')
+        data = np.empty((len(columns), ), dtype=dtype)
         for i, column in enumerate(columns):
             data[i] = self[column]
         return np.vstack(data).T.astype(dtype)
@@ -69,10 +98,7 @@ class DataFrame(pd.DataFrame):
 
     def _prep_trait_values(self):
         '''
-        Placeholder or subclasses to use when logic is required before getting
-        traits.
         '''
-        pass
 
     def _post_trait_values(self):
         '''
@@ -84,6 +110,9 @@ class DataFrame(pd.DataFrame):
         '''
         if len(self) > 0:
             cls = self.__class__
+            for col in self.columns:
+                if self[col].dtype == 'category':
+                    self[col] = self[col].astype(self[col].cat.categories.dtype.name)
             if self.__groupby__:
                 getter = self[self.__groupby__].unique()[index]
                 return cls(self.groupby(self.__groupby__).get_group(getter))
@@ -97,6 +126,9 @@ class DataFrame(pd.DataFrame):
         '''
         if len(self) > 0:
             cls = self.__class__
+            for col in self.columns:
+                if self[col].dtype == 'category':
+                    self[col] = self[col].astype(self[col].cat.categories.dtype.name)
             if self.__groupby__:
                 getters = self[self.__groupby__].unique()[indices]
                 return cls(self[self[self.__groupby__].isin(getters)])
@@ -110,6 +142,9 @@ class DataFrame(pd.DataFrame):
         '''
         if len(self) > 0:
             cls = self.__class__
+            for col in self.columns:
+                if self[col].dtype == 'category':
+                    self[col] = self[col].astype(self[col].cat.categories.dtype.name)
             indices = self.index
             if self.__groupby__:
                 indices = self[self.__groupby__].unique()
@@ -126,22 +161,24 @@ class DataFrame(pd.DataFrame):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if len(self) > 0:
-            name = self.__class__.__name__
-            missing_pk = set(self.__pk__).difference(self.index.names)
-            missing_fk = set(self.__fk__).difference(self.columns)
-            if missing_pk:                                      # If missing the index name,
-                if list(missing_pk) == self.__pk__:             # see if it can be attached,
-                    self.index.names = self.__pk__
-                else:                                           # otherwise throw error.
-                    raise RequiredIndexError(missing_pk, name)
-            if missing_fk:
-                raise RequiredColumnError(missing_fk, name)
+            if self._pkeys:
+                missing_pkeys = set(self._pkeys).difference(self.index.names)
+                if missing_pkeys:
+                    if list(missing_pkeys) == self._pkeys:
+                        self.index.names = self._pkeys
+                    else:
+                        raise RequiredIndexError(missing_pkeys, self.__class__.__name__)
+            if self._fkeys:
+                missing_fkeys = set(self._fkeys).difference(self.columns)
+                if missing_fkeys:
+                    raise RequiredColumnError(missing_fkeys, self.__class__.__name__)
 
     def __repr__(self):
-        return '{0}'.format(self.__class__.__name__)
+        return '{0}(rows: {1}, cols: {2})'.format(self.__class__.__name__,
+                                                  len(self), len(self.columns))
 
-    def __str__(self):                   # Prevents the awkard string print
-        return self.__class__.__name__   # of the dataframe html.
+    def __str__(self):
+        return self.__repr__()
 
 
 class Updater(pd.SparseDataFrame):
@@ -169,13 +206,13 @@ class ManyToMany(pd.DataFrame):
     '''
     A DataFrame with only two columns which enumerates the relationship information.
     '''
-    __fks__ = []
+    __fkeys__ = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if len(self) > 0:
-            if len(self.__fks__) != 2 or  not np.all([col in self.__fks__ for col in self.columns]):
-                raise RequiredColumnError(self.__fks__, self.__class__.__name__)
+            if len(self.__fkeys__) != 2 or  not np.all([col in self.__fkeys__ for col in self.columns]):
+                raise RequiredColumnError(self.__fkeys__, self.__class__.__name__)
 
     def __repr__(self):
         return '{0}'.format(self.__class__.__name__)

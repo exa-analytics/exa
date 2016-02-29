@@ -5,6 +5,7 @@ Editor
 Text-editor-like functionality for programatically manipulating raw text input
 and output files.
 '''
+from exa import _os as os
 
 
 class Editor:
@@ -41,8 +42,12 @@ class Editor:
             fullpath (str): Full file path
         '''
         if fullpath:
-            with open(fullpath, 'w') as f:
-                f.write(str(self).format(*args, **kwargs))
+            if self.filename:
+                with open(mkpath(fullpath, self.filename), 'w') as f:
+                    f.write(str(self).format(*args, **kwargs))
+            else:
+                with open(fullpath, 'w') as f:
+                    f.write(str(self).format(*args, **kwargs))
         else:
             print(str(self).format(*args, **kwargs))
 
@@ -104,10 +109,11 @@ class Editor:
         '''
         Create an editor instance from a file on disk.
         '''
+        filename = os.path.basename(path)
         lines = None
         with open(path) as f:
             lines = f.read().splitlines()
-        return cls(lines)
+        return cls(lines, filename)
 
     @classmethod
     def from_stream(cls, f):
@@ -142,8 +148,9 @@ class Editor:
     def __len__(self):
         return len(self._lines)
 
-    def __init__(self, lines):
+    def __init__(self, lines, filename=None):
         self._lines = lines
+        self.filename = filename
 
     def __str__(self):
         return '\n'.join(self._lines)
