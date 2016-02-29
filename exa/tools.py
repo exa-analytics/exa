@@ -35,7 +35,7 @@ def install_notebook_widgets(origin_base=Config.nbext, dest_base=Config.extensio
             install_nbextension(orig, verbose=verbose, overwrite=True, nbextensions_dir=dest)
 
 
-def initialize_database(force=False):
+def initialize_database(verbose=False):
     '''
     Generates the static relational database tables for isotopes, constants,
     and unit conversions.
@@ -56,7 +56,8 @@ def initialize_database(force=False):
         except:
             pass
         if count == 0:
-            print('Loading {0} data'.format(name))
+            if verbose:
+                print('Loading {0} data'.format(name))
             if name == 'isotope':
                 data = pd.read_json(mkpath(Config.static, 'isotopes.json'))
                 data.sort_values(['Z', 'A'], inplace=True)
@@ -73,15 +74,20 @@ def initialize_database(force=False):
                 fac = (values / values_t).ravel()
                 data = [{'from_unit': cols[i][0], 'to_unit': cols[i][1], 'factor': v} for i, v in enumerate(fac)]
             tbl.bulk_insert(data)
-        elif force:
-            raise NotImplementedError('Updating constants, isotopes, and unit conversions is not yet available')
+        else:
+            raise NotImplementedError('Updating existing databases not implemented')
     obj = Container(name='test', description='created during install...')    # This prevents FlushError for inherited containers...
 
 
-def finalize_install(verbose=False):
+def finalize_install(path=None, verbose=False):
     '''
     This function is run after successfully installing this package to install
     some extensions and initialize the database.
     '''
-    initialize_database()                        # Create the database and tables
+    if path:
+        Config['exa'] = path
+    else:
+        Config['exa'] = mkpath(Config.home, '.exa')
+    Config.relational['database'] = 'exa.sqlite'
+    initialize_database(verbose=verbose)         # Create the database and tables
     install_notebook_widgets(verbose=verbose)    # Copy widget JS to the Jupyter notebook

@@ -1,5 +1,5 @@
-DataFrame
+Event Based DataFrames
 ==================================
 
-.. automodule:: exa.dataframe
+.. automodule:: exa.frames
     :members:

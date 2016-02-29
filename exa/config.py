@@ -13,6 +13,8 @@ import os
 import getpass
 import platform
 import json
+import shutil
+from tempfile import gettempdir
 from notebook.nbextensions import jupyter_data_dir
 from exa.utils import mkpath
 
@@ -24,15 +26,24 @@ class Config:
     '''
 
     def save(self):
-        confpath = mkpath(self.exa, 'config.json')
-        with open(confpath, 'w') as f:
-            json.dump(vars(self), f)
+        try:
+            confpath = mkpath(self.exa, 'config.json')
+            with open(confpath, 'w') as f:
+                json.dump(vars(self), f)
+        except:
+            pass
 
     def update(self, other=None):
         if hasattr(other, 'items'):
             for k, v in other.items():
                 if v and k != 'ipynb':
                     self[k] = v
+
+    def cleanup(self):
+        try:
+            shutil.rmtree(self.exa)
+        except:
+            pass
 
     def relational_engine(self):
         b = self.relational['backend']
@@ -41,7 +52,10 @@ class Config:
         h = self.relational['host']
         u = self.relational['user']
         if b == 'sqlite':
-            return '{0}:///{1}/{2}'.format(b, e, d)
+            if h is None:
+                return '{0}://'.format(b)
+            else:
+                return '{0}:///{1}/{2}'.format(b, e, d)
         else:
             raise NotImplementedError('Backends other that "sqlite" are not supported yet.')
 
@@ -91,11 +105,16 @@ class Config:
             self.home = os.getenv('USERPROFILE')
         else:
             self.home = os.getenv('HOME')
-        self.exa = mkpath(self.home, '.exa', mkdir=True)    # Dir config
+        self.exa = mkpath(self.home, '.exa')    # Dir config
+        if os.path.isdir(self.exa):
+            self._temp = False
+        else:
+            self.exa = mkpath(gettempdir(), 'exa', mkdir=True)
+            self._temp = True
         self.syslog = mkpath(self.exa, 'system.log')        # Backend log
         self.testlog = mkpath(self.exa, 'test.log')         # Unit and doc tests
         self.userlog = mkpath(self.exa, 'user.log')         # Frontend log
-        self.tmp = mkpath(self.exa, 'tmp', mkdir=True)
+        self.tmp = mkpath(self.exa, 'tmp')
         self.pkg = os.path.dirname(__file__)
         self.templates = mkpath(self.pkg, 'templates')
         self.static = mkpath(self.pkg, 'static')
@@ -105,8 +124,8 @@ class Config:
         self.nbext = mkpath(self.static, 'nbextensions')
         self.extensions = mkpath(jupyter_data_dir(), 'nbextensions', 'exa')
         self.relational = {'backend': 'sqlite', 'host': None,
-                           'database': 'exa.sqlite', 'user': None}
-        self.numerical = {'backend': 'hdf5', 'host': None,
+                           'database': None, 'user': None}
+        self.numerical = {'backend': None, 'host': None,
                           'database': None, 'user': None}
         existing_config = mkpath(self.exa, 'config.json')   # Update existing
         if os.path.isfile(existing_config):
