@@ -58,12 +58,12 @@ class DataFrame(pd.DataFrame):
         if len(self) > 0:
             self._prep_trait_values()
             groups = None
-            if self.__groupby__:
-                groups = self.groupby(self.__groupby__)
+            if self._groupbys:
+                groups = self.groupby(self._groupbys)
             for trait in self.__traits__:
                 name = '_'.join(('', self.__class__.__name__.lower(), trait))
                 if trait in self.columns:
-                    if self.__groupby__:
+                    if self._groupbys:
                         traits[name] = groups.apply(lambda group: group[trait].values).to_json()
                     else:
                         traits[name] = self[trait].to_json(orient='values')
@@ -110,12 +110,9 @@ class DataFrame(pd.DataFrame):
         '''
         if len(self) > 0:
             cls = self.__class__
-            for col in self.columns:
-                if self[col].dtype == 'category':
-                    self[col] = self[col].astype(self[col].cat.categories.dtype.name)
-            if self.__groupby__:
-                getter = self[self.__groupby__].unique()[index]
-                return cls(self.groupby(self.__groupby__).get_group(getter))
+            if self._groupbys:
+                getter = self[self._groupbys].unique()[index]
+                return cls(self.groupby(self._groupbys).get_group(getter))
             else:
                 return cls(self.ix[index:index, :])
         else:
@@ -126,12 +123,9 @@ class DataFrame(pd.DataFrame):
         '''
         if len(self) > 0:
             cls = self.__class__
-            for col in self.columns:
-                if self[col].dtype == 'category':
-                    self[col] = self[col].astype(self[col].cat.categories.dtype.name)
-            if self.__groupby__:
-                getters = self[self.__groupby__].unique()[indices]
-                return cls(self[self[self.__groupby__].isin(getters)])
+            if self._groupbys:
+                getters = self[self._groupbys].unique()[indices]
+                return cls(self[self[self._groupbys].isin(getters)])
             else:
                 return cls(self.ix[indices, :])
         else:
@@ -142,18 +136,15 @@ class DataFrame(pd.DataFrame):
         '''
         if len(self) > 0:
             cls = self.__class__
-            for col in self.columns:
-                if self[col].dtype == 'category':
-                    self[col] = self[col].astype(self[col].cat.categories.dtype.name)
             indices = self.index
-            if self.__groupby__:
-                indices = self[self.__groupby__].unique()
+            if self._groupbys:
+                indices = self[self._groupbys].unique()
             start = indices[0] if s.start is None else indices[s.start]
             stop = indices[-1] if s.stop is None else indices[s.stop]
             step = s.step
             indices = indices[start:stop:step]
-            if self.__groupby__:
-                return cls(self.ix[self[self.__groupby__].isin(indices)])
+            if self._groupbys:
+                return cls(self.ix[self[self._groupbys].isin(indices)])
             return cls(self.ix[indices, :])
         else:
             return self
