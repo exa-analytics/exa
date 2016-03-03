@@ -16,6 +16,7 @@ class DataFrame(pd.DataFrame):
     DataFrames). Contains logic for creating "traits" for use within the a
     JavaScript visualization system. Finally tracks physical units.
     '''
+    _metadata = []
     _pkeys = []         # List of required column names
     _fkeys = []         # List of column names which correspond to another DataFrame's columns
     _traits = []        # List of column names that are passed to JavaScript
@@ -45,7 +46,7 @@ class DataFrame(pd.DataFrame):
         Args:
             which: String or list of strings of column names to convert
         '''
-        for name, dtype in self.__categories:
+        for name, dtype in self._categories:
             if which == [] or name in which or name == which:
                 self[col] = self[col].astype('category')
 
@@ -60,7 +61,7 @@ class DataFrame(pd.DataFrame):
             groups = None
             if self._groupbys:
                 groups = self.groupby(self._groupbys)
-            for trait in self.__traits__:
+            for trait in self._traits:
                 name = '_'.join(('', self.__class__.__name__.lower(), trait))
                 if trait in self.columns:
                     if self._groupbys:
@@ -75,7 +76,7 @@ class DataFrame(pd.DataFrame):
     def _get_column_values(self, *columns, dtype='f8'):
         '''
         '''
-        data = np.empty((len(columns), ), dtype=dtype)
+        data = np.empty((len(columns), ), dtype='O')
         for i, column in enumerate(columns):
             data[i] = self[column]
         return np.vstack(data).T.astype(dtype)
@@ -99,6 +100,7 @@ class DataFrame(pd.DataFrame):
     def _prep_trait_values(self):
         '''
         '''
+        pass
 
     def _post_trait_values(self):
         '''
@@ -176,13 +178,13 @@ class Updater(pd.SparseDataFrame):
     '''
     Sparse dataframe used to update a full :class:`~exa.dataframes.DataFrame`.
     '''
-    __key__ = []   # This is both the index and the foreign DataFrame designation.
+    _key = []   # This is both the index and the foreign DataFrame designation.
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if len(self) > 0:
             name = self.__class__.__name__
-            missing = set(self.__key__).difference(self.index.names)
+            missing = set(self._key).difference(self.index.names)
             if missing:
                 raise RequiredIndexError(missing, name)
 
@@ -197,13 +199,13 @@ class ManyToMany(pd.DataFrame):
     '''
     A DataFrame with only two columns which enumerates the relationship information.
     '''
-    __fkeys__ = []
+    _fkeys = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if len(self) > 0:
-            if len(self.__fkeys__) != 2 or  not np.all([col in self.__fkeys__ for col in self.columns]):
-                raise RequiredColumnError(self.__fkeys__, self.__class__.__name__)
+            if len(self._fkeys) != 2 or  not np.all([col in self._fkeys for col in self.columns]):
+                raise RequiredColumnError(self._fkeys, self.__class__.__name__)
 
     def __repr__(self):
         return '{0}'.format(self.__class__.__name__)
