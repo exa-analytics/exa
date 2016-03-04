@@ -50,7 +50,7 @@ class DataFrame(pd.DataFrame):
             if which == [] or name in which or name == which:
                 self[col] = self[col].astype('category')
 
-    def _get_trait_values(self):
+    def get_trait_values(self):
         '''
         Returns:
             traits (dict): Traits to be added to the DOMWidget (:class:`~exa.relational.container.Container`)
