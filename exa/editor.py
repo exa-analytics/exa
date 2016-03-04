@@ -5,6 +5,8 @@ Editor
 Text-editor-like functionality for programatically manipulating raw text input
 and output files.
 '''
+import re
+from exa import _os as os
 
 
 class Editor:
@@ -24,13 +26,6 @@ class Editor:
         print(len(editor))                           # 1
         editor.write(fullpath=None, user='Alice')    # "Hello Alice"
     '''
-    @property
-    def meta(self):
-        '''
-        Generate a dictionary of metadata (default is string text of editor).
-        '''
-        return {'text': str(self)}
-
     def write(self, fullpath=None, *args, **kwargs):
         '''
         Write the editor's contents to disk.
@@ -41,8 +36,12 @@ class Editor:
             fullpath (str): Full file path
         '''
         if fullpath:
-            with open(fullpath, 'w') as f:
-                f.write(str(self).format(*args, **kwargs))
+            if self.filename:
+                with open(mkpath(fullpath, self.filename), 'w') as f:
+                    f.write(str(self).format(*args, **kwargs))
+            else:
+                with open(fullpath, 'w') as f:
+                    f.write(str(self).format(*args, **kwargs))
         else:
             print(str(self).format(*args, **kwargs))
 
@@ -99,15 +98,40 @@ class Editor:
         for k, i in enumerate(lines):
             del self[i - k]
 
+    @property
+    def templates(self):
+        '''
+        Display a list of templates in the file.
+
+        Templating is accomplished by creating a bracketed object in the same
+        way that Python performs `string formatting`_. The editor is able to
+        replace the placeholder value of the template. Integer templates are
+        positional arguments.
+
+        .. _string formatting: https://docs.python.org/3.6/library/string.html
+        '''
+        string = str(self)
+        constants = [match[1:-1] for match in re.findall('{{[A-z0-9]}}', string)]
+        variables = re.findall('{[A-z0-9]*}', string)
+        return sorted(set(variables).difference(constants))
+
+    @property
+    def meta(self):
+        '''
+        Generate a dictionary of metadata (default is string text of editor).
+        '''
+        return {'text': str(self)}
+
     @classmethod
     def from_file(cls, path):
         '''
         Create an editor instance from a file on disk.
         '''
+        filename = os.path.basename(path)
         lines = None
         with open(path) as f:
             lines = f.read().splitlines()
-        return cls(lines)
+        return cls(lines, filename)
 
     @classmethod
     def from_stream(cls, f):
@@ -142,8 +166,9 @@ class Editor:
     def __len__(self):
         return len(self._lines)
 
-    def __init__(self, lines):
+    def __init__(self, lines, filename=None):
         self._lines = lines
+        self.filename = filename
 
     def __str__(self):
         return '\n'.join(self._lines)

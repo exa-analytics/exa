@@ -36,7 +36,7 @@ if Config._temp:
     relational.create_all()
     initialize_database()
     del tools, initialize_database
-    Container()
+
 
 # API cleanup
 del utils, config, log, Config, decorators, editor, frames, setup, testers
