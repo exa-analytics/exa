@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 '''
-Container
+Relational Container
 ===============================================
+This version of the container object has no visualization capability. It is
+used with
 '''
 import traitlets
 from ipywidgets import DOMWidget
@@ -11,9 +13,10 @@ from exa import _os as os
 from exa import _sys as sys
 from exa import _pd as pd
 from exa import _np as np
-from exa.frames import DataFrame, Updater, ManyToMany
+from exa.config import Config
+from exa.frame import DataFrame, Updater, ManyToMany
 from exa.relational.base import Column, Integer, Base, Name, HexUID, Time, Disk, Meta, event
-from exa.utils import mkpath
+from exa.utility import mkpath
 
 from datetime import datetime as dt
 
@@ -215,10 +218,12 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
     def _repr_html_(self):
         '''
         '''
-        print('HERE!!!')
-        if self._traits_need_update:
-            self._update_traits()
-        return self._ipython_display_()
+        if Config.interactive:
+            if self._traits_need_update:
+                self._update_traits()
+            return self._ipython_display_()
+        else:
+            return None
 
     def _get_by_index(self, index):
         '''

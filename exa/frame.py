@@ -6,7 +6,7 @@ Custom DataFrame for exa Analytics
 from traitlets import Unicode, Dict
 from exa import _np as np
 from exa import _pd as pd
-from exa.errors import RequiredIndexError, RequiredColumnError
+from exa.error import RequiredIndexError, RequiredColumnError
 
 
 class DataFrame(pd.DataFrame):

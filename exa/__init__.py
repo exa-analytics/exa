@@ -19,13 +19,12 @@ __exa_version__ = (0, 1, 0)    # Version number is defined here!
 __version__ = '.'.join((str(v) for v in __exa_version__))
 
 
-from exa.utils import mkpath
 from exa.config import Config
 _ae.register(Config.save)
 from exa.log import log_tail, log_head, setup
 setup()
-from exa.testers import run_unittests, run_doctests
-from exa.frames import DataFrame
+from exa.testing import run_unittests, run_doctests
+from exa.frame import DataFrame
 from exa.relational import Container, Session
 from exa.editor import Editor
 _ae.register(relational.cleanup_sessions)
@@ -34,10 +33,9 @@ if Config._temp:
     _ae.register(Config.cleanup)
     relational.create_all()
 if Config.interactive:
-    from exa.tools import initialize_database
+    from exa.install import initialize_database
     initialize_database()
-    del tools
 
 
 # API cleanup
-del utils, config, log, Config, decorators, editor, frames, setup, testers
+#del config, log, Config, decorators, editor, frames, setup, testers
