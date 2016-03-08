@@ -111,6 +111,16 @@ class Config:
         else:
             self.exa = mkpath(gettempdir(), 'exa', mkdir=True)
             self._temp = True
+        interactive = True
+        try:
+            cfg = get_ipython().config
+            if 'IPKernelApp' in cfg:
+                interactive = True
+            else:
+                interactive = False
+        except:
+            interactive = False
+        self.interactive = interactive
         self.syslog = mkpath(self.exa, 'system.log')        # Backend log
         self.testlog = mkpath(self.exa, 'test.log')         # Unit and doc tests
         self.userlog = mkpath(self.exa, 'user.log')         # Frontend log

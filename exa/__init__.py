@@ -31,11 +31,12 @@ from exa.editor import Editor
 _ae.register(relational.cleanup_sessions)
 _ae.register(relational.commit)
 if Config._temp:
-    from exa.tools import initialize_database
     _ae.register(Config.cleanup)
     relational.create_all()
+if Config.interactive:
+    from exa.tools import initialize_database
     initialize_database()
-    del tools, initialize_database
+    del tools
 
 
 # API cleanup
