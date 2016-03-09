@@ -15,9 +15,9 @@ from sqlalchemy import Column, Integer, String, DateTime, create_engine, event
 from sqlalchemy.orm import sessionmaker, mapper
 from sqlalchemy.orm.query import Query
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
-from exa import Config
 from exa import _pd as pd
-from exa.utils import gen_uid
+from exa.config import Config
+from exa.utility import gen_uid
 
 
 class Meta(DeclarativeMeta):

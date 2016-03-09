@@ -1,17 +1,34 @@
 # -*- coding: utf-8 -*-
 '''
-Utilities
+Helper Functions
 ====================
-Do not require internal imports
 '''
 import os
 from uuid import uuid4
+from itertools import product
+from notebook import install_nbextension
+from exa.config import Config
 
 
 DBLSEP = os.sep + os.sep
 
 
-# Functions
+def gen_uid(as_hex=True):
+    '''
+    Generate a unique id (uuid4).
+
+    Args:
+        as_hex (bool): If True return hex string
+
+    Returns:
+        uid: String unique id or UUID object
+    '''
+    if as_hex:
+        return uuid4().hex
+    else:
+        return uuid4()
+
+
 def mkpath(*args, mkdir=False):
     '''
     Creates an OS aware file or directory path string. If directory,
@@ -36,19 +53,3 @@ def mkpath(*args, mkdir=False):
             path = path.replace(DBLSEP, os.sep)
         os.makedirs(path, exist_ok=True)
     return path
-
-
-def gen_uid(as_hex=True):
-    '''
-    Generate a unique id (uuid4).
-
-    Args:
-        as_hex (bool): If True return hex string
-
-    Returns:
-        uid: String unique id or UUID object
-    '''
-    if as_hex:
-        return uuid4().hex
-    else:
-        return uuid4()

@@ -4,7 +4,7 @@ File
 ===============================================
 '''
 from sqlalchemy import String, DateTime
-from exa.utils import gen_uid
+from exa.utility import gen_uid
 from exa.relational.base import datetime, Column, Integer, Base
 
 
