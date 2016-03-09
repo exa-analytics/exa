@@ -8,6 +8,8 @@ expression) replacement, insertion, and deletion.
 '''
 import re
 from io import StringIO
+from operator import itemgetter
+from collections import OrderedDict
 from exa import _os as os
 from exa.utility import mkpath
 
@@ -29,6 +31,8 @@ class Editor:
         print(len(editor))                           # 1
         editor.write(fullpath=None, user='Alice')    # "Hello Alice"
     '''
+    _fmt = '{0}: {1}\n'.format
+
     def write(self, fullpath=None, *args, **kwargs):
         '''
         Write the editor's contents to disk.
@@ -90,25 +94,41 @@ class Editor:
         Args:
             lines (list): List of line strings to append to the end of the editor
         '''
-        raise NotImplementedError()
+        if isinstance(lines, list):
+            self._lines = self._lines + lines
+        elif isinstance(lines, str):
+            lines = lines.split('\n')
+            self._lines = self._lines + lines
+        else:
+            raise TypeError('Unsupported type {0} for lines.'.format(type(lines)))
 
     def preappend(self, lines):
         '''
         Args:
             lines (list): List of line strings to insert at the beginning of the editor
         '''
-        raise NotImplementedError()
+        if isinstance(lines, list):
+            self._lines = lines + self._lines
+        elif isinstance(lines, str):
+            lines = lines.split('\n')
+            self._lines = lines + self._lines
+        else:
+            raise TypeError('Unsupported type {0} for lines.'.format(type(lines)))
 
     def insert(self, lines={}):
         '''
         Note:
-            To insert before the first line, use 0; to insert after the last
-            line use :func:`~exa.editor.Editor.append`.
+            To insert before the first line, use :func:`~exa.editor.Editor.preappend`
+            (or key 0); to insert after the last line use :func:`~exa.editor.Editor.append`.
 
         Args:
             lines (dict): Line number key, line string value dictionary to insert
         '''
-        pass
+        for i, (key, line) in enumerate(lines.items()):
+            n = key + i
+            first_half = self._lines[:n]
+            last_half = self._lines[n:]
+            self._lines = first_half + [line] + last_half
 
     def delete_blank(self):
         '''
@@ -119,9 +139,9 @@ class Editor:
             ln = line.strip()
             if ln == '':
                 to_remove.append(i)
-        self.del_lines(to_remove)
+        self.delete(to_remove)
 
-    def delete(lines):
+    def delete(self, lines):
         '''
         Delete the given line numbers.
 
@@ -130,6 +150,16 @@ class Editor:
         '''
         for k, i in enumerate(lines):
             del self[i - k]
+
+    def find(self, string):
+        '''
+        Search the editor for lines that match the string.
+        '''
+        lines = {}
+        for i, line in enumerate(self):
+            if string in line:
+                lines[i] = line
+        return OrderedDict(sorted(lines.items(), key=itemgetter(0)))
 
     @property
     def variables(self):
@@ -180,6 +210,28 @@ class Editor:
         '''
         return cls(lines_from_string(string))
 
+    def _line_repr(self, lines):
+        r = None
+        n = len(str(len(lines)))
+        for i, line in enumerate(lines):
+            ln = str(i).rjust(n, ' ')
+            if r is None:
+                r = self._fmt(ln, line)
+            else:
+                r += self._fmt(ln, line)
+        return r
+
+    def _dict_repr(self, lines):
+        r = None
+        n = len(str(max(lines.keys())))
+        for i, line in sorted(lines.items(), key=itemgetter(0)):
+            ln = str(i).rjust(n, ' ')
+            if r is None:
+                r = self._fmt(ln, line)
+            else:
+                r += self._fmt(ln, line)
+        return r
+
     def __init__(self, data, filename=None):
         '''
         Args:
@@ -219,17 +271,13 @@ class Editor:
     def __str__(self):
         return '\n'.join(self._lines)
 
+    def __contains__(self, item):
+        for obj in self:
+            if item in obj:
+                return True
+
     def __repr__(self):
-        r = None
-        fmt = '{0}: {1}\n'
-        n = len(str(len(self)))
-        for i, line in enumerate(self):
-            ln = str(i).rjust(n, ' ')
-            if r is None:
-                r = fmt.format(ln, line)
-            else:
-                r += fmt.format(ln, line)
-        return r
+        return self._line_repr(self._lines)
 
 
 def lines_from_file(path):
