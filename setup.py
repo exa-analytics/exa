@@ -11,25 +11,24 @@ dependencies = [
     'pandas>=0.17',
     'sqlalchemy>=1.0.0',
     'scikit-learn>=0.17',
-    'networkx',
+    'networkx>=1.10',
     'jupyter>=1.0.0',
     'notebook>=4.1.0',
-    'ipython>=4.0.0',
-    'ipywidgets>=4.0.0',
-    'ipyparallel>=4.0.0'
+    'ipython>=4.1.0',
+    'ipywidgets>=4.1.0',
     'matplotlib>=1.5.0',
-    'seaborn>=0.6.0',
+    'seaborn>=0.7.0',
     'sphinx>=1.3',
     'sphinx_rtd_theme>=0.1.7',
     'sphinxcontrib-autoanysrc',
-    'xmltodict'
+    'xmltodict>=0.9.0'
 ]
 
 try:
     setup(
         name='exa',
         version=__version__,
-        description='Core exa functionality',
+        description='Data processing, analysis, and visualization made simple.',
         author='Tom Duignan & Alex Marchenko',
         author_email='exa.data.analytics@gmail.com',
         url='https://exa-analytics.github.io/website',
@@ -40,16 +39,17 @@ try:
                 'static/js/*.js',
                 'static/js/libs/*.js',
                 'static/css/*.css',
-                'static/img/*.*'
-                'static/html/*.html'
+                'static/img/*.*',
+                'static/html/*.html',
+                'static/nbextensions/*.js',
+                'static/nbextensions/lib/*.js'
             ]
         },
         entry_points={'console_scripts': ['exa = exa.__main__:main']},
-        include_package_data=True
-        #install_requires=dependencies
+        include_package_data=True,
+        install_requires=dependencies
     )
+    from exa.install import finalize_installation
+    finalize_installation()
 except:
     raise
-finally:
-    from exa.tools import finalize_install
-    finalize_install()

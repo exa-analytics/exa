@@ -3,11 +3,11 @@
 Logging
 =====================
 '''
+import os
 import logging
 from logging.handlers import RotatingFileHandler
 from textwrap import wrap
-from exa import _os as os
-from exa.config import Config
+from exa import _conf
 
 
 class _LogFormat(logging.Formatter):
@@ -29,38 +29,38 @@ class _LogFormat(logging.Formatter):
         return fmt.format(record)
 
 
-log_files = {
-    'system': Config.syslog,
-    'test': Config.testlog,
-    'user': Config.userlog
-}
-
-
-loggers = {
-    'system': logging.getLogger('system'),
-    'test': logging.getLogger('test'),
-    'user': logging.getLogger('user')
-}
-
-
-def setup():
-    '''
-    Should only be called on package import. Sets up logging style
-    for the rest of the package.
-    '''
-    for handler in logging.root.handlers:     # Remove default handlers
-        logging.root.removeHandler(handler)
-    for name, path in log_files.items():
-        handler = RotatingFileHandler(
-            path,
-            maxBytes=Config.max_log_bytes,
-            backupCount=Config.max_log_count
-        )
-        handler.setFormatter(_LogFormat())
-        loggers[name].addHandler(handler)
-        loggers[name].setLevel(logging.DEBUG)
-
-
+#log_files = {
+#    'system': _conf.syslog,
+#    'test': _conf.testlog,
+#    'user': _conf.userlog
+#}
+#
+#
+#loggers = {
+#    'system': logging.getLogger('system'),
+#    'test': logging.getLogger('test'),
+#    'user': logging.getLogger('user')
+#}
+#
+#
+#def setup():
+#    '''
+#    Should only be called on package import. Sets up logging style
+#    for the rest of the package.
+#    '''
+#    for handler in logging.root.handlers:     # Remove default handlers
+#        logging.root.removeHandler(handler)
+#    for name, path in log_files.items():
+#        handler = RotatingFileHandler(
+#            path,
+#            maxBytes=_conf.max_log_bytes,
+#            backupCount=_conf.max_log_count
+#        )
+#        handler.setFormatter(_LogFormat())
+#        loggers[name].addHandler(handler)
+#        loggers[name].setLevel(logging.DEBUG)
+#
+#
 def get_logger(name='system'):
     '''
     Get one of the loggers available to exa.
@@ -77,38 +77,39 @@ def get_logger(name='system'):
         raise KeyError('Unknown logger name')
 
 
-def log_tail(log='sys', n=10):
-    '''
-    Displays the most recent messages of the specified log file.
-
-    Args
-        log (str): One of ['sys', 'rel', 'doc', 'num', 'unit']
-        n (int): Number of lines to display
-    '''
-    _show_log(log, n)
-
-
-def log_head(log='sys', n=10):
-    '''
-    Displays the earliest messages of the specified log file.
-
-    Args
-        log (str): One of ['sys', 'rel', 'doc', 'num', 'unit']
-        n (int): Number of lines to display
-    '''
-    _show_log(log, n, True)
-
-
-def _show_log(log, n, head=False):
-    '''
-    See Also:
-        This function is called by :func:`~exa.log.head` and
-        :func:`~exa.log.tail`, not usually called directly.
-    '''
-    lines = None
-    with open(Config[log + 'log'], 'r') as f:
-        lines = f.readlines()
-    if head:
-        print('\n'.join(lines[:n]))
-    else:
-        print('\n'.join(lines[-n:]))
+#def log_tail(log='sys', n=10):
+#    '''
+#    Displays the most recent messages of the specified log file.
+#
+#    Args
+#        log (str): One of ['sys', 'rel', 'doc', 'num', 'unit']
+#        n (int): Number of lines to display
+#    '''
+#    _show_log(log, n)
+#
+#
+#def log_head(log='sys', n=10):
+#    '''
+#    Displays the earliest messages of the specified log file.
+#
+#    Args
+#        log (str): One of ['sys', 'rel', 'doc', 'num', 'unit']
+#        n (int): Number of lines to display
+#    '''
+#    _show_log(log, n, True)
+#
+#
+#def _show_log(log, n, head=False):
+#    '''
+#    See Also:
+#        This function is called by :func:`~exa.log.head` and
+#        :func:`~exa.log.tail`, not usually called directly.
+#    '''
+#    lines = None
+#    with open(_conf[log + 'log'], 'r') as f:
+#        lines = f.readlines()
+#    if head:
+#        print('\n'.join(lines[:n]))
+#    else:
+#        print('\n'.join(lines[-n:]))
+#

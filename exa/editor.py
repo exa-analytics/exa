@@ -161,6 +161,16 @@ class Editor:
                 lines[i] = line
         return OrderedDict(sorted(lines.items(), key=itemgetter(0)))
 
+    def regex(self, pattern):
+        '''
+        Search the editro for lines matching the regular expression.
+        '''
+        lines = {}
+        for i, line in enumerate(self):
+            if re.match(pattern, line):
+                lines[i] = line
+        return OrderedDict(sorted(lines.items(), key=itemgetter(0)))
+
     @property
     def variables(self):
         '''
@@ -239,7 +249,9 @@ class Editor:
             filename: Name of file or None
         '''
         self.filename = filename
-        if os.path.isfile(data):
+        if isinstance(data, list):
+            self._lines = data
+        elif os.path.exists(data):
             self._lines = lines_from_file(data)
             self.filename = os.path.basename(data)
         elif isinstance(data, StringIO):
@@ -247,8 +259,6 @@ class Editor:
             self.filename = data.name if hasattr(data, 'name') else None
         elif isinstance(data, str):
             self._lines = lines_from_string(data)
-        elif isinstance(data, list):
-            self._lines = data
         else:
             raise TypeError('Unknown type for arg data: {}'.format(type(data)))
 

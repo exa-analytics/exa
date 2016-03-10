@@ -4,11 +4,11 @@ Exceptions, Errors, and Warnings
 ==================================
 All base level exceptions are defined here.
 '''
-from exa import _re as re
-from exa.decorator import logger
+import re
+#from exa.decorator import logger
 
 
-@logger
+#@logger
 class ExaException(Exception):
     '''
     Exception with support for logging.

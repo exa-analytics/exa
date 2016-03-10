@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-Base Relational Objects
+Base Table for Relational Objects
 ===============================================
 This module outlines the event-based content management system established by exa and creates
 a complex base table (schema) class, :class:`~exa.relational.base.Base`. The schema base class's
@@ -9,26 +9,41 @@ tables to be able to have HTML representations (within the `Jupyter notebook`_).
 
 .. _Jupyter notebook: http://jupyter.org/
 '''
+__all__ = ['_create_all']
+
+
+import pandas as pd
 from uuid import UUID
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, create_engine, event
 from sqlalchemy.orm import sessionmaker, mapper
 from sqlalchemy.orm.query import Query
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
-from exa import _pd as pd
-from exa.config import Config
-from exa.utility import gen_uid
+from exa import _conf
+from exa.utility import uid
 
 
-class Meta(DeclarativeMeta):
+class BaseMeta(DeclarativeMeta):
     '''
-    '''
-    def __len__(self):                         # Length of the table (in database)
-        return db_sess.query(self).count()
+    This class defines the :class:`~exa.relational.base.Base` class instance.
+    Its primary function is to allow custom variable getting at the class
+    object level:
 
-    def __iter__(self):                        # Iterate over every entry in the database
-        for item in db_sess.query(self).all():
+    .. code:: Python
+
+        obj = exa.relational.base.Meta['some key']
+    '''
+    def __len__(self):
+        session = SessionMaker()
+        n = session.query(self).count()
+        session.close()
+        return n
+
+    def __iter__(self):
+        session = SessionMaker()
+        for item in session.query(self).all():
             yield item
+        session.close()
 
     def __getitem__(self, key):
         '''
@@ -44,19 +59,23 @@ class Meta(DeclarativeMeta):
             c[::4]    # container (via the :class:`~exa.relational.container.Container`'s __getitem__)
 
         '''
+        session = SessionMaker()
+        obj = None
         if isinstance(key, int):
-            return db_sess.query(self).filter(self.pkid == key).one()
+            obj = session.query(self).filter(self.pkid == key).one()
         elif isinstance(key, str) and hasattr(self, 'name'):
-            return db_sess.query(self).filter(self.name == key).one()
+            obj = session.query(self).filter(self.name == key).one()
         elif isinstance(key, UUID) and hasattr(self, 'uid'):
-            return db_sess.query(self).filter(self.uid == key.hex).one()
+            obj = session.query(self).filter(self.uid == key.hex).one()
         elif hasattr(self, '_getitem'):
-            return self._getitem(key)    # Allows for custom getters specific to certain classes
+            obj = self._getitem(key, session)
         else:
             raise KeyError('Unknown key {0}.'.format(key))
+        session.close()
+        return obj
 
 
-@as_declarative(metaclass=Meta)
+@as_declarative(metaclass=BaseMeta)
 class Base:
     '''
     Declarative base class (used by SQLAlchemy) to initialize relational tables.
@@ -66,10 +85,6 @@ class Base:
     @declared_attr
     def __tablename__(cls):
         return cls.__name__.lower()
-
-    @declared_attr
-    def __categories__(cls):
-        return []
 
     @classmethod
     def bulk_insert(cls, data):
@@ -83,30 +98,34 @@ class Base:
         Args:
             data (list): List of dictionary objects (mappings - see the example above)
         '''
+        session = SessionMaker()
         try:
-            db_sess.bulk_insert_mappings(cls, data)
+            session.bulk_insert_mappings(cls, data)
+            session.commit()
         except:
-            db_sess.rollback()
+            session.rollback()
             raise
+        finally:
+            session.close()
 
     @classmethod
-    def table(cls):
+    def table(cls, force_full=False):
         '''
-        Display a :py:class:`~pandas.DataFrame` representation of the table.
+        Args:
+            force_full (bool): Force return of the complete table
 
         Returns:
             df (:py:class:`~pandas.DataFrame`): In memory table copy
         '''
-        df = pd.read_sql(db_sess.query(cls).statement, engine.connect())
-        for column in cls.__categories__:
-            df[column] = df[column].astype('category')
+        session = SessionMaker()
+        df = pd.read_sql(session.query(cls).statement, engine)
+        session.close()
         if 'pkid' in df.columns:
-            return df.set_index('pkid')
-        else:
-            return df
+            df.set_index('pkid', inplace=True)
+        return df
 
     def __repr__(cls):
-        return '{0}({1})'.format(cls.__class__.__name__, cls.pkid)
+        return '{0}(pkid: {1})'.format(cls.__class__.__name__, cls.pkid)
 
 
 class Name:
@@ -120,7 +139,7 @@ class HexUID:
     '''
     Mixin when a unique ID is required.
     '''
-    hexuid = Column(String(32), default=gen_uid)
+    hexuid = Column(String(32), default=uid)
 
     @property
     def uid(self):
@@ -150,7 +169,7 @@ class Disk:
     file_count = Column(Integer)
 
 
-def create_all():
+def _create_all():
     '''
     Create all tables if they do not already exist in the database.
 
@@ -177,11 +196,12 @@ def commit(*args, **kwargs):
     are automatically added to the database session (db_sess) and that committing
     these objects does not normally have to be performed manually.
     '''
-    try:
-        db_sess.commit()
-    except:
-        db_sess.rollback()
-        raise
+    pass
+    #try:
+    #    db_sess.commit()
+    #except:
+    #    db_sess.rollback()
+    #    raise
 
 
 @event.listens_for(Base, 'before_insert')            # Before inserting a new object
@@ -202,7 +222,6 @@ def base_before_update(mapper, connection, target):  # update its timestamps.
     print('before update')
 
 
-engine_name = Config.relational_engine()
+engine_name = _conf['exa_relational']
 engine = create_engine(engine_name)
-DBSession = sessionmaker(bind=engine)
-db_sess = DBSession()    # Database session (note that this is an unscoped session)
+SessionMaker = sessionmaker(bind=engine)

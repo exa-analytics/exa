@@ -1,19 +1,22 @@
 # -*- coding: utf-8 -*-
 '''
-Helper Functions
+Utility Functions
 ====================
+These functions are simply syntactic sugar. They help cleanup the code base by
+providing a cleaner API for commonly used functions.
 '''
-import os
-from uuid import uuid4
-from itertools import product
-from notebook import install_nbextension
-from exa.config import Config
+__all__ = ['uid', 'mkp']
 
 
-DBLSEP = os.sep + os.sep
+from os import makedirs as _mkdirs
+from os import sep as _sep
+from uuid import uuid4 as _uuid4
 
 
-def gen_uid(as_hex=True):
+_sep2 = _sep + _sep
+
+
+def uid(as_hex=True):
     '''
     Generate a unique id (uuid4).
 
@@ -24,16 +27,14 @@ def gen_uid(as_hex=True):
         uid: String unique id or UUID object
     '''
     if as_hex:
-        return uuid4().hex
+        return _uuid4().hex
     else:
-        return uuid4()
+        return _uuid4()
 
 
-def mkpath(*args, mkdir=False):
+def mkp(*args, mk=False, exist_ok=True):
     '''
-    Creates an OS aware file or directory path string. If directory,
-    can create on disk (if mkdir is True, default False). Does not
-    throw a warning if the directory already exists.
+    Generate a directory path, and create it if requested.
 
     .. code-block:: Python
 
@@ -42,14 +43,15 @@ def mkpath(*args, mkdir=False):
 
     Args
         \*args: File or directory path segments to be concatenated
-        mkdir (bool): Make the directory (returns None)
+        mk (bool): Make the directory (returns None)
+        exist_ok (bool): Don't raise warning if director already exists (default True)
 
     Returns
         path (str): OS aware file or directory path
     '''
-    path = os.sep.join(list(args))
-    if mkdir:
-        while DBLSEP in path:
-            path = path.replace(DBLSEP, os.sep)
-        os.makedirs(path, exist_ok=True)
+    path = _sep.join(list(args))
+    if mk:
+        while _sep2 in path:
+            path = path.replace(_sep2, _sep)
+        _mkdirs(path, exist_ok=exist_ok)
     return path

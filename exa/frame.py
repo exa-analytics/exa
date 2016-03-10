@@ -3,9 +3,12 @@
 Custom DataFrame for exa Analytics
 ====================================
 '''
+__all__ = ['DataFrame']
+
+
+import numpy as np
+import pandas as pd
 from traitlets import Unicode, Dict
-from exa import _np as np
-from exa import _pd as pd
 from exa.error import RequiredIndexError, RequiredColumnError
 
 
@@ -65,7 +68,7 @@ class DataFrame(pd.DataFrame):
                 name = '_'.join(('', self.__class__.__name__.lower(), trait))
                 if trait in self.columns:
                     if self._groupbys:
-                        traits[name] = groups.apply(lambda group: group[trait].values).to_json()
+                        traits[name] = groups.apply(lambda group: group[trait].astype('O').values).to_json()
                     else:
                         traits[name] = self[trait].to_json(orient='values')
                 else:

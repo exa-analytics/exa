@@ -3,19 +3,23 @@
 Isotope Data
 ===============================================
 '''
+__all__ = ['Isotope']
+
+
+import pandas as pd
 from itertools import product
 from sqlalchemy import String, Float
-from exa import _pd as pd
-from exa.relational.base import Base, Column, Integer
-from exa.relational.base import Meta as _Meta
-from exa.relational.base import db_sess
+from sqlalchemy import Column, Integer, String
+from exa.relational.base import SessionMaker, BaseMeta, Base
+from exa.frame import DataFrame
 
 
-class Meta(_Meta):
+class Meta(BaseMeta):
     '''
     This class provides methods available to the :class:`~exa.relational.isotopes.Isotope`
     class object used to efficiently look up data stored in the database.
     '''
+    _session = SessionMaker()
     _symbols_to_radii_map = None    # {'HH': 1.21, ...}
     _element_mass_map = None        # See the properties below: this pattern is
     _Z_to_symbol_map = None         # used so that we cache the result once computed.
@@ -96,7 +100,7 @@ class Meta(_Meta):
         Returns:
             isotope (:class:`~exa.relational.isotopes.Isotope`): Isotope object
         '''
-        return db_sess.query(self).filter(self.strid == strid).one()
+        return self._session.query(self).filter(self.strid == strid).one()
 
     def get_by_symbol(self, symbol):
         '''
@@ -108,7 +112,7 @@ class Meta(_Meta):
         Returns:
             isotopes (list): List of isotope with the given symbol
         '''
-        return db_sess.query(self).filter(self.symbol == symbol).all()
+        return self._session.query(self).filter(self.symbol == symbol).all()
 
     def get_by_szuid(self, szuid):
         '''
@@ -120,7 +124,7 @@ class Meta(_Meta):
         Returns:
             isotope (:class:`~exa.relational.isotopes.Isotope`): Isotope object
         '''
-        return db_sess.query(self).filter(self.szuid == szuid).one()
+        return self._session.query(self).filter(self.szuid == szuid).one()
 
     def get_by_pkid(self, pkid):
         '''
@@ -132,7 +136,7 @@ class Meta(_Meta):
         Returns:
             isotope (:class:`~exa.relational.isotopes.Isotope`): Isotope object
         '''
-        return db_sess.query(self).filter(self.pkid == pkid).one()
+        return self._session.query(self).filter(self.pkid == pkid).one()
 
     def __getitem__(self, key):
         '''
@@ -174,8 +178,6 @@ class Isotope(Base, metaclass=Meta):
     symbol = Column(String(length=3))
     szuid = Column(Integer)
     strid = Column(Integer)
-
-    __categories__ = ['name', 'symbol']
 
     @classmethod
     def symbol_to_mass(cls):

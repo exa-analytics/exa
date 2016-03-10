@@ -21,12 +21,12 @@ from exa.utility import mkpath
 from datetime import datetime as dt
 
 
-ContainerFile = Table(
-    'containerfile',
-    Base.metadata,
-    Column('container_pkid', Integer, ForeignKey('container.pkid', onupdate='CASCADE', ondelete='CASCADE')),
-    Column('file_pkid', Integer, ForeignKey('file.pkid', onupdate='CASCADE', ondelete='CASCADE'))
-)
+#ContainerFile = Table(
+#    'containerfile',
+#    Base.metadata,
+#    Column('container_pkid', Integer, ForeignKey('container.pkid', onupdate='CASCADE', ondelete='CASCADE')),
+#    Column('file_pkid', Integer, ForeignKey('file.pkid', onupdate='CASCADE', ondelete='CASCADE'))
+#)
 
 
 class ContainerMeta(traitlets.MetaHasTraits, Meta):

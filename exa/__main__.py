@@ -2,7 +2,8 @@
 '''
 exa Web Application
 =====================
-This is the starter for exa's standalone web application.
+This module starts up the web GUI. Rather than having a standalone graphical
+client, exa's GUI is presented as a web client.
 '''
 import argparse
 import webbrowser
