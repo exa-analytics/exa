@@ -29,6 +29,15 @@ class _LogFormat(logging.Formatter):
         return fmt.format(record)
 
 
+def get_logfile_path(name):
+    '''
+    Get the log file path for the log with the given name.
+    '''
+    for log_file in log_files:
+        if name in log_file:
+            return log_file
+
+
 def log_names():
     '''
     Lists available log names.

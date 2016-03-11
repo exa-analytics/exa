@@ -12,6 +12,8 @@ _sns.set_style('white')
 
 from exa._config import _conf, show_conf, _cleanup_exa_root
 from exa.log import log_names, log_head, log_tail
+from exa.test import unit_tests, doc_tests
+from exa import tests
 from exa import relational
 
 

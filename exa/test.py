@@ -5,12 +5,14 @@ Unit and Doc Testing Base Classes
 Extends the functionality of standard documentation and unit testing for use
 inside the Jupyter notebook (interactive testing) and automatic logging.
 '''
-import unittest
+import sys
 import doctest
+import unittest
+from exa.log import get_logfile_path
+from exa.utility import datetime_header
 
 
-testlog = get_logger('test').handlers[0].baseFilename
-
+log_sys = get_logfile_path('log_sys')
 
 
 class UnitTester(unittest.TestCase):
@@ -33,30 +35,16 @@ class UnitTester(unittest.TestCase):
         result = None
         if log:
             with open(testlog, 'a') as f:
+                f.write(datetime_header())
                 result = unittest.TextTestRunner(f, verbosity=2).run(suite)
         else:
             result = unittest.TextTestRunner(verbosity=2).run(suite)
         return result
 
 
-def unit_tests(log=False):
+def doc_tests(verbose=True, log=False):
     '''
-    Perform (interactive) unit testing logging the results.
-
-    Args
-        log (bool): Send results to system log (default False)
-    '''
-    tests = UnitTester.__subclasses__()
-    if log:
-        with open(testlog, 'a') as f:
-            f.write(header())
-    for test in tests:
-        test.run_interactively(log=log)
-
-
-def run_doctests(verbose=True, log=False):
-    '''
-    Execute all exa doc tests loaded in the current session.
+    Perform (interactive) doc(string) testing logging the results.
 
     Args
         verbose (bool): Verbose output (default True)
@@ -86,8 +74,22 @@ def run_doctests(verbose=True, log=False):
     modules.sort(key=lambda module: module.__file__)
     if log:
         with open(testlog, 'a') as f:
-            f.write(header())
+            f.write(datetime_header())
             tester(modules, runner, f=f)
     else:
-        print(header())
         tester(modules, runner)
+
+
+def unit_tests(log=False):
+    '''
+    Perform (interactive) unit testing logging the results.
+
+    Args
+        log (bool): Send results to system log (default False)
+    '''
+    tests = UnitTester.__subclasses__()
+    if log:
+        with open(testlog, 'a') as f:
+            f.write(datetime_header())
+    for test in tests:
+        test.run_interactively(log=log)
