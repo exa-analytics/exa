@@ -70,11 +70,11 @@ _conf['nbext_localdir'] = mkp(pkg, 'static', 'nbextensions')
 
 
 # Check what type of Python session this is (python/ipython or jupyter notebook)
-_conf['notebook_active'] = False
+_conf['notebook'] = False
 try:
     cfg = get_ipython().config
     if 'IPKernelApp' in cfg:
-        _conf['notebook_active'] = True
+        _conf['notebook'] = True
 except:
     pass
 
@@ -95,7 +95,7 @@ except:
 
 
 # Set default relational database
-_conf['exa_relational'] = 'sqlite:///{}/{}'.format(_conf['exa_root'], 'exa.sqlite')
+_conf['exa_relational'] = 'sqlite:///{}'.format(mkp(_conf['exa_root'], 'exa.sqlite'))
 
 
 # Update the _confuration if existing _confuration exists

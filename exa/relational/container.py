@@ -5,20 +5,16 @@ Relational Container
 This version of the container object has no visualization capability. It is
 used with
 '''
-import traitlets
-from ipywidgets import DOMWidget
+import os
+import sys
+import numpy as np
+import pandas as pd
 from sqlalchemy import Column, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
-from exa import _os as os
-from exa import _sys as sys
-from exa import _pd as pd
-from exa import _np as np
-from exa.config import Config
+from exa import _conf
 from exa.frame import DataFrame, Updater, ManyToMany
 from exa.relational.base import Column, Integer, Base, Name, HexUID, Time, Disk, Meta, event
-from exa.utility import mkpath
-
-from datetime import datetime as dt
+from exa.utility import mkp
 
 
 #ContainerFile = Table(
@@ -28,14 +24,7 @@ from datetime import datetime as dt
 #    Column('file_pkid', Integer, ForeignKey('file.pkid', onupdate='CASCADE', ondelete='CASCADE'))
 #)
 
-
-class ContainerMeta(traitlets.MetaHasTraits, Meta):
-    '''
-    '''
-    pass
-
-
-class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMeta):
+class Container(Name, HexUID, Time, Disk, Base):
     '''
     Containers control data manipulation, processing, and provide convenient
     visualizations.
@@ -172,13 +161,8 @@ class Container(DOMWidget, Name, HexUID, Time, Disk, Base, metaclass=ContainerMe
         for name in self.__dfclasses__.keys():
             value = self[name]
             if isinstance(value, DataFrame):
-                print(name)
-                st = dt.now()
                 values = self[name].get_trait_values()
-                print('values: ', (dt.now() - st).total_seconds())
-                st = dt.now()
                 self._add_unicode_traits(**values)
-                print('add: ', (dt.now() - st).total_seconds())
 
     def _save(self, path=None):
         '''
