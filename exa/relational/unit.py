@@ -2,46 +2,38 @@
 '''
 Units and Dimensions
 ===============================================
+This module provides relational classes for unit conversion tables.
 '''
-from sqlalchemy import and_, String, Float
-from exa.relational.base import Meta as _Meta
-from exa.relational.base import Base, Column, db_sess
+from sqlalchemy import and_, String, Float, Column
+from exa.relational.base import BaseMeta, Base, SessionMaker
 
 
-class Meta(_Meta):
+class Meta(BaseMeta):
     '''
     '''
+    aliases = {}
+
     def _getitem(cls, key):
-        if isinstance(key, tuple):
-            f = key[0]
-            t = key[1]
-            return db_sess.query(cls).filter(and_(cls.from_unit == f, cls.to_unit == t)).one().factor
-        else:
-            raise TypeError('Key must be a tuple not {0}'.format(type(key)))
+        '''
+        Allows for selection of a conversion factor using the following syntax:
 
-    def from_alias(cls, source, target):
+        .. code-block:: Python
+
+            from exa.relational import Length
+            Length['angstrom', 'au']
+            1.88973
+            Length['A', 'au']
+            1.88973
         '''
-        Attempt to find a conversion factor using alternative names.
-        '''
-        f = source
-        t = target
-        try:
-            f = cls.aliases[source]
-        except:
-            try:
-                f = cls.aliases[source.lower()]
-            except:
-                pass
-            pass
-        try:
-            t = cls.aliases[target]
-        except:
-            try:
-                t = cls.aliases[target.lower()]
-            except:
-                pass
-            pass
-        return cls[f, t]
+        if isinstance(key, tuple):
+            f = cls.aliases[key[0]] if key[0] in cls.aliases else key[0]
+            t = cls.aliases[key[1]] if key[1] in cls.aliases else key[1]
+            session = SessionMaker()
+            factor = session.query(cls).filter(and_(cls.from_unit==f, cls.to_unit==t)).one().factor
+            session.close()
+            return factor
+        else:
+            raise TypeError('Usage requires syntax Class["from_unit", "to_unit"]')
 
 
 class Dimension:

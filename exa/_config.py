@@ -5,9 +5,6 @@ Configuration
 This module determines what type of Python session is being used (Jupyter
 notebook or other) and what optional dependencies are installed.
 '''
-__all__ = ['show_conf', '_conf', '_cleanup_exa_root']
-
-
 import os
 import platform
 import getpass
@@ -55,6 +52,8 @@ _conf['nbext_sysdir'] = mkp(jupyter_data_dir(), 'nbextensions', 'exa')
 _conf['log_db'] = mkp(_conf['exa_root'], 'db.log')
 _conf['log_sys'] = mkp(_conf['exa_root'], 'sys.log')
 _conf['log_user'] = mkp(_conf['exa_root'], 'user.log')
+_conf['logfile_max_bytes'] = 1048576
+_conf['logfile_max_count'] = 5
 
 
 # Internal package paths

@@ -14,11 +14,11 @@ class _LogFormat(logging.Formatter):
     '''
     Systematic log formatting (for all logging levels).
     '''
+    spacing = '                                     '
     log_basic = '%(asctime)19s - %(levelname)8s'
     debug_format = '''%(asctime)19s - %(levelname)8s - %(pathname)s:%(lineno)d
                                      %(message)s'''
     info_format = '''%(asctime)19s - %(levelname)8s - %(message)s'''
-    spacing = '                                     '
     log_formats = {logging.DEBUG: debug_format, logging.INFO: info_format,
                    logging.WARNING: info_format, logging.ERROR: debug_format,
                    logging.CRITICAL: debug_format}
@@ -29,87 +29,57 @@ class _LogFormat(logging.Formatter):
         return fmt.format(record)
 
 
-#log_files = {
-#    'system': _conf.syslog,
-#    'test': _conf.testlog,
-#    'user': _conf.userlog
-#}
-#
-#
-#loggers = {
-#    'system': logging.getLogger('system'),
-#    'test': logging.getLogger('test'),
-#    'user': logging.getLogger('user')
-#}
-#
-#
-#def setup():
-#    '''
-#    Should only be called on package import. Sets up logging style
-#    for the rest of the package.
-#    '''
-#    for handler in logging.root.handlers:     # Remove default handlers
-#        logging.root.removeHandler(handler)
-#    for name, path in log_files.items():
-#        handler = RotatingFileHandler(
-#            path,
-#            maxBytes=_conf.max_log_bytes,
-#            backupCount=_conf.max_log_count
-#        )
-#        handler.setFormatter(_LogFormat())
-#        loggers[name].addHandler(handler)
-#        loggers[name].setLevel(logging.DEBUG)
-#
-#
-def get_logger(name='system'):
+def log_names():
     '''
-    Get one of the loggers available to exa.
-
-    Args:
-        name (str): One of ['system', 'test', 'user']
+    Lists available log names.
 
     Returns:
-        logger (:class:`~logging.Logger`): Logging object
+        names (list): List of available log names
     '''
-    if name in loggers:
-        return loggers[name]
+    return [handler.name for handler in logging.handlers]
+
+
+def log_head(log='log_sys', n=10):
+    '''
+    Print the oldest log messages.
+
+    Args:
+        log (str): Log name
+        n (int): Number of lines to print
+    '''
+    _print_log(log, n, True)
+
+
+def log_tail(log='log_sys', n=10):
+    '''
+    Print the most recent log messages.
+
+    Args:
+        log (str): Log name
+        n (int): Number of lines to print
+    '''
+    _print_log(log, n, False)
+
+
+def _print_log(log, n, head=True):
+    lines = None
+    with open(_conf[log], 'r') as f:
+        lines = f.read().splitlines()
+    if head:
+        print('\n'.join(lines[:n]))
     else:
-        raise KeyError('Unknown logger name')
+        print('\n'.join(lines[-n:]))
 
 
-#def log_tail(log='sys', n=10):
-#    '''
-#    Displays the most recent messages of the specified log file.
-#
-#    Args
-#        log (str): One of ['sys', 'rel', 'doc', 'num', 'unit']
-#        n (int): Number of lines to display
-#    '''
-#    _show_log(log, n)
-#
-#
-#def log_head(log='sys', n=10):
-#    '''
-#    Displays the earliest messages of the specified log file.
-#
-#    Args
-#        log (str): One of ['sys', 'rel', 'doc', 'num', 'unit']
-#        n (int): Number of lines to display
-#    '''
-#    _show_log(log, n, True)
-#
-#
-#def _show_log(log, n, head=False):
-#    '''
-#    See Also:
-#        This function is called by :func:`~exa.log.head` and
-#        :func:`~exa.log.tail`, not usually called directly.
-#    '''
-#    lines = None
-#    with open(_conf[log + 'log'], 'r') as f:
-#        lines = f.readlines()
-#    if head:
-#        print('\n'.join(lines[:n]))
-#    else:
-#        print('\n'.join(lines[-n:]))
-#
+log_files = dict((key, value) for key, value in _conf.items() if key.startswith('log_'))
+# Remove all default handlers
+for handler in logging.root.handlers:
+    logging.root.removeHandler(handler)
+# Add custom handlers
+for i, (key, path) in enumerate(log_files.items()):
+    handler = RotatingFileHandler(path, maxBytes=_conf['logfile_max_bytes'],
+                                  backupCount=_conf['logfile_max_count'])
+    handler.setFormatter(_LogFormat())
+    logging.root.addHandler(handler)
+    logging.root.handlers[i].setLevel(logging.DEBUG)
+    logging.root.handlers[i].set_name(key)

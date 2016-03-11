@@ -1,21 +1,16 @@
 # -*- coding: utf-8 -*-
 '''
-Testers
-==================
-Functionality for systematic unittests and doctests
+Unit and Doc Testing Base Classes
+==================================
+Extends the functionality of standard documentation and unit testing for use
+inside the Jupyter notebook (interactive testing) and automatic logging.
 '''
 import unittest
 import doctest
-from datetime import datetime
-from exa import _sys as sys
-from exa.log import get_logger
 
 
 testlog = get_logger('test').handlers[0].baseFilename
 
-
-def header():
-    return '\n'.join(('=' * 80, str(datetime.now()), '=' * 80))
 
 
 class UnitTester(unittest.TestCase):
@@ -44,12 +39,12 @@ class UnitTester(unittest.TestCase):
         return result
 
 
-def run_unittests(log=False):
+def unit_tests(log=False):
     '''
-    Execute all exa unit tests loaded in the current session.
+    Perform (interactive) unit testing logging the results.
 
     Args
-        log (bool): If True, write output to log file rather than screen.
+        log (bool): Send results to system log (default False)
     '''
     tests = UnitTester.__subclasses__()
     if log:

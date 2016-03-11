@@ -9,9 +9,6 @@ tables to be able to have HTML representations (within the `Jupyter notebook`_).
 
 .. _Jupyter notebook: http://jupyter.org/
 '''
-__all__ = ['_create_all']
-
-
 import pandas as pd
 from uuid import UUID
 from datetime import datetime
@@ -33,19 +30,38 @@ class BaseMeta(DeclarativeMeta):
 
         obj = exa.relational.base.Meta['some key']
     '''
-    def __len__(self):
+    def __len__(cls):
         session = SessionMaker()
-        n = session.query(self).count()
+        n = session.query(cls).count()
         session.close()
         return n
 
-    def __iter__(self):
+    def __contains__(cls, obj):
+        '''
+        Can check if conversions for a specific unit exist.
+
+        .. code-block:: Python
+
+            'A' in exa.relational.Length
+        '''
+        if hasattr(cls, 'from_unit'):
+            from_unit = cls.table()['from_unit'].values
+            if obj in cls.aliases:
+                obj = cls.aliases[obj]
+            if obj in from_unit:
+                return True
+        else:
+            raise NotImplementedError()
+        return False
+
+
+    def __iter__(cls):
         session = SessionMaker()
-        for item in session.query(self).all():
+        for item in session.query(cls).all():
             yield item
         session.close()
 
-    def __getitem__(self, key):
+    def __getitem__(cls, key):
         '''
         This is called when a user attempts to slice/select an entry from the
         database table (the metaclass of the object is a representation of the
@@ -62,13 +78,13 @@ class BaseMeta(DeclarativeMeta):
         session = SessionMaker()
         obj = None
         if isinstance(key, int):
-            obj = session.query(self).filter(self.pkid == key).one()
-        elif isinstance(key, str) and hasattr(self, 'name'):
-            obj = session.query(self).filter(self.name == key).one()
-        elif isinstance(key, UUID) and hasattr(self, 'uid'):
-            obj = session.query(self).filter(self.uid == key.hex).one()
-        elif hasattr(self, '_getitem'):
-            obj = self._getitem(key, session)
+            obj = session.query(cls).filter(cls.pkid == key).one()
+        elif isinstance(key, str) and hasattr(cls, 'name'):
+            obj = session.query(cls).filter(cls.name == key).one()
+        elif isinstance(key, UUID) and hasattr(cls, 'uid'):
+            obj = session.query(cls).filter(cls.uid == key.hex).one()
+        elif hasattr(cls, '_getitem'):
+            obj = cls._getitem(key, session)
         else:
             raise KeyError('Unknown key {0}.'.format(key))
         session.close()
@@ -93,7 +109,8 @@ class Base:
 
         .. code-block:: Python
 
-            [{'column1': 'foo', 'column2': 42, 'column3': 'bar'}]
+            mappings = [{'column1': 'foo', 'column2': 42, 'column3': 'bar'}]
+            Table.bulk_insert(mappings)
 
         Args:
             data (list): List of dictionary objects (mappings - see the example above)
@@ -130,6 +147,7 @@ class Base:
 
 class Name:
     '''
+    Mixin providing name and description fields.
     '''
     name = Column(String)
     description = Column(String)
@@ -137,7 +155,7 @@ class Name:
 
 class HexUID:
     '''
-    Mixin when a unique ID is required.
+    Mixin providing a unique ID.
     '''
     hexuid = Column(String(32), default=uid)
 
@@ -148,8 +166,7 @@ class HexUID:
 
 class Time:
     '''
-    Mixin for when date and time stamps for created, accessed, and modified
-    are required
+    Mixin providing timestamp information.
     '''
     created = Column(DateTime, default=datetime.now)
     modified = Column(DateTime, default=datetime.now)
@@ -164,6 +181,7 @@ class Time:
 
 class Disk:
     '''
+    Mixin providing disk utilization information.
     '''
     size = Column(Integer)
     file_count = Column(Integer)
@@ -178,48 +196,6 @@ def _create_all():
         namespace will attempt to be created.
     '''
     Base.metadata.create_all(engine)
-
-
-@event.listens_for(mapper, 'init')             # Any time an object is created,
-def add_to_db(obj, args, kwargs):              # add it to the database session
-    '''
-    All relational objects are automatically added to the database session on
-    instantiation.
-    '''
-    db_sess.add(obj)
-
-
-@event.listens_for(Query, 'before_compile')    # Always commit before querying (SELECT)
-def commit(*args, **kwargs):
-    '''
-    Commit all of the objects currently in the session. Note that objects
-    are automatically added to the database session (db_sess) and that committing
-    these objects does not normally have to be performed manually.
-    '''
-    pass
-    #try:
-    #    db_sess.commit()
-    #except:
-    #    db_sess.rollback()
-    #    raise
-
-
-@event.listens_for(Base, 'before_insert')            # Before inserting a new object
-def base_before_insert(mapper, connection, target):  # update its timestamps.
-    '''
-    Update timestampes and save :class:`~exa.frames.DataFrame` data to disk
-    before inserting to the database.
-    '''
-    print('before insert')
-
-
-@event.listens_for(Base, 'before_update')            # Before inserting a new object
-def base_before_update(mapper, connection, target):  # update its timestamps.
-    '''
-    Update timestampes and save :class:`~exa.frames.DataFrame` data to disk
-    before updating the database.
-    '''
-    print('before update')
 
 
 engine_name = _conf['exa_relational']

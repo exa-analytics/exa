@@ -5,15 +5,21 @@ Utility Functions
 These functions are simply syntactic sugar. They help cleanup the code base by
 providing a cleaner API for commonly used functions.
 '''
-__all__ = ['uid', 'mkp']
+from os import makedirs
+from os import sep
+from uuid import uuid4
+from datetime import datetime
 
 
-from os import makedirs as _mkdirs
-from os import sep as _sep
-from uuid import uuid4 as _uuid4
+sep2 = sep + sep
 
 
-_sep2 = _sep + _sep
+def datetime_header():
+    '''
+    Creates a simple header string containing the current date/time stamp
+    delimited using "=".
+    '''
+    return '\n'.join(('=' * 80, str(datetime.now()), '=' * 80))
 
 
 def uid(as_hex=True):
@@ -27,9 +33,9 @@ def uid(as_hex=True):
         uid: String unique id or UUID object
     '''
     if as_hex:
-        return _uuid4().hex
+        return uuid4().hex
     else:
-        return _uuid4()
+        return uuid4()
 
 
 def mkp(*args, mk=False, exist_ok=True):
@@ -49,9 +55,9 @@ def mkp(*args, mk=False, exist_ok=True):
     Returns
         path (str): OS aware file or directory path
     '''
-    path = _sep.join(list(args))
+    path = sep.join(list(args))
     if mk:
-        while _sep2 in path:
-            path = path.replace(_sep2, _sep)
-        _mkdirs(path, exist_ok=exist_ok)
+        while sep2 in path:
+            path = path.replace(sep2, sep)
+        makedirs(path, exist_ok=exist_ok)
     return path

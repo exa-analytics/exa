@@ -10,8 +10,9 @@ _sns.set_palette('colorblind')                # defaults...
 _sns.set_style('white')
 
 
-from exa._config import *
-from exa.relational import *
+from exa._config import _conf, show_conf, _cleanup_exa_root
+from exa.log import log_names, log_head, log_tail
+from exa import relational
 
 
 if _conf['exa_persistent']:
