@@ -25,23 +25,25 @@ def install(persistent=False):
     Args:
         persistent (bool): If True, will install exa to the ~/.exa directory
     '''
-    _create_all()
-    _load_isotope_data()
-    _load_unit_data()
-    _load_constant_data()
-    _install_notebook_widgets()
+    if persistent:
+        raise NotImplementedError('Persistent state exa not yet working...')
+    else:
+        _create_all()
+        _load_isotope_data()
+        _load_unit_data()
+        _load_constant_data()
+        _install_notebook_widgets()
 
 
 def _load_isotope_data():
     '''
     Load static isotope data into the database.
     '''
-    df = pd.read_json(_conf['static_isotopes.json'])
-    df.sort_values(['Z', 'A'], inplace=True)
-    df.reset_index(drop=True, inplace=True)
+    df = pd.read_json(_conf['static_isotopes.json'], orient='values')
+    df.columns = ('A', 'Z', 'af', 'eaf', 'color', 'radius', 'gfactor', 'mass', 'emass',
+                  'name', 'eneg', 'quadmom', 'spin', 'symbol', 'szuid', 'strid')
+    df.index.names = ['pkid']
     df.reset_index(inplace=True)
-    df['pkid'] = df['index']
-    del df['index']
     df.to_sql(name='isotope', con=engine, index=False, if_exists='replace')
 
 

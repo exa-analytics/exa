@@ -1,8 +1,7 @@
-Initialization and Configuration
-==================================
-
-.. automodule:: exa.config
+Configuration and Installation
+-------------------------------------
+.. automodule:: exa._config
     :members:
 
-.. automodule:: exa.log
+.. automodule:: exa._install
     :members:

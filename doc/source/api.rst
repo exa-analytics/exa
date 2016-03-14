@@ -6,7 +6,9 @@ Python
 .. toctree::
     :maxdepth: 2
 
-    exa.rst
+    modules/config.rst
+    relational.rst
+    tests.rst
 
 JavaScript
 -------------------

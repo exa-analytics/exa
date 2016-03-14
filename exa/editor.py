@@ -6,12 +6,12 @@ Text-editor-like functionality for programatically manipulating raw text input
 and output files. Supports commonly used logic such as (simple or regular
 expression) replacement, insertion, and deletion.
 '''
+import os
 import re
 from io import StringIO
 from operator import itemgetter
 from collections import OrderedDict
-from exa import _os as os
-from exa.utility import mkpath
+from exa.utility import mkp
 
 
 class Editor:

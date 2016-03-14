@@ -29,5 +29,5 @@ class WidgetContainer(_Container, DOMWidget, metaclass=ContainerMeta):
 
 
 Container = BaseContainer
-if _conf['notebook]:
+if _conf['notebook']:
     Container = WidgetContainer

@@ -12,7 +12,7 @@ _sns.set_style('white')
 
 from exa._config import _conf, show_conf, _cleanup_exa_root
 from exa.log import log_names, log_head, log_tail
-from exa.test import unit_tests, doc_tests
+from exa.test import run_doctests, run_unittests
 from exa import tests
 from exa import relational
 
@@ -25,20 +25,3 @@ else:
 
 
 _ae.register(_cleanup_exa_root)
-
-
-#_ae.register(Config.save)
-#from exa.log import log_tail, log_head, setup
-#setup()
-#from exa.testing import run_unittests, run_doctests
-#from exa.frame import DataFrame
-#from exa.relational import Container
-#from exa.editor import Editor
-#_ae.register(relational.cleanup_sessions)
-#_ae.register(relational.commit)
-#if Config._temp:
-#    _ae.register(Config.cleanup)
-#    relational.create_all()
-#if Config.interactive:
-#    from exa.install import initialize_database
-#    initialize_database()

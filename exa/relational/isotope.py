@@ -3,23 +3,19 @@
 Isotope Data
 ===============================================
 '''
-__all__ = ['Isotope']
-
-
 import pandas as pd
 from itertools import product
 from sqlalchemy import String, Float
 from sqlalchemy import Column, Integer, String
-from exa.relational.base import SessionMaker, BaseMeta, Base
+from exa.relational.base import BaseMeta, Base, SessionFactory
 from exa.frame import DataFrame
 
 
-class Meta(BaseMeta):
+class _Meta(BaseMeta):
     '''
-    This class provides methods available to the :class:`~exa.relational.isotopes.Isotope`
+    This class provides methods available to the :class:`~exa.relational.isotope.Isotope`
     class object used to efficiently look up data stored in the database.
     '''
-    _session = SessionMaker()
     _symbols_to_radii_map = None    # {'HH': 1.21, ...}
     _element_mass_map = None        # See the properties below: this pattern is
     _Z_to_symbol_map = None         # used so that we cache the result once computed.
@@ -100,7 +96,7 @@ class Meta(BaseMeta):
         Returns:
             isotope (:class:`~exa.relational.isotopes.Isotope`): Isotope object
         '''
-        return self._session.query(self).filter(self.strid == strid).one()
+        return SessionFactory().query(self).filter(self.strid == strid).one()
 
     def get_by_symbol(self, symbol):
         '''
@@ -112,7 +108,7 @@ class Meta(BaseMeta):
         Returns:
             isotopes (list): List of isotope with the given symbol
         '''
-        return self._session.query(self).filter(self.symbol == symbol).all()
+        return SessionFactory().query(self).filter(self.symbol == symbol).all()
 
     def get_by_szuid(self, szuid):
         '''
@@ -124,7 +120,7 @@ class Meta(BaseMeta):
         Returns:
             isotope (:class:`~exa.relational.isotopes.Isotope`): Isotope object
         '''
-        return self._session.query(self).filter(self.szuid == szuid).one()
+        return SessionFactory().query(self).filter(self.szuid == szuid).one()
 
     def get_by_pkid(self, pkid):
         '''
@@ -136,7 +132,7 @@ class Meta(BaseMeta):
         Returns:
             isotope (:class:`~exa.relational.isotopes.Isotope`): Isotope object
         '''
-        return self._session.query(self).filter(self.pkid == pkid).one()
+        return SessionFactory().query(self).filter(self.pkid == pkid).one()
 
     def __getitem__(self, key):
         '''
@@ -158,9 +154,30 @@ class Meta(BaseMeta):
             raise TypeError('Key type {0} not supported.'.format(type(key)))
 
 
-class Isotope(Base, metaclass=Meta):
+class Isotope(Base, metaclass=_Meta):
     '''
     A variant of a chemical element with a specific proton and neutron count.
+
+    >>> h = Isotope['1H']
+    >>> h.A
+    1
+    >>> h.Z
+    1
+    >>> h.mass
+    1.0078250321
+    >>> Isotope.symbol_to_mass()['H']
+    1.0076788974703454
+    >>> Isotope['C']
+    [8C, 9C, 10C, 11C, 12C, 13C, 14C, 15C, 16C, 17C, 18C, 19C, 20C, 21C, 22C]
+    >>> Isotope['13C'].szuid
+    175
+    >>> c = Isotope[175]
+    >>> c.A
+    13
+    >>> c.Z
+    6
+    >>> c.strid
+    '13C'
     '''
     A = Column(Integer, nullable=False)
     Z = Column(Integer, nullable=False)
@@ -181,11 +198,44 @@ class Isotope(Base, metaclass=Meta):
 
     @classmethod
     def symbol_to_mass(cls):
+        '''
+        Series containing element symbols and their respective mass (in a.u.).
+
+        >>> Isotope.symbol_to_mass().head()    # .head() used to truncate the full series
+        symbol
+        Ac    227.027752
+        Ag    107.869877
+        Al     26.981539
+        Am    240.630767
+        Ar     39.947843
+        Name: fmass, dtype: float64
+
+        Note:
+            The resulting mass the isotope abundance fraction averaged "element"
+            mass.
+        '''
         return cls.element_mass_map
 
     @classmethod
     def symbols_to_radii(cls):
-        return cls.symbols_to_radii
+        '''
+        Series containing element symbol pairs and their respective sum of
+        covalent radii (in a.u.).
+
+        >>> Isotope.symbols_to_radii().head()    # Try without .head()
+        HH     1.209425
+        HD     1.209425
+        HT     1.209425
+        HHe    1.473986
+        HLi    3.118048
+        Name: radius, dtype: float64
+
+        Note:
+            The covalent radii data are taken from `this reference`_.
+
+            .. _this reference: http://doi.org/10.1039/b801115j
+        '''
+        return cls.symbols_to_radii_map
 
     def __repr__(self):
         return '{0}{1}'.format(self.A, self.symbol)

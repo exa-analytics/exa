@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
-from exa.relational.base import _create_all
-from exa.relational.unit import (Length, Mass, Time, Current, Temperature,
-                                 Amount, Luminosity, Dose, Acceleration,
-                                 Angle, Charge, Dipole, Energy, Force,
+from exa.relational.base import _create_all, session_scope
+from exa.relational.unit import (Length, Mass, Time, Current, Amount,
+                                 Luminosity, Dose, Acceleration,
+                                 Charge, Dipole, Energy, Force,
                                  Frequency, MolarMass)
 from exa.relational.isotope import Isotope
+from exa.relational.constant import Constant
+from exa.relational import tests
 #from exa.relational.base import commit, Base, create_all
 
 #from exa.relational.session import Session, cleanup_sessions

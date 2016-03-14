@@ -12,6 +12,7 @@ tables to be able to have HTML representations (within the `Jupyter notebook`_).
 import pandas as pd
 from uuid import UUID
 from datetime import datetime
+from contextlib import contextmanager
 from sqlalchemy import Column, Integer, String, DateTime, create_engine, event
 from sqlalchemy.orm import sessionmaker, mapper
 from sqlalchemy.orm.query import Query
@@ -22,21 +23,60 @@ from exa.utility import uid
 
 class BaseMeta(DeclarativeMeta):
     '''
-    This class defines the :class:`~exa.relational.base.Base` class instance.
-    Its primary function is to allow custom variable getting at the class
-    object level:
-
-    .. code:: Python
-
-        obj = exa.relational.base.Meta['some key']
+    This class defines the behavior of the :class:`~exa.relational.base.Base`
+    object. It provides methods for convenient class level look up.
     '''
-    def __len__(cls):
-        session = SessionMaker()
-        n = session.query(cls).count()
-        session.close()
+    def _get_by_pkid(self, pkid):
+        '''
+        Select a single entry using the primary key.
+
+        Returns:
+            entry: Single entry with given pkid
+        '''
+        return SessionFactory().query(self).filter(self.pkid == key).one()
+
+    def _get_by_str(self, string):
+        '''
+        Select entries using a string identifier: first tries to find objects
+        using the "name" field then by alternate fields.
+
+        Returns:
+            data (list): List of matching entries
+        '''
+        value = None
+        session = SessionFactory()
+        if hasattr(self, 'name'):
+            value = session.query(self).filter(self.name == string).all()
+        elif hasattr(self, 'symbol'):
+            value = session.query(self).filter(self.symbol == string).all()
+            if len(value) == 1:
+                value = value[0]
+        elif hasattr(self, 'from_unit'):
+            value = session.query(self).filter(self.from_unit == string).all()
+        else:
+            session.close_all()
+            raise TypeError('Selection by string arguments not supported for {}'.format(self.__name__))
+        return value
+
+    def _get_by_uid(self, uid):
+        '''
+        Select an entry using a unique ID.
+
+        Returns:
+            entry: Single entry with given uid
+        '''
+        value = None
+        if hasattr(self, 'uid'):
+            return SessionFactory().query(self).filter(self.uid == uid).one()
+        else:
+            raise AttributeError('No uid attribute for {}'.format(self.__name__))
+
+    def __len__(self):
+        with session_scope() as session:        # Don't need to keep the session
+            n = session.query(self).count()     # around after counting
         return n
 
-    def __contains__(cls, obj):
+    def __contains__(self, obj):
         '''
         Can check if conversions for a specific unit exist.
 
@@ -44,50 +84,30 @@ class BaseMeta(DeclarativeMeta):
 
             'A' in exa.relational.Length
         '''
-        if hasattr(cls, 'from_unit'):
-            from_unit = cls.table()['from_unit'].values
-            if obj in cls.aliases:
-                obj = cls.aliases[obj]
+        if hasattr(self, 'from_unit'):
+            from_unit = self.table()['from_unit'].values
+            if obj in self.aliases:
+                obj = self.aliases[obj]
             if obj in from_unit:
                 return True
         else:
             raise NotImplementedError()
         return False
 
-
-    def __iter__(cls):
-        session = SessionMaker()
-        for item in session.query(cls).all():
+    def __iter__(self):
+        for item in SessionFactory().query(self).all():
             yield item
-        session.close()
 
-    def __getitem__(cls, key):
-        '''
-        This is called when a user attempts to slice/select an entry from the
-        database table (the metaclass of the object is a representation of the
-        table). This is not the getitem function that is called when a user
-        attempts to slice an entry instance.
-
-        .. code-block:: Python
-
-            c = exa.Container[1]    # Loads the container with pkid == 1 (via this __getitem__)
-            c[1]      # Slices the first (multiindex) level of each dataframe attached to this
-            c[::4]    # container (via the :class:`~exa.relational.container.Container`'s __getitem__)
-
-        '''
-        session = SessionMaker()
+    def __getitem__(self, key):
         obj = None
         if isinstance(key, int):
-            obj = session.query(cls).filter(cls.pkid == key).one()
-        elif isinstance(key, str) and hasattr(cls, 'name'):
-            obj = session.query(cls).filter(cls.name == key).one()
-        elif isinstance(key, UUID) and hasattr(cls, 'uid'):
-            obj = session.query(cls).filter(cls.uid == key.hex).one()
-        elif hasattr(cls, '_getitem'):
-            obj = cls._getitem(key, session)
-        else:
-            raise KeyError('Unknown key {0}.'.format(key))
-        session.close()
+            obj = self._get_by_pkid()
+        elif isinstance(key, str):
+            obj = self._get_by_str(key)
+        elif isinstance(key, UUID):
+            obj = self._get_by_uid(key)
+        if obj is None and hasattr(self, '_getitem'):
+            obj = self._getitem(key)
         return obj
 
 
@@ -105,7 +125,7 @@ class Base:
     @classmethod
     def bulk_insert(cls, data):
         '''
-        Perform a bulk insert into a specific table.
+        Perform a `bulk insert`_ into a specific table.
 
         .. code-block:: Python
 
@@ -113,17 +133,12 @@ class Base:
             Table.bulk_insert(mappings)
 
         Args:
-            data (list): List of dictionary objects (mappings - see the example above)
+            data (list): List of dictionary objects
+
+        .. _bulk insert: http://docs.sqlalchemy.org/en/latest/orm/session_api.html
         '''
-        session = SessionMaker()
-        try:
+        with session_scope() as session:
             session.bulk_insert_mappings(cls, data)
-            session.commit()
-        except:
-            session.rollback()
-            raise
-        finally:
-            session.close()
 
     @classmethod
     def table(cls, force_full=False):
@@ -134,9 +149,9 @@ class Base:
         Returns:
             df (:py:class:`~pandas.DataFrame`): In memory table copy
         '''
-        session = SessionMaker()
-        df = pd.read_sql(session.query(cls).statement, engine)
-        session.close()
+        df = None
+        with session_scope() as session:
+            df = pd.read_sql(session.query(cls).statement, engine)
         if 'pkid' in df.columns:
             df.set_index('pkid', inplace=True)
         return df
@@ -191,13 +206,31 @@ def _create_all():
     '''
     Create all tables if they do not already exist in the database.
 
-    Note:
+    Warning:
         When this function is called only class objects loaded in the current
-        namespace will attempt to be created.
+        namespace will be created.
     '''
     Base.metadata.create_all(engine)
 
 
+@contextmanager
+def session_scope():
+    '''
+    Separation of transaction management from actual work using a `context manager`_.
+
+    .. _context manager: http://docs.sqlalchemy.org/en/latest/orm/session_basics.html
+    '''
+    session = SessionFactory()
+    try:
+        yield session
+        session.commit()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()    # Occurs regardless if an exception is raised or not
+
+
 engine_name = _conf['exa_relational']
 engine = create_engine(engine_name)
-SessionMaker = sessionmaker(bind=engine)
+SessionFactory = sessionmaker(bind=engine)

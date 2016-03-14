@@ -11,6 +11,7 @@ import getpass
 import json
 import pprint
 import shutil
+from uuid import uuid4
 from tempfile import gettempdir
 from notebook.nbextensions import jupyter_data_dir
 from exa.utility import mkp
@@ -21,7 +22,12 @@ _filename = 'config.json'
 
 def show_conf():
     '''
-    Read-only representation of the current configuration
+    Read-only representation of the current configuration.
+
+    .. code-block:: Python
+
+        >>> 'exa_root' in _conf
+        True
     '''
     pprint.pprint(_conf)
 
@@ -47,7 +53,7 @@ if os.path.exists(dot_exa):
     _conf['exa_root'] = dot_exa
     _conf['exa_persistent'] = True
 else:
-    _conf['exa_root'] = mkp(gettempdir(), '.exa', mk=True)
+    _conf['exa_root'] = mkp(gettempdir(), 'exa' + uuid4().hex, mk=True)
 _conf['nbext_sysdir'] = mkp(jupyter_data_dir(), 'nbextensions', 'exa')
 _conf['log_db'] = mkp(_conf['exa_root'], 'db.log')
 _conf['log_sys'] = mkp(_conf['exa_root'], 'sys.log')

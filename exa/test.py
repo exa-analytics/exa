@@ -25,16 +25,16 @@ class UnitTester(unittest.TestCase):
         '''
         Run a test suite interactively (e.g. in an IPython notebook).
 
-        Args
+        Args:
             log (bool): Write output to a log file instead of to stdout
 
-        Returns
+        Returns:
             result (:class:`unittest.TestResult`): Test result
         '''
         suite = unittest.TestLoader().loadTestsFromTestCase(cls)
         result = None
         if log:
-            with open(testlog, 'a') as f:
+            with open(log_sys, 'a') as f:
                 f.write(datetime_header())
                 result = unittest.TextTestRunner(f, verbosity=2).run(suite)
         else:
@@ -42,11 +42,46 @@ class UnitTester(unittest.TestCase):
         return result
 
 
-def doc_tests(verbose=True, log=False):
+class TestTester(UnitTester):
+    '''
+    Functions that test the :class:`~exa.test.UnitTester` itself as well as
+    foundational modules, :mod:`~exa._config`, :mod:`~exa._log`,
+    and :mod:`~exa.utility`.
+    '''
+    def test_config(self):
+        '''
+        Check that access to the configuration object is possible and that
+        the root exa directory and relational database exist.
+        '''
+        import os
+        from exa._config import _conf
+        self.assertIsInstance(_conf, dict)
+        self.assertIn('exa_root', _conf)
+        self.assertTrue(os.path.exists(_conf['exa_root']))
+        del os, _conf
+
+    def test_log(self):
+        '''
+        Check that log file paths are accessible.
+        '''
+        import os
+        from exa.log import get_logfile_path
+        path = get_logfile_path(name='log_sys')
+        self.assertTrue(os.path.exists(path))
+        del os, get_logfile_path
+
+    def test_utility(self):
+        '''
+        Check that the datetime_header imported correctly.
+        '''
+        self.assertTrue(hasattr(datetime_header, '__call__'))
+
+
+def run_doctests(verbose=True, log=False):
     '''
     Perform (interactive) doc(string) testing logging the results.
 
-    Args
+    Args:
         verbose (bool): Verbose output (default True)
         log (bool): If True, write output to log file rather than screen.
     '''
@@ -73,18 +108,18 @@ def doc_tests(verbose=True, log=False):
     modules = [v for k, v in sys.modules.items() if k.startswith('exa')]
     modules.sort(key=lambda module: module.__file__)
     if log:
-        with open(testlog, 'a') as f:
+        with open(log_sys, 'a') as f:
             f.write(datetime_header())
             tester(modules, runner, f=f)
     else:
         tester(modules, runner)
 
 
-def unit_tests(log=False):
+def run_unittests(log=False):
     '''
     Perform (interactive) unit testing logging the results.
 
-    Args
+    Args:
         log (bool): Send results to system log (default False)
     '''
     tests = UnitTester.__subclasses__()

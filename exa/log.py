@@ -35,7 +35,7 @@ def get_logfile_path(name):
     '''
     for log_file in log_files:
         if name in log_file:
-            return log_file
+            return log_files[log_file]
 
 
 def log_names():
