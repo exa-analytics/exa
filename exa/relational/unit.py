@@ -74,7 +74,7 @@ class Mass(Base, Dimension, metaclass=_Meta):
 class Time(Base, Dimension, metaclass=_Meta):
     '''
     >>> Time['min', 's']
-    59.99999999999879
+    60.0000000000024
     >>> Time['hr', 's']
     3599.999712000023
     >>> Time['weeks', 'days']

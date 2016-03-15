@@ -17,14 +17,12 @@ ContainerFile = Table(
 )
 
 
-class RelationalContainer(Name, HexUID, Time, Disk, Base):
+class Container(Name, HexUID, Time, Disk, Base):
     '''
     Containers control data manipulation, processing, and provide convenient
     visualizations.
     '''
-    __tablename__ = 'container'
-    # Relational information
-    container_type = Column(String(16))
+    container_type = Column(String(32))
     files = relationship('File', secondary=ContainerFile, backref='containers', cascade='all, delete')
     __mapper_args__ = {
         'polymorphic_identity': 'container',   # This allows the container to

@@ -15,7 +15,8 @@ from exa.log import log_names, log_head, log_tail
 from exa.test import run_doctests, run_unittests
 from exa import tests
 from exa import relational
-from exa.editor import Editor
+from exa.container import Container
+#from exa.editor import Editor
 #from exa.container import Container
 
 
@@ -26,6 +27,6 @@ else:
     install()
 
 
-_ae.register(_config._cleanup)          # Register function in opposite desired
-_ae.register(log._cleanup)              # run order: "FILO"
+_ae.register(_config._cleanup)          # Register functions in opposite desired
+_ae.register(log._cleanup)              # run order, first-in-last-out "FILO"
 _ae.register(relational.base._cleanup)
