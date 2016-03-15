@@ -80,10 +80,25 @@ def _print_log(log, n, head=True):
         print('\n'.join(lines[-n:]))
 
 
+def _cleanup():
+    '''
+    Clean up logging file handlers.
+    '''
+    _remove_handlers()
+
+
+def _remove_handlers():
+    '''
+    Clean up logging file handlers.
+    '''
+    handlers = logging.root.handlers[:]
+    for handler in handlers:
+        handler.close()
+        logging.root.removeHandler(handler)
+
+
 log_files = dict((key, value) for key, value in _conf.items() if key.startswith('log_'))
-# Remove all default handlers
-for handler in logging.root.handlers:
-    logging.root.removeHandler(handler)
+_remove_handlers()
 # Add custom handlers
 for i, (key, path) in enumerate(log_files.items()):
     handler = RotatingFileHandler(path, maxBytes=_conf['logfile_max_bytes'],

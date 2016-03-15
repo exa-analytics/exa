@@ -11,8 +11,8 @@ import getpass
 import json
 import pprint
 import shutil
-from uuid import uuid4
-from tempfile import gettempdir
+import stat
+from tempfile import mkdtemp
 from notebook.nbextensions import jupyter_data_dir
 from exa.utility import mkp
 
@@ -32,13 +32,12 @@ def show_conf():
     pprint.pprint(_conf)
 
 
-def _cleanup_exa_root():
+def _cleanup():
     '''
-    If non-persistent session, cleanup when done.
+    Remove root directory in non-persistent session.
     '''
     if not _conf['exa_persistent']:
         shutil.rmtree(_conf['exa_root'])
-
 
 
 _conf = {}    # Global configuration object
@@ -53,7 +52,7 @@ if os.path.exists(dot_exa):
     _conf['exa_root'] = dot_exa
     _conf['exa_persistent'] = True
 else:
-    _conf['exa_root'] = mkp(gettempdir(), 'exa' + uuid4().hex, mk=True)
+    _conf['exa_root'] = mkdtemp()
 _conf['nbext_sysdir'] = mkp(jupyter_data_dir(), 'nbextensions', 'exa')
 _conf['log_db'] = mkp(_conf['exa_root'], 'db.log')
 _conf['log_sys'] = mkp(_conf['exa_root'], 'sys.log')

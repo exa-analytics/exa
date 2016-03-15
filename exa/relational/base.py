@@ -213,14 +213,21 @@ def _create_all():
     Base.metadata.create_all(engine)
 
 
+def _cleanup():
+    '''
+    Cleanup the engine's connection pool before exiting.
+    '''
+    engine.dispose()
+
+
 @contextmanager
-def session_scope():
+def session_scope(*args, **kwargs):
     '''
     Separation of transaction management from actual work using a `context manager`_.
 
     .. _context manager: http://docs.sqlalchemy.org/en/latest/orm/session_basics.html
     '''
-    session = SessionFactory()
+    session = SessionFactory(*args, **kwargs)
     try:
         yield session
         session.commit()
@@ -229,6 +236,15 @@ def session_scope():
         raise
     finally:
         session.close()    # Occurs regardless if an exception is raised or not
+
+
+@event.listens_for(mapper, 'init')
+def _auto_add(obj, args, kwargs):
+    '''
+    Automatically add all new objects to a session.
+    '''
+    with session_scope(expire_on_commit=False) as session:
+        session.add(obj)
 
 
 engine_name = _conf['exa_relational']

@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 '''
-Widget
+Container (Widget)
 =======================
-The workspace is a way to track and interact with different sets of
-:class:`~exa.relational.Session` objects, which themselves that keep track of
-user work. This includes :class:`~exa.relational.Program`s,
-:class:`~exa.relational.Project`s, :class:`~exa.relational.Job`s,
-:class:`~exa.relational.File`s, and :class:`~exa.relational.Container`s.
+Functionality for using Jupyter notebook extensions to visualize data containers.
 '''
 from ipywidgets import DOMWidget
 from traitlets import Unicode
@@ -15,8 +11,10 @@ from traitlets import Unicode
 class Widget(DOMWidget):
     '''
     '''
-    _view_module = Unicode('nbextensions/exa/static/js/exa.dashboard.widget', sync=True)
-    _view_name = Unicode('DashboardView', sync=True)
-
-    def __init__(self):
-        super().__init__()
+    _ipy_disp = DOMWidget._ipython_display_
+    _view_module = traitlets.Unicode('nbextensions/exa/container').tag(sync=True)
+    _view_name = traitlets.Unicode('ContainerView').tag(sync=True)
+    width = traitlets.Integer(850).tag(sync=True)
+    height = traitlets.Integer(500).tag(sync=True)
+    _gui_width = traitlets.Integer(250).tag(sync=True)
+    _fps = traitlets.Integer(24).tag(sync=True)

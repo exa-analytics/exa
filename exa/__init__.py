@@ -10,11 +10,13 @@ _sns.set_palette('colorblind')                # defaults...
 _sns.set_style('white')
 
 
-from exa._config import _conf, show_conf, _cleanup_exa_root
+from exa._config import _conf, show_conf
 from exa.log import log_names, log_head, log_tail
 from exa.test import run_doctests, run_unittests
 from exa import tests
 from exa import relational
+from exa.editor import Editor
+#from exa.container import Container
 
 
 if _conf['exa_persistent']:
@@ -24,4 +26,6 @@ else:
     install()
 
 
-_ae.register(_cleanup_exa_root)
+_ae.register(_config._cleanup)          # Register function in opposite desired
+_ae.register(log._cleanup)              # run order: "FILO"
+_ae.register(relational.base._cleanup)

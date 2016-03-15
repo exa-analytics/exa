@@ -4,28 +4,31 @@ Container
 ===============================================
 '''
 from traitlets import MetaHasTraits
-from ipywidgets import DOMWidget
 from exa import _conf
-from exa.relational.base import Meta
+from exa.widget import Widget
+from exa.relational.base import BaseMeta
 from exa.relational.container import RelationalContainer
 
 
 class BaseContainer(RelationalContainer):
     '''
+    The data container.
     '''
-    __tablename__ = 'container'
+    __dfs = {}
 
 
-class ContainerMeta(traitlets.MetaHasTraits, Meta):
+class ContainerMeta(MetaHasTraits, BaseMeta):
     '''
+    A dummy metaclass to enable inheritence from both :class:`~ipywidget.DOMWidget`
+    and :class:`~exa.relational.RelationalContainer`.
     '''
     pass
 
 
-class WidgetContainer(_Container, DOMWidget, metaclass=ContainerMeta):
+class WidgetContainer(Widget, BaseContainer, metaclass=ContainerMeta):
     '''
     '''
-    __tablename__ = 'container'
+    pass
 
 
 Container = BaseContainer

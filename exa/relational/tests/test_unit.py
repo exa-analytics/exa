@@ -21,7 +21,7 @@ class TestUnit(UnitTester):
         tbl = Acceleration.table()
         self.assertIsInstance(tbl, pd.DataFrame)
 
-    def test_getitem(self):
+    def test_factor(self):
         '''
         Ensure that conversion factors can be selected from the tables.
         '''

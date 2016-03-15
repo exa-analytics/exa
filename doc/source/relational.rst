@@ -17,3 +17,11 @@ Static Tables
     :maxdepth: 2
 
     relational/static_tables.rst
+
+
+Content Management Tables
+------------------------------
+.. toctree::
+    :maxdepth: 2
+
+    relational/object_storage.rst
