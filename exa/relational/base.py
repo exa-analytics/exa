@@ -18,7 +18,7 @@ from sqlalchemy.orm import sessionmaker, mapper
 from sqlalchemy.orm.query import Query
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
 from exa import _conf
-from exa.utility import uid
+from exa.utility import uid as _uid
 
 
 class BaseMeta(DeclarativeMeta):
@@ -65,16 +65,12 @@ class BaseMeta(DeclarativeMeta):
         Returns:
             entry: Single entry with given uid
         '''
-        value = None
-        if hasattr(self, 'uid'):
-            return SessionFactory().query(self).filter(self.uid == uid).one()
+        if isinstance(uid, uuid.UUID):
+            return SessionFactory().query(self).filter(self.hexuid == uid.hex).one()
+        elif isinstance(uid, str):
+            return SessionFactory().query(self).filter(self.hexuid == uid).one()
         else:
-            raise AttributeError('No uid attribute for {}'.format(self.__name__))
-
-    def __len__(self):
-        with session_scope() as session:        # Don't need to keep the session
-            n = session.query(self).count()     # around after counting
-        return n
+            raise TypeError('uid must be of type str or UUID, not {}'.format(type(uid)))
 
     def __contains__(self, obj):
         '''
@@ -123,7 +119,7 @@ class Base:
         return cls.__name__.lower()
 
     @classmethod
-    def bulk_insert(cls, data):
+    def _bulk_insert(cls, data):
         '''
         Perform a `bulk insert`_ into a specific table.
 
@@ -143,18 +139,43 @@ class Base:
     @classmethod
     def table(cls, force_full=False):
         '''
+        Create a DataFrame representation of the current table.
+
         Args:
             force_full (bool): Force return of the complete table
 
         Returns:
             df (:py:class:`~pandas.DataFrame`): In memory table copy
+
+        See Also:
+            :class:`~exa.container.Standard` and the (source code)
+            comments therein.
+
+        Warning:
+            If performing this action on a very large table, may raise a
+            memory error. In this case it is more effective to perform a
+            custom select query then convert the result to a DataFrame.
         '''
         df = None
         with session_scope() as session:
             df = pd.read_sql(session.query(cls).statement, engine)
         if 'pkid' in df.columns:
             df.set_index('pkid', inplace=True)
+        for column in df.columns:    # Mask the auxiliary pkid columns if applicable
+            if 'id' in column and len(column) == 4:
+                if df.index.names == ['pkid']:
+                    del df[column]
+                else:
+                    df.set_index(column, inplace=True)
+                    df.index.names = ['pkid']
         return df
+
+    def _save(self):
+        '''
+        Save the relational object to the database.
+        '''
+        with session_scope(expire_on_commit=False) as session:
+            session.add(self)
 
     def __repr__(cls):
         return '{0}(pkid: {1})'.format(cls.__class__.__name__, cls.pkid)
@@ -172,7 +193,7 @@ class HexUID:
     '''
     Mixin providing a unique ID.
     '''
-    hexuid = Column(String(32), default=uid)
+    hexuid = Column(String(32), default=_uid)
 
     @property
     def uid(self):
@@ -187,19 +208,26 @@ class Time:
     modified = Column(DateTime, default=datetime.now)
     accessed = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
-    def update_accessed(self):
+    def _update_accessed(self):
         self.accessed = datetime.now()
 
-    def update_modified(self):
+    def _update_modified(self):
         self.modified = datetime.now()
 
 
 class Disk:
     '''
     Mixin providing disk utilization information.
+
+    Attributes:
+        nfiles (int): Number of associated files (in the file table)
+        size (int): Total size on disk (in KiB) (of all files)
+
+    See Also:
+        :class:`~exa.relational.file.File`
     '''
+    nfiles = Column(Integer)
     size = Column(Integer)
-    file_count = Column(Integer)
 
 
 def _create_all():
@@ -236,15 +264,6 @@ def session_scope(*args, **kwargs):
         raise
     finally:
         session.close()    # Occurs regardless if an exception is raised or not
-
-
-@event.listens_for(mapper, 'init')
-def _auto_add(obj, args, kwargs):
-    '''
-    Automatically add all new objects to a session.
-    '''
-    with session_scope(expire_on_commit=False) as session:
-        session.add(obj)
 
 
 engine_name = _conf['exa_relational']

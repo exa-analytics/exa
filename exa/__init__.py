@@ -15,14 +15,10 @@ from exa.log import log_names, log_head, log_tail
 from exa.test import run_doctests, run_unittests
 from exa import tests
 from exa import relational
-from exa.container import Container
-#from exa.editor import Editor
-#from exa.container import Container
+from exa.relational.container import Container
 
 
-if _conf['exa_persistent']:
-    pass    # Eventually do something here
-else:
+if not _conf['exa_persistent']:
     from exa._install import install
     install()
 

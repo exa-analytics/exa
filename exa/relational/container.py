@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 '''
-Container (Relational)
+Container (Container)
 ===============================================
-Describes the database entry corresponding to a data container object.
 '''
 from sqlalchemy import Column, String, ForeignKey, Table, Integer, event
 from sqlalchemy.orm import relationship, mapper
 from exa.relational.base import Base, Name, HexUID, Time, Disk
+from exa.container import BaseContainer
 
 
 ContainerFile = Table(
@@ -17,18 +17,24 @@ ContainerFile = Table(
 )
 
 
-class Container(Name, HexUID, Time, Disk, Base):
+class Container(BaseContainer, Name, HexUID, Time, Disk, Base):
     '''
-    Containers control data manipulation, processing, and provide convenient
-    visualizations.
     '''
-    container_type = Column(String(32))
+    _ctype = Column(String(32), nullable=False)    # Container type == class name
     files = relationship('File', secondary=ContainerFile, backref='containers', cascade='all, delete')
-    __mapper_args__ = {
-        'polymorphic_identity': 'container',   # This allows the container to
-        'polymorphic_on': container_type,      # be inherited.
-        'with_polymorphic': '*'
-    }
+    __mapper_args__ = {'polymorphic_on': _ctype,
+                       'polymorphic_identity': 'container',
+                       'with_polymorphic': '*'}
+
+#    def __init__(self, *args, **kwargs):
+#        super().__init__(*args, **kwargs)
+
+    def __repr__(self):
+        c = self.__class__.__name__
+        p = self.pkid
+        n = self.name
+        u = self.hexuid
+        return '{0}({1}: {2}[{3}])'.format(c, p, n, u)
 
 
 #    def copy(self):
@@ -52,13 +58,13 @@ class Container(Name, HexUID, Time, Disk, Base):
 #        kwargs['name'] = self.name                 # All other table attributes (e.g. times)
 #        kwargs['description'] = self.description   # will be populated automatically
 #        meta = self.meta                           # Add a note about the copy
-#        meta['__copy_note__'] = 'copy of container with pkid: {0}'.format(self.pkid)
+#        meta['__copy_note__'] = 'copy of record with pkid: {0}'.format(self.pkid)
 #        kwargs['meta'] = meta
 #        return cls(**kwargs)
 #
 #    def info(self):
 #        '''
-#        Get (human readable) information about the container.
+#        Get (human readable) information about the record.
 #        '''
 #        n = self.nbytes()
 #        sizes = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'too high..']
@@ -97,7 +103,7 @@ class Container(Name, HexUID, Time, Disk, Base):
 #    @classmethod
 #    def from_archive(cls, path):
 #        '''
-#        Import a container from an archive into the current session.
+#        Import a record from an archive into the current session.
 #
 #        Note:
 #            This function will also create file entries and objects
@@ -109,16 +115,16 @@ class Container(Name, HexUID, Time, Disk, Base):
 #    def _load(cls, path):
 #        '''
 #        '''
-#        container = cls()
+#        record = cls()
 #        with pd.HDFStore(path) as store:
 #            for key in store.keys():
 #                name = key[1:]
-#                container[name] = store[key]
-#        return container
+#                record[name] = store[key]
+#        return record
 #
 #    def _update_traits(self):
 #        '''
-#        Overwritten when containers require complexe trait updating logic.
+#        Overwritten when records require complexe trait updating logic.
 #        '''
 #        self._update_df_traits()
 #        self._traits_need_update = False
@@ -276,12 +282,6 @@ class Container(Name, HexUID, Time, Disk, Base):
 #        self.meta = meta
 #        self._traits_need_update = True
 #
-#    def __repr__(self):
-#        c = self.__class__.__name__
-#        p = self.pkid
-#        n = self.name
-#        u = self.hexuid
-#        return '{0}({1}: {2}[{3}])'.format(c, p, n, u)
 #
 #    def __str__(self):
 #        return repr(self)
