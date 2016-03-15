@@ -26,9 +26,6 @@ class Container(BaseContainer, Name, HexUID, Time, Disk, Base):
                        'polymorphic_identity': 'container',
                        'with_polymorphic': '*'}
 
-#    def __init__(self, *args, **kwargs):
-#        super().__init__(*args, **kwargs)
-
     def __repr__(self):
         c = self.__class__.__name__
         p = self.pkid

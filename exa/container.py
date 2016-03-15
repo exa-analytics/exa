@@ -49,13 +49,25 @@ class BaseContainer:
         Create a copy of the current object.
         '''
         cls = self.__class__
+        meta = self.meta
         widget = self._widget.__class__
         kws = self._get_relational_kwargs(copy=True)
         dfs = self._get_dataframes(copy=True)
         kws.update(kwargs)
         kws.update(dfs)
-        meta = self.meta
         return cls(meta=meta, widget=widget, **kws)
+
+    @classmethod
+    def from_hdf(cls, path):
+        '''
+        '''
+        raise NotImplementedError()
+
+    @classmethod
+    def load(cls, pkid=None, path=None):
+        '''
+        '''
+        raise NotImplementedError()
 
     def _get_relational_kwargs(self, copy=False):
         '''
