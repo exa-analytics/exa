@@ -33,7 +33,7 @@ class BaseMeta(DeclarativeMeta):
         Returns:
             entry: Single entry with given pkid
         '''
-        return SessionFactory().query(self).filter(self.pkid == key).one()
+        return SessionFactory().query(self).filter(self.pkid == pkid).one()
 
     def _get_by_str(self, string):
         '''
@@ -97,7 +97,7 @@ class BaseMeta(DeclarativeMeta):
     def __getitem__(self, key):
         obj = None
         if isinstance(key, int):
-            obj = self._get_by_pkid()
+            obj = self._get_by_pkid(key)
         elif isinstance(key, str):
             obj = self._get_by_str(key)
         elif isinstance(key, UUID):
@@ -170,12 +170,15 @@ class Base:
                     df.index.names = ['pkid']
         return df
 
-    def _save(self):
+    def _save_record(self):
         '''
         Save the relational object to the database.
         '''
-        with session_scope(expire_on_commit=False) as session:
-            session.add(self)
+        session = SessionFactory(expire_on_commit=False)
+        session.add(self)
+        session.commit()
+        #with session_scope(expire_on_commit=False) as session:
+        #    session.add(self)
 
     def __repr__(cls):
         return '{0}(pkid: {1})'.format(cls.__class__.__name__, cls.pkid)
