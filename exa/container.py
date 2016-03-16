@@ -23,7 +23,6 @@ from exa import _conf
 from exa.widget import Widget
 
 
-_rm_keys = ('id', 'accessed', 'modified', 'files', 'created', 'size')
 _widget_default = Widget if _conf['notebook'] else None
 
 
@@ -88,11 +87,14 @@ class BaseContainer:
         '''
         kwargs = {}
         with pd.HDFStore(path) as store:
-            if '/_relational' in store.keys():
-                kwargs = store['/_relational'].to_dict()
             for key in store.keys():
-                kwargs[key[1:]] = store[key]
-        return cls(**kwargs)
+                if 'kwargs' in key:
+                    kwargs = store.get_storer(key).attrs.metadata
+                else:
+                    kwargs[key[1:]] = store[key]
+        c = cls(**kwargs)
+        c._update_accessed()
+        return c
 
     @classmethod
     def load(cls, pkid=None, path=None):
@@ -106,18 +108,26 @@ class BaseContainer:
     def _save_data(self, path=None):
         '''
         Save the dataframe (and related series) data to an `HDF5`_ file. This
-        file contains all of the
+        file contains all of the dataframe data as well as the descriptive
+        relational data attached to the current container.
         '''
+        # Check the path
         if path is None:
             path = self.hexuid + '.hdf5'
         elif os.path.isdir(path):
             path += os.sep + self.hexuid + '.hdf5'
         elif not (path.endswith('.hdf5') or path.endswith('.hdf')):
             raise ValueError('File path must have a ".hdf5" or ".hdf" extension.')
-        series = pd.Series(_prune_kws(self._kw_dict(copy=True), _rm_keys))
-        series['meta'] = str(self.meta) if self.meta else None
+        # Get the container "kwargs" - relational values and metadata
+        kwargs = self._kw_dict()
+        kwargs['meta'] = str(self.meta) if self.meta else None
+        # Remove unique data from the kwargs (i.e. primary keys)
+        del_keys = [key for key in kwargs.keys() if 'id' in key]
+        for key in del_keys:
+            del kwargs[key]
         with pd.HDFStore(path) as store:
-            store['_relational'] = series
+            store['kwargs'] = pd.Series()
+            store.get_storer('kwargs').attrs.metadata = kwargs
             for name, df in self._dataframe_dict().items():
                 store[name] = df
 
@@ -138,7 +148,9 @@ class BaseContainer:
         kws = {}
         for name, value in self.__class__.__dict__.items():
             if isinstance(value, InstrumentedAttribute):
-                kws[name] = self[name]
+                obj = self[name]
+                if obj:
+                    kws[name] = obj
         if copy:
             return kws.copy()
         else:
@@ -156,17 +168,6 @@ class BaseContainer:
                 else:
                     dfs[name] = value
         return dfs
-
-    def _kw_frame(self):
-        '''
-        Create a dataframe from the kwargs used to generate this container
-        in order to save them to HDF5.
-        '''
-        kwargs = _prune_kws(self._kw_dict(), _rm_keys)
-        df = pd.Series(kwargs).to_frame().T
-        for column in df.columns:
-            df[column] = df[column].astype(type(kwargs[column]))
-        return df
 
     def __sizeof__(self):
         '''
@@ -197,13 +198,3 @@ class BaseContainer:
         if self._widget:
             return self._widget._ipython_display_()
         return None
-
-
-def _prune_kws(kws, to_prune, how='contains'):
-    '''
-    '''
-    rkws = kws.copy()
-    for key in kws.keys():
-        if any((prune in key for prune in to_prune)):
-            del rkws[key]
-    return rkws

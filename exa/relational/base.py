@@ -125,11 +125,12 @@ class Base:
 
         .. code-block:: Python
 
-            mappings = [{'column1': 'foo', 'column2': 42, 'column3': 'bar'}]
+            mappings = [{'column1': 'foo', 'column2': 42, 'column3': 'bar'},
+                        {'column1': 'fop', 'column2': 43, 'column3': 'baz'}]
             Table.bulk_insert(mappings)
 
         Args:
-            data (list): List of dictionary objects
+            data (list): List of records as dictionary objects
 
         .. _bulk insert: http://docs.sqlalchemy.org/en/latest/orm/session_api.html
         '''
@@ -137,19 +138,12 @@ class Base:
             session.bulk_insert_mappings(cls, data)
 
     @classmethod
-    def table(cls, force_full=False):
+    def table(cls):
         '''
         Create a DataFrame representation of the current table.
 
-        Args:
-            force_full (bool): Force return of the complete table
-
         Returns:
             df (:py:class:`~pandas.DataFrame`): In memory table copy
-
-        See Also:
-            :class:`~exa.container.Standard` and the (source code)
-            comments therein.
 
         Warning:
             If performing this action on a very large table, may raise a
@@ -177,9 +171,7 @@ class Base:
         session = SessionFactory(expire_on_commit=False)
         session.add(self)
         session.commit()
-        #with session_scope(expire_on_commit=False) as session:
-        #    session.add(self)
-
+        
     def __repr__(cls):
         return '{0}(pkid: {1})'.format(cls.__class__.__name__, cls.pkid)
 
