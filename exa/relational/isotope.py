@@ -8,7 +8,6 @@ from itertools import product
 from sqlalchemy import String, Float
 from sqlalchemy import Column, Integer, String
 from exa.relational.base import BaseMeta, Base, SessionFactory
-from exa.frame import DataFrame
 
 
 class _Meta(BaseMeta):

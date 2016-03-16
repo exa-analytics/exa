@@ -44,15 +44,3 @@ class RequiredColumnError(ExaException):
     def __init__(self, missing, clsname):
         self.msg = self._msg.format(missing, clsname)
         super().__init__()
-
-
-class MissingColumns(ExaException):
-    '''
-    Raised when optional columns are missing from a
-    :class:`~exa.dataframe.DataFrame` object (these columns are required to
-    perform a specific - optional - operation).
-    '''
-    _msg = 'Can\'t perform operation. Missing column(s), {0}, in class {1}.'
-
-    def __init__(self, missing, clsname):
-        self.msg = self._msg.format(missing, clsname)

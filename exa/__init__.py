@@ -14,8 +14,10 @@ from exa._config import _conf, show_conf
 from exa.log import log_names, log_head, log_tail
 from exa.test import run_doctests, run_unittests
 from exa import tests
-from exa import relational
+#from exa import relational
 from exa.relational.container import Container
+from exa.dataframe import DataFrame
+from exa.editor import Editor
 
 
 if not _conf['exa_persistent']:

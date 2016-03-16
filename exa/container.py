@@ -18,12 +18,13 @@ See Also:
 '''
 import os
 import pandas as pd
+from sys import getsizeof
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from exa import _conf
-from exa.widget import Widget
+from exa.widget import ContainerWidget
 
 
-_widget_default = Widget if _conf['notebook'] else None
+_widget_default = ContainerWidget if _conf['notebook'] else None
 
 
 class BaseContainer:
@@ -63,8 +64,7 @@ class BaseContainer:
         '''
         Print human readable information about the container.
         '''
-        df_total_bytes = self._df_bytes()
-        n = df_total_bytes
+        n = getsizeof(self)
         sizes = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'too high..']
         for size in sizes:
             s = str(n).split('.')
@@ -131,17 +131,6 @@ class BaseContainer:
             for name, df in self._dataframe_dict().items():
                 store[name] = df
 
-    def _df_bytes(self):
-        '''
-        Compute the size of all of the attached dataframes
-        '''
-        total_bytes = 0
-        for df in self._dataframe_dict().values():
-            total_bytes += df.values.nbytes
-            total_bytes += df.index.nbytes
-            total_bytes += df.columns.nbytes
-        return total_bytes
-
     def _kw_dict(self, copy=False):
         '''
         '''
@@ -169,11 +158,32 @@ class BaseContainer:
                     dfs[name] = value
         return dfs
 
+    def _df_bytes(self):
+        '''
+        Compute the size of all of the attached dataframes
+        '''
+        total_bytes = 0
+        for df in self._dataframe_dict().values():
+            total_bytes += df.values.nbytes
+            total_bytes += df.index.nbytes
+            total_bytes += df.columns.nbytes
+        return total_bytes
+
     def __sizeof__(self):
         '''
         Sum of the dataframe sizes, trait values, and relational data.
+
+        Warning:
+            This function currently doesn't account for memory usage due to
+            traits (and the DOMWidget itself).
         '''
-        pass
+        jstot = 0  # Memory usage from the widget
+        dftot = self._df_bytes()
+        kwtot = 0
+        for key, value in self._kw_dict().items():
+            kwtot += getsizeof(key)
+            kwtot += getsizeof(value)
+        return dftot + kwtot + jstot
 
     def __getitem__(self, key):
         if isinstance(key, int):
@@ -196,5 +206,5 @@ class BaseContainer:
 
     def _repr_html_(self):
         if self._widget:
-            return self._widget._ipython_display_()
+            return self._widget._repr_html_()
         return None

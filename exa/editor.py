@@ -4,7 +4,7 @@ Editor
 ====================================
 Text-editor-like functionality for programatically manipulating raw text input
 and output files. Supports commonly used logic such as (simple or regular
-expression) replacement, insertion, and deletion.
+expression) search and replace, insert, and delete operations.
 '''
 import os
 import re
@@ -25,13 +25,13 @@ class Editor:
         template = "Hello World!\\nHello {user}"
         editor = Editor.from_template(template)
         print(editor[0])                             # "Hello World!"
-        print(editor.format(user='Bob'))             # "Hello World!\nHello Bob"
+        print(editor.format(user='Bob'))             # "Hello World!\\nHello Bob"
         print(len(editor))                           # 2
         del editor[0]                                # Deletes first line
         print(len(editor))                           # 1
         editor.write(fullpath=None, user='Alice')    # "Hello Alice"
     '''
-    _fmt = '{0}: {1}\n'.format
+    _fmt = '{0}: {1}\n'.format    # The line format
 
     def write(self, fullpath=None, *args, **kwargs):
         '''
@@ -244,6 +244,10 @@ class Editor:
 
     def __init__(self, data, filename=None):
         '''
+        The constructor can be passed any valid data argument (file path,
+        stream, or string variable) and it will determine which construction
+        method to call.
+
         Args:
             data: File path, stream, or string text
             filename: Name of file or None

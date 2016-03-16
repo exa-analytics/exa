@@ -3,6 +3,7 @@
 Container (Container)
 ===============================================
 '''
+from sys import getsizeof
 from sqlalchemy import Column, String, ForeignKey, Table, Integer, event
 from sqlalchemy.orm import relationship, mapper
 from exa.relational.base import Base, Name, HexUID, Time, Disk
@@ -32,6 +33,15 @@ class Container(BaseContainer, Name, HexUID, Time, Disk, Base):
         n = self.name
         u = self.hexuid
         return '{0}({1}: {2}[{3}])'.format(c, p, n, u)
+
+
+@event.listens_for(Container, 'before_insert')
+def _before_insert(mapper, connection, target):
+    '''
+    Before insertion update the time stamp and size.
+    '''
+    target._update_size()
+    target._update_accessed()
 
 
 #    def _update_traits(self):
@@ -64,51 +74,6 @@ class Container(BaseContainer, Name, HexUID, Time, Disk, Base):
 #            if isinstance(value, DataFrame):
 #                values = self[name].get_trait_values()
 #                self._add_unicode_traits(**values)
-#
-#    def _save(self, path=None):
-#        '''
-#        '''
-#        if path is None:
-#            path = mkpath(os.getcwd(), self.uid.hex + '.hdf5')
-#        with pd.HDFStore(path) as store:
-#            for name, df in self.get_dataframes().items():
-#                if isinstance(df, Updater):
-#                    df = df.to_dense()       # Conversion to a Pandas DataFrame
-#                else:                        # is required in order to dump the
-#                    df = pd.DataFrame(df)    # data to the HDFStore.
-#                dtypes = df.dtypes
-#                for column in df.columns:
-#                    if str(dtypes[column]) == 'category':
-#                        df[column] = df[column].astype('O')
-#                store[name] = df
-#
-#
-#    def _handle_custom_msg(self, *args, **kwargs):
-#        '''
-#        Recieve and dispatch messages from the JavaScript frontend to the
-#        Python backend.
-#        '''
-#        print(args)
-#        print(kwargs)
-#
-#    def _ipython_display_(self):
-#        '''
-#        Custom HTML representation
-#        '''
-#        if self._traits_need_update:
-#            self._update_traits()
-#        self._ipy_disp()
-#        print(repr(self))
-#
-#    def _repr_html_(self):
-#        '''
-#        '''
-#        if Config.interactive:
-#            if self._traits_need_update:
-#                self._update_traits()
-#            return self._ipython_display_()
-#        else:
-#            return None
 #
 #    def _get_by_index(self, index):
 #        '''

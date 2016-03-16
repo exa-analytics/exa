@@ -10,6 +10,7 @@ tables to be able to have HTML representations (within the `Jupyter notebook`_).
 .. _Jupyter notebook: http://jupyter.org/
 '''
 import pandas as pd
+from sys import getsizeof
 from uuid import UUID
 from datetime import datetime
 from contextlib import contextmanager
@@ -171,7 +172,7 @@ class Base:
         session = SessionFactory(expire_on_commit=False)
         session.add(self)
         session.commit()
-        
+
     def __repr__(cls):
         return '{0}(pkid: {1})'.format(cls.__class__.__name__, cls.pkid)
 
@@ -223,6 +224,16 @@ class Disk:
     '''
     nfiles = Column(Integer)
     size = Column(Integer)
+
+    def _update_size(self):
+        '''
+        Attempts to call the instance's __sizeof__ to populate the value of
+        size.
+        '''
+        try:
+            self.size = getsizeof(self)
+        except:
+            pass
 
 
 def _create_all():
