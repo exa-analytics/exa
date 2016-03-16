@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-Tools
+DB Initialization
 ====================
-Require internal (exa) imports.
 '''
 from itertools import product
 from notebook import install_nbextension
@@ -12,12 +11,12 @@ from exa import _np as np
 from exa import _pd as pd
 from exa import _json as json
 from exa.config import Config
-from exa.utils import mkpath
 from exa.relational.base import Base, engine
 from exa.relational.isotope import Isotope
 from exa.relational.constant import Constant
 from exa.relational.unit import Dimension
 from exa.relational.container import Container
+from exa.utility import mkpath
 
 
 def install_notebook_widgets(origin_base=Config.nbext, dest_base=Config.extensions,

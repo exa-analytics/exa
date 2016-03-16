@@ -3,8 +3,13 @@
 Editor
 ====================================
 Text-editor-like functionality for programatically manipulating raw text input
-and output files.
+and output files. Supports commonly used logic such as (simple or regular
+expression) replacement, insertion, and deletion.
 '''
+import re
+from io import StringIO
+from exa import _os as os
+from exa.utility import mkpath
 
 
 class Editor:
@@ -24,22 +29,24 @@ class Editor:
         print(len(editor))                           # 1
         editor.write(fullpath=None, user='Alice')    # "Hello Alice"
     '''
-    @property
-    def meta(self):
-        '''
-        Generate a dictionary of metadata (default is string text of editor).
-        '''
-        return {'text': str(self)}
-
     def write(self, fullpath=None, *args, **kwargs):
         '''
         Write the editor's contents to disk.
 
-        Optional arguments can be used to format the editor's contents.
+        Optional arguments can be used to format the editor's contents. If no
+        file path is given, prints to standard output (useful for debugging).
 
         Args:
-            fullpath (str): Full file path
+            fullpath (str): Full file path, if no path given will write to stdout (default)
+            *args: Positional arguments to format the editor with
+            **kwargs: Keyword arguments to format the editor with
+
+        See Also:
+            :func:`~exa.editor.Editor.format`
         '''
+        if fullpath is None:
+            if self.filename:
+                fullpath = self.filename
         if fullpath:
             with open(fullpath, 'w') as f:
                 f.write(str(self).format(*args, **kwargs))
@@ -78,7 +85,32 @@ class Editor:
         r = self.__repr__().split('\n')
         print('\n'.join(r[-n:]), end=' ')
 
-    def remove_blank_lines(self):
+    def append(self, lines):
+        '''
+        Args:
+            lines (list): List of line strings to append to the end of the editor
+        '''
+        raise NotImplementedError()
+
+    def preappend(self, lines):
+        '''
+        Args:
+            lines (list): List of line strings to insert at the beginning of the editor
+        '''
+        raise NotImplementedError()
+
+    def insert(self, lines={}):
+        '''
+        Note:
+            To insert before the first line, use 0; to insert after the last
+            line use :func:`~exa.editor.Editor.append`.
+
+        Args:
+            lines (dict): Line number key, line string value dictionary to insert
+        '''
+        pass
+
+    def delete_blank(self):
         '''
         Permanently removes blank lines from input.
         '''
@@ -89,7 +121,7 @@ class Editor:
                 to_remove.append(i)
         self.del_lines(to_remove)
 
-    def del_lines(lines):
+    def delete(lines):
         '''
         Delete the given line numbers.
 
@@ -99,41 +131,83 @@ class Editor:
         for k, i in enumerate(lines):
             del self[i - k]
 
+    @property
+    def variables(self):
+        '''
+        Display a list of templatable variables present in the file.
+
+        Templating is accomplished by creating a bracketed object in the same
+        way that Python performs `string formatting`_. The editor is able to
+        replace the placeholder value of the template. Integer templates are
+        positional arguments.
+
+        .. _string formatting: https://docs.python.org/3.6/library/string.html
+        '''
+        string = str(self)
+        constants = [match[1:-1] for match in re.findall('{{[A-z0-9]}}', string)]
+        variables = re.findall('{[A-z0-9]*}', string)
+        return sorted(set(variables).difference(constants))
+
+    @property
+    def meta(self):
+        '''
+        Generate a dictionary of metadata (default is string text of editor).
+        '''
+        return {'filename': self.filename}
+
     @classmethod
     def from_file(cls, path):
         '''
         Create an editor instance from a file on disk.
         '''
-        lines = None
-        with open(path) as f:
-            lines = f.read().splitlines()
-        return cls(lines)
+        filename = os.path.basename(path)
+        lines = lines_from_file(path)
+        return cls(lines, filename)
 
     @classmethod
     def from_stream(cls, f):
         '''
         Create an editor instance from a file stream.
         '''
-        lines = f.read().splitlines()
-        return cls(lines)
+        lines = lines_from_stream(f)
+        filename = f.name if hasattr(f, 'name') else None
+        return cls(lines, filename)
 
     @classmethod
-    def from_template(cls, template):
+    def from_string(cls, string):
         '''
         Create an editor instance from a string template.
         '''
-        lines = template.splitlines()
-        print(lines)
-        return cls(lines)
+        return cls(lines_from_string(string))
 
-    def __delitem__(self, key):
-        del self._lines[key]
+    def __init__(self, data, filename=None):
+        '''
+        Args:
+            data: File path, stream, or string text
+            filename: Name of file or None
+        '''
+        self.filename = filename
+        if os.path.isfile(data):
+            self._lines = lines_from_file(data)
+            self.filename = os.path.basename(data)
+        elif isinstance(data, StringIO):
+            self._lines = lines_from_stream(data)
+            self.filename = data.name if hasattr(data, 'name') else None
+        elif isinstance(data, str):
+            self._lines = lines_from_string(data)
+        elif isinstance(data, list):
+            self._lines = data
+        else:
+            raise TypeError('Unknown type for arg data: {}'.format(type(data)))
 
-    def __getitem__(self, key):
-        return self._lines[key]
+    def __delitem__(self, line):
+        del self._lines[line]     # "line" is the line number minus one
 
-    def __setitem__(self, key, value):
-        self._lines[key] = value
+    def __getitem__(self, line):
+        return self._lines[line]
+
+    def __setitem__(self, line, value):
+        self._lines[line] = value
 
     def __iter__(self):
         for line in self._lines:
@@ -141,9 +215,6 @@ class Editor:
 
     def __len__(self):
         return len(self._lines)
-
-    def __init__(self, lines):
-        self._lines = lines
 
     def __str__(self):
         return '\n'.join(self._lines)
@@ -159,3 +230,25 @@ class Editor:
             else:
                 r += fmt.format(ln, line)
         return r
+
+
+def lines_from_file(path):
+    '''
+    Line list from file.
+    '''
+    lines = None
+    with open(path) as f:
+        lines = f.read().splitlines()
+    return lines
+
+def lines_from_stream(f):
+    '''
+    Line list from an IO stream.
+    '''
+    return f.read().splitlines()
+
+def lines_from_string(string):
+    '''
+    Line list from string.
+    '''
+    return string.splitlines()

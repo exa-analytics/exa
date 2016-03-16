@@ -45,7 +45,7 @@ def idxs_from_starts_and_count(starts, count):
             values[h] = value
             h += 1
     return i_idx, j_idx, values
-    
+
 
 @vectorize([int64(int64, int64)])
 def unordered_pairing_function(x, y):

@@ -16,7 +16,6 @@ import json
 import shutil
 from tempfile import gettempdir
 from notebook.nbextensions import jupyter_data_dir
-from exa.utils import mkpath
 
 
 class Config:
@@ -27,7 +26,7 @@ class Config:
 
     def save(self):
         try:
-            confpath = mkpath(self.exa, 'config.json')
+            confpath = os.sep.join((self.exa, 'config.json'))
             with open(confpath, 'w') as f:
                 json.dump(vars(self), f)
         except:
@@ -105,29 +104,42 @@ class Config:
             self.home = os.getenv('USERPROFILE')
         else:
             self.home = os.getenv('HOME')
-        self.exa = mkpath(self.home, '.exa')    # Dir config
+        self.exa = os.sep.join((self.home, '.exa'))    # Dir config
         if os.path.isdir(self.exa):
             self._temp = False
         else:
-            self.exa = mkpath(gettempdir(), 'exa', mkdir=True)
+            self.exa = os.sep.join((gettempdir(), 'exa'))
+            os.makedirs(self.exa, exist_ok=True)
             self._temp = True
-        self.syslog = mkpath(self.exa, 'system.log')        # Backend log
-        self.testlog = mkpath(self.exa, 'test.log')         # Unit and doc tests
-        self.userlog = mkpath(self.exa, 'user.log')         # Frontend log
-        self.tmp = mkpath(self.exa, 'tmp')
+        interactive = True
+        try:
+            cfg = get_ipython().config
+            if 'IPKernelApp' in cfg:
+                interactive = True
+            else:
+                interactive = False
+        except:
+            interactive = False
+        self.interactive = interactive
+        self.syslog = os.sep.join((self.exa, 'system.log'))        # Backend log
+        self.testlog = os.sep.join((self.exa, 'test.log'))         # Unit and doc tests
+        self.userlog = os.sep.join((self.exa, 'user.log'))         # Frontend log
+        self.tmp = os.sep.join((self.exa, 'tmp'))
+        os.makedirs(self.tmp, exist_ok=True)
         self.pkg = os.path.dirname(__file__)
-        self.templates = mkpath(self.pkg, 'templates')
-        self.static = mkpath(self.pkg, 'static')
-        self.img = mkpath(self.static, 'img')
-        self.css = mkpath(self.static, 'css')
-        self.js = mkpath(self.static, 'js')
-        self.nbext = mkpath(self.static, 'nbextensions')
-        self.extensions = mkpath(jupyter_data_dir(), 'nbextensions', 'exa')
+        self.templates = os.sep.join((self.pkg, 'templates'))
+        self.static = os.sep.join((self.pkg, 'static'))
+        self.img = os.sep.join((self.static, 'img'))
+        self.css = os.sep.join((self.static, 'css'))
+        self.js = os.sep.join((self.static, 'js'))
+        self.nbext = os.sep.join((self.static, 'nbextensions'))
+        self.extensions = os.sep.join((jupyter_data_dir(), 'nbextensions', 'exa'))
+        os.makedirs(self.extensions, exist_ok=True)
         self.relational = {'backend': 'sqlite', 'host': None,
                            'database': None, 'user': None}
         self.numerical = {'backend': None, 'host': None,
                           'database': None, 'user': None}
-        existing_config = mkpath(self.exa, 'config.json')   # Update existing
+        existing_config = os.sep.join((self.exa, 'config.json'))   # Update existing
         if os.path.isfile(existing_config):
             with open(existing_config) as f:
                 self.update(json.load(f))

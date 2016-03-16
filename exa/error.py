@@ -5,7 +5,7 @@ Exceptions, Errors, and Warnings
 All base level exceptions are defined here.
 '''
 from exa import _re as re
-from exa.decorators import logger
+from exa.decorator import logger
 
 
 @logger

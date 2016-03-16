@@ -7,20 +7,22 @@ from exa import __version__
 
 dependencies = [
     'numpy>=1.10.0',
-    'scipy>=0.16',
+    'scipy>=0.17',
     'pandas>=0.17',
     'sqlalchemy>=1.0.0',
     'scikit-learn>=0.17',
+    'networkx',
     'jupyter>=1.0.0',
-    'notebook>=4.0.6',
+    'notebook>=4.1.0',
     'ipython>=4.0.0',
     'ipywidgets>=4.0.0',
+    'ipyparallel>=4.0.0'
     'matplotlib>=1.5.0',
     'seaborn>=0.6.0',
     'sphinx>=1.3',
     'sphinx_rtd_theme>=0.1.7',
     'sphinxcontrib-autoanysrc',
-    'networkx'
+    'xmltodict'
 ]
 
 try:

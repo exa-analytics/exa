@@ -7,7 +7,7 @@ from sqlalchemy import ForeignKey, Table, Column, Integer
 from sqlalchemy.orm import relationship
 from exa import Config
 from exa.relational.base import db_sess, Base, Name, HexUID, Time, Disk
-from exa.utils import gen_uid
+from exa.utility import gen_uid
 
 
 #SessionProgram = Table(
