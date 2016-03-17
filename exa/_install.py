@@ -5,12 +5,10 @@ Installer
 This module is responsible for initializing the database (whether in memory or
 on disk/elsewhere) and installing/updating the (Jupyter) notebook widgets.
 '''
-import os
 import pandas as pd
 from itertools import product
-from notebook import install_nbextension
 from exa import _conf
-from exa.utility import mkp
+from exa.utility import _install_notebook_widgets
 from exa.relational.base import _create_all, engine
 
 
@@ -32,7 +30,7 @@ def install(persistent=False):
         _load_isotope_data()
         _load_unit_data()
         _load_constant_data()
-        _install_notebook_widgets()
+        _install_notebook_widgets(_conf['nbext_localdir'], _conf['nbext_sysdir'])
 
 
 def _load_isotope_data():
@@ -73,18 +71,3 @@ def _load_constant_data():
     df.columns = ['symbol', 'value']
     df['pkid'] = df.index
     df.to_sql(name='constant', con=engine, index=False, if_exists='replace')
-
-
-def _install_notebook_widgets(origin_base=_conf['nbext_localdir'],
-                              dest_base=_conf['nbext_sysdir'], verbose=False):
-    '''
-    Installs custom :py:mod:`ipywidgets` JavaScript into the Jupyter
-    nbextensions directory to allow use of exa's JavaScript frontend
-    within the Jupyter notebook GUI.
-    '''
-    for root, subdirs, files in os.walk(origin_base):
-        for filename in files:
-            subdir = root.split('nbextensions')[-1]
-            orig = mkp(root, filename)
-            dest = mkp(dest_base, subdir, mk=True)
-            install_nbextension(orig, verbose=verbose, overwrite=True, nbextensions_dir=dest)

@@ -21,8 +21,8 @@ ContainerFile = Table(
 class Container(BaseContainer, Name, HexUID, Time, Disk, Base):
     '''
     '''
-    _ctype = Column(String(32), nullable=False)    # Container type == class name
     files = relationship('File', secondary=ContainerFile, backref='containers', cascade='all, delete')
+    _ctype = Column(String(32), nullable=False)    # Container type == class name
     __mapper_args__ = {'polymorphic_on': _ctype,
                        'polymorphic_identity': 'container',
                        'with_polymorphic': '*'}

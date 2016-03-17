@@ -22,9 +22,7 @@ from sys import getsizeof
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from exa import _conf
 from exa.widget import ContainerWidget
-
-
-_widget_default = ContainerWidget if _conf['notebook'] else None
+from exa.ndframe import DataFrame
 
 
 class BaseContainer:
@@ -34,6 +32,8 @@ class BaseContainer:
     inherited directly; rather :class:`~exa.relational.container.Container`
     should be inherited.
     '''
+    _widget_class = ContainerWidget
+
     def save(self, path=None):
         '''
         Save the current working container to an HDF5 file.
@@ -129,7 +129,12 @@ class BaseContainer:
             store['kwargs'] = pd.Series()
             store.get_storer('kwargs').attrs.metadata = kwargs
             for name, df in self._dataframe_dict().items():
-                store[name] = df
+                if isinstance(df, DataFrame):
+                    df._revert_categories()
+                    store[name] = df.copy()
+                    df._set_categories()
+                else:
+                    store[name] = df
 
     def _kw_dict(self, copy=False):
         '''
@@ -145,13 +150,20 @@ class BaseContainer:
         else:
             return kws
 
-    def _dataframe_dict(self, copy=False):
+    def _dataframe_dict(self, copy=False, cls_criteria=pd.DataFrame):
         '''
         Get the attached dataframe objects.
+
+        Args:
+            copy (bool): Return an in memory copy
+            cls_criteria (class): Class object to identify by (default :class:`~pandas.DataFrame`)
+
+        Returns:
+            dfs (dict): Name, dataframe key-value pairs
         '''
         dfs = {}
         for name, value in self.__dict__.items():
-            if isinstance(value, pd.DataFrame):
+            if isinstance(value, cls_criteria):
                 if copy:
                     dfs[name] = value.copy()
                 else:
@@ -160,7 +172,7 @@ class BaseContainer:
 
     def _df_bytes(self):
         '''
-        Compute the size of all of the attached dataframes
+        Compute the size (in bytes) of all of the attached dataframes.
         '''
         total_bytes = 0
         for df in self._dataframe_dict().values():
@@ -168,6 +180,13 @@ class BaseContainer:
             total_bytes += df.index.nbytes
             total_bytes += df.columns.nbytes
         return total_bytes
+
+    def _update_trait_values(self):
+        '''
+        Poll each of the attached :class:`~exa.ndframe.DataFrame`.
+        '''
+        dfs = self._dataframe_dict(cls_criteria=DataFrame)
+        pass
 
     def __sizeof__(self):
         '''
@@ -193,7 +212,7 @@ class BaseContainer:
         else:
             raise KeyError()
 
-    def __init__(self, meta=None, widget=_widget_default, **kwargs):
+    def __init__(self, meta=None, **kwargs):
         '''
         Args:
             meta: Dictionary of metadata key, value pairs
@@ -202,7 +221,7 @@ class BaseContainer:
         for key, value in kwargs.items():
             setattr(self, key, value)
         self.meta = meta
-        self._widget = widget(self) if widget else None
+        self._widget = self._widget_class(self) if _conf['notebook'] else None
 
     def _repr_html_(self):
         if self._widget:

@@ -53,7 +53,6 @@ if os.path.exists(dot_exa):
     _conf['exa_persistent'] = True
 else:
     _conf['exa_root'] = mkdtemp()
-_conf['nbext_sysdir'] = mkp(jupyter_data_dir(), 'nbextensions', 'exa')
 _conf['log_db'] = mkp(_conf['exa_root'], 'db.log')
 _conf['log_sys'] = mkp(_conf['exa_root'], 'sys.log')
 _conf['log_user'] = mkp(_conf['exa_root'], 'user.log')
@@ -71,6 +70,7 @@ _conf['static_constants.json'] = mkp(pkg, 'static', 'constants.json')
 _conf['static_isotopes.json'] = mkp(pkg, 'static', 'isotopes.json')
 _conf['static_units.json'] = mkp(pkg, 'static', 'units.json')
 _conf['nbext_localdir'] = mkp(pkg, 'static', 'nbextensions')
+_conf['nbext_sysdir'] = mkp(jupyter_data_dir(), 'nbextensions', 'exa')
 
 
 # Check what type of Python session this is (python/ipython or jupyter notebook)

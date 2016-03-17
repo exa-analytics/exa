@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-Custom DataFrame Classes
+Custom DataFrame (and Related) Classes
 ====================================
 The :class:`~exa.dataframe.DataFrame` inherits :class:`~pandas.DataFrame` and
 behaves just like it, but it provides special methods for extracting trait
@@ -29,11 +29,26 @@ class DataFrame(pd.DataFrame):
         Columns, indices, etc. are only enforced if the dataframe has non-zero
         length.
     '''
+    _precision = 4      # Default number of decimal places passed by traits
     _indices = []       # Required index names (typically single valued list)
     _columns = []       # Required column entries
     _traits = []        # Columns that are usable traits
     _groupbys = []      # Column names by which to group the data
     _categories = {}    # Column name, original type pairs ('label', int) that can be compressed to a category
+
+    def _revert_categories(self):
+        '''
+        Change all columns of type category to their native type.
+        '''
+        for column, dtype in self._categories.items():
+            self[column] = self[column].astype(dtype)
+
+    def _set_categories(self):
+        '''
+        Change all category like columns from their native type to category type.
+        '''
+        for column, dtype in self._categories.items():
+            self[column] = self[column].astype('category')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
