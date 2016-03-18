@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 '''
-Numba Vectorized Universal Functions
+Just-in-Time Compiled UFuncs
 =======================================
-dSee Also:
+See Also:
     :mod:`~exa.algorithms.broadcasting`
 '''
 import numpy as np

@@ -1,12 +1,7 @@
 Algorithms
 ==================
+.. toctree::
+    :maxdepth: 2
 
-Numpy Based Algorithms
-------------------------
-.. automodule:: exa.algorithms.broadcasting
-    :members:
-
-JiT Compiled Algorithms
------------------------------
-.. automodule:: exa.algorithms.jitted.broadcasting
-    :members:
+    algorithms/broadcasting.rst
+    algorithms/indexing.rst

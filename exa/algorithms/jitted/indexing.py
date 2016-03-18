@@ -2,54 +2,14 @@
 '''
 Indexing Recipes
 =====================
-Jitted functions related to generating indexes
 '''
-from exa import _np as np
-from exa.jitted import jit, int64, vectorize
+from numba import jit, vectorize, int32, int64, float32, float64
+from exa.algorithms.indexing import arange1, arange2, unordered_pairing_single
 
 
-@jit(nopython=True, cache=True)
-def idxs_from_starts_and_counts(starts, counts):
-    '''
-    Numba'd version of :func:`~exa.jitted
-    '''
-    n = np.sum(counts)
-    i_idx = np.empty((n, ), dtype=int64)
-    j_idx = i_idx.copy()
-    values = j_idx.copy()
-    h = 0
-    for i, start in enumerate(starts):
-        stop = start + counts[i]
-        for j, value in enumerate(range(start, stop)):
-            i_idx[h] = i
-            j_idx[h] = j
-            values[h] = value
-            h += 1
-    return i_idx, j_idx, values
-
-
-@jit(nopython=True, cache=True)
-def idxs_from_starts_and_count(starts, count):
-    '''
-    '''
-    n = len(starts)
-    i_idx = np.empty((n * count, ), dtype=int64)
-    j_idx = i_idx.copy()
-    values = j_idx.copy()
-    h = 0
-    for i, start in enumerate(starts):
-        stop = start + count
-        for j, value in enumerate(range(start, stop)):
-            i_idx[h] = i
-            j_idx[h] = j
-            values[h] = value
-            h += 1
-    return i_idx, j_idx, values
-
-
-@vectorize([int64(int64, int64)])
-def unordered_pairing_function(x, y):
-    '''
-    http://www.mattdipasquale.com/blog/2014/03/09/unique-unordered-pairing-function/
-    '''
-    return np.int64(x * y + np.trunc((np.abs(x - y) - 1)**2 / 4))
+nb_arange1 = jit(nopython=True, cache=True)(arange1)
+nb_arange2 = jit(nopython=True, cache=True)(arange2)
+nb_unordered_pairing = vectorize([int32(int32, int32),
+                                  int64(int64, int64),
+                                  float32(float32, float32),
+                                  float64(float64, float64)])(unordered_pairing_single)
