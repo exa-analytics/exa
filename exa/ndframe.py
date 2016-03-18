@@ -46,6 +46,19 @@ class _TraitsDF:
         for column, dtype in self._categories.items():
             self[column] = self[column].astype('category')
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if len(self) > 0:
+            name = self.__class__.__name__
+            if self._columns:
+                missing = set(self._columns).difference(self.columns)
+                if missing:
+                    raise RequiredColumnError(missing, name)
+            if self._indices:
+                missing = set(self._indices).difference(self.index.names)
+                if missing:
+                    raise RequiredIndexError(missing, name)
+
     def __repr__(self):
         name = self.__class__.__name__
         n = len(self)
@@ -63,25 +76,17 @@ class DataFrame(_TraitsDF, pd.DataFrame):
         Columns, indices, etc. are only enforced if the dataframe has non-zero
         length.
     '''
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if len(self) > 0:
-            name = self.__class__.__name__
-            if self._columns:
-                missing = set(self._columns).difference(self.columns)
-                if missing:
-                    raise RequiredColumnError(missing, name)
-            if self._indices:
-                missing = set(self._indices).difference(self.index.names)
-                if missing:
-                    raise RequiredIndexError(missing, name)
+    pass
 
 
-class SparseFrame(pd.SparseDataFrame):
+class SparseFrame(_TraitsDF, pd.SparseDataFrame):
     '''
     A sparse dataframe used to update it's corresponding
-    :class:`~exa.ndframe.DataFrame` or store truly sparse data.
+    :class:`~exa.ndframe.DataFrame` or a truly sparse data store.
     '''
+    pass
+
+
 #    _key = []   # This is both the index and the foreign DataFrame designation.
 #
 #    def __init__(self, *args, **kwargs):

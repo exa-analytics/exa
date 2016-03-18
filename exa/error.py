@@ -5,10 +5,7 @@ Exceptions, Errors, and Warnings
 All base level exceptions are defined here.
 '''
 import re
-#from exa.decorator import logger
 
-
-#@logger
 class ExaException(Exception):
     '''
     Exception with support for logging.
@@ -21,7 +18,7 @@ class ExaException(Exception):
             msg = re.sub(r'\s*\n\s*', spacer, msg)
         super().__init__(msg)
         if log:
-            self._logger.error(msg)
+            pass
 
 
 class RequiredIndexError(ExaException):
