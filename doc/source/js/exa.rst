@@ -1,10 +1,3 @@
-=====================
-JavaScript
-=====================
-Custom JavaScript libraries used by the exa package laying the foundation for
-both the web gui and Jupyter notebook extensions.
-
-
 NBExtensions
 ==============
 Jupyter notebook related JavaScript. This code relies on the `ipywidgets`_

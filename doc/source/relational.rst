@@ -1,6 +1,21 @@
-Content Management Features
-==============================
+Content Management and the Data Container
+============================================
 
+Content Management Tables
+------------------------------
+.. toctree::
+    :maxdepth: 2
+
+    relational/file_container.rst
+
+Static Tables
+------------------------------
+.. toctree::
+    :maxdepth: 2
+
+    relational/constant.rst
+    relational/unit.rst
+    relational/isotope.rst
 
 Base Class and Exceptions
 ---------------------------
@@ -9,19 +24,3 @@ Base Class and Exceptions
 
     relational/base.rst
     relational/error.rst
-
-
-Static Tables
-------------------------------
-.. toctree::
-    :maxdepth: 2
-
-    relational/static_tables.rst
-
-
-Content Management Tables
-------------------------------
-.. toctree::
-    :maxdepth: 2
-
-    relational/object_storage.rst

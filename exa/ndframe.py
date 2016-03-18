@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
 Custom DataFrame (and Related) Classes
-====================================
+=========================================
 The :class:`~exa.dataframe.DataFrame` inherits :class:`~pandas.DataFrame` and
 behaves just like it, but it provides special methods for extracting trait
 data from the frame. The trait data is used by :class:`~exa.widget.ContainerWidget`

@@ -1,10 +1,14 @@
 Tests
 =================
-Unit tests for various base exa packages.
+The base testing functionality and various tests.
 
+.. automodule:: exa.test
+    :members:
 
 .. toctree::
     :maxdepth: 2
 
-    tests/test.rst
-    relational/test.rst
+    tests/base.rst
+    tests/relational.rst
+    tests/algorithms.rst
+    tests/jitted_algorithms.rst

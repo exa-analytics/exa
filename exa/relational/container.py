@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 '''
-Container (Container)
+The Container Module
 ===============================================
+This module provides the relational container object and a relationship table
+that connects containers to recrods representing files on disk.
 '''
 from sys import getsizeof
 from sqlalchemy import Column, String, ForeignKey, Table, Integer, event
@@ -20,6 +22,8 @@ ContainerFile = Table(
 
 class Container(BaseContainer, Name, HexUID, Time, Disk, Base):
     '''
+    The relational store and file controller that is inherited by data specific
+    containers to facilitate data processing, analysis, and visualization.
     '''
     files = relationship('File', secondary=ContainerFile, backref='containers', cascade='all, delete')
     _ctype = Column(String(32), nullable=False)    # Container type == class name

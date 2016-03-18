@@ -6,7 +6,7 @@ dSee Also:
     :mod:`~exa.algorithms.broadcasting`
 '''
 import numpy as np
-from exa.jitted import vectorize, float64, int32, int64, float32
+from numba import vectorize, float64, int32, int64, float32
 from exa.algorithms.broadcasting import vmag3, vdist3
 
 

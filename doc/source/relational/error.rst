@@ -1,2 +1,4 @@
-Relational Exceptions
-----------------------
+Exceptions
+---------------------
+.. automodule:: exa.relational.error
+    :members:

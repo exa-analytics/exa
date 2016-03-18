@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
 Tests for :mod:`~exa.relational.constant`
-========================================
+===========================================
 '''
 import numpy as np
 import pandas as pd
