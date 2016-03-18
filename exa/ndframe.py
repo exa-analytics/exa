@@ -20,14 +20,10 @@ from traitlets import Unicode, Dict
 from exa.error import RequiredIndexError, RequiredColumnError
 
 
-class DataFrame(pd.DataFrame):
+class _TraitsDF:
     '''
-    A :class:`~pandas.DataFrame` like object that provides methods for creating
-    traits required for visualization.
-
-    Note:
-        Columns, indices, etc. are only enforced if the dataframe has non-zero
-        length.
+    Base dataframe class providing trait support for :class:`~pandas.DataFrame`
+    like objects.
     '''
     _precision = 4      # Default number of decimal places passed by traits
     _indices = []       # Required index names (typically single valued list)
@@ -50,6 +46,23 @@ class DataFrame(pd.DataFrame):
         for column, dtype in self._categories.items():
             self[column] = self[column].astype('category')
 
+    def __repr__(self):
+        name = self.__class__.__name__
+        n = len(self)
+        m = len(self.columns)
+        return '{0}(rows: {1} columns: {2})'.format(name, n, m)
+
+    def __str__(self):
+        return self.__repr__()
+
+class DataFrame(_TraitsDF, pd.DataFrame):
+    '''
+    Trait supporting analogue of :class:`~pandas.DataFrame`.
+
+    Note:
+        Columns, indices, etc. are only enforced if the dataframe has non-zero
+        length.
+    '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if len(self) > 0:
@@ -63,15 +76,27 @@ class DataFrame(pd.DataFrame):
                 if missing:
                     raise RequiredIndexError(missing, name)
 
-    def __repr__(self):
-        name = self.__class__.__name__
-        n = len(self)
-        m = len(self.columns)
-        return '{0}(rows: {1} columns: {2})'.format(name, n, m)
 
-    def __str__(self):
-        return self.__repr__()
-
+class SparseFrame(pd.SparseDataFrame):
+    '''
+    A sparse dataframe used to update it's corresponding
+    :class:`~exa.ndframe.DataFrame` or store truly sparse data.
+    '''
+#    _key = []   # This is both the index and the foreign DataFrame designation.
+#
+#    def __init__(self, *args, **kwargs):
+#        super().__init__(*args, **kwargs)
+#        if len(self) > 0:
+#            name = self.__class__.__name__
+#            missing = set(self._key).difference(self.index.names)
+#            if missing:
+#                raise RequiredIndexError(missing, name)
+#
+#    def __repr__(self):
+#        return '{0}'.format(self.__class__.__name__)
+#
+#    def __str__(self):
+#        return self.__class__.__name__
 
 
 
