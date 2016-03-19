@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-Indexing Recipes
-=====================
+Indexing Recipes and Array Creation
+=========================================
 Functions related to generating indices.
 '''
 import numpy as np
@@ -13,11 +13,11 @@ def arange1(initials, counts):
 
     >>> import numpy
     >>> initials = numpy.array([0, 4], dtype=numpy.int64)
-    >>> counts = numpy.array([5, 4], dtype=numpy.int64)
+    >>> counts = numpy.array([4, 5], dtype=numpy.int64)
     >>> arange1(initials, counts)
-    (array([0, 0, 0, 0, 0, 1, 1, 1, 1]),
-     array([0, 1, 2, 3, 4, 0, 1, 2, 3]),
-     array([0, 1, 2, 3, 4, 4, 5, 6, 7]))
+    (array([0, 0, 0, 0, 1, 1, 1, 1, 1], dtype=int64),
+     array([0, 1, 2, 3, 0, 1, 2, 3, 4], dtype=int64),
+     array([0, 1, 2, 3, 4, 5, 6, 7, 8], dtype=int64))
 
     Args:
         initials (array): Starting points for array generation
@@ -49,9 +49,9 @@ def arange2(initials, count):
     >>> initials = numpy.array([0, 4], dtype=numpy.int64)
     >>> count = 5
     >>> arange2(initials, count)
-    (array([0, 0, 0, 0, 0, 1, 1, 1, 1]),
-     array([0, 1, 2, 3, 4, 0, 1, 2, 3]),
-     array([0, 1, 2, 3, 4, 4, 5, 6, 7]))
+    (array([0, 0, 0, 0, 0], dtype=int64),
+     array([0, 1, 2, 3, 4], dtype=int64),
+     array([0, 1, 2, 3, 4], dtype=int64))
 
     Args:
         initials (array): Starting points for array generation
@@ -60,7 +60,7 @@ def arange2(initials, count):
     Returns:
         arrays (tuple): First index, second index, and indices to select, respectively
     '''
-    n = np.sum(counts)
+    n = len(initials) * count
     i_idx = np.empty((n, ), dtype=np.int64)
     j_idx = i_idx.copy()
     values = j_idx.copy()

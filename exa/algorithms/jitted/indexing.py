@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-Indexing Recipes
-=====================
+Just-in-Time Compiled Array Creation
+=======================================
 '''
 from numba import jit, vectorize, int32, int64, float32, float64
 from exa.algorithms.indexing import arange1, arange2, unordered_pairing_single
