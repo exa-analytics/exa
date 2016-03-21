@@ -22,7 +22,8 @@ from sys import getsizeof
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from exa import _conf
 from exa.widget import ContainerWidget
-from exa.structures import DataFrame
+from exa.numerical import _HasTraits, DataFrame
+from exa.utility import del_keys
 
 
 class BaseContainer:
@@ -51,14 +52,12 @@ class BaseContainer:
         Create a copy of the current object.
         '''
         cls = self.__class__
-        meta = self.meta
-        widget = self._widget.__class__
-        kws = self._kw_dict(copy=True)
-        kws = _prune_kws(kws, _rm_keys)
-        dfs = self._dataframe_dict(copy=True)
+        kws = del_keys(self._kw_dict(copy=True))
+        dfs = self._numerical_dict(copy=True)
         kws.update(kwargs)
         kws.update(dfs)
-        return cls(meta=meta, widget=widget, **kws)
+        print(kws)
+        return cls(**kws)
 
     def info(self):
         '''
@@ -121,14 +120,11 @@ class BaseContainer:
         # Get the container "kwargs" - relational values and metadata
         kwargs = self._kw_dict()
         kwargs['meta'] = str(self.meta) if self.meta else None
-        # Remove unique data from the kwargs (i.e. primary keys)
-        del_keys = [key for key in kwargs.keys() if 'id' in key]
-        for key in del_keys:
-            del kwargs[key]
+        kwargs = del_keys(kwargs)
         with pd.HDFStore(path) as store:
             store['kwargs'] = pd.Series()
             store.get_storer('kwargs').attrs.metadata = kwargs
-            for name, df in self._dataframe_dict().items():
+            for name, df in self._numerical_dict().items():
                 if isinstance(df, DataFrame):
                     df._revert_categories()
                     store[name] = df.copy()
@@ -138,6 +134,13 @@ class BaseContainer:
 
     def _kw_dict(self, copy=False):
         '''
+        Create kwargs from the available (non-null valued) relational arguments.
+
+        Args:
+            copy (bool): Return a copy of the attributes (default False)
+
+        Returns:
+            d (dict): Dictionary of non-null relational attributes.
         '''
         kws = {}
         for name, value in self.__class__.__dict__.items():
@@ -150,9 +153,10 @@ class BaseContainer:
         else:
             return kws
 
-    def _dataframe_dict(self, copy=False, cls_criteria=pd.DataFrame):
+    def _numerical_dict(self, copy=False, cls_criteria=pd.DataFrame):
         '''
-        Get the attached dataframe objects.
+        Get the attached :class:`~exa.numerical.Series` and
+        :class:`~exa.numerical.DataFrame` objects.
 
         Args:
             copy (bool): Return an in memory copy
@@ -165,7 +169,8 @@ class BaseContainer:
         for name, value in self.__dict__.items():
             if isinstance(value, cls_criteria):
                 if copy:
-                    dfs[name] = value.copy()
+                    cls = value.__class__
+                    dfs[name] = cls(value.copy())
                 else:
                     dfs[name] = value
         return dfs
@@ -175,18 +180,22 @@ class BaseContainer:
         Compute the size (in bytes) of all of the attached dataframes.
         '''
         total_bytes = 0
-        for df in self._dataframe_dict().values():
+        for df in self._numerical_dict().values():
             total_bytes += df.values.nbytes
             total_bytes += df.index.nbytes
             total_bytes += df.columns.nbytes
         return total_bytes
 
-    def _update_trait_values(self):
+    def _trait_names(self):
         '''
-        Poll each of the attached :class:`~exa.ndframe.DataFrame`.
+        Poll each of the attached :class:`~exa.ndframe.DataFrame` for their
+        trait names.
         '''
-        dfs = self._dataframe_dict(cls_criteria=DataFrame)
-        pass
+        names = []
+        has_traits = self._numerical_dict(cls_criteria=_HasTraits)
+        for name, obj in has_traits.items():
+            names += obj._traits
+        self._widget._names = names
 
     def __sizeof__(self):
         '''
@@ -194,7 +203,7 @@ class BaseContainer:
 
         Warning:
             This function currently doesn't account for memory usage due to
-            traits (and the DOMWidget itself).
+            traits (:class:`~exa.widget.ContainerWidget`).
         '''
         jstot = 0  # Memory usage from the widget
         dftot = self._df_bytes()

@@ -23,25 +23,8 @@ from exa.error import RequiredIndexError, RequiredColumnError
 class _DataRepr:
     '''
     '''
-    def __repr__(self):
-        name = self.__class__.__name__
-        n = len(self)
-        return '{0}(len: {1})'.format(name, n)
-
-    def __str__(self):
-        return self.__repr__()
-
-
-class _TraitsDF(_DataRepr):
-    '''
-    Base dataframe class providing trait support for :class:`~pandas.DataFrame`
-    like objects.
-    '''
-    _precision = 4      # Default number of decimal places passed by traits
     _indices = []       # Required index names (typically single valued list)
     _columns = []       # Required column entries
-    _traits = []        # Columns that are usable traits
-    _groupbys = []      # Column names by which to group the data
     _categories = {}    # Column name, original type pairs ('label', int) that can be compressed to a category
 
     def _revert_categories(self):
@@ -58,6 +41,46 @@ class _TraitsDF(_DataRepr):
         for column, dtype in self._categories.items():
             self[column] = self[column].astype('category')
 
+    def __repr__(self):
+        name = self.__class__.__name__
+        n = len(self)
+        return '{0}(len: {1})'.format(name, n)
+
+    def __str__(self):
+        return self.__repr__()
+
+
+class _HasTraits(_DataRepr):
+    '''
+    Base dataframe class providing trait support for :class:`~pandas.DataFrame`
+    like objects.
+    '''
+    _precision = 4      # Default number of decimal places passed by traits
+    _traits = []        # Trait names (as strings)
+    _groupbys = []      # Column names by which to group the data
+
+    def _get_traits(self):
+        '''
+        Generate trait objects from column data.
+        '''
+        pass
+
+
+class Series(_HasTraits, pd.Series):
+    '''
+    Trait supporting analogue of :class:`~pandas.Series`.
+    '''
+    pass
+
+
+class DataFrame(_HasTraits, pd.DataFrame):
+    '''
+    Trait supporting analogue of :class:`~pandas.DataFrame`.
+
+    Note:
+        Columns, indices, etc. are only enforced if the dataframe has non-zero
+        length.
+    '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if len(self) > 0:
@@ -72,23 +95,7 @@ class _TraitsDF(_DataRepr):
                     raise RequiredIndexError(missing, name)
 
 
-class Series(_DataRepr, pd.Series):
-    '''
-    '''
-    pass
-
-class DataFrame(_TraitsDF, pd.DataFrame):
-    '''
-    Trait supporting analogue of :class:`~pandas.DataFrame`.
-
-    Note:
-        Columns, indices, etc. are only enforced if the dataframe has non-zero
-        length.
-    '''
-    pass
-
-
-class SparseFrame(_TraitsDF, pd.SparseDataFrame):
+class SparseFrame(_HasTraits, pd.SparseDataFrame):
     '''
     A sparse dataframe used to update it's corresponding
     :class:`~exa.ndframe.DataFrame` or a truly sparse data store.

@@ -85,3 +85,20 @@ def _install_notebook_widgets(origin_base, dest_base, verbose=False):
             orig = mkp(root, filename)
             dest = mkp(dest_base, subdir, mk=True)
             install_nbextension(orig, verbose=verbose, overwrite=True, nbextensions_dir=dest)
+
+
+def del_keys(kwargs, match='id'):
+    '''
+    Delete certain keys in a dictionary containing a given string.
+
+    Args:
+        kwargs (dict): Dictionary to prune
+        match (str): Sting to match for each key
+
+    Return:
+        d (dict): Pruned dictionary
+    '''
+    keys = [key for key in kwargs.keys() if match in key]
+    for key in keys:
+        del kwargs[key]
+    return kwargs
