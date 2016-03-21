@@ -4,6 +4,7 @@ Container (Widget)
 =======================
 Functionality for using Jupyter notebook extensions to visualize data containers.
 '''
+import numpy as np
 import pandas as pd
 from ipywidgets import DOMWidget
 from traitlets import Instance, Type, Any, Float, Int
@@ -16,7 +17,9 @@ class Widget(DOMWidget):
     '''
     _view_module = Unicode('nbextensions/exa/container').tag(sync=True)
     _view_name = Unicode('ContainerView').tag(sync=True)
-    _value = Unicode('Hello World!').tag(sync=True)
+    test_value = Unicode('Hello World!').tag(sync=True)
+    test_json = Unicode(pd.Series(np.random.rand(10)).to_json()).tag(sync=True)
+    test_float = Float(42.0).tag(sync=True)
 
     def _handle_custom_msg(self, *args, **kwargs):
         '''
@@ -38,7 +41,6 @@ class ContainerWidget(Widget):
     Attributes:
         _names (list): List of all traits associated with the :class:`~exa.widget.ContainerWidget`
     '''
-    _trait_names = List().tag(sync=True)
     width = Integer(850).tag(sync=True)
     height = Integer(500).tag(sync=True)
     fps = Integer(24).tag(sync=True)

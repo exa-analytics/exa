@@ -9,7 +9,6 @@ expression) search and replace, insert, and delete operations.
 import os
 import re
 from io import StringIO
-from operator import itemgetter
 from collections import OrderedDict
 from exa.utility import mkp
 
@@ -159,21 +158,26 @@ class Editor:
         '''
         Search the editor for lines that match the string.
         '''
-        lines = {}
+        lines = OrderedDict()
         for i, line in enumerate(self):
             if string in line:
                 lines[i] = line
-        return OrderedDict(sorted(lines.items(), key=itemgetter(0)))
+        return lines
 
-    def regex(self, pattern):
+    def regex(self, pattern, line=False):
         '''
         Search the editro for lines matching the regular expression.
         '''
-        lines = {}
+        lines = OrderedDict()
         for i, line in enumerate(self):
-            if re.match(pattern, line):
-                lines[i] = line
-        return OrderedDict(sorted(lines.items(), key=itemgetter(0)))
+            grps = re.search(pattern, line)
+            if grps:
+                grps = grps.groups()
+                if grps:
+                    lines[i] = grps
+                else:
+                    lines[i] = line
+        return lines
 
     @property
     def variables(self):
@@ -310,11 +314,13 @@ def lines_from_file(path):
         lines = f.read().splitlines()
     return lines
 
+
 def lines_from_stream(f):
     '''
     Line list from an IO stream.
     '''
     return f.read().splitlines()
+
 
 def lines_from_string(string):
     '''

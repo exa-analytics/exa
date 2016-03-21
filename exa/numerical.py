@@ -16,7 +16,7 @@ See Also:
 '''
 import numpy as np
 import pandas as pd
-from traitlets import Unicode, Dict
+from traitlets import Unicode, Integer, Float
 from exa.error import RequiredIndexError, RequiredColumnError
 
 
@@ -59,12 +59,6 @@ class _HasTraits(_DataRepr):
     _traits = []        # Trait names (as strings)
     _groupbys = []      # Column names by which to group the data
 
-    def _get_traits(self):
-        '''
-        Generate trait objects from column data.
-        '''
-        pass
-
 
 class Series(_HasTraits, pd.Series):
     '''
@@ -81,6 +75,43 @@ class DataFrame(_HasTraits, pd.DataFrame):
         Columns, indices, etc. are only enforced if the dataframe has non-zero
         length.
     '''
+    def _get_traits(self, traits=None):
+        '''
+        Generate trait objects from column data.
+
+        Args:
+            traits (list): List of traits to update or None (updates all, default)
+        '''
+        traits = {}
+        fi = self.index[0]
+        groups = None
+        if self._groupbys:
+            self._revert_categories()
+            groups = self.groupby(self._groupbys)
+        for name in self._traits:
+            if name in self.columns:
+                trait = None
+                # Name mangle to allow similar column in different data objects
+                trait_name = '_'.join((self.__class__.__name__.lower(), name))
+                if np.all(np.isclose(self[name], self.ix[fi, name])):    # Don't send duplicate data,
+                    value = self.ix[fi, name]                            # rather send a single trait
+                    dtype = type(value)                                  # that contains the value
+                    if dtype is np.int64 or dtype is np.int32:           # representative of all objects.
+                        trait = Integer(value)
+                    elif dtype is np.float64 or dtype is np.float32:
+                        trait = Float(value)
+                    else:
+                        raise TypeError('Unknown type for {0} with type {1}'.format(name, dtype))
+                elif groups:
+
+                    trait = Unicode(groups.apply(lambda g: g[name].values).to_json())
+                else:
+                    trait = self[name].to_json(orient='values')
+                traits[trait_name] = trait.tag(sync=True)
+        if self._groupbys:
+            self._set_categories()
+        return traits
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if len(self) > 0:

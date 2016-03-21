@@ -56,7 +56,6 @@ class BaseContainer:
         dfs = self._numerical_dict(copy=True)
         kws.update(kwargs)
         kws.update(dfs)
-        print(kws)
         return cls(**kws)
 
     def info(self):
@@ -194,8 +193,25 @@ class BaseContainer:
         names = []
         has_traits = self._numerical_dict(cls_criteria=_HasTraits)
         for name, obj in has_traits.items():
+            obj._update_traits()
             names += obj._traits
         self._widget._names = names
+
+    def _update_traits(self, which=None):
+        '''
+        Update specific traits, given in the arguments.
+
+        Args:
+            traits (list): Names of traits to update
+        '''
+        traits = {}
+        has_traits = self._numerical_dict(cls_criteria=_HasTraits)
+        which = which if which else has_traits.keys()
+        for name, obj in has_traits.items():
+            if name in which:
+                traits.update(obj._get_traits())
+        return traits
+        #self._widget.add_traits(**traits)
 
     def __sizeof__(self):
         '''
