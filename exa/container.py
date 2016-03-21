@@ -22,7 +22,7 @@ from sys import getsizeof
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from exa import _conf
 from exa.widget import ContainerWidget
-from exa.ndframe import DataFrame
+from exa.structures import DataFrame
 
 
 class BaseContainer:

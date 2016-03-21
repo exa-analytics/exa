@@ -30,8 +30,15 @@ class Editor:
         del editor[0]                                # Deletes first line
         print(len(editor))                           # 1
         editor.write(fullpath=None, user='Alice')    # "Hello Alice"
+
+    Note:
+        By default an editor object will only print (string representation)
+        60 rows (30 from the head and 30 from the tail of the file). To show
+        more lines on print, increase the *_print_count* value (use with
+        caution!).
     '''
-    _fmt = '{0}: {1}\n'.format    # The line format
+    _print_count = 30            # Default head and tail block length
+    _fmt = '{0}: {1}\n'.format   # The line format
 
     def write(self, fullpath=None, *args, **kwargs):
         '''
@@ -48,9 +55,6 @@ class Editor:
         See Also:
             :func:`~exa.editor.Editor.format`
         '''
-        if fullpath is None:
-            if self.filename:
-                fullpath = self.filename
         if fullpath:
             with open(fullpath, 'w') as f:
                 f.write(str(self).format(*args, **kwargs))
@@ -188,13 +192,6 @@ class Editor:
         variables = re.findall('{[A-z0-9]*}', string)
         return sorted(set(variables).difference(constants))
 
-    @property
-    def meta(self):
-        '''
-        Generate a dictionary of metadata (default is string text of editor).
-        '''
-        return {'filename': self.filename}
-
     @classmethod
     def from_file(cls, path):
         '''
@@ -221,13 +218,20 @@ class Editor:
         return cls(lines_from_string(string))
 
     def _line_repr(self, lines):
-        r = None
+        r = ''
+        nn = len(self)
         n = len(str(len(lines)))
-        for i, line in enumerate(lines):
-            ln = str(i).rjust(n, ' ')
-            if r is None:
-                r = self._fmt(ln, line)
-            else:
+        if nn > self._print_count * 2:
+            for i in range(self._print_count):
+                ln = str(i).rjust(n, ' ')
+                r += self._fmt(ln, self._lines[i])
+            r += '...\n'.rjust(n, ' ')
+            for i in range(nn - self._print_count, nn):
+                ln = str(i).rjust(n, ' ')
+                r += self._fmt(ln, self._lines[i])
+        else:
+            for i, line in enumerate(lines):
+                ln = str(i).rjust(n, ' ')
                 r += self._fmt(ln, line)
         return r
 
@@ -242,7 +246,7 @@ class Editor:
                 r += self._fmt(ln, line)
         return r
 
-    def __init__(self, data, filename=None):
+    def __init__(self, data, filename=None, meta={}, **kwargs):
         '''
         The constructor can be passed any valid data argument (file path,
         stream, or string variable) and it will determine which construction
@@ -253,6 +257,7 @@ class Editor:
             filename: Name of file or None
         '''
         self.filename = filename
+        self.meta = meta
         if isinstance(data, list):
             self._lines = data
         elif os.path.exists(data):
@@ -265,6 +270,8 @@ class Editor:
             self._lines = lines_from_string(data)
         else:
             raise TypeError('Unknown type for arg data: {}'.format(type(data)))
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
     def __delitem__(self, line):
         del self._lines[line]     # "line" is the line number minus one

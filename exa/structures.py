@@ -20,7 +20,19 @@ from traitlets import Unicode, Dict
 from exa.error import RequiredIndexError, RequiredColumnError
 
 
-class _TraitsDF:
+class _DataRepr:
+    '''
+    '''
+    def __repr__(self):
+        name = self.__class__.__name__
+        n = len(self)
+        return '{0}(len: {1})'.format(name, n)
+
+    def __str__(self):
+        return self.__repr__()
+
+
+class _TraitsDF(_DataRepr):
     '''
     Base dataframe class providing trait support for :class:`~pandas.DataFrame`
     like objects.
@@ -59,14 +71,11 @@ class _TraitsDF:
                 if missing:
                     raise RequiredIndexError(missing, name)
 
-    def __repr__(self):
-        name = self.__class__.__name__
-        n = len(self)
-        m = len(self.columns)
-        return '{0}(rows: {1} columns: {2})'.format(name, n, m)
 
-    def __str__(self):
-        return self.__repr__()
+class Series(_DataRepr, pd.Series):
+    '''
+    '''
+    pass
 
 class DataFrame(_TraitsDF, pd.DataFrame):
     '''
