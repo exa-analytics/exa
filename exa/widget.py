@@ -17,9 +17,14 @@ class Widget(DOMWidget):
     '''
     _view_module = Unicode('nbextensions/exa/container').tag(sync=True)
     _view_name = Unicode('ContainerView').tag(sync=True)
-    test_value = Unicode('Hello World!').tag(sync=True)
-    test_json = Unicode(pd.Series(np.random.rand(10)).to_json()).tag(sync=True)
-    test_float = Float(42.0).tag(sync=True)
+    width = Integer(850).tag(sync=True)
+    height = Integer(500).tag(sync=True)
+    fps = Integer(24).tag(sync=True)
+    test_3D = Unicode(pd.DataFrame(np.random.randint(-10, 10, size=(20, 3)),
+                                   columns=('x', 'y', 'z')).to_json(orient='values')).tag(sync=True)
+    test_2D = Unicode(pd.DataFrame(np.random.randint(-10, 10, size=(20, 2)),
+                                   columns=('x', 'y')).to_json(orient='values')).tag(sync=True)
+    test_diameter = Float(4.2).tag(sync=True)
 
     def _handle_custom_msg(self, *args, **kwargs):
         '''
@@ -41,11 +46,7 @@ class ContainerWidget(Widget):
     Attributes:
         _names (list): List of all traits associated with the :class:`~exa.widget.ContainerWidget`
     '''
-    width = Integer(850).tag(sync=True)
-    height = Integer(500).tag(sync=True)
-    fps = Integer(24).tag(sync=True)
     gui_width = Integer(250).tag(sync=True)
-
 
     def __init__(self, container, *args, **kwargs):
         super().__init__(*args, **kwargs)

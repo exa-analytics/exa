@@ -7,4 +7,12 @@ package (and the dependencies therein).
     :src: ../../exa/static/nbextensions/container.js
     :analyzer: js
 
+.. autoanysrc:: directives
+    :src: ../../exa/static/nbextensions/three.app.js
+    :analyzer: js
+
+.. autoanysrc:: directives
+    :src: ../../exa/static/nbextensions/utility.js
+    :analyzer: js
+
 .. _ipywidgets: http://ipywidgets.readthedocs.org/en/latest/
