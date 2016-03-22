@@ -1,9 +1,12 @@
 /*"""
-========================================
-Container Module
-========================================
-An extension for the Jupyter notebook environment that allows for visualization
-of exa's Container class.
+Container
+===============
+This module provides custom functionality for communication with the Python
+backend via ipywidgets implementation (itself utilizing `backbone.js`_ and
+`zeromq`_).
+
+.. _backbone.js: http://backbonejs.org/
+.. _zeromq: http://zeromq.org/
 */
 'use strict';
 
@@ -34,8 +37,8 @@ define(['widgets/js/widget'], function(widget) {
         */
         init: function() {    // Overwritten when "subclassing" views
             //this.model.on('change:_____', this._____, this);
-            var obj = this.get_trait('garbage');
-            console.log(obj);
+            //var obj = this.get_trait('garbage');
+            //console.log(obj);
         },
 
         render: function() {
@@ -49,7 +52,7 @@ define(['widgets/js/widget'], function(widget) {
             this.update_value();
             this.model.on('change:test_value', this.update_value, this);
             this.init();
-            // Below is debug/test
+            /* Below is debug/test
             var obj1 = this.model.get('test_value');
             var obj2 = this.model.get('test_json');
             var obj3 = this.get_trait('test_value');
@@ -71,7 +74,7 @@ define(['widgets/js/widget'], function(widget) {
             console.log(obj2[0]);
             console.log(obj4[0]);
             console.log(obj5);
-            console.log(obj6);
+            console.log(obj6);*/
         },
 
         update_value: function() {

@@ -35,9 +35,9 @@ Contents
     :maxdepth: 2
     :caption: Developer Documentation
 
-    general.rst
     bugs.rst
     proposal.rst
+    general.rst
     contrib.rst
 
 .. _rel-proj:

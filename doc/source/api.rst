@@ -16,7 +16,7 @@ Python
 .. toctree::
     :maxdepth: 3
 
-    modules/editor_ndframe.rst
+    modules/editor_an.rst
     modules/container_widget.rst
     modules/web_main.rst
     modules/config_install.rst
