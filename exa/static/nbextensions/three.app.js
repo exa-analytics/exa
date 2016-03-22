@@ -147,8 +147,14 @@ define([
         } else {
             n = positions.length / 3;
         };
-        for (var i=0, i3=0; i<n; i++, i3+=3) {
-
+        for (var i=0; i<n; i++) {
+            if (nunique == 1) {
+                var mesh = meshes[0]
+                mesh.geometry.position.x = positions[i]
+            }
+            var radius = radii[i]
+            var mesh_index =
+            if
         };
     };
 
