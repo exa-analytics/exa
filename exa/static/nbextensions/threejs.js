@@ -14,7 +14,7 @@ require.config({
         },
 
         'nbextensions/exa/lib/TrackballControls': {
-            deps: ['nbextensions/exa/atomic/lib/three.min'],
+            deps: ['nbextensions/exa/lib/three.min'],
             exports: 'THREE.TrackballControls'
         },
 
@@ -32,14 +32,57 @@ define([
 ], function(
     THREE,
     TrackballControls,
-    MarchingCubes,
+    MarchingCubes
 ) {
-    var ThreeJS = {
+    var ThreeJS = function(canvas) {
+        this.canvas = canvas;
+        console.log(this.canvas);
+    };
+
+    ThreeJS.prototype.vertex_shader = "\
+        attribute float size;\
+        attribute vec3 color;\
+        varying vec3 vColor;\
+        \
+        void main() {\
+            vColor = color;\
+            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);\
+            gl_PointSize = size * (450.0 / length(mvPosition.xyz));\
+            gl_Position = projectionMatrix * mvPosition;\
+        }\
+    ";
+
+    ThreeJS.prototype.point_frag_shader = "\
+        varying vec3 vColor;\
+        \
+        void main() {\
+            if (length(gl_PointCoord * 2.0 - 1.0) > 1.0)\
+                discard;\
+            gl_FragColor = vec4(vColor, 1.0);\
+        }\
+    ";
+
+    ThreeJS.prototype.circle_frag_shader = "\
+        varying vec3 vColor;\
+        \
+        void main() {\
+            if (length(gl_PointCoord * 2.0 - 1.0) > 1.0)\
+                discard;\
+            if (length(gl_PointCoord * 2.0 - 1.0) < 0.9)\
+                discard;\
+            gl_FragColor = vec4(vColor, 1.0);\
+        }\
+    ";
+
+    return {'ThreeJS': ThreeJS};
+});
+
+
+    /*var ThreeJS = {
         /*"""
         ThreeJS
         -------------
         Custom ThreeJS class.
-        */
         init: function(canvas) {
             this.canvas = canvas;
             this.width = this.canvas.width();
@@ -62,44 +105,4 @@ define([
             this.controls.dynamicDampingFactor = 0.3;
             this.controls.keys = [65, 83, 68];
             this.controls.addEventListener('change', this.render.bind(this));
-        },
-
-        vertex_shader: "\
-            attribute float size;\
-            attribute vec3 color;\
-            varying vec3 vColor;\
-            \
-            void main() {\
-                vColor = color;\
-                vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);\
-                gl_PointSize = size * (450.0 / length(mvPosition.xyz));\
-                gl_Position = projectionMatrix * mvPosition;\
-            }\
-        ",
-
-        point_frag_shader: "\
-            varying vec3 vColor;\
-            \
-            void main() {\
-                if (length(gl_PointCoord * 2.0 - 1.0) > 1.0)\
-                    discard;\
-                gl_FragColor = vec4(vColor, 1.0);\
-            }\
-        ",
-
-        circle_frag_shader: "\
-            varying vec3 vColor;\
-            \
-            void main() {\
-                if (length(gl_PointCoord * 2.0 - 1.0) > 1.0)\
-                    discard;\
-                if (length(gl_PointCoord * 2.0 - 1.0) < 0.9)\
-                    discard;\
-                gl_FragColor = vec4(vColor, 1.0);\
-            }\
-        ",
-    };
-
-
-    return {'ThreeJS': ThreeJS};
-});
+        },*/
