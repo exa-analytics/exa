@@ -58,7 +58,7 @@ define([
             this.model.on('change:test_2D', this.update_2D, this);
             this.model.on('change:test_diameter', this.update_diameter, this);
 
-            //this.app.test_mesh();    // Simple box geometry three.app.js test
+            this.app.test_mesh();    // Simple box geometry three.app.js test
             this.init_container();
             this.container.append(this.canvas);
             this.setElement(this.container);
@@ -113,11 +113,6 @@ define([
                 Documentation for three.app.js (below).
             */
             this.app = new app3D.ThreeJSApp(canvas);
-            console.log(this.app);
-            console.log(this.app.canvas);
-            console.log(this.app.renderer);
-            console.log(this.app.camera);
-            console.log(this.app.controls);
         },
 
         app3D_displayed: function() {
@@ -191,10 +186,6 @@ define([
             Update the frontend value of the 3D array
             */
             this.value3D = this.get_trait('test_3D');
-            console.log(this.value3D);
-            console.log(this.value3D.length);
-            console.log(this.value3D[0]);
-            console.log(this.value3D[0][0]);
             this.app.add_spheres(this.value3D);
         },
 
@@ -205,10 +196,6 @@ define([
             Update the frontend value of the 2D array
             */
             this.value2D = this.get_trait('test_2D');
-            console.log(this.value2D);
-            console.log(this.value2D.length);
-            console.log(this.value2D[0]);
-            console.log(this.value2D[0][0]);
         },
 
         update_diameter: function() {
@@ -218,7 +205,6 @@ define([
             Update the frontend value of the 3D array
             */
             this.diameter = this.get_trait('test_diameter');
-            console.log(this.diameter);
         },
     });
 
