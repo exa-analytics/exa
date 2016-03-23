@@ -147,7 +147,7 @@ define([
         var geometries = [];
         var materials = [];
         for (var i=0; i<nunique; i++) {
-            geometries.push(new THREE.SphereGeometry(unique_radii[i]));
+            geometries.push(new THREE.SphereBufferGeometry(unique_radii[i]));
             materials.push(new material({color: unique_colors[i]}));
         };
         if (typeof positions[0] == 'object') {

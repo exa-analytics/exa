@@ -43,6 +43,7 @@ define([
             ipywidgets DOMWidgetView objects.
             */
             console.log('Initializing container...');
+            var self = this;
             this.init_canvas();
             this.init_3D(this.canvas);
 
@@ -60,10 +61,12 @@ define([
 
             this.app.test_mesh();    // Simple box geometry three.app.js test
             this.init_container();
-            this.container.append(this.canvas);
+            this.container.append(this.app.renderer.domElement);
             this.setElement(this.container);
-            this.app.render();
-            this.on('displayed', this.app3D_displayed);
+            this.on('displayed', function() {
+                self.app.animate();
+                self.app.controls.handleResize();
+            });
         },
 
         init_container: function() {
@@ -82,10 +85,7 @@ define([
                     self.set_trait('height', self.height);
                     self.canvas.width(self.width);
                     self.canvas.height(self.height);
-                    self.app.resize();
-                },
-                stop: function(event, ui) {
-                    self.app.render();
+                    //self.app.resize();
                 },
             });
         },
@@ -187,6 +187,7 @@ define([
             */
             this.value3D = this.get_trait('test_3D');
             this.app.add_spheres(this.value3D);
+            this.app.render();
         },
 
         update_2D: function() {
