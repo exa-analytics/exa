@@ -28,7 +28,7 @@ define([], function() {
             console.log(u);               // ["a", 1, 2, "1"]
 
         Args:
-            obj (object): Array like object.
+            obj (object): An object (should have the filter method)
 
         See Also:
             **_unique**
