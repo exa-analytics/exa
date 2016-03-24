@@ -59,8 +59,9 @@ define([
             this.update_3D();
             this.update_2D();
             this.update_diameter();
-            
-            this.app.test_mesh();    // Simple box geometry three.app.js test
+
+            //this.app.test_mesh();    // Simple box geometry three.app.js test
+            this.app.default_camera();
             this.init_container();
             this.container.append(this.canvas);
             this.setElement(this.container);
@@ -189,7 +190,7 @@ define([
             Update the frontend value of the 3D array
             */
             this.value3D = this.get_trait('test_3D');
-            this.app.add_spheres(this.value3D);
+            this.app.add_points(this.value3D);
         },
 
         update_2D: function() {

@@ -58,14 +58,19 @@ define([
         this.canvas = canvas;
         this.width = this.canvas.width();
         this.height = this.canvas.height();
+
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.canvas.get(0),
             antialias: true,
         });
         this.renderer.setClearColor(0xFFFFFF);
+        this.renderer.setPixelRatio( window.devicePixelRatio );
         this.renderer.setSize(this.width, this.height);
+
         this.scene = new THREE.Scene();
+
         this.camera = new THREE.PerspectiveCamera(60, this.width / this.height, 0.0001, 10000);
+
         this.controls = new TrackballControls(this.camera, this.canvas.get(0));
         this.controls.rotateSpeed = 10.0;
         this.controls.zoomSpeed = 5.0;
@@ -78,8 +83,11 @@ define([
         this.controls.addEventListener('change', this.render.bind(this));
 
         this.dlight1 = new THREE.DirectionalLight(0xFFFFFF, 0.4);
-        this.dlight1.position.set(100, 100, 100);
+        this.dlight1.position.set(0, 100, 100);
         this.scene.add(this.dlight1);
+        this.dlight2 = new THREE.DirectionalLight(0xFFFFFF, 0.4);
+        this.dlight2.position.set(100, 0, 100);
+        this.scene.add(this.dlight2);
         this.ambient_light = new THREE.AmbientLight(0xFFFFFF);
         this.scene.add(this.ambient_light);
     };
@@ -134,9 +142,27 @@ define([
         /*"""
         add_sphere
         -------------
-        Add spheres...?
+        Add's SphereBufferGeometry objects from the given positions with the
+        given radii, colors, and material.
+
+        If no colors or radii (or material) are provided, suitable defaults will
+        chosen.
+
+        Args:
+            positions (object): An N x 3 array like object
+            colors (object): List like colors corresponding to every object
+            radii (object): List like radii corresponding to every object
+            material (THREE.Material): Three.js material object
+
+        Warning:
+            On a modern machine attempting to render >50k (approximately) objects
+            will cause a slowdown of the browser and framerate of the render
+            down to barely usable speeds.
+
+        See Also:
+            **add_points**
         */
-        var colors = colors || [0x9E9E9E];
+        var colors = colors || [0x808080];
         var radii = radii || [1.0];
         var material = material || THREE.MeshLambertMaterial;
         var unique_radii = utility.unique(radii);
@@ -146,7 +172,9 @@ define([
         var materials = [];
         for (var i=0; i<nunique; i++) {
             geometries.push(new THREE.SphereBufferGeometry(unique_radii[i]));
-            materials.push(new material({color: unique_colors[i]}));
+            materials.push(new material({
+                color: unique_colors[i],
+            }));
         };
         if (typeof positions[0] == 'object') {
             var n = positions.length;
@@ -170,35 +198,54 @@ define([
         };
     };
 
-    ThreeJSApp.prototype.add_points = function(x, y, z, r, c) {
+    ThreeJSApp.prototype.add_points = function(positions, colors, radii) {
         /*"""
         add_points
         ---------------
+        Create a point cloud from positions, colors, and radii.
 
         Args:
-            x (array): x values
-            y (array): y values
-            z (array): z values
-            r (array): radius values
-            c (array): color values
+            positions (object): An N x 3 array like object
+            colors (object): List like colors corresponding to every object
+            radii (object): List like radii corresponding to every object
+
+        Warning:
+            On a modern machine attempting to render >5 million (approximately)
+            objects can cause a slowdown of the browser and framerate of the
+            application.
         */
+        var flat_xyz = utility.flatten_to_array(positions);
+        var geometry = new THREE.BufferGeometry();
         var material = new THREE.ShaderMaterial({
             vertexShader: this.vertex_shader,
             fog: true,
-            fragmentShader: point_frag_shader,
-            transparent: false,
-        })
-        var geometry = new THREE.BufferGeometry();
-        var color = new THREE.Color();
-        var n = x.length;
-        var positions = new Float32Array(n *3);
+            fragmentShader: this.point_frag_shader,
+            transparent: true,
+            opacity: 0.8
+        });
+        var size = 1.0;
+        var color = new THREE.Color(0x808080);
+        var n = positions.length;
         var colors = new Float32Array(n * 3);
         var sizes = new Float32Array(n);
-        for (var i=0, i3=0; i<n; i++, i3+=3) {
-            positions[i3 + 0] = x[i];
-            positions[i3 + 1] = y[i];
-            positions[i3 + 2] = z[i];
+        for (let i=0, i3=0; i<n; i++, i3+=3) {
+            colors[i3 + 0] = color.r;
+            colors[i3 + 1] = color.g;
+            colors[i3 + 2] = color.b;
+            sizes[i] = size;
         };
+        geometry.addAttribute('position', new THREE.BufferAttribute(flat_xyz, 3));
+        geometry.addAttribute('color', new THREE.BufferAttribute(colors, 3));
+        geometry.addAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        var points = new THREE.Points(geometry, material);
+        this.scene.add(points);
+    };
+
+    ThreeJSApp.prototype.add_lines = function() {
+        /*"""
+        add_lines
+        ------------
+        */
     };
 
     ThreeJSApp.prototype.test_mesh = function() {
@@ -207,13 +254,13 @@ define([
         ---------------
         Example of a render
         */
-        this.test_geometry = new THREE.BoxGeometry(5, 5, 5);
+        this.test_geometry = new THREE.BoxGeometry(2.0, 2.0, 2.0);
         this.test_material = new THREE.MeshLambertMaterial({color: 0x005500});
         this.test_cube = new THREE.Mesh(this.test_geometry, this.test_material);
         this.scene.add(this.test_cube);
-        this.camera.position.x = 20;
-        this.camera.position.y = 20;
-        this.camera.position.z = 20;
+        this.camera.position.x = 100;
+        this.camera.position.y = 100;
+        this.camera.position.z = 100;
         this.target = new THREE.Vector3(0, 0, 0);
         this.camera.lookAt(this.target);
         this.controls.target = this.target;
@@ -225,12 +272,14 @@ define([
         ------------------
         Set the camera in the default position and have it look at the origin.
         */
-        this.camera.position.set(20, 20, 20);
+        this.camera.position.set(100, 100, 100);
         this.target = new THREE.Vector3(0, 0, 0);
         this.camera.lookAt(this.target);
         this.controls.target = this.target;
     };
 
+    // These are shaders written in GLSL (GLslang: OpenGL Shading Language).
+    // This code is executed on the GPU.
     ThreeJSApp.prototype.vertex_shader = "\
         attribute float size;\
         attribute vec3 color;\
@@ -239,7 +288,7 @@ define([
         void main() {\
             vColor = color;\
             vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);\
-            gl_PointSize = size * (450.0 / length(mvPosition.xyz));\
+            gl_PointSize = size * (600.0 / length(mvPosition.xyz));\
             gl_Position = projectionMatrix * mvPosition;\
         }\
     ";
@@ -263,6 +312,29 @@ define([
             if (length(gl_PointCoord * 2.0 - 1.0) < 0.9)\
                 discard;\
             gl_FragColor = vec4(vColor, 1.0);\
+        }\
+    ";
+
+    ThreeJSApp.prototype.line_frag_shader = "\
+        uniform vec3 color;\
+        uniform float opacity;\
+        \
+        vary vec3 vColor;\
+        void main() {\
+            gl_FragColor = vec4(vColor * color, opacity);\
+        }\
+    ";
+
+    ThreeJSApp.prototype.line_vertex_shader = "\
+        uniform float amplitude;\
+        attribute vec3 displacement;\
+        attribute vec3 customColor;\
+        varying vec3 vColor;\
+        \
+        void main() {\
+            vec3 newPosition = position + amplitude * displacement;\
+            vColor = customColor;\
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);\
         }\
     ";
 

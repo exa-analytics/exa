@@ -45,5 +45,30 @@ define([], function() {
         return self.indexOf(value) === index;
     };
 
-    return {'unique': unique};
+    var flatten_to_array = function(obj) {
+        /*"""
+        flatten_to_array
+        -------------------
+        Flattens an array-like object into a 1-D Float32Array object.
+
+        Args:
+            obj (object): Array like object to be flattened
+        */
+        var n = obj.length;
+        var m = obj[0].length;
+        var flat = new Float32Array(n * m);
+        var h = 0;
+        for (let i=0; i<n; i++) {
+            for (let j=0; j<m; j++) {
+                flat[h] = obj[i][j];
+                h += 1;
+            };
+        };
+        return flat;
+    };
+
+    return {
+        'unique': unique,
+        'flatten_to_array': flatten_to_array
+    };
 });
