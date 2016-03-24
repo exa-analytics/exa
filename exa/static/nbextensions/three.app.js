@@ -61,8 +61,6 @@ define([
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.canvas.get(0),
             antialias: true,
-            logarithmicDepthBuffer: true,
-            alpha: true,
         });
         this.renderer.setClearColor(0xFFFFFF);
         this.renderer.setSize(this.width, this.height);
@@ -219,7 +217,18 @@ define([
         this.target = new THREE.Vector3(0, 0, 0);
         this.camera.lookAt(this.target);
         this.controls.target = this.target;
-        this.render();
+    };
+
+    ThreeJSApp.prototype.default_camera = function() {
+        /*"""
+        default_camera
+        ------------------
+        Set the camera in the default position and have it look at the origin.
+        */
+        this.camera.position.set(20, 20, 20);
+        this.target = new THREE.Vector3(0, 0, 0);
+        this.camera.lookAt(this.target);
+        this.controls.target = this.target;
     };
 
     ThreeJSApp.prototype.vertex_shader = "\
