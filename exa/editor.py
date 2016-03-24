@@ -154,15 +154,41 @@ class Editor:
         for k, i in enumerate(lines):
             del self[i - k]
 
-    def find(self, string):
+    def find(self, string, start=0):
         '''
         Search the editor for lines that match the string.
         '''
         lines = OrderedDict()
-        for i, line in enumerate(self):
+        for i, line in enumerate(self, start=start):
             if string in line:
                 lines[i] = line
         return lines
+
+    def find_next(self, string, reverse=False):
+        '''
+        Find the subsequent line containing the given string.
+
+        Args:
+            string (str): String to search for
+
+        Returns:
+            tup (tuple): Tuple of integer line number and line value
+        '''
+        ret = None
+        lines = list(reversed(self._lines[self._next_pos:])) if reverse else self._lines[self._next_pos:]
+        for i, line in enumerate(lines):
+            if string in line:
+                if reverse:
+                    self._next_pos = len(self) - i + 1
+                else:
+                    self._next_pos += i + 1
+                ret = (self._next_pos - 1, line)
+                break
+        if ret:
+            return ret
+        else:
+            self._next_pos = 0
+            return ()
 
     def regex(self, pattern, line=False):
         '''
@@ -260,6 +286,7 @@ class Editor:
             data: File path, stream, or string text
             filename: Name of file or None
         '''
+        self._next_pos = 0
         self.filename = filename
         self.meta = meta
         if isinstance(data, list):
@@ -286,8 +313,8 @@ class Editor:
     def __setitem__(self, line, value):
         self._lines[line] = value
 
-    def __iter__(self):
-        for line in self._lines:
+    def __iter__(self, start=0):
+        for line in self._lines[start:]:
             yield line
 
     def __len__(self):
