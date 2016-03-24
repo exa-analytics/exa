@@ -18,17 +18,23 @@ class Editor:
     An editor is the contents of a text file that can be programmatically
     manipulated.
 
-    .. code-block:: Python
+    All lines are stored in memory; no file handles are kept open. For extremely
+    large files, this approach may not be feasible on a single machine.
 
-        from exa.editor import Editor
-        template = "Hello World!\\nHello {user}"
-        editor = Editor.from_template(template)
-        print(editor[0])                             # "Hello World!"
-        print(editor.format(user='Bob'))             # "Hello World!\\nHello Bob"
-        print(len(editor))                           # 2
-        del editor[0]                                # Deletes first line
-        print(len(editor))                           # 1
-        editor.write(fullpath=None, user='Alice')    # "Hello Alice"
+    >>> template = "Hello World!\\nHello {user}"
+    >>> editor = Editor(template)
+    >>> print(editor[0])
+    Hello World!
+    >>> print(editor.format(user='Bob'))
+    Hello World!
+    Hello Bob
+    >>> print(len(editor))
+    2
+    >>> del editor[0]
+    >>> print(len(editor))
+    1
+    >>> editor.write(fullpath=None, user='Alice')
+    Hello Alice
 
     Note:
         By default an editor object will only print (string representation)
@@ -180,6 +186,11 @@ class Editor:
 
         Returns:
             tup (tuple): String line, value pair
+
+        Note:
+            This function is cyclic: if the same string is searched for that
+            was previously not found, the function will start a "new" search
+            from the beginning of the file.
         '''
         if string != self._next_string or len(self._prev_match) == 0:
             self._next_pos = 0

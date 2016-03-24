@@ -14,10 +14,13 @@ def arange1(initials, counts):
     >>> import numpy
     >>> initials = numpy.array([0, 4], dtype=numpy.int64)
     >>> counts = numpy.array([4, 5], dtype=numpy.int64)
-    >>> arange1(initials, counts)
-    (array([0, 0, 0, 0, 1, 1, 1, 1, 1], dtype=int64),
-     array([0, 1, 2, 3, 0, 1, 2, 3, 4], dtype=int64),
-     array([0, 1, 2, 3, 4, 5, 6, 7, 8], dtype=int64))
+    >>> values = arange1(initials, counts)
+    >>> values[0]
+    array([0, 0, 0, 0, 1, 1, 1, 1, 1])
+    >>> values[1]
+    array([0, 1, 2, 3, 0, 1, 2, 3, 4])
+    >>> values[2]
+    array([0, 1, 2, 3, 4, 5, 6, 7, 8])
 
     Args:
         initials (array): Starting points for array generation
@@ -46,12 +49,15 @@ def arange2(initials, count):
     Generate a pseudo-sequential array from initial values and a single count.
 
     >>> import numpy
-    >>> initials = numpy.array([0, 4], dtype=numpy.int64)
+    >>> initials = numpy.array([0, 5], dtype=numpy.int64)
     >>> count = 5
-    >>> arange2(initials, count)
-    (array([0, 0, 0, 0, 0], dtype=int64),
-     array([0, 1, 2, 3, 4], dtype=int64),
-     array([0, 1, 2, 3, 4], dtype=int64))
+    >>> values = arange2(initials, count)
+    >>> values[0]
+    array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1])
+    >>> values[1]
+    array([0, 1, 2, 3, 4, 0, 1, 2, 3, 4])
+    >>> values[2]
+    array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 
     Args:
         initials (array): Starting points for array generation
