@@ -20,11 +20,11 @@ class Widget(DOMWidget):
     width = Integer(850).tag(sync=True)
     height = Integer(500).tag(sync=True)
     fps = Integer(24).tag(sync=True)
-    test_3D = Unicode(pd.DataFrame(np.random.randint(-80, 80, size=(10000, 3)),
+    test_3D = Unicode(pd.DataFrame(np.random.randint(-5, 5, size=(10, 3)),
                                    columns=('x', 'y', 'z')).to_json(orient='values')).tag(sync=True)
-    test_2D = Unicode(pd.DataFrame(np.random.randint(-20, 20, size=(20, 2)),
-                                   columns=('x', 'y')).to_json(orient='values')).tag(sync=True)
-    test_diameter = Float(4.2).tag(sync=True)
+    #test_2D = Unicode(pd.DataFrame(np.random.randint(-20, 20, size=(20, 2)),
+    #                               columns=('x', 'y')).to_json(orient='values')).tag(sync=True)
+    #test_diameter = Float(4.2).tag(sync=True)
 
     def _handle_custom_msg(self, *args, **kwargs):
         '''

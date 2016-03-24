@@ -266,14 +266,28 @@ define([
         this.controls.target = this.target;
     };
 
-    ThreeJSApp.prototype.default_camera = function() {
+    ThreeJSApp.prototype.default_camera = function(x, y, z, ox, oy, oz) {
         /*"""
         default_camera
         ------------------
         Set the camera in the default position and have it look at the origin.
+
+        Args:
+            x (float): Camera position in x
+            y (float): Camera position in y
+            z (float): Camera position in z
+            ox (float): Target position in x
+            oy (float): Target position in y
+            oz (float): Target position in z
         */
-        this.camera.position.set(100, 100, 100);
-        this.target = new THREE.Vector3(0, 0, 0);
+        var x = x || 100;
+        var y = y || 100;
+        var z = z || 100;
+        var ox = ox || 0;
+        var oy = oy || 0;
+        var oz = oz || 0;
+        this.camera.position.set(x, y, z);
+        this.target = new THREE.Vector3(ox, oy, oz);
         this.camera.lookAt(this.target);
         this.controls.target = this.target;
     };

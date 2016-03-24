@@ -75,21 +75,17 @@ class DataFrame(_HasTraits, pd.DataFrame):
         Columns, indices, etc. are only enforced if the dataframe has non-zero
         length.
     '''
-    def _get_traits(self, traits=None):
+    def _get_traits(self):
         '''
         Generate trait objects from column data.
-
-        Args:
-            traits (list): List of traits to update or None (updates all, default)
         '''
-        traits = {}
         fi = self.index[0]
         groups = None
         if self._groupbys:
             self._revert_categories()
             groups = self.groupby(self._groupbys)
         for name in self._traits:
-            if name in self.columns:
+            if name in self.columns or all((t in self.columns for t in name.split())):
                 trait = None
                 # Name mangle to allow similar column in different data objects
                 trait_name = '_'.join((self.__class__.__name__.lower(), name))
@@ -126,7 +122,7 @@ class DataFrame(_HasTraits, pd.DataFrame):
                     raise RequiredIndexError(missing, name)
 
 
-class SparseFrame(_HasTraits, pd.SparseDataFrame):
+class SparseFrame(_DataRepr, pd.SparseDataFrame):
     '''
     A sparse dataframe used to update it's corresponding
     :class:`~exa.ndframe.DataFrame` or a truly sparse data store.

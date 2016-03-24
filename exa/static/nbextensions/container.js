@@ -61,7 +61,7 @@ define([
             this.update_diameter();
 
             //this.app.test_mesh();    // Simple box geometry three.app.js test
-            this.app.default_camera();
+            this.app.default_camera(10, 10, 10);
             this.init_container();
             this.container.append(this.canvas);
             this.setElement(this.container);
