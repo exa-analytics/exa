@@ -154,17 +154,24 @@ class Editor:
         for k, i in enumerate(lines):
             del self[i - k]
 
-    def find(self, string, start=0):
+    def find(self, *strings):
         '''
-        Search the editor for lines that match the string.
-        '''
-        lines = OrderedDict()
-        for i, line in enumerate(self, start=start):
-            if string in line:
-                lines[i] = line
-        return lines
+        Search the entire editor for lines that match the string.
 
-    def find_next(self, string, reverse=False):
+        Args:
+            \*strings: Any number of strings to search for
+
+        Returns:
+            results (dict): Dictionary of string key, line values.
+        '''
+        results = {string: OrderedDict() for string in strings}
+        for i, line in enumerate(self):
+            for string in strings:
+                if string in line:
+                    results[string][i] = line
+        return results
+
+    def find_next(self, string):
         '''
         Find the subsequent line containing the given string.
 
@@ -172,38 +179,44 @@ class Editor:
             string (str): String to search for
 
         Returns:
-            tup (tuple): Tuple of integer line number and line value
+            tup (tuple): String line, value pair
         '''
-        ret = None
-        lines = list(reversed(self._lines[self._next_pos:])) if reverse else self._lines[self._next_pos:]
+        if string != self._next_string or len(self._prev_match) == 0:
+            self._next_pos = 0
+            self._next_string = string
+            self._prev_match = None
+        tup = ()
+        lines = self._lines[self._next_pos:]
         for i, line in enumerate(lines):
             if string in line:
-                if reverse:
-                    self._next_pos = len(self) - i + 1
-                else:
-                    self._next_pos += i + 1
-                ret = (self._next_pos - 1, line)
+                self._next_pos += i + 1
+                tup = (self._next_pos - 1, line)
                 break
-        if ret:
-            return ret
-        else:
-            self._next_pos = 0
-            return ()
+        self._prev_match = tup
+        return tup
 
-    def regex(self, pattern, line=False):
+    def regex(self, *patterns, line=False):
         '''
-        Search the editro for lines matching the regular expression.
+        Search the editor for lines matching the regular expression.
+
+        Args:
+            \*patterns: Regular expressions to search each line for
+            line (bool): Return the whole line or the matched groups (groups default)
+
+        Returns:
+            results (dict): Dictionary of pattern keys, line values (or groups - default)
         '''
-        lines = OrderedDict()
+        results = {pattern: OrderedDict() for pattern in patterns}
         for i, line in enumerate(self):
-            grps = re.search(pattern, line)
-            if grps:
-                grps = grps.groups()
+            for pattern in patterns:
+                grps = re.search(pattern, line)
                 if grps:
-                    lines[i] = grps
-                else:
-                    lines[i] = line
-        return lines
+                    grps = grps.groups()
+                    if grps:
+                        results[pattern][i] = grps
+                    else:
+                        results[pattern][i] = line
+        return results
 
     @property
     def variables(self):
@@ -286,7 +299,9 @@ class Editor:
             data: File path, stream, or string text
             filename: Name of file or None
         '''
-        self._next_pos = 0
+        self._next_pos = None
+        self._next_string = None
+        self._prev_match = None
         self.filename = filename
         self.meta = meta
         if isinstance(data, list):
