@@ -8,3 +8,4 @@ Base DataFrame and (Text) Editor Functionality
 
 .. automodule:: exa.numerical
     :members:
+    :private-members:

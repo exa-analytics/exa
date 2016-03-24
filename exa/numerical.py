@@ -75,17 +75,60 @@ class DataFrame(_HasTraits, pd.DataFrame):
         Columns, indices, etc. are only enforced if the dataframe has non-zero
         length.
     '''
+    @property
+    def _fi(self):
+        return self.index[0]
+
+    @property
+    def _li(self):
+        return self.index[-1]
+
     def _get_traits(self):
         '''
         Generate trait objects from column data.
+
+        This function will group columns by the :class:`~exa.numerical.DataFrame`'s
+        **_groupbys** attribute, select the column (or columns) that specify a
+        single trait, and package that up as a trait to be used by the frontend.
+
+        Note:
+            This function decides what `trait type`_ to use. Typically, a
+            column (or columns) containing unique data is sent as a (grouped)
+            json string. If the column contains non-unique data, this function
+            will send a single value of the appropriate type (e.g. `Float`_) so
+            as to duplicate the least amount of data possible (and have the least
+            communication overhead possible).
+
+        See Also:
+            The collecting function of the JavaScript side of things is the
+            **get_trait** method in **container.js**.
+
+        Warning:
+            The algorithm's performance could be improved: in the case where
+            each group has *N* values that are the same to each other but
+            unique with respect to other groups' values all values are sent to
+            the frontend!
+
+        .. _trait type: http://traitlets.readthedocs.org/en/stable/trait_types.html
+        .. _Float: http://traitlets.readthedocs.org/en/stable/trait_types.html#traitlets.Float
         '''
-        fi = self.index[0]
         groups = None
         if self._groupbys:
-            self._revert_categories()
+            self._revert_categories()              # We cannot groupby category
             groups = self.groupby(self._groupbys)
         for name in self._traits:
-            if name in self.columns or all((t in self.columns for t in name.split())):
+            if name in self.columns:
+                if np.all(np.isclose(self[name], self.ix[fi, name])):
+                    value = self.ix[self._fi, name]
+                    dtype = type(value)
+                    if dtype is np.int64 or dtype is np.int32:
+                        trait = Integer(value)
+                    elif dtype is np.float64 or dtype is np.float32:
+                        trait = Float(value)
+                    else:
+                        raise TypeError('Unknown type for {0} with type {1}'.format(name, dtype))
+
+            elif all((t in self.columns for t in name.split())):
                 trait = None
                 # Name mangle to allow similar column in different data objects
                 trait_name = '_'.join((self.__class__.__name__.lower(), name))
