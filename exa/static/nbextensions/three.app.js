@@ -126,18 +126,6 @@ define([
         this.render();
     };
 
-    ThreeJSApp.prototype.add_points_from_xyz_matrix = function(values) {
-        /*"""
-        add_points_from_xyz_matrix
-        -----------------------------
-        Creates a points scene using matrix of positions.
-        */
-        n = values.length;
-        var obj = new Float32Array(values);
-        console.log(obj);
-        console.log(typeof obj);
-    };
-
     ThreeJSApp.prototype.add_spheres = function(positions, colors, radii, material) {
         /*"""
         add_sphere
@@ -205,7 +193,9 @@ define([
         Create a point cloud from positions, colors, and radii.
 
         Args:
-            positions (object): An N x 3 array like object
+            x (array-like): Array like object of x values
+            y (array-like): Array like object of y values
+            z (array-like): Array like object of z values
             colors (object): List like colors corresponding to every object
             radii (object): List like radii corresponding to every object
 
@@ -214,7 +204,8 @@ define([
             objects can cause a slowdown of the browser and framerate of the
             application.
         */
-        var flat_xyz = utility.flatten_to_array(positions);
+        colors = colors || 1;
+        radii = radii || 1;
         var geometry = new THREE.BufferGeometry();
         var material = new THREE.ShaderMaterial({
             vertexShader: this.vertex_shader,
@@ -223,22 +214,43 @@ define([
             transparent: true,
             opacity: 0.8
         });
-        var size = 1.0;
-        var color = new THREE.Color(0x808080);
-        var n = positions.length;
-        var colors = new Float32Array(n * 3);
-        var sizes = new Float32Array(n);
-        for (let i=0, i3=0; i<n; i++, i3+=3) {
-            colors[i3 + 0] = color.r;
-            colors[i3 + 1] = color.g;
-            colors[i3 + 2] = color.b;
-            sizes[i] = size;
+        console.log(x);
+        console.log(y);
+        console.log(z);
+        var xyz = utility.create_float_array_xyz(x, y, z);
+        var n = Math.floor(xyz.length / 3);
+        if (!colors.hasOwnProperty('length')) {
+            colors = utility.repeat_object(0x808080, n);
         };
-        geometry.addAttribute('position', new THREE.BufferAttribute(flat_xyz, 3));
+        if (!radii.hasOwnProperty('length')) {
+            radii = utility.repeat_float(1.0, n);
+        };
+        colors = this.flatten_color(colors);
+        radii = new Float32Array(radii);
+        geometry.addAttribute('position', new THREE.BufferAttribute(xyz, 3));
         geometry.addAttribute('color', new THREE.BufferAttribute(colors, 3));
-        geometry.addAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        geometry.addAttribute('size', new THREE.BufferAttribute(radii, 1));
         var points = new THREE.Points(geometry, material);
         this.scene.add(points);
+    };
+
+    ThreeJSApp.prototype.flatten_color = function(colors) {
+        /*"""
+        flatten_color
+        ------------------
+        */
+        var n = colors.length;
+        console.log(n);
+        console.log(colors);
+        var flat = new Float32Array(n * 3);
+        for (let i=0, i3=0; i<n; i++, i3+=3) {
+            var color = new THREE.Color(colors[i]);
+            flat[i3] = color.r;
+            flat[i3+1] = color.g;
+            flat[i3+2] = color.b;
+        };
+        console.log(flat);
+        return flat;
     };
 
     ThreeJSApp.prototype.add_lines = function() {

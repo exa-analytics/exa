@@ -22,11 +22,9 @@ class Widget(DOMWidget):
     fps = Integer(24).tag(sync=True)
     hl = 5
     n = 10
-    test_3D = Unicode(pd.DataFrame(np.random.randint(-5, 5, size=(10, 3)),
-                                   columns=('x', 'y', 'z')).to_json(orient='values')).tag(sync=True)
-    #test_2D = Unicode(pd.DataFrame(np.random.randint(-20, 20, size=(20, 2)),
-    #                               columns=('x', 'y')).to_json(orient='values')).tag(sync=True)
-    #test_diameter = Float(4.2).tag(sync=True)
+    test_x = Unicode(pd.Series(np.random.randint(-hl, hl, size=n)).to_json(orient='values')).tag(sync=True)
+    test_y = Unicode(pd.Series(np.random.randint(-hl, hl, size=n)).to_json(orient='values')).tag(sync=True)
+    test_z = Unicode(pd.Series(np.random.randint(-hl, hl, size=n)).to_json(orient='values')).tag(sync=True)
 
     def _handle_custom_msg(self, *args, **kwargs):
         '''

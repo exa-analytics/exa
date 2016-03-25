@@ -41,31 +41,33 @@ define([
             -------------
             Main entry point (called immediately after the constructor) for
             ipywidgets DOMWidgetView objects.
+
+            Note:
+                This function is typically overwritten by data specific packages.
             */
             console.log('Initializing container...');
-            var self = this;
+            var self = this;                          // First pull in the data
+            this.update_width();                      // and set listeners.
+            this.update_height();
+            this.update_x();
+            this.update_y();
+            this.update_z();
+            this.model.on('change:test_x', this.update_x, this);
+            this.model.on('change:test_y', this.update_y, this);
+            this.model.on('change:test_z', this.update_z, this);
             this.model.on('change:width', this.update_width, this);
             this.model.on('change:height', this.update_height, this);
-            this.model.on('change:test_3D', this.update_3D, this);
-            this.model.on('change:test_2D', this.update_2D, this);
-            this.model.on('change:test_diameter', this.update_diameter, this);
 
-            this.update_width();
-            this.update_height();
-
-            this.init_canvas();
-            this.init_3D(this.canvas);
-
-            this.update_3D();
-            this.update_2D();
-            this.update_diameter();
+            this.init_container();                    // Second initialize the
+            this.init_canvas();                       // application(s).
+            this.init_3D();
+            this.app.add_points(this.test_x, this.test_y, this.test_z);
 
             //this.app.test_mesh();    // Simple box geometry three.app.js test
             this.app.default_camera();
-            this.init_container();
-            this.container.append(this.canvas);
-            this.setElement(this.container);
 
+            this.container.append(this.canvas);       // Lastly set the html
+            this.setElement(this.container);          // objects and run.
             this.app.render();
             this.on('displayed', function() {
                 self.app.animate();
@@ -107,7 +109,7 @@ define([
             this.canvas.css('left', shift);
         },
 
-        init_3D: function(canvas) {
+        init_3D: function() {
             /*"""
             init_3D
             ------------
@@ -116,7 +118,7 @@ define([
             See Also:
                 Documentation for three.app.js (below).
             */
-            this.app = new app3D.ThreeJSApp(canvas);
+            this.app = new app3D.ThreeJSApp(this.canvas);
         },
 
         app3D_displayed: function() {
@@ -183,32 +185,31 @@ define([
             this.height = this.get_trait('height');
         },
 
-        update_3D: function() {
+        update_x: function() {
             /*"""
-            update_3D
+            update_x
             ------------
-            Update the frontend value of the 3D array
+            Pull in x data.
             */
-            this.value3D = this.get_trait('test_3D');
-            this.app.add_points(this.value3D);
+            this.test_x = this.get_trait('test_x');
         },
 
-        update_2D: function() {
+        update_y: function() {
             /*"""
-            update_2D
+            update_y
             ------------
-            Update the frontend value of the 2D array
+            Pull in y data.
             */
-            this.value2D = this.get_trait('test_2D');
+            this.test_y = this.get_trait('test_y');
         },
 
-        update_diameter: function() {
+        update_z: function() {
             /*"""
-            update_3D
+            update_z
             ------------
-            Update the frontend value of the 3D array
+            Pull in z data.
             */
-            this.diameter = this.get_trait('test_diameter');
+            this.test_z = this.get_trait('test_z');
         },
     });
 
