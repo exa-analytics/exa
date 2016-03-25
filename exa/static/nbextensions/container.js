@@ -61,7 +61,7 @@ define([
             this.update_diameter();
 
             //this.app.test_mesh();    // Simple box geometry three.app.js test
-            this.app.default_camera(10, 10, 10);
+            this.app.default_camera();
             this.init_container();
             this.container.append(this.canvas);
             this.setElement(this.container);
@@ -100,7 +100,7 @@ define([
             -------------
             Create a canvas for WebGL.
             */
-            var shift = shift || 0;     // default shift
+            shift = shift || 0;     // default shift
             this.canvas = $('<canvas/>').width(this.width - shift).height(this.height);
             this.canvas.css('position', 'absolute');
             this.canvas.css('top', 0);

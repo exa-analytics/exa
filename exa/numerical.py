@@ -152,13 +152,83 @@ class DataFrame(_HasTraits, pd.DataFrame):
                 if missing:
                     raise RequiredIndexError(missing, name)
 
+class Field(DataFrame):
+    '''
+    A dataframe for storing field (meta)data along with the actual field values.
 
-class SparseFrame(_DataRepr, pd.SparseDataFrame):
+    The storage of field values may be in the form of a scalar field (via
+    :class:`~exa.numerical.Series`) or vector field (via
+    :class:`~exa.numerical.DataFrame`). The field index (of this dataframe)
+    corresponds to the index in the list of field value data.
+
+    +-------------------+----------+-------------------------------------------+
+    | Column            | Type     | Description                               |
+    +===================+==========+===========================================+
+    | nx                | int      | number of dimensionsin x                  |
+    +-------------------+----------+-------------------------------------------+
+    | ny                | int      | number of dimensionsin y                  |
+    +-------------------+----------+-------------------------------------------+
+    | nz                | int      | number of dimensionsin z                  |
+    +-------------------+----------+-------------------------------------------+
+    | ox                | float    | field origin point in x                   |
+    +-------------------+----------+-------------------------------------------+
+    | oy                | float    | field origin point in y                   |
+    +-------------------+----------+-------------------------------------------+
+    | oz                | float    | field origin point in z                   |
+    +-------------------+----------+-------------------------------------------+
+    | xi                | float    | First component in x                      |
+    +-------------------+----------+-------------------------------------------+
+    | xj                | float    | Second component in x                     |
+    +-------------------+----------+-------------------------------------------+
+    | xk                | float    | Third component in x                      |
+    +-------------------+----------+-------------------------------------------+
+    | yi                | float    | First component in y                      |
+    +-------------------+----------+-------------------------------------------+
+    | yj                | float    | Second component in y                     |
+    +-------------------+----------+-------------------------------------------+
+    | yk                | float    | Third component in y                      |
+    +-------------------+----------+-------------------------------------------+
+    | zi                | float    | First component in z                      |
+    +-------------------+----------+-------------------------------------------+
+    | zj                | float    | Second component in z                     |
+    +-------------------+----------+-------------------------------------------+
+    | zk                | float    | Third component in z                      |
+    +-------------------+----------+-------------------------------------------+
     '''
-    A sparse dataframe used to update it's corresponding
-    :class:`~exa.ndframe.DataFrame` or a truly sparse data store.
-    '''
-    pass
+    _indices = ['field']
+    _columns = ['nx', 'ny', 'nz', 'ox', 'oy', 'oz', 'xi', 'xj', 'xk',
+                'yi', 'yj', 'yk', 'zi', 'zj', 'zk']
+    @property
+    def fields(self):
+        '''
+        List of fields with order matching that of the field table.
+
+        Returns:
+            fields (list): List of fields
+        '''
+        return self._fields
+
+    def field(self, which):
+        '''
+        Select a specific field from the list of fields.
+        '''
+        return self.fields[which]
+
+    def __init__(self, *args, fields=None, **kwargs):
+        '''
+        Args:
+            fields (dict): Dictionary of field
+        '''
+        super().__init__(*args, **kwargs)
+        self._fields = fields
+
+
+#class SparseFrame(_DataRepr, pd.SparseDataFrame):
+#    '''
+#    A sparse dataframe used to update it's corresponding
+#    :class:`~exa.ndframe.DataFrame` or a truly sparse data store.
+#    '''
+#    pass
 
 
 #    _key = []   # This is both the index and the foreign DataFrame designation.

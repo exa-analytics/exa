@@ -162,9 +162,9 @@ define([
         See Also:
             **add_points**
         */
-        var colors = colors || [0x808080];
-        var radii = radii || [1.0];
-        var material = material || THREE.MeshLambertMaterial;
+        colors = colors || [0x808080];
+        radii = radii || [1.0];
+        material = material || THREE.MeshLambertMaterial;
         var unique_radii = utility.unique(radii);
         var unique_colors = utility.unique(colors);
         var nunique = unique_radii.length;
@@ -198,7 +198,7 @@ define([
         };
     };
 
-    ThreeJSApp.prototype.add_points = function(positions, colors, radii) {
+    ThreeJSApp.prototype.add_points = function(x, y, z, colors, radii) {
         /*"""
         add_points
         ---------------
@@ -280,12 +280,12 @@ define([
             oy (float): Target position in y
             oz (float): Target position in z
         */
-        var x = x || 100;
-        var y = y || 100;
-        var z = z || 100;
-        var ox = ox || 0;
-        var oy = oy || 0;
-        var oz = oz || 0;
+        x = x || 100;
+        y = y || 100;
+        z = z || 100;
+        ox = ox || 0;
+        oy = oy || 0;
+        oz = oz || 0;
         this.camera.position.set(x, y, z);
         this.target = new THREE.Vector3(ox, oy, oz);
         this.camera.lookAt(this.target);
