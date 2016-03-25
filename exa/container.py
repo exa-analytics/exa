@@ -210,8 +210,7 @@ class BaseContainer:
         for name, obj in has_traits.items():
             if name in which:
                 traits.update(obj._get_traits())
-        return traits
-        #self._widget.add_traits(**traits)
+        self._widget.add_traits(**traits)
 
     def __sizeof__(self):
         '''
