@@ -137,7 +137,6 @@ class DataFrame(_HasTraits, pd.DataFrame):
                     trait = self[name].to_json(orient='values')
                 traits[trait_name] = trait.tag(sync=True)
             elif name == self.index.names[0]:
-                print('here')
                 trait_name = '_'.join((prefix, name))
                 traits[trait_name] = Unicode(pd.Series(self.index).to_json(orient='values')).tag(sync=True)
         if self._groupbys:
