@@ -5,3 +5,4 @@ Algorithms
 
     algorithms/broadcasting.rst
     algorithms/indexing.rst
+    algorithms/iteration.rst

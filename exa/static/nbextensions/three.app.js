@@ -199,6 +199,12 @@ define([
             colors (object): List like colors corresponding to every object
             radii (object): List like radii corresponding to every object
 
+        Returns:
+            points (THREE.Points): Reference to added points object
+
+        Tip:
+            By tracking the returned object, one can create animations.
+
         Warning:
             On a modern machine attempting to render >5 million (approximately)
             objects can cause a slowdown of the browser and framerate of the
@@ -214,9 +220,6 @@ define([
             transparent: true,
             opacity: 0.8
         });
-        console.log(x);
-        console.log(y);
-        console.log(z);
         var xyz = utility.create_float_array_xyz(x, y, z);
         var n = Math.floor(xyz.length / 3);
         if (!colors.hasOwnProperty('length')) {
@@ -232,6 +235,7 @@ define([
         geometry.addAttribute('size', new THREE.BufferAttribute(radii, 1));
         var points = new THREE.Points(geometry, material);
         this.scene.add(points);
+        return points;
     };
 
     ThreeJSApp.prototype.flatten_color = function(colors) {

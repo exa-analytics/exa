@@ -56,7 +56,7 @@ class _HasTraits(_DataRepr):
     like objects.
     '''
     _precision = 4      # Default number of decimal places passed by traits
-    _traits = []        # Trait names (as strings)
+    _traits = []        # Traits present as dataframe columns (or series values)
     _groupbys = []      # Column names by which to group the data
 
 
@@ -82,6 +82,16 @@ class DataFrame(_HasTraits, pd.DataFrame):
     @property
     def _li(self):
         return self.index[-1]
+
+    def _get_custom_traits(self):
+        '''
+        Placeholder function to be overwritten when custom trait creation is
+        required
+
+        Returns:
+            traits (dict): Dictionary of traits to be added
+        '''
+        return {}
 
     def _get_traits(self):
         '''
@@ -112,14 +122,13 @@ class DataFrame(_HasTraits, pd.DataFrame):
         .. _trait type: http://traitlets.readthedocs.org/en/stable/trait_types.html
         .. _Float: http://traitlets.readthedocs.org/en/stable/trait_types.html#traitlets.Float
         '''
-        traits = {}
+        traits = self._get_custom_traits()
         groups = None
         prefix = self.__class__.__name__.lower()
         if self._groupbys:
             self._revert_categories()                    # Category dtype can't be used
             groups = self.groupby(self._groupbys)        # for grouping.
         for name in self._traits:
-            print(name)
             if name in self.columns:
                 trait_name = '_'.join((prefix, name))    # Name mangle to ensure uniqueness
                 if np.all(np.isclose(self[name], self.ix[self._fi, name])):
@@ -131,12 +140,12 @@ class DataFrame(_HasTraits, pd.DataFrame):
                         trait = Float(value)
                     else:
                         raise TypeError('Unknown type for {0} with type {1}'.format(name, dtype))
-                elif groups:
+                elif groups:                              # Else send grouped traits
                     trait = Unicode(groups.apply(lambda g: g[name].values).to_json(orient='values'))
-                else:
+                else:                                     # Else send flat values
                     trait = self[name].to_json(orient='values')
                 traits[trait_name] = trait.tag(sync=True)
-            elif name == self.index.names[0]:
+            elif name == self.index.names[0]:             # Otherwise, if index, send flat values
                 trait_name = '_'.join((prefix, name))
                 traits[trait_name] = Unicode(pd.Series(self.index).to_json(orient='values')).tag(sync=True)
         if self._groupbys:

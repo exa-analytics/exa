@@ -217,6 +217,27 @@ class Isotope(Base, metaclass=_Meta):
         return cls.element_mass_map
 
     @classmethod
+    def symbol_to_radius(cls):
+        '''
+        Series containing the element symbol and its respective covalent radius.
+
+        >>> Isotope.symbol_to_radius().head()
+        symbol
+        H     0.604712
+        D     0.604712
+        T     0.604712
+        He    0.869274
+        Li    2.513336
+        Name: radius, dtype: float64
+
+        Note:
+            The covalent radii data are taken from `this reference`_.
+
+            .. _this reference: http://doi.org/10.1039/b801115j
+        '''
+        return cls.symbol_to_radius_map
+
+    @classmethod
     def symbols_to_radii(cls):
         '''
         Series containing element symbol pairs and their respective sum of
@@ -229,13 +250,24 @@ class Isotope(Base, metaclass=_Meta):
         HHe    1.473986
         HLi    3.118048
         Name: radius, dtype: float64
-
-        Note:
-            The covalent radii data are taken from `this reference`_.
-
-            .. _this reference: http://doi.org/10.1039/b801115j
         '''
         return cls.symbols_to_radii_map
+
+    @classmethod
+    def symbol_to_color(cls):
+        '''
+        Series containing the element symbol and its color
+
+        >>> Isotope.symbol_to_color().head()
+        symbol
+        H            0
+        D            0
+        T            0
+        He    14286847
+        Li    13402367
+        Name: color, dtype: int64
+        '''
+        return cls.symbol_to_color_map
 
     @classmethod
     def Z_to_symbol(cls):

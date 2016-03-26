@@ -121,11 +121,25 @@ define([], function() {
         return obj;
     };
 
+    var mapper = function(indices, map) {
+        /*"""
+        mapper
+        --------
+        */
+        var n = indices.length;
+        var mapped = [];
+        for (let i=0; i<n; i++) {
+            mapped.push(map[indices[i]])
+        };
+        return mapped;
+    };
+
     return {
         'unique': unique,
         'flatten_to_array': flatten_to_array,
         'create_float_array_xyz': create_float_array_xyz,
         'repeat_float': repeat_float,
         'repeat_object': repeat_object,
+        'mapper': mapper,
     };
 });
