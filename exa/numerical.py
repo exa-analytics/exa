@@ -119,6 +119,7 @@ class DataFrame(_HasTraits, pd.DataFrame):
             self._revert_categories()                    # Category dtype can't be used
             groups = self.groupby(self._groupbys)        # for grouping.
         for name in self._traits:
+            print(name)
             if name in self.columns:
                 trait_name = '_'.join((prefix, name))    # Name mangle to ensure uniqueness
                 if np.all(np.isclose(self[name], self.ix[self._fi, name])):
@@ -135,6 +136,10 @@ class DataFrame(_HasTraits, pd.DataFrame):
                 else:
                     trait = self[name].to_json(orient='values')
                 traits[trait_name] = trait.tag(sync=True)
+            elif name == self.index.names[0]:
+                print('here')
+                trait_name = '_'.join((prefix, name))
+                traits[trait_name] = Unicode(pd.Series(self.index).to_json(orient='values')).tag(sync=True)
         if self._groupbys:
             self._set_categories()
         return traits
