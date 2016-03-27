@@ -9,6 +9,10 @@ import numpy as np
 def pdist(array):
     '''
     Compute all pairwise distances of m-dimensional vectors in an array.
+    
+    .. math::
+
+        d_{ij} = \\left(\\sum_{m=1}^{M}\\left(v^{i}_{m} - v^{j}_{m}\\right)^{2}\\right)^{\\frac{1}{2}}
 
     Args:
         array (:class:`~numpy.ndarray`): M-dimensional vectors in an array
@@ -16,9 +20,6 @@ def pdist(array):
     Returns:
         tup (tuple): Tuple of distances, first index, and second index, respectively
 
-    .. math::
-
-        d_{ij} = \left(\sum_{m=1}^{M}\left(v^{i}_{m} - v^{j}_{m}\right)^{2}\right)^{\frac{1}{2}}
     '''
     n, m = array.shape
     nn = n * (n - 1) // 2
