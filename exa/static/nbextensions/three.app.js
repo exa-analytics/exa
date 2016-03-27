@@ -244,8 +244,6 @@ define([
         ------------------
         */
         var n = colors.length;
-        console.log(n);
-        console.log(colors);
         var flat = new Float32Array(n * 3);
         for (let i=0, i3=0; i<n; i++, i3+=3) {
             var color = new THREE.Color(colors[i]);
@@ -253,7 +251,6 @@ define([
             flat[i3+1] = color.g;
             flat[i3+2] = color.b;
         };
-        console.log(flat);
         return flat;
     };
 
@@ -282,9 +279,9 @@ define([
         this.controls.target = this.target;
     };
 
-    ThreeJSApp.prototype.default_camera = function(x, y, z, ox, oy, oz) {
+    ThreeJSApp.prototype.set_camera = function(x, y, z, ox, oy, oz) {
         /*"""
-        default_camera
+        set_camera
         ------------------
         Set the camera in the default position and have it look at the origin.
 

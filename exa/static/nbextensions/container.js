@@ -64,7 +64,7 @@ define([
             this.app.add_points(this.test_x, this.test_y, this.test_z);
 
             //this.app.test_mesh();    // Simple box geometry three.app.js test
-            this.app.default_camera();
+            this.app.set_camera();
 
             this.container.append(this.canvas);       // Lastly set the html
             this.setElement(this.container);          // objects and run.

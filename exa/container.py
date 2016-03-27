@@ -22,7 +22,7 @@ from sys import getsizeof
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from exa import _conf
 from exa.widget import ContainerWidget
-from exa.numerical import _HasTraits, DataFrame
+from exa.numerical import NDBase
 from exa.utility import del_keys
 
 
@@ -152,21 +152,21 @@ class BaseContainer:
         else:
             return kws
 
-    def _numerical_dict(self, copy=False, cls_criteria=pd.DataFrame):
+    def _numerical_dict(self, copy=False, cls_criteria=[pd.Series, pd.DataFrame]):
         '''
         Get the attached :class:`~exa.numerical.Series` and
         :class:`~exa.numerical.DataFrame` objects.
 
         Args:
             copy (bool): Return an in memory copy
-            cls_criteria (class): Class object to identify by (default :class:`~pandas.DataFrame`)
+            cls_criteria (class): List of class objects to identify by (default :class:`~pandas.DataFrame`)
 
         Returns:
             dfs (dict): Name, dataframe key-value pairs
         '''
         dfs = {}
         for name, value in self.__dict__.items():
-            if isinstance(value, cls_criteria):
+            if any((isinstance(value, klass) for klass in cls_criteria)):
                 if copy:
                     cls = value.__class__
                     dfs[name] = cls(value.copy())
@@ -191,7 +191,7 @@ class BaseContainer:
         trait names.
         '''
         names = []
-        has_traits = self._numerical_dict(cls_criteria=_HasTraits)
+        has_traits = self._numerical_dict()
         for name, obj in has_traits.items():
             obj._update_traits()
             names += obj._traits
@@ -205,7 +205,7 @@ class BaseContainer:
             traits (list): Names of traits to update
         '''
         traits = {}
-        has_traits = self._numerical_dict(cls_criteria=_HasTraits)
+        has_traits = self._numerical_dict(cls_criteria=[NDBase])
         which = which if which else has_traits.keys()
         for name, obj in has_traits.items():
             if name in which:
