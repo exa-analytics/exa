@@ -149,6 +149,10 @@ define([
             this.gui_width = this.get_trait('gui_width');
         },
 
+        update_fps: function() {
+            this.fps = this.get_trait('fps');
+        },
+
         update_width: function() {
             /*"""
             update_width

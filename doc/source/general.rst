@@ -49,8 +49,8 @@ Support
 * utility
 
 
-Examples
-------------------
+Python Sub-classing
+----------------------
 The package provides a few classes that can be inherited for data specific
 applications.
 
@@ -156,3 +156,56 @@ Inheriting the editor can be done as follows.
             '''
             return MyContainer(section1=self.parse_section1(),
                                section2=self.parse_section2())
+
+JavaScript Extensions
+----------------------
+In order to support data container specific visualization within the Jupyter notebook
+environment, extensions must be written. The base package (exa) handles communication
+between the frontend JavaScript application and backend Python dataframe objects. It
+also provides a two interfaces to 3D and 2D rendering applications on which the data
+specific visualization application can be built.
+
+Below is an example application for a data container containing dataframes with
+information about atoms' coordinates, types, and their electronic densities. The
+data container is called a Universe; the corresponding JavaScript, universe.js,
+handles communication between the frontend and backend (akin to container.js).
+The application JavaScript, app.js, builds a custom graphical user interface for
+interacting with this specific application.
+
+universe.js
+~~~~~~~~~~~~~~
+
+.. code-block:: javascript
+
+    // container is a require.js reference to container.js
+    var UniverseView = container.ContainerView.extend({
+        render: function() {
+            console.log('Initializing universe...');
+            this.model.one('change:atom_x', this.update_atom_x, this);
+            this.update_atom_x();
+            this.init_canvas();
+            console.log(this.atom_x);
+        },
+
+        update_atom_x: function() {
+            this.atom_x = this.get_traits('atom_x');    // provided by container.js
+        },
+    });
+
+
+app.js
+~~~~~~~~~~~~~~~~
+
+.. code-block:: javascript
+
+    var AtomicApp = function(view) {
+        this.view = view;    // reference to instance of UniverseView (above);
+        this.canvas = this.view.canvas;
+        this.index = 0;
+        this.app3d = new app3D.ThreeJSApp(this.canvas);    // provided by three.app.js
+        this.gui = new dat.GUI({autoPlace: false, width: this.view.gui_width});
+        this.gui_style = document.createElement('style');
+        this.gui_style.innerHTML = gui_style;
+        this.init_gui();
+        this.render_atoms(this.index);
+    };
