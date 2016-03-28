@@ -197,6 +197,12 @@ class BaseContainer:
             names += obj._traits
         self._widget._names = names
 
+    def _custom_container_traits(self):
+        '''
+        Used when a container is required to build specific trait objects.
+        '''
+        return {}
+
     def _update_traits(self, which=None):
         '''
         Update specific traits, given in the arguments.
@@ -204,7 +210,7 @@ class BaseContainer:
         Args:
             traits (list): Names of traits to update
         '''
-        traits = {}
+        traits = self._custom_container_traits()
         has_traits = self._numerical_dict(cls_criteria=[NDBase])
         which = which if which else has_traits.keys()
         for name, obj in has_traits.items():
