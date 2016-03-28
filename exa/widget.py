@@ -46,7 +46,7 @@ class ContainerWidget(Widget):
     Attributes:
         _names (list): List of all traits associated with the :class:`~exa.widget.ContainerWidget`
     '''
-    gui_width = Integer(250).tag(sync=True)
+    gui_width = Integer(0).tag(sync=True)
 
     def __init__(self, container, *args, **kwargs):
         super().__init__(*args, **kwargs)

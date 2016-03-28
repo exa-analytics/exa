@@ -49,6 +49,7 @@ define([
             var self = this;                          // First pull in the data
             this.update_width();                      // and set listeners.
             this.update_height();
+            this.update_gui_width();
             this.update_x();
             this.update_y();
             this.update_z();
@@ -60,7 +61,7 @@ define([
 
             this.init_container();                    // Second initialize the
             this.init_canvas();                       // application(s).
-            this.init_3D();
+            this.app = new app3D.ThreeJSApp(this.canvas);
             this.app.add_points(this.test_x, this.test_y, this.test_z);
 
             //this.app.test_mesh();    // Simple box geometry three.app.js test
@@ -85,7 +86,7 @@ define([
             this.container = $('<div/>').width(this.width).height(this.height).resizable({
                 aspectRatio: false,
                 resize: function(event, ui) {
-                    self.width = ui.size.width;
+                    self.width = ui.size.width - this.gui_width;
                     self.height = ui.size.height;
                     self.set_trait('width', self.width);
                     self.set_trait('height', self.height);
@@ -107,29 +108,6 @@ define([
             this.canvas.css('position', 'absolute');
             this.canvas.css('top', 0);
             this.canvas.css('left', shift);
-        },
-
-        init_3D: function() {
-            /*"""
-            init_3D
-            ------------
-            Initializes a 3D application (using the three.js backend).
-
-            See Also:
-                Documentation for three.app.js (below).
-            */
-            this.app = new app3D.ThreeJSApp(this.canvas);
-        },
-
-        app3D_displayed: function() {
-            /*"""
-            app3D_displayed
-            ------------------
-            Should be run when backbone returns the displayed status if using
-            the 3D app.
-            */
-            this.app.animate();
-            this.app.controls.handleResize();
         },
 
         get_trait: function(name) {
@@ -165,6 +143,10 @@ define([
                 };
             };
             this.model.set(name, value);
+        },
+
+        update_gui_width: function() {
+            this.gui_width = this.get_trait('gui_width');
         },
 
         update_width: function() {

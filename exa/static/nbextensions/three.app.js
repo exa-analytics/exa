@@ -126,66 +126,6 @@ define([
         this.render();
     };
 
-    ThreeJSApp.prototype.add_spheres = function(positions, colors, radii, material) {
-        /*"""
-        add_sphere
-        -------------
-        Add's SphereBufferGeometry objects from the given positions with the
-        given radii, colors, and material.
-
-        If no colors or radii (or material) are provided, suitable defaults will
-        chosen.
-
-        Args:
-            positions (object): An N x 3 array like object
-            colors (object): List like colors corresponding to every object
-            radii (object): List like radii corresponding to every object
-            material (THREE.Material): Three.js material object
-
-        Warning:
-            On a modern machine attempting to render >50k (approximately) objects
-            will cause a slowdown of the browser and framerate of the render
-            down to barely usable speeds.
-
-        See Also:
-            **add_points**
-        */
-        colors = colors || [0x808080];
-        radii = radii || [1.0];
-        material = material || THREE.MeshLambertMaterial;
-        var unique_radii = utility.unique(radii);
-        var unique_colors = utility.unique(colors);
-        var nunique = unique_radii.length;
-        var geometries = [];
-        var materials = [];
-        for (var i=0; i<nunique; i++) {
-            geometries.push(new THREE.SphereBufferGeometry(unique_radii[i]));
-            materials.push(new material({
-                color: unique_colors[i],
-            }));
-        };
-        if (typeof positions[0] == 'object') {
-            var n = positions.length;
-            for (let i=0; i<n; i++) {
-                var color;
-                var radius;
-                if (nunique == 1) {
-                    color = colors[0];
-                    radius = radii[0];
-                } else {
-                    color = colors[i];
-                    radius = radii[i];
-                };
-                var index = unique_colors.indexOf(color);
-                var mesh = new THREE.Mesh(geometries[index], materials[index]);
-                mesh.position.set(positions[i][0], positions[i][1], positions[i][2]);
-                this.scene.add(mesh);
-            };
-        } else {
-            console.log('not implemented');
-        };
-    };
-
     ThreeJSApp.prototype.add_points = function(x, y, z, colors, radii) {
         /*"""
         add_points
@@ -238,6 +178,44 @@ define([
         return points;
     };
 
+    ThreeJSApp.prototype.add_lines = function(v0, v1, x, y, z, colors) {
+        /*"""
+        add_lines
+        ------------
+        Add lines between pairs of points.
+
+        Args:
+            v0 (array): Array of first vertex in pair
+            v1 (array): Array of second vertex
+            x (array): Position in x of vertices
+            y (array): Position in y of vertices
+            z (array): Position in z of vertices
+            colors (array): Colors of vertices
+
+        Returns:
+            linesegs (THREE.LineSegments): Line segment objects
+        */
+        var material = new THREE.LineBasicMaterial({
+            vertexColors: THREE.VertexColors,
+            linewidth: 4,
+        });
+        var geometry = new THREE.Geometry();
+        var n = v0.length;
+        for (let i=0; i<n; i++) {
+            var j = v0[i];
+            var k = v1[i];
+            var vector0 = new THREE.Vector3(x[j], y[j], z[j]);
+            var vector1 = new THREE.Vector3(x[k], y[k], z[k]);
+            geometry.vertices.push(vector0);
+            geometry.vertices.push(vector1);
+            geometry.colors.push(new THREE.Color(colors[j]));
+            geometry.colors.push(new THREE.Color(colors[k]));
+        };
+        var lines = new THREE.LineSegments(geometry, material);
+        this.scene.add(lines);
+        return lines;
+    };
+
     ThreeJSApp.prototype.flatten_color = function(colors) {
         /*"""
         flatten_color
@@ -252,13 +230,6 @@ define([
             flat[i3+2] = color.b;
         };
         return flat;
-    };
-
-    ThreeJSApp.prototype.add_lines = function() {
-        /*"""
-        add_lines
-        ------------
-        */
     };
 
     ThreeJSApp.prototype.test_mesh = function() {
