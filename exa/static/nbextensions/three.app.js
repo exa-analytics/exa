@@ -293,12 +293,18 @@ define([
             oy (float): Target position in y
             oz (float): Target position in z
         */
-        x = x || 100;
-        y = y || 100;
-        z = z || 100;
-        ox = ox || 0;
-        oy = oy || 0;
-        oz = oz || 0;
+        x = x || 100.;
+        y = y || 100.0;
+        z = z || 100.0;
+        if (ox == undefined) {
+            ox = 0.0;
+        };
+        if (oy == undefined) {
+            oy = 0.0;
+        };
+        if (oz == undefined) {
+            oz = 0.0;
+        };
         this.camera.position.set(x, y, z);
         this.target = new THREE.Vector3(ox, oy, oz);
         this.camera.lookAt(this.target);

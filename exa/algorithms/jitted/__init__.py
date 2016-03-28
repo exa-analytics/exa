@@ -7,3 +7,4 @@ from exa.algorithms.jitted.indexing import nb_arange2 as arange2
 from exa.algorithms.jitted.indexing import nb_unordered_pairing as unordered_pairing
 
 from exa.algorithms.jitted.iteration import nb_pdist as pdist
+from exa.algorithms.jitted.iteration import nb_supercell3 as supercell3
