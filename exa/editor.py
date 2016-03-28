@@ -6,9 +6,11 @@ Text-editor-like functionality for programatically manipulating raw text input
 and output files. Supports commonly used logic such as (simple or regular
 expression) replacement, insertion, and deletion.
 '''
+import os
 import re
 from io import StringIO
-from exa import _os as os
+from operator import itemgetter
+from collections import OrderedDict
 from exa.utility import mkpath
 
 
@@ -29,6 +31,9 @@ class Editor:
         print(len(editor))                           # 1
         editor.write(fullpath=None, user='Alice')    # "Hello Alice"
     '''
+    _print_count = 30            # Default head and tail block length
+    _fmt = '{0}: {1}\n'.format   # The line format
+
     def write(self, fullpath=None, *args, **kwargs):
         '''
         Write the editor's contents to disk.
@@ -131,6 +136,78 @@ class Editor:
         for k, i in enumerate(lines):
             del self[i - k]
 
+    #def find(self, string):
+    #    '''
+    #    Search the editor for lines that match the string.
+    #    '''
+    #    lines = OrderedDict()
+    #    for i, line in enumerate(self):
+    #        if string in line:
+    #            lines[i] = line
+    #    return lines
+
+    def find(self, *strings):
+        '''
+        Search the entire editor for lines that match the string.
+        Args:
+            \*strings: Any number of strings to search for
+        Returns:
+            results (dict): Dictionary of string key, line values.
+        '''
+        results = {string: OrderedDict() for string in strings}
+        for i, line in enumerate(self):
+            for string in strings:
+                if string in line:
+                    results[string][i] = line
+        return results
+
+    def find_next(self, string):
+        '''
+        Find the subsequent line containing the given string.
+        Args:
+            string (str): String to search for
+        Returns:
+            tup (tuple): String line, value pair
+        Note:
+            This function is cyclic: if the same string is searched for that
+            was previously not found, the function will start a "new" search
+            from the beginning of the file.
+        '''
+        if string != self._next_string or len(self._prev_match) == 0:
+            self._next_pos = 0
+            self._next_string = string
+            self._prev_match = None
+        tup = ()
+        lines = self._lines[self._next_pos:]
+        for i, line in enumerate(lines):
+            if string in line:
+                self._next_pos += i + 1
+                tup = (self._next_pos - 1, line)
+                break
+        self._prev_match = tup
+        return tup
+
+    def regex(self, *patterns, line=False):
+        '''
+        Search the editor for lines matching the regular expression.
+        Args:
+            \*patterns: Regular expressions to search each line for
+            line (bool): Return the whole line or the matched groups (groups default)
+        Returns:
+            results (dict): Dictionary of pattern keys, line values (or groups - default)
+        '''
+        results = {pattern: OrderedDict() for pattern in patterns}
+        for i, line in enumerate(self):
+            for pattern in patterns:
+                grps = re.search(pattern, line)
+                if grps:
+                    grps = grps.groups()
+                    if grps:
+                        results[pattern][i] = grps
+                    else:
+                        results[pattern][i] = line
+        return results
+
     @property
     def variables(self):
         '''
@@ -180,6 +257,35 @@ class Editor:
         '''
         return cls(lines_from_string(string))
 
+    def _line_repr(self, lines):
+        r = ''
+        nn = len(self)
+        n = len(str(len(lines)))
+        if nn > self._print_count * 2:
+            for i in range(self._print_count):
+                ln = str(i).rjust(n, ' ')
+                r += self._fmt(ln, self._lines[i])
+            r += '...\n'.rjust(n, ' ')
+            for i in range(nn - self._print_count, nn):
+                ln = str(i).rjust(n, ' ')
+                r += self._fmt(ln, self._lines[i])
+        else:
+            for i, line in enumerate(lines):
+                ln = str(i).rjust(n, ' ')
+                r += self._fmt(ln, line)
+        return r
+
+    def _dict_repr(self, lines):
+        r = None
+        n = len(str(max(lines.keys())))
+        for i, line in sorted(lines.items(), key=itemgetter(0)):
+            ln = str(i).rjust(n, ' ')
+            if r is None:
+                r = self._fmt(ln, line)
+            else:
+                r += self._fmt(ln, line)
+        return r
+
     def __init__(self, data, filename=None):
         '''
         Args:
@@ -219,18 +325,20 @@ class Editor:
     def __str__(self):
         return '\n'.join(self._lines)
 
-    def __repr__(self):
-        r = None
-        fmt = '{0}: {1}\n'
-        n = len(str(len(self)))
-        for i, line in enumerate(self):
-            ln = str(i).rjust(n, ' ')
-            if r is None:
-                r = fmt.format(ln, line)
-            else:
-                r += fmt.format(ln, line)
-        return r
+    #def __repr__(self):
+    #    r = None
+    #    fmt = '{0}: {1}\n'
+    #    n = len(str(len(self)))
+    #    for i, line in enumerate(self):
+    #        ln = str(i).rjust(n, ' ')
+    #        if r is None:
+    #            r = fmt.format(ln, line)
+    #        else:
+    #            r += fmt.format(ln, line)
+    #    return r
 
+    def __repr__(self):
+        return self._line_repr(self._lines)
 
 def lines_from_file(path):
     '''
