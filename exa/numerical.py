@@ -158,8 +158,10 @@ class DataFrame(NDBase, pd.DataFrame):
                     raise RequiredColumnError(missing, name)
             if self._indices:
                 missing = set(self._indices).difference(self.index.names)
-                if missing:
+                if missing and len(self.index.names) != len(self._indices):
                     raise RequiredIndexError(missing, name)
+                else:
+                    self.index.names = self._indices
 
 
 class Field(DataFrame):
@@ -207,7 +209,7 @@ class Field(DataFrame):
     '''
     _indices = ['field']
     _columns = ['nx', 'ny', 'nz', 'ox', 'oy', 'oz', 'xi', 'xj', 'xk',
-                'yi', 'yj', 'yk', 'zi', 'zj', 'zk']
+                'yi', 'yj', 'yk', 'zi', 'zj', 'zk', 'frame']
     @property
     def fields(self):
         '''

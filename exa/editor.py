@@ -6,6 +6,7 @@ Text-editor-like functionality for programatically manipulating raw text input
 and output files. Supports commonly used logic such as (simple or regular
 expression) search and replace, insert, and delete operations.
 '''
+import sys
 import os
 import re
 from io import StringIO
@@ -300,7 +301,7 @@ class Editor:
                 r += self._fmt(ln, line)
         return r
 
-    def __init__(self, data, filename=None, meta={}, **kwargs):
+    def __init__(self, data, filename=None, meta={}, as_interned=False, **kwargs):
         '''
         The constructor can be passed any valid data argument (file path,
         stream, or string variable) and it will determine which construction
@@ -318,13 +319,13 @@ class Editor:
         if isinstance(data, list):
             self._lines = data
         elif os.path.exists(data):
-            self._lines = lines_from_file(data)
+            self._lines = lines_from_file(data, as_interned)
             self.filename = os.path.basename(data)
         elif isinstance(data, StringIO):
-            self._lines = lines_from_stream(data)
+            self._lines = lines_from_stream(data, as_interned)
             self.filename = data.name if hasattr(data, 'name') else None
         elif isinstance(data, str):
-            self._lines = lines_from_string(data)
+            self._lines = lines_from_string(data, as_interned)
         else:
             raise TypeError('Unknown type for arg data: {}'.format(type(data)))
         for key, value in kwargs.items():
@@ -358,25 +359,55 @@ class Editor:
         return self._line_repr(self._lines)
 
 
-def lines_from_file(path):
+def lines_from_file(path, as_interned=False):
     '''
-    Line list from file.
+    Get list of lines in file.
+
+    Args:
+        path (str): File path
+        as_interned (bool): List of "interned" strings (default False)
+
+    Returns:
+        strings (list): Line list
     '''
     lines = None
     with open(path) as f:
-        lines = f.read().splitlines()
+        if as_interned:
+            lines = [sys.intern(line) for line in f.read().splitlines()]
+        else:
+            lines = f.read().splitlines()
     return lines
 
 
-def lines_from_stream(f):
+def lines_from_stream(f, as_interned=False):
     '''
-    Line list from an IO stream.
+    Get list of lines in stream.
+
+    Args:
+        path (str): File path
+        as_interned (bool): List of "interned" strings (default False)
+
+    Returns:
+        strings (list): Line list
     '''
-    return f.read().splitlines()
+    if as_interned:
+        return [sys.intern(line) for line in f.read().splitlines()]
+    else:
+        return f.read().splitlines()
 
 
-def lines_from_string(string):
+def lines_from_string(string, as_interned=False):
     '''
-    Line list from string.
+    Get list of lines in string.
+
+    Args:
+        path (str): File path
+        as_interned (bool): List of "interned" strings (default False)
+
+    Returns:
+        strings (list): Line list
     '''
-    return string.splitlines()
+    if as_interned:
+        return [sys.intern(line) for line in string.splitlines()]
+    else:
+        return string.splitlines()

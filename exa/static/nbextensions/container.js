@@ -86,7 +86,7 @@ define([
             this.container = $('<div/>').width(this.width).height(this.height).resizable({
                 aspectRatio: false,
                 resize: function(event, ui) {
-                    self.width = ui.size.width - this.gui_width;
+                    self.width = ui.size.width - self.gui_width;
                     self.height = ui.size.height;
                     self.set_trait('width', self.width);
                     self.set_trait('height', self.height);
