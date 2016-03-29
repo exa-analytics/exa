@@ -63,7 +63,7 @@ class _Meta(BaseMeta):
         Dictionary of symbol keys and proton number (Z) values.
         '''
         if self._symbol_to_Z_map is None:
-            self._symbol_to_Z_map = self.table()[['symbol', 'Z']].set_index('symbol')['Z']
+            self._symbol_to_Z_map = self.table()[['symbol', 'Z']].drop_duplicates().set_index('symbol')['Z']
         return self._symbol_to_Z_map
 
     @property
@@ -284,6 +284,10 @@ class Isotope(Base, metaclass=_Meta):
         Name: symbol, dtype: object
         '''
         return cls.Z_to_symbol_map
+
+    @classmethod
+    def symbol_to_Z(cls):
+        return cls.symbol_to_Z_map
 
     def __repr__(self):
         return '{0}{1}'.format(self.A, self.symbol)
