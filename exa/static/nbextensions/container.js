@@ -154,6 +154,7 @@ define([
             this.model.on('change:field_oy', this.update_field_oy, this);
             this.model.on('change:field_oz', this.update_field_oz, this);
             this.model.on('change:field_values', this.update_field_values, this);
+            this.model.on('change:field_indices', this.update_field_values, this);
         },
 
         get_trait: function(name) {
@@ -280,20 +281,11 @@ define([
         },
 
         update_field_values: function() {
-            this.nfields = this.field_nx.length;
-            if (this.nfields == undefined && this.field_nx != undefined) {
-                this.nfields = 1;
-            };
-            console.log(this.field_nx);
-            console.log(this.nfields);
-            for (let i=0; i<this.nfields; ++i) {
-                name = 'field_' + i.toString();
-                this.update_field_value(name);
-            };
+            this.field_values = this.get_trait('field_values');
         },
 
-        update_field_value: function(key) {
-            this[name] = this.get_trait(name);
+        update_field_indices: function() {
+            this.field_indices = this.get_trait('field_indices');
         },
     });
 

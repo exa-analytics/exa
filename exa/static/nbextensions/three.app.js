@@ -250,7 +250,7 @@ define([
         this.controls.target = this.target;
     };
 
-    ThreeJSApp.prototype.set_camera = function(x, y, z, ox, oy, oz) {
+    ThreeJSApp.prototype.set_camera = function(x, y, z, ox, oy, oz, rx, ry, rz) {
         /*"""
         set_camera
         ------------------
@@ -264,9 +264,15 @@ define([
             oy (float): Target position in y
             oz (float): Target position in z
         */
-        x = x || 100.;
-        y = y || 100.0;
-        z = z || 100.0;
+        if (x == undefined) {
+            x = 100.0;
+        };
+        if (y == undefined) {
+            y = 100.0;
+        };
+        if (y == undefined) {
+            y = 100.0;
+        };
         if (ox == undefined) {
             ox = 0.0;
         };
@@ -276,10 +282,46 @@ define([
         if (oz == undefined) {
             oz = 0.0;
         };
+        if (rx == undefined) {
+            rx = 0.0;
+        }
+        if (ry == undefined) {
+            ry = 0.0;
+        }
+        if (rz == undefined) {
+            rz = 0.0;
+        }
+        x += rx;
+        y += ry;
+        z += rz;
         this.camera.position.set(x, y, z);
         this.target = new THREE.Vector3(ox, oy, oz);
         this.camera.lookAt(this.target);
         this.controls.target = this.target;
+    };
+
+    ThreeJSApp.prototype.set_camera_from_geometry =  function(x, y, z, geometry, rx, ry, rz) {
+        var n = x.length;
+        var i = n;
+        var oxyz = [0.0, 0.0, 0.0];
+        while (i--) {
+            oxyz[0] += x[i];
+            oxyz[1] += y[i];
+            oxyz[2] += z[i];
+        };
+        oxyz[0] /= n;
+        oxyz[1] /= n;
+        oxyz[2] /= n;
+        geometry.computeBoundingBox();
+        var bbox = geometry.boundingBox;
+        var xyz = bbox.max;
+        xyz.x *= 1.2;
+        xyz.x += rx;
+        xyz.y *= 1.2;
+        xyz.y += ry;
+        xyz.z *= 1.2;
+        xyz.z += rz;
+        this.set_camera(xyz.x, xyz.y, xyz.z, oxyz[0], oxyz[1], oxyz[2]);
     };
 
     // These are shaders written in GLSL (GLslang: OpenGL Shading Language).

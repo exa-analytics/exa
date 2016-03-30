@@ -215,16 +215,12 @@ class Field(DataFrame):
         the last index changing the fastest and the first index changing the
         slowest.
     '''
-    _main_get_traits = DataFrame._get_traits
+    _df_get_traits = DataFrame._get_traits
     _indices = ['field']
     _columns = ['nx', 'ny', 'nz', 'ox', 'oy', 'oz', 'xi', 'xj', 'xk',
-<<<<<<< HEAD
                 'yi', 'yj', 'yk', 'zi', 'zj', 'zk']
     _traits = ['nx', 'ny', 'nz', 'ox', 'oy', 'oz', 'xi', 'xj', 'xk',
                'yi', 'yj', 'yk', 'zi', 'zj', 'zk']
-=======
-                'yi', 'yj', 'yk', 'zi', 'zj', 'zk', 'frame']
->>>>>>> 9113876991552a4cce45801e0af43f472dd5de8b
 
     @property
     def fields(self):
@@ -247,11 +243,16 @@ class Field(DataFrame):
         Because the :class:`~exa.numerical.Field` object has attached vector
         and scalar fields, trait creation is handled slightly differently.
         '''
-        traits = self._main_get_traits();
-        name_fmt = 'field{}'
-        for i, field in enumerate(self.fields):
-            name = name_fmt.format(i)
-            traits[name] = Unicode(field.to_json(orient='values')).tag(sync=True)
+        traits = self._df_get_traits()
+        if self._groupbys:
+            grps = self.groupby(self._groupbys)
+            string = grps.apply(lambda g: g.index).to_json(orient='values')
+            traits['field_indices'] = Unicode(string).tag(sync=True)
+        else:
+            string = Series(self.index).to_json(orient='values')
+            traits['field_indices'] = Unicode(string).tag(sync=True)
+        s = pd.Series({i: field.values for i, field in enumerate(self._fields)})
+        traits['field_values'] = Unicode(s.to_json(orient='index'))
         return traits
 
     def __init__(self, *args, fields=None, **kwargs):
