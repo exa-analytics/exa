@@ -206,10 +206,22 @@ class Field(DataFrame):
     +-------------------+----------+-------------------------------------------+
     | zk                | float    | Third component in z                      |
     +-------------------+----------+-------------------------------------------+
+
+    Note:
+        Each field should be flattened into an N x 1 (scalar) or N x 3 (vector)
+        series or dataframe respectively. The orientation of the flattening
+        should have x as the outer loop and z values as the inner loop (for both
+        cases). This is sometimes called C-major order, C-style order, and has
+        the last index changing the fastest and the first index changing the
+        slowest.
     '''
+    _main_get_traits = DataFrame._get_traits
     _indices = ['field']
     _columns = ['nx', 'ny', 'nz', 'ox', 'oy', 'oz', 'xi', 'xj', 'xk',
-                'yi', 'yj', 'yk', 'zi', 'zj', 'zk', 'frame']
+                'yi', 'yj', 'yk', 'zi', 'zj', 'zk']
+    _traits = ['nx', 'ny', 'nz', 'ox', 'oy', 'oz', 'xi', 'xj', 'xk',
+               'yi', 'yj', 'yk', 'zi', 'zj', 'zk']
+
     @property
     def fields(self):
         '''
@@ -225,6 +237,18 @@ class Field(DataFrame):
         Select a specific field from the list of fields.
         '''
         return self.fields[which]
+
+    def _get_traits(self):
+        '''
+        Because the :class:`~exa.numerical.Field` object has attached vector
+        and scalar fields, trait creation is handled slightly differently.
+        '''
+        traits = self._main_get_traits();
+        name_fmt = 'field{}'
+        for i, field in enumerate(self.fields):
+            name = name_fmt.format(i)
+            traits[name] = Unicode(field.to_json(orient='values')).tag(sync=True)
+        return traits
 
     def __init__(self, *args, fields=None, **kwargs):
         '''

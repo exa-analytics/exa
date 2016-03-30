@@ -47,17 +47,13 @@ define([
             */
             console.log('Initializing container...');
             var self = this;                          // First pull in the data
-            this.update_width();                      // and set listeners.
-            this.update_height();
-            this.update_gui_width();
+            this.init_default_model_listeners();
             this.update_x();
             this.update_y();
             this.update_z();
             this.model.on('change:test_x', this.update_x, this);
             this.model.on('change:test_y', this.update_y, this);
             this.model.on('change:test_z', this.update_z, this);
-            this.model.on('change:width', this.update_width, this);
-            this.model.on('change:height', this.update_height, this);
 
             this.init_container();                    // Second initialize the
             this.init_canvas();                       // application(s).
@@ -110,6 +106,56 @@ define([
             this.canvas.css('left', shift);
         },
 
+        init_default_model_listeners: function() {
+            /*"""
+            init_default_model_listeners
+            -------------------------------
+            Sets up the frontend to listen to common variables present in the
+            backend
+            */
+            this.field_values = {};    // Works like a Python dictionary
+            this.update_width();
+            this.update_height();
+            this.update_gui_width();
+            this.update_fps();
+            this.update_field_nx();
+            this.update_field_ny();
+            this.update_field_nz();
+            this.update_field_xi();
+            this.update_field_xj();
+            this.update_field_xk();
+            this.update_field_yi();
+            this.update_field_yj();
+            this.update_field_yk();
+            this.update_field_zi();
+            this.update_field_zj();
+            this.update_field_zk();
+            this.update_field_ox();
+            this.update_field_oy();
+            this.update_field_oz();
+            this.update_field_values();
+            this.model.on('change:width', this.update_width, this);
+            this.model.on('change:height', this.update_height, this);
+            this.model.on('change:gui_width', this.update_gui_width, this);
+            this.model.on('change:fps', this.update_fps, this);
+            this.model.on('change:field_nx', this.update_field_nx, this);
+            this.model.on('change:field_ny', this.update_field_ny, this);
+            this.model.on('change:field_nz', this.update_field_nz, this);
+            this.model.on('change:field_xi', this.update_field_xi, this);
+            this.model.on('change:field_xj', this.update_field_xj, this);
+            this.model.on('change:field_xk', this.update_field_xk, this);
+            this.model.on('change:field_yi', this.update_field_yi, this);
+            this.model.on('change:field_yj', this.update_field_yj, this);
+            this.model.on('change:field_yk', this.update_field_yk, this);
+            this.model.on('change:field_zi', this.update_field_zi, this);
+            this.model.on('change:field_zj', this.update_field_zj, this);
+            this.model.on('change:field_zk', this.update_field_zk, this);
+            this.model.on('change:field_ox', this.update_field_ox, this);
+            this.model.on('change:field_oy', this.update_field_oy, this);
+            this.model.on('change:field_oz', this.update_field_oz, this);
+            this.model.on('change:field_values', this.update_field_values, this);
+        },
+
         get_trait: function(name) {
             /*"""
             get_trait
@@ -154,48 +200,100 @@ define([
         },
 
         update_width: function() {
-            /*"""
-            update_width
-            -----------------
-            Updates widget width.
-            */
             this.width = this.get_trait('width');
         },
 
         update_height: function() {
-            /*"""
-            update_height
-            -----------------
-            Updates widget height.
-            */
             this.height = this.get_trait('height');
         },
 
         update_x: function() {
-            /*"""
-            update_x
-            ------------
-            Pull in x data.
-            */
             this.test_x = this.get_trait('test_x');
         },
 
         update_y: function() {
-            /*"""
-            update_y
-            ------------
-            Pull in y data.
-            */
             this.test_y = this.get_trait('test_y');
         },
 
         update_z: function() {
-            /*"""
-            update_z
-            ------------
-            Pull in z data.
-            */
             this.test_z = this.get_trait('test_z');
+        },
+
+        update_field_nx: function() {
+            this.field_nx = this.get_trait('field_nx');
+        },
+
+        update_field_ny: function() {
+            this.field_ny = this.get_trait('field_ny');
+        },
+
+        update_field_nz: function() {
+            this.field_nz = this.get_trait('field_nz');
+        },
+
+        update_field_xi: function() {
+            this.field_xi = this.get_trait('field_xi');
+        },
+
+        update_field_xj: function() {
+            this.field_xj = this.get_trait('field_xj');
+        },
+
+        update_field_xk: function() {
+            this.field_xk = this.get_trait('field_xk');
+        },
+
+        update_field_yi: function() {
+            this.field_yi = this.get_trait('field_yi');
+        },
+
+        update_field_yj: function() {
+            this.field_yj = this.get_trait('field_yj');
+        },
+
+        update_field_yk: function() {
+            this.field_yk = this.get_trait('field_yk');
+        },
+
+        update_field_zi: function() {
+            this.field_zi = this.get_trait('field_zi');
+        },
+
+        update_field_zj: function() {
+            this.field_zj = this.get_trait('field_zj');
+        },
+
+        update_field_zk: function() {
+            this.field_zk = this.get_trait('field_zk');
+        },
+
+        update_field_ox: function() {
+            this.field_ox = this.get_trait('field_ox');
+        },
+
+        update_field_oy: function() {
+            this.field_oy = this.get_trait('field_oy');
+        },
+
+        update_field_oz: function() {
+            this.field_oz = this.get_trait('field_oz');
+        },
+
+        update_field_values: function() {
+            this.nfields = this.field_nx.length;
+            if (this.nfields == undefined && this.field_nx != undefined) {
+                this.nfields = 1;
+            };
+            console.log(this.field_nx);
+            console.log(this.nfields);
+            for (let i=0; i<this.nfields; ++i) {
+                name = 'field_' + i.toString();
+                this.update_field_value(name);
+            };
+        },
+
+        update_field_value: function(key) {
+            this[name] = this.get_trait(name);
         },
     });
 
