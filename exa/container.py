@@ -218,6 +218,20 @@ class BaseContainer:
                 traits.update(obj._get_traits())
         self._widget.add_traits(**traits)
 
+    def _is(self, name):
+        '''
+        Check if the dataframe or series object exists.
+
+        Args:
+            name (str): String name of the series or dataframe object
+
+        Returns:
+            exists (bool): True if it exists
+        '''
+        if hasattr(self[name], 'shape'):
+            return True
+        return False
+
     def __sizeof__(self):
         '''
         Sum of the dataframe sizes, trait values, and relational data.

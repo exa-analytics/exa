@@ -218,9 +218,13 @@ class Field(DataFrame):
     _main_get_traits = DataFrame._get_traits
     _indices = ['field']
     _columns = ['nx', 'ny', 'nz', 'ox', 'oy', 'oz', 'xi', 'xj', 'xk',
+<<<<<<< HEAD
                 'yi', 'yj', 'yk', 'zi', 'zj', 'zk']
     _traits = ['nx', 'ny', 'nz', 'ox', 'oy', 'oz', 'xi', 'xj', 'xk',
                'yi', 'yj', 'yk', 'zi', 'zj', 'zk']
+=======
+                'yi', 'yj', 'yk', 'zi', 'zj', 'zk', 'frame']
+>>>>>>> 9113876991552a4cce45801e0af43f472dd5de8b
 
     @property
     def fields(self):
@@ -232,7 +236,7 @@ class Field(DataFrame):
         '''
         return self._fields
 
-    def field(self, which):
+    def field_values(self, which):
         '''
         Select a specific field from the list of fields.
         '''
