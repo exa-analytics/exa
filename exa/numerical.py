@@ -210,6 +210,7 @@ class Field(DataFrame):
     _indices = ['field']
     _columns = ['nx', 'ny', 'nz', 'ox', 'oy', 'oz', 'xi', 'xj', 'xk',
                 'yi', 'yj', 'yk', 'zi', 'zj', 'zk', 'frame']
+
     @property
     def fields(self):
         '''
@@ -220,7 +221,7 @@ class Field(DataFrame):
         '''
         return self._fields
 
-    def field(self, which):
+    def field_values(self, which):
         '''
         Select a specific field from the list of fields.
         '''
