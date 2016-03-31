@@ -8,39 +8,59 @@ test.js
 
 require.config({
     shim: {
-        'nbextensions/exa/app.gui': {
+        'nbextensions/exa/app': {
             exports: 'gui'
+        },
+
+        'nbextensions/exa/gui': {
+            exports: 'gui'
+        },
+
+        'nbextensions/exa/field': {
+            exports: 'field'
         },
     },
 });
 
 
 define([
-    'nbextensions/exa/app.gui'
-], function(gui) {
+    'nbextensions/exa/app',
+    'nbextensions/exa/gui',
+    'nbextensions/exa/field'
+], function(app, gui, field) {
     class TestGUI extends gui.ContainerGUI {
         constructor(view) {
-            super(view);
-        }
-    }
-
-    TestGUI.prototype.init = function() {
-        var self = this;
-        this.buttons = {
-            'run all tests': function() {
-                console.log('run all clicked');
-                self.run_all_tests();
-            },
+            super({view: view, autoPlace: false, width: view.gui_width});
         };
-        this.run_all = this.ui.add(this.buttons, 'run all tests');
+
+        init() {
+            var self = this;
+            this.buttons = {
+                'run all tests': function() {
+                    console.log('run all clicked');
+                    self.run_all_tests();
+                },
+            };
+            this.run_all = this.add(this.buttons, 'run all tests');
+        };
+
+        run_all_tests() {
+            console.log('running all tests');
+        };
     };
 
-    var TestApp = function(view) {
-        /*"""
-        */
-        this.view = view;
-        this.gui = new TestGUI(this.view);
+    class TestApp extends app.BaseApp {
+        constructor(view) {
+            super(view, new TestGUI(view));
+            this.field = new field.ScalarField({
+                xmin: 0, xmax: 10, nx: 11,
+                ymin: 0, ymax: 10, ny: 11,
+                zmin: 0, zmin: 10, nz: 11
+            });
+            this.field.make_field();
+        };
+
     };
 
-    return {'TestApp': TestApp};
+    return {TestApp: TestApp};
 });

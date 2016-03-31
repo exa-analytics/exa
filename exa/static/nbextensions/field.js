@@ -8,7 +8,58 @@ functions.
 'use strict';
 
 
-define([], function() {
+require.config({
+    shim: {
+        'nbextensions/exa/num': {
+            exports: 'num'
+        },
+    },
+});
+
+
+define([
+    'nbextensions/exa/num',
+], function(num) {
+    class ScalarField {
+        constructor(dimensions, func) {
+            /*"""
+            ScalarField
+            =============
+            A class to contain a scalar field
+
+            Args:
+                dimensions (array): List of dimensions specifying the construction of the field
+                func (function): Function of 3D space
+
+            Note:
+                The dimensions should be of the form [[xmin, xmax, nx], [...], [...]].
+            */
+            this.xmin = dimensions.xmin;
+            this.xmax = dimensions.xmax;
+            this.nx = dimensions.nx;
+            this.ymin = dimensions.ymin;
+            this.ymay = dimensions.ymax;
+            this.ny = dimensions.ny;
+            this.zmin = dimensions.zmin;
+            this.zmaz = dimensions.zmax;
+            this.nz = dimensions.nz;
+        };
+
+        update_x() {
+            /*"""
+            update_x
+            ---------
+            */
+            this.xarray = num.linspace(this.xmin, this.xmax, this.nx);
+            console.log(this.xarray);
+        };
+
+        make_field() {
+            this.update_x();
+            console.log('hai')  ;
+        };
+    };
+
     var make_scalar_field = function(nx, ny, nz, ox, oy, oz,
                                      xi, xj, xk, yi, yj, yk, zi, zj, zk, f) {
         /*"""
@@ -45,7 +96,10 @@ define([], function() {
         };
 
     };
-    return {'make_scalar_field': make_scalar_field};
+    return {
+        make_scalar_field: make_scalar_field,
+        ScalarField: ScalarField
+    };
 });
 
 /*

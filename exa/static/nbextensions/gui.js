@@ -19,22 +19,21 @@ require.config({
 define([
     'nbextensions/exa/lib/dat.gui.min',
 ], function(dat) {
-    class ContainerGUI {
+    class ContainerGUI extends dat.GUI {
         /*"""
         ContainerGUI
         ===============
         */
-        constructor(view) {
-            var self = this;
-            this.view = view;
-            this.canvas = this.view.canvas;
-            this.ui = new dat.GUI({autoPlace: false, width: this.view.gui_width});
+        constructor(args) {
+            super(args);
+            this.view = args.view;
             this.ui_css = document.createElement('style');
             this.ui_css.innerHTML = this.gui_style;
             this.init();
         };
-    };
 
+        init() {};
+    };
 
     ContainerGUI.prototype.gui_style = ".dg {\
         color: black;\
@@ -149,5 +148,5 @@ define([
         outline-width: 1.5px\
     }";
 
-    return {'ContainerGUI': ContainerGUI};
+    return {ContainerGUI: ContainerGUI};
 });

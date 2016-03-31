@@ -23,13 +23,14 @@ define([], function() {
         Returns:
             array (array): Array of values
         */
-        var step = (max - min) / n
+        var step = (max - min) / (n - 1);
         var element = min;
         var array = [element];
-        for (let i=1; i<n; i++) {
+        for (let i=0; i<n; i++) {
             element += step;
             array.push(element);
         };
+        return array;
     };
 
     return {
