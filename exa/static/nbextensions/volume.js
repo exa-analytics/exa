@@ -9,8 +9,8 @@ functions.
 
 
 define([], function() {
-    var make_scalar_field = function(nx, ny, nz, ox, oy, oz, xi, xj, xk,
-                                     yi, yj, yk, zi, zj, zk, func) {
+    var make_scalar_field = function(nx, ny, nz, ox, oy, oz,
+                                     xi, xj, xk, yi, yj, yk, zi, zj, zk, f) {
         /*"""
         make_scalar_field
         --------------------
@@ -27,7 +27,7 @@ define([], function() {
             yi (float): First component of y
             yj (float): Second component of y
             yk (float): Third component of y
-            func (function): Function of 3D space (x, y, z) of the shape to make
+            f (function): Function of 3D space (x, y, z) of the shape to make
 
         Returns:
             cube (array)
@@ -36,16 +36,19 @@ define([], function() {
         var n = nx * ny * nz;
         var field = new Float32Array(n);
         var h = 0;
-        var x =
         for (let i=0; i<nx; i++) {
             for (let j=0; j<ny; j++) {
                 for (let k=0; k<nz; k++) {
-                    field[h] = func()
+                    field[h] = f()
                 };
             };
         };
 
     };
+    return {'make_scalar_field': make_scalar_field};
+});
+
+/*
     return memoize(function() {
   var res = new Array(3);
   for(var i=0; i<3; ++i) {
@@ -69,6 +72,4 @@ numeric.linspace = function linspace(a,b,n) {
     for(i=n;i>=0;i--) { ret[i] = (i*b+(n-i)*a)/n; }
     return ret;
 }
-
-    return {'make_scalar_field': make_scalar_field};
-});
+*/

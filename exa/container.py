@@ -19,6 +19,7 @@ See Also:
 import os
 import pandas as pd
 from sys import getsizeof
+from traitlets import Bool
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from exa import _conf
 from exa.widget import ContainerWidget
@@ -203,20 +204,22 @@ class BaseContainer:
         '''
         return {}
 
-    def _update_traits(self, which=None):
+    def _update_traits(self, test=False):
         '''
         Update specific traits, given in the arguments.
 
         Args:
             traits (list): Names of traits to update
         '''
-        traits = self._custom_container_traits()
-        has_traits = self._numerical_dict(cls_criteria=[NDBase])
-        which = which if which else has_traits.keys()
-        for name, obj in has_traits.items():
-            if name in which:
+        traits = {}
+        if test:
+            traits['test'] = Bool(True).tag(sync=True)
+        else:
+            traits = self._custom_container_traits()
+            has_traits = self._numerical_dict(cls_criteria=[NDBase])
+            for obj in has_traits.values():
                 traits.update(obj._get_traits())
-        self._widget.add_traits(**traits)
+            self._widget.add_traits(**traits)
 
     def _is(self, name):
         '''
@@ -266,6 +269,8 @@ class BaseContainer:
             setattr(self, key, value)
         self.meta = meta
         self._widget = self._widget_class(self) if _conf['notebook'] else None
+        if meta is None and len(kwargs) == 0:
+            self._update_traits(test=True)
 
     def _repr_html_(self):
         if self._widget:

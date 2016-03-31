@@ -1,17 +1,38 @@
 Code Overview
 ======================================
 The exa package provides the foundation for data analysis tools. It's primary
-purpose is to provide analytical data objects (:mod:`~exa.analytical`), numerical
-data objects (:mod:`~exa.numerical`), visualization support (:mod:`~exa.widget`
-and :mod:`~exa.web`, for the Jupyter notebook and standalone application
-environments respectively), and a container object (itself composed of two
+purpose is to provide **analytical** data objects (:mod:`~exa.analytical`), **numerical**
+data objects (:mod:`~exa.numerical`), **visualization** support (:mod:`~exa.widget`
+and :mod:`~exa.web` - for both the **Jupyter notebook** and standalone application
+environments), and a **container** object (itself composed of two
 modules, :mod:`~exa.container` and :mod:`~exa.relational.container`) to
-facilitate data management and analysis. The secondary purpose of the package
-is to provide convenient methods for programmatic analysis and manipulation of
+facilitate data **management** and **analysis**. The secondary purpose of the package
+is to provide convenient methods for **programmatic analysis** and manipulation of
 data on disk into analytical and numerical data objects as well as container
 objects (:mod:`~exa.editor`). Finally, the exa package provides a set of fast
-algorithms (see the modules in the algorithms documentation) for common operations.
+(in and out of core) **algorithms** (see the modules in the algorithms
+documentation) for common operations.
 
+The latter two purposes are accomplished in practice by using data specific
+packages built on top of exa; exa provides the foundation for manipulation of
+n-dimensional data, communication to data frameworks, databases, data transfer
+between programming languages (i.e. frontend and backend), and content
+management.
+
+Note:
+    Performance is critical for such applications both in terms of speed and memory
+    usage. The backend application is built exclusively in **Python**: Python has well
+    established libraries for accomplishing all of the foundational task described
+    above. **JavaScript/HTML/CSS** are used for creating dynamic Jupyter notebook
+    extensions, and are also used for the standalone web application. Other languages,
+    primarily **C++**, are used for situations requiring high performance.
+
+Tip:
+    Due to the limitations of Python and JavaScript, numerically difficult operations
+    should be offloaded to statically typed languages (or use numpy for example).
+    Where unavoidable every effort should be made to not waste cpu cycles or memory.
+    Whenever communication is required between languages, ensure that only the
+    minimum amount of data is being copied and/or transferred.
 
 Organization
 ---------------------
