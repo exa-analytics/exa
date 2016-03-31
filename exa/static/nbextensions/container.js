@@ -20,14 +20,19 @@ require.config({
         'nbextensions/exa/utility': {
             exports: 'utility'
         },
+
+        'nbextensions/exa/volume': {
+            exports: 'utility'
+        },
     },
 });
 
 define([
     'widgets/js/widget',
     'nbextensions/exa/three.app',
-    'nbextensions/exa/utility'
-], function(widget, app3D, utility) {
+    'nbextensions/exa/utility',
+    'nbextensions/exa/volume'
+], function(widget, app3D, utility, volume) {
     var ContainerView = widget.DOMWidgetView.extend({
         /*"""
         ContainerView
@@ -54,6 +59,9 @@ define([
             this.model.on('change:test_x', this.update_x, this);
             this.model.on('change:test_y', this.update_y, this);
             this.model.on('change:test_z', this.update_z, this);
+            console.log(this.test_x);
+            console.log(this.test_y);
+            console.log(this.test_z);
 
             this.init_container();                    // Second initialize the
             this.init_canvas();                       // application(s).
@@ -70,6 +78,9 @@ define([
                 self.app.animate();
                 self.app.controls.handleResize();
             });
+
+            console.log(volume.make_scalar_field());
+            this.send({'key': 'value'});
         },
 
         init_container: function() {
@@ -166,7 +177,7 @@ define([
             that attempts to convert JSON strings to objects. Note that
             */
             var obj = this.model.get(name);
-            if (typeof obj == 'string') {
+            if (typeof obj === 'string') {
                 try {
                     obj = JSON.parse(obj);
                 } catch(err) {
@@ -183,7 +194,7 @@ define([
             Wrapper around the DOMWidgetView "model.set" function to correctly
             set json strings.
             */
-            if (typeof value == 'Object') {
+            if (typeof value === Object) {
                 try {
                     value = JSON.stringify(value);
                 } catch(err) {
