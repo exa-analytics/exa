@@ -252,7 +252,7 @@ class Field(DataFrame):
             string = Series(self.index).to_json(orient='values')
             traits['field_indices'] = Unicode(string).tag(sync=True)
         s = pd.Series({i: field.values for i, field in enumerate(self._fields)})
-        traits['field_values'] = Unicode(s.to_json(orient='index'))
+        traits['field_values'] = Unicode(s.to_json(orient='index')).tag(sync=True)
         return traits
 
     def __init__(self, *args, fields=None, **kwargs):

@@ -134,6 +134,7 @@ define([
             this.update_field_oy();
             this.update_field_oz();
             this.update_field_values();
+            this.update_field_indices();
             this.model.on('change:width', this.update_width, this);
             this.model.on('change:height', this.update_height, this);
             this.model.on('change:gui_width', this.update_gui_width, this);
@@ -282,10 +283,12 @@ define([
 
         update_field_values: function() {
             this.field_values = this.get_trait('field_values');
+            console.log(this.field_values);
         },
 
         update_field_indices: function() {
             this.field_indices = this.get_trait('field_indices');
+            console.log(this.field_indices);
         },
     });
 
