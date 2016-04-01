@@ -39,40 +39,40 @@ define([
             this.xmax = dimensions.xmax;
             this.nx = dimensions.nx;
             this.ymin = dimensions.ymin;
-            this.ymay = dimensions.ymax;
+            this.ymax = dimensions.ymax;
             this.ny = dimensions.ny;
             this.zmin = dimensions.zmin;
-            this.zmaz = dimensions.zmax;
+            this.zmax = dimensions.zmax;
             this.nz = dimensions.nz;
             this.update_x();
             this.update_y();
             this.update_z();
+            this.update_field();
         };
 
         update_x() {
-            this.xarray = num.linspace(this.xmin, this.xmax, this.nx);
+            this.x = num.linspace(this.xmin, this.xmax, this.nx);
         };
 
         update_y() {
-            this.yarray = num.linspace(this.ymin, this.ymax, this.ny);
+            this.y = num.linspace(this.ymin, this.ymax, this.ny);
         };
 
         update_z() {
-            this.zarray = num.linspace(this.zmin, this.zmax, this.nz);
+            this.z = num.linspace(this.zmin, this.zmax, this.nz);
         };
 
-        make_field() {
-            this.field = new Float32Array(this.nx * this.ny * this.nz);
+        update_field() {
+            this.values = new Float32Array(this.nx * this.ny * this.nz);
             var h = 0;
-            for (let x of this.xarray) {
-                for (let y of this.yarray) {
-                    for (let z of this.zarray) {
-                        this.field[h] = this.func(x, y, z);
+            for (let x of this.x) {
+                for (let y of this.y) {
+                    for (let z of this.z) {
+                        this.values[h] = this.func(x, y, z);
                         h += 1;
                     };
                 };
             };
-            return this.field;
         };
     };
 

@@ -8,11 +8,10 @@ test.js
 
 require.config({
     shim: {
-        'nbextensions/exa/app': {
-            exports: 'app'
+        'nbextensions/exa/app.three': {
+            exports: 'app3d'
         },
-
-        'nbextensions/exa/gui': {
+        'nbextensions/exa/app.gui': {
             exports: 'gui'
         },
 
@@ -24,18 +23,13 @@ require.config({
 
 
 define([
-    'nbextensions/exa/app',
-    'nbextensions/exa/gui',
+    'nbextensions/exa/app.three',
+    'nbextensions/exa/app.gui',
     'nbextensions/exa/field'
-], function(app, gui, field) {
-    var ScalarField = field.ScalarField;
-    var sphere = field.sphere;
-
+], function(app3d, gui, field) {
     class TestGUI extends gui.ContainerGUI {
-        constructor(view) {
-            super({view: view, autoPlace: false, width: view.gui_width});
-        };
-
+        /*"""
+        */
         init() {
             var self = this;
             this.buttons = {
@@ -44,7 +38,7 @@ define([
                     self.run_all_tests();
                 },
             };
-            this.run_all = this.add(this.buttons, 'run all tests');
+            this.run_all = this.ui.add(this.buttons, 'run all tests');
         };
 
         run_all_tests() {
@@ -52,18 +46,34 @@ define([
         };
     };
 
-    class TestApp extends app.BaseApp {
+    class TestApp {
         constructor(view) {
-            super(view, new TestGUI(view));
-            this.field = new ScalarField({
-                xmin: 0, xmax: 10, nx: 11,
-                ymin: 0, ymax: 10, ny: 11,
-                zmin: 0, zmin: 10, nz: 11
-            }, sphere);
-            var field = this.field.make_field();
-            console.log(field);
+            this.view = view;
+            this.gui = new TestGUI(this.view);
+            this.app3d = new app3d.ThreeJSApp(this.view.canvas);
+            this.field = new field.ScalarField({
+                xmin: -5, xmax: 5, nx: 11,
+                ymin: -5, ymax: 5, ny: 11,
+                zmin: -5, zmax: 5, nz: 11
+            }, field.sphere);
+            console.log(this.field);
+            console.log(this.field.values);
+            //this.points = this.app3d.add_points(this.field.x, this.field.y, this.field.z);
+            //this.app3d.set_camera_from_mesh(this.points);
+            this.field_mesh = this.app3d.add_scalar_field(this.field, 3);
+            console.log(this.field_mesh);
+            this.app3d.set_camera();
         };
 
+        resize() {
+            this.app3d.resize();
+        };
+
+        func() {
+            for (let i=0; i<10; i++) {
+                console.log('inner i' + i.toString());
+            };
+        };
     };
 
     return {TestApp: TestApp};

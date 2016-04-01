@@ -102,7 +102,6 @@ define([], function() {
     };
 
     return {
-        'unique': unique,
         'flatten_to_array': flatten_to_array,
         'create_float_array_xyz': create_float_array_xyz,
         'repeat_float': repeat_float,

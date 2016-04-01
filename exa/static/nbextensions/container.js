@@ -50,9 +50,15 @@ define([
             this.create_canvas();
             this.if_test();
 
-            this.container.append(this.app.gui.domElement);
+            this.container.append(this.app.gui.ui.domElement);
             this.container.append(this.app.gui.ui_css);
+            this.container.append(this.canvas);
             this.setElement(this.container);
+            this.app.app3d.render();
+            this.on('displayed', function() {
+                self.app.app3d.animate();
+                self.app.app3d.controls.handleResize();
+            });
         };
 
         get_trait(name) {
@@ -103,9 +109,10 @@ define([
             var check = this.get_trait('test');
             if (check === true) {
                 console.log('Empty container, displaying test interface!');
+                this.app = new test.TestApp(this);
+            } else {
+
             };
-            this.app = new test.TestApp(this);
-            console.log(this.app);
         };
 
         default_listeners() {
@@ -123,7 +130,6 @@ define([
             this.listenTo(this.model, 'change:height', this.get_height);
             this.listenTo(this.model, 'change:gui_width', this.get_gui_width);
             this.listenTo(this.model, 'change:fps', this.get_fps);
-            console.log(this.width);
         };
 
         create_container() {
@@ -147,17 +153,16 @@ define([
             });
         };
 
-        create_canvas(shift) {
+        create_canvas() {
             /*"""
             create_canvas
             ----------------
             Create a canvas for WebGL.
             */
-            shift = shift || 0;     // default shift
-            this.canvas = $('<canvas/>').width(this.width - shift).height(this.height);
+            this.canvas = $('<canvas/>').width(this.width - this.gui_width).height(this.height);
             this.canvas.css('position', 'absolute');
             this.canvas.css('top', 0);
-            this.canvas.css('left', shift);
+            this.canvas.css('left', this.gui_width);
         };
 
         get_gui_width() {

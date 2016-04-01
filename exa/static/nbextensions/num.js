@@ -23,7 +23,7 @@ define([], function() {
         Returns:
             array (array): Array of values
         */
-        var step = (max - min) / (n - 1);
+        var step = (max - min) / n;
         var array = [min];
         for (let i=0; i<n; i++) {
             min += step;

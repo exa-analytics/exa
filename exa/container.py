@@ -219,7 +219,7 @@ class BaseContainer:
             has_traits = self._numerical_dict(cls_criteria=[NDBase])
             for obj in has_traits.values():
                 traits.update(obj._get_traits())
-            self._widget.add_traits(**traits)
+        self._widget.add_traits(**traits)
 
     def _is(self, name):
         '''
