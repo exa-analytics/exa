@@ -34,6 +34,7 @@ define([
             Note:
                 The dimensions should be of the form [[xmin, xmax, nx], [...], [...]].
             */
+            this.func = func;
             this.xmin = dimensions.xmin;
             this.xmax = dimensions.xmax;
             this.nx = dimensions.nx;
@@ -43,87 +44,44 @@ define([
             this.zmin = dimensions.zmin;
             this.zmaz = dimensions.zmax;
             this.nz = dimensions.nz;
+            this.update_x();
+            this.update_y();
+            this.update_z();
         };
 
         update_x() {
-            /*"""
-            update_x
-            ---------
-            */
             this.xarray = num.linspace(this.xmin, this.xmax, this.nx);
-            console.log(this.xarray);
+        };
+
+        update_y() {
+            this.yarray = num.linspace(this.ymin, this.ymax, this.ny);
+        };
+
+        update_z() {
+            this.zarray = num.linspace(this.zmin, this.zmax, this.nz);
         };
 
         make_field() {
-            this.update_x();
-            console.log('hai')  ;
-        };
-    };
-
-    var make_scalar_field = function(nx, ny, nz, ox, oy, oz,
-                                     xi, xj, xk, yi, yj, yk, zi, zj, zk, f) {
-        /*"""
-        make_scalar_field
-        --------------------
-        Args:
-            nx (int): Discretization in x
-            ny (int): Discretization in x
-            nz (int): Discretization in x
-            ox (float): Origin in x
-            oy (float): Origin in y
-            oz (float): Origin in z
-            xi (float): First component of x
-            xj (float): Second component of x
-            xk (float): Third component of x
-            yi (float): First component of y
-            yj (float): Second component of y
-            yk (float): Third component of y
-            f (function): Function of 3D space (x, y, z) of the shape to make
-
-        Returns:
-            cube (array)
-        */
-        console.log('making volume');
-        var n = nx * ny * nz;
-        var field = new Float32Array(n);
-        var h = 0;
-        for (let i=0; i<nx; i++) {
-            for (let j=0; j<ny; j++) {
-                for (let k=0; k<nz; k++) {
-                    field[h] = f()
+            this.field = new Float32Array(this.nx * this.ny * this.nz);
+            var h = 0;
+            for (let x of this.xarray) {
+                for (let y of this.yarray) {
+                    for (let z of this.zarray) {
+                        this.field[h] = this.func(x, y, z);
+                        h += 1;
+                    };
                 };
             };
+            return this.field;
         };
-
     };
+
+    var sphere = function(x, y, z) {
+        return x^2 + y^2 + z^2;
+    };
+
     return {
-        make_scalar_field: make_scalar_field,
-        ScalarField: ScalarField
+        ScalarField: ScalarField,
+        sphere: sphere
     };
 });
-
-/*
-    return memoize(function() {
-  var res = new Array(3);
-  for(var i=0; i<3; ++i) {
-    res[i] = 2 + Math.ceil((dims[i][1] - dims[i][0]) / dims[i][2]);
-  }
-  var volume = new Float32Array(res[0] * res[1] * res[2])
-    , n = 0;
-  for(var k=0, z=dims[2][0]-dims[2][2]; k<res[2]; ++k, z+=dims[2][2])
-  for(var j=0, y=dims[1][0]-dims[1][2]; j<res[1]; ++j, y+=dims[1][2])
-  for(var i=0, x=dims[0][0]-dims[0][2]; i<res[0]; ++i, x+=dims[0][2], ++n) {
-    volume[n] = f(x,y,z);
-  }
-  return {data: volume, dims:res};
-});
-}
-numeric.linspace = function linspace(a,b,n) {
-    if(typeof n === "undefined") n = Math.max(Math.round(b-a)+1,1);
-    if(n<2) { return n===1?[a]:[]; }
-    var i,ret = Array(n);
-    n--;
-    for(i=n;i>=0;i--) { ret[i] = (i*b+(n-i)*a)/n; }
-    return ret;
-}
-*/
