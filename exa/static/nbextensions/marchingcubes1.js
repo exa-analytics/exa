@@ -8,7 +8,7 @@ A function of marching cubes
 
 
 define([], function() {
-    var marching_cubes_field = function(field, dimensions, origin, scale, isovalue) {
+    var march_field = function(field, dimensions, origin, scale, isovalue) {
         /*"""
         marching_cubes_field
         ======================
@@ -20,7 +20,28 @@ define([], function() {
         var nvertices = [];
         var nfaces = [];
         var pos = [[], [], [], [], [], [], [], []];
-    ]
+        var mags = new Float32Array(8);
+        var pedges = new Int32Array(12);
+        var nedges = new Int32Array(12);
+        var nx = dimensions.nx;
+        var ny = dimensions.ny;
+        var nz = dimensions.nz;
+
+        for (let i=0; i<nx, i++) {
+            for (let j=0; j<ny; j++) {
+                for (let k=0; k<nz; k++) {
+                    var pflag = 0;
+                    var nflag = 0;
+                    for (let l=0; l<8; l++) {
+                        var v = voffset[l];
+                        var ti = i + v[0];
+                        var tj = j + v[1];
+                        var tk = k + v[2];
+                        mags[i] = field[()]
+                    };
+                };
+            };
+        };
     };
 
     var voffset = [

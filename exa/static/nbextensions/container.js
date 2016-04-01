@@ -177,5 +177,5 @@ define([
         };
     };
 
-    return {'ContainerView': ContainerView};
+    return {ContainerView: ContainerView};
 });
