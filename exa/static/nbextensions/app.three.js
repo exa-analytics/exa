@@ -491,6 +491,8 @@ define([
         };
         console.log(geometry.vertices.length);
         console.log(geometry.faces.length);
+        console.log(geometry.vertices);
+        console.log(geometry.faces);
         geometry.computeFaceNormals();
         geometry.computeVertexNormals();
         var material = new THREE.MeshLambertMaterial({
