@@ -428,24 +428,32 @@ define([
            corresponding to the current cube, pull the field values at those
            vertices, compare them to the isovalue, and generate the corresponding
            face vertexes where the field value is less than the isovalue. */
-        for (let i=0; i<nnx; i++) {
-            for (let j=0; j<nny; j++) {
-                for (let k=0; k<nnz; k++) {
+        var n = 0;
+        for (let i=0; i<nnz; i++, n+=nz) {
+            for (let j=0; j<nny; j++, n++) {
+                for (let k=0; k<nnx; k++, n++) {
                     var cube_index = 0;
                     var field_values = new Float32Array(8);
                     var field_xyzs = new Array(8);
+                    console.log(i);
+                    console.log(j);
+                    console.log(k);
                     for (let l=0; l<8; l++) {
                         var offset = cube_vertices[l];
+                        console.log(offset);
                         var ioff = i + offset[0];
                         var joff = j + offset[1];
-                        var koff = k + offset[2]
-                        //var field_index = (nz * ioff + joff) * ny + koff
-                        var field_index = ioff * ny * nz + joff * nz + koff;
+                        var koff = k + offset[2];
+                        //var field_index = ioff * ny * nz + joff * nz + koff;
+                        var field_index = n + offset[0] + nz * (offset[1] + ny * offset[2]);
+                        console.log(field_index);
                         field_values[l] = field.values[field_index];
+                        console.log(field_values[l]);
                         field_xyzs[l] = new THREE.Vector3(field.x[ioff], field.y[joff], field.z[koff]);
                         if (field_values[l] > isovalue) {
                             cube_index |= bits[l];
                         };
+                        console.log(cube_index);
                     };
                     /* Now that we have the cube_index, we can use the edge_table
                        to lookup the type of face we have to deal with. */
@@ -485,6 +493,11 @@ define([
                         var i2 = face_vertex_index[cur_face_verts[m+2]];
                         var face = new THREE.Face3(i0, i1, i2);
                         geometry.faces.push(face);
+                        geometry.faceVertexUvs[0].push([
+                            new THREE.Vector2(0,0),
+                            new THREE.Vector2(0,1),
+                            new THREE.Vector2(1,1)
+                        ]);
                     };
                 };
             };
