@@ -23,9 +23,22 @@ define([], function() {
         Returns:
             array (array): Array of values
         */
-        var step = (max - min) / n;
+        var step = (max - min) / (n - 1);
         var array = [min];
-        for (let i=0; i<n; i++) {
+        for (let i=0; i<=n; i++) {
+            min += step;
+            array.push(min);
+        };
+        return array;
+    };
+
+    var arange = function(min, max, step) {
+        /*"""
+        arange
+        -------------
+        */
+        var array = [min];
+        while (min <= max) {
             min += step;
             array.push(min);
         };
@@ -34,5 +47,6 @@ define([], function() {
 
     return {
         'linspace': linspace,
+        'arange': arange
     };
 });

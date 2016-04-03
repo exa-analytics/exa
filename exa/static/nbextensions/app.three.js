@@ -345,28 +345,54 @@ define([
         this.set_camera(xyz.x, xyz.y, xyz.z, oxyz[0], oxyz[1], oxyz[2]);
     };
 
-    ThreeJSApp.prototype.add_scalar_field = function(field, isovalue) {
+    ThreeJSApp.prototype.add_single_scalar_field = function(field, isovalue, how) {
         /*"""
-        add_scalar_field
-        ==================
-        Perform the marching cubes algorithm given a ScalarField.
+        add_single_scalar_field
+        -------------------------
+        Create an isosurface of a scalar field.
 
-        Loop over indices to find triangle vertices. Vertices are numbered:
+        When given a scalar field, creating a surface requires selecting a set
+        of vertices that intersect the provided field magnitude (isovalue).
+        There are a couple of algorithms that do this.
+        */
+        if (how === undefined) {
+            how = 'marching cubes single';
+        };
+        if (how === 'marching cubes single') {
+            var mesh0 = this.marching_cubes_single(field, isovalue);
+            this.scene.add(mesh0);
+            return mesh0
+        } else {
+            console.log('NotImplementedError');
+        };
+    };
+
+    ThreeJSApp.prototype.marching_cubes_single = function(field, isovalue) {
+        /*"""
+        marching_cubes_single
+        ------------------------
+        Run the marching cubes algorithm finding the volumetric shell that is
+        smaller than the isovalue.
+
+        The marching cubes algorithm takes a scalar field and for each field
+        vertex looks at the nearest indices (in an evenly space field this
+        forms a cube), determines along what edges the scalar field is less
+        than the isovalue, and creates new vertices along the edges of the
+        field's cube. The at each point in the field, a cube is created with
+        vertices numbered:
                4-------5
              / |     / |
             7-------6  |
             |  0----|--1
             | /     | /
             3-------2
-        Below the variable is called index# because it is used to lookup
-        the scalar field value (magnitude) at the given point. Edges are
+        Field values are given for each field vertex. Edges are
         labeled as follows (see the lookup table below).
 
                                             4
                o-------o                o-------o
              / |     / |            7 / | 6   / |  5
             o-------o  |             o-------o  |
-
             |  o----|--o             |  o----|--o
           3 | /   0 | / 1            | /     | /
             o-------o                o-------o
@@ -375,144 +401,103 @@ define([
         as drawn) the vertical edges of the cube, with 8 being the vertical
         edge between vertex 0 and 4 (see above).
 
+        Note:
+            Scalar fields are assumed to be in row major order (also known C
+            style, and implies that the last index is changing the fastest).
+
         See Also:
             **field.js**
         */
-        console.log('adding scalar field');
-        var nx = field.nx;
-        var ny = field.ny;
-        var nz = field.nz;
-        var nnx = nx - 1;
-        var nny = ny - 1;
-        var nnz = nz - 1;
+        console.log('marching cubes single...');
+        var nx = field.x.length;
+        var ny = field.y.length;
+        var nz = field.z.length;
+        var nnx = nx - 1;    // Do not use the last vertex of the field data
+        var nny = ny - 1;    // when constructing the surface because there is
+        var nnz = nz - 1;    // no cube that can be formed for it.
         var cube_vertices = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0],
-                             [0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1]];
-        var cube_edges = [
-            [0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6],
-            [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]
-        ];
+                   [0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1]];
+        //var cube_vertices = [[0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1],
+        //                     [1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1]];
+        var cube_edges = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6],
+                          [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]];
         var bits = [1, 2, 4, 8, 16, 32, 64, 128];
         var geometry = new THREE.Geometry();
-        var face_vertex_index = 0;    // Used when adding a THREE.Face3's vertices to the geometry
+        var face_vertex_index = new Int32Array(12);    // Keeps track of which FACE vertex we are on
+        /* Loop over field vertex indices, at each index, create the 8 vertices
+           corresponding to the current cube, pull the field values at those
+           vertices, compare them to the isovalue, and generate the corresponding
+           face vertexes where the field value is less than the isovalue. */
         for (let i=0; i<nnx; i++) {
             for (let j=0; j<nny; j++) {
                 for (let k=0; k<nnz; k++) {
-                    var p_cube_index = 0;
-                    var n_cube_index = 0;
-                    var values = new Float32Array(8);
-                    var positions = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-                    //var positions = new Float32Array(8);
-                    /*
-                    From a given source vertex (i.e. a given 0 vertex in the
-                    above picture), search the magnitudes of the vertices
-                    around it and compare to identify the correct triangle
-                    vertices to use for building the face.
-                    */
+                    var cube_index = 0;
+                    var field_values = new Float32Array(8);
+                    var field_xyzs = new Array(8);
                     for (let l=0; l<8; l++) {
                         var offset = cube_vertices[l];
                         var ioff = i + offset[0];
                         var joff = j + offset[1];
                         var koff = k + offset[2]
-                        var index = ioff * ny * nz + joff * nz + koff;
-                        values[l] = field.values[index];
-                        positions[l] = new THREE.Vector3(field.x[ioff], field.y[joff], field.z[koff]);
-
-                        if (values[l] < isovalue) {
-                            p_cube_index |= bits[l];
-                        };
-                        if (values[l] < -isovalue) {
-                            n_cube_index |= bits[l];
+                        //var field_index = (nz * ioff + joff) * ny + koff
+                        var field_index = ioff * ny * nz + joff * nz + koff;
+                        field_values[l] = field.values[field_index];
+                        field_xyzs[l] = new THREE.Vector3(field.x[ioff], field.y[joff], field.z[koff]);
+                        if (field_values[l] > isovalue) {
+                            cube_index |= bits[l];
                         };
                     };
-
-                    /*
-                    Now look up the bit index (corresponding to an entry in the
-                    triangle table) using the values of the edge indices. After
-                    this lookup we still need to interpolate along the resultant
-                    edges (using the field values at the vertices) to find the
-                    vertices that will make up our triangle.
-                    */
-                    var pbit = this.edge_table[p_cube_index];
-                    var nbit = this.edge_table[n_cube_index];
-                    var plist = this.tri_table[p_cube_index];
-                    var nlist = this.tri_table[n_cube_index];
-
-                    /* Interpolate the vertices of the faces using the cube edges
-                       and vertix magnitudes. */
-                    var mu = 0.5;
-                    var face_vertices = [];
-                    var edges = new Int32Array(12);
-                    if (pbit !== 0 && pbit !== 255) {    // Only create face if edge exists
-                        for (let m=0; m<12; m++) {
-                            var check = 1 << m;    // 1, 2, 4, 8, ... (i.e. 2^i but computed via bit shifting)
-                            if (pbit & check) {     // If NOT equal to 0 (equal to false)
-                                var vertex_pair = cube_edges[m];
-                                var a = vertex_pair[0];
-                                var b = vertex_pair[1];
-                                var pos_a = positions[a];
-                                var pos_b = positions[b];
-                                var val_a = values[a];
-                                var val_b = values[b];
-                                mu = (isovalue - val_a) / (val_b - val_a);
-                                var vertex = pos_a.lerp(pos_b, mu);
-                                console.log(vertex);
-                                face_vertices.push(vertex);
-                                edges[i] = face_vertices.length;
-                            };
-                        };
-                        var nvertices = plist.length;
-                        console.log(nvertices);
-                        for (let m=0; m<nvertices; m+=3) {
-                            var i0 = edges[plist[m]];
-                            var i1 = edges[plist[m+1]];
-                            var i2 = edges[plist[m+2]];
-                            geometry.vertices.push(face_vertices[i0]);
-                            geometry.vertices.push(face_vertices[i1]);
-                            geometry.vertices.push(face_vertices[i2]);
-                            var face = new THREE.Face3(
-                                face_vertex_index,
-                                face_vertex_index+1,
-                                face_vertex_index+2
-                            );
-                            geometry.faces.push(face);
-                            geometry.faceVertexUvs[0].push([
-                                new THREE.Vector2(0,0),
-                                new THREE.Vector2(0,1),
-                                new THREE.Vector2(1,1)
-                            ]);
-                            face_vertex_index += 3;
+                    /* Now that we have the cube_index, we can use the edge_table
+                       to lookup the type of face we have to deal with. */
+                    var integer = this.edge_table[cube_index];
+                    /* If this cube has no intersecting field values, skip
+                       adding surface vertices and faces (the continue command
+                       means skip the remaining code and go to the next
+                       iteration of the loop). */
+                    if (integer === 0 || integer === 255) continue;
+                    /* If we do have an integer index to use, lets interpolate
+                       the face vertices. Along edges of our current field
+                       cube where the field values meet the criteria set by the
+                       isovalue, we need to linearly interpolate along that
+                       edge to find the position of the face's vertex. */
+                    var alpha = 0.5;              // linear interpolation parameter
+                    for (let m=0; m<12; m++) {    // 12 field cube edges
+                        var check = 1 << m;       // 1, 2, 4, 8, ... (bit shift)
+                        if (integer & check) {
+                            face_vertex_index[m] = geometry.vertices.length;
+                            var vertex_pair = cube_edges[m];
+                            var a = vertex_pair[0];
+                            var b = vertex_pair[1];
+                            var xyz_a = field_xyzs[a];
+                            var xyz_b = field_xyzs[b];
+                            var val_a = field_values[a];
+                            var val_b = field_values[b];
+                            alpha = (isovalue - val_a) / (val_b - val_a);
+                            var vertex = xyz_a.lerp(xyz_b, alpha);
+                            geometry.vertices.push(vertex);
                         };
                     };
-//                    if (nbit !== 0) && (nbit !== 255) {
-//                        var face_vertices = new Array(12);
-//                        for (let m=0; m<12; m++) {
-//                            var check = 1 << m;
-//                            if (nbit & check) {
-//                                var vertex_pair = cube_edges[m];
-//                                var a = vertex_pair[0];
-//                                var b = vertex_pair[1];
-//                                var pos_a = positions[a];
-//                                var pos_b = positions[b];
-//                                var val_a = values[a];
-//                                var val_b = values[b];
-//                                mu = (-isovalue - val_a) / (val_b - val_a);
-//                                var vertex = pos_a.clone().lerp(pos_b, mu);
-//                                face_vertices.push(vertex);
-//                            };
-//                        };
-//                    };
+                    var cur_face_verts = this.tri_table[cube_index];
+                    var num_face_verts = cur_face_verts.length;
+                    for (let m=0; m<num_face_verts; m+=3) {
+                        var i0 = face_vertex_index[cur_face_verts[m]];
+                        var i1 = face_vertex_index[cur_face_verts[m+1]];
+                        var i2 = face_vertex_index[cur_face_verts[m+2]];
+                        var face = new THREE.Face3(i0, i1, i2);
+                        geometry.faces.push(face);
+                    };
                 };
             };
         };
+        console.log(geometry.vertices.length);
+        console.log(geometry.faces.length);
         geometry.computeFaceNormals();
         geometry.computeVertexNormals();
         var material = new THREE.MeshLambertMaterial({
             color: 0x0000ff,
             side: THREE.DoubleSide
         });
-        var field_mesh = new THREE.Mesh(geometry, material);
-        this.scene.add(field_mesh);
-        return field_mesh;
+        return new THREE.Mesh(geometry, material);
     };
 
     // These are shaders written in GLSL (GLslang: OpenGL Shading Language).

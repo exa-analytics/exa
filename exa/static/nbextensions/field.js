@@ -21,7 +21,7 @@ define([
     'nbextensions/exa/num',
 ], function(num) {
     class ScalarField {
-        constructor(dimensions, func) {
+        constructor(dimensions, func_or_values) {
             /*"""
             ScalarField
             =============
@@ -32,44 +32,68 @@ define([
                 func (function): Function of 3D space
 
             Note:
-                The dimensions should be of the form [[xmin, xmax, nx], [...], [...]].
+                The dimensions argument should be a dictionary of the form
+                {xmin: xmin, xmax: xmax, nx: nx, ymin: ymin, ...}
             */
-            this.func = func;
+            console.log('scalar fielding');
+            this.func;
+            this.values;
             this.xmin = dimensions.xmin;
             this.xmax = dimensions.xmax;
             this.nx = dimensions.nx;
+            this.dx = dimensions.dx;
             this.ymin = dimensions.ymin;
             this.ymax = dimensions.ymax;
             this.ny = dimensions.ny;
+            this.dy = dimensions.dy;
             this.zmin = dimensions.zmin;
             this.zmax = dimensions.zmax;
             this.nz = dimensions.nz;
-            this.update_x();
-            this.update_y();
-            this.update_z();
-            this.update_field();
+            this.dz = dimensions.dz;
+            if (typeof func_or_values === 'function') {
+                console.log('Building field from function');
+                console.log(func_or_values);
+                this.func = func_or_values;
+                this.update_x();
+                this.update_y();
+                this.update_z();
+                this.update_field();
+            } else {
+                console.log('NotImplementedError(Field values are not yet supported)');
+            };
         };
 
         update_x() {
-            this.x = num.linspace(this.xmin, this.xmax, this.nx);
+            if (this.dx === undefined) {
+                this.x = num.linspace(this.xmin, this.xmax, this.nx);
+            } else {
+                this. x = num.arange(this.xmin, this.xmax, this.dx);
+            };
         };
 
         update_y() {
-            this.y = num.linspace(this.ymin, this.ymax, this.ny);
+            if (this.dy === undefined) {
+                this.y = num.linspace(this.ymin, this.ymax, this.ny);
+            } else {
+                this.y = num.arange(this.ymin, this.ymax, this.dy);
+            };
         };
 
         update_z() {
-            this.z = num.linspace(this.zmin, this.zmax, this.nz);
+            if (this.dz === undefined) {
+                this.z = num.linspace(this.zmin, this.zmax, this.nz);
+            } else {
+                this.z = num.arange(this.zmin, this.zmax, this.dz);
+            };
         };
 
         update_field() {
-            this.values = new Float32Array(this.nx * this.ny * this.nz);
-            var h = 0;
+            this.values = [];
             for (let x of this.x) {
                 for (let y of this.y) {
                     for (let z of this.z) {
-                        this.values[h] = this.func(x, y, z);
-                        h += 1;
+//                        console.log(x.toString() + ' ' + y.toString() + ' ' + z.toString());
+                        this.values.push(this.func(x, y, z));
                     };
                 };
             };
@@ -77,7 +101,7 @@ define([
     };
 
     var sphere = function(x, y, z) {
-        return x^2 + y^2 + z^2;
+        return x * x + y * y + z * z - 1.0;
     };
 
     return {
