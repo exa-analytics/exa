@@ -400,7 +400,7 @@ define([
         return {mesh1: mesh1, mesh2: mesh2};
     };
 
-    ThreeJSApp.prototype.add_scalar_field = function(field, isovalue, algorithm, sides) {
+    ThreeJSApp.prototype.add_scalar_field = function(field, isovalue, sides, algorithm) {
         /*"""
         add_scalar_field
         -------------------------
@@ -423,6 +423,9 @@ define([
             var field_mesh = this.march_cubes1(field, isovalue);
             //this.scene.add(field_mesh);
             return field_mesh;
+        } else if (algorithm == 'mc' && sides == 2) {
+            var field_meshes = this.march_cubes2(field, isovalue);
+            return field_meshes;
         } else {
             console.log('NotImplementedError');
         };
@@ -470,34 +473,30 @@ define([
             **field.js**
         */
         console.log('march_cubes1');
-        var cube_vertices = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0],
-                             [0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1]];
-        var cube_edges = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6],
-                          [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]];
-        var bits = [1, 2, 4, 8, 16, 32, 64, 128];
         var nx = field.nx;
         var ny = field.ny;
         var nz = field.nz;
         var nnx = nx - 1;
         var nny = ny - 1;
         var nnz = nz - 1;
-        var x;
-        var y;
-        var z;
-        var xyz = new Array(8);             // Field cube vertices
-        var values = new Float32Array(8);   // Field cube vertex magnitudes
-        var face_vertices = new Int32Array(12);
+        // Field cube objects
+        var xyz = new Array(8);                    // vertex coordinates
+        var values = new Float32Array(8);          // vertex values (magnitudes)
+        var value_index;
         var cube_index = 0;
         var integer = 0;
         var alpha = 0.5;
         var check = 1;
+        // Resulting vertices
+        var face_vertices = new Int32Array(12);    // vertices of the resultant faces
+        // THREE
         var geometry = new THREE.Geometry();
         for (let i=0; i<nnx; i++) {
             for (let j=0; j<nny; j++) {
                 for (let k=0; k<nnz; k++) {
                     cube_index = 0;
                     for (let m=0; m<8; m++) {    // Search the field cube
-                        var offset = cube_vertices[m];
+                        var offset = this.cube_vertices[m];
                         var oi = offset[0];
                         var oj = offset[1];
                         var ok = offset[2];
@@ -507,8 +506,8 @@ define([
                         xyz[m] = new THREE.Vector3(field.x[ii], field.y[jj], field.z[kk]);
                         var value_index = i * ny * nz + j * nz + k + oi * ny * nz + oj * nz + ok;
                         values[m] = field.values[value_index];
-                        if (values[m] > isovalue) {
-                            cube_index |= bits[m];
+                        if (values[m] < isovalue) {
+                            cube_index |= this.bits[m];
                         };
                     };
                     integer = this.edge_table[cube_index];
@@ -518,7 +517,7 @@ define([
                         check = 1 << m;
                         if (integer & check) {
                             face_vertices[m] = geometry.vertices.length;
-                            var vertex_pair = cube_edges[m];
+                            var vertex_pair = this.cube_edges[m];
                             var a = vertex_pair[0];
                             var b = vertex_pair[1];
                             var xyz_a = xyz[a];
@@ -548,6 +547,138 @@ define([
         var frame = new THREE.Mesh(geometry, mat);
         this.scene.add(frame);
         return new THREE.Mesh(geometry, material);
+    };
+
+    ThreeJSApp.prototype.march_cubes2 = function(field, isovalue) {
+        /*"""
+        march_cubes2
+        ------------------------
+        Similar to the above but for finding dual geometries.
+        */
+        console.log('march_cubes2');
+        var nx = field.nx;
+        var ny = field.ny;
+        var nz = field.nz;
+        var nnx = nx - 1;
+        var nny = ny - 1;
+        var nnz = nz - 1;
+        // Field cube objects
+        var xyz = new Array(8);                    // vertex coordinates
+        var values = new Float32Array(8);          // vertex values (magnitudes)
+        var value_index;
+        var p_cube_index = 0;
+        var n_cube_index = 0;
+        var p_integer = 0;
+        var n_integer = 0;
+        var alpha = 0.5;
+        var check = 1;
+        // Resulting vertices
+        var face_vertices = new Int32Array(12);    // vertices of the resultant faces
+        // THREE
+        var p_geometry = new THREE.Geometry();
+        var n_geometry = new THREE.Geometry();
+        for (let i=0; i<nnx; i++) {
+            for (let j=0; j<nny; j++) {
+                for (let k=0; k<nnz; k++) {
+                    p_cube_index = 0;
+                    n_cube_index = 0;
+                    for (let m=0; m<8; m++) {    // Search the field cube
+                        var offset = this.cube_vertices[m];
+                        var oi = offset[0];
+                        var oj = offset[1];
+                        var ok = offset[2];
+                        var ii = i + oi;
+                        var jj = j + oj;
+                        var kk = k + ok;
+                        xyz[m] = new THREE.Vector3(field.x[ii], field.y[jj], field.z[kk]);
+                        var value_index = i * ny * nz + j * nz + k + oi * ny * nz + oj * nz + ok;
+                        values[m] = field.values[value_index];
+                        if (values[m] < isovalue) {
+                            p_cube_index |= this.bits[m];
+                        };
+                        if (values[m] < -isovalue) {
+                            n_cube_index |= this.bits[m];
+                        };
+                    };
+
+                    p_integer = this.edge_table[p_cube_index];
+                    if (p_integer !== 0) {
+                        alpha = 0.5;
+                        for (let m=0; m<12; m++) {
+                            check = 1 << m;
+                            if (p_integer & check) {
+                                face_vertices[m] = p_geometry.vertices.length;
+                                var vertex_pair = this.cube_edges[m];
+                                var a = vertex_pair[0];
+                                var b = vertex_pair[1];
+                                var xyz_a = xyz[a];
+                                var xyz_b = xyz[b];
+                                var val_a = values[a];
+                                var val_b = values[b];
+                                alpha = (isovalue - val_a) / (val_b - val_a);
+                                var vertex = xyz_a.clone().lerp(xyz_b, alpha);    // Clone is critical otherwise reference to Vector3 object gets obfusticated
+                                p_geometry.vertices.push(vertex);
+                            };
+                        };
+
+                        var cur_face_verts = this.tri_table[p_cube_index];
+                        var num_face_verts = cur_face_verts.length;
+                        for (let m=0; m<num_face_verts; m+=3) {
+                            var i0 = face_vertices[cur_face_verts[m]];
+                            var i1 = face_vertices[cur_face_verts[m+1]];
+                            var i2 = face_vertices[cur_face_verts[m+2]];
+                            var face = new THREE.Face3(i0, i1, i2);
+                            p_geometry.faces.push(face);
+                        };
+                    };
+
+                    n_integer = this.edge_table[n_cube_index];
+                    if (n_integer !== 0) {
+                        alpha = 0.5;
+                        for (let m=0; m<12; m++) {
+                            check = 1 << m;
+                            if (n_integer & check) {
+                                face_vertices[m] = n_geometry.vertices.length;
+                                var vertex_pair = this.cube_edges[m];
+                                var a = vertex_pair[0];
+                                var b = vertex_pair[1];
+                                var xyz_a = xyz[a];
+                                var xyz_b = xyz[b];
+                                var val_a = values[a];
+                                var val_b = values[b];
+                                alpha = (-isovalue - val_a) / (val_b - val_a);
+                                var vertex = xyz_a.clone().lerp(xyz_b, alpha);    // Clone is critical otherwise reference to Vector3 object gets obfusticated
+                                n_geometry.vertices.push(vertex);
+                            };
+                        };
+
+                        var cur_face_verts = this.tri_table[n_cube_index];
+                        var num_face_verts = cur_face_verts.length;
+                        for (let m=0; m<num_face_verts; m+=3) {
+                            var i0 = face_vertices[cur_face_verts[m]];
+                            var i1 = face_vertices[cur_face_verts[m+1]];
+                            var i2 = face_vertices[cur_face_verts[m+2]];
+                            var face = new THREE.Face3(i0, i1, i2);
+                            n_geometry.faces.push(face);
+                        };
+
+                    }
+                };
+            };
+        };
+        var p_material = new THREE.MeshLambertMaterial({color: 0x003399, side: THREE.DoubleSide});
+        var n_material = new THREE.MeshLambertMaterial({color: 0xFF9900, side: THREE.DoubleSide});
+        var material1 = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
+        var material2 = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
+        var mesh1 = new THREE.Mesh(p_geometry, p_material);
+        var mesh2 = new THREE.Mesh(n_geometry, n_material);
+        var mesh3 = new THREE.Mesh(p_geometry, material1);
+        var mesh4 = new THREE.Mesh(n_geometry, material2);
+        this.scene.add(mesh1);
+        this.scene.add(mesh2);
+        this.scene.add(mesh3);
+        this.scene.add(mesh4);
+        return {mesh1: mesh1, mesh2: mesh2, mesh3: mesh3, mesh4: mesh4};
     };
 
 
@@ -904,6 +1035,11 @@ define([
         [0, 3, 8],
         []
     ];
+    ThreeJSApp.prototype.cube_vertices = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0],
+                                          [0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1]];
+    ThreeJSApp.prototype.cube_edges = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6],
+                                       [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]];
+    ThreeJSApp.prototype.bits = [1, 2, 4, 8, 16, 32, 64, 128];
 
     return {'ThreeJSApp': ThreeJSApp};
 });

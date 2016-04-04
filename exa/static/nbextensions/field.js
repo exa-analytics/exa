@@ -120,10 +120,15 @@ define([
         return Math.exp(-Math.sqrt(x * x + y * y + z * z));
     };
 
+    var test = function(x, y, z) {
+        return x * Math.exp(-(x * x + y * y + z * z));
+    };
+
     return {
         ScalarField: ScalarField,
         sphere: sphere,
         torus: torus,
-        sto: sto
+        sto: sto,
+        test: test
     };
 });

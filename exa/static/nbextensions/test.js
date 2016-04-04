@@ -56,10 +56,10 @@ define([
             this.gui = new TestGUI(this.view);
             this.app3d = new app3d.ThreeJSApp(this.view.canvas);
             this.field = new field.ScalarField({
-                xmin: -1.0, xmax: 1.0, dx: 0.1,
-                ymin: -1.0, ymax: 1.0, dy: 0.1,
-                zmin: -1.0, zmax: 1.0, dz: 0.1
-            }, field.sphere);
+                xmin: -1.0, xmax: 1.0, dx: 0.05,
+                ymin: -1.0, ymax: 1.0, dy: 0.05,
+                zmin: -1.0, zmax: 1.0, dz: 0.05
+            }, field.test);
             console.log(this.field);
             /*var x = [];
             var y = [];
@@ -75,16 +75,18 @@ define([
             };
             this.points = this.app3d.add_points(x, y, z, 1, 0.3);
             this.app3d.set_camera_from_mesh(this.points);*/
-            var isolevel = 0;
-            this.field_mesh = this.app3d.add_scalar_field(this.field, isolevel);
-            console.log(this.field_mesh.geometry.vertices.length);
-            console.log(this.field_mesh.geometry.faces.length);
-            console.log('-------------');
+            var isolevel = 0.03;
+            console.log(Math.min(...this.field.values));
+            console.log(Math.max(...this.field.values));
+            console.log(isolevel);
+            this.field_mesh = this.app3d.add_scalar_field(this.field, isolevel, 2);
+            console.log(this.field_mesh);
             //console.log(this.field_mesh.geometry.vertices.length);
             //console.log(this.field_mesh.geometry.faces.length);
-            console.log(Math.max(...this.field.values));
-            console.log(Math.min(...this.field.values));
-            var data = this.field.values;
+            //console.log('-------------');
+            //console.log(this.field_mesh.geometry.vertices.length);
+            //console.log(this.field_mesh.geometry.faces.length);
+            /*var data = this.field.values;
             var dims = [this.field.nx, this.field.ny, this.field.nz];
             var orig = [this.field.x[0], this.field.y[0], this.field.z[0]];
             var scale = [this.field.dx, this.field.dy, this.field.dz];
@@ -104,8 +106,10 @@ define([
             console.log(results.faces.length);
             console.log(results.nfaces.length);
             console.log(results);
-            console.log(meshes);
-            this.app3d.set_camera_from_mesh(this.field_mesh);
+            console.log(meshes);*/
+            this.app3d.set_camera();
+            //this.app3d.set_camera_from_mesh(this.field_mesh);
+            console.log(this.obj);
         };
 
         resize() {
@@ -118,6 +122,8 @@ define([
             };
         };
     };
+
+    TestApp.prototype.obj = 42;
 
     return {TestApp: TestApp};
 });
