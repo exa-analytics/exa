@@ -384,6 +384,7 @@ define([], function() {
                             nflag |= bitAdd[i];
                         };
                     };
+                    //console.log(pos);
 
                     //Skip cubes where all above, all below
                     var edgebit = edgeTable[flag];

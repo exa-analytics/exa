@@ -414,7 +414,7 @@ define([
         };
         if (algorithm == 'mc' && sides == 1) {
             var field_mesh = this.march_cubes1(field, isovalue);
-            this.scene.add(field_mesh);
+            //this.scene.add(field_mesh);
             return field_mesh;
         } else {
             console.log('NotImplementedError');
@@ -422,6 +422,46 @@ define([
     };
 
     ThreeJSApp.prototype.march_cubes1 = function(field, isovalue) {
+        /*"""
+        march_cubes1
+        ------------------------
+        Run the marching cubes algorithm finding the volumetric shell that is
+        smaller than the isovalue.
+
+        The marching cubes algorithm takes a scalar field and for each field
+        vertex looks at the nearest indices (in an evenly space field this
+        forms a cube), determines along what edges the scalar field is less
+        than the isovalue, and creates new vertices along the edges of the
+        field's cube. The at each point in the field, a cube is created with
+        vertices numbered:
+               4-------5
+             / |     / |
+            7-------6  |
+            |  0----|--1
+            | /     | /
+            3-------2
+        Field values are given for each field vertex. Edges are
+        labeled as follows (see the lookup table below).
+
+                                            4
+               o-------o                o-------o
+             / |     / |            7 / | 6   / |  5
+            o-------o  |             o-------o  |
+            |  o----|--o             |  o----|--o
+          3 | /   0 | / 1            | /     | /
+            o-------o                o-------o
+               2
+        Edges 8, 9, 10, and 11 wrap around (clockwise looking from the top
+        as drawn) the vertical edges of the cube, with 8 being the vertical
+        edge between vertex 0 and 4 (see above).
+
+        Note:
+            Scalar fields are assumed to be in row major order (also known C
+            style, and implies that the last index is changing the fastest).
+
+        See Also:
+            **field.js**
+        */
         console.log('march_cubes1');
         var cube_vertices = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0],
                              [0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1]];
@@ -449,7 +489,6 @@ define([
             for (let j=0; j<nny; j++) {
                 for (let k=0; k<nnz; k++) {
                     cube_index = 0;
-//                    console.log([i, j, k]);
                     for (let m=0; m<8; m++) {    // Search the field cube
                         var offset = cube_vertices[m];
                         var oi = offset[0];
@@ -461,12 +500,10 @@ define([
                         xyz[m] = new THREE.Vector3(field.x[ii], field.y[jj], field.z[kk]);
                         var value_index = i * ny * nz + j * nz + k + oi * ny * nz + oj * nz + ok;
                         values[m] = field.values[value_index];
-                        if (values[m] < isovalue) {
+                        if (values[m] > isovalue) {
                             cube_index |= bits[m];
                         };
-//                        console.log(value_index);
                     };
-//                    console.log('........');
                     integer = this.edge_table[cube_index];
                     if (integer === 0) continue;
                     alpha = 0.5;
@@ -482,7 +519,7 @@ define([
                             var val_a = values[a];
                             var val_b = values[b];
                             alpha = (isovalue - val_a) / (val_b - val_a);
-                            var vertex = xyz_a.lerp(xyz_b, alpha);
+                            var vertex = xyz_a.clone().lerp(xyz_b, alpha);    // Clone is critical otherwise reference to Vector3 object gets obfusticated
                             geometry.vertices.push(vertex);
                         };
                     };

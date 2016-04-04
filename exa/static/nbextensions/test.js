@@ -56,10 +56,10 @@ define([
             this.gui = new TestGUI(this.view);
             this.app3d = new app3d.ThreeJSApp(this.view.canvas);
             this.field = new field.ScalarField({
-                xmin: -1.0, xmax: 1.0, dx: 0.05,
-                ymin: -1.0, ymax: 1.0, dy: 0.05,
-                zmin: -1.0, zmax: 1.0, dz: 0.05
-            }, field.sto);
+                xmin: -1.0, xmax: 1.0, dx: 0.1,
+                ymin: -1.0, ymax: 1.0, dy: 0.1,
+                zmin: -1.0, zmax: 1.0, dz: 0.1
+            }, field.sphere);
             console.log(this.field);
             /*var x = [];
             var y = [];
@@ -75,7 +75,8 @@ define([
             };
             this.points = this.app3d.add_points(x, y, z, 1, 0.3);
             this.app3d.set_camera_from_mesh(this.points);*/
-            //this.field_mesh = this.app3d.add_scalar_field(this.field, 0.9);
+            var isolevel = 0;
+            this.field_mesh = this.app3d.add_scalar_field(this.field, isolevel);
             //console.log(this.field_mesh.geometry.vertices.length);
             //console.log(this.field_mesh.geometry.faces.length);
             console.log(Math.max(...this.field.values));
@@ -84,7 +85,9 @@ define([
             var dims = [this.field.nx, this.field.ny, this.field.nz];
             var orig = [this.field.x[0], this.field.y[0], this.field.z[0]];
             var scale = [this.field.dx, this.field.dy, this.field.dz];
-            var isolevel = 0.9;
+            console.log(dims);
+            console.log(orig);
+            console.log(scale);
 
             var results = mc.MarchingCubes(data, dims, orig, scale, isolevel);
             var meshes = this.app3d.add_temp(
