@@ -3,17 +3,16 @@
 Isotope Data
 ===============================================
 '''
+import pandas as pd
 from itertools import product
 from sqlalchemy import String, Float
-from exa import _pd as pd
-from exa.relational.base import Base, Column, Integer
-from exa.relational.base import Meta as _Meta
-from exa.relational.base import db_sess
+from sqlalchemy import Column, Integer, String
+from exa.relational.base import BaseMeta, Base, SessionFactory
 
 
-class Meta(_Meta):
+class _Meta(BaseMeta):
     '''
-    This class provides methods available to the :class:`~exa.relational.isotopes.Isotope`
+    This class provides methods available to the :class:`~exa.relational.isotope.Isotope`
     class object used to efficiently look up data stored in the database.
     '''
     _symbols_to_radii_map = None    # {'HH': 1.21, ...}
@@ -54,7 +53,8 @@ class Meta(_Meta):
         Dictionary of proton number (Z) keys and symbol values.
         '''
         if self._Z_to_symbol_map is None:
-            self._Z_to_symbol_map = self.table()[['symbol', 'Z']].set_index('Z')['symbol']
+            mapper = self.table()[['symbol', 'Z']].drop_duplicates('Z', keep='first').set_index('Z')['symbol']
+            self._Z_to_symbol_map = mapper
         return self._Z_to_symbol_map
 
     @property
@@ -63,7 +63,7 @@ class Meta(_Meta):
         Dictionary of symbol keys and proton number (Z) values.
         '''
         if self._symbol_to_Z_map is None:
-            self._symbol_to_Z_map = self.table()[['symbol', 'Z']].set_index('symbol')['Z']
+            self._symbol_to_Z_map = self.table()[['symbol', 'Z']].drop_duplicates().set_index('symbol')['Z']
         return self._symbol_to_Z_map
 
     @property
@@ -96,7 +96,7 @@ class Meta(_Meta):
         Returns:
             isotope (:class:`~exa.relational.isotopes.Isotope`): Isotope object
         '''
-        return db_sess.query(self).filter(self.strid == strid).one()
+        return SessionFactory().query(self).filter(self.strid == strid).one()
 
     def get_by_symbol(self, symbol):
         '''
@@ -108,7 +108,7 @@ class Meta(_Meta):
         Returns:
             isotopes (list): List of isotope with the given symbol
         '''
-        return db_sess.query(self).filter(self.symbol == symbol).all()
+        return SessionFactory().query(self).filter(self.symbol == symbol).all()
 
     def get_by_szuid(self, szuid):
         '''
@@ -120,7 +120,7 @@ class Meta(_Meta):
         Returns:
             isotope (:class:`~exa.relational.isotopes.Isotope`): Isotope object
         '''
-        return db_sess.query(self).filter(self.szuid == szuid).one()
+        return SessionFactory().query(self).filter(self.szuid == szuid).one()
 
     def get_by_pkid(self, pkid):
         '''
@@ -132,7 +132,7 @@ class Meta(_Meta):
         Returns:
             isotope (:class:`~exa.relational.isotopes.Isotope`): Isotope object
         '''
-        return db_sess.query(self).filter(self.pkid == pkid).one()
+        return SessionFactory().query(self).filter(self.pkid == pkid).one()
 
     def __getitem__(self, key):
         '''
@@ -154,9 +154,30 @@ class Meta(_Meta):
             raise TypeError('Key type {0} not supported.'.format(type(key)))
 
 
-class Isotope(Base, metaclass=Meta):
+class Isotope(Base, metaclass=_Meta):
     '''
     A variant of a chemical element with a specific proton and neutron count.
+
+    >>> h = Isotope['1H']
+    >>> h.A
+    1
+    >>> h.Z
+    1
+    >>> h.mass
+    1.0078250321
+    >>> Isotope.symbol_to_mass()['H']
+    1.0076788974703454
+    >>> Isotope['C']
+    [8C, 9C, 10C, 11C, 12C, 13C, 14C, 15C, 16C, 17C, 18C, 19C, 20C, 21C, 22C]
+    >>> Isotope['13C'].szuid
+    175
+    >>> c = Isotope[175]
+    >>> c.A
+    13
+    >>> c.Z
+    6
+    >>> c.strid
+    '13C'
     '''
     A = Column(Integer, nullable=False)
     Z = Column(Integer, nullable=False)
@@ -175,15 +196,98 @@ class Isotope(Base, metaclass=Meta):
     szuid = Column(Integer)
     strid = Column(Integer)
 
-    __categories__ = ['name', 'symbol']
-
     @classmethod
     def symbol_to_mass(cls):
+        '''
+        Series containing element symbols and their respective mass (in a.u.).
+
+        >>> Isotope.symbol_to_mass().head()    # .head() used to truncate the full series
+        symbol
+        Ac    227.027752
+        Ag    107.869877
+        Al     26.981539
+        Am    240.630767
+        Ar     39.947843
+        Name: fmass, dtype: float64
+
+        Note:
+            The resulting mass the isotope abundance fraction averaged "element"
+            mass.
+        '''
         return cls.element_mass_map
 
     @classmethod
+    def symbol_to_radius(cls):
+        '''
+        Series containing the element symbol and its respective covalent radius.
+
+        >>> Isotope.symbol_to_radius().head()
+        symbol
+        H     0.604712
+        D     0.604712
+        T     0.604712
+        He    0.869274
+        Li    2.513336
+        Name: radius, dtype: float64
+
+        Note:
+            The covalent radii data are taken from `this reference`_.
+
+            .. _this reference: http://doi.org/10.1039/b801115j
+        '''
+        return cls.symbol_to_radius_map
+
+    @classmethod
     def symbols_to_radii(cls):
-        return cls.symbols_to_radii
+        '''
+        Series containing element symbol pairs and their respective sum of
+        covalent radii (in a.u.).
+
+        >>> Isotope.symbols_to_radii().head()    # Try without .head()
+        HH     1.209425
+        HD     1.209425
+        HT     1.209425
+        HHe    1.473986
+        HLi    3.118048
+        Name: radius, dtype: float64
+        '''
+        return cls.symbols_to_radii_map
+
+    @classmethod
+    def symbol_to_color(cls):
+        '''
+        Series containing the element symbol and its color
+
+        >>> Isotope.symbol_to_color().head()
+        symbol
+        H            0
+        D            0
+        T            0
+        He    14286847
+        Li    13402367
+        Name: color, dtype: int64
+        '''
+        return cls.symbol_to_color_map
+
+    @classmethod
+    def Z_to_symbol(cls):
+        '''
+        Series containing Z number (proton number) and the corresponding symbol.
+
+        >>> Isotope.Z_to_symbol().head()
+        Z
+        1     H
+        2    He
+        3    Li
+        4    Be
+        5     B
+        Name: symbol, dtype: object
+        '''
+        return cls.Z_to_symbol_map
+
+    @classmethod
+    def symbol_to_Z(cls):
+        return cls.symbol_to_Z_map
 
     def __repr__(self):
         return '{0}{1}'.format(self.A, self.symbol)

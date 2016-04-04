@@ -8,16 +8,45 @@ exa
 ##################
 Data management, processing, and visualization.
 
+Documentation is organized into three categories.
+
+    - :ref:`User Docs<user-docs>`
+    - :ref:`Developer Docs<dev-docs>`
+    - :ref:`Related Projects<rel-proj>`
+
 ****************
 Contents
 ****************
+
+.. _user-docs:
+
 .. toctree::
     :maxdepth: 2
+    :caption: User Documentation
 
     install.rst
     started.rst
     api.rst
     glossary.rst
+
+.. _dev-docs:
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Developer Documentation
+
+    bugs.rst
+    proposal.rst
+    general.rst
+    contrib.rst
+
+.. _rel-proj:
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Related Projects
+
+    related.rst
 
 ****************
 License
@@ -30,5 +59,3 @@ Indexes
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-*This is a flying circus after all...*

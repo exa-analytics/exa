@@ -3,28 +3,20 @@
 Physical Constants
 ===============================================
 '''
-from sqlalchemy import String, Float
-from exa.relational.base import Base, Column
-from exa.relational.base import db_sess
-from exa.relational.base import Meta as _Meta
+from sqlalchemy import String, Float, Column
+from exa.relational.base import Base
 
 
-class Meta(_Meta):
+class Constant(Base):
     '''
-    '''
-    def _getitem(self, key):
-        '''
-        '''
-        obj = db_sess.query(self).filter(self.symbol == key).all()
-        if len(obj) == 1:
-            return obj[0].value
-        else:
-            raise ValueError('Value {0} not found in {1}'.format(key, self.__tablename__))
+    Physical constants and their values in SI units.
 
-
-class Constant(Base, metaclass=Meta):
-    '''
-    Physical constants.
+    >>> Eh = Constant['Eh']
+    >>> Eh.value
+    4.35974434e-18
     '''
     symbol = Column(String, nullable=False)
     value = Column(Float, nullable=False)
+
+    def __repr__(self):
+        return 'Constant({0}: {1})'.format(self.symbol, self.value)
