@@ -52,9 +52,9 @@ define([
             this.gui = new TestGUI(this.view);
             this.app3d = new app3d.ThreeJSApp(this.view.canvas);
             this.field = new field.ScalarField({
-                xmin: -1.0, xmax: 1.0, dx: 0.25,
-                ymin: -1.0, ymax: 1.0, dy: 0.25,
-                zmin: -1.0, zmax: 1.0, dz: 0.25
+                xmin: -1.0, xmax: 1.0, dx: 1.0,
+                ymin: -1.0, ymax: 1.0, dy: 1.0,
+                zmin: -1.0, zmax: 1.0, dz: 1.0
             }, field.sphere);
             //this.points = this.app3d.add_points(this.field.x, this.field.y, this.field.z);
             //this.app3d.set_camera_from_mesh(this.points);

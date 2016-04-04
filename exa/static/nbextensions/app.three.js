@@ -82,12 +82,18 @@ define([
         this.controls.keys = [65, 83, 68];
         this.controls.addEventListener('change', this.render.bind(this));
 
+        this.dlight0 = new THREE.DirectionalLight(0xFFFFFF, 0.4);
+        this.dlight0.position.set(-100, -100, -100);
+        this.scene.add(this.dlight0);
         this.dlight1 = new THREE.DirectionalLight(0xFFFFFF, 0.4);
         this.dlight1.position.set(0, 100, 100);
         this.scene.add(this.dlight1);
         this.dlight2 = new THREE.DirectionalLight(0xFFFFFF, 0.4);
         this.dlight2.position.set(100, 0, 100);
         this.scene.add(this.dlight2);
+        this.dlight3 = new THREE.DirectionalLight(0xFFFFFF, 0.4);
+        this.dlight3.position.set(100, 100, 0);
+        this.scene.add(this.dlight3);
         this.ambient_light = new THREE.AmbientLight(0xFFFFFF);
         this.scene.add(this.ambient_light);
     };
@@ -409,12 +415,15 @@ define([
             **field.js**
         */
         console.log('marching cubes single...');
-        var nx = field.x.length;
-        var ny = field.y.length;
-        var nz = field.z.length;
+        var nx = field.nx;
+        var ny = field.ny;
+        var nz = field.nz;
         var nnx = nx - 1;    // Do not use the last vertex of the field data
         var nny = ny - 1;    // when constructing the surface because there is
         var nnz = nz - 1;    // no cube that can be formed for it.
+        console.log(nx);
+        console.log(ny);
+        console.log(nz);
         var cube_vertices = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0],
                    [0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1]];
         //var cube_vertices = [[0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1],
@@ -429,31 +438,26 @@ define([
            vertices, compare them to the isovalue, and generate the corresponding
            face vertexes where the field value is less than the isovalue. */
         var n = 0;
-        for (let i=0; i<nnz; i++, n+=nz) {
+        for (let i=0; i<nnz; i++, n+=nx) {
             for (let j=0; j<nny; j++, n++) {
                 for (let k=0; k<nnx; k++, n++) {
                     var cube_index = 0;
                     var field_values = new Float32Array(8);
                     var field_xyzs = new Array(8);
-                    console.log(i);
-                    console.log(j);
-                    console.log(k);
                     for (let l=0; l<8; l++) {
                         var offset = cube_vertices[l];
-                        console.log(offset);
                         var ioff = i + offset[0];
                         var joff = j + offset[1];
                         var koff = k + offset[2];
-                        //var field_index = ioff * ny * nz + joff * nz + koff;
-                        var field_index = n + offset[0] + nz * (offset[1] + ny * offset[2]);
-                        console.log(field_index);
+//                        var field_index = koff * nz + joff * ny + ioff;
+//                        var field_index = ioff * ny * nz + joff * nz + koff;
+//                        var field_index = i * ny + j * nz + k + offset[0] + nx * (offset[1] + ny * offset[2]);
+                        var field_index = n + offset[0] + nx * (offset[1] + ny * offset[2]);
                         field_values[l] = field.values[field_index];
-                        console.log(field_values[l]);
                         field_xyzs[l] = new THREE.Vector3(field.x[ioff], field.y[joff], field.z[koff]);
                         if (field_values[l] > isovalue) {
                             cube_index |= bits[l];
                         };
-                        console.log(cube_index);
                     };
                     /* Now that we have the cube_index, we can use the edge_table
                        to lookup the type of face we have to deal with. */
@@ -462,7 +466,7 @@ define([
                        adding surface vertices and faces (the continue command
                        means skip the remaining code and go to the next
                        iteration of the loop). */
-                    if (integer === 0 || integer === 255) continue;
+                    if (integer === 0) continue;
                     /* If we do have an integer index to use, lets interpolate
                        the face vertices. Along edges of our current field
                        cube where the field values meet the criteria set by the
@@ -474,17 +478,22 @@ define([
                         if (integer & check) {
                             face_vertex_index[m] = geometry.vertices.length;
                             var vertex_pair = cube_edges[m];
-                            var a = vertex_pair[0];
-                            var b = vertex_pair[1];
-                            var xyz_a = field_xyzs[a];
-                            var xyz_b = field_xyzs[b];
-                            var val_a = field_values[a];
-                            var val_b = field_values[b];
+                            var a = cube_vertices[vertex_pair[0]];
+                            var b = cube_vertices[vertex_pair[1]];
+                            var xyz_a = new THREE.Vector3(a[0], a[1], a[2]);
+                            var xyz_b = new THREE.Vector3(b[0], b[1], b[2]);
+                            var val_a = field_values[vertex_pair[0]];
+                            var val_b = field_values[vertex_pair[1]];
                             alpha = (isovalue - val_a) / (val_b - val_a);
-                            var vertex = xyz_a.lerp(xyz_b, alpha);
-                            geometry.vertices.push(vertex);
+                            var xyz = new THREE.Vector3(k, j, i);
+                            xyz.x = xyz.x + xyz_a.x + alpha * (xyz_b.x - xyz_a.x);
+                            xyz.y = xyz.y + xyz_a.y + alpha * (xyz_b.y - xyz_a.y);
+                            xyz.z = xyz.z + xyz_a.z + alpha * (xyz_b.z - xyz_a.z);
+                            console.log(xyz);
+                            geometry.vertices.push(xyz);
                         };
                     };
+                    //console.log(face_vertex_index);
                     var cur_face_verts = this.tri_table[cube_index];
                     var num_face_verts = cur_face_verts.length;
                     for (let m=0; m<num_face_verts; m+=3) {
@@ -493,25 +502,20 @@ define([
                         var i2 = face_vertex_index[cur_face_verts[m+2]];
                         var face = new THREE.Face3(i0, i1, i2);
                         geometry.faces.push(face);
-                        geometry.faceVertexUvs[0].push([
-                            new THREE.Vector2(0,0),
-                            new THREE.Vector2(0,1),
-                            new THREE.Vector2(1,1)
-                        ]);
                     };
                 };
             };
         };
+        //geometry.computeFaceNormals();
+        //geometry.computeVertexNormals();
+        var material = new THREE.MeshLambertMaterial({
+            color: 0x303030,
+            side: THREE.DoubleSide,
+        });
         console.log(geometry.vertices.length);
         console.log(geometry.faces.length);
         console.log(geometry.vertices);
         console.log(geometry.faces);
-        geometry.computeFaceNormals();
-        geometry.computeVertexNormals();
-        var material = new THREE.MeshLambertMaterial({
-            color: 0x0000ff,
-            side: THREE.DoubleSide
-        });
         return new THREE.Mesh(geometry, material);
     };
 

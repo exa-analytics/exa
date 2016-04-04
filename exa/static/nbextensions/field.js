@@ -66,32 +66,38 @@ define([
         update_x() {
             if (this.dx === undefined) {
                 this.x = num.linspace(this.xmin, this.xmax, this.nx);
+                this.dx = this.x[1] - this.x[0];
             } else {
-                this. x = num.arange(this.xmin, this.xmax, this.dx);
+                this.x = num.arange(this.xmin, this.xmax, this.dx);
+                this.nx = this.x.length;
             };
         };
 
         update_y() {
             if (this.dy === undefined) {
                 this.y = num.linspace(this.ymin, this.ymax, this.ny);
+                this.dy = this.y[1] - this.y[0];
             } else {
                 this.y = num.arange(this.ymin, this.ymax, this.dy);
+                this.ny = this.y.length;
             };
         };
 
         update_z() {
             if (this.dz === undefined) {
                 this.z = num.linspace(this.zmin, this.zmax, this.nz);
+                this.dz = this.z[1] - this.z[0];
             } else {
                 this.z = num.arange(this.zmin, this.zmax, this.dz);
+                this.nz = this.z.length;
             };
         };
 
         update_field() {
             this.values = [];
-            for (let x of this.x) {
+            for (let z of this.z) {
                 for (let y of this.y) {
-                    for (let z of this.z) {
+                    for (let x of this.x) {
 //                        console.log(x.toString() + ' ' + y.toString() + ' ' + z.toString());
                         this.values.push(this.func(x, y, z));
                     };

@@ -27,6 +27,8 @@ class Widget(DOMWidget):
         Python backend.
         '''
         content = args[0]
+        with open('file', 'a') as f:
+            f.write(args)
         print(content, args, kwargs)
 
     def _repr_html_(self):
