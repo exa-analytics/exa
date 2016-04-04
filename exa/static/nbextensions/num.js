@@ -25,7 +25,7 @@ define([], function() {
         */
         var step = (max - min) / (n - 1);
         var array = [min];
-        for (let i=0; i<=n; i++) {
+        for (let i=0; i<n; i++) {
             min += step;
             array.push(min);
         };
@@ -38,7 +38,7 @@ define([], function() {
         -------------
         */
         var array = [min];
-        while (min <= max) {
+        while (min < max) {
             min += step;
             array.push(min);
         };

@@ -95,10 +95,9 @@ define([
 
         update_field() {
             this.values = [];
-            for (let z of this.z) {
+            for (let x of this.x) {
                 for (let y of this.y) {
-                    for (let x of this.x) {
-//                        console.log(x.toString() + ' ' + y.toString() + ' ' + z.toString());
+                    for (let z of this.z) {
                         this.values.push(this.func(x, y, z));
                     };
                 };
@@ -107,11 +106,24 @@ define([
     };
 
     var sphere = function(x, y, z) {
-        return x * x + y * y + z * z - 1.0;
+        return x * x + y * y + z * z - 0.1;
+    };
+
+    var torus = function(x, y, z, c) {
+        if (c === undefined) {
+            c = 1.0;
+        };
+        return Math.pow(c - Math.sqrt(x * x + y * y), 2) + z * z;
+    };
+
+    var sto = function(x, y, z) {
+        return Math.exp(-Math.sqrt(x * x + y * y + z * z));
     };
 
     return {
         ScalarField: ScalarField,
-        sphere: sphere
+        sphere: sphere,
+        torus: torus,
+        sto: sto
     };
 });
