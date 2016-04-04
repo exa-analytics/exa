@@ -77,6 +77,9 @@ define([
             this.app3d.set_camera_from_mesh(this.points);*/
             var isolevel = 0;
             this.field_mesh = this.app3d.add_scalar_field(this.field, isolevel);
+            console.log(this.field_mesh.geometry.vertices.length);
+            console.log(this.field_mesh.geometry.faces.length);
+            console.log('-------------');
             //console.log(this.field_mesh.geometry.vertices.length);
             //console.log(this.field_mesh.geometry.faces.length);
             console.log(Math.max(...this.field.values));
@@ -102,7 +105,7 @@ define([
             console.log(results.nfaces.length);
             console.log(results);
             console.log(meshes);
-            this.app3d.set_camera();
+            this.app3d.set_camera_from_mesh(this.field_mesh);
         };
 
         resize() {

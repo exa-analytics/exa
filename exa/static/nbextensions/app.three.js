@@ -326,7 +326,13 @@ define([
         if (mesh.geometry.type === 'BufferGeometry') {
             position = mesh.geometry.attributes.position.array;
         } else {
-            console.log('NotImplementedError appthreejs323');
+            var n = mesh.geometry.vertices.length;
+            position = new Float32Array(n * 3);
+            for (let i=0; i<n; i+=3) {
+                position[i] = mesh.geometry.vertices[i].x;
+                position[i+1] = mesh.geometry.vertices[i].y;
+                position[i+2] = mesh.geometry.vertices[i].z;
+            }
         };
         var n = position.length / 3;
         var i = n;
@@ -352,6 +358,7 @@ define([
     };
 
     ThreeJSApp.prototype.add_temp = function(v1, v2, f1, f2) {
+        /* Temporary function used by marchingcubes.js*/
         var geometry1 = new THREE.Geometry();
         var geometry2 = new THREE.Geometry();
         var n = v1.length;
@@ -543,153 +550,6 @@ define([
         return new THREE.Mesh(geometry, material);
     };
 
-    ThreeJSApp.prototype.marching_cubes_single = function(field, isovalue) {
-        /*"""
-        marching_cubes_single
-        ------------------------
-        Run the marching cubes algorithm finding the volumetric shell that is
-        smaller than the isovalue.
-
-        The marching cubes algorithm takes a scalar field and for each field
-        vertex looks at the nearest indices (in an evenly space field this
-        forms a cube), determines along what edges the scalar field is less
-        than the isovalue, and creates new vertices along the edges of the
-        field's cube. The at each point in the field, a cube is created with
-        vertices numbered:
-               4-------5
-             / |     / |
-            7-------6  |
-            |  0----|--1
-            | /     | /
-            3-------2
-        Field values are given for each field vertex. Edges are
-        labeled as follows (see the lookup table below).
-
-                                            4
-               o-------o                o-------o
-             / |     / |            7 / | 6   / |  5
-            o-------o  |             o-------o  |
-            |  o----|--o             |  o----|--o
-          3 | /   0 | / 1            | /     | /
-            o-------o                o-------o
-               2
-        Edges 8, 9, 10, and 11 wrap around (clockwise looking from the top
-        as drawn) the vertical edges of the cube, with 8 being the vertical
-        edge between vertex 0 and 4 (see above).
-
-        Note:
-            Scalar fields are assumed to be in row major order (also known C
-            style, and implies that the last index is changing the fastest).
-
-        See Also:
-            **field.js**
-        */
-        console.log('marching cubes single...');
-        var nx = field.nx;
-        var ny = field.ny;
-        var nz = field.nz;
-        var nnx = nx - 1;    // Do not use the last vertex of the field data
-        var nny = ny - 1;    // when constructing the surface because there is
-        var nnz = nz - 1;    // no cube that can be formed for it.
-        console.log(nx);
-        console.log(ny);
-        console.log(nz);
-        var cube_vertices = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0],
-                             [0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1]];
-        //var cube_vertices = [[0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1],
-        //                     [1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1]];
-        var cube_edges = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6],
-                          [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]];
-        var bits = [1, 2, 4, 8, 16, 32, 64, 128];
-        var geometry = new THREE.Geometry();
-        var face_vertex_index = new Int32Array(12);    // Keeps track of which FACE vertex we are on
-        /* Loop over field vertex indices, at each index, create the 8 vertices
-           corresponding to the current cube, pull the field values at those
-           vertices, compare them to the isovalue, and generate the corresponding
-           face vertexes where the field value is less than the isovalue. */
-        var n = 0;
-        for (let i=0; i<nnx; i++, n+=nx) {
-            for (let j=0; j<nny; j++, n++) {
-                for (let k=0; k<nnz; k++, n++) {
-                    var cube_index = 0;
-                    var field_values = new Float32Array(8);
-                    var field_xyzs = new Array(8);
-                    for (let l=0; l<8; l++) {
-                        var offset = cube_vertices[l];
-                        var ioff = i + offset[0];
-                        var joff = j + offset[1];
-                        var koff = k + offset[2];
-//                        var field_index = koff * nz + joff * ny + ioff;
-//                        var field_index = ioff * ny * nz + joff * nz + koff;
-//                        var field_index = i * ny + j * nz + k + offset[0] + nx * (offset[1] + ny * offset[2]);
-                        var field_index = n + offset[0] + nx * (offset[1] + ny * offset[2]);
-                        field_values[l] = field.values[field_index];
-                        var pos = new THREE.Vector3(field.x[ioff], field.y[joff], field.z[koff]);
-                        field_xyzs[l] = pos;
-                        if (field_values[l] > isovalue) {
-                            cube_index |= bits[l];
-                        };
-                    };
-                    /* Now that we have the cube_index, we can use the edge_table
-                       to lookup the type of face we have to deal with. */
-                    var integer = this.edge_table[cube_index];
-                    /* If this cube has no intersecting field values, skip
-                       adding surface vertices and faces (the continue command
-                       means skip the remaining code and go to the next
-                       iteration of the loop). */
-                    if (integer === 0) continue;
-                    /* If we do have an integer index to use, lets interpolate
-                       the face vertices. Along edges of our current field
-                       cube where the field values meet the criteria set by the
-                       isovalue, we need to linearly interpolate along that
-                       edge to find the position of the face's vertex. */
-                    var alpha = 0.5;              // linear interpolation parameter
-                    for (let m=0; m<12; m++) {    // 12 field cube edges
-                        var check = 1 << m;       // 1, 2, 4, 8, ... (bit shift)
-                        if (integer & check) {
-                            face_vertex_index[m] = geometry.vertices.length;
-                            var vertex_pair = cube_edges[m];
-                            var a = vertex_pair[0];
-                            var b = vertex_pair[1];
-                            var xyz_a = field_xyzs[a];
-                            var xyz_b = field_xyzs[b];
-                            var val_a = field_values[a];
-                            var val_b = field_values[b];
-                            alpha = (isovalue - val_a) / (val_b - val_a);
-                            var vertex = xyz_a.lerp(xyz_b, alpha);
-                            console.log('..........');
-                            console.log(xyz_a);
-                            console.log(xyz_b);
-                            console.log(vertex);
-                            console.log('..........');
-                            geometry.vertices.push(vertex);
-                        };
-                    };
-                    //console.log(face_vertex_index);
-                    var cur_face_verts = this.tri_table[cube_index];
-                    var num_face_verts = cur_face_verts.length;
-                    for (let m=0; m<num_face_verts; m+=3) {
-                        var i0 = face_vertex_index[cur_face_verts[m]];
-                        var i1 = face_vertex_index[cur_face_verts[m+1]];
-                        var i2 = face_vertex_index[cur_face_verts[m+2]];
-                        var face = new THREE.Face3(i0, i1, i2);
-                        geometry.faces.push(face);
-                    };
-                };
-            };
-        };
-        //geometry.computeFaceNormals();
-        //geometry.computeVertexNormals();
-        var material = new THREE.MeshLambertMaterial({
-            color: 0x303030,
-            side: THREE.DoubleSide,
-        });
-        console.log(geometry.vertices.length);
-        console.log(geometry.faces.length);
-        console.log(geometry.vertices);
-        console.log(geometry.faces);
-        return new THREE.Mesh(geometry, material);
-    };
 
     // These are shaders written in GLSL (GLslang: OpenGL Shading Language).
     // This code is executed on the GPU.
