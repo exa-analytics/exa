@@ -7,7 +7,7 @@ A base JavaScript tester class.
 'use strict';
 
 
-require.config({
+/*require.config({
     shim: {},
 });
 
@@ -19,10 +19,18 @@ define([], function() {
         ============
         Base class for testing applications
         */
-        constructor() {
+/*        constructor() {
             this.obj = 42;
         };
     };
 
     return Tester;
 });
+*/
+
+
+class Tester {
+    constructor() {
+        this.obj = 42;
+    };
+};
