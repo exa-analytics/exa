@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-Base Relational Objects
+Base Table for Relational Objects
 ===============================================
 This module outlines the event-based content management system established by exa and creates
 a complex base table (schema) class, :class:`~exa.relational.base.Base`. The schema base class's
@@ -9,54 +9,106 @@ tables to be able to have HTML representations (within the `Jupyter notebook`_).
 
 .. _Jupyter notebook: http://jupyter.org/
 '''
+import pandas as pd
+from sys import getsizeof
 from uuid import UUID
 from datetime import datetime
+from contextlib import contextmanager
 from sqlalchemy import Column, Integer, String, DateTime, create_engine, event
 from sqlalchemy.orm import sessionmaker, mapper
 from sqlalchemy.orm.query import Query
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
-from exa import _pd as pd
-from exa.config import Config
-from exa.utility import gen_uid
+from exa import _conf
+from exa.utility import uid as _uid
 
 
-class Meta(DeclarativeMeta):
+class BaseMeta(DeclarativeMeta):
     '''
+    This class defines the behavior of the :class:`~exa.relational.base.Base`
+    object. It provides methods for convenient class level look up.
     '''
-    def __len__(self):                         # Length of the table (in database)
-        return db_sess.query(self).count()
-
-    def __iter__(self):                        # Iterate over every entry in the database
-        for item in db_sess.query(self).all():
-            yield item
-
-    def __getitem__(self, key):
+    def _get_by_pkid(self, pkid):
         '''
-        This is called when a user attempts to slice/select an entry from the
-        database table (the metaclass of the object is a representation of the
-        table). This is not the getitem function that is called when a user
-        attempts to slice an entry instance.
+        Select a single entry using the primary key.
+
+        Returns:
+            entry: Single entry with given pkid
+        '''
+        return SessionFactory().query(self).filter(self.pkid == pkid).one()
+
+    def _get_by_str(self, string):
+        '''
+        Select entries using a string identifier: first tries to find objects
+        using the "name" field then by alternate fields.
+
+        Returns:
+            data (list): List of matching entries
+        '''
+        value = None
+        session = SessionFactory()
+        if hasattr(self, 'name'):
+            value = session.query(self).filter(self.name == string).all()
+        elif hasattr(self, 'symbol'):
+            value = session.query(self).filter(self.symbol == string).all()
+            if len(value) == 1:
+                value = value[0]
+        elif hasattr(self, 'from_unit'):
+            value = session.query(self).filter(self.from_unit == string).all()
+        else:
+            session.close_all()
+            raise TypeError('Selection by string arguments not supported for {}'.format(self.__name__))
+        return value
+
+    def _get_by_uid(self, uid):
+        '''
+        Select an entry using a unique ID.
+
+        Returns:
+            entry: Single entry with given uid
+        '''
+        if isinstance(uid, uuid.UUID):
+            return SessionFactory().query(self).filter(self.hexuid == uid.hex).one()
+        elif isinstance(uid, str):
+            return SessionFactory().query(self).filter(self.hexuid == uid).one()
+        else:
+            raise TypeError('uid must be of type str or UUID, not {}'.format(type(uid)))
+
+    def __contains__(self, obj):
+        '''
+        Can check if conversions for a specific unit exist.
 
         .. code-block:: Python
 
-            c = exa.Container[1]    # Loads the container with pkid == 1 (via this __getitem__)
-            c[1]      # Slices the first (multiindex) level of each dataframe attached to this
-            c[::4]    # container (via the :class:`~exa.relational.container.Container`'s __getitem__)
-
+            'A' in exa.relational.Length
         '''
-        if isinstance(key, int):
-            return db_sess.query(self).filter(self.pkid == key).one()
-        elif isinstance(key, str) and hasattr(self, 'name'):
-            return db_sess.query(self).filter(self.name == key).one()
-        elif isinstance(key, UUID) and hasattr(self, 'uid'):
-            return db_sess.query(self).filter(self.uid == key.hex).one()
-        elif hasattr(self, '_getitem'):
-            return self._getitem(key)    # Allows for custom getters specific to certain classes
+        if hasattr(self, 'from_unit'):
+            from_unit = self.table()['from_unit'].values
+            if obj in self.aliases:
+                obj = self.aliases[obj]
+            if obj in from_unit:
+                return True
         else:
-            raise KeyError('Unknown key {0}.'.format(key))
+            raise NotImplementedError()
+        return False
+
+    def __iter__(self):
+        for item in SessionFactory().query(self).all():
+            yield item
+
+    def __getitem__(self, key):
+        obj = None
+        if isinstance(key, int):
+            obj = self._get_by_pkid(key)
+        elif isinstance(key, str):
+            obj = self._get_by_str(key)
+        elif isinstance(key, UUID):
+            obj = self._get_by_uid(key)
+        if obj is None and hasattr(self, '_getitem'):
+            obj = self._getitem(key)
+        return obj
 
 
-@as_declarative(metaclass=Meta)
+@as_declarative(metaclass=BaseMeta)
 class Base:
     '''
     Declarative base class (used by SQLAlchemy) to initialize relational tables.
@@ -67,50 +119,67 @@ class Base:
     def __tablename__(cls):
         return cls.__name__.lower()
 
-    @declared_attr
-    def __categories__(cls):
-        return []
-
     @classmethod
-    def bulk_insert(cls, data):
+    def _bulk_insert(cls, data):
         '''
-        Perform a bulk insert into a specific table.
+        Perform a `bulk insert`_ into a specific table.
 
         .. code-block:: Python
 
-            [{'column1': 'foo', 'column2': 42, 'column3': 'bar'}]
+            mappings = [{'column1': 'foo', 'column2': 42, 'column3': 'bar'},
+                        {'column1': 'fop', 'column2': 43, 'column3': 'baz'}]
+            Table.bulk_insert(mappings)
 
         Args:
-            data (list): List of dictionary objects (mappings - see the example above)
+            data (list): List of records as dictionary objects
+
+        .. _bulk insert: http://docs.sqlalchemy.org/en/latest/orm/session_api.html
         '''
-        try:
-            db_sess.bulk_insert_mappings(cls, data)
-        except:
-            db_sess.rollback()
-            raise
+        with session_scope() as session:
+            session.bulk_insert_mappings(cls, data)
 
     @classmethod
     def table(cls):
         '''
-        Display a :py:class:`~pandas.DataFrame` representation of the table.
+        Create a DataFrame representation of the current table.
 
         Returns:
             df (:py:class:`~pandas.DataFrame`): In memory table copy
+
+        Warning:
+            If performing this action on a very large table, may raise a
+            memory error. In this case it is more effective to perform a
+            custom select query then convert the result to a DataFrame.
         '''
-        df = pd.read_sql(db_sess.query(cls).statement, engine.connect())
-        for column in cls.__categories__:
-            df[column] = df[column].astype('category')
+        df = None
+        with session_scope() as session:
+            df = pd.read_sql(session.query(cls).statement, engine)
         if 'pkid' in df.columns:
-            return df.set_index('pkid')
-        else:
-            return df
+            df.set_index('pkid', inplace=True)
+        for column in df.columns:    # Mask the auxiliary pkid columns if applicable
+            if 'id' in column and len(column) == 4:
+                if df.index.names == ['pkid']:
+                    del df[column]
+                else:
+                    df.set_index(column, inplace=True)
+                    df.index.names = ['pkid']
+        return df
+
+    def _save_record(self):
+        '''
+        Save the relational object to the database.
+        '''
+        session = SessionFactory(expire_on_commit=False)
+        session.add(self)
+        session.commit()
 
     def __repr__(cls):
-        return '{0}({1})'.format(cls.__class__.__name__, cls.pkid)
+        return '{0}(pkid: {1})'.format(cls.__class__.__name__, cls.pkid)
 
 
 class Name:
     '''
+    Mixin providing name and description fields.
     '''
     name = Column(String)
     description = Column(String)
@@ -118,9 +187,9 @@ class Name:
 
 class HexUID:
     '''
-    Mixin when a unique ID is required.
+    Mixin providing a unique ID.
     '''
-    hexuid = Column(String(32), default=gen_uid)
+    hexuid = Column(String(32), default=_uid)
 
     @property
     def uid(self):
@@ -129,80 +198,80 @@ class HexUID:
 
 class Time:
     '''
-    Mixin for when date and time stamps for created, accessed, and modified
-    are required
+    Mixin providing timestamp information.
     '''
     created = Column(DateTime, default=datetime.now)
     modified = Column(DateTime, default=datetime.now)
     accessed = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
-    def update_accessed(self):
+    def _update_accessed(self):
         self.accessed = datetime.now()
 
-    def update_modified(self):
+    def _update_modified(self):
         self.modified = datetime.now()
 
 
 class Disk:
     '''
+    Mixin providing disk utilization information.
+
+    Attributes:
+        nfiles (int): Number of associated files (in the file table)
+        size (int): Total size on disk (in KiB) (of all files)
+
+    See Also:
+        :class:`~exa.relational.file.File`
     '''
+    nfiles = Column(Integer)
     size = Column(Integer)
-    file_count = Column(Integer)
+
+    def _update_size(self):
+        '''
+        Attempts to call the instance's __sizeof__ to populate the value of
+        size.
+        '''
+        try:
+            self.size = getsizeof(self)
+        except:
+            pass
 
 
-def create_all():
+def _create_all():
     '''
     Create all tables if they do not already exist in the database.
 
-    Note:
+    Warning:
         When this function is called only class objects loaded in the current
-        namespace will attempt to be created.
+        namespace will be created.
     '''
     Base.metadata.create_all(engine)
 
 
-@event.listens_for(mapper, 'init')             # Any time an object is created,
-def add_to_db(obj, args, kwargs):              # add it to the database session
+def _cleanup():
     '''
-    All relational objects are automatically added to the database session on
-    instantiation.
+    Cleanup the engine's connection pool before exiting.
     '''
-    db_sess.add(obj)
+    engine.dispose()
 
 
-@event.listens_for(Query, 'before_compile')    # Always commit before querying (SELECT)
-def commit(*args, **kwargs):
+@contextmanager
+def session_scope(*args, **kwargs):
     '''
-    Commit all of the objects currently in the session. Note that objects
-    are automatically added to the database session (db_sess) and that committing
-    these objects does not normally have to be performed manually.
+    Separation of transaction management from actual work using a `context manager`_.
+
+    .. _context manager: http://docs.sqlalchemy.org/en/latest/orm/session_basics.html
     '''
+    session = SessionFactory(*args, **kwargs)
     try:
-        db_sess.commit()
+        yield session
+        session.commit()
     except:
-        db_sess.rollback()
+        session.rollback()
         raise
+    finally:
+        session.close()    # Occurs regardless if an exception is raised or not
 
 
-@event.listens_for(Base, 'before_insert')            # Before inserting a new object
-def base_before_insert(mapper, connection, target):  # update its timestamps.
-    '''
-    Update timestampes and save :class:`~exa.frames.DataFrame` data to disk
-    before inserting to the database.
-    '''
-    print('before insert')
-
-
-@event.listens_for(Base, 'before_update')            # Before inserting a new object
-def base_before_update(mapper, connection, target):  # update its timestamps.
-    '''
-    Update timestampes and save :class:`~exa.frames.DataFrame` data to disk
-    before updating the database.
-    '''
-    print('before update')
-
-
-engine_name = Config.relational_engine()
+engine_name = _conf['exa_relational']
 engine = create_engine(engine_name)
-DBSession = sessionmaker(bind=engine)
-db_sess = DBSession()    # Database session (note that this is an unscoped session)
+SessionFactory = sessionmaker(bind=engine)

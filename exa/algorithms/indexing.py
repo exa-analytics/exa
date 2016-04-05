@@ -1,23 +1,40 @@
 # -*- coding: utf-8 -*-
 '''
-Indexing Recipes
-=====================
-Functions related to generating indexes
+Indexing Recipes and Array Creation
+=========================================
+Functions related to generating indices.
 '''
-from exa import _np as np
+import numpy as np
 
 
-def idxs_from_starts_and_counts(starts, counts):
+def arange1(initials, counts):
     '''
-    Generates flat indexes from starting points (starts) and counts
-    with incrementing by 1.
+    Generate a pseudo-sequential array from initial values and counts.
+
+    >>> import numpy
+    >>> initials = numpy.array([0, 4], dtype=numpy.int64)
+    >>> counts = numpy.array([4, 5], dtype=numpy.int64)
+    >>> values = arange1(initials, counts)
+    >>> values[0]
+    array([0, 0, 0, 0, 1, 1, 1, 1, 1])
+    >>> values[1]
+    array([0, 1, 2, 3, 0, 1, 2, 3, 4])
+    >>> values[2]
+    array([0, 1, 2, 3, 4, 5, 6, 7, 8])
+
+    Args:
+        initials (array): Starting points for array generation
+        counts (array): Values by which to increment from each starting point
+
+    Returns:
+        arrays (tuple): First index, second index, and indices to select, respectively
     '''
     n = np.sum(counts)
-    i_idx = np.empty((n, ), dtype='i8')
+    i_idx = np.empty((n, ), dtype=np.int64)
     j_idx = i_idx.copy()
     values = j_idx.copy()
     h = 0
-    for i, start in enumerate(starts):
+    for i, start in enumerate(initials):
         stop = start + counts[i]
         for j, value in enumerate(range(start, stop)):
             i_idx[h] = i
@@ -27,15 +44,34 @@ def idxs_from_starts_and_counts(starts, counts):
     return (i_idx, j_idx, values)
 
 
-def idxs_from_starts_and_count(starts, count):
+def arange2(initials, count):
     '''
+    Generate a pseudo-sequential array from initial values and a single count.
+
+    >>> import numpy
+    >>> initials = numpy.array([0, 5], dtype=numpy.int64)
+    >>> count = 5
+    >>> values = arange2(initials, count)
+    >>> values[0]
+    array([0, 0, 0, 0, 0, 1, 1, 1, 1, 1])
+    >>> values[1]
+    array([0, 1, 2, 3, 4, 0, 1, 2, 3, 4])
+    >>> values[2]
+    array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+    Args:
+        initials (array): Starting points for array generation
+        count (int): Value by which to increment from each starting points
+
+    Returns:
+        arrays (tuple): First index, second index, and indices to select, respectively
     '''
-    n = len(starts)
-    i_idx = np.empty((n * count, ), dtype='i8')
+    n = len(initials) * count
+    i_idx = np.empty((n, ), dtype=np.int64)
     j_idx = i_idx.copy()
     values = j_idx.copy()
     h = 0
-    for i, start in enumerate(starts):
+    for i, start in enumerate(initials):
         stop = start + count
         for j, value in enumerate(range(start, stop)):
             i_idx[h] = i
@@ -45,10 +81,33 @@ def idxs_from_starts_and_count(starts, count):
     return (i_idx, j_idx, values)
 
 
-def _unordered_pairing_function(x, y):
+def unordered_pairing_single(x, y):
     '''
-    http://www.mattdipasquale.com/blog/2014/03/09/unique-unordered-pairing-function/
+    A `pairing function`_ for unordered (in magnitude) values.
+
+    The pairing value is computed as follows:
+
+    .. math::
+
+        xy + \\text{trunc}\\left(\\frac{\\left(\\left|x - y\\right| -
+            1\\right)^{2}}{4}\\right)
+
+    Args:
+        x (array): First value array
+        y (array): Second value array
+
+    Returns:
+        p (array): Pairing function result
+
+    Note:
+        This function has a vectorized version that is imported as
+        :func:`~exa.algorithms.indexing.unordered_pairing`; use that
+        function when working with array data.
+
+    .. _pairing function: http://www.mattdipasquale.com/blog/2014/03/09/unique-unordered-pairing-function/
     '''
     return np.int64(x * y + np.trunc((np.abs(x - y) - 1)**2 / 4))
 
-unordered_pairing_function = np.vectorize(_unordered_pairing_function)
+
+unordered_pairing = np.vectorize(unordered_pairing_single,
+                                 doc=unordered_pairing_single.__doc__)

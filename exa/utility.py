@@ -1,19 +1,28 @@
 # -*- coding: utf-8 -*-
 '''
-Helper Functions
+Utility Functions
 ====================
+These functions are simply syntactic sugar. They help cleanup the code base by
+providing a cleaner API for commonly used functions.
 '''
 import os
 from uuid import uuid4
-from itertools import product
+from datetime import datetime
 from notebook import install_nbextension
-from exa.config import Config
 
 
-DBLSEP = os.sep + os.sep
+sep2 = os.sep + os.sep
 
 
-def gen_uid(as_hex=True):
+def datetime_header():
+    '''
+    Creates a simple header string containing the current date/time stamp
+    delimited using "=".
+    '''
+    return '\n'.join(('=' * 80, str(datetime.now()), '=' * 80))
+
+
+def uid(as_hex=True):
     '''
     Generate a unique id (uuid4).
 
@@ -29,11 +38,9 @@ def gen_uid(as_hex=True):
         return uuid4()
 
 
-def mkpath(*args, mkdir=False):
+def mkp(*args, mk=False, exist_ok=True):
     '''
-    Creates an OS aware file or directory path string. If directory,
-    can create on disk (if mkdir is True, default False). Does not
-    throw a warning if the directory already exists.
+    Generate a directory path, and create it if requested.
 
     .. code-block:: Python
 
@@ -42,14 +49,56 @@ def mkpath(*args, mkdir=False):
 
     Args
         \*args: File or directory path segments to be concatenated
-        mkdir (bool): Make the directory (returns None)
+        mk (bool): Make the directory (returns None)
+        exist_ok (bool): Don't raise warning if director already exists (default True)
 
     Returns
         path (str): OS aware file or directory path
     '''
     path = os.sep.join(list(args))
-    if mkdir:
-        while DBLSEP in path:
-            path = path.replace(DBLSEP, os.sep)
-        os.makedirs(path, exist_ok=True)
+    if mk:
+        while sep2 in path:
+            path = path.replace(sep2, os.sep)
+        os.makedirs(path, exist_ok=exist_ok)
     return path
+
+
+def _install_notebook_widgets(origin_base, dest_base, verbose=False):
+    '''
+    Convenience wrapper around :py:func:`~notebook.install_nbextension` that
+    installs Jupyter notebook extensions using a systematic naming convention (
+    mimics the source directory and file name structure rather than installing
+    as a flat file set).
+
+    Args:
+        origin_base (str): Location of extension source code
+        dest_base (str): Destination location (system and/or user specific)
+        verbose (bool): Verbose installation (default False)
+
+    See Also:
+        The configuration module :mod:`~exa._config` describes the default
+        arguments used by :func:`~exa._install.install` during installation.
+    '''
+    for root, subdirs, files in os.walk(origin_base):
+        for filename in files:
+            subdir = root.split('nbextensions')[-1]
+            orig = mkp(root, filename)
+            dest = mkp(dest_base, subdir, mk=True)
+            install_nbextension(orig, verbose=verbose, overwrite=True, nbextensions_dir=dest)
+
+
+def del_keys(kwargs, match='id'):
+    '''
+    Delete certain keys in a dictionary containing a given string.
+
+    Args:
+        kwargs (dict): Dictionary to prune
+        match (str): Sting to match for each key
+
+    Return:
+        d (dict): Pruned dictionary
+    '''
+    keys = [key for key in kwargs.keys() if match in key]
+    for key in keys:
+        del kwargs[key]
+    return kwargs

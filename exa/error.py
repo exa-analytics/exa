@@ -4,11 +4,8 @@ Exceptions, Errors, and Warnings
 ==================================
 All base level exceptions are defined here.
 '''
-from exa import _re as re
-from exa.decorator import logger
+import re
 
-
-@logger
 class ExaException(Exception):
     '''
     Exception with support for logging.
@@ -21,7 +18,7 @@ class ExaException(Exception):
             msg = re.sub(r'\s*\n\s*', spacer, msg)
         super().__init__(msg)
         if log:
-            self._logger.error(msg)
+            pass
 
 
 class RequiredIndexError(ExaException):
@@ -44,15 +41,3 @@ class RequiredColumnError(ExaException):
     def __init__(self, missing, clsname):
         self.msg = self._msg.format(missing, clsname)
         super().__init__()
-
-
-class MissingColumns(ExaException):
-    '''
-    Raised when optional columns are missing from a
-    :class:`~exa.dataframe.DataFrame` object (these columns are required to
-    perform a specific - optional - operation).
-    '''
-    _msg = 'Can\'t perform operation. Missing column(s), {0}, in class {1}.'
-
-    def __init__(self, missing, clsname):
-        self.msg = self._msg.format(missing, clsname)

@@ -3,22 +3,22 @@
 Logging
 =====================
 '''
+import os
 import logging
 from logging.handlers import RotatingFileHandler
 from textwrap import wrap
-from exa import _os as os
-from exa.config import Config
+from exa import _conf
 
 
 class _LogFormat(logging.Formatter):
     '''
     Systematic log formatting (for all logging levels).
     '''
+    spacing = '                                     '
     log_basic = '%(asctime)19s - %(levelname)8s'
     debug_format = '''%(asctime)19s - %(levelname)8s - %(pathname)s:%(lineno)d
                                      %(message)s'''
     info_format = '''%(asctime)19s - %(levelname)8s - %(message)s'''
-    spacing = '                                     '
     log_formats = {logging.DEBUG: debug_format, logging.INFO: info_format,
                    logging.WARNING: info_format, logging.ERROR: debug_format,
                    logging.CRITICAL: debug_format}
@@ -29,86 +29,81 @@ class _LogFormat(logging.Formatter):
         return fmt.format(record)
 
 
-log_files = {
-    'system': Config.syslog,
-    'test': Config.testlog,
-    'user': Config.userlog
-}
-
-
-loggers = {
-    'system': logging.getLogger('system'),
-    'test': logging.getLogger('test'),
-    'user': logging.getLogger('user')
-}
-
-
-def setup():
+def get_logfile_path(name):
     '''
-    Should only be called on package import. Sets up logging style
-    for the rest of the package.
+    Get the log file path for the log with the given name.
     '''
-    for handler in logging.root.handlers:     # Remove default handlers
-        logging.root.removeHandler(handler)
-    for name, path in log_files.items():
-        handler = RotatingFileHandler(
-            path,
-            maxBytes=Config.max_log_bytes,
-            backupCount=Config.max_log_count
-        )
-        handler.setFormatter(_LogFormat())
-        loggers[name].addHandler(handler)
-        loggers[name].setLevel(logging.DEBUG)
+    for log_file in log_files:
+        if name in log_file:
+            return log_files[log_file]
 
 
-def get_logger(name='system'):
+def log_names():
     '''
-    Get one of the loggers available to exa.
-
-    Args:
-        name (str): One of ['system', 'test', 'user']
+    Lists available log names.
 
     Returns:
-        logger (:class:`~logging.Logger`): Logging object
+        names (list): List of available log names
     '''
-    if name in loggers:
-        return loggers[name]
-    else:
-        raise KeyError('Unknown logger name')
+    return [handler.name for handler in logging.handlers]
 
 
-def log_tail(log='sys', n=10):
+def log_head(log='log_sys', n=10):
     '''
-    Displays the most recent messages of the specified log file.
+    Print the oldest log messages.
 
-    Args
-        log (str): One of ['sys', 'rel', 'doc', 'num', 'unit']
-        n (int): Number of lines to display
+    Args:
+        log (str): Log name
+        n (int): Number of lines to print
     '''
-    _show_log(log, n)
+    _print_log(log, n, True)
 
 
-def log_head(log='sys', n=10):
+def log_tail(log='log_sys', n=10):
     '''
-    Displays the earliest messages of the specified log file.
+    Print the most recent log messages.
 
-    Args
-        log (str): One of ['sys', 'rel', 'doc', 'num', 'unit']
-        n (int): Number of lines to display
+    Args:
+        log (str): Log name
+        n (int): Number of lines to print
     '''
-    _show_log(log, n, True)
+    _print_log(log, n, False)
 
 
-def _show_log(log, n, head=False):
-    '''
-    See Also:
-        This function is called by :func:`~exa.log.head` and
-        :func:`~exa.log.tail`, not usually called directly.
-    '''
+def _print_log(log, n, head=True):
     lines = None
-    with open(Config[log + 'log'], 'r') as f:
-        lines = f.readlines()
+    with open(_conf[log], 'r') as f:
+        lines = f.read().splitlines()
     if head:
         print('\n'.join(lines[:n]))
     else:
         print('\n'.join(lines[-n:]))
+
+
+def _cleanup():
+    '''
+    Clean up logging file handlers.
+    '''
+    _remove_handlers()
+
+
+def _remove_handlers():
+    '''
+    Clean up logging file handlers.
+    '''
+    handlers = logging.root.handlers[:]
+    for handler in handlers:
+        handler.close()
+        logging.root.removeHandler(handler)
+
+
+log_files = dict((key, value) for key, value in _conf.items() if key.startswith('log_'))
+_remove_handlers()
+# Add custom handlers
+for i, (key, path) in enumerate(log_files.items()):
+    handler = RotatingFileHandler(path, maxBytes=_conf['logfile_max_bytes'],
+                                  backupCount=_conf['logfile_max_count'])
+    handler.setFormatter(_LogFormat())
+    logging.root.addHandler(handler)
+    logging.root.handlers[i].setLevel(logging.DEBUG)
+    logging.root.handlers[i].set_name(key)
