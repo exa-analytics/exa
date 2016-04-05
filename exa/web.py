@@ -2,75 +2,53 @@
 '''
 Web Application
 ==================================
-Entry point for communication between Python and the standalone exa web
-application (HTML/CSS/JS).
 '''
-import os
-from tornado.web import Application, RequestHandler
-from tornado.template import Loader
-from tornado.ioloop import IOLoop
-from jinja2 import Environment, FileSystemLoader
-from exa import _conf
-from exa.utility import mkp
+from tornado import websocket, web, ioloop
+import json
 
+cl = []
 
-#def build_static_path_kwargs():
-#    '''
-#    '''
-#    kwargs = {}
-#    for root, subdirs, files in os.walk(_conf[]):
-#        print(root)
-#        print(subdirs)
-#        print(files)
-#        splitdir = root.split(Config.static)[1]
-#        directory = 'static'
-#        if splitdir:
-#            directory = directory + splitdir
-#        for name in files:
-#            if name.endswith('js'):
-#                print(name)
-#                n = name.replace('.', '_')
-#                n = n.replace('-', '_')
-#                kwargs[n] = '\'' + '/'.join((directory.replace('\\', '/'), name)) + '\''
-#    return kwargs
-#
-#
-#templates_path = Config.templates
-#static_path = Config.static
-#kwargs = build_static_path_kwargs()
-#
-#
-#class HelloWorldHandler(RequestHandler):
-#    '''
-#    '''
-#    def get(self):
-#        self.write('Hello World')
-#
-#
-#class DashboardHandler(RequestHandler):
-#    '''
-#    '''
-#    def get(self):
-#        self.write(jinja2_loader.get_template('dashboard.html').render(**kwargs))
-#
-#def serve(port=5000):
-#    '''
-#    '''
-#    app.listen(port)
-#    IOLoop.instance().start()
-#
-#
-##print(Config.static)
-#
-#tornado_settings = {
-#    'static_path': Config.static
-#}
-#tornado_handlers = [
-#    (r'/', DashboardHandler),
-#    (r'/hi', HelloWorldHandler),
-#    #(r'/routing', RoutingHandler),
-#    #(r'/#!/sessions', SessionHandler),
-#]
-#jinja2_loader = Environment(loader=FileSystemLoader(searchpath=templates_path))
-#app = Application(tornado_handlers, **tornado_settings)
-#
+class IndexHandler(web.RequestHandler):
+    def get(self):
+        self.render("static/html/dashboard.html")
+
+class SocketHandler(websocket.WebSocketHandler):
+    def check_origin(self, origin):
+        return True
+
+    def open(self):
+        if self not in cl:
+            cl.append(self)
+
+    def on_close(self):
+        if self in cl:
+            cl.remove(self)
+
+class ApiHandler(web.RequestHandler):
+
+    @web.asynchronous
+    def get(self, *args):
+        self.finish()
+        id = self.get_argument("id")
+        value = self.get_argument("value")
+        data = {"id": id, "value" : value}
+        data = json.dumps(data)
+        for c in cl:
+            c.write_message(data)
+
+    @web.asynchronous
+    def post(self):
+        pass
+
+app = web.Application([
+    (r'/', IndexHandler),
+    (r'/ws', SocketHandler),
+    (r'/api', ApiHandler),
+    (r'/(favicon.ico)', web.StaticFileHandler, {'path': '../'}),
+    (r'/(rest_api_example.png)', web.StaticFileHandler, {'path': './'}),
+])
+
+def serve(port):
+    print('serving')
+    app.listen(5000)
+    ioloop.IOLoop.instance().start()

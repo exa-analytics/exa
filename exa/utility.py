@@ -6,6 +6,7 @@ These functions are simply syntactic sugar. They help cleanup the code base by
 providing a cleaner API for commonly used functions.
 '''
 import os
+import shutil
 from uuid import uuid4
 from datetime import datetime
 from notebook import install_nbextension
@@ -75,10 +76,18 @@ def _install_notebook_widgets(origin_base, dest_base, verbose=False):
         dest_base (str): Destination location (system and/or user specific)
         verbose (bool): Verbose installation (default False)
 
+    Note:
+        This function follows symbolic links (symlinks) and creates a copy of
+        the linked file in the destination location.
+
     See Also:
         The configuration module :mod:`~exa._config` describes the default
         arguments used by :func:`~exa._install.install` during installation.
     '''
+    try:
+        shutil.rmtree(dest_base)
+    except:
+        pass
     for root, subdirs, files in os.walk(origin_base):
         for filename in files:
             subdir = root.split('nbextensions')[-1]

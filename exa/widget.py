@@ -2,7 +2,8 @@
 '''
 Container (Widget)
 =======================
-Functionality for using Jupyter notebook extensions to visualize data containers.
+Functionality for using Jupyter notebook extensions to visualize data speficic
+containers.
 '''
 import numpy as np
 import pandas as pd
@@ -13,10 +14,11 @@ from traitlets import Unicode, List, Integer, Bytes, CUnicode, Set, Tuple, Dict
 
 class Widget(DOMWidget):
     '''
-    Provides a custom Jupyter notebook widget class.
+    Base class for creating data specific container widgets within a Jupyter
+    notebook. The class provides some suitable defaults and custom methods for
+    bidirectional communication (Python-Javascript), logging, and
+    representation.
     '''
-    _view_module = Unicode('nbextensions/exa/container').tag(sync=True)
-    _view_name = Unicode('ContainerView').tag(sync=True)
     width = Integer(850).tag(sync=True)
     height = Integer(500).tag(sync=True)
     fps = Integer(24).tag(sync=True)
@@ -27,8 +29,6 @@ class Widget(DOMWidget):
         Python backend.
         '''
         content = args[0]
-        with open('file', 'a') as f:
-            f.write(args)
         print(content, args, kwargs)
 
     def _repr_html_(self):
@@ -37,12 +37,11 @@ class Widget(DOMWidget):
 
 class ContainerWidget(Widget):
     '''
-    Specific implementation used by :class:`~exa.container.BaseContainer` and
-    :class:`~exa.relational.container.Container`.
-
-    Attributes:
-        _names (list): List of all traits associated with the :class:`~exa.widget.ContainerWidget`
+    Jupyter notebook widget representation of a
+    :class:`~exa.container.BaseContainer` object.
     '''
+    _view_module = Unicode('nbextensions/exa/container').tag(sync=True)
+    _view_name = Unicode('ContainerView').tag(sync=True)
     gui_width = Integer(250).tag(sync=True)
 
     def __init__(self, container, *args, **kwargs):

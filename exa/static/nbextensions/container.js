@@ -4,31 +4,37 @@ container.js
 ===============
 This module provides custom functionality for communication with the Python
 backend via ipywidgets implementation (itself utilizing `backbone.js`_ and
-`zeromq`_).
+`zeromq`_). It does this via the (extendable) ContainerView class. When
+building new data specific notebook widgets, this class should be extended
+rather than extending the DOMWidgetView class.
 
 .. _backbone.js: http://backbonejs.org/
 .. _zeromq: http://zeromq.org/
 */
 'use strict';
 
+
 require.config({
     shim: {
-        'nbextensions/exa/test': {
-            exports: 'test'
+        'nbextensions/exa/test.container': {
+            exports: 'TestContainer'
         },
     },
 });
 
+
 define([
     'widgets/js/widget',
-    'nbextensions/exa/test'
-], function(widget, test) {
+    'nbextensions/exa/test.container'
+], function(widget, TestContainer) {
     class ContainerView extends widget.DOMWidgetView {
         /*"""
         ContainerView
         ===============
-        Backbone.js view defined within the ipywidgets JavaScript environment.
-        Below is a general outline of the structure of any "View" code.
+        Base view for creating data specific container widgets used within the
+        Jupyter notebook. All logic related to communication (between Python
+        and JavaScript) should be located here. This class provides a number
+        of commonly used functions for such logic.
 
         Warning:
             Do not override the DOMWidgetView constructor ("initialize").
@@ -38,27 +44,46 @@ define([
             render
             -------------
             Main entry point (called immediately after initialize) for
-            ipywidgets DOMWidgetView objects.
+            (ipywidgets) DOMWidgetView objects.
 
             Note:
-                This function is typically overwritten by data specific packages.
+                This function  can be overwritten by container specific code,
+                but it is more common to overwrite the **init** function.
+
+            See Also:
+                **init()**
             */
             var self = this;
             console.log('Initializing container view...');
-            this.default_listeners();
-            this.create_container();
-            this.create_canvas();
-            this.if_test();
+            //this.default_listeners();
+            //this.create_container();
+            //this.create_canvas();
+
+            var testapp = new TestContainer();
+            console.log(testapp);
+
+            /*this.init();
 
             this.container.append(this.app.gui.ui.domElement);
             this.container.append(this.app.gui.ui_css);
             this.container.append(this.canvas);
             this.setElement(this.container);
-            this.app.app3d.render();
-            this.on('displayed', function() {
-                self.app.app3d.animate();
-                self.app.app3d.controls.handleResize();
-            });
+
+            try {
+                this.app.app3d.render();
+                this.on('displayed', function() {
+                    self.app.app3d.animate();
+                    self.app.app3d.controls.handleResize();
+                });
+            } catch(err) {
+                console.log(err);
+            };*/
+        };
+
+        init() {
+            /*"""
+            */
+            this.if_test();
         };
 
         get_trait(name) {

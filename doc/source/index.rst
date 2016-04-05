@@ -37,7 +37,8 @@ Contents
 
     bugs.rst
     proposal.rst
-    general.rst
+    stack.rst
+    code.rst
     contrib.rst
 
 .. _rel-proj:

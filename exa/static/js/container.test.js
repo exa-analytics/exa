@@ -2,6 +2,7 @@
 ===============
 test.js
 ===============
+A generic test application.
 */
 'use strict';
 
@@ -18,9 +19,6 @@ require.config({
         'nbextensions/exa/field': {
             exports: 'field'
         },
-        'nbextensions/exa/marchingcubes': {
-            exports: 'mc'
-        }
     },
 });
 
@@ -28,9 +26,8 @@ require.config({
 define([
     'nbextensions/exa/app.three',
     'nbextensions/exa/app.gui',
-    'nbextensions/exa/field',
-    'nbextensions/exa/marchingcubes'
-], function(app3d, gui, field, mc) {
+    'nbextensions/exa/field'
+], function(app3d, gui, field) {
     class TestGUI extends gui.ContainerGUI {
         /*"""
         */
@@ -64,13 +61,13 @@ define([
             this.view = view;
             this.app3d = new app3d.ThreeJSApp(this.view.canvas);
             this.field = new field.ScalarField({
-                xmin: -5.0, xmax: 5.0, dx: 0.4,
-                ymin: -5.0, ymax: 5.0, dy: 0.4,
-                zmin: -5.0, zmax: 5.0, dz: 0.4
-            }, field.test);
+                xmin: -10.0, xmax: 10.0, dx: 0.5,
+                ymin: -10.0, ymax: 10.0, dy: 0.5,
+                zmin: -10.0, zmax: 10.0, dz: 0.5
+            }, field.torus);
             this.gui = new TestGUI(this);
             console.log(this.field);
-            this.isovalue = 0.23;
+            this.isovalue = 0.5;
             this.plot();
         };
 
