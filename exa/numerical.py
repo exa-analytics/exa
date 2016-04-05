@@ -8,8 +8,10 @@ data from the frame. The trait data is used by :class:`~exa.widget.ContainerWidg
 (and its subclasses) and the web gui to generate interactive data visualizations.
 Because these dataframes have context about their data, they also provide
 convience methods for in memory data compression (using `categories`_).
+
 See Also:
     Modules :mod:`~exa.container` and :mod:`~exa.widget` may provide context.
+
 .. _categories: http://pandas-docs.github.io/pandas-docs-travis/categorical.html
 '''
 import numpy as np
@@ -88,9 +90,11 @@ class DataFrame(NDBase, pd.DataFrame):
     def _get_traits(self):
         '''
         Generate trait objects from column data.
+
         This function will group columns by the :class:`~exa.numerical.DataFrame`'s
         **_groupbys** attribute, select the column (or columns) that specify a
         single trait, and package that up as a trait to be used by the frontend.
+
         Note:
             This function decides what `trait type`_ to use. Typically, a
             column (or columns) containing unique data is sent as a (grouped)
@@ -98,14 +102,17 @@ class DataFrame(NDBase, pd.DataFrame):
             will send a single value of the appropriate type (e.g. `Float`_) so
             as to duplicate the least amount of data possible (and have the least
             communication overhead possible).
+
         See Also:
             The collecting function of the JavaScript side of things is the
             **get_trait** method in **container.js**.
+
         Tip:
             The algorithm's performance could be improved: in the case where
             each group has *N* values that are the same to each other but
             unique with respect to other groups' values all values are sent to
             the frontend!
+
         .. _trait type: http://traitlets.readthedocs.org/en/stable/trait_types.html
         .. _Float: http://traitlets.readthedocs.org/en/stable/trait_types.html#traitlets.Float
         '''
@@ -149,8 +156,10 @@ class DataFrame(NDBase, pd.DataFrame):
                     raise RequiredColumnError(missing, name)
             if self._indices:
                 missing = set(self._indices).difference(self.index.names)
-                if missing:
+                if missing and len(self.index.names) != len(self._indices):
                     raise RequiredIndexError(missing, name)
+                else:
+                    self.index.names = self._indices
 
 
 class Field(DataFrame):
@@ -160,6 +169,7 @@ class Field(DataFrame):
     :class:`~exa.numerical.Series`) or vector field (via
     :class:`~exa.numerical.DataFrame`). The field index (of this dataframe)
     corresponds to the index in the list of field value data.
+
     +-------------------+----------+-------------------------------------------+
     | Column            | Type     | Description                               |
     +===================+==========+===========================================+
@@ -193,10 +203,22 @@ class Field(DataFrame):
     +-------------------+----------+-------------------------------------------+
     | zk                | float    | Third component in z                      |
     +-------------------+----------+-------------------------------------------+
+
+    Note:
+        Each field should be flattened into an N x 1 (scalar) or N x 3 (vector)
+        series or dataframe respectively. The orientation of the flattening
+        should have x as the outer loop and z values as the inner loop (for both
+        cases). This is sometimes called C-major order, C-style order, and has
+        the last index changing the fastest and the first index changing the
+        slowest.
     '''
+    _df_get_traits = DataFrame._get_traits
     _indices = ['field']
     _columns = ['nx', 'ny', 'nz', 'ox', 'oy', 'oz', 'xi', 'xj', 'xk',
                 'yi', 'yj', 'yk', 'zi', 'zj', 'zk']
+    _traits = ['nx', 'ny', 'nz', 'ox', 'oy', 'oz', 'xi', 'xj', 'xk',
+               'yi', 'yj', 'yk', 'zi', 'zj', 'zk']
+
     @property
     def fields(self):
         '''
@@ -206,11 +228,28 @@ class Field(DataFrame):
         '''
         return self._fields
 
-    def field(self, which):
+    def field_values(self, which):
         '''
         Select a specific field from the list of fields.
         '''
         return self.fields[which]
+
+    def _get_traits(self):
+        '''
+        Because the :class:`~exa.numerical.Field` object has attached vector
+        and scalar fields, trait creation is handled slightly differently.
+        '''
+        traits = self._df_get_traits()
+        if self._groupbys:
+            grps = self.groupby(self._groupbys)
+            string = grps.apply(lambda g: g.index).to_json(orient='values')
+            traits['field_indices'] = Unicode(string).tag(sync=True)
+        else:
+            string = Series(self.index).to_json(orient='values')
+            traits['field_indices'] = Unicode(string).tag(sync=True)
+        s = pd.Series({i: field.values for i, field in enumerate(self._fields)})
+        traits['field_values'] = Unicode(s.to_json(orient='index')).tag(sync=True)
+        return traits
 
     def __init__(self, *args, fields=None, **kwargs):
         '''
