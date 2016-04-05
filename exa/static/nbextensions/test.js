@@ -42,7 +42,16 @@ define([
                     self.run_all_tests();
                 },
             };
+
+            this.sliders = {
+                'isovalue': 0.03,
+            };
+
             this.run_all = this.ui.add(this.buttons, 'run all tests');
+            this.isovalue = this.ui.add(this.sliders, 'isovalue', 0.0001, 5);
+            this.isovalue.onFinishChange(function(value) {
+                console.log(value);
+            });
         };
 
         run_all_tests() {
@@ -53,14 +62,19 @@ define([
     class TestApp {
         constructor(view) {
             this.view = view;
-            this.gui = new TestGUI(this.view);
             this.app3d = new app3d.ThreeJSApp(this.view.canvas);
             this.field = new field.ScalarField({
-                xmin: -1.0, xmax: 1.0, dx: 0.05,
-                ymin: -1.0, ymax: 1.0, dy: 0.05,
-                zmin: -1.0, zmax: 1.0, dz: 0.05
+                xmin: -5.0, xmax: 5.0, dx: 0.4,
+                ymin: -5.0, ymax: 5.0, dy: 0.4,
+                zmin: -5.0, zmax: 5.0, dz: 0.4
             }, field.test);
+            this.gui = new TestGUI(this);
             console.log(this.field);
+            this.isovalue = 0.23;
+            this.plot();
+        };
+
+        plot() {
             /*var x = [];
             var y = [];
             var z = [];
@@ -75,11 +89,10 @@ define([
             };
             this.points = this.app3d.add_points(x, y, z, 1, 0.3);
             this.app3d.set_camera_from_mesh(this.points);*/
-            var isolevel = 0.03;
             console.log(Math.min(...this.field.values));
             console.log(Math.max(...this.field.values));
-            console.log(isolevel);
-            this.field_mesh = this.app3d.add_scalar_field(this.field, isolevel, 2);
+            console.log(this.isovalue);
+            this.field_mesh = this.app3d.add_scalar_field(this.field, this.isovalue, 2);
             console.log(this.field_mesh);
             //console.log(this.field_mesh.geometry.vertices.length);
             //console.log(this.field_mesh.geometry.faces.length);

@@ -121,7 +121,8 @@ define([
     };
 
     var test = function(x, y, z) {
-        return x * Math.exp(-(x * x + y * y + z * z));
+        var r = Math.sqrt(x * x + y * y + z * z);
+        return 1 / (4 * Math.sqrt(Math.PI)) * Math.pow(1 / 0.529, 3 /2) * (2 - 1 * r / 0.529) * r * Math.exp(-r / (2 * 0.529)) * z / r;
     };
 
     return {

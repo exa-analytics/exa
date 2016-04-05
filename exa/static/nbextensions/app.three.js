@@ -666,8 +666,16 @@ define([
                 };
             };
         };
-        var p_material = new THREE.MeshLambertMaterial({color: 0x003399, side: THREE.DoubleSide});
-        var n_material = new THREE.MeshLambertMaterial({color: 0xFF9900, side: THREE.DoubleSide});
+        var p_material = new THREE.MeshLambertMaterial({
+            color: 0x003399,
+            transparent: true,
+            opacity: 0.7
+        });
+        var n_material = new THREE.MeshLambertMaterial({
+            color: 0xFF9900,
+            transparent: true,
+            opacity: 0.8
+        });
         var material1 = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
         var material2 = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
         var mesh1 = new THREE.Mesh(p_geometry, p_material);
