@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-Web Application
+Main
 ==================================
 '''
 from tornado import websocket, web, ioloop

@@ -27,7 +27,8 @@ def install(persistent=False):
         persistent (bool): If True, will install exa to the ~/.exa directory
     '''
     if persistent:
-        raise NotImplementedError('Persistent state exa not yet working...')
+        pass
+        #raise NotImplementedError('Persistent state exa not yet working...')
     else:
         _create_all()
         _load_isotope_data()
@@ -107,12 +108,3 @@ def _install_notebook_widgets(origin_base, dest_base, verbose=False):
             orig = mkp(root, filename)
             dest = mkp(dest_base, subdir, mk=True)
             install_nbextension(orig, verbose=verbose, overwrite=True, nbextensions_dir=dest)
-    with open(mkp(origin_base, '__paths__')) as f:
-        for line in f:
-            if len(line) > 0:
-                partial = line.replace('\'', '').replace('/', ' ')
-                orig = mkp(origin_base, '..', os.sep, *partial.split())
-                if partial.startswith('js'):
-                    partial = partial[2:]
-                dest = mkp(dest_base, *partial.split()[:-1], mk=True)
-                install_nbextension(orig, verbose=verbose, overwrite=True, nbextensions_dir=dest)

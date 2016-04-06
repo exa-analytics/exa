@@ -2,7 +2,7 @@
 ===============
 num.js
 ===============
-Numerical utilities; mimicking numpy's functionality in some cases.
+Numerical utilities
 */
 'use strict';
 
@@ -11,7 +11,7 @@ define([], function() {
     var linspace = function(min, max, n) {
         /*"""
         linspace
-        --------------
+        ================
         Create a linearly spaced array of the form [min, max] with n linearly
         spaced elements.
 
@@ -35,7 +35,7 @@ define([], function() {
     var arange = function(min, max, step) {
         /*"""
         arange
-        -------------
+        ================
         */
         var array = [min];
         while (min < max) {
@@ -45,8 +45,34 @@ define([], function() {
         return array;
     };
 
+    var ellipsoid = function(x, y, z, a, b, c) {
+        /*"""
+        ellipsoid
+        ===========
+        */
+        return (x * x) / (a * a) + (y * y) / (b * b) + (z * z) / (c * c)
+    };
+
+    var sphere = function(x, y, z) {
+        /*"""
+        sphere
+        ================
+        */
+        return x * x + y * y + z * z
+    }
+
+    var torus = function(x, y, z, c) {
+        if (c === undefined) {
+            c = 1.0;
+        };
+        return Math.pow(c - Math.sqrt(x * x + y * y), 2) + z * z;
+    };
+
     return {
         'linspace': linspace,
-        'arange': arange
+        'arange': arange,
+        'sphere': sphere,
+        'ellipsoid': ellipsoid,
+        'torus': torus
     };
 });
