@@ -1,1 +1,0 @@
-../../js/adapters/threejs.js

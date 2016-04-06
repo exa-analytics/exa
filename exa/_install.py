@@ -5,11 +5,14 @@ Installer
 This module is responsible for initializing the database (whether in memory or
 on disk/elsewhere) and installing/updating the (Jupyter) notebook widgets.
 '''
+import os
+import shutil
 import pandas as pd
 from itertools import product
+from notebook import install_nbextension
 from exa import _conf
-from exa.utility import _install_notebook_widgets
 from exa.relational.base import _create_all, engine
+from exa.utility import mkp
 
 
 def install(persistent=False):
@@ -71,3 +74,45 @@ def _load_constant_data():
     df.columns = ['symbol', 'value']
     df['pkid'] = df.index
     df.to_sql(name='constant', con=engine, index=False, if_exists='replace')
+
+
+def _install_notebook_widgets(origin_base, dest_base, verbose=False):
+    '''
+    Convenience wrapper around :py:func:`~notebook.install_nbextension` that
+    installs Jupyter notebook extensions using a systematic naming convention (
+    mimics the source directory and file name structure rather than installing
+    as a flat file set).
+
+    This function will read the special file "__paths__" to collect dependencies
+    not present in the nbextensions directory.
+
+    Args:
+        origin_base (str): Location of extension source code
+        dest_base (str): Destination location (system and/or user specific)
+        verbose (bool): Verbose installation (default False)
+
+    Note:
+
+    See Also:
+        The configuration module :mod:`~exa._config` describes the default
+        arguments used by :func:`~exa._install.install` during installation.
+    '''
+    try:
+        shutil.rmtree(dest_base)
+    except:
+        pass
+    for root, subdirs, files in os.walk(origin_base):
+        for filename in files:
+            subdir = root.split('nbextensions')[-1]
+            orig = mkp(root, filename)
+            dest = mkp(dest_base, subdir, mk=True)
+            install_nbextension(orig, verbose=verbose, overwrite=True, nbextensions_dir=dest)
+    with open(mkp(origin_base, '__paths__')) as f:
+        for line in f:
+            if len(line) > 0:
+                partial = line.replace('\'', '').replace('/', ' ')
+                orig = mkp(origin_base, '..', os.sep, *partial.split())
+                if partial.startswith('js'):
+                    partial = partial[2:]
+                dest = mkp(dest_base, *partial.split()[:-1], mk=True)
+                install_nbextension(orig, verbose=verbose, overwrite=True, nbextensions_dir=dest)
