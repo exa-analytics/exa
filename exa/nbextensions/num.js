@@ -50,6 +50,15 @@ define([], function() {
         ellipsoid
         ===========
         */
+        if (a === undefined) {
+            a = 2.0;
+        };
+        if (b === undefined) {
+            b = 0.5;
+        };
+        if (c === undefined) {
+            c = 5.0;
+        };
         return (x * x) / (a * a) + (y * y) / (b * b) + (z * z) / (c * c)
     };
 
@@ -73,6 +82,7 @@ define([], function() {
         'arange': arange,
         'sphere': sphere,
         'ellipsoid': ellipsoid,
-        'torus': torus
+        'torus': torus,
+        'function_list_3d': ['sphere', 'torus', 'ellipsoid'],
     };
 });

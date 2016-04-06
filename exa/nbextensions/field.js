@@ -95,8 +95,10 @@ define([
                     this.compute_field();
                 };
             } else {
-                this.values = Float32Array(func_or_values);
+                this.values = new Float32Array(func_or_values);
             };
+            console.log(Math.min(...this.values));
+            console.log(Math.max(...this.values));
         };
 
         compute_field() {
@@ -104,7 +106,7 @@ define([
             compute_field
             --------------
             */
-            this.values = Float32Array(this.n);
+            this.values = new Float32Array(this.n);
             var i = 0;
             for (let x of this.x) {
                 for (let y of this.y) {

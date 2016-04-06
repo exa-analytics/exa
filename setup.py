@@ -41,6 +41,9 @@ try:
         license='Apache License Version 2.0'
     )
     from exa._install import install
-    install(persistent=True)
+    exa_root = input('Specify install directory [default: ~/.exa]: ')
+    if exa_root == '':
+        exa_root = exa._conf['exa_root']
+    install(exa_root=exa_root)
 except:
     raise

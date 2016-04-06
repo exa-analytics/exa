@@ -266,6 +266,7 @@ class BaseContainer:
         self._widget = self._widget_class(self) if _conf['notebook'] else None
         if meta is None and len(kwargs) == 0:
             self._test = True
+            self.name = 'TestContainer'
             self._update_traits()
 
     def _repr_html_(self):

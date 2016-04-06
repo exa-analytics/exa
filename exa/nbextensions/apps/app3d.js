@@ -112,6 +112,7 @@ define([
             Start the animation.
             */
             window.requestAnimationFrame(this.animate.bind(this));
+            this.render();
             this.controls.update();
         };
 
@@ -128,6 +129,17 @@ define([
             this.camera.updateProjectionMatrix();
             this.controls.handleResize();
             this.render();
+        };
+
+        remove_meshes(meshes) {
+            /*"""
+            remove_meshes
+            ----------------
+            Iterates over the meshes and removes each from the scene.
+            */
+            for (let mesh of meshes) {
+                this.scene.remove(mesh);
+            };
         };
 
         add_points(x, y, z, colors, radii) {
@@ -295,13 +307,13 @@ define([
             /*"""
             */
             if (rx === undefined) {
-                rx = 0.0;
+                rx = 2.0;
             }
             if (ry === undefined) {
-                ry = 0.0;
+                ry = 2.0;
             }
             if (rz === undefined) {
-                rz = 0.0;
+                rz = 2.0;
             }
             var position;
             if (mesh.geometry.type === 'BufferGeometry') {
@@ -526,8 +538,12 @@ define([
             var material = new THREE.MeshLambertMaterial({color:0x303030});
             var mat = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
             var frame = new THREE.Mesh(geometry, mat);
+            var filled = new THREE.Mesh(geometry, material);
+            this.scene.add(filled);
             this.scene.add(frame);
-            return new THREE.Mesh(geometry, material);
+            console.log(frame.geometry.vertices.length);
+            console.log(frame.geometry.faces.length);
+            return [filled, frame];
         };
 
         march_cubes2(field, isovalue) {

@@ -15,7 +15,7 @@ from exa.relational.base import _create_all, engine
 from exa.utility import mkp
 
 
-def install(persistent=False):
+def install(exa_root=None):
     '''
     Initializes exa's database and notebook widget features.
 
@@ -24,9 +24,9 @@ def install(persistent=False):
     location in **~/.exa** where all configuration, log, and data are housed.
 
     Args:
-        persistent (bool): If True, will install exa to the ~/.exa directory
+        exa_root (str): If None assumes temporary session, otherwise directory path where the package will be installed
     '''
-    if persistent:
+    if exa_root:
         pass
         #raise NotImplementedError('Persistent state exa not yet working...')
     else:
