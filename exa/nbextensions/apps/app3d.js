@@ -253,50 +253,42 @@ define([
             return flat;
         };
 
-        set_camera(x, y, z, ox, oy, oz, rx, ry, rz) {
+        set_camera(kwargs) {
             /*"""
             set_camera
             ------------------
             Set the camera in the default position and have it look at the origin.
 
             Args:
-                x (float): Camera position in x
-                y (float): Camera position in y
-                z (float): Camera position in z
-                ox (float): Target position in x
-                oy (float): Target position in y
-                oz (float): Target position in z
+                kwargs: {'x': x, 'y': y, ..., 'ox': ox, ...}
             */
-            if (x === undefined) {
-                x = 100.0;
+            if (kwargs === undefined) {
+                kwargs = {};
             };
-            if (y === undefined) {
-                y = 100.0;
+            for (let key of ['x', 'y', 'z']) {
+                if (!kwargs.hasOwnProperty(key)) {
+                    kwargs[key] = 60.0;
+                } else {
+                    if (kwargs[key] === undefined || isNaN(kwargs[key]) || !isFinite(kwargs[key])) {
+                        kwargs[key] = 60.0;
+                    };
+                };
             };
-            if (z === undefined) {
-                z = 100.0;
+            for (let key of ['ox', 'oy', 'oz', 'rx', 'ry', 'rz']) {
+                if (!kwargs.hasOwnProperty(key)) {
+                    kwargs[key] = 0.0;
+                } else {
+                    if (kwargs[key] === undefined || isNaN(kwargs[key]) || !isFinite(kwargs[key])) {
+                        kwargs[key] = 0.0;
+                    };
+                };
             };
-            if (ox === undefined) {
-                ox = 0.0;
-            };
-            if (oy === undefined) {
-                oy = 0.0;
-            };
-            if (oz === undefined) {
-                oz = 0.0;
-            };
-            if (rx === undefined) {
-                rx = 0.0;
-            }
-            if (ry === undefined) {
-                ry = 0.0;
-            }
-            if (rz === undefined) {
-                rz = 0.0;
-            }
-            x += rx;
-            y += ry;
-            z += rz;
+            var x = kwargs['x'] + kwargs['rx'];
+            var y = kwargs['y'] + kwargs['ry'];
+            var z = kwargs['z'] + kwargs['rz'];
+            var ox = kwargs['ox'];
+            var oy = kwargs['oy'];
+            var oz = kwargs['oz'];
             this.camera.position.set(x, y, z);
             this.target = new THREE.Vector3(ox, oy, oz);
             this.camera.lookAt(this.target);
@@ -347,7 +339,9 @@ define([
             xyz.y += ry;
             xyz.z *= 1.2;
             xyz.z += rz;
-            this.set_camera(xyz.x, xyz.y, xyz.z, oxyz[0], oxyz[1], oxyz[2]);
+            var kwargs = {'x': xyz.x, 'y': xyz.y, 'z': xyz.z,
+                          'ox': oxyz[0], 'oy': oxyz[1], 'oz': oxyz[2]};
+            this.set_camera(kwargs);
         };
 
         add_temp(v1, v2, f1, f2) {
@@ -683,7 +677,11 @@ define([
             this.scene.add(mesh2);
             this.scene.add(mesh3);
             this.scene.add(mesh4);
-            return {mesh1: mesh1, mesh2: mesh2, mesh3: mesh3, mesh4: mesh4};
+            console.log(mesh3.geometry.vertices.length);
+            console.log(mesh3.geometry.faces.length);
+            console.log(mesh4.geometry.vertices.length);
+            console.log(mesh4.geometry.faces.length);
+            return [mesh1, mesh2, mesh3, mesh4];
         };
     };
 

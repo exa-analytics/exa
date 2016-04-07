@@ -34,6 +34,7 @@ define([
             {xmin: xmin, xmax: xmax, nx: nx, ...}
         */
         constructor(dimensions, func_or_values) {
+            this.func = {};
             if (dimensions.hasOwnProperty('xvalues') === true) {
                 this.x = dimensions.xvalues;
                 this.xmin = Math.min(...dimensions.xvalues);
@@ -97,8 +98,125 @@ define([
             } else {
                 this.values = new Float32Array(func_or_values);
             };
-            console.log(Math.min(...this.values));
-            console.log(Math.max(...this.values));
+        };
+
+        new_dr(d) {
+            /*"""
+            new_dr
+            -------------
+            Updates the y array using the new step size.
+
+            Args:
+                d: {dx: dx, ...}
+            */
+            if (typeof this.func === 'function') {
+                var all_equal = 0;
+                if (!d.hasOwnProperty('dx')) {
+                    d['dx'] = this.dx;
+                    ++all_equal;
+                } else {
+                    this.dx = d.dx;
+                    this.x = num.arange(this.xmin, this.xmax, this.dx);
+                    this.nx = this.x.length;
+                };
+                if (!d.hasOwnProperty('dy')) {
+                    d['dy'] = this.dy;
+                    ++all_equal;
+                } else {
+                    this.dy = d.dy;
+                    this.y = num.arange(this.ymin, this.ymax, this.dy);
+                    this.ny = this.y.length;
+                };
+                if (!d.hasOwnProperty('dz')) {
+                    d['dz'] = this.dz;
+                    ++all_equal;
+                } else {
+                    this.dz = d.dz;
+                    this.z = num.arange(this.zmin, this.zmax, this.dz);
+                    this.nz = this.z.length;
+                };
+                if (all_equal === 3) {
+                    return;
+                };
+                this.compute_field();
+            } else {
+                console.log('Cannot automatically update a field with no analytical form!');
+            };
+        };
+
+        new_limits(limits) {
+            /*"""
+            new_limits
+            --------------
+            Args:
+                limits: {xmin: xmin, ymin: ymin, ...}
+            */
+            if (typeof this.func === 'function') {
+                var all_equal = 0;
+                var x = false;
+                var y = false;
+                var z = false;
+                if (!limits.hasOwnProperty('xmin')) {
+                    limits['xmin'] = this.xmin;
+                    ++all_equal;
+                } else {
+                    this.xmin = limits.xmin;
+                    x = true;
+                };
+                if (!limits.hasOwnProperty('ymin')) {
+                    limits['ymin'] = this.ymin;
+                    ++all_equal;
+                } else {
+                    this.ymin = limits.ymin;
+                    y = true;
+                };
+                if (!limits.hasOwnProperty('zmin')) {
+                    limits['zmin'] = this.zmin;
+                    ++all_equal;
+                } else {
+                    this.zmin = limits.zmin;
+                    z = true;
+                };
+                if (!limits.hasOwnProperty('xmax')) {
+                    limits['xmax'] = this.xmax;
+                    ++all_equal;
+                } else {
+                    this.xmax = limits.xmax;
+                    x = true;
+                };
+                if (!limits.hasOwnProperty('ymax')) {
+                    limits['ymax'] = this.ymax;
+                    ++all_equal;
+                } else {
+                    this.ymax = limits.ymax;
+                    y = true;
+                };
+                if (!limits.hasOwnProperty('zmax')) {
+                    limits['zmax'] = this.zmax;
+                    ++all_equal;
+                } else {
+                    this.zmax = limits.zmax;
+                    z = true;
+                };
+                if (all_equal === 6) {
+                    return;
+                };
+                if (x === true) {
+                    this.x = num.arange(this.xmin, this.xmax, this.dx);
+                    this.nx = this.x.length;
+                };
+                if (y === true) {
+                    this.y = num.arange(this.ymin, this.ymax, this.dy);
+                    this.ny = this.y.length;
+                };
+                if (z === true) {
+                    this.z = num.arange(this.zmin, this.zmax, this.dz);
+                    this.nz = this.z.length;
+                };
+                this.compute_field();
+            } else {
+                console.log('Cannot automatically update a field with no analytical form!');
+            };
         };
 
         compute_field() {
