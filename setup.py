@@ -30,26 +30,20 @@ try:
         version=__version__,
         description='Data processing, analysis, and visualization made simple.',
         author='Tom Duignan & Alex Marchenko',
-        author_email='exa.data.analytics@gmail.com',
+        maintainer_email='exa.data.analytics@gmail.com',
         url='https://exa-analytics.github.io/website',
         packages=find_packages(),
-        package_data={
-            'exa': [
-                'templates/*',
-                'static/js/*.js',
-                'static/js/libs/*.js',
-                'static/css/*.css',
-                'static/img/*.*',
-                'static/html/*.html',
-                'static/nbextensions/*.js',
-                'static/nbextensions/lib/*.js'
-            ]
-        },
+        package_data={'exa': ['static/*.json', 'nbextensions/*.js', 'nbextensions/lib/*.js',
+                              'nbextensions/apps/*.js']},
         entry_points={'console_scripts': ['exa = exa.__main__:main']},
         include_package_data=True,
-        install_requires=dependencies
+        install_requires=dependencies,
+        license='Apache License Version 2.0'
     )
-    from exa.install import finalize_installation
-    finalize_installation()
+    from exa._install import install
+    exa_root = input('Specify install directory [default: ~/.exa]: ')
+    if exa_root == '':
+        exa_root = exa._conf['exa_root']
+    install(exa_root=exa_root)
 except:
     raise

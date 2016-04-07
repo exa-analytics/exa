@@ -112,7 +112,7 @@ class Editor:
         else:
             raise TypeError('Unsupported type {0} for lines.'.format(type(lines)))
 
-    def preappend(self, lines):
+    def prepend(self, lines):
         '''
         Args:
             lines (list): List of line strings to insert at the beginning of the editor

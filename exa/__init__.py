@@ -2,13 +2,11 @@
 __exa_version__ = (0, 2, 0)    # Version number is defined here!
 __version__ = '.'.join((str(v) for v in __exa_version__))
 
-
 import atexit as _ae
 import seaborn as _sns
 _sns.set_context('poster', font_scale=1.3)    # This may override user plotting
 _sns.set_palette('colorblind')                # defaults...
 _sns.set_style('white')
-
 
 from exa._config import _conf, show_conf
 from exa.log import log_names, log_head, log_tail
@@ -18,7 +16,6 @@ from exa.relational.container import Container
 from exa.numerical import Series, DataFrame, Field
 from exa.editor import Editor
 from exa import algorithms
-
 
 if not _conf['exa_persistent']:
     from exa._install import install

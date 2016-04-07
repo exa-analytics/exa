@@ -204,7 +204,7 @@ class BaseContainer:
         '''
         return {}
 
-    def _update_traits(self, test=False):
+    def _update_traits(self):
         '''
         Update specific traits, given in the arguments.
 
@@ -212,7 +212,7 @@ class BaseContainer:
             traits (list): Names of traits to update
         '''
         traits = {}
-        if test:
+        if self._test:
             traits['test'] = Bool(True).tag(sync=True)
         else:
             traits = self._custom_container_traits()
@@ -243,7 +243,7 @@ class BaseContainer:
             This function currently doesn't account for memory usage due to
             traits (:class:`~exa.widget.ContainerWidget`).
         '''
-        jstot = 0  # Memory usage from the widget
+        jstot = 0  # Memory usage from the widget view
         dftot = self._df_bytes()
         kwtot = 0
         for key, value in self._kw_dict().items():
@@ -260,17 +260,14 @@ class BaseContainer:
             raise KeyError()
 
     def __init__(self, meta=None, **kwargs):
-        '''
-        Args:
-            meta: Dictionary of metadata key, value pairs
-            widget: Class instance (of Jupyter notebook widget) or None
-        '''
         for key, value in kwargs.items():
             setattr(self, key, value)
         self.meta = meta
         self._widget = self._widget_class(self) if _conf['notebook'] else None
         if meta is None and len(kwargs) == 0:
-            self._update_traits(test=True)
+            self._test = True
+            self.name = 'TestContainer'
+            self._update_traits()
 
     def _repr_html_(self):
         if self._widget:
