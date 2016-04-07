@@ -21,6 +21,9 @@ from sqlalchemy.ext.declarative import as_declarative, declared_attr, Declarativ
 from exa import _conf
 
 
+gen_uid = lambda: uuid4().hex    # Unique random id in db format
+
+
 class BaseMeta(DeclarativeMeta):
     '''
     This class defines the behavior of the :class:`~exa.relational.base.Base`
@@ -188,7 +191,7 @@ class HexUID:
     '''
     Mixin providing a unique ID.
     '''
-    hexuid = Column(String(32), default=uuid4)
+    hexuid = Column(String(32), default=gen_uid)
 
     @property
     def uid(self):

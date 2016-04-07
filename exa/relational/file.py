@@ -11,8 +11,7 @@ See Also:
 '''
 from datetime import datetime
 from sqlalchemy import String, DateTime, Column, Integer
-from exa.utility import uid
-from exa.relational.base import Base
+from exa.relational.base import Base, gen_uid
 
 
 class File(Base):
@@ -23,7 +22,7 @@ class File(Base):
     '''
     name = Column(String)
     description = Column(String)
-    uid = Column(String(32), default=uid)
+    uid = Column(String(32), default=gen_uid)
     extension = Column(String, nullable=False)    # This keeps track of file type
     created = Column(DateTime, default=datetime.now)
     modified = Column(DateTime, default=datetime.now)
