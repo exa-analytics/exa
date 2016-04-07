@@ -8,7 +8,6 @@ providing a cleaner API for commonly used functions.
 import os
 from uuid import uuid4
 from datetime import datetime
-from notebook import install_nbextension
 
 
 sep2 = os.sep + os.sep
@@ -61,30 +60,6 @@ def mkp(*args, mk=False, exist_ok=True):
             path = path.replace(sep2, os.sep)
         os.makedirs(path, exist_ok=exist_ok)
     return path
-
-
-def _install_notebook_widgets(origin_base, dest_base, verbose=False):
-    '''
-    Convenience wrapper around :py:func:`~notebook.install_nbextension` that
-    installs Jupyter notebook extensions using a systematic naming convention (
-    mimics the source directory and file name structure rather than installing
-    as a flat file set).
-
-    Args:
-        origin_base (str): Location of extension source code
-        dest_base (str): Destination location (system and/or user specific)
-        verbose (bool): Verbose installation (default False)
-
-    See Also:
-        The configuration module :mod:`~exa._config` describes the default
-        arguments used by :func:`~exa._install.install` during installation.
-    '''
-    for root, subdirs, files in os.walk(origin_base):
-        for filename in files:
-            subdir = root.split('nbextensions')[-1]
-            orig = mkp(root, filename)
-            dest = mkp(dest_base, subdir, mk=True)
-            install_nbextension(orig, verbose=verbose, overwrite=True, nbextensions_dir=dest)
 
 
 def del_keys(kwargs, match='id'):

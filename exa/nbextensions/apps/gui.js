@@ -9,7 +9,7 @@ Basic gui for container views.
 
 require.config({
     shim: {
-        'nbextensions/exa/lib/dat.gui.min': {
+        'nbextensions/exa/libs/dat.gui.min': {
             exports: 'dat'
         },
     },
@@ -17,22 +17,18 @@ require.config({
 
 
 define([
-    'nbextensions/exa/lib/dat.gui.min',
+    'nbextensions/exa/libs/dat.gui.min',
 ], function(dat) {
     class ContainerGUI extends dat.GUI {
         /*"""
         ContainerGUI
         ===============
         */
-        constructor(args) {
-            super(args);
-            this.view = args.view;
-            this.ui_css = document.createElement('style');
-            this.ui_css.innerHTML = this.gui_style;
-            this.init();
+        constructor(width) {
+            super({autoPlace: false, width: width});
+            this.custom_css = document.createElement('style');
+            this.custom_css.innerHTML = this.gui_style;
         };
-
-        init() {};
     };
 
     ContainerGUI.prototype.gui_style = ".dg {\
@@ -148,5 +144,5 @@ define([
         outline-width: 1.5px\
     }";
 
-    return {ContainerGUI: ContainerGUI};
+    return ContainerGUI;
 });
