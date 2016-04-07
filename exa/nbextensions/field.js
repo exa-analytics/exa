@@ -34,7 +34,7 @@ define([
             {xmin: xmin, xmax: xmax, nx: nx, ...}
         */
         constructor(dimensions, func_or_values) {
-            if (dimensions.xvalues !== undefined) {
+            if (dimensions.hasOwnProperty('xvalues') === true) {
                 this.x = dimensions.xvalues;
                 this.xmin = Math.min(...dimensions.xvalues);
                 this.xmax = Math.max(...dimensions.xvalues);
@@ -52,7 +52,7 @@ define([
                 this.x = num.arange(this.xmin, this.xmax, this.dx);
                 this.nx = this.x.length;
             };
-            if (dimensions.yvalues !== undefined) {
+            if (dimensions.hasOwnProperty('yvalues') === true) {
                 this.y = dimensions.yvalues;
                 this.ymin = Math.min(...dimensions.yvalues);
                 this.ymax = Math.max(...dimensions.yvalues);
@@ -70,7 +70,7 @@ define([
                 this.y = num.arange(this.ymin, this.ymax, this.dy);
                 this.ny = this.y.length;
             };
-            if (dimensions.zvalues !== undefined) {
+            if (dimensions.hasOwnProperty('zvalues') === true) {
                 this.z = dimensions.zvalues;
                 this.zmin = Math.min(...dimensions.zvalues);
                 this.zmax = Math.max(...dimensions.zvalues);

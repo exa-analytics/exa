@@ -106,10 +106,11 @@ define([
             this.fields['zmin_slider'] = this.fields.add(this.fields, 'zmin', -50.0, 50.0);
             this.fields['zmax_slider'] = this.fields.add(this.fields, 'zmax', -50.0, 50.0);
             this.fields['field_type_dropdown'] = this.fields.add(this.fields, 'field type', num.function_list_3d);
+
             this.fields.field_type_dropdown.onFinishChange(function(field_type) {
                 self.app3d.remove_meshes(self.meshes);
                 self.fields['field type'] = field_type;
-                self.dimensions = {
+                self.fields.dimensions = {
                     'xmin': self.fields.xmin,
                     'xmax': self.fields.xmax,
                     'ymin': self.fields.ymin,
@@ -120,24 +121,33 @@ define([
                     'dy': self.fields.dy,
                     'dz': self.fields.dz
                 };
-                self.field = new field.ScalarField(self.dimensions, num[field_type]);
-                self.meshes = self.app3d.add_scalar_field(self.field, self.fields.isovalue, 1);
-                self.app3d.set_camera_from_mesh(self.meshes[0]);
+                self.fields.field = new field.ScalarField(self.fields.dimensions, num[field_type]);
+                self.render_field();
             });
+
+            this.fields.dual_checkbox.onChange(function(value) {
+                console.log(value);
+                self.fields.dual = value;
+                self.fields.sides = self.fields.dual + 1;
+                console.log(self.fields.sides);
+                self.render_field();
+            });
+
             this.fields.isovalue_slider.onFinishChange(function(value) {
                 self.fields.isovalue = value;
-                console.log(self.dimensions);
-                console.log(self.fields['field type']);
-                console.log(num[self.fields['field type']]);
-                self.field = new field.ScalarField(self.dimensions, num[self.fields['field type']]);
-                self.app3d.remove_meshes(self.meshes);
-                self.meshes = self.app3d.add_scalar_field(self.field, self.fields.isovalue, 1);
-                self.app3d.set_camera_from_mesh(self.meshes[0]);
+                self.fields.field = new field.ScalarField(self.fields.dimensions, num[self.fields['field type']]);
+                self.render_field();
             });
         };
 
         resize() {
             this.app3d.resize();
+        };
+
+        render_field() {
+            this.app3d.remove_meshes(this.meshes);
+            this.meshes = this.app3d.add_scalar_field(this.fields.field, this.fields.isovalue, this.fields.sides);
+            this.app3d.set_camera_from_mesh(this.meshes[0]);
         };
     };
 
