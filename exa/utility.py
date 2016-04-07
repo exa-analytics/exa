@@ -6,7 +6,6 @@ These functions are simply syntactic sugar. They help cleanup the code base by
 providing a cleaner API for commonly used functions.
 '''
 import os
-from uuid import uuid4
 from datetime import datetime
 
 
@@ -19,22 +18,6 @@ def datetime_header():
     delimited using "=".
     '''
     return '\n'.join(('=' * 80, str(datetime.now()), '=' * 80))
-
-
-def uid(as_hex=True):
-    '''
-    Generate a unique id (uuid4).
-
-    Args:
-        as_hex (bool): If True return hex string
-
-    Returns:
-        uid: String unique id or UUID object
-    '''
-    if as_hex:
-        return uuid4().hex
-    else:
-        return uuid4()
 
 
 def mkp(*args, mk=False, exist_ok=True):

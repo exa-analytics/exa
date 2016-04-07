@@ -101,8 +101,7 @@ class BaseContainer:
         '''
         if pkid:
             raise NotImplementedError()
-        else:
-            return cls.from_hdf(path)
+        return cls.from_hdf(path)
 
     def _save_data(self, path=None):
         '''
@@ -150,8 +149,7 @@ class BaseContainer:
                     kws[name] = obj
         if copy:
             return kws.copy()
-        else:
-            return kws
+        return kws
 
     def _numerical_dict(self, copy=False, cls_criteria=[pd.Series, pd.DataFrame]):
         '''

@@ -81,6 +81,66 @@ def arange2(initials, count):
     return (i_idx, j_idx, values)
 
 
+def indexes_sc1(starts, counts):
+    '''
+    Generate piecewise linear (step 1) indices from starting points and counts.
+
+    Args:
+        starts (:class:`numpy.ndarray`): Array of starting points
+        counts (:class:`numpy.ndarray`): Array of counts (same length as starts)
+
+    Returns:
+        indices (tuple): Outer sequential index, inner sequential index, resulting indicies
+
+    Note:
+        Typically only the resulting indices will be of interest (third array
+        of the returned tuple).
+    '''
+    n = np.sum(counts)
+    outer = np.empty((n, ), dtype=np.int64)
+    inner = outer.copy()
+    index = inner.copy()
+    h = 0
+    for i, start in enumerate(starts):
+        stop = start + counts[i]
+        for j, value in enumerate(range(start, stop)):
+            outer[h] = i
+            inner[h] = j
+            index[h] = value
+            h += 1
+    return (outer, inner, index)
+
+
+def indexes_sc2(starts, count):
+    '''
+    Generate piecewise linear (step 1) indices from starting points and counts.
+
+    Args:
+        starts (:class:`numpy.ndarray`): Array of starting points
+        count (int): Integer count
+
+    Returns:
+        indices (tuple): Outer sequential index, inner sequential index, resulting indicies
+
+    Note:
+        Typically only the resulting indices will be of interest (third array
+        of the returned tuple).
+    '''
+    n = len(starts) * count
+    outer = np.empty((n, ), dtype=np.int64)
+    inner = outer.copy()
+    index = inner.copy()
+    h = 0
+    for i, start in enumerate(starts):
+        stop = start + count
+        for j, value in enumerate(range(start, stop)):
+            outer[h] = i
+            inner[h] = j
+            index[h] = value
+            h += 1
+    return (outer, inner, index)
+
+
 def unordered_pairing_single(x, y):
     '''
     A `pairing function`_ for unordered (in magnitude) values.
