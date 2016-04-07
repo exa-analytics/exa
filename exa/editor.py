@@ -181,7 +181,6 @@ class Editor:
     def find_next(self, string):
         '''
         Find the subsequent line containing the given string.
-
         Args:
             string (str): String to search for
 
@@ -210,6 +209,9 @@ class Editor:
     def regex(self, *patterns, line=False):
         '''
         Search the editor for lines matching the regular expression.
+        Args:
+            \*patterns: Regular expressions to search each line for
+            line (bool): Return the whole line or the matched groups (groups default)
 
         Args:
             \*patterns: Regular expressions to search each line for
@@ -357,7 +359,6 @@ class Editor:
 
     def __repr__(self):
         return self._line_repr(self._lines)
-
 
 def lines_from_file(path, as_interned=False):
     '''

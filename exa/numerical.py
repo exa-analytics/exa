@@ -47,7 +47,6 @@ class Series(NDBase, pd.Series):
 class DataFrame(NDBase, pd.DataFrame):
     '''
     Trait supporting analogue of :class:`~pandas.DataFrame`.
-
     Note:
         Columns, indices, etc. are only enforced if the dataframe has non-zero
         length.
@@ -83,7 +82,6 @@ class DataFrame(NDBase, pd.DataFrame):
         '''
         Placeholder function to be overwritten when custom trait creation is
         required
-
         Returns:
             traits (dict): Dictionary of traits to be added
         '''
@@ -167,7 +165,6 @@ class DataFrame(NDBase, pd.DataFrame):
 class Field(DataFrame):
     '''
     A dataframe for storing field (meta)data along with the actual field values.
-
     The storage of field values may be in the form of a scalar field (via
     :class:`~exa.numerical.Series`) or vector field (via
     :class:`~exa.numerical.DataFrame`). The field index (of this dataframe)
@@ -226,7 +223,6 @@ class Field(DataFrame):
     def fields(self):
         '''
         List of fields with order matching that of the field table.
-
         Returns:
             fields (list): List of fields
         '''
