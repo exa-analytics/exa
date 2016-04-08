@@ -17,6 +17,7 @@ See Also:
     :mod:`~exa.relational.container`
 '''
 import os
+import numpy as np
 import pandas as pd
 from sys import getsizeof
 from traitlets import Bool
@@ -248,11 +249,11 @@ class BaseContainer:
                 if np.any([key in df[col] for col in df._groupbys]):
                     kws[name] = dfcls(df.groupby(df._groupbys).get_group(key))
                 elif key in df.index:
-                    kws[name] = dfcls(df.ix[key, :])
+                    kws[name] = dfcls(df.ix[key:key, :])
                 else:
                     kws[name] = df
             else:
-                kws[name] = dfcls(df.ix[key, :])
+                kws[name] = dfcls(df.ix[key:key, :])
         return cls(**kws)
 
     def _slice_with_list_or_tuple(self, keys):
@@ -263,8 +264,42 @@ class BaseContainer:
         cls = self.__class__
         kws = del_keys(self._kw_dict(copy=True))
         for name, df in self._numerical_dict(copy=True).items():
+            dfcls = df.__class__
+            if hasattr(df, '_groupbys'):
+                if np.all([np.any([key in df[col] for col in df._groupbys]) for key in keys]):
+                    kws[name] = dfcls(pd.concat([df.groupby(df._groupbys).get_group(key) for key in keys]))
+                elif np.all([key in df.index for key in keys]):
+                    kws[name] = dfcls(df.ix[keys, :])
+                else:
+                    kws[name] = df
+            elif np.all([key in df.index for key in keys]):
+                kws[name] = dfcls(df.ix[keys, :])
+            else:
+                kws[name] = df
+        return cls(**kws)
 
-
+    def __getitem__(self, key):
+        '''
+        The key can be an integer, slice, list, tuple, or string. If integer, this function will
+        attempt to build a copy of this container object with dataframes whose contents only contains
+        the slice of the dataframe where the **_groupby** attribute matches the integer value. If
+        slice, list, or tuple this function will do the same as for an integer but attempt to select
+        all matches in the _groupby field. Note that if the _groupby attribute is empty, this will
+        select by row index instead (not column index!). If string, this function will attempt to
+        get the attribute matching that string.
+        '''
+        if isinstance(key, int):
+            return self._slice_with_int_or_string(key)
+        elif isinstance(key, str) and not hasattr(self, key):
+            return self._slice_with_int_or_string(key)
+        elif isinstance(key, list) or isinstance(key, tuple):
+            return self._slice_with_list_or_tuple(key)
+        elif isinstance(key, slice):
+            raise NotImplementedError()
+        elif hasattr(self, key):
+            return getattr(self, key)
+        else:
+            raise KeyError('No selection method for key {} of type {}'.format(key, type(key)))
 
     def __sizeof__(self):
         '''
@@ -282,28 +317,8 @@ class BaseContainer:
             kwtot += getsizeof(value)
         return dftot + kwtot + jstot
 
-    def __getitem__(self, key):
-        '''
-        The key can be an integer, slice, list, tuple, or string. If integer, this function will
-        attempt to build a copy of this container object with dataframes whose contents only contains
-        the slice of the dataframe where the **_groupby** attribute matches the integer value. If
-        slice, list, or tuple this function will do the same as for an integer but attempt to select
-        all matches in the _groupby field. Note that if the _groupby attribute is empty, this will
-        select by row index instead (not column index!). If string, this function will attempt to
-        get the attribute matching that string.
-        '''
-        if (isinstance(key, int) or isinstance(key, str)) and not hasattr(self, key):
-            raise NotImplementedError()
-        elif isinstance(key, slice):
-            raise
-        elif isinstance(key, list) or isinstance(key, tuple):
-            raise
-        elif hasattr(self, key):
-            return getattr(self, key)
-        else:
-            raise KeyError('No selection method for key {} of type {}'.format(key, type(key)))
-
     def __init__(self, meta=None, **kwargs):
+        self._test = False
         for key, value in kwargs.items():
             setattr(self, key, value)
         self.meta = meta

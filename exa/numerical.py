@@ -30,6 +30,9 @@ class NDBase:
     _precision = 4      # Default number of decimal places passed by traits
     _traits = []        # Traits present as dataframe columns (or series values)
 
+    def _get_traits(self):
+        return {}
+
     def __repr__(self):
         name = self.__class__.__name__
         n = len(self)
