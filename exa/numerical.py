@@ -262,3 +262,19 @@ class Field(DataFrame):
         '''
         super().__init__(*args, **kwargs)
         self._fields = fields
+
+
+class SparseDataFrame(NDBase, pd.SparseDataFrame):
+    '''
+    Trait supporting sparse dataframe
+    '''
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if len(self) > 0:
+            name = self.__class__.__name__
+            if self._indices:
+                missing = set(self._indices).difference(self.index.names)
+                if missing and len(self.index.names) != len(self._indices):
+                    raise RequiredIndexError(missing, name)
+                else:
+                    self.index.names = self._indices
