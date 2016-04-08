@@ -9,6 +9,9 @@ data from the frame. The trait data is used by :class:`~exa.widget.ContainerWidg
 Because these dataframes have context about their data, they also provide
 convience methods for in memory data compression (using `categories`_).
 
+Another feature of these dataframes is that the _groupbys parameter provides a
+convenient algorithm for container slicing. See the container module for more info.
+
 See Also:
     Modules :mod:`~exa.container` and :mod:`~exa.widget` may provide context.
 

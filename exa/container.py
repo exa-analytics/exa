@@ -233,6 +233,39 @@ class BaseContainer:
             return True
         return False
 
+    def _slice_with_int_or_string(self, key):
+        '''
+        Slices the current container selecting data that matches the key (either on _groupbys or
+        by row index).
+        '''
+        cls = self.__class__
+        kws = del_keys(self._kw_dict(copy=True))
+        for name, df in self._numerical_dict(copy=True).items():
+            dfcls = df.__class__
+            if not hasattr(df, '_groupbys') and key not in df.index:
+                kws[name] = df
+            elif hasattr(df, '_groupbys'):
+                if np.any([key in df[col] for col in df._groupbys]):
+                    kws[name] = dfcls(df.groupby(df._groupbys).get_group(key))
+                elif key in df.index:
+                    kws[name] = dfcls(df.ix[key, :])
+                else:
+                    kws[name] = df
+            else:
+                kws[name] = dfcls(df.ix[key, :])
+        return cls(**kws)
+
+    def _slice_with_list_or_tuple(self, keys):
+        '''
+        Slices the current container selecting data that matches the keys (either on _groupbys or
+        by row index).
+        '''
+        cls = self.__class__
+        kws = del_keys(self._kw_dict(copy=True))
+        for name, df in self._numerical_dict(copy=True).items():
+
+
+
     def __sizeof__(self):
         '''
         Sum of the dataframe sizes, trait values, and relational data.
@@ -250,12 +283,25 @@ class BaseContainer:
         return dftot + kwtot + jstot
 
     def __getitem__(self, key):
-        if isinstance(key, int):
-            pass
+        '''
+        The key can be an integer, slice, list, tuple, or string. If integer, this function will
+        attempt to build a copy of this container object with dataframes whose contents only contains
+        the slice of the dataframe where the **_groupby** attribute matches the integer value. If
+        slice, list, or tuple this function will do the same as for an integer but attempt to select
+        all matches in the _groupby field. Note that if the _groupby attribute is empty, this will
+        select by row index instead (not column index!). If string, this function will attempt to
+        get the attribute matching that string.
+        '''
+        if (isinstance(key, int) or isinstance(key, str)) and not hasattr(self, key):
+            raise NotImplementedError()
+        elif isinstance(key, slice):
+            raise
+        elif isinstance(key, list) or isinstance(key, tuple):
+            raise
         elif hasattr(self, key):
             return getattr(self, key)
         else:
-            raise KeyError()
+            raise KeyError('No selection method for key {} of type {}'.format(key, type(key)))
 
     def __init__(self, meta=None, **kwargs):
         for key, value in kwargs.items():
