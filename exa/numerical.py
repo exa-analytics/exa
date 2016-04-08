@@ -10,10 +10,15 @@ Because these dataframes have context about their data, they also provide
 convience methods for in memory data compression (using `categories`_).
 
 Another feature of these dataframes is that the _groupbys parameter provides a
-convenient algorithm for container slicing. See the container module for more info.
+convenient algorithm for container slicing and concatenation/joining/merging.
+These types of operations are non-trivial when dealing with dataframes whose
+contents may be related (i.e. relational dataframes) so care must be taken to
+ensure no mangling of indices is performed. See the container module for more
+info.
 
 See Also:
-    Modules :mod:`~exa.container` and :mod:`~exa.widget` may provide context.
+    Modules :mod:`~exa.container` and :mod:`~exa.widget` may provide context
+    and usage examples for these classes.
 
 .. _categories: http://pandas-docs.github.io/pandas-docs-travis/categorical.html
 '''
@@ -29,6 +34,16 @@ class NDBase:
     '''
     _precision = 4      # Default number of decimal places passed by traits
     _traits = []        # Traits present as dataframe columns (or series values)
+
+    def save_to_hdf(self, argname, store):
+        '''
+        Save the current object to the specified HDF5 file.
+
+        Args:
+            argname (str): Variable name
+            store: HDFStore object
+        '''
+        raise NotImplementedError('Custom save not implemented for {}'.format(self.__class__.__name__))
 
     def _get_traits(self):
         return {}
@@ -46,6 +61,24 @@ class Series(NDBase, pd.Series):
     '''
     Trait supporting analogue of :class:`~pandas.Series`.
     '''
+    _copy = pd.Series.copy
+
+    def save_to_hdf(self, argname, store):
+        '''
+        Save the current object to the specified HDF5 file.
+
+        Args:
+            argname (str): Variable name
+            store: HDFStore object
+        '''
+
+
+    def copy(self, *args, **kwargs):
+        '''
+        Custom copy function returns same type
+        '''
+        return self.__class__(self._copy(*args, **kwargs))
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -58,6 +91,7 @@ class DataFrame(NDBase, pd.DataFrame):
         Columns, indices, etc. are only enforced if the dataframe has non-zero
         length.
     '''
+    _copy = pd.DataFrame.copy
     _groupbys = []      # Column names by which to group the data
     _indices = []       # Required index names (typically single valued list)
     _columns = []       # Required column entries
@@ -70,6 +104,12 @@ class DataFrame(NDBase, pd.DataFrame):
     @property
     def _li(self):
         return self.index[-1]
+
+    def copy(self, *args, **kwargs):
+        '''
+        Custom copy function returns same type
+        '''
+        return self.__class__(self._copy(*args, **kwargs))
 
     def _revert_categories(self):
         '''
@@ -170,14 +210,24 @@ class DataFrame(NDBase, pd.DataFrame):
                     self.index.names = self._indices
 
 
-class Field(DataFrame):
+class Field:
     '''
-    A dataframe for storing field (meta)data along with the actual field values.
+    A discrete field is described by its spatial discritization (field data)
+    where each discrete point has any number of attributes (field values). This
+    is a special type of dataframe because the dimensionality of the field
+    values may be different for different fields. This class, therefore, stores
+    the field dimensionality in one dataframe and field values in other data
+    frames.
+    '''
+    pass
 
-    The storage of field values may be in the form of a scalar field (via
-    :class:`~exa.numerical.Series`) or vector field (via
-    :class:`~exa.numerical.DataFrame`). The field index (of this dataframe)
-    corresponds to the index in the list of field value data.
+
+
+
+class Field3D(DataFrame):
+    '''
+    Dataframe for storing dimensions of a scalar or vector field of 3D space.
+    The row index present in this dataframe should correspond to a
 
     +-------------------+----------+-------------------------------------------+
     | Column            | Type     | Description                               |
@@ -238,6 +288,13 @@ class Field(DataFrame):
         '''
         return self._fields
 
+    def copy(self, *args, **kwargs):
+        '''
+        '''
+        df = self._copy(*args, **kwargs)
+        fields = [field.copy() for field in self.fields]
+        return self.__class__(df, fields=fields)
+
     def field_values(self, which):
         '''
         Select a specific field from the list of fields.
@@ -268,6 +325,24 @@ class Field(DataFrame):
         '''
         super().__init__(*args, **kwargs)
         self._fields = fields
+
+
+class FieldValues(tuple):
+    '''
+    Class for storing field values (scalar or vector).
+
+    Note:
+        FieldValues are immutable since they subclass tuple. This means that
+        one has to be very careful when manipulating the field table so as to
+        ensure consistency between indices there and indices here.
+
+    See Also:
+        :class:`~exa.numerical.Field`
+    '''
+    def __repr__(self):
+        name = self.__class__.__name__
+        nfield = len(self)
+        return '{}(nfields: {})'.format()
 
 
 class SparseDataFrame(NDBase, pd.SparseDataFrame):
