@@ -151,7 +151,7 @@ class BaseContainer:
                 #if hasattr(df, 'save_to_hdf'):
                 #    df.save(name, store)
                 #else:
-                #    store[name] = 
+                #    store[name] =
                 df.save(name, store)
                 if isinstance(df, Field):
                     df._revert_categories()
@@ -301,8 +301,20 @@ class BaseContainer:
         '''
         cls = self.__class__
         kws = del_keys(self._kw_dict(copy=True))
+        fix_keys = False
+        if np.all([key < 0 for key in keys]):
+            fix_keys = True
         for name, df in self._numerical_dict(copy=True).items():
             dfcls = df.__class__
+            if fix_keys:
+                if not hasattr(df, '_groupbys'):
+                    keys = [df.index[key] for key in keys]
+                elif len(df._groupbys) > 0:
+                    srtd = sorted(df.groupby(df._groupbys).groups.keys())
+                    keys = [srtd[key] for key in keys]
+                else:
+                    keys = [df.index[key] for key in keys]
+                fix_keys = False
             if hasattr(df, '_groupbys'):
                 if np.all([np.any([key in df[col] for col in df._groupbys]) for key in keys]):
                     grps = df.groupby(df._groupbys)
@@ -312,6 +324,8 @@ class BaseContainer:
                 else:
                     kws[name] = df
             elif np.all([key in df.index for key in keys]):
+                if fix_keys:
+                    srtd
                 kws[name] = dfcls(df.ix[keys, :])
             else:
                 kws[name] = df
