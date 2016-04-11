@@ -417,6 +417,7 @@ class BaseContainer:
 
     def __init__(self, meta=None, **kwargs):
         self._test = False
+        self._traits_need_update = True
         for key, value in kwargs.items():
             setattr(self, key, value)
         self.meta = meta
@@ -425,9 +426,12 @@ class BaseContainer:
             self._test = True
             self.name = 'TestContainer'
             self._update_traits()
+            self._traits_need_update = False
 
     def _repr_html_(self):
         if self._widget:
+            if self._traits_need_update:
+                self._update_traits()
             return self._widget._repr_html_()
         return None
 
