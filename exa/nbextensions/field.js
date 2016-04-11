@@ -92,9 +92,7 @@ define([
             this.n = this.nx * this.ny * this.nz;
             if (typeof func_or_values === 'function') {
                 this.func = func_or_values;
-                if (!this.hasOwnProperty('values')) {
-                    this.compute_field();
-                };
+                this.compute_field();
             } else {
                 this.values = new Float32Array(func_or_values);
             };
@@ -224,6 +222,7 @@ define([
             compute_field
             --------------
             */
+            console.log('computing field...');
             this.values = new Float32Array(this.n);
             var i = 0;
             for (let x of this.x) {

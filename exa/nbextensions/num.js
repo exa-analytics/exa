@@ -38,7 +38,7 @@ define([], function() {
         ================
         */
         var array = [min];
-        while (min < max) {
+        while (min < max && min + step < max) {
             min += step;
             array.push(min);
         };
