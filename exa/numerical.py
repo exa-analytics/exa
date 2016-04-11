@@ -32,7 +32,7 @@ class NDBase:
     '''
     Base class for custom dataframe and series objects that have traits.
     '''
-    _precision = 4      # Default number of decimal places passed by traits
+    _precision = 3      # Default number of decimal places passed by traits
     _traits = []        # Traits present as dataframe columns (or series values)
 
     def save_to_hdf(self, argname, store):
@@ -116,14 +116,16 @@ class DataFrame(NDBase, pd.DataFrame):
         Change all columns of type category to their native type.
         '''
         for column, dtype in self._categories.items():
-            self[column] = self[column].astype(dtype)
+            if column in self.columns:
+                self[column] = self[column].astype(dtype)
 
     def _set_categories(self):
         '''
         Change all category like columns from their native type to category type.
         '''
         for column, dtype in self._categories.items():
-            self[column] = self[column].astype('category')
+            if column in self.columns:
+                self[column] = self[column].astype('category')
 
     def _get_custom_traits(self):
         '''
@@ -183,13 +185,13 @@ class DataFrame(NDBase, pd.DataFrame):
                     else:
                         raise TypeError('Unknown type for {0} with type {1}'.format(name, dtype))
                 elif groups:                              # Else send grouped traits
-                    trait = Unicode(groups.apply(lambda g: g[name].values).to_json(orient='values'))
+                    trait = Unicode(groups.apply(lambda g: g[name].values).to_json(orient='values', double_precision=self._precision))
                 else:                                     # Else send flat values
-                    trait = self[name].to_json(orient='values')
+                    trait = self[name].to_json(orient='values', double_precision=self._precision)
                 traits[trait_name] = trait.tag(sync=True)
             elif name == self.index.names[0]:             # Otherwise, if index, send flat values
                 trait_name = '_'.join((prefix, name))
-                traits[trait_name] = Unicode(pd.Series(self.index).to_json(orient='values')).tag(sync=True)
+                traits[trait_name] = Unicode(pd.Series(self.index).to_json(orient='values', double_precision=self._precision)).tag(sync=True)
         if self._groupbys:
             self._set_categories()
         return traits
@@ -210,7 +212,7 @@ class DataFrame(NDBase, pd.DataFrame):
                     self.index.names = self._indices
 
 
-class Field:
+class Field(DataFrame):
     '''
     A discrete field is described by its spatial discritization (field data)
     where each discrete point has any number of attributes (field values). This
@@ -219,12 +221,50 @@ class Field:
     the field dimensionality in one dataframe and field values in other data
     frames.
     '''
-    pass
+    _precision = 6
+    _indices = ['field']
+    _df_get_traits = DataFrame._get_traits
+
+    def copy(self, *args, **kwargs):
+        '''
+        Copy the field dataframe, including the field values
+        '''
+        df = self._copy(*args, **kwargs)
+        fields = [field.copy() for field in self.fields]
+        return self.__class__(df, field_values=fields)
+
+    def _get_traits(self):
+        '''
+        Because the :class:`~exa.numerical.Field` object has attached vector
+        and scalar fields, trait creation is handled slightly differently.
+        '''
+        traits = self._df_get_traits()
+        if self._groupbys:
+            grps = self.groupby(self._groupbys)
+            string = grps.apply(lambda g: g.index).to_json(orient='values', double_precision=self._precision)
+            traits['field_indices'] = Unicode(string).tag(sync=True)
+        else:
+            string = Series(self.index).to_json(orient='values', double_precision=self._precision)
+            traits['field_indices'] = Unicode(string).tag(sync=True)
+        s = pd.Series({i: field.values for i, field in enumerate(self.field_values)})
+        traits['field_values'] = Unicode(s.to_json(orient='values', double_precision=self._precision)).tag(sync=True)
+        return traits
+
+    def __init__(self, field_values, *args, **kwargs):
+        '''
+        Args:
+            field_values (list): List of Series or DataFrame objects containing field values with indices corresponding to field data index
+        '''
+        super().__init__(*args, **kwargs)
+        self.field_values = field_values
+
+    def __repr__(self):
+        name = self.__class__.__name__
+        nfield = len(self.field_values)
+        return '{}(fields: {})'.format(name, nfield)
 
 
-
-
-class Field3D(DataFrame):
+class Field3D(Field):
     '''
     Dataframe for storing dimensions of a scalar or vector field of 3D space.
     The row index present in this dataframe should correspond to a
@@ -271,83 +311,16 @@ class Field3D(DataFrame):
         the last index changing the fastest and the first index changing the
         slowest.
     '''
-    _df_get_traits = DataFrame._get_traits
-    _indices = ['field']
     _columns = ['nx', 'ny', 'nz', 'ox', 'oy', 'oz', 'xi', 'xj', 'xk',
                 'yi', 'yj', 'yk', 'zi', 'zj', 'zk']
     _traits = ['nx', 'ny', 'nz', 'ox', 'oy', 'oz', 'xi', 'xj', 'xk',
                'yi', 'yj', 'yk', 'zi', 'zj', 'zk']
 
-    @property
-    def fields(self):
-        '''
-        List of fields with order matching that of the field table.
-
-        Returns:
-            fields (list): List of fields
-        '''
-        return self._fields
-
-    def copy(self, *args, **kwargs):
-        '''
-        '''
-        df = self._copy(*args, **kwargs)
-        fields = [field.copy() for field in self.fields]
-        return self.__class__(df, fields=fields)
-
-    def field_values(self, which):
-        '''
-        Select a specific field from the list of fields.
-        '''
-        return self.fields[which]
-
-    def _get_traits(self):
-        '''
-        Because the :class:`~exa.numerical.Field` object has attached vector
-        and scalar fields, trait creation is handled slightly differently.
-        '''
-        traits = self._df_get_traits()
-        if self._groupbys:
-            grps = self.groupby(self._groupbys)
-            string = grps.apply(lambda g: g.index).to_json(orient='values')
-            traits['field_indices'] = Unicode(string).tag(sync=True)
-        else:
-            string = Series(self.index).to_json(orient='values')
-            traits['field_indices'] = Unicode(string).tag(sync=True)
-        s = pd.Series({i: field.values for i, field in enumerate(self._fields)})
-        traits['field_values'] = Unicode(s.to_json(orient='index')).tag(sync=True)
-        return traits
-
-    def __init__(self, *args, fields=None, **kwargs):
-        '''
-        Args:
-            fields (dict): Dictionary of field
-        '''
-        super().__init__(*args, **kwargs)
-        self._fields = fields
-
-
-class FieldValues(tuple):
-    '''
-    Class for storing field values (scalar or vector).
-
-    Note:
-        FieldValues are immutable since they subclass tuple. This means that
-        one has to be very careful when manipulating the field table so as to
-        ensure consistency between indices there and indices here.
-
-    See Also:
-        :class:`~exa.numerical.Field`
-    '''
-    def __repr__(self):
-        name = self.__class__.__name__
-        nfield = len(self)
-        return '{}(nfields: {})'.format()
-
 
 class SparseDataFrame(NDBase, pd.SparseDataFrame):
     '''
-    Trait supporting sparse dataframe
+    Trait supporting sparse dataframe, typically used to update values in a
+    related dataframe.
     '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

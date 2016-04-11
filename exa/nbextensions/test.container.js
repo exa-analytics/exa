@@ -35,7 +35,7 @@ define([
     'nbextensions/exa/num',
     'nbextensions/exa/field'
 ], function(App3D, ContainerGUI, num, field) {
-    class TestContainer {
+    class TestApp {
         /*"""
         TestContainer
         ==============
@@ -56,6 +56,7 @@ define([
                 view_self.app.app3d.animate();
                 view_self.app.app3d.controls.handleResize();
             });
+            this.view.send({'type': 'message', 'app': 'TestApp', 'content': 'True'});
         };
 
         create_gui() {
@@ -202,5 +203,5 @@ define([
         };
     };
 
-    return TestContainer;
+    return TestApp;
 });

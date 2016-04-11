@@ -17,7 +17,7 @@ rather than extending the DOMWidgetView class.
 require.config({
     shim: {
         'nbextensions/exa/test.container': {
-            exports: 'TestContainer'
+            exports: 'TestApp'
         },
     },
 });
@@ -26,7 +26,7 @@ require.config({
 define([
     'widgets/js/widget',
     'nbextensions/exa/test.container'
-], function(widget, TestContainer) {
+], function(widget, TestApp) {
     class ContainerView extends widget.DOMWidgetView {
         /*"""
         ContainerView
@@ -114,7 +114,7 @@ define([
             var check = this.get_trait('test');
             if (check === true) {
                 console.log('Empty container, displaying test interface!');
-                this.app = new TestContainer(this);
+                this.app = new TestApp(this);
             };
         };
 

@@ -21,10 +21,11 @@ import numpy as np
 import pandas as pd
 from sys import getsizeof
 from traitlets import Bool
+from collections import defaultdict
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from exa import _conf
 from exa.widget import ContainerWidget
-from exa.numerical import NDBase, DataFrame, Field
+from exa.numerical import NDBase, DataFrame, Field, SparseDataFrame
 from exa.utility import del_keys
 
 
@@ -36,6 +37,7 @@ class BaseContainer:
     should be inherited.
     '''
     _widget_class = ContainerWidget
+    _df_types = {}
 
     def save(self, path=None):
         '''
@@ -99,15 +101,11 @@ class BaseContainer:
         with pd.HDFStore(path) as store:
             for key in store.keys():
                 if 'kwargs' in key:
-                    kwargs = store.get_storer(key).attrs.metadata
+                    kwargs.update(store.get_storer(key).attrs.metadata)
                 else:
                     name = str(key[1:])
-                    kwargs[name] = store[key].copy()
-        print(kwargs.keys())
-        fields = {name.replace('FIELD_', ''): obj for name, obj in kwargs.items() if 'FIELD_' in name}
-        c = cls(**kwargs)
-        c._update_accessed()
-        return c
+                    kwargs[name] = store[key]
+        return cls(**kwargs)
 
     @classmethod
     def load(cls, pkid_or_path=None):
@@ -127,11 +125,24 @@ class BaseContainer:
         else:
             raise TypeError('The argument should be int or str, not {}.'.format(type(pkid_or_path)))
 
-    def _save_data(self, path=None):
+    def _save_data(self, path=None, how='hdf'):
         '''
         Save the dataframe (and related series) data to an `HDF5`_ file. This
         file contains all of the dataframe data as well as the descriptive
         relational data attached to the current container.
+        '''
+        kwargs = self._kw_dict()
+        kwargs['meta'] = str(self.meta) if self.meta else None
+        kwargs = del_keys(kwargs)
+        if how == 'hdf':
+            self._save_hdf(path, kwargs)
+        else:
+            raise NotImplementedError('Currently only hdf5 is supported')
+
+    def _save_hdf(self, path, kwargs):
+        '''
+        Save the container to an HDF5 file. Returns the saved file path upon
+        completion.
         '''
         # Check the path
         if path is None:
@@ -140,19 +151,11 @@ class BaseContainer:
             path += os.sep + self.hexuid + '.hdf5'
         elif not (path.endswith('.hdf5') or path.endswith('.hdf')):
             raise ValueError('File path must have a ".hdf5" or ".hdf" extension.')
-        # Get the container "kwargs" - relational values and metadata
-        kwargs = self._kw_dict()
-        kwargs['meta'] = str(self.meta) if self.meta else None
-        kwargs = del_keys(kwargs)
         with pd.HDFStore(path) as store:
             store['kwargs'] = pd.Series()
             store.get_storer('kwargs').attrs.metadata = kwargs
             for name, df in self._numerical_dict().items():
-                #if hasattr(df, 'save_to_hdf'):
-                #    df.save(name, store)
-                #else:
-                #    store[name] =
-                df.save(name, store)
+                name = name[1:] if name.startswith('_') else name
                 if isinstance(df, Field):
                     df._revert_categories()
                     fname = 'FIELD_' + name
@@ -161,14 +164,15 @@ class BaseContainer:
                         ffname = '_'.join((fname, str(i)))
                         store[ffname] = pd.Series(field)
                     df._set_categories()
-                elif isinstance(df, DataFrame):
+                elif isinstance(df, SparseDataFrame):
+                    store[name] = pd.SparseDataFrame(df)
+                elif isinstance(df, NDBase):
                     df._revert_categories()
                     store[name] = pd.DataFrame(df)
                     df._set_categories()
-                elif type(df) != pd.DataFrame:
-                    store[name] = pd.DataFrame(df)
                 else:
                     store[name] = df
+        return path
 
     def _kw_dict(self, copy=False):
         '''
@@ -223,6 +227,16 @@ class BaseContainer:
             total_bytes += df.columns.nbytes
         return total_bytes
 
+    def _widget_bytes(self):
+        '''
+        Compute the size (in bytes) of all of the attached traits.
+        '''
+        total_bytes = 0
+        if self._widget:
+            for value in self._widget._trait_values.values():
+                total_bytes += getsizeof(value)
+        return total_bytes
+
     def _trait_names(self):
         '''
         Poll each of the attached :class:`~exa.ndframe.DataFrame` for their
@@ -271,6 +285,40 @@ class BaseContainer:
         if hasattr(self[name], 'shape'):
             return True
         return False
+
+    def _enforce_df_type(self, name, value):
+        '''
+        Enforces dataframe type (or NoneType).
+        '''
+        if value is None:
+            return None
+        else:
+            cls = self._df_types[name]
+            if not isinstance(value, cls):
+                df = cls(value)
+                if hasattr(df, '_set_categories'):
+                    df._set_categories()
+                return df
+            return value
+
+    def _reconstruct_field(self, name, data, values):
+        '''
+        Enforces the field dataframe type.
+        '''
+        if data is None and values is None:
+            return None
+        elif hasattr(data, 'field_values'):
+            if hasattr(data, '_set_categories'):
+                data._set_categories()
+            return data
+        elif len(data) != len(values):
+            raise TypeError('Length of Field ({}) data and values don\'t match.'.format(name))
+        else:
+            cls = self._df_types[name]
+            df = cls(values, data)
+            if hasattr(df, '_set_categories'):
+                df._set_categories()
+            return data
 
     def _slice_with_int_or_string(self, key):
         '''
@@ -407,7 +455,7 @@ class BaseContainer:
             This function currently doesn't account for memory usage due to
             traits (:class:`~exa.widget.ContainerWidget`).
         '''
-        jstot = 0  # Memory usage from the widget view
+        jstot = self._widget_bytes()
         dftot = self._df_bytes()
         kwtot = 0
         for key, value in self._kw_dict().items():
@@ -419,6 +467,8 @@ class BaseContainer:
         self._test = False
         self._traits_need_update = True
         for key, value in kwargs.items():
+            if key in self._df_types.keys():
+                value = self._enforce_df_type(key, value)
             setattr(self, key, value)
         self.meta = meta
         self._widget = self._widget_class(self) if _conf['notebook'] else None
