@@ -361,7 +361,6 @@ class Editor:
     def __repr__(self):
         return self._line_repr(self._lines)
 
-
 def lines_from_file(path, as_interned=False):
     '''
     Get list of lines in file.
