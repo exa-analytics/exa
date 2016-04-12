@@ -9,8 +9,16 @@ data from the frame. The trait data is used by :class:`~exa.widget.ContainerWidg
 Because these dataframes have context about their data, they also provide
 convience methods for in memory data compression (using `categories`_).
 
+Another feature of these dataframes is that the _groupbys parameter provides a
+convenient algorithm for container slicing and concatenation/joining/merging.
+These types of operations are non-trivial when dealing with dataframes whose
+contents may be related (i.e. relational dataframes) so care must be taken to
+ensure no mangling of indices is performed. See the container module for more
+info.
+
 See Also:
-    Modules :mod:`~exa.container` and :mod:`~exa.widget` may provide context.
+    Modules :mod:`~exa.container` and :mod:`~exa.widget` may provide context
+    and usage examples for these classes.
 
 .. _categories: http://pandas-docs.github.io/pandas-docs-travis/categorical.html
 '''
@@ -24,8 +32,21 @@ class NDBase:
     '''
     Base class for custom dataframe and series objects that have traits.
     '''
-    _precision = 4      # Default number of decimal places passed by traits
+    _precision = 3      # Default number of decimal places passed by traits
     _traits = []        # Traits present as dataframe columns (or series values)
+
+    def save_to_hdf(self, argname, store):
+        '''
+        Save the current object to the specified HDF5 file.
+
+        Args:
+            argname (str): Variable name
+            store: HDFStore object
+        '''
+        raise NotImplementedError('Custom save not implemented for {}'.format(self.__class__.__name__))
+
+    def _get_traits(self):
+        return {}
 
     def __repr__(self):
         name = self.__class__.__name__
@@ -40,6 +61,24 @@ class Series(NDBase, pd.Series):
     '''
     Trait supporting analogue of :class:`~pandas.Series`.
     '''
+    _copy = pd.Series.copy
+
+    def save_to_hdf(self, argname, store):
+        '''
+        Save the current object to the specified HDF5 file.
+
+        Args:
+            argname (str): Variable name
+            store: HDFStore object
+        '''
+
+
+    def copy(self, *args, **kwargs):
+        '''
+        Custom copy function returns same type
+        '''
+        return self.__class__(self._copy(*args, **kwargs))
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -47,10 +86,12 @@ class Series(NDBase, pd.Series):
 class DataFrame(NDBase, pd.DataFrame):
     '''
     Trait supporting analogue of :class:`~pandas.DataFrame`.
+
     Note:
         Columns, indices, etc. are only enforced if the dataframe has non-zero
         length.
     '''
+    _copy = pd.DataFrame.copy
     _groupbys = []      # Column names by which to group the data
     _indices = []       # Required index names (typically single valued list)
     _columns = []       # Required column entries
@@ -64,19 +105,27 @@ class DataFrame(NDBase, pd.DataFrame):
     def _li(self):
         return self.index[-1]
 
+    def copy(self, *args, **kwargs):
+        '''
+        Custom copy function returns same type
+        '''
+        return self.__class__(self._copy(*args, **kwargs))
+
     def _revert_categories(self):
         '''
         Change all columns of type category to their native type.
         '''
         for column, dtype in self._categories.items():
-            self[column] = self[column].astype(dtype)
+            if column in self.columns:
+                self[column] = self[column].astype(dtype)
 
     def _set_categories(self):
         '''
         Change all category like columns from their native type to category type.
         '''
         for column, dtype in self._categories.items():
-            self[column] = self[column].astype('category')
+            if column in self.columns:
+                self[column] = self[column].astype('category')
 
     def _get_custom_traits(self):
         '''
@@ -135,13 +184,13 @@ class DataFrame(NDBase, pd.DataFrame):
                     else:
                         raise TypeError('Unknown type for {0} with type {1}'.format(name, dtype))
                 elif groups:                              # Else send grouped traits
-                    trait = Unicode(groups.apply(lambda g: g[name].values).to_json(orient='values'))
+                    trait = Unicode(groups.apply(lambda g: g[name].values).to_json(orient='values', double_precision=self._precision))
                 else:                                     # Else send flat values
-                    trait = self[name].to_json(orient='values')
+                    trait = self[name].to_json(orient='values', double_precision=self._precision)
                 traits[trait_name] = trait.tag(sync=True)
             elif name == self.index.names[0]:             # Otherwise, if index, send flat values
                 trait_name = '_'.join((prefix, name))
-                traits[trait_name] = Unicode(pd.Series(self.index).to_json(orient='values')).tag(sync=True)
+                traits[trait_name] = Unicode(pd.Series(self.index).to_json(orient='values', double_precision=self._precision)).tag(sync=True)
         if self._groupbys:
             self._set_categories()
         return traits
@@ -164,6 +213,60 @@ class DataFrame(NDBase, pd.DataFrame):
 
 class Field(DataFrame):
     '''
+    A discrete field is described by its spatial discritization (field data)
+    where each discrete point has any number of attributes (field values). This
+    is a special type of dataframe because the dimensionality of the field
+    values may be different for different fields. This class, therefore, stores
+    the field dimensionality in one dataframe and field values in other data
+    frames.
+    '''
+    _precision = 6
+    _indices = ['field']
+    _df_get_traits = DataFrame._get_traits
+
+    def copy(self, *args, **kwargs):
+        '''
+        Copy the field dataframe, including the field values
+        '''
+        df = self._copy(*args, **kwargs)
+        fields = [field.copy() for field in self.fields]
+        return self.__class__(df, field_values=fields)
+
+    def _get_traits(self):
+        '''
+        Because the :class:`~exa.numerical.Field` object has attached vector
+        and scalar fields, trait creation is handled slightly differently.
+        '''
+        traits = self._df_get_traits()
+        if self._groupbys:
+            grps = self.groupby(self._groupbys)
+            string = grps.apply(lambda g: g.index).to_json(orient='values', double_precision=self._precision)
+            traits['field_indices'] = Unicode(string).tag(sync=True)
+        else:
+            string = Series(self.index).to_json(orient='values', double_precision=self._precision)
+            traits['field_indices'] = Unicode(string).tag(sync=True)
+        s = pd.Series({i: field.values for i, field in enumerate(self.field_values)})
+        traits['field_values'] = Unicode(s.to_json(orient='values', double_precision=self._precision)).tag(sync=True)
+        return traits
+
+    def __init__(self, field_values, *args, **kwargs):
+        '''
+        Args:
+            field_values (list): List of Series or DataFrame objects containing field values with indices corresponding to field data index
+        '''
+        super().__init__(*args, **kwargs)
+        self.field_values = field_values
+
+    def __repr__(self):
+        name = self.__class__.__name__
+        nfield = len(self.field_values)
+        return '{}(fields: {})'.format(name, nfield)
+
+
+class Field3D(Field):
+    '''
+    Dataframe for storing dimensions of a scalar or vector field of 3D space.
+    The row index present in this dataframe should correspond to a
     A dataframe for storing field (meta)data along with the actual field values.
     The storage of field values may be in the form of a scalar field (via
     :class:`~exa.numerical.Series`) or vector field (via
@@ -212,49 +315,24 @@ class Field(DataFrame):
         the last index changing the fastest and the first index changing the
         slowest.
     '''
-    _df_get_traits = DataFrame._get_traits
-    _indices = ['field']
     _columns = ['nx', 'ny', 'nz', 'ox', 'oy', 'oz', 'xi', 'xj', 'xk',
                 'yi', 'yj', 'yk', 'zi', 'zj', 'zk']
     _traits = ['nx', 'ny', 'nz', 'ox', 'oy', 'oz', 'xi', 'xj', 'xk',
                'yi', 'yj', 'yk', 'zi', 'zj', 'zk']
 
-    @property
-    def fields(self):
-        '''
-        List of fields with order matching that of the field table.
-        Returns:
-            fields (list): List of fields
-        '''
-        return self._fields
 
-    def field_values(self, which):
-        '''
-        Select a specific field from the list of fields.
-        '''
-        return self.fields[which]
-
-    def _get_traits(self):
-        '''
-        Because the :class:`~exa.numerical.Field` object has attached vector
-        and scalar fields, trait creation is handled slightly differently.
-        '''
-        traits = self._df_get_traits()
-        if self._groupbys:
-            grps = self.groupby(self._groupbys)
-            string = grps.apply(lambda g: g.index).to_json(orient='values')
-            traits['field_indices'] = Unicode(string).tag(sync=True)
-        else:
-            string = Series(self.index).to_json(orient='values')
-            traits['field_indices'] = Unicode(string).tag(sync=True)
-        s = pd.Series({i: field.values for i, field in enumerate(self._fields)})
-        traits['field_values'] = Unicode(s.to_json(orient='index')).tag(sync=True)
-        return traits
-
-    def __init__(self, *args, fields=None, **kwargs):
-        '''
-        Args:
-            fields (dict): Dictionary of field
-        '''
+class SparseDataFrame(NDBase, pd.SparseDataFrame):
+    '''
+    Trait supporting sparse dataframe, typically used to update values in a
+    related dataframe.
+    '''
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._fields = fields
+        if len(self) > 0:
+            name = self.__class__.__name__
+            if self._indices:
+                missing = set(self._indices).difference(self.index.names)
+                if missing and len(self.index.names) != len(self._indices):
+                    raise RequiredIndexError(missing, name)
+                else:
+                    self.index.names = self._indices

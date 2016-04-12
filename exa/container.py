@@ -17,13 +17,15 @@ See Also:
     :mod:`~exa.relational.container`
 '''
 import os
+import numpy as np
 import pandas as pd
 from sys import getsizeof
 from traitlets import Bool
+from collections import defaultdict
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from exa import _conf
 from exa.widget import ContainerWidget
-from exa.numerical import NDBase
+from exa.numerical import NDBase, DataFrame, Field, SparseDataFrame
 from exa.utility import del_keys
 
 
@@ -35,6 +37,7 @@ class BaseContainer:
     should be inherited.
     '''
     _widget_class = ContainerWidget
+    _df_types = {}
 
     def save(self, path=None):
         '''
@@ -59,12 +62,22 @@ class BaseContainer:
         kws.update(dfs)
         return cls(**kws)
 
+    def concat(self, *args, **kwargs):
+        '''
+        Concatenate any number of container objects with the current object into
+        a single container object.
+
+        See Also:
+            For argument description, see :func:`~exa.container.concat`.
+        '''
+        return concat(self, *args, **kwargs)
+
     def info(self):
         '''
         Print human readable information about the container.
         '''
         n = getsizeof(self)
-        sizes = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'too high..']
+        sizes = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB']
         for size in sizes:
             s = str(n).split('.')
             if len(s) > 1:
@@ -88,27 +101,48 @@ class BaseContainer:
         with pd.HDFStore(path) as store:
             for key in store.keys():
                 if 'kwargs' in key:
-                    kwargs = store.get_storer(key).attrs.metadata
+                    kwargs.update(store.get_storer(key).attrs.metadata)
                 else:
-                    kwargs[key[1:]] = store[key]
-        c = cls(**kwargs)
-        c._update_accessed()
-        return c
+                    name = str(key[1:])
+                    kwargs[name] = store[key]
+        return cls(**kwargs)
 
     @classmethod
-    def load(cls, pkid=None, path=None):
+    def load(cls, pkid_or_path=None):
         '''
-        '''
-        if pkid:
-            raise NotImplementedError()
-        else:
-            return cls.from_hdf(path)
+        Load a container object from a persistent location or file path.
 
-    def _save_data(self, path=None):
+        Args:
+            pkid_or_path: Integer pkid corresponding to the container table or file path
+
+        Returns:
+            container: The saved container object
+        '''
+        if isinstance(pkid_or_path, int):
+            raise NotImplementedError('Support for persistent storage coming soon...')
+        elif isinstance(pkid_or_path, str):
+            return cls.from_hdf(pkid_or_path)
+        else:
+            raise TypeError('The argument should be int or str, not {}.'.format(type(pkid_or_path)))
+
+    def _save_data(self, path=None, how='hdf'):
         '''
         Save the dataframe (and related series) data to an `HDF5`_ file. This
         file contains all of the dataframe data as well as the descriptive
         relational data attached to the current container.
+        '''
+        kwargs = self._kw_dict()
+        kwargs['meta'] = str(self.meta) if self.meta else None
+        kwargs = del_keys(kwargs)
+        if how == 'hdf':
+            self._save_hdf(path, kwargs)
+        else:
+            raise NotImplementedError('Currently only hdf5 is supported')
+
+    def _save_hdf(self, path, kwargs):
+        '''
+        Save the container to an HDF5 file. Returns the saved file path upon
+        completion.
         '''
         # Check the path
         if path is None:
@@ -117,20 +151,28 @@ class BaseContainer:
             path += os.sep + self.hexuid + '.hdf5'
         elif not (path.endswith('.hdf5') or path.endswith('.hdf')):
             raise ValueError('File path must have a ".hdf5" or ".hdf" extension.')
-        # Get the container "kwargs" - relational values and metadata
-        kwargs = self._kw_dict()
-        kwargs['meta'] = str(self.meta) if self.meta else None
-        kwargs = del_keys(kwargs)
         with pd.HDFStore(path) as store:
             store['kwargs'] = pd.Series()
             store.get_storer('kwargs').attrs.metadata = kwargs
             for name, df in self._numerical_dict().items():
-                if isinstance(df, DataFrame):
+                name = name[1:] if name.startswith('_') else name
+                if isinstance(df, Field):
                     df._revert_categories()
-                    store[name] = df.copy()
+                    fname = 'FIELD_' + name
+                    store[fname] = pd.DataFrame(df)
+                    for i, field in enumerate(df.fields):
+                        ffname = '_'.join((fname, str(i)))
+                        store[ffname] = pd.Series(field)
+                    df._set_categories()
+                elif isinstance(df, SparseDataFrame):
+                    store[name] = pd.SparseDataFrame(df)
+                elif isinstance(df, NDBase):
+                    df._revert_categories()
+                    store[name] = pd.DataFrame(df)
                     df._set_categories()
                 else:
                     store[name] = df
+        return path
 
     def _kw_dict(self, copy=False):
         '''
@@ -150,8 +192,7 @@ class BaseContainer:
                     kws[name] = obj
         if copy:
             return kws.copy()
-        else:
-            return kws
+        return kws
 
     def _numerical_dict(self, copy=False, cls_criteria=[pd.Series, pd.DataFrame]):
         '''
@@ -184,6 +225,16 @@ class BaseContainer:
             total_bytes += df.values.nbytes
             total_bytes += df.index.nbytes
             total_bytes += df.columns.nbytes
+        return total_bytes
+
+    def _widget_bytes(self):
+        '''
+        Compute the size (in bytes) of all of the attached traits.
+        '''
+        total_bytes = 0
+        if self._widget:
+            for value in self._widget._trait_values.values():
+                total_bytes += getsizeof(value)
         return total_bytes
 
     def _trait_names(self):
@@ -235,6 +286,167 @@ class BaseContainer:
             return True
         return False
 
+    def _enforce_df_type(self, name, value):
+        '''
+        Enforces dataframe type (or NoneType).
+        '''
+        if value is None:
+            return None
+        else:
+            cls = self._df_types[name]
+            if not isinstance(value, cls):
+                df = cls(value)
+                if hasattr(df, '_set_categories'):
+                    df._set_categories()
+                return df
+            return value
+
+    def _reconstruct_field(self, name, data, values):
+        '''
+        Enforces the field dataframe type.
+        '''
+        if data is None and values is None:
+            return None
+        elif hasattr(data, 'field_values'):
+            if hasattr(data, '_set_categories'):
+                data._set_categories()
+            return data
+        elif len(data) != len(values):
+            raise TypeError('Length of Field ({}) data and values don\'t match.'.format(name))
+        else:
+            cls = self._df_types[name]
+            df = cls(values, data)
+            if hasattr(df, '_set_categories'):
+                df._set_categories()
+            return data
+
+    def _slice_with_int_or_string(self, key):
+        '''
+        Slices the current container selecting data that matches the key (either on _groupbys or
+        by row index).
+        '''
+        cls = self.__class__
+        kws = del_keys(self._kw_dict(copy=True))
+        for name, df in self._numerical_dict(copy=True).items():
+            dfcls = df.__class__
+            if not hasattr(df, '_groupbys') and key not in df.index:
+                kws[name] = df
+            elif hasattr(df, '_groupbys'):
+                if np.any([key in df[col] for col in df._groupbys]):
+                    kws[name] = dfcls(df.groupby(df._groupbys).get_group(key))
+                elif key in df.index:
+                    kws[name] = dfcls(df.ix[key:key, :])
+                else:
+                    kws[name] = df
+            else:
+                kws[name] = dfcls(df.ix[key:key, :])
+        return cls(**kws)
+
+    def _slice_with_list_or_tuple(self, keys):
+        '''
+        Slices the current container selecting data that matches the keys (either on _groupbys or
+        by row index).
+        '''
+        cls = self.__class__
+        kws = del_keys(self._kw_dict(copy=True))
+        fix_keys = False
+        if np.all([key < 0 for key in keys]):
+            fix_keys = True
+        for name, df in self._numerical_dict(copy=True).items():
+            dfcls = df.__class__
+            if fix_keys:
+                if not hasattr(df, '_groupbys'):
+                    keys = [df.index[key] for key in keys]
+                elif len(df._groupbys) > 0:
+                    srtd = sorted(df.groupby(df._groupbys).groups.keys())
+                    keys = [srtd[key] for key in keys]
+                else:
+                    keys = [df.index[key] for key in keys]
+                fix_keys = False
+            if hasattr(df, '_groupbys'):
+                if np.all([np.any([key in df[col] for col in df._groupbys]) for key in keys]):
+                    grps = df.groupby(df._groupbys)
+                    kws[name] = dfcls(pd.concat([grps.get_group(key) for key in keys]))
+                elif np.all([key in df.index for key in keys]):
+                    kws[name] = dfcls(df.ix[keys, :])
+                else:
+                    kws[name] = df
+            elif np.all([key in df.index for key in keys]):
+                if fix_keys:
+                    srtd
+                kws[name] = dfcls(df.ix[keys, :])
+            else:
+                kws[name] = df
+        return cls(**kws)
+
+    def _slice_with_slice(self, slce):
+        '''
+        Slices the current container selecting data that matches the range given
+        by the slice object.
+        '''
+        def get_keys(df):
+            if hasattr(df, '_groupbys'):
+                if len(df._groupbys) > 0:
+                    possible = list(df.groupby(df._groupbys).groups.keys())
+                    if len(possible) == 0:
+                        raise KeyError('Slice not possible; no entries exist.')
+                    keys = possible[slce]
+                    if len(keys) == 0:
+                        raise KeyError('Slicing full copy; use .copy() instead.')
+                    return keys
+            keys = df.index[slce]
+            if len(keys) == 0:
+                raise KeyError('No slice found.')
+            return keys
+
+        cls = self.__class__
+        kws = del_keys(self._kw_dict(copy=True))
+        for name, df in self._numerical_dict(copy=True).items():
+            dfcls = df.__class__
+            keys = get_keys(df)
+            if hasattr(df, '_groupbys'):
+                if len(df._groupbys) > 0:
+                    grps = df.groupby(df._groupbys)
+                    kws[name] = dfcls(pd.concat([grps.get_group(key) for key in keys]))
+                elif np.all([key in df.index for key in keys]):
+                    kws[name] = dfcls(df.ix[keys, :])
+                else:
+                    kws[name] = df
+            elif np.all([key in df.index for key in keys]):
+                kws[name] = dfcls(df.ix[keys, :])
+            else:
+                kws[name] = df
+        return cls(**kws)
+
+    def __getitem__(self, key):
+        '''
+        The key can be an integer, slice, list, tuple, or string. If integer,
+        this function will attempt to build a copy of this container object with
+        dataframes whose contents only contains the slice of the dataframe where
+        the **_groupby** attribute matches the integer value. If slice, list,
+        or tuple this function will do the same as for an integer but attempt
+        to select all matches in the _groupby field. Note that if the _groupby
+        attribute is empty, this will select by row index instead (not column
+        index!). If string, this function will attempt to get the attribute
+        matching that string.
+
+        Note:
+            Getting an attribute returns a reference to the attribute not a
+            copy of the attribute.
+        '''
+        if isinstance(key, int):
+            return self._slice_with_int_or_string(key)
+        elif isinstance(key, str) and not hasattr(self, key):
+            return self._slice_with_int_or_string(key)
+        elif isinstance(key, list) or isinstance(key, tuple):
+            return self._slice_with_list_or_tuple(key)
+        elif isinstance(key, slice):
+            return self._slice_with_slice(key)
+        elif hasattr(self, key):
+            return getattr(self, key)
+        else:
+            raise KeyError('No selection method for key {} of type {}'.format(key, type(key)))
+
     def __sizeof__(self):
         '''
         Sum of the dataframe sizes, trait values, and relational data.
@@ -243,7 +455,7 @@ class BaseContainer:
             This function currently doesn't account for memory usage due to
             traits (:class:`~exa.widget.ContainerWidget`).
         '''
-        jstot = 0  # Memory usage from the widget view
+        jstot = self._widget_bytes()
         dftot = self._df_bytes()
         kwtot = 0
         for key, value in self._kw_dict().items():
@@ -251,16 +463,12 @@ class BaseContainer:
             kwtot += getsizeof(value)
         return dftot + kwtot + jstot
 
-    def __getitem__(self, key):
-        if isinstance(key, int):
-            pass
-        elif hasattr(self, key):
-            return getattr(self, key)
-        else:
-            raise KeyError()
-
     def __init__(self, meta=None, **kwargs):
+        self._test = False
+        self._traits_need_update = True
         for key, value in kwargs.items():
+            if key in self._df_types.keys():
+                value = self._enforce_df_type(key, value)
             setattr(self, key, value)
         self.meta = meta
         self._widget = self._widget_class(self) if _conf['notebook'] else None
@@ -268,8 +476,37 @@ class BaseContainer:
             self._test = True
             self.name = 'TestContainer'
             self._update_traits()
+            self._traits_need_update = False
 
     def _repr_html_(self):
         if self._widget:
+            if self._traits_need_update:
+                self._update_traits()
             return self._widget._repr_html_()
         return None
+
+
+def concat(*containers, axis=0, join='outer', ingore_index=False):
+    '''
+    Concatenate any number of container objects into a single container object.
+
+    Args:
+        containers: A sequence of container or container like objects
+        axis (int): Axis along which to concatenate (0: "hstack", 1: "vstack")
+        join (str): How to handle indices on other axis (full outer join: "outer", inner join: "inner")
+        ignore_index (bool): See warning below!
+
+    Returns:
+        container: Concatenated container object
+
+    Note:
+        The concatenated object will have a new unique id, primary, key, and
+        its metadata will contain references to the original conatiners.
+
+    Warning:
+        The ignore_index option is primarily for internal use. If set to true,
+        may cause the resulting concatenated container object to not have
+        meaningful indices or columns. Use with care.
+    '''
+    # In the simplest case, all of the containers have unique indices and should
+    # simply be sorted and then their dataframe data appended

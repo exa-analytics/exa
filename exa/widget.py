@@ -29,7 +29,18 @@ class Widget(DOMWidget):
         Python backend.
         '''
         content = args[0]
-        print(content, args, kwargs)
+        mtype = content['type']
+        if mtype == 'message':
+            self._handle_message(content)
+        else:
+            print(args, kwargs)
+
+    def _handle_message(self, message):
+        '''
+        '''
+        app = message['app']
+        content = message['content']
+        print('Message from {}: {}'.format(app, content))
 
     def _repr_html_(self):
         return self._ipython_display_()

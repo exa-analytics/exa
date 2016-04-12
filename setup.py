@@ -20,8 +20,7 @@ dependencies = [
     'seaborn>=0.7.0',
     'sphinx>=1.3',
     'sphinx_rtd_theme>=0.1.7',
-    'sphinxcontrib-autoanysrc',
-    'xmltodict>=0.9.0'
+    'sphinxcontrib-autoanysrc'
 ]
 
 try:

@@ -344,8 +344,7 @@ define([
             this.set_camera(kwargs);
         };
 
-        add_temp(v1, v2, f1, f2) {
-            /* Temporary function used by marchingcubes.js*/
+/*        add_temp(v1, v2, f1, f2) {
             var geometry1 = new THREE.Geometry();
             var geometry2 = new THREE.Geometry();
             var n = v1.length;
@@ -373,7 +372,10 @@ define([
                 geometry2.faces.push(face);
             };
             var material1 = new THREE.MeshLambertMaterial({color: 0x003399});
-            var material2 = new THREE.MeshLambertMaterial({color: 0xFF9900});
+            var material2 = new THREE.MeshLambertMaterial({
+                color: 0xFF9900,
+                side: THREE.BackSide
+            });
             var material3 = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
             var material4 = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
             var mesh1 = new THREE.Mesh(geometry1, material1);
@@ -385,7 +387,7 @@ define([
             this.scene.add(mesh3);
             this.scene.add(mesh4);
             return {mesh1: mesh1, mesh2: mesh2};
-        };
+        };*/
 
         add_scalar_field(field, isovalue, sides, algorithm) {
             /*"""
@@ -416,6 +418,25 @@ define([
             } else {
                 console.log('NotImplementedError');
             };
+        };
+
+        add_unit_axis() {
+            /*"""
+            add_unit_axis
+            ---------------
+            Adds a unit length coordinate axis at the origin
+            */
+            var origin = new THREE.Vector3(0, 0, 0);
+            var xdir = new THREE.Vector3(1, 0, 0);
+            var ydir = new THREE.Vector3(0, 1, 0);
+            var zdir = new THREE.Vector3(0, 0, 1);
+            var x = new THREE.ArrowHelper(xdir, origin, 1.0, 0xFF0000);
+            var y = new THREE.ArrowHelper(ydir, origin, 1.0, 0x00FF00);
+            var z = new THREE.ArrowHelper(zdir, origin, 1.0, 0x0000FF);
+            this.scene.add(x);
+            this.scene.add(y);
+            this.scene.add(z);
+            return [x, y, z];
         };
 
         march_cubes1(field, isovalue) {
@@ -660,12 +681,14 @@ define([
             var p_material = new THREE.MeshLambertMaterial({
                 color: 0x003399,
                 transparent: true,
-                opacity: 0.7
+                opacity: 0.7,
+                side: THREE.FrontSide
             });
             var n_material = new THREE.MeshLambertMaterial({
                 color: 0xFF9900,
                 transparent: true,
-                opacity: 0.8
+                opacity: 0.8,
+                side: THREE.BackSide
             });
             var material1 = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
             var material2 = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});

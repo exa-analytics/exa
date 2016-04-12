@@ -11,7 +11,7 @@ tables to be able to have HTML representations (within the `Jupyter notebook`_).
 '''
 import pandas as pd
 from sys import getsizeof
-from uuid import UUID
+from uuid import UUID, uuid4
 from datetime import datetime
 from contextlib import contextmanager
 from sqlalchemy import Column, Integer, String, DateTime, create_engine, event
@@ -19,7 +19,9 @@ from sqlalchemy.orm import sessionmaker, mapper
 from sqlalchemy.orm.query import Query
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
 from exa import _conf
-from exa.utility import uid as _uid
+
+
+gen_uid = lambda: uuid4().hex    # Unique random id in db format
 
 
 class BaseMeta(DeclarativeMeta):
@@ -189,7 +191,7 @@ class HexUID:
     '''
     Mixin providing a unique ID.
     '''
-    hexuid = Column(String(32), default=_uid)
+    hexuid = Column(String(32), default=gen_uid)
 
     @property
     def uid(self):

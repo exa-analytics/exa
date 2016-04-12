@@ -20,7 +20,10 @@ class Editor:
     manipulated.
 
     All lines are stored in memory; no file handles are kept open. For extremely
-    large files, this approach may not be feasible on a single machine.
+    large files, this approach may not be feasible on a single machine (consider using the
+    as_interned option if appropriate). Finally, note that the purpose of this class is not to be
+    a full fledged text editor, rather it provides a programmatic interface for composing and
+    parsing documents (namely, its purpose is to facilitate parsing of complex text data).
 
     >>> template = "Hello World!\\nHello {user}"
     >>> editor = Editor(template)
@@ -181,6 +184,7 @@ class Editor:
     def find_next(self, string):
         '''
         Find the subsequent line containing the given string.
+
         Args:
             string (str): String to search for
 
@@ -209,9 +213,6 @@ class Editor:
     def regex(self, *patterns, line=False):
         '''
         Search the editor for lines matching the regular expression.
-        Args:
-            \*patterns: Regular expressions to search each line for
-            line (bool): Return the whole line or the matched groups (groups default)
 
         Args:
             \*patterns: Regular expressions to search each line for
@@ -342,8 +343,8 @@ class Editor:
     def __setitem__(self, line, value):
         self._lines[line] = value
 
-    def __iter__(self, start=0):
-        for line in self._lines[start:]:
+    def __iter__(self):
+        for line in self._lines:
             yield line
 
     def __len__(self):
