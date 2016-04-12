@@ -131,7 +131,6 @@ class DataFrame(NDBase, pd.DataFrame):
         '''
         Placeholder function to be overwritten when custom trait creation is
         required
-
         Returns:
             traits (dict): Dictionary of traits to be added
         '''
@@ -268,6 +267,11 @@ class Field3D(Field):
     '''
     Dataframe for storing dimensions of a scalar or vector field of 3D space.
     The row index present in this dataframe should correspond to a
+    A dataframe for storing field (meta)data along with the actual field values.
+    The storage of field values may be in the form of a scalar field (via
+    :class:`~exa.numerical.Series`) or vector field (via
+    :class:`~exa.numerical.DataFrame`). The field index (of this dataframe)
+    corresponds to the index in the list of field value data.
 
     +-------------------+----------+-------------------------------------------+
     | Column            | Type     | Description                               |
