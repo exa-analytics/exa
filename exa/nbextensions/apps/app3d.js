@@ -344,51 +344,6 @@ define([
             this.set_camera(kwargs);
         };
 
-/*        add_temp(v1, v2, f1, f2) {
-            var geometry1 = new THREE.Geometry();
-            var geometry2 = new THREE.Geometry();
-            var n = v1.length;
-            for (let i=0; i<n; i++) {
-                var vertex = v1[i];
-                vertex = new THREE.Vector3(vertex[0], vertex[1], vertex[2]);
-                geometry1.vertices.push(vertex);
-            };
-            var n = v2.length;
-            for (let i=0; i<n; i++) {
-                var vertex = v2[i];
-                vertex = new THREE.Vector3(vertex[0], vertex[1], vertex[2]);
-                geometry2.vertices.push(vertex);
-            };
-            var n = f1.length;
-            for (let i=0; i<n; i++) {
-                var face = f1[i];
-                face = new THREE.Face3(face[0], face[1], face[2]);
-                geometry1.faces.push(face);
-            };
-            var n = f2.length;
-            for (let i=0; i<n; i++) {
-                var face = f2[i];
-                face = new THREE.Face3(face[0], face[1], face[2]);
-                geometry2.faces.push(face);
-            };
-            var material1 = new THREE.MeshLambertMaterial({color: 0x003399});
-            var material2 = new THREE.MeshLambertMaterial({
-                color: 0xFF9900,
-                side: THREE.BackSide
-            });
-            var material3 = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
-            var material4 = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
-            var mesh1 = new THREE.Mesh(geometry1, material1);
-            var mesh2 = new THREE.Mesh(geometry2, material2);
-            var mesh3 = new THREE.Mesh(geometry1, material3);
-            var mesh4 = new THREE.Mesh(geometry2, material4);
-            this.scene.add(mesh1);
-            this.scene.add(mesh2);
-            this.scene.add(mesh3);
-            this.scene.add(mesh4);
-            return {mesh1: mesh1, mesh2: mesh2};
-        };*/
-
         add_scalar_field(field, isovalue, sides, algorithm) {
             /*"""
             add_scalar_field

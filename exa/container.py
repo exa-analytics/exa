@@ -19,7 +19,9 @@ See Also:
 import os
 import numpy as np
 import pandas as pd
+import networkx as nx
 from sys import getsizeof
+from collections import OrderedDict
 from traitlets import Bool
 from collections import defaultdict
 from sqlalchemy.orm.attributes import InstrumentedAttribute
@@ -37,7 +39,7 @@ class BaseContainer:
     should be inherited.
     '''
     _widget_class = ContainerWidget
-    _df_types = {}
+    _df_types = OrderedDict()
 
     def save(self, path=None):
         '''
@@ -89,6 +91,20 @@ class BaseContainer:
                 break
             n /= 1024
 
+    def network(self):
+        '''
+        Visualize the dataframe relationships as a directed network graph. The
+        direction points toward the dataframe that contains the index and
+        away from the dataframe that contains the column. If no direction is
+        given the match is on column axis or if both directions are given the match
+        is on index axis.
+        '''
+        g = nx.DiGraph()
+        nodes = [name[1:] if name.startswith('_') else name for name in self._numerical_dict().keys()]
+        edges = []
+        n = len(nodes)
+#        for i, name in enumerate(nodes):
+
     @classmethod
     def from_hdf(cls, path):
         '''
@@ -105,6 +121,26 @@ class BaseContainer:
                 else:
                     name = str(key[1:])
                     kwargs[name] = store[key]
+        # Process any fields
+        n = [int(key.split('_')[0].replace('FIELD', '')) for key in kwargs.keys() if 'FIELD' in key]
+        if len(n) != 0:
+            n = max(n)
+            to_del = []
+            for i in range(n + 1):
+                search = 'FIELD' + str(i)
+                names = [key for key in kwargs.keys() if search in key]
+                to_del += names
+                arg = names[0].replace(search + '_', '').split('/')[0]
+                field_values = [kwargs[key] for key in names if 'values' in key]
+                dkey = None
+                for name in names:
+                    if 'data' in name:
+                        dkey = name
+                field_data = kwargs[dkey]
+                kwargs[arg] = field_data
+                kwargs[arg + '_values'] = field_values
+            for name in to_del:
+                del kwargs[name]
         return cls(**kwargs)
 
     @classmethod
@@ -154,16 +190,21 @@ class BaseContainer:
         with pd.HDFStore(path) as store:
             store['kwargs'] = pd.Series()
             store.get_storer('kwargs').attrs.metadata = kwargs
+            fc = 0
             for name, df in self._numerical_dict().items():
                 name = name[1:] if name.startswith('_') else name
                 if isinstance(df, Field):
                     df._revert_categories()
-                    fname = 'FIELD_' + name
-                    store[fname] = pd.DataFrame(df)
-                    for i, field in enumerate(df.fields):
-                        ffname = '_'.join((fname, str(i)))
-                        store[ffname] = pd.Series(field)
+                    fname = 'FIELD{}_'.format(fc) + name + '/'
+                    store[fname + 'data'] = pd.DataFrame(df)
+                    for i, field in enumerate(df.field_values):
+                        ffname = fname + 'values' + str(i)
+                        if isinstance(field, pd.Series):
+                            store[ffname] = pd.Series(field)
+                        else:
+                            store[ffname] = pd.DataFrame(field)
                     df._set_categories()
+                    fc += 1
                 elif isinstance(df, SparseDataFrame):
                     store[name] = pd.SparseDataFrame(df)
                 elif isinstance(df, NDBase):
@@ -315,10 +356,15 @@ class BaseContainer:
             raise TypeError('Length of Field ({}) data and values don\'t match.'.format(name))
         else:
             cls = self._df_types[name]
+            for i in range(values):
+                if not isinstance(values[i], DataFrame) and isinstance(values[i], pd.DataFrame):
+                    values[i] = DataFrame(values[i])
+                else:
+                    values[i] = Series(values[i])
             df = cls(values, data)
             if hasattr(df, '_set_categories'):
                 df._set_categories()
-            return data
+            return df
 
     def _slice_with_int_or_string(self, key):
         '''
