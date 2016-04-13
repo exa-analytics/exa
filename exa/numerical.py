@@ -35,16 +35,6 @@ class NDBase:
     _precision = 3      # Default number of decimal places passed by traits
     _traits = []        # Traits present as dataframe columns (or series values)
 
-    def save_to_hdf(self, argname, store):
-        '''
-        Save the current object to the specified HDF5 file.
-
-        Args:
-            argname (str): Variable name
-            store: HDFStore object
-        '''
-        raise NotImplementedError('Custom save not implemented for {}'.format(self.__class__.__name__))
-
     def _get_traits(self):
         return {}
 
@@ -62,16 +52,6 @@ class Series(NDBase, pd.Series):
     Trait supporting analogue of :class:`~pandas.Series`.
     '''
     _copy = pd.Series.copy
-
-    def save_to_hdf(self, argname, store):
-        '''
-        Save the current object to the specified HDF5 file.
-
-        Args:
-            argname (str): Variable name
-            store: HDFStore object
-        '''
-
 
     def copy(self, *args, **kwargs):
         '''
@@ -177,10 +157,10 @@ class DataFrame(NDBase, pd.DataFrame):
                 if np.all(np.isclose(self[name], self.ix[self._fi, name])):
                     value = self.ix[self._fi, name]
                     dtype = type(value)
-                    if dtype is np.int64 or dtype is np.int32:
-                        trait = Integer(value)
-                    elif dtype is np.float64 or dtype is np.float32:
-                        trait = Float(value)
+                    if dtype is np.int64 or dtype is np.int32 or dtype is int:
+                        trait = Integer(int(value))
+                    elif dtype is np.float64 or dtype is np.float32 or dtype is float:
+                        trait = Float(float(value))
                     else:
                         raise TypeError('Unknown type for {0} with type {1}'.format(name, dtype))
                 elif groups:                              # Else send grouped traits
@@ -220,7 +200,7 @@ class Field(DataFrame):
     the field dimensionality in one dataframe and field values in other data
     frames.
     '''
-    _precision = 6
+    _precision = 4
     _indices = ['field']
     _df_get_traits = DataFrame._get_traits
 
@@ -229,8 +209,8 @@ class Field(DataFrame):
         Copy the field dataframe, including the field values
         '''
         df = self._copy(*args, **kwargs)
-        fields = [field.copy() for field in self.fields]
-        return self.__class__(df, field_values=fields)
+        field_values = [field.copy() for field in self.field_values]
+        return self.__class__(field_values, df)
 
     def _get_traits(self):
         '''
@@ -256,11 +236,6 @@ class Field(DataFrame):
         '''
         super().__init__(*args, **kwargs)
         self.field_values = field_values
-
-    def __repr__(self):
-        name = self.__class__.__name__
-        nfield = len(self.field_values)
-        return '{}(fields: {})'.format(name, nfield)
 
 
 class Field3D(Field):

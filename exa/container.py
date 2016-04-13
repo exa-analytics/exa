@@ -19,13 +19,15 @@ See Also:
 import os
 import numpy as np
 import pandas as pd
+import networkx as nx
 from sys import getsizeof
+from collections import OrderedDict
 from traitlets import Bool
 from collections import defaultdict
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from exa import _conf
 from exa.widget import ContainerWidget
-from exa.numerical import NDBase, DataFrame, Field, SparseDataFrame
+from exa.numerical import NDBase, DataFrame, Field, SparseDataFrame, Series
 from exa.utility import del_keys
 
 
@@ -37,7 +39,7 @@ class BaseContainer:
     should be inherited.
     '''
     _widget_class = ContainerWidget
-    _df_types = {}
+    _df_types = OrderedDict()
 
     def save(self, path=None):
         '''
@@ -89,6 +91,56 @@ class BaseContainer:
                 break
             n /= 1024
 
+    def network(self):
+        '''
+        Visualize the dataframe relationships as a directed network graph. The
+        direction points toward the dataframe that contains the index and
+        away from the dataframe that contains the column. If no direction is
+        given the match is on column axis or if both directions are given the match
+        is on index axis.
+        '''
+        node_scheme = ['olivedrab', 'orange', 'firebrick']
+        edge_scheme = ['olive', 'gold', 'darkred']
+        nodes = {name: name[1:] if name.startswith('_') else name for name in self._numerical_dict().keys()}
+        edges = []
+        ncolors = defaultdict(int)
+        ecolors = defaultdict(int)
+        n = len(nodes)
+        for internal_name, pn in nodes.items():
+            df0 = self[internal_name]
+            for internal_other, po in nodes.items():
+                df1 = self[internal_other]
+                if df0 is df1:
+                    continue    # Skip if same
+                index0 = df0.index.names
+                index1 = df1.index.names
+                columns0 = df0.columns
+                columns1 = df1.columns
+                if np.any([idx0 in index1 for idx0 in index0]):
+                    edges.append((pn, po))
+                    ncolors[pn] = max([ncolors[pn], 2])
+                    ncolors[po] = max([ncolors[po], 2])
+                    ecolors[(pn, po)] = max([ecolors[(pn, po)], 2])
+                    ecolors[(po, pn)] = max([ecolors[(po, pn)], 2])
+                elif np.any([idx0 in columns1 for idx0 in index0]) or np.any([idx0 + '0' in columns1 for idx0 in index0]):
+                    edges.append((pn, po))
+                    ncolors[pn] = max([ncolors[pn], 2])
+                    ncolors[po] = max([ncolors[po], 1])
+                    ecolors[(pn, po)] = max([ecolors[(pn, po)], 1])
+                    ecolors[(po, pn)] = max([ecolors[(po, pn)], 1])
+                elif np.any([idx1 in columns0 for idx1 in index1]) or np.any([idx1 + '0' in columns0 for idx1 in index1]):
+                    edges.append((pn, po))
+                    ncolors[pn] = max([ncolors[pn], 1])
+                    ncolors[po] = max([ncolors[po], 2])
+                    ecolors[(pn, po)] = max([ecolors[(pn, po)], 1])
+                    ecolors[(po, pn)] = max([ecolors[(po, pn)], 1])
+        g = nx.Graph()
+        g.add_nodes_from(nodes.values())
+        g.add_edges_from(edges)
+        node_colors = [node_scheme[ncolors[node]] for node in g.nodes()]
+        edge_colors = [edge_scheme[ecolors[edge]] for edge in g.edges()]
+        nx.draw(g, with_labels=True, node_size=11000, font_size=15, node_color=node_colors, edge_colors=edge_colors)
+
     @classmethod
     def from_hdf(cls, path):
         '''
@@ -105,6 +157,26 @@ class BaseContainer:
                 else:
                     name = str(key[1:])
                     kwargs[name] = store[key]
+        # Process any fields
+        n = [int(key.split('_')[0].replace('FIELD', '')) for key in kwargs.keys() if 'FIELD' in key]
+        if len(n) != 0:
+            n = max(n)
+            to_del = []
+            for i in range(n + 1):
+                search = 'FIELD' + str(i)
+                names = [key for key in kwargs.keys() if search in key]
+                to_del += names
+                arg = names[0].replace(search + '_', '').split('/')[0]
+                field_values = [kwargs[key] for key in names if 'values' in key]
+                dkey = None
+                for name in names:
+                    if 'data' in name:
+                        dkey = name
+                field_data = kwargs[dkey]
+                kwargs[arg] = field_data
+                kwargs[arg + '_values'] = field_values
+            for name in to_del:
+                del kwargs[name]
         return cls(**kwargs)
 
     @classmethod
@@ -154,19 +226,26 @@ class BaseContainer:
         with pd.HDFStore(path) as store:
             store['kwargs'] = pd.Series()
             store.get_storer('kwargs').attrs.metadata = kwargs
+            fc = 0
             for name, df in self._numerical_dict().items():
                 name = name[1:] if name.startswith('_') else name
                 if isinstance(df, Field):
                     df._revert_categories()
-                    fname = 'FIELD_' + name
-                    store[fname] = pd.DataFrame(df)
-                    for i, field in enumerate(df.fields):
-                        ffname = '_'.join((fname, str(i)))
-                        store[ffname] = pd.Series(field)
+                    fname = 'FIELD{}_'.format(fc) + name + '/'
+                    store[fname + 'data'] = pd.DataFrame(df)
+                    for i, field in enumerate(df.field_values):
+                        ffname = fname + 'values' + str(i)
+                        if isinstance(field, pd.Series):
+                            store[ffname] = pd.Series(field)
+                        else:
+                            store[ffname] = pd.DataFrame(field)
                     df._set_categories()
+                    fc += 1
+                elif isinstance(df, Series):
+                    store[name] = pd.Series(df)
                 elif isinstance(df, SparseDataFrame):
                     store[name] = pd.SparseDataFrame(df)
-                elif isinstance(df, NDBase):
+                elif isinstance(df, DataFrame):
                     df._revert_categories()
                     store[name] = pd.DataFrame(df)
                     df._set_categories()
@@ -262,15 +341,16 @@ class BaseContainer:
         Args:
             traits (list): Names of traits to update
         '''
-        traits = {}
-        if self._test:
-            traits['test'] = Bool(True).tag(sync=True)
-        else:
-            traits = self._custom_container_traits()
-            has_traits = self._numerical_dict(cls_criteria=[NDBase])
-            for obj in has_traits.values():
-                traits.update(obj._get_traits())
-        self._widget.add_traits(**traits)
+        if self._widget is not None:
+            traits = {}
+            if self._test:
+                traits['test'] = Bool(True).tag(sync=True)
+            else:
+                traits = self._custom_container_traits()
+                has_traits = self._numerical_dict(cls_criteria=[NDBase])
+                for obj in has_traits.values():
+                    traits.update(obj._get_traits())
+            self._widget.add_traits(**traits)
 
     def _is(self, name):
         '''
@@ -315,10 +395,15 @@ class BaseContainer:
             raise TypeError('Length of Field ({}) data and values don\'t match.'.format(name))
         else:
             cls = self._df_types[name]
+            for i in range(len(values)):
+                if not isinstance(values[i], DataFrame) and isinstance(values[i], pd.DataFrame):
+                    values[i] = DataFrame(values[i])
+                else:
+                    values[i] = Series(values[i])
             df = cls(values, data)
             if hasattr(df, '_set_categories'):
                 df._set_categories()
-            return data
+            return df
 
     def _slice_with_int_or_string(self, key):
         '''
@@ -329,17 +414,16 @@ class BaseContainer:
         kws = del_keys(self._kw_dict(copy=True))
         for name, df in self._numerical_dict(copy=True).items():
             dfcls = df.__class__
-            if not hasattr(df, '_groupbys') and key not in df.index:
-                kws[name] = df
-            elif hasattr(df, '_groupbys'):
-                if np.any([key in df[col] for col in df._groupbys]):
-                    kws[name] = dfcls(df.groupby(df._groupbys).get_group(key))
-                elif key in df.index:
-                    kws[name] = dfcls(df.ix[key:key, :])
+            if hasattr(df, '_groupbys'):
+                if len(df._groupbys) > 0:
+                    grps = df.groupby(df._groupbys)
+                    selector = key if key > 0 else sorted(grps.groups.keys())[key]
+                    kws[name] = dfcls(grps.get_group(selector))
+            if name not in kws:
+                if key < 0 or key in df.index:
+                    kws[name] = dfcls(df.iloc[[key], :])
                 else:
                     kws[name] = df
-            else:
-                kws[name] = dfcls(df.ix[key:key, :])
         return cls(**kws)
 
     def _slice_with_list_or_tuple(self, keys):
@@ -349,34 +433,20 @@ class BaseContainer:
         '''
         cls = self.__class__
         kws = del_keys(self._kw_dict(copy=True))
-        fix_keys = False
-        if np.all([key < 0 for key in keys]):
-            fix_keys = True
         for name, df in self._numerical_dict(copy=True).items():
             dfcls = df.__class__
-            if fix_keys:
-                if not hasattr(df, '_groupbys'):
-                    keys = [df.index[key] for key in keys]
-                elif len(df._groupbys) > 0:
-                    srtd = sorted(df.groupby(df._groupbys).groups.keys())
-                    keys = [srtd[key] for key in keys]
-                else:
-                    keys = [df.index[key] for key in keys]
-                fix_keys = False
             if hasattr(df, '_groupbys'):
-                if np.all([np.any([key in df[col] for col in df._groupbys]) for key in keys]):
+                if len(df._groupbys) > 0:
                     grps = df.groupby(df._groupbys)
-                    kws[name] = dfcls(pd.concat([grps.get_group(key) for key in keys]))
-                elif np.all([key in df.index for key in keys]):
-                    kws[name] = dfcls(df.ix[keys, :])
+                    srtd = stored(grps.groups.keys())
+                    selector = [srtd[key] for key in keys]
+                    kws[name] = dfcls(pd.concat([grps.get_group(key) for key in selector]))
+            if name not in kws:
+                if np.any([key in df.index for key in keys]):
+                    selector = [df.index[key] for key in keys]
+                    kws[name] = dfcls(df.iloc[selector, :])
                 else:
                     kws[name] = df
-            elif np.all([key in df.index for key in keys]):
-                if fix_keys:
-                    srtd
-                kws[name] = dfcls(df.ix[keys, :])
-            else:
-                kws[name] = df
         return cls(**kws)
 
     def _slice_with_slice(self, slce):
@@ -384,38 +454,21 @@ class BaseContainer:
         Slices the current container selecting data that matches the range given
         by the slice object.
         '''
-        def get_keys(df):
-            if hasattr(df, '_groupbys'):
-                if len(df._groupbys) > 0:
-                    possible = list(df.groupby(df._groupbys).groups.keys())
-                    if len(possible) == 0:
-                        raise KeyError('Slice not possible; no entries exist.')
-                    keys = possible[slce]
-                    if len(keys) == 0:
-                        raise KeyError('Slicing full copy; use .copy() instead.')
-                    return keys
-            keys = df.index[slce]
-            if len(keys) == 0:
-                raise KeyError('No slice found.')
-            return keys
-
         cls = self.__class__
         kws = del_keys(self._kw_dict(copy=True))
         for name, df in self._numerical_dict(copy=True).items():
             dfcls = df.__class__
-            keys = get_keys(df)
             if hasattr(df, '_groupbys'):
                 if len(df._groupbys) > 0:
                     grps = df.groupby(df._groupbys)
-                    kws[name] = dfcls(pd.concat([grps.get_group(key) for key in keys]))
-                elif np.all([key in df.index for key in keys]):
-                    kws[name] = dfcls(df.ix[keys, :])
-                else:
+                    srtd = sorted(grps.groups.keys())
+                    kws[name] = dfcls(pd.concat([grps.get_group(key) for key in srtd[slce]]))
+            if name not in kws:
+                if slce == slice(None):
                     kws[name] = df
-            elif np.all([key in df.index for key in keys]):
-                kws[name] = dfcls(df.ix[keys, :])
-            else:
-                kws[name] = df
+                else:
+                    keys = df.index[slce]
+                    kws[name] = dfcls(df.iloc[keys, :])
         return cls(**kws)
 
     def __getitem__(self, key):
