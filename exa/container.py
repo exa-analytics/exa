@@ -27,7 +27,7 @@ from collections import defaultdict
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from exa import _conf
 from exa.widget import ContainerWidget
-from exa.numerical import NDBase, DataFrame, Field, SparseDataFrame
+from exa.numerical import NDBase, DataFrame, Field, SparseDataFrame, Series
 from exa.utility import del_keys
 
 
@@ -356,11 +356,12 @@ class BaseContainer:
             raise TypeError('Length of Field ({}) data and values don\'t match.'.format(name))
         else:
             cls = self._df_types[name]
-            for i in range(values):
-                if not isinstance(values[i], DataFrame) and isinstance(values[i], pd.DataFrame):
-                    values[i] = DataFrame(values[i])
+            for value in values:
+                if not isinstance(value, DataFrame) and isinstance(value, pd.DataFrame):
+                    value = DataFrame(value)
                 else:
-                    values[i] = Series(values[i])
+                    value = Series(value)
+                print(type(value))
             df = cls(values, data)
             if hasattr(df, '_set_categories'):
                 df._set_categories()
