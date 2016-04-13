@@ -237,6 +237,17 @@ define([
             return lines;
         };
 
+        add_wireframe(vertices, color) {
+            /*"""
+            add_wireframe
+            -----------------
+            Create a wireframe object
+            */
+            if (color === undefined) {
+                color = 0x808080;
+            };
+        }
+
         flatten_color(colors) {
             /*"""
             flatten_color
