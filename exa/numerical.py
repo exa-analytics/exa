@@ -157,10 +157,10 @@ class DataFrame(NDBase, pd.DataFrame):
                 if np.all(np.isclose(self[name], self.ix[self._fi, name])):
                     value = self.ix[self._fi, name]
                     dtype = type(value)
-                    if dtype is np.int64 or dtype is np.int32:
-                        trait = Integer(value)
-                    elif dtype is np.float64 or dtype is np.float32:
-                        trait = Float(value)
+                    if dtype is np.int64 or dtype is np.int32 or dtype is int:
+                        trait = Integer(int(value))
+                    elif dtype is np.float64 or dtype is np.float32 or dtype is float:
+                        trait = Float(float(value))
                     else:
                         raise TypeError('Unknown type for {0} with type {1}'.format(name, dtype))
                 elif groups:                              # Else send grouped traits
