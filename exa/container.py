@@ -99,11 +99,48 @@ class BaseContainer:
         given the match is on column axis or if both directions are given the match
         is on index axis.
         '''
-        g = nx.DiGraph()
-        nodes = [name[1:] if name.startswith('_') else name for name in self._numerical_dict().keys()]
+        node_scheme = ['olivedrab', 'orange', 'firebrick']
+        edge_scheme = ['olive', 'gold', 'darkred']
+        nodes = {name: name[1:] if name.startswith('_') else name for name in self._numerical_dict().keys()}
         edges = []
+        ncolors = defaultdict(int)
+        ecolors = defaultdict(int)
         n = len(nodes)
-#        for i, name in enumerate(nodes):
+        for internal_name, pn in nodes.items():
+            df0 = self[internal_name]
+            for internal_other, po in nodes.items():
+                df1 = self[internal_other]
+                if df0 is df1:
+                    continue    # Skip if same
+                index0 = df0.index.names
+                index1 = df1.index.names
+                columns0 = df0.columns
+                columns1 = df1.columns
+                if np.any([idx0 in index1 for idx0 in index0]):
+                    edges.append((pn, po))
+                    ncolors[pn] = max([ncolors[pn], 2])
+                    ncolors[po] = max([ncolors[po], 2])
+                    ecolors[(pn, po)] = max([ecolors[(pn, po)], 2])
+                    ecolors[(po, pn)] = max([ecolors[(po, pn)], 2])
+                elif np.any([idx0 in columns1 for idx0 in index0]) or np.any([idx0 + '0' in columns1 for idx0 in index0]):
+                    edges.append((pn, po))
+                    ncolors[pn] = max([ncolors[pn], 2])
+                    ncolors[po] = max([ncolors[po], 1])
+                    ecolors[(pn, po)] = max([ecolors[(pn, po)], 1])
+                    ecolors[(po, pn)] = max([ecolors[(po, pn)], 1])
+                elif np.any([idx1 in columns0 for idx1 in index1]) or np.any([idx1 + '0' in columns0 for idx1 in index1]):
+                    edges.append((pn, po))
+                    ncolors[pn] = max([ncolors[pn], 1])
+                    ncolors[po] = max([ncolors[po], 2])
+                    ecolors[(pn, po)] = max([ecolors[(pn, po)], 1])
+                    ecolors[(po, pn)] = max([ecolors[(po, pn)], 1])
+        g = nx.Graph()
+        g.add_nodes_from(nodes.values())
+        g.add_edges_from(edges)
+        node_colors = [node_scheme[ncolors[node]] for node in g.nodes()]
+        edge_colors = [edge_scheme[ecolors[edge]] for edge in g.edges()]
+        print(edge_colors)
+        nx.draw(g, with_labels=True, node_size=11000, font_size=15, node_color=node_colors, edge_colors=edge_colors)
 
     @classmethod
     def from_hdf(cls, path):
@@ -356,12 +393,11 @@ class BaseContainer:
             raise TypeError('Length of Field ({}) data and values don\'t match.'.format(name))
         else:
             cls = self._df_types[name]
-            for value in values:
-                if not isinstance(value, DataFrame) and isinstance(value, pd.DataFrame):
-                    value = DataFrame(value)
+            for i in range(len(values)):
+                if not isinstance(values[i], DataFrame) and isinstance(values[i], pd.DataFrame):
+                    values[i] = DataFrame(values[i])
                 else:
-                    value = Series(value)
-                print(type(value))
+                    values[i] = Series(values[i])
             df = cls(values, data)
             if hasattr(df, '_set_categories'):
                 df._set_categories()
