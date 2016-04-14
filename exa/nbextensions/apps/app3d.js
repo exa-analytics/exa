@@ -137,8 +137,10 @@ define([
             ----------------
             Iterates over the meshes and removes each from the scene.
             */
-            for (let mesh of meshes) {
-                this.scene.remove(mesh);
+            if (meshes !== undefined) {
+                for (let mesh of meshes) {
+                    this.scene.remove(mesh);
+                };
             };
         };
 

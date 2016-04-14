@@ -346,11 +346,13 @@ class BaseContainer:
             if self._test:
                 traits['test'] = Bool(True).tag(sync=True)
             else:
-                traits = self._custom_container_traits()
+                traits['test'] = Bool(False).tag(sync=True)
+                traits.update(self._custom_container_traits())
                 has_traits = self._numerical_dict(cls_criteria=[NDBase])
                 for obj in has_traits.values():
                     traits.update(obj._get_traits())
             self._widget.add_traits(**traits)
+
 
     def _is(self, name):
         '''
@@ -438,12 +440,12 @@ class BaseContainer:
             if hasattr(df, '_groupbys'):
                 if len(df._groupbys) > 0:
                     grps = df.groupby(df._groupbys)
-                    srtd = stored(grps.groups.keys())
+                    srtd = sorted(grps.groups.keys())
                     selector = [srtd[key] for key in keys]
                     kws[name] = dfcls(pd.concat([grps.get_group(key) for key in selector]))
             if name not in kws:
-                if np.any([key in df.index for key in keys]):
-                    selector = [df.index[key] for key in keys]
+                if np.any([key < 0 for key in keys]) or np.any([key in df.index for key in keys]):
+                    selector = [df.index[key] if key < 0 else key for key in keys]
                     kws[name] = dfcls(df.iloc[selector, :])
                 else:
                     kws[name] = df
@@ -488,7 +490,7 @@ class BaseContainer:
             copy of the attribute.
         '''
         if isinstance(key, int):
-            return self._slice_with_int_or_string(key)
+            obj = self._slice_with_int_or_string(key)
         elif isinstance(key, str) and not hasattr(self, key):
             return self._slice_with_int_or_string(key)
         elif isinstance(key, list) or isinstance(key, tuple):
