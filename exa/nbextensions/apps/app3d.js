@@ -137,12 +137,8 @@ define([
             ----------------
             Iterates over the meshes and removes each from the scene.
             */
-            try {
-                for (let mesh of meshes) {
-                    this.scene.remove(mesh);
-                };
-            } catch (err) {
-                console.log(err);
+            for (let mesh of meshes) {
+                this.scene.remove(mesh);
             };
         };
 
