@@ -8,6 +8,15 @@ Numerical utilities
 
 
 define([], function() {
+    var hstack = function(arrays) {
+        /*"""
+        hstack
+        ===========
+        Horizontally concatenate a list of arrays.
+        */
+        console.log('NotImplementedError')
+    };
+
     var linspace = function(min, max, n) {
         /*"""
         linspace

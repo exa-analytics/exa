@@ -148,9 +148,9 @@ class DataFrame(NDBase, pd.DataFrame):
         traits = self._get_custom_traits()
         groups = None
         prefix = self.__class__.__name__.lower()
+        self._revert_categories()
         if self._groupbys:
-            self._revert_categories()                    # Category dtype can't be used
-            groups = self.groupby(self._groupbys)        # for grouping.
+            groups = self.groupby(self._groupbys)
         for name in self._traits:
             if name in self.columns:
                 trait_name = '_'.join((prefix, name))    # Name mangle to ensure uniqueness
@@ -171,8 +171,7 @@ class DataFrame(NDBase, pd.DataFrame):
             elif name == self.index.names[0]:             # Otherwise, if index, send flat values
                 trait_name = '_'.join((prefix, name))
                 traits[trait_name] = Unicode(pd.Series(self.index).to_json(orient='values', double_precision=self._precision)).tag(sync=True)
-        if self._groupbys:
-            self._set_categories()
+        self._set_categories()
         return traits
 
     def __init__(self, *args, **kwargs):
@@ -215,18 +214,28 @@ class Field(DataFrame):
     def _get_traits(self):
         '''
         Because the :class:`~exa.numerical.Field` object has attached vector
-        and scalar fields, trait creation is handled slightly differently.
+        and scalar field values, trait creation is handled slightly differently.
         '''
         traits = self._df_get_traits()
+        self._revert_categories()
         if self._groupbys:
             grps = self.groupby(self._groupbys)
-            string = grps.apply(lambda g: g.index).to_json(orient='values', double_precision=self._precision)
+            string = grps.apply(lambda g: g.index).to_json(orient='values')
             traits['field_indices'] = Unicode(string).tag(sync=True)
+            #string = grps.apply(lambda g: g['label'].values).to_json(orient='values')
+            #traits['field_labels'] = Unicode(string).tag(sync=True)
+            #string = grps.apply(lambda g: g['field_type'].values).to_json(orient='values')
+            #traits['field_types'] = Unicode(string).tag(sync=True)
         else:
-            string = Series(self.index).to_json(orient='values', double_precision=self._precision)
+            string = Series(self.index).to_json(orient='values')
             traits['field_indices'] = Unicode(string).tag(sync=True)
+            #string = self['label'].to_json(orient='values')
+            #traits['field_labels'] = Unicode(string).tag(sync=True)
+            #string = self['field_types'].to_json(orient='values')
+            #traits['field_types'] = Unicode(strign).tag(sync=True)
         s = pd.Series({i: field.values for i, field in enumerate(self.field_values)})
         traits['field_values'] = Unicode(s.to_json(orient='values', double_precision=self._precision)).tag(sync=True)
+        self._set_categories()
         return traits
 
     def __init__(self, field_values, *args, **kwargs):

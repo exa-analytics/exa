@@ -137,8 +137,12 @@ define([
             ----------------
             Iterates over the meshes and removes each from the scene.
             */
-            for (let mesh of meshes) {
-                this.scene.remove(mesh);
+            try {
+                for (let mesh of meshes) {
+                    this.scene.remove(mesh);
+                };
+            } catch (err) {
+                console.log(err);
             };
         };
 
@@ -196,7 +200,7 @@ define([
             geometry.addAttribute('size', new THREE.BufferAttribute(radii, 1));
             var points = new THREE.Points(geometry, material);
             this.scene.add(points);
-            return points;
+            return [points];
         };
 
         add_lines(v0, v1, x, y, z, colors) {
@@ -234,7 +238,33 @@ define([
             };
             var lines = new THREE.LineSegments(geometry, material);
             this.scene.add(lines);
-            return lines;
+            return [lines];
+        };
+
+        add_wireframe(vertices, color) {
+            /*"""
+            add_wireframe
+            -----------------
+            Create a wireframe object
+            */
+            if (color === undefined) {
+                color = 0x808080;
+            };
+            var geometry = new THREE.Geometry();
+            for (let vertex of vertices) {
+                geometry.vertices.push(new THREE.Vector3(vertex[0], vertex[1], vertex[2]));
+            };
+            var material = new THREE.MeshBasicMaterial({
+                transparent: true,
+                opacity: 0.5,
+                wireframeLinewidth: 10,
+                wireframe: true
+            });
+            var cell = new THREE.Mesh(geometry, material);
+            cell = new THREE.BoxHelper(cell);
+            cell.material.color.set(color);
+            this.scene.add(cell);
+            return [cell];
         };
 
         flatten_color(colors) {
