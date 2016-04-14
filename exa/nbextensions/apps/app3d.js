@@ -200,7 +200,7 @@ define([
             geometry.addAttribute('size', new THREE.BufferAttribute(radii, 1));
             var points = new THREE.Points(geometry, material);
             this.scene.add(points);
-            return points;
+            return [points];
         };
 
         add_lines(v0, v1, x, y, z, colors) {
@@ -238,7 +238,7 @@ define([
             };
             var lines = new THREE.LineSegments(geometry, material);
             this.scene.add(lines);
-            return lines;
+            return [lines];
         };
 
         add_wireframe(vertices, color) {
@@ -264,7 +264,7 @@ define([
             cell = new THREE.BoxHelper(cell);
             cell.material.color.set(color);
             this.scene.add(cell);
-            return cell;
+            return [cell];
         };
 
         flatten_color(colors) {
