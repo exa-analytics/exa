@@ -137,8 +137,12 @@ define([
             ----------------
             Iterates over the meshes and removes each from the scene.
             */
-            for (let mesh of meshes) {
-                this.scene.remove(mesh);
+            try {
+                for (let mesh of meshes) {
+                    this.scene.remove(mesh);
+                };
+            } catch (err) {
+                console.log(err);
             };
         };
 
@@ -246,7 +250,22 @@ define([
             if (color === undefined) {
                 color = 0x808080;
             };
-        }
+            var geometry = new THREE.Geometry();
+            for (let vertex of vertices) {
+                geometry.vertices.push(new THREE.Vector3(vertex[0], vertex[1], vertex[2]));
+            };
+            var material = new THREE.MeshBasicMaterial({
+                transparent: true,
+                opacity: 0.5,
+                wireframeLinewidth: 10,
+                wireframe: true
+            });
+            var cell = new THREE.Mesh(geometry, material);
+            cell = new THREE.BoxHelper(cell);
+            cell.material.color.set(color);
+            this.scene.add(cell);
+            return cell;
+        };
 
         flatten_color(colors) {
             /*"""

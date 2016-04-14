@@ -14,7 +14,7 @@ define([], function() {
         ===========
         Horizontally concatenate a list of arrays.
         */
-        var n = arrays[0].length;
+        console.log('NotImplementedError')
     };
 
     var linspace = function(min, max, n) {

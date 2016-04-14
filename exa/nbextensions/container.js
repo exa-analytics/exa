@@ -129,10 +129,14 @@ define([
             this.get_height();
             this.get_gui_width();
             this.get_fps();
+            this.get_field_values();
+            this.get_field_indices();
             this.listenTo(this.model, 'change:width', this.get_width);
             this.listenTo(this.model, 'change:height', this.get_height);
             this.listenTo(this.model, 'change:gui_width', this.get_gui_width);
             this.listenTo(this.model, 'change:fps', this.get_fps);
+            this.listenTo(this.model, 'change:field_values', this.get_field_values);
+            this.listenTo(this.model, 'change:field_indices', this.get_field_indices);
         };
 
         create_container() {
@@ -182,6 +186,14 @@ define([
 
         get_height() {
             this.height = this.get_trait('height');
+        };
+
+        get_field_values() {
+            this.field_values = this.get_trait('field_values');
+        };
+
+        get_field_indices() {
+            this.field_indices = this.get_trait('field_indices');
         };
     };
 
