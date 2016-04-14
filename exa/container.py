@@ -490,7 +490,7 @@ class BaseContainer:
             copy of the attribute.
         '''
         if isinstance(key, int):
-            obj = self._slice_with_int_or_string(key)
+            return self._slice_with_int_or_string(key)
         elif isinstance(key, str) and not hasattr(self, key):
             return self._slice_with_int_or_string(key)
         elif isinstance(key, list) or isinstance(key, tuple):
