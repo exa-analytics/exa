@@ -422,7 +422,7 @@ class BaseContainer:
                     selector = key if key > 0 else sorted(grps.groups.keys())[key]
                     kws[name] = dfcls(grps.get_group(selector))
             if name not in kws:
-                if key < 0 or key in df.index:
+                if key < 0 or key in df.index and not isinstance(df, pd.SparseDataFrame) and not isinstance(df, pd.SparseSeries):
                     kws[name] = dfcls(df.iloc[[key], :])
                 else:
                     kws[name] = df
