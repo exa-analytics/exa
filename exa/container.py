@@ -527,7 +527,7 @@ class BaseContainer:
             setattr(self, key, value)
         self.meta = meta
         self._widget = self._widget_class(self) if _conf['notebook'] else None
-        if meta is None and len(kwargs) == 0:
+        if meta is None and len(kwargs) == 0 and len(self._numerical_dict()) == 0:
             self._test = True
             self.name = 'TestContainer'
             self._update_traits()
