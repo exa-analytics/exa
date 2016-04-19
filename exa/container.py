@@ -419,13 +419,18 @@ class BaseContainer:
             if hasattr(df, '_groupbys'):
                 if len(df._groupbys) > 0:
                     grps = df.groupby(df._groupbys)
-                    selector = key if key > 0 else sorted(grps.groups.keys())[key]
+                    selector = sorted(grps.groups.keys())[key]
                     kws[name] = dfcls(grps.get_group(selector))
             if name not in kws:
-                if key < 0 or key in df.index and not isinstance(df, pd.SparseDataFrame) and not isinstance(df, pd.SparseSeries):
-                    kws[name] = dfcls(df.iloc[[key], :])
-                else:
+                selector = None
+                if key < 0:
+                    selector = df.index[key]
+                    kws[name] = dfcls(df.ix[[selector], :])
+                elif key > len(df.index):
                     kws[name] = df
+                else:
+                    selector = df.index[key]
+                    kws[name] = dfcls(df.ix[[selector], :])
         return cls(**kws)
 
     def _slice_with_list_or_tuple(self, keys):
@@ -446,7 +451,7 @@ class BaseContainer:
             if name not in kws:
                 if np.any([key < 0 for key in keys]) or np.any([key in df.index for key in keys]):
                     selector = [df.index[key] if key < 0 else key for key in keys]
-                    kws[name] = dfcls(df.iloc[selector, :])
+                    kws[name] = dfcls(df.ix[selector, :])
                 else:
                     kws[name] = df
         return cls(**kws)
