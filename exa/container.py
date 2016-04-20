@@ -423,9 +423,8 @@ class BaseContainer:
                     kws[name] = dfcls(grps.get_group(selector))
             if name not in kws:
                 selector = None
-                if key < 0:
-                    selector = df.index[key]
-                    kws[name] = dfcls(df.ix[[selector], :])
+                if isinstance(df, pd.SparseDataFrame) or isinstance(df, pd.SparseSeries):
+                    kws[name] = df
                 elif key > len(df.index):
                     kws[name] = df
                 else:
@@ -449,11 +448,13 @@ class BaseContainer:
                     selector = [srtd[key] for key in keys]
                     kws[name] = dfcls(pd.concat([grps.get_group(key) for key in selector]))
             if name not in kws:
-                if np.any([key < 0 for key in keys]) or np.any([key in df.index for key in keys]):
-                    selector = [df.index[key] if key < 0 else key for key in keys]
-                    kws[name] = dfcls(df.ix[selector, :])
-                else:
+                if isinstance(df, pd.SparseDataFrame) or isinstance(df, pd.SparseSeries):
                     kws[name] = df
+                elif max(keys) > len(df.index):
+                    kws[name] = df
+                else:
+                    selector = [df.index[key] for key in keys]
+                    kws[name] = dfcls(df.ix[selector, :])
         return cls(**kws)
 
     def _slice_with_slice(self, slce):
@@ -471,7 +472,9 @@ class BaseContainer:
                     srtd = sorted(grps.groups.keys())
                     kws[name] = dfcls(pd.concat([grps.get_group(key) for key in srtd[slce]]))
             if name not in kws:
-                if slce == slice(None):
+                if isinstance(df, pd.SparseDataFrame) or isinstance(df, pd.SparseSeries):
+                    kws[name] = df
+                elif slce == slice(None):
                     kws[name] = df
                 else:
                     keys = df.index[slce]
