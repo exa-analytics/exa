@@ -295,6 +295,17 @@ class BaseContainer:
                     dfs[name] = value
         return dfs
 
+    def _active_trait_dfs(self):
+        '''
+        Get only dataframes that have active traits.
+        '''
+        active = {}
+        for name, value in self._numerical_dict().items():
+            if hasattr(value, '_traits'):
+                if len(value._traits) > 0:
+                    active[name] = value
+        return active
+
     def _df_bytes(self):
         '''
         Compute the size (in bytes) of all of the attached dataframes.
@@ -316,18 +327,6 @@ class BaseContainer:
                 total_bytes += getsizeof(value)
         return total_bytes
 
-    def _trait_names(self):
-        '''
-        Poll each of the attached :class:`~exa.ndframe.DataFrame` for their
-        trait names.
-        '''
-        names = []
-        has_traits = self._numerical_dict()
-        for name, obj in has_traits.items():
-            obj._update_traits()
-            names += obj._traits
-        self._widget._names = names
-
     def _custom_container_traits(self):
         '''
         Used when a container is required to build specific trait objects.
@@ -348,7 +347,7 @@ class BaseContainer:
             else:
                 traits['test'] = Bool(False).tag(sync=True)
                 traits.update(self._custom_container_traits())
-                has_traits = self._numerical_dict(cls_criteria=[NDBase])
+                has_traits = self._active_trait_dfs()
                 for obj in has_traits.values():
                     traits.update(obj._get_traits())
             self._widget.add_traits(**traits)
@@ -481,6 +480,9 @@ class BaseContainer:
                     kws[name] = dfcls(df.iloc[keys, :])
         return cls(**kws)
 
+    def _other_bytes(self):
+        return 0
+
     def __getitem__(self, key):
         '''
         The key can be an integer, slice, list, tuple, or string. If integer,
@@ -520,6 +522,7 @@ class BaseContainer:
         '''
         jstot = self._widget_bytes()
         dftot = self._df_bytes()
+        other = self._other_bytes()
         kwtot = 0
         for key, value in self._kw_dict().items():
             kwtot += getsizeof(key)
