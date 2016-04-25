@@ -552,27 +552,95 @@ class BaseContainer:
         return None
 
 
-def concat(*containers, axis=0, join='outer', ingore_index=False):
-    '''
-    Concatenate any number of container objects into a single container object.
-
-    Args:
-        containers: A sequence of container or container like objects
-        axis (int): Axis along which to concatenate (0: "hstack", 1: "vstack")
-        join (str): How to handle indices on other axis (full outer join: "outer", inner join: "inner")
-        ignore_index (bool): See warning below!
-
-    Returns:
-        container: Concatenated container object
-
-    Note:
-        The concatenated object will have a new unique id, primary, key, and
-        its metadata will contain references to the original conatiners.
-
-    Warning:
-        The ignore_index option is primarily for internal use. If set to true,
-        may cause the resulting concatenated container object to not have
-        meaningful indices or columns. Use with care.
-    '''
-    # In the simplest case, all of the containers have unique indices and should
-    # simply be sorted and then their dataframe data appended
+#def concat(*containers, axis=0, join='outer', ingore_index=False):
+#    '''
+#    Concatenate any number of container objects into a single container object.
+#
+#    Args:
+#        containers: A sequence of container or container like objects
+#        axis (int): Axis along which to concatenate (0: "hstack", 1: "vstack")
+#        join (str): How to handle indices on other axis (full outer join: "outer", inner join: "inner")
+#        ignore_index (bool): See warning below!
+#
+#    Returns:
+#        container: Concatenated container object
+#
+#    Note:
+#        The concatenated object will have a new unique id, primary, key, and
+#        its metadata will contain references to the original conatiners.
+#
+#    Warning:
+#        The ignore_index option is primarily for internal use. If set to true,
+#        may cause the resulting concatenated container object to not have
+#        meaningful indices or columns. Use with care.
+#    '''
+#    # In the simplest case, all of the containers have unique indices and should
+#    # simply be sorted and then their dataframe data appended
+#    cls = containers[0].__class__
+#    if not np.all([cls == container.__class__ for container in containers]):
+#        raise TypeError('Can only concatenate containers of the same type!')
+#    # Get the master list of dataframes and record pkids
+#    df_classes = {}
+#    meta = {'concat_pkid': []}
+#    for container in containers:
+#        meta['concat_pkid'].append(container.pkid)
+#        for key, value in container._numerical_dict().items():
+#            name = key[1:] if key.startswith('_') else key
+#            df_classes[name] = value.__class__
+#    # For each dataframe, concatentate first by groupbys then by index
+#    new_dfs = {}
+#    for name, cls in df_classes.items():
+#        dflist = [container[name] for container in containers]
+#        dftypes = [type(df) for df in dflist]
+#        df_type = dftypes[0]
+#        df0 = dflist[0]
+#        if np.any([dftype is not df_type for dftype in dftypes]):
+#            raise TypeError('Cannot concantenate dataframes ({}) with different types!'.format(name))
+#        if isinstance(df0, exa.numerical.Field):
+#            print('FIELD')
+#            news_dfs[name] = _concat_fields(dflist, cls, axis=axis, join=join)
+#        elif isinstance(df0, exa.numerical.Series):
+#            print('SERIES')
+#            new_dfs[name] = _concat_series(dflist, cls)
+#        elif isinstance(df0, exa.numerical.SparseDataFrame):
+#
+#            pass
+#        elif isinstance(df0, exa.numerical.DataFrame):
+#            pass
+#        else:
+#            pass
+#            #new_dfs[name] = _concat_reindex(dflist, cls)
+#    print(new_dfs.keys())
+#    kwargs.update(new_dfs)
+#    if 'meta' in kwargs:
+#        kwargs['meta'].update(meta)
+#    else:
+#        kwargs['meta'] = meta
+#    return kwargs
+#
+#def _concat_series(series, cls):
+#    '''
+#    '''
+#    return cls(pd.concat(series))
+#
+#def _concat_dataframes(dataframes, cls):
+#    '''
+#    '''
+#    grps = dataframes
+#
+#def _concat_fields(fields, cls, axis, join):
+#    '''
+#    '''
+#    grps = fields[0]._groupbys
+#    new_groupbys = {}
+#    for name in grps:
+#        if axis == 0:
+#            new_groupbys[name] = pd.Series([i for i in range(len(fields)) for j in range(len(fields[i]))], dtype='category')
+#        else:
+#            new_groupbys[name] = pd.Series([i for i in range(len(fields[0]))], dtype='category')
+#    field_values = [values for field in fields for values in field.field_values]
+#    field_data = pd.concat([pd.DataFrame(field) for field in fields], axis=axis, join=join)
+#    field_data.reset_index(inplace=True, drop=True)
+#    for name in grps:
+#        field_data[name] = new_groupbys[name]
+#    return cls(field_values, field_data)
