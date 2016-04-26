@@ -79,14 +79,25 @@ define([
             this.scene.add(this.ambient_light);
         };
 
-        test_mesh() {
+        test_mesh(phong) {
             /*"""
             test_mesh
             ---------------
             Example of a render
             */
+            if (phong === undefined) {
+                phong = false;
+            };
             var test_geometry = new THREE.BoxGeometry(2.0, 2.0, 2.0);
-            var test_material = new THREE.MeshLambertMaterial({color: 0x005500});
+            var test_material;
+            if (phong === true) {
+                test_material = new THREE.MeshPhongMaterial({
+                    color: 0x005500,
+                    specular: 0x005500
+                });
+            } else {
+                test_material = new THREE.MeshLambertMaterial({color: 0x005500});
+            };
             var test_material2 = new THREE.MeshBasicMaterial({wireframe: true, color: 0x909090});
             var test_outline = new THREE.Mesh(test_geometry, test_material2);
             var test_cube = new THREE.Mesh(test_geometry, test_material);

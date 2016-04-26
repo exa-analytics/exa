@@ -78,9 +78,15 @@ define([
                     self.app3d.remove_meshes(self.meshes);
                     self.meshes = self.app3d.test_mesh();
                 },
+
+                'test phong': function() {
+                    self.app3d.remove_meshes(self.meshes);
+                    self.meshes = self.app3d.test_mesh(true);
+                },
             };
             this.level0.clear_button = this.gui.add(this.level0, 'clear');
             this.level0.test_mesh_button = this.gui.add(this.level0, 'test mesh');
+            this.level0.test_phong_button = this.gui.add(this.level0, 'test phong');
 
             this.fields = this.gui.addFolder('fields');
             this.fields['field type'] = '';

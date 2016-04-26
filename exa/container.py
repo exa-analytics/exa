@@ -41,6 +41,12 @@ class BaseContainer:
     _widget_class = ContainerWidget
     _df_types = OrderedDict()
 
+    def add_numerical(self, frame_or_series):
+        '''
+        Attach a dataframe or series object to the current container.
+        '''
+        raise NotImplementedError()
+
     def save(self, path=None):
         '''
         Save the current working container to an HDF5 file.
@@ -72,7 +78,8 @@ class BaseContainer:
         See Also:
             For argument description, see :func:`~exa.container.concat`.
         '''
-        return concat(self, *args, **kwargs)
+        raise NotImplementedError()
+        #return concat(self, *args, **kwargs)
 
     def info(self):
         '''
