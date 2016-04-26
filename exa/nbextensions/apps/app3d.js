@@ -63,18 +63,12 @@ define([
             this.controls.keys = [65, 83, 68];
             this.controls.addEventListener('change', this.render.bind(this));
 
-            /*this.dlight0 = new THREE.DirectionalLight(0xFFFFFF, 0.3);
+            this.dlight0 = new THREE.DirectionalLight(0xFFFFFF, 0.3);
             this.dlight0.position.set(-100, -100, -100);
-            this.scene.add(this.dlight0);*/
+            this.scene.add(this.dlight0);
             this.dlight1 = new THREE.DirectionalLight(0xFFFFFF, 0.3);
-            this.dlight1.position.set(0, 100, 100);
+            this.dlight1.position.set(100, 100, 100);
             this.scene.add(this.dlight1);
-            this.dlight2 = new THREE.DirectionalLight(0xFFFFFF, 0.3);
-            this.dlight2.position.set(100, 0, 100);
-            this.scene.add(this.dlight2);
-            /*this.dlight3 = new THREE.DirectionalLight(0xFFFFFF, 0.3);
-            this.dlight3.position.set(100, 100, 0);
-            this.scene.add(this.dlight3);*/
             this.ambient_light = new THREE.AmbientLight(0xFFFFFF);
             this.scene.add(this.ambient_light);
         };
@@ -272,7 +266,9 @@ define([
                 var mesh = new THREE.Mesh(geometries[color], materials[color]);
                 mesh.position.set(xyz[i3], xyz[i3+1], xyz[i3+2]);
                 meshes.push(mesh);
+                //mesh.geometry.computeBoundingBox();
                 this.scene.add(mesh);
+                //console.log(mesh.geometry.boundingBox);
             };
             return meshes;
         };
@@ -454,11 +450,12 @@ define([
             ------------------------
             */
             var bbox = new THREE.Box3().setFromObject(this.scene);
+            console.log(bbox);
             var min = bbox.min;
             var max = bbox.max;
-            var ox = (max.x - min.x) / 2;
-            var oy = (max.y - min.y) / 2;
-            var oz = (max.z - min.z) / 2;
+            var ox = (max.x + min.x) / 2;
+            var oy = (max.y + min.y) / 2;
+            var oz = (max.z + min.z) / 2;
             max.x *= 1.2;
             max.y *= 1.2;
             max.z *= 1.2;

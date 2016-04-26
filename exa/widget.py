@@ -23,15 +23,18 @@ class Widget(DOMWidget):
     height = Integer(500).tag(sync=True)
     fps = Integer(24).tag(sync=True)
 
-    def _handle_custom_msg(self, *args, **kwargs):
+    def _handle_custom_msg(self, msg, unimportant):
         '''
         Recieve and dispatch messages from the JavaScript frontend to the
         Python backend.
         '''
-        content = args[0]
-        mtype = content['type']
+        mtype = msg['type']
         if mtype == 'message':
             self._handle_message(content)
+        elif mtype == 'field':
+            self._handle_field(msg['data'])
+        elif mtype == 'image':
+            self._handle_image(msg['data'])
         else:
             print(args, kwargs)
 
@@ -41,6 +44,12 @@ class Widget(DOMWidget):
         app = message['app']
         content = message['content']
         print('Message from {}: {}'.format(app, content))
+
+    def _handle_field(self, message):
+        raise NotImplementedError()
+
+    def _handle_image(self, message):
+        raise NotImplementedError()
 
     def _repr_html_(self):
         return self._ipython_display_()
@@ -58,3 +67,4 @@ class ContainerWidget(Widget):
     def __init__(self, container, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.container = container
+        self.params = {'save_dir': '', 'file_name': ''}
