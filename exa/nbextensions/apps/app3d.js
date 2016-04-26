@@ -255,7 +255,7 @@ define([
                 var color = colors[i];
                 var radius = radii[i];
                 if (geometries.hasOwnProperty(color) === false) {
-                    geometries[color] = new THREE.SphereGeometry(radius * 0.5, 24, 24);
+                    geometries[color] = new THREE.SphereGeometry(radius, 24, 24);
                 };
                 if (materials.hasOwnProperty(color) === false) {
                     materials[color] = new THREE.MeshPhongMaterial({
@@ -271,6 +271,61 @@ define([
                 var color = colors[i];
                 var mesh = new THREE.Mesh(geometries[color], materials[color]);
                 mesh.position.set(xyz[i3], xyz[i3+1], xyz[i3+2]);
+                meshes.push(mesh);
+                this.scene.add(mesh);
+            };
+            return meshes;
+        };
+
+        add_cylinders(v0, v1, x, y, z, colors, radius) {
+            /*"""
+            add_lines
+            ------------
+            Add lines between pairs of points.
+
+            Args:
+                v0 (array): Array of first vertex in pair
+                v1 (array): Array of second vertex
+                x (array): Position in x of vertices
+                y (array): Position in y of vertices
+                z (array): Position in z of vertices
+                colors (array): Colors of vertices
+
+            Returns:
+                linesegs (THREE.LineSegments): Line segment objects
+            */
+            if (radius === undefined) {
+                radius = 1;
+            };
+            var material = new THREE.MeshPhongMaterial({
+                vertexColors: THREE.VertexColors,
+                color: 0x606060,
+                specular: 0x606060,
+                shininess: 5,
+            });
+            var meshes = [];
+            var n = v0.length;
+            for (let i=0; i<n; i++) {
+                var j = v0[i];
+                var k = v1[i];
+                var vector0 = new THREE.Vector3(x[j], y[j], z[j]);
+                var vector1 = new THREE.Vector3(x[k], y[k], z[k]);
+                var direction = new THREE.Vector3().subVectors(vector0, vector1);
+                var center = new THREE.Vector3().addVectors(vector0, vector1);
+                center.divideScalar(2.0);
+                var geometry = new THREE.CylinderGeometry(radius, radius, direction.length());
+                geometry.applyMatrix(new THREE.Matrix4().makeRotationX( Math.PI / 2));
+                /*var nn = geometry.faces.length;
+                var color0 = new THREE.Color(colors[j]);
+                var color1 = new THREE.Color(colors[k]);
+                geometry.colors.push(color0.clone());
+                geometry.colors.push(color1.clone());
+                for (let l=0; l<nn; l++) {
+                    geometry.faces[l].vertexColors[0] =
+                };*/
+                var mesh = new THREE.Mesh(geometry, material);
+                mesh.position.set(center.x, center.y, center.z);
+                mesh.lookAt(vector1);
                 meshes.push(mesh);
                 this.scene.add(mesh);
             };
@@ -797,7 +852,7 @@ define([
         void main() {\
             vColor = color;\
             vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);\
-            gl_PointSize = size * (600.0 / length(mvPosition.xyz));\
+            gl_PointSize = size * (1000.0 / length(mvPosition.xyz));\
             gl_Position = projectionMatrix * mvPosition;\
         }\
     ";
