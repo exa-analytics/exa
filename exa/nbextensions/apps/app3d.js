@@ -63,18 +63,18 @@ define([
             this.controls.keys = [65, 83, 68];
             this.controls.addEventListener('change', this.render.bind(this));
 
-            this.dlight0 = new THREE.DirectionalLight(0xFFFFFF, 0.4);
+            /*this.dlight0 = new THREE.DirectionalLight(0xFFFFFF, 0.3);
             this.dlight0.position.set(-100, -100, -100);
-            this.scene.add(this.dlight0);
-            this.dlight1 = new THREE.DirectionalLight(0xFFFFFF, 0.4);
+            this.scene.add(this.dlight0);*/
+            this.dlight1 = new THREE.DirectionalLight(0xFFFFFF, 0.3);
             this.dlight1.position.set(0, 100, 100);
             this.scene.add(this.dlight1);
-            this.dlight2 = new THREE.DirectionalLight(0xFFFFFF, 0.4);
+            this.dlight2 = new THREE.DirectionalLight(0xFFFFFF, 0.3);
             this.dlight2.position.set(100, 0, 100);
             this.scene.add(this.dlight2);
-            this.dlight3 = new THREE.DirectionalLight(0xFFFFFF, 0.4);
+            /*this.dlight3 = new THREE.DirectionalLight(0xFFFFFF, 0.3);
             this.dlight3.position.set(100, 100, 0);
-            this.scene.add(this.dlight3);
+            this.scene.add(this.dlight3);*/
             this.ambient_light = new THREE.AmbientLight(0xFFFFFF);
             this.scene.add(this.ambient_light);
         };
@@ -210,6 +210,71 @@ define([
             var points = new THREE.Points(geometry, material);
             this.scene.add(points);
             return [points];
+        };
+
+        add_spheres(x, y, z, colors, radii) {
+            /*"""
+            add_spheres
+            ---------------
+            Create a point cloud from x, y, z coordinates and colors and radii
+            (optional).
+
+            Args:
+                x (array-like): Array like object of x values
+                y (array-like): Array like object of y values
+                z (array-like): Array like object of z values
+                colors (object): List like colors corresponding to every object
+                radii (object): List like radii corresponding to every object
+
+            Returns:
+                spheres (list): List of THREE.Mesh objects
+            */
+            var n = 1;
+            if (x.hasOwnProperty('length')) {
+                n = x.length;
+            } else if (y.hasOwnProperty('length')) {
+                n = y.length;
+            } else if (z.hasOwnProperty('length')) {
+                n = z.length;
+            };
+            if (colors === undefined) {
+                colors = 0x808080;
+            };
+            if (radii == undefined) {
+                radii = 1;
+            }
+            if (!colors.hasOwnProperty('length')) {
+                colors = utility.repeat_object(colors, n);
+            };
+            if (!radii.hasOwnProperty('length')) {
+                radii = utility.repeat_float(radii, n);
+            };
+            var geometries = {};
+            var materials = {};
+            for (let i=0; i<n; i++) {
+                var color = colors[i];
+                var radius = radii[i];
+                if (geometries.hasOwnProperty(color) === false) {
+                    geometries[color] = new THREE.SphereGeometry(radius * 0.5, 24, 24);
+                };
+                if (materials.hasOwnProperty(color) === false) {
+                    materials[color] = new THREE.MeshPhongMaterial({
+                        color: color,
+                        specular: color,
+                        shininess: 5
+                    });
+                };
+            };
+            var xyz = utility.create_float_array_xyz(x, y, z);
+            var meshes = [];
+            for (let i=0, i3=0; i<n; i++, i3+=3) {
+                var color = colors[i];
+                var mesh = new THREE.Mesh(geometries[color], materials[color]);
+                mesh.position.set(xyz[i3], xyz[i3+1], xyz[i3+2]);
+                meshes.push(mesh);
+                this.scene.add(mesh);
+            };
+            return meshes;
         };
 
         add_lines(v0, v1, x, y, z, colors) {
@@ -380,6 +445,25 @@ define([
             xyz.z += rz;
             var kwargs = {'x': xyz.x, 'y': xyz.y, 'z': xyz.z,
                           'ox': oxyz[0], 'oy': oxyz[1], 'oz': oxyz[2]};
+            this.set_camera(kwargs);
+        };
+
+        set_camera_from_scene() {
+            /*"""
+            set_camera_from_scene
+            ------------------------
+            */
+            var bbox = new THREE.Box3().setFromObject(this.scene);
+            var min = bbox.min;
+            var max = bbox.max;
+            var ox = (max.x - min.x) / 2;
+            var oy = (max.y - min.y) / 2;
+            var oz = (max.z - min.z) / 2;
+            max.x *= 1.2;
+            max.y *= 1.2;
+            max.z *= 1.2;
+            var kwargs = {'x': max.x, 'y': max.y, 'z': max.z,
+                          'ox': ox, 'oy': oy, 'oz': oz};
             this.set_camera(kwargs);
         };
 
