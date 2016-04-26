@@ -13,7 +13,7 @@ dependencies = [
     'scikit-learn>=0.17',
     'networkx>=1.10',
     'jupyter>=1.0.0',
-    'notebook=4.1.0',
+    'notebook>=4.1.0',
     'ipython>=4.1.0',
     'ipywidgets>=4.1.0',
     'matplotlib>=1.5.0',
@@ -39,10 +39,10 @@ try:
         install_requires=dependencies,
         license='Apache License Version 2.0'
     )
-    from exa._install import install
-    exa_root = input('Specify install directory [default: ~/.exa]: ')
-    if exa_root == '':
-        exa_root = exa._conf['exa_root']
-    install(exa_root=exa_root)
+#    import exa
+#    exa_root = input('Specify install directory [default: ~/.exa]: ')
+#    if exa_root == '':
+#        exa_root = exa._conf['exa_root']
+#    install(exa_root=exa_root)
 except:
     raise
