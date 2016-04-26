@@ -29,14 +29,15 @@ class Widget(DOMWidget):
         Python backend.
         '''
         mtype = msg['type']
+        content = msg['data']
         if mtype == 'message':
             self._handle_message(content)
         elif mtype == 'field':
-            self._handle_field(msg['data'])
+            self._handle_field(content)
         elif mtype == 'image':
-            self._handle_image(msg['data'])
+            self._handle_image(content)
         else:
-            print(args, kwargs)
+            print(msg)
 
     def _handle_message(self, message):
         '''
