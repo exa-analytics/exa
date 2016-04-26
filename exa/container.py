@@ -41,6 +41,12 @@ class BaseContainer:
     _widget_class = ContainerWidget
     _df_types = OrderedDict()
 
+    def add_numerical(self, frame_or_series):
+        '''
+        Attach a dataframe or series object to the current container.
+        '''
+        raise NotImplementedError()
+
     def save(self, path=None):
         '''
         Save the current working container to an HDF5 file.
@@ -72,7 +78,8 @@ class BaseContainer:
         See Also:
             For argument description, see :func:`~exa.container.concat`.
         '''
-        return concat(self, *args, **kwargs)
+        raise NotImplementedError()
+        #return concat(self, *args, **kwargs)
 
     def info(self):
         '''
@@ -295,6 +302,17 @@ class BaseContainer:
                     dfs[name] = value
         return dfs
 
+    def _active_trait_dfs(self):
+        '''
+        Get only dataframes that have active traits.
+        '''
+        active = {}
+        for name, value in self._numerical_dict().items():
+            if hasattr(value, '_traits'):
+                if len(value._traits) > 0:
+                    active[name] = value
+        return active
+
     def _df_bytes(self):
         '''
         Compute the size (in bytes) of all of the attached dataframes.
@@ -316,18 +334,6 @@ class BaseContainer:
                 total_bytes += getsizeof(value)
         return total_bytes
 
-    def _trait_names(self):
-        '''
-        Poll each of the attached :class:`~exa.ndframe.DataFrame` for their
-        trait names.
-        '''
-        names = []
-        has_traits = self._numerical_dict()
-        for name, obj in has_traits.items():
-            obj._update_traits()
-            names += obj._traits
-        self._widget._names = names
-
     def _custom_container_traits(self):
         '''
         Used when a container is required to build specific trait objects.
@@ -348,7 +354,7 @@ class BaseContainer:
             else:
                 traits['test'] = Bool(False).tag(sync=True)
                 traits.update(self._custom_container_traits())
-                has_traits = self._numerical_dict(cls_criteria=[NDBase])
+                has_traits = self._active_trait_dfs()
                 for obj in has_traits.values():
                     traits.update(obj._get_traits())
             self._widget.add_traits(**traits)
@@ -419,13 +425,17 @@ class BaseContainer:
             if hasattr(df, '_groupbys'):
                 if len(df._groupbys) > 0:
                     grps = df.groupby(df._groupbys)
-                    selector = key if key > 0 else sorted(grps.groups.keys())[key]
+                    selector = sorted(grps.groups.keys())[key]
                     kws[name] = dfcls(grps.get_group(selector))
             if name not in kws:
-                if key < 0 or key in df.index and not isinstance(df, pd.SparseDataFrame) and not isinstance(df, pd.SparseSeries):
-                    kws[name] = dfcls(df.iloc[[key], :])
-                else:
+                selector = None
+                if isinstance(df, pd.SparseDataFrame) or isinstance(df, pd.SparseSeries):
                     kws[name] = df
+                elif key > len(df.index):
+                    kws[name] = df
+                else:
+                    selector = df.index[key]
+                    kws[name] = dfcls(df.ix[[selector], :])
         return cls(**kws)
 
     def _slice_with_list_or_tuple(self, keys):
@@ -444,11 +454,13 @@ class BaseContainer:
                     selector = [srtd[key] for key in keys]
                     kws[name] = dfcls(pd.concat([grps.get_group(key) for key in selector]))
             if name not in kws:
-                if np.any([key < 0 for key in keys]) or np.any([key in df.index for key in keys]):
-                    selector = [df.index[key] if key < 0 else key for key in keys]
-                    kws[name] = dfcls(df.iloc[selector, :])
-                else:
+                if isinstance(df, pd.SparseDataFrame) or isinstance(df, pd.SparseSeries):
                     kws[name] = df
+                elif max(keys) > len(df.index):
+                    kws[name] = df
+                else:
+                    selector = [df.index[key] for key in keys]
+                    kws[name] = dfcls(df.ix[selector, :])
         return cls(**kws)
 
     def _slice_with_slice(self, slce):
@@ -466,12 +478,17 @@ class BaseContainer:
                     srtd = sorted(grps.groups.keys())
                     kws[name] = dfcls(pd.concat([grps.get_group(key) for key in srtd[slce]]))
             if name not in kws:
-                if slce == slice(None):
+                if isinstance(df, pd.SparseDataFrame) or isinstance(df, pd.SparseSeries):
+                    kws[name] = df
+                elif slce == slice(None):
                     kws[name] = df
                 else:
                     keys = df.index[slce]
                     kws[name] = dfcls(df.iloc[keys, :])
         return cls(**kws)
+
+    def _other_bytes(self):
+        return 0
 
     def __getitem__(self, key):
         '''
@@ -512,6 +529,7 @@ class BaseContainer:
         '''
         jstot = self._widget_bytes()
         dftot = self._df_bytes()
+        other = self._other_bytes()
         kwtot = 0
         for key, value in self._kw_dict().items():
             kwtot += getsizeof(key)
@@ -541,27 +559,95 @@ class BaseContainer:
         return None
 
 
-def concat(*containers, axis=0, join='outer', ingore_index=False):
-    '''
-    Concatenate any number of container objects into a single container object.
-
-    Args:
-        containers: A sequence of container or container like objects
-        axis (int): Axis along which to concatenate (0: "hstack", 1: "vstack")
-        join (str): How to handle indices on other axis (full outer join: "outer", inner join: "inner")
-        ignore_index (bool): See warning below!
-
-    Returns:
-        container: Concatenated container object
-
-    Note:
-        The concatenated object will have a new unique id, primary, key, and
-        its metadata will contain references to the original conatiners.
-
-    Warning:
-        The ignore_index option is primarily for internal use. If set to true,
-        may cause the resulting concatenated container object to not have
-        meaningful indices or columns. Use with care.
-    '''
-    # In the simplest case, all of the containers have unique indices and should
-    # simply be sorted and then their dataframe data appended
+#def concat(*containers, axis=0, join='outer', ingore_index=False):
+#    '''
+#    Concatenate any number of container objects into a single container object.
+#
+#    Args:
+#        containers: A sequence of container or container like objects
+#        axis (int): Axis along which to concatenate (0: "hstack", 1: "vstack")
+#        join (str): How to handle indices on other axis (full outer join: "outer", inner join: "inner")
+#        ignore_index (bool): See warning below!
+#
+#    Returns:
+#        container: Concatenated container object
+#
+#    Note:
+#        The concatenated object will have a new unique id, primary, key, and
+#        its metadata will contain references to the original conatiners.
+#
+#    Warning:
+#        The ignore_index option is primarily for internal use. If set to true,
+#        may cause the resulting concatenated container object to not have
+#        meaningful indices or columns. Use with care.
+#    '''
+#    # In the simplest case, all of the containers have unique indices and should
+#    # simply be sorted and then their dataframe data appended
+#    cls = containers[0].__class__
+#    if not np.all([cls == container.__class__ for container in containers]):
+#        raise TypeError('Can only concatenate containers of the same type!')
+#    # Get the master list of dataframes and record pkids
+#    df_classes = {}
+#    meta = {'concat_pkid': []}
+#    for container in containers:
+#        meta['concat_pkid'].append(container.pkid)
+#        for key, value in container._numerical_dict().items():
+#            name = key[1:] if key.startswith('_') else key
+#            df_classes[name] = value.__class__
+#    # For each dataframe, concatentate first by groupbys then by index
+#    new_dfs = {}
+#    for name, cls in df_classes.items():
+#        dflist = [container[name] for container in containers]
+#        dftypes = [type(df) for df in dflist]
+#        df_type = dftypes[0]
+#        df0 = dflist[0]
+#        if np.any([dftype is not df_type for dftype in dftypes]):
+#            raise TypeError('Cannot concantenate dataframes ({}) with different types!'.format(name))
+#        if isinstance(df0, exa.numerical.Field):
+#            print('FIELD')
+#            news_dfs[name] = _concat_fields(dflist, cls, axis=axis, join=join)
+#        elif isinstance(df0, exa.numerical.Series):
+#            print('SERIES')
+#            new_dfs[name] = _concat_series(dflist, cls)
+#        elif isinstance(df0, exa.numerical.SparseDataFrame):
+#
+#            pass
+#        elif isinstance(df0, exa.numerical.DataFrame):
+#            pass
+#        else:
+#            pass
+#            #new_dfs[name] = _concat_reindex(dflist, cls)
+#    print(new_dfs.keys())
+#    kwargs.update(new_dfs)
+#    if 'meta' in kwargs:
+#        kwargs['meta'].update(meta)
+#    else:
+#        kwargs['meta'] = meta
+#    return kwargs
+#
+#def _concat_series(series, cls):
+#    '''
+#    '''
+#    return cls(pd.concat(series))
+#
+#def _concat_dataframes(dataframes, cls):
+#    '''
+#    '''
+#    grps = dataframes
+#
+#def _concat_fields(fields, cls, axis, join):
+#    '''
+#    '''
+#    grps = fields[0]._groupbys
+#    new_groupbys = {}
+#    for name in grps:
+#        if axis == 0:
+#            new_groupbys[name] = pd.Series([i for i in range(len(fields)) for j in range(len(fields[i]))], dtype='category')
+#        else:
+#            new_groupbys[name] = pd.Series([i for i in range(len(fields[0]))], dtype='category')
+#    field_values = [values for field in fields for values in field.field_values]
+#    field_data = pd.concat([pd.DataFrame(field) for field in fields], axis=axis, join=join)
+#    field_data.reset_index(inplace=True, drop=True)
+#    for name in grps:
+#        field_data[name] = new_groupbys[name]
+#    return cls(field_values, field_data)

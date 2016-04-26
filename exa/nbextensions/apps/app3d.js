@@ -79,14 +79,25 @@ define([
             this.scene.add(this.ambient_light);
         };
 
-        test_mesh() {
+        test_mesh(phong) {
             /*"""
             test_mesh
             ---------------
             Example of a render
             */
+            if (phong === undefined) {
+                phong = false;
+            };
             var test_geometry = new THREE.BoxGeometry(2.0, 2.0, 2.0);
-            var test_material = new THREE.MeshLambertMaterial({color: 0x005500});
+            var test_material;
+            if (phong === true) {
+                test_material = new THREE.MeshPhongMaterial({
+                    color: 0x005500,
+                    specular: 0x005500
+                });
+            } else {
+                test_material = new THREE.MeshLambertMaterial({color: 0x005500});
+            };
             var test_material2 = new THREE.MeshBasicMaterial({wireframe: true, color: 0x909090});
             var test_outline = new THREE.Mesh(test_geometry, test_material2);
             var test_cube = new THREE.Mesh(test_geometry, test_material);
@@ -254,8 +265,8 @@ define([
             };
             var material = new THREE.MeshBasicMaterial({
                 transparent: true,
-                opacity: 0.5,
-                wireframeLinewidth: 10,
+                opacity: 0.2,
+                wireframeLinewidth: 8,
                 wireframe: true
             });
             var cell = new THREE.Mesh(geometry, material);
@@ -413,9 +424,9 @@ define([
             var xdir = new THREE.Vector3(1, 0, 0);
             var ydir = new THREE.Vector3(0, 1, 0);
             var zdir = new THREE.Vector3(0, 0, 1);
-            var x = new THREE.ArrowHelper(xdir, origin, 1.0, 0xFF0000);
-            var y = new THREE.ArrowHelper(ydir, origin, 1.0, 0x00FF00);
-            var z = new THREE.ArrowHelper(zdir, origin, 1.0, 0x0000FF);
+            var x = new THREE.ArrowHelper(xdir, origin, 5.0, 0xFF0000);
+            var y = new THREE.ArrowHelper(ydir, origin, 5.0, 0x00FF00);
+            var z = new THREE.ArrowHelper(zdir, origin, 5.0, 0x0000FF);
             this.scene.add(x);
             this.scene.add(y);
             this.scene.add(z);
