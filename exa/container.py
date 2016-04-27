@@ -115,9 +115,11 @@ class BaseContainer:
         n = len(nodes)
         for internal_name, pn in nodes.items():
             df0 = self[internal_name]
+            if isinstance(df0, pd.Series):
+                continue
             for internal_other, po in nodes.items():
                 df1 = self[internal_other]
-                if df0 is df1:
+                if df0 is df1 or isinstance(df1, pd.Series):
                     continue    # Skip if same
                 index0 = df0.index.names
                 index1 = df1.index.names
@@ -319,9 +321,7 @@ class BaseContainer:
         '''
         total_bytes = 0
         for df in self._numerical_dict().values():
-            total_bytes += df.values.nbytes
-            total_bytes += df.index.nbytes
-            total_bytes += df.columns.nbytes
+            total_bytes += np.sum(df.memory_usage())
         return total_bytes
 
     def _widget_bytes(self):

@@ -32,17 +32,12 @@ try:
         maintainer_email='exa.data.analytics@gmail.com',
         url='https://exa-analytics.github.io/website',
         packages=find_packages(),
-        package_data={'exa': ['static/*.json', 'nbextensions/*.js', 'nbextensions/lib/*.js',
+        package_data={'exa': ['static/*.json', 'nbextensions/*.js', 'nbextensions/libs/*.js',
                               'nbextensions/apps/*.js']},
         entry_points={'console_scripts': ['exa = exa.__main__:main']},
         include_package_data=True,
         install_requires=dependencies,
         license='Apache License Version 2.0'
     )
-#    import exa
-#    exa_root = input('Specify install directory [default: ~/.exa]: ')
-#    if exa_root == '':
-#        exa_root = exa._conf['exa_root']
-#    install(exa_root=exa_root)
 except:
     raise

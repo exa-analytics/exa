@@ -60,3 +60,11 @@ def del_keys(kwargs, match='id'):
     for key in keys:
         del kwargs[key]
     return kwargs
+
+
+def savefig(path, ax, dpi=300, **kwargs):
+    '''
+    Save figure with sensible defaults.
+    '''
+    fig = ax.get_figure()
+    fig.savefig(path, dpi=300, **kwargs)
