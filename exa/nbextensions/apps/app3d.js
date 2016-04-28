@@ -45,7 +45,7 @@ define([
                 antialias: true,
             });
             this.renderer.setClearColor(0xFFFFFF);
-            this.renderer.setPixelRatio( window.devicePixelRatio );
+            this.renderer.setPixelRatio(window.devicePixelRatio);
             this.renderer.setSize(this.width, this.height);
 
             this.scene = new THREE.Scene();
@@ -69,7 +69,7 @@ define([
             this.dlight1 = new THREE.DirectionalLight(0xFFFFFF, 0.3);
             this.dlight1.position.set(100, 100, 100);
             this.scene.add(this.dlight1);
-            this.ambient_light = new THREE.AmbientLight(0xFFFFFF);
+            this.ambient_light = new THREE.AmbientLight(0xFFFFFF, 0.5);
             this.scene.add(this.ambient_light);
         };
 
@@ -505,7 +505,6 @@ define([
             ------------------------
             */
             var bbox = new THREE.Box3().setFromObject(this.scene);
-            console.log(bbox);
             var min = bbox.min;
             var max = bbox.max;
             var ox = (max.x + min.x) / 2;
@@ -680,6 +679,9 @@ define([
                     };
                 };
             };
+            geometry.mergeVertices();
+            geometry.computeFaceNormals();
+            geometry.computeVertexNormals();
             var material = new THREE.MeshLambertMaterial({color:0x303030});
             var mat = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
             var frame = new THREE.Mesh(geometry, mat);
@@ -808,7 +810,13 @@ define([
                     };
                 };
             };
-            var p_material = new THREE.MeshLambertMaterial({
+            p_geometry.mergeVertices();
+            p_geometry.computeFaceNormals();
+            p_geometry.computeVertexNormals();
+            n_geometry.mergeVertices();
+            n_geometry.computeFaceNormals();
+            n_geometry.computeVertexNormals();
+            /*var p_material = new THREE.MeshLambertMaterial({
                 color: 0x003399,
                 transparent: true,
                 opacity: 0.7,
@@ -819,22 +827,35 @@ define([
                 transparent: true,
                 opacity: 0.8,
                 side: THREE.BackSide
+            });*/
+            var p_material = new THREE.MeshPhongMaterial({
+                color: 0x003399,
+                specular: 0x003399,
+                shininess: 30,
+                side: THREE.FrontSide
+            });
+            var n_material = new THREE.MeshPhongMaterial({
+                color: 0xFF9900,
+                specular: 0xFF9900,
+                shininess: 30,
+                side: THREE.BackSide
             });
             var material1 = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
             var material2 = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
             var mesh1 = new THREE.Mesh(p_geometry, p_material);
             var mesh2 = new THREE.Mesh(n_geometry, n_material);
-            var mesh3 = new THREE.Mesh(p_geometry, material1);
-            var mesh4 = new THREE.Mesh(n_geometry, material2);
+            //var mesh3 = new THREE.Mesh(p_geometry, material1);
+            //var mesh4 = new THREE.Mesh(n_geometry, material2);
             this.scene.add(mesh1);
             this.scene.add(mesh2);
-            this.scene.add(mesh3);
+            /*this.scene.add(mesh3);
             this.scene.add(mesh4);
             console.log(mesh3.geometry.vertices.length);
             console.log(mesh3.geometry.faces.length);
             console.log(mesh4.geometry.vertices.length);
             console.log(mesh4.geometry.faces.length);
-            return [mesh1, mesh2, mesh3, mesh4];
+            return [mesh1, mesh2, mesh3, mesh4];*/
+            return [mesh1, mesh2];
         };
     };
 

@@ -45,6 +45,11 @@ class Editor:
         60 rows (30 from the head and 30 from the tail of the file). To show
         more lines on print, increase the *_print_count* value (use with
         caution!).
+
+    Tip:
+        Editor line numbers are 0 based just like Python. Because lines are
+        stored in a list-like object, indexing them is possible using the
+        standard (0 based) Python convention.
     '''
     _print_count = 30            # Default head and tail block length
     _fmt = '{0}: {1}\n'.format   # The line format
