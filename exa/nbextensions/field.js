@@ -225,9 +225,9 @@ define([
             console.log('computing field...');
             this.values = new Float32Array(this.n);
             var i = 0;
-            for (let x of this.x) {
-                for (let y of this.y) {
-                    for (let z of this.z) {
+            for (var x of this.x) {
+                for (var y of this.y) {
+                    for (var z of this.z) {
                         this.values[i] = this.func(x, y, z);
                         ++i;
                     };
