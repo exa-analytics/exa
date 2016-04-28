@@ -25,8 +25,8 @@ define([], function() {
         var m = obj[0].length;
         var flat = new Float32Array(n * m);
         var h = 0;
-        for (let i=0; i<n; i++) {
-            for (let j=0; j<m; j++) {
+        for (var i=0; i<n; i++) {
+            for (var j=0; j<m; j++) {
                 flat[h] = obj[i][j];
                 h += 1;
             };
@@ -54,7 +54,7 @@ define([], function() {
             z = repeat_float(z, n);
         };
         var xyz = new Float32Array(n * 3)
-        for (let i=0, i3=0; i<n; i++, i3+=3) {
+        for (var i=0, i3=0; i<n; i++, i3+=3) {
             xyz[i3] = x[i];
             xyz[i3+1] = y[i];
             xyz[i3+2] = z[i];
@@ -69,7 +69,7 @@ define([], function() {
         Repeat a value n times.
         */
         var array = new Float32Array(n);
-        for (let i=0; i<n; i++) {
+        for (var i=0; i<n; i++) {
             array[i] = value
         };
         return array;
@@ -82,7 +82,7 @@ define([], function() {
         Repeat an object n time.
         */
         var obj = [];
-        for (let i=0; i<n; i++) {
+        for (var i=0; i<n; i++) {
             obj.push(value);
         };
         return obj;
@@ -95,7 +95,7 @@ define([], function() {
         */
         var n = indices.length;
         var mapped = [];
-        for (let i=0; i<n; i++) {
+        for (var i=0; i<n; i++) {
             mapped.push(map[indices[i]])
         };
         return mapped;
