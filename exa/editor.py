@@ -45,6 +45,11 @@ class Editor:
         60 rows (30 from the head and 30 from the tail of the file). To show
         more lines on print, increase the *_print_count* value (use with
         caution!).
+
+    Tip:
+        Editor line numbers are 0 based just like Python. Because lines are
+        stored in a list-like object, indexing them is possible using the
+        standard (0 based) Python convention.
     '''
     _print_count = 30            # Default head and tail block length
     _fmt = '{0}: {1}\n'.format   # The line format
@@ -251,29 +256,29 @@ class Editor:
         return sorted(set(variables).difference(constants))
 
     @classmethod
-    def from_file(cls, path):
+    def from_file(cls, path, **kwargs):
         '''
         Create an editor instance from a file on disk.
         '''
         filename = os.path.basename(path)
         lines = lines_from_file(path)
-        return cls(lines, filename)
+        return cls(lines, filename, **kwargs)
 
     @classmethod
-    def from_stream(cls, f):
+    def from_stream(cls, f, **kwargs):
         '''
         Create an editor instance from a file stream.
         '''
         lines = lines_from_stream(f)
         filename = f.name if hasattr(f, 'name') else None
-        return cls(lines, filename)
+        return cls(lines, filename, **kwargs)
 
     @classmethod
-    def from_string(cls, string):
+    def from_string(cls, string, **kwargs):
         '''
         Create an editor instance from a string template.
         '''
-        return cls(lines_from_string(string))
+        return cls(lines_from_string(string), **kwargs)
 
     def _line_repr(self, lines):
         r = ''
@@ -319,9 +324,14 @@ class Editor:
         self._prev_match = None
         self.filename = filename
         self.meta = meta
+        ispath = False
+        try:
+            ispath = os.path.exists(data)   # Long "file paths" (i.e. templates/strings) throw errors
+        except:
+            pass
         if isinstance(data, list):
             self._lines = data
-        elif os.path.exists(data):
+        elif ispath:
             self._lines = lines_from_file(data, as_interned)
             self.filename = os.path.basename(data)
         elif isinstance(data, StringIO):

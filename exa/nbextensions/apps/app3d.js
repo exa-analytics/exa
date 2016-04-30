@@ -45,7 +45,7 @@ define([
                 antialias: true,
             });
             this.renderer.setClearColor(0xFFFFFF);
-            this.renderer.setPixelRatio( window.devicePixelRatio );
+            this.renderer.setPixelRatio(window.devicePixelRatio);
             this.renderer.setSize(this.width, this.height);
 
             this.scene = new THREE.Scene();
@@ -69,7 +69,7 @@ define([
             this.dlight1 = new THREE.DirectionalLight(0xFFFFFF, 0.3);
             this.dlight1.position.set(100, 100, 100);
             this.scene.add(this.dlight1);
-            this.ambient_light = new THREE.AmbientLight(0xFFFFFF);
+            this.ambient_light = new THREE.AmbientLight(0xFFFFFF, 0.5);
             this.scene.add(this.ambient_light);
         };
 
@@ -143,7 +143,7 @@ define([
             Iterates over the meshes and removes each from the scene.
             */
             if (meshes !== undefined) {
-                for (let mesh of meshes) {
+                for (var mesh of meshes) {
                     this.scene.remove(mesh);
                 };
             };
@@ -245,7 +245,7 @@ define([
             };
             var geometries = {};
             var materials = {};
-            for (let i=0; i<n; i++) {
+            for (var i=0; i<n; i++) {
                 var color = colors[i];
                 var radius = radii[i];
                 if (geometries.hasOwnProperty(color) === false) {
@@ -261,7 +261,7 @@ define([
             };
             var xyz = utility.create_float_array_xyz(x, y, z);
             var meshes = [];
-            for (let i=0, i3=0; i<n; i++, i3+=3) {
+            for (var i=0, i3=0; i<n; i++, i3+=3) {
                 var color = colors[i];
                 var mesh = new THREE.Mesh(geometries[color], materials[color]);
                 mesh.position.set(xyz[i3], xyz[i3+1], xyz[i3+2]);
@@ -301,7 +301,7 @@ define([
             });
             var meshes = [];
             var n = v0.length;
-            for (let i=0; i<n; i++) {
+            for (var i=0; i<n; i++) {
                 var j = v0[i];
                 var k = v1[i];
                 var vector0 = new THREE.Vector3(x[j], y[j], z[j]);
@@ -316,7 +316,7 @@ define([
                 var color1 = new THREE.Color(colors[k]);
                 geometry.colors.push(color0.clone());
                 geometry.colors.push(color1.clone());
-                for (let l=0; l<nn; l++) {
+                for (var l=0; l<nn; l++) {
                     geometry.faces[l].vertexColors[0] =
                 };*/
                 var mesh = new THREE.Mesh(geometry, material);
@@ -351,7 +351,7 @@ define([
             });
             var geometry = new THREE.Geometry();
             var n = v0.length;
-            for (let i=0; i<n; i++) {
+            for (var i=0; i<n; i++) {
                 var j = v0[i];
                 var k = v1[i];
                 var vector0 = new THREE.Vector3(x[j], y[j], z[j]);
@@ -376,7 +376,7 @@ define([
                 color = 0x808080;
             };
             var geometry = new THREE.Geometry();
-            for (let vertex of vertices) {
+            for (var vertex of vertices) {
                 geometry.vertices.push(new THREE.Vector3(vertex[0], vertex[1], vertex[2]));
             };
             var material = new THREE.MeshBasicMaterial({
@@ -399,7 +399,7 @@ define([
             */
             var n = colors.length;
             var flat = new Float32Array(n * 3);
-            for (let i=0, i3=0; i<n; i++, i3+=3) {
+            for (var i=0, i3=0; i<n; i++, i3+=3) {
                 var color = new THREE.Color(colors[i]);
                 flat[i3] = color.r;
                 flat[i3+1] = color.g;
@@ -420,7 +420,7 @@ define([
             if (kwargs === undefined) {
                 kwargs = {};
             };
-            for (let key of ['x', 'y', 'z']) {
+            for (var key of ['x', 'y', 'z']) {
                 if (!kwargs.hasOwnProperty(key)) {
                     kwargs[key] = 60.0;
                 } else {
@@ -429,7 +429,7 @@ define([
                     };
                 };
             };
-            for (let key of ['ox', 'oy', 'oz', 'rx', 'ry', 'rz']) {
+            for (var key of ['ox', 'oy', 'oz', 'rx', 'ry', 'rz']) {
                 if (!kwargs.hasOwnProperty(key)) {
                     kwargs[key] = 0.0;
                 } else {
@@ -468,7 +468,7 @@ define([
             } else {
                 var n = mesh.geometry.vertices.length;
                 position = new Float32Array(n * 3);
-                for (let i=0; i<n; i+=3) {
+                for (var i=0; i<n; i+=3) {
                     position[i] = mesh.geometry.vertices[i].x;
                     position[i+1] = mesh.geometry.vertices[i].y;
                     position[i+2] = mesh.geometry.vertices[i].z;
@@ -505,7 +505,6 @@ define([
             ------------------------
             */
             var bbox = new THREE.Box3().setFromObject(this.scene);
-            console.log(bbox);
             var min = bbox.min;
             var max = bbox.max;
             var ox = (max.x + min.x) / 2;
@@ -629,11 +628,11 @@ define([
             var face_vertices = new Int32Array(12);    // vertices of the resultant faces
             // THREE
             var geometry = new THREE.Geometry();
-            for (let i=0; i<nnx; i++) {
-                for (let j=0; j<nny; j++) {
-                    for (let k=0; k<nnz; k++) {
+            for (var i=0; i<nnx; i++) {
+                for (var j=0; j<nny; j++) {
+                    for (var k=0; k<nnz; k++) {
                         cube_index = 0;
-                        for (let m=0; m<8; m++) {    // Search the field cube
+                        for (var m=0; m<8; m++) {    // Search the field cube
                             var offset = this.cube_vertices[m];
                             var oi = offset[0];
                             var oj = offset[1];
@@ -651,7 +650,7 @@ define([
                         integer = this.edge_table[cube_index];
                         if (integer === 0) continue;
                         alpha = 0.5;
-                        for (let m=0; m<12; m++) {
+                        for (var m=0; m<12; m++) {
                             check = 1 << m;
                             if (integer & check) {
                                 face_vertices[m] = geometry.vertices.length;
@@ -670,7 +669,7 @@ define([
 
                         var cur_face_verts = this.tri_table[cube_index];
                         var num_face_verts = cur_face_verts.length;
-                        for (let m=0; m<num_face_verts; m+=3) {
+                        for (var m=0; m<num_face_verts; m+=3) {
                             var i0 = face_vertices[cur_face_verts[m]];
                             var i1 = face_vertices[cur_face_verts[m+1]];
                             var i2 = face_vertices[cur_face_verts[m+2]];
@@ -680,6 +679,9 @@ define([
                     };
                 };
             };
+            geometry.mergeVertices();
+            geometry.computeFaceNormals();
+            geometry.computeVertexNormals();
             var material = new THREE.MeshLambertMaterial({color:0x303030});
             var mat = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
             var frame = new THREE.Mesh(geometry, mat);
@@ -719,12 +721,12 @@ define([
             // THREE
             var p_geometry = new THREE.Geometry();
             var n_geometry = new THREE.Geometry();
-            for (let i=0; i<nnx; i++) {
-                for (let j=0; j<nny; j++) {
-                    for (let k=0; k<nnz; k++) {
+            for (var i=0; i<nnx; i++) {
+                for (var j=0; j<nny; j++) {
+                    for (var k=0; k<nnz; k++) {
                         p_cube_index = 0;
                         n_cube_index = 0;
-                        for (let m=0; m<8; m++) {    // Search the field cube
+                        for (var m=0; m<8; m++) {    // Search the field cube
                             var offset = this.cube_vertices[m];
                             var oi = offset[0];
                             var oj = offset[1];
@@ -746,7 +748,7 @@ define([
                         p_integer = this.edge_table[p_cube_index];
                         if (p_integer !== 0) {
                             alpha = 0.5;
-                            for (let m=0; m<12; m++) {
+                            for (var m=0; m<12; m++) {
                                 check = 1 << m;
                                 if (p_integer & check) {
                                     face_vertices[m] = p_geometry.vertices.length;
@@ -765,7 +767,7 @@ define([
 
                             var cur_face_verts = this.tri_table[p_cube_index];
                             var num_face_verts = cur_face_verts.length;
-                            for (let m=0; m<num_face_verts; m+=3) {
+                            for (var m=0; m<num_face_verts; m+=3) {
                                 var i0 = face_vertices[cur_face_verts[m]];
                                 var i1 = face_vertices[cur_face_verts[m+1]];
                                 var i2 = face_vertices[cur_face_verts[m+2]];
@@ -777,7 +779,7 @@ define([
                         n_integer = this.edge_table[n_cube_index];
                         if (n_integer !== 0) {
                             alpha = 0.5;
-                            for (let m=0; m<12; m++) {
+                            for (var m=0; m<12; m++) {
                                 check = 1 << m;
                                 if (n_integer & check) {
                                     face_vertices[m] = n_geometry.vertices.length;
@@ -796,7 +798,7 @@ define([
 
                             var cur_face_verts = this.tri_table[n_cube_index];
                             var num_face_verts = cur_face_verts.length;
-                            for (let m=0; m<num_face_verts; m+=3) {
+                            for (var m=0; m<num_face_verts; m+=3) {
                                 var i0 = face_vertices[cur_face_verts[m]];
                                 var i1 = face_vertices[cur_face_verts[m+1]];
                                 var i2 = face_vertices[cur_face_verts[m+2]];
@@ -808,7 +810,13 @@ define([
                     };
                 };
             };
-            var p_material = new THREE.MeshLambertMaterial({
+            p_geometry.mergeVertices();
+            p_geometry.computeFaceNormals();
+            p_geometry.computeVertexNormals();
+            n_geometry.mergeVertices();
+            n_geometry.computeFaceNormals();
+            n_geometry.computeVertexNormals();
+            /*var p_material = new THREE.MeshLambertMaterial({
                 color: 0x003399,
                 transparent: true,
                 opacity: 0.7,
@@ -819,22 +827,35 @@ define([
                 transparent: true,
                 opacity: 0.8,
                 side: THREE.BackSide
+            });*/
+            var p_material = new THREE.MeshPhongMaterial({
+                color: 0x003399,
+                specular: 0x003399,
+                shininess: 30,
+                side: THREE.FrontSide
+            });
+            var n_material = new THREE.MeshPhongMaterial({
+                color: 0xFF9900,
+                specular: 0xFF9900,
+                shininess: 30,
+                side: THREE.BackSide
             });
             var material1 = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
             var material2 = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
             var mesh1 = new THREE.Mesh(p_geometry, p_material);
             var mesh2 = new THREE.Mesh(n_geometry, n_material);
-            var mesh3 = new THREE.Mesh(p_geometry, material1);
-            var mesh4 = new THREE.Mesh(n_geometry, material2);
+            //var mesh3 = new THREE.Mesh(p_geometry, material1);
+            //var mesh4 = new THREE.Mesh(n_geometry, material2);
             this.scene.add(mesh1);
             this.scene.add(mesh2);
-            this.scene.add(mesh3);
+            /*this.scene.add(mesh3);
             this.scene.add(mesh4);
             console.log(mesh3.geometry.vertices.length);
             console.log(mesh3.geometry.faces.length);
             console.log(mesh4.geometry.vertices.length);
             console.log(mesh4.geometry.faces.length);
-            return [mesh1, mesh2, mesh3, mesh4];
+            return [mesh1, mesh2, mesh3, mesh4];*/
+            return [mesh1, mesh2];
         };
     };
 
