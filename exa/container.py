@@ -369,8 +369,8 @@ class BaseContainer:
                 traits['test'] = Bool(False).tag(sync=True)
                 traits.update(self._custom_container_traits())
                 has_traits = self._active_trait_dfs()
-                for obj in has_traits.values():
-                    traits.update(obj._get_traits())
+                for df_or_series in has_traits.values():
+                    traits.update(df_or_series._get_traits())
             self._widget.add_traits(**traits)
 
 

@@ -42,7 +42,6 @@ class NDBase:
     Base class for custom dataframe and series objects that have traits.
     '''
     _precision = 3      # Default number of decimal places passed by traits
-    _traits = []        # Traits present as dataframe columns (or series values)
 
     def _get_traits(self):
         return {}
@@ -85,6 +84,7 @@ class DataFrame(NDBase, pd.DataFrame):
     _indices = []       # Required index names (typically single valued list)
     _columns = []       # Required column entries
     _categories = {}    # Column name, original type pairs ('label', int) that can be compressed to a category
+    _traits = []        # Traits present as dataframe columns (or series values)
 
     @property
     def _fi(self):
