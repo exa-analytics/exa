@@ -9,4 +9,5 @@ from exa.algorithms.jitted.indexing import nb_indexes_sc1 as indexes_sc1
 from exa.algorithms.jitted.indexing import nb_indexes_sc2 as indexes_sc2
 
 from exa.algorithms.jitted.iteration import nb_pdist as pdist
-from exa.algorithms.jitted.iteration import nb_supercell3 as supercell3
+from exa.algorithms.jitted.iteration import nb_supercell3d as supercell3d
+from exa.algorithms.jitted.iteration import nb_meshgrid3d as meshgrid3d
