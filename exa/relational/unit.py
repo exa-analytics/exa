@@ -51,8 +51,10 @@ class Length(Base, Dimension, metaclass=_Meta):
     1.88971616463
     '''
     aliases = {
+        'a.u.': 'au',
         'bohr': 'au',
         'angstrom': 'A',
+        'angstroms': 'A',
         u'\u212B': 'A',
         u'\u212Bngstrom': 'A',
         'a0': 'au'

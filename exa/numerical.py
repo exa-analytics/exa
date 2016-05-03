@@ -229,7 +229,8 @@ class Field(DataFrame):
         self._revert_categories()
         if self._groupbys:
             grps = self.groupby(self._groupbys)
-            string = grps.apply(lambda g: g.index).to_json(orient='values')
+            string = str(list(grps.groups.values())).replace(' ', '')
+            #string = grps.apply(lambda g: g.index).to_json(orient='values')
             traits['field_indices'] = Unicode(string).tag(sync=True)
         else:
             string = Series(self.index).to_json(orient='values')
@@ -242,10 +243,15 @@ class Field(DataFrame):
     def __init__(self, field_values, *args, **kwargs):
         '''
         Args:
-            field_values (list): List of Series or DataFrame objects containing field values with indices corresponding to field data index
+            field_values (list or Series or DataFrame): Field value data
         '''
+        if isinstance(args[0], pd.Series):
+            args[0] = args[0].to_frame().T
         super().__init__(*args, **kwargs)
-        self.field_values = field_values
+        if isinstance(field_values, list):
+            self.field_values = field_values
+        else:
+            self.field_values = [field_values]
 
 
 class Field3D(Field):
