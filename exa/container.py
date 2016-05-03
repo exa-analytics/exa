@@ -41,7 +41,21 @@ class BaseContainer:
     _widget_class = ContainerWidget
     _df_types = OrderedDict()
 
-    def add_numerical(self, frame_or_series):
+    @property
+    def field_values(self):
+        '''
+        Retrieve values of a specific field.
+
+        Args:
+            field (int): Field index (corresponding to the fields dataframe)
+
+        Returns:
+            data: Series or dataframe object containing field values
+        '''
+        if self._is('_field'):
+            return self._field.field_values
+
+    def append_numerical(self, frame_or_series):
         '''
         Attach a dataframe or series object to the current container.
         '''
@@ -355,8 +369,8 @@ class BaseContainer:
                 traits['test'] = Bool(False).tag(sync=True)
                 traits.update(self._custom_container_traits())
                 has_traits = self._active_trait_dfs()
-                for obj in has_traits.values():
-                    traits.update(obj._get_traits())
+                for df_or_series in has_traits.values():
+                    traits.update(df_or_series._get_traits())
             self._widget.add_traits(**traits)
 
 
@@ -534,7 +548,7 @@ class BaseContainer:
         for key, value in self._kw_dict().items():
             kwtot += getsizeof(key)
             kwtot += getsizeof(value)
-        return dftot + kwtot + jstot
+        return dftot + kwtot + jstot + other
 
     def __init__(self, meta=None, **kwargs):
         self._test = False

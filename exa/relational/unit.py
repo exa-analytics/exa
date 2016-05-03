@@ -39,6 +39,7 @@ class Dimension:
     from_unit = Column(String(8), nullable=False)
     to_unit = Column(String(8), nullable=False)
     factor = Column(Float, nullable=False)
+    aliases = {}
 
 
 class Length(Base, Dimension, metaclass=_Meta):
@@ -51,8 +52,10 @@ class Length(Base, Dimension, metaclass=_Meta):
     1.88971616463
     '''
     aliases = {
+        'a.u.': 'au',
         'bohr': 'au',
         'angstrom': 'A',
+        'angstroms': 'A',
         u'\u212B': 'A',
         u'\u212Bngstrom': 'A',
         'a0': 'au'
@@ -154,7 +157,9 @@ class Energy(Base, Dimension, metaclass=_Meta):
     >>> Energy['kcal', 'Btu']
     3.9683205782473134
     '''
-    pass
+    aliases = {
+        'cm-1': 'cm^-1'
+    }
 
 
 class Force(Base, Dimension, metaclass=_Meta):

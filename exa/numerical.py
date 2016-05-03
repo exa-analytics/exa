@@ -42,7 +42,6 @@ class NDBase:
     Base class for custom dataframe and series objects that have traits.
     '''
     _precision = 3      # Default number of decimal places passed by traits
-    _traits = []        # Traits present as dataframe columns (or series values)
 
     def _get_traits(self):
         return {}
@@ -85,6 +84,7 @@ class DataFrame(NDBase, pd.DataFrame):
     _indices = []       # Required index names (typically single valued list)
     _columns = []       # Required column entries
     _categories = {}    # Column name, original type pairs ('label', int) that can be compressed to a category
+    _traits = []        # Traits present as dataframe columns (or series values)
 
     @property
     def _fi(self):
@@ -229,7 +229,8 @@ class Field(DataFrame):
         self._revert_categories()
         if self._groupbys:
             grps = self.groupby(self._groupbys)
-            string = grps.apply(lambda g: g.index).to_json(orient='values')
+            string = str(list(grps.groups.values())).replace(' ', '')
+            #string = grps.apply(lambda g: g.index).to_json(orient='values')
             traits['field_indices'] = Unicode(string).tag(sync=True)
         else:
             string = Series(self.index).to_json(orient='values')
@@ -242,10 +243,15 @@ class Field(DataFrame):
     def __init__(self, field_values, *args, **kwargs):
         '''
         Args:
-            field_values (list): List of Series or DataFrame objects containing field values with indices corresponding to field data index
+            field_values (list or Series or DataFrame): Field value data
         '''
+        if isinstance(args[0], pd.Series):
+            args[0] = args[0].to_frame().T
         super().__init__(*args, **kwargs)
-        self.field_values = field_values
+        if isinstance(field_values, list):
+            self.field_values = field_values
+        else:
+            self.field_values = [field_values]
 
 
 class Field3D(Field):

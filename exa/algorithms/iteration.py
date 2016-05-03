@@ -39,7 +39,7 @@ def pdist(array):
     return distances, index0, index1
 
 
-def supercell3(x, y, z, rx, ry, rz):
+def supercell3d(x, y, z, rx, ry, rz):
     '''
     Generate a 3x3x3 super cell of coordinates from given unit cell coordinates and cell dimensions.
 
@@ -66,3 +66,22 @@ def supercell3(x, y, z, rx, ry, rz):
                     pz[h] = z[l] + k * rz
                     h += 1
     return px, py, pz
+
+
+def meshgrid3d(x, y, z):
+    '''
+    Expand x, y, and z into a volume of len(x) by len(y) by len(z) dimensions.
+    '''
+    n = len(x) * len(y) * len(z)
+    xx = np.empty((n, ), dtype=np.float64)
+    yy = np.empty((n, ), dtype=np.float64)
+    zz = np.empty((n, ), dtype=np.float64)
+    h = 0
+    for i in x:
+        for j in y:
+            for k in z:
+                xx[h] = i
+                yy[h] = j
+                zz[h] = k
+                h += 1
+    return xx, yy, zz
