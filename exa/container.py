@@ -99,7 +99,7 @@ class BaseContainer:
         '''
         Print human readable information about the container.
         '''
-        n = getsizeof(self)
+        n = self.__sizeof__()
         sizes = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB']
         for size in sizes:
             s = str(n).split('.')
