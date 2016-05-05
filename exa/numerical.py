@@ -246,7 +246,7 @@ class Field(DataFrame):
             field_values (list or Series or DataFrame): Field value data
         '''
         if isinstance(args[0], pd.Series):
-            args[0] = args[0].to_frame().T
+            args = (args[0].to_frame().T, )
         super().__init__(*args, **kwargs)
         if isinstance(field_values, list):
             self.field_values = field_values
