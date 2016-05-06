@@ -6,13 +6,12 @@ Data management, processing, and visualization.
 The following will install the exa package and all dependencies in the
 current [Python](https://www.python.org/, "Python") environment.
 ```
-python setup.py install
-or
 pip install .
 ```
 
 
 # Getting Started
+
 
 # Documentation
 Documentation is generated using [sphinx](http://sphinx-doc.org "Sphinx")
