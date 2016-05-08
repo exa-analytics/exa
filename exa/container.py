@@ -114,57 +114,21 @@ class BaseContainer:
                 break
             n /= 1024
 
-    def network(self):
+    def data_architecture(self):
         '''
-        Visualize the dataframe relationships as a directed network graph. The
-        direction points toward the dataframe that contains the index and
-        away from the dataframe that contains the column. If no direction is
-        given the match is on column axis or if both directions are given the match
-        is on index axis.
+        Visualize the theoretical data architecture of the current container.
         '''
-        node_scheme = ['olivedrab', 'orange', 'firebrick']
-        edge_scheme = ['olive', 'gold', 'darkred']
-        nodes = {name: name[1:] if name.startswith('_') else name for name in self._numerical_dict().keys()}
         edges = []
-        ncolors = defaultdict(int)
-        ecolors = defaultdict(int)
-        n = len(nodes)
-        for internal_name, pn in nodes.items():
-            df0 = self[internal_name]
-            if isinstance(df0, pd.Series):
-                continue
-            for internal_other, po in nodes.items():
-                df1 = self[internal_other]
-                if df0 is df1 or isinstance(df1, pd.Series):
-                    continue    # Skip if same
-                index0 = df0.index.names
-                index1 = df1.index.names
-                columns0 = df0.columns
-                columns1 = df1.columns
-                if np.any([idx0 in index1 for idx0 in index0]):
-                    edges.append((pn, po))
-                    ncolors[pn] = max([ncolors[pn], 2])
-                    ncolors[po] = max([ncolors[po], 2])
-                    ecolors[(pn, po)] = max([ecolors[(pn, po)], 2])
-                    ecolors[(po, pn)] = max([ecolors[(po, pn)], 2])
-                elif np.any([idx0 in columns1 for idx0 in index0]) or np.any([idx0 + '0' in columns1 for idx0 in index0]):
-                    edges.append((pn, po))
-                    ncolors[pn] = max([ncolors[pn], 2])
-                    ncolors[po] = max([ncolors[po], 1])
-                    ecolors[(pn, po)] = max([ecolors[(pn, po)], 1])
-                    ecolors[(po, pn)] = max([ecolors[(po, pn)], 1])
-                elif np.any([idx1 in columns0 for idx1 in index1]) or np.any([idx1 + '0' in columns0 for idx1 in index1]):
-                    edges.append((pn, po))
-                    ncolors[pn] = max([ncolors[pn], 1])
-                    ncolors[po] = max([ncolors[po], 2])
-                    ecolors[(pn, po)] = max([ecolors[(pn, po)], 1])
-                    ecolors[(po, pn)] = max([ecolors[(po, pn)], 1])
+        nodes = []
+        for name0, df0 in self._df_types.items():
+            nodes.append(name0)
+            for name1, df1 in self._df_types.items():
+                if name0 in df1._links() or name1 in df0._links():
+                    edges.append((name0, name1))
         g = nx.Graph()
-        g.add_nodes_from(nodes.values())
+        g.add_nodes_from(nodes)
         g.add_edges_from(edges)
-        node_colors = [node_scheme[ncolors[node]] for node in g.nodes()]
-        edge_colors = [edge_scheme[ecolors[edge]] for edge in g.edges()]
-        nx.draw(g, with_labels=True, node_size=11000, font_size=15, node_color=node_colors, edge_colors=edge_colors)
+        nx.draw(g, with_labels=True, node_size=4000, font_size=15, node_color='grey')
 
     @classmethod
     def from_hdf(cls, path):

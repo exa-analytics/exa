@@ -43,12 +43,21 @@ class NDBase:
     '''
     _precision = 3      # Default number of decimal places passed by traits
 
-    @property
-    def _links(self):
+    @classmethod
+    def _links(cls):
         '''
         Iterable of all possible relationship names.
         '''
-        return self._columns + self._indices + list(self._categories.keys()) + self._groupbys
+        l = []
+        if hasattr(cls, '_columns'):
+            l += cls._columns
+        if hasattr(cls, '_indices'):
+            l += cls._indices
+        if hasattr(cls, '_groupbys'):
+            l += cls._groupbys
+        if hasattr(cls, '._categories'):
+            l += list(cls._categories.keys())
+        return l
 
     def _get_traits(self):
         return {}
