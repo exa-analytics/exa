@@ -2,16 +2,18 @@
 '''
 Base Container Class
 ===============================================
-The :class:`~exa.container.BaseContainer` class is the primary controller for
-data acquisition, management, and visualization. Containers are an object based
-storage device used to process, analyze, (visualize), and organize
-raw data stored as n-dimensional array objects (dataframes). Each Container
-object is aware of the dataframes attached to it and provides standard
-methods for common manipulations.
+The :class:`~exa.container.BaseContainer` class is the primary object for
+data acquisition, management, and visualization. Containers are composed of
+n-dimensional dataframes (:class:`~pandas.DataFrame` and :class:`~pandas.Series`)
+objects whose columns often define variables of interest in visualization.
 
-Data specific containers (such as the Universe class which is provided by the
-atomic package, for example) are capable of advanced, automatic data analysis
-tailored to the specific data content at hand.
+Data analysis requires three pillars: 1) data arrays (:mod:`~exa.numerical`
+and :mod:`~exa.analytical`), 2) visualization traits (:mod:`~exa.widget`), and
+3) containers (:mod:`~exa.container` and :mod:`~exa.relational.container`).
+
+The class provided by this module is the base class for data specific applications.
+Sub-packages utlize this class in order to leverage functionality such as data
+relationship analysis, saving and loading, and dynamic trait creation.
 
 See Also:
     :mod:`~exa.relational.container`
@@ -99,7 +101,7 @@ class BaseContainer:
         '''
         Print human readable information about the container.
         '''
-        n = self.__sizeof__()
+        n = int(getsizeof(self))
         sizes = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB']
         for size in sizes:
             s = str(n).split('.')
@@ -536,10 +538,6 @@ class BaseContainer:
     def __sizeof__(self):
         '''
         Sum of the dataframe sizes, trait values, and relational data.
-
-        Warning:
-            This function currently doesn't account for memory usage due to
-            traits (:class:`~exa.widget.ContainerWidget`).
         '''
         jstot = self._widget_bytes()
         dftot = self._df_bytes()
