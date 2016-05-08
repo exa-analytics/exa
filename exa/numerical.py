@@ -43,6 +43,13 @@ class NDBase:
     '''
     _precision = 3      # Default number of decimal places passed by traits
 
+    @property
+    def _links(self):
+        '''
+        Iterable of all possible relationship names.
+        '''
+        return self._columns + self._indices + list(self._categories.keys()) + self._groupbys
+
     def _get_traits(self):
         return {}
 
