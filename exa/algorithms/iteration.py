@@ -4,6 +4,7 @@ Loop Intensive Algorithms
 ==================================
 '''
 import numpy as np
+from exa import _conf
 
 
 def pdist(array):
@@ -85,3 +86,10 @@ def meshgrid3d(x, y, z):
                 zz[h] = k
                 h += 1
     return xx, yy, zz
+
+
+if _conf['pkg_numba']:
+    from numba import jit
+    pdist = jit(nopython=True, cache=True)(pdist)
+    supercell3d = jit(nopython=True, cache=True)(supercell3d)
+    meshgrid3d = jit(nopython=True, cache=True)(meshgrid3d)

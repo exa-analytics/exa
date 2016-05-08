@@ -3,8 +3,11 @@ Data management, processing, and visualization.
 
 
 # Installation
-The following will install the exa package and all dependencies in the
-current [Python](https://www.python.org/, "Python") environment.
+The typical Python data stack is required (example using the **conda** package manager).
+```
+conda install numpy scipy pandas seaborn scikit-learn jupyter notebook ipywidgets sphinx
+```
+From inside the git repository, exa can be installed using:
 ```
 pip install .
 ```

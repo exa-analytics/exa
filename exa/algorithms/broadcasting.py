@@ -48,15 +48,14 @@ def vdist3(x1, y1, z1, x2, y2, z2):
     return (x1 - x2)**2 + (y1 - y2)**2 + (z1 - z2)**2
 
 
-#if _conf['pkg_numba']:
-#    from numba import vectorize, float64, float32, int64, int32
-#    vmag3 = vectorize([int32(int32, int32, int32),
-#                       int64(int64, int64, int64),
-#                       float32(float32, float32, float32),
-#                       float64(float64, float64, float64)])(vmag3)
-#
-#
-#    vdist3 = vectorize([int32(int32, int32, int32, int32, int32, int32),
-#                        int64(int64, int64, int64, int64, int64, int64),
-#                        float32(float32, float32, float32, float32, float32, float32),
-#                        float64(float64, float64, float64, float64, float64, float64)])(vdist3)
+if _conf['pkg_numba']:
+    from numba import vectorize, float64, float32, int64, int32
+    vmag3 = vectorize([int32(int32, int32, int32),
+                       int64(int64, int64, int64),
+                       float32(float32, float32, float32),
+                       float64(float64, float64, float64)])(vmag3)
+
+    vdist3 = vectorize([int32(int32, int32, int32, int32, int32, int32),
+                        int64(int64, int64, int64, int64, int64, int64),
+                        float32(float32, float32, float32, float32, float32, float32),
+                        float64(float64, float64, float64, float64, float64, float64)])(vdist3)
