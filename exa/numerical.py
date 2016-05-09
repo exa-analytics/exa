@@ -51,8 +51,6 @@ class NDBase:
         l = []
         if hasattr(cls, '_columns'):
             l += cls._columns
-        if hasattr(cls, '_indices'):
-            l += cls._indices
         if hasattr(cls, '_groupbys'):
             l += cls._groupbys
         if hasattr(cls, '._categories'):

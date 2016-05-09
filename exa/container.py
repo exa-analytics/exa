@@ -120,15 +120,28 @@ class BaseContainer:
         '''
         edges = []
         nodes = []
-        for name0, df0 in self._df_types.items():
-            nodes.append(name0)
-            for name1, df1 in self._df_types.items():
-                if name0 in df1._links() or name1 in df0._links():
-                    edges.append((name0, name1))
+        objs = self._df_types.items()
+        if not self._test:
+            objs = self._numerical_dict().items()
+        for name0, df0 in objs:
+            n0 = name0
+            if name0.startswith('_'):
+                n0 = name0[1:]
+            nodes.append(n0)
+            for name1, df1 in objs:
+                if (any([name in df0._links() for name in df1._indices]) or
+                    any([name in df1._links() for name in df0._indices]) or
+                    any([cat in df0._links() for cat in df1._categories.keys()]) or
+                    any([cat in df1._links() for cat in df0._categories.keys()])):
+                    n1 = name1
+                    if name1.startswith('_'):
+                        n1 = name1[1:]
+                    edges.append((n0, n1))
         g = nx.Graph()
         g.add_nodes_from(nodes)
         g.add_edges_from(edges)
-        nx.draw(g, with_labels=True, node_size=4000, font_size=15, node_color='grey')
+        nx.draw(g, with_labels=True, node_size=15000, font_size=15,
+                node_color='grey', alpha=0.2)
 
     @classmethod
     def from_hdf(cls, path):
