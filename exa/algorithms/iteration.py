@@ -73,7 +73,10 @@ def meshgrid3d(x, y, z):
     '''
     Expand x, y, and z into a volume of len(x) by len(y) by len(z) dimensions.
     '''
-    n = len(x) * len(y) * len(z)
+    nx = len(x)
+    ny = len(y)
+    nz = len(z)
+    n = nx * ny * nz
     xx = np.empty((n, ), dtype=np.float64)
     yy = np.empty((n, ), dtype=np.float64)
     zz = np.empty((n, ), dtype=np.float64)

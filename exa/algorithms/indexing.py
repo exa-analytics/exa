@@ -176,6 +176,6 @@ if _conf['pkg_numba']:
     arange2 = jit(nopython=True, cache=True)(arange2)
     indexes_sc1 = jit(nopython=True, cache=True)(indexes_sc1)
     indexes_sc2 = jit(nopython=True, cache=True)(indexes_sc2)
-    nb_unordered_pairing = vectorize([int32(int32, int32), int64(int64, int64),
-                                      float32(float32, float32), float64(float64, float64)],
-                                      nopython=True)(unordered_pairing)
+    unordered_pairing = vectorize([int32(int32, int32), int64(int64, int64),
+                                   float32(float32, float32), float64(float64, float64)],
+                                   nopython=True)(unordered_pairing)
