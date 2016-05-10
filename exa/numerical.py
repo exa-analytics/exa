@@ -43,20 +43,6 @@ class NDBase:
     '''
     _precision = 3      # Default number of decimal places passed by traits
 
-    @classmethod
-    def _links(cls):
-        '''
-        Iterable of all possible relationship names.
-        '''
-        l = []
-        if hasattr(cls, '_columns'):
-            l += cls._columns
-        if hasattr(cls, '_groupbys'):
-            l += cls._groupbys
-        if hasattr(cls, '._categories'):
-            l += list(cls._categories.keys())
-        return l
-
     def _get_traits(self):
         return {}
 
@@ -263,9 +249,11 @@ class Field(DataFrame):
             args = (args[0].to_frame().T, )
         super().__init__(*args, **kwargs)
         if isinstance(field_values, list):
-            self.field_values = field_values
+            self.field_values = [Series(v) for v in field_values]
         else:
-            self.field_values = [field_values]
+            self.field_values = [Series(v) for v in field_values]
+        for i in range(len(field_values)):
+            self.field_values[i].name = i
 
 
 class Field3D(Field):
@@ -341,3 +329,22 @@ class SparseDataFrame(NDBase, pd.SparseDataFrame):
                     raise RequiredIndexError(missing, name)
                 else:
                     self.index.names = self._indices
+
+
+def links(obj):
+    '''
+    Compute a list of possible relational attributes of a given exa dataframe.
+    '''
+    l = []
+    if hasattr(obj, '_columns'):
+        l += obj._columns
+    if hasattr(obj, 'columns'):
+        l += list(obj.columns)
+    if hasattr(obj, '_groupbys'):
+        l += obj._groupbys
+    if hasattr(obj, '_categories'):
+        l += list(obj._categories.keys())
+    for i in range(len(l)):
+        if l[i][-1].isdigit():
+            l.append(l[i][:-1])
+    return l

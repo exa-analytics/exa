@@ -29,7 +29,7 @@ from collections import defaultdict
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from exa import _conf
 from exa.widget import ContainerWidget
-from exa.numerical import NDBase, DataFrame, Field, SparseDataFrame, Series
+from exa.numerical import NDBase, DataFrame, Field, SparseDataFrame, Series, links
 from exa.utility import del_keys
 
 
@@ -121,26 +121,39 @@ class BaseContainer:
         edges = []
         nodes = []
         objs = self._df_types.items()
+        node_size = 15000
         if not self._test:
             objs = self._numerical_dict().items()
-        for name0, df0 in objs:
+            node_size = np.empty((len(objs), ))
+        for i, (name0, df0) in enumerate(objs):
             n0 = name0
             if name0.startswith('_'):
                 n0 = name0[1:]
             nodes.append(n0)
+            if not self._test:
+                print(len(df0))
+                node_size[i] = len(df0)
             for name1, df1 in objs:
-                if (any([name in df0._links() for name in df1._indices]) or
-                    any([name in df1._links() for name in df0._indices]) or
-                    any([cat in df0._links() for cat in df1._categories.keys()]) or
-                    any([cat in df1._links() for cat in df0._categories.keys()])):
+                idx0 = []
+                idx1 = []
+                if hasattr(df0, '_indices'):
+                    idx0 = df0._indices
+                if hasattr(df1, '_indices'):
+                    idx1 = df1._indices
+                if (any([name in links(df0) for name in idx1]) or
+                    any([name in links(df1) for name in idx0])):
                     n1 = name1
                     if name1.startswith('_'):
                         n1 = name1[1:]
                     edges.append((n0, n1))
+        print(node_size)
+        if not self._test:
+            node_size /= node_size.max() * 15000
+        print(node_size)
         g = nx.Graph()
         g.add_nodes_from(nodes)
         g.add_edges_from(edges)
-        nx.draw(g, with_labels=True, node_size=15000, font_size=15,
+        nx.draw(g, with_labels=True, node_size=node_size, font_size=15,
                 node_color='grey', alpha=0.2)
 
     @classmethod
