@@ -331,20 +331,21 @@ class SparseDataFrame(NDBase, pd.SparseDataFrame):
                     self.index.names = self._indices
 
 
-def links(obj):
+def get_indices_columns(obj):
     '''
-    Compute a list of possible relational attributes of a given exa dataframe.
+    Compute a list of possible relational attributes of a given dataframe or
+    series object.
     '''
-    l = []
-    if hasattr(obj, '_columns'):
-        l += obj._columns
+    indices = []
+    columns = []
+    #if hasattr(obj, 'index'):
+    #    indices += [name for name in obj.index.names if name is not None]
+    if hasattr(obj, '_indices'):
+        indices += obj._indices
     if hasattr(obj, 'columns'):
-        l += list(obj.columns)
-    if hasattr(obj, '_groupbys'):
-        l += obj._groupbys
+        columns += [name[:-1] if name[-1].isdigit() else name for name in obj.columns if name is not None]
     if hasattr(obj, '_categories'):
-        l += list(obj._categories.keys())
-    for i in range(len(l)):
-        if l[i][-1].isdigit():
-            l.append(l[i][:-1])
-    return l
+        columns += [name[:-1] if name[-1].isdigit() else name for name in obj._categories.keys()]
+    if hasattr(obj, '_groupbys'):
+        columns += obj._groupbys
+    return indices, columns

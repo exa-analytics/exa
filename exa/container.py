@@ -22,6 +22,7 @@ import os
 import numpy as np
 import pandas as pd
 import networkx as nx
+import seaborn as sns
 from sys import getsizeof
 from collections import OrderedDict
 from traitlets import Bool
@@ -29,8 +30,12 @@ from collections import defaultdict
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from exa import _conf
 from exa.widget import ContainerWidget
-from exa.numerical import NDBase, DataFrame, Field, SparseDataFrame, Series, links
+from exa.numerical import NDBase, DataFrame, Field, SparseDataFrame, Series, get_indices_columns
 from exa.utility import del_keys
+
+rc = {'legend.frameon': True, 'legend.fancybox': True, 'patch.facecolor': 'white', 'patch.edgecolor': 'black',
+      'axes.formatter.useoffset': False}
+sns.set(context='poster', style='white', font_scale=1.3, font='serif', palette='viridis', rc=rc)
 
 
 class BaseContainer:
@@ -114,47 +119,117 @@ class BaseContainer:
                 break
             n /= 1024
 
-    def data_architecture(self):
+    def data_network(self):
         '''
-        Visualize the theoretical data architecture of the current container.
+        Visualize the dataframe/series relationships and relative sizes.
+
+        A network graph representation of the current container is drawn. Nodes
+        are data objects (dataframes or series) attached to the current
+        container. Their relative size is proportional to the amount of data
+        they contain. The node color corresponds to the number of relationships
+        a given node has with other nodes. The edge color correspond to the
+        type of connection a given node has with another node (index to index,
+        index to column, or index to other).
+
+        If performed on an empty or test container, this function will display
+        the enforced data objects and their connectivity. No information about
+        the type of connectivity
         '''
         edges = []
         nodes = []
-        objs = self._df_types.items()
-        node_size = 15000
+        node_sizes = {}
+        edge_colors = {}
+        edge_color_map = sns.color_palette('viridis', 4)
+        data = self._df_types.items()
         if not self._test:
-            objs = self._numerical_dict().items()
-            node_size = np.empty((len(objs), ))
-        for i, (name0, df0) in enumerate(objs):
-            n0 = name0
-            if name0.startswith('_'):
-                n0 = name0[1:]
+            data = self._numerical_dict().items()
+        for i, (name0, df0) in enumerate(data):
+            n0 = name0[1:] if name0.startswith('_') else name0
+            indices0, columns0 = get_indices_columns(df0)
+            for name1, df1 in data:
+                if df0 is df1:
+                    continue
+                n1 = name1[1:] if name1.startswith('_') else name1
+                indices1, columns1 = get_indices_columns(df1)
+                key = (n0, n1)
+                if any([index in indices1 for index in indices0]):
+                    edges.append(key)
+                    edge_colors[key] = edge_color_map[0]
+                elif any([index in columns1 for index in indices0]):
+                    edges.append(key)
+                    edge_colors[key] = edge_color_map[1]
+                elif any([index in columns0 for index in indices1]):
+                    edges.append(key)
+                    edge_colors[key] = edge_color_map[1]
+                #elif (hasattr(df0, '_categories') and hasattr(df1, '_categories')):
+                #    if (np.any([index in  for index in df0._groupbys]) or
+                #        np.any([index in columns0 for index in df1._groupbys])):
+                #        edges.append(key)
+                #        edge_colors[key] = edge_color_map[2]
             nodes.append(n0)
-            if not self._test:
-                print(len(df0))
-                node_size[i] = len(df0)
-            for name1, df1 in objs:
-                idx0 = []
-                idx1 = []
-                if hasattr(df0, '_indices'):
-                    idx0 = df0._indices
-                if hasattr(df1, '_indices'):
-                    idx1 = df1._indices
-                if (any([name in links(df0) for name in idx1]) or
-                    any([name in links(df1) for name in idx0])):
-                    n1 = name1
-                    if name1.startswith('_'):
-                        n1 = name1[1:]
-                    edges.append((n0, n1))
-        print(node_size)
-        if not self._test:
-            node_size /= node_size.max() * 15000
-        print(node_size)
+            node_sizes[n0] = df0.size if isinstance(df0.size, np.int64) or isinstance(df0.size, int) else 0
+            if hasattr(df0, 'field_values'):
+                for i, field in enumerate(df0.field_values):
+                    key = (n0, 'field_values[*]'.format(i))
+                    if key[1] not in nodes:
+                        nodes.append(key[1])
+                        node_sizes[key[1]] = field.size if isinstance(field.size, np.int64) or isinstance(field.size, int) else 0
+                    else:
+                        node_sizes[key[1]] += field.size if isinstance(field.size, np.int64) or isinstance(field.size, int) else 0
+                    edges.append(key)
+                    edge_colors[key] = edge_color_map[3]
+                    key = (key[1], key[0])
+                    edges.append(key)
+                    edge_colors[key] = edge_color_map[2]
         g = nx.Graph()
         g.add_nodes_from(nodes)
         g.add_edges_from(edges)
-        nx.draw(g, with_labels=True, node_size=node_size, font_size=15,
-                node_color='grey', alpha=0.2)
+        fig, ax = sns.plt.subplots(1, figsize=(13, 8), dpi=600)
+        ax.axis('off')
+        degree_values = np.unique(list(g.degree().values()))
+        enum_map = {v: k for k, v in enumerate(degree_values)}
+        node_colors = sns.color_palette('viridis', len(degree_values))
+        node_color = [node_colors[enum_map[g.degree()[node]]] for node in g.nodes()]
+        edge_color = [edge_colors[edge] for edge in g.edges()]
+        node_size = 3000
+        if not self._test:
+            node_size = np.log(np.array([node_sizes[node] for node in g.nodes()]))
+            node_size *= 13000 / node_size.max()
+            node_size += 2000
+        pos = nx.spring_layout(g)
+        f0 = nx.draw_networkx_nodes(g, pos=pos, node_size=node_size,
+                                    node_color=node_color, alpha=0.8, ax=ax)
+        f1 = nx.draw_networkx_labels(g, pos=pos, labels={k: k for k in g.nodes()},
+                                     font_size=15, font_weight='bold', ax=ax)
+        f2 = nx.draw_networkx_edges(g, pos=pos, edge_color=edge_color, width=2, ax=ax)
+        axbox = ax.get_position()
+        # Node color legend
+        degree_map = {v: k for k, v in enum_map.items()}
+        proxies = []
+        descriptions = []
+        for i, v in enumerate(degree_values):
+            line = sns.mpl.lines.Line2D([], [], linestyle='none', color=node_colors[enum_map[v]], marker='o')
+            proxies.append(line)
+            descriptions.append(degree_map[i])
+        r_legend = ax.legend(proxies, descriptions, title='Connections', loc=(1, 0), frameon=True)
+        r_frame = r_legend.get_frame()
+        r_frame.set_facecolor('white')
+        r_frame.set_edgecolor('black')
+        # Edge color legend
+        rel_types = {0: 'index - index', 1: 'index - column', 2: 'column - column',
+                     3: 'index - other'}
+        proxies = []
+        descriptions = []
+        for i, c in enumerate(edge_color_map):
+            line = sns.mpl.lines.Line2D([], [], linestyle='-', color=c)
+            proxies.append(line)
+            descriptions.append(rel_types[i])
+        e_legend = ax.legend(proxies, descriptions, title='Relationship Type', loc=(1, 0.7), frameon=True)
+        e_frame = r_legend.get_frame()
+        e_frame.set_facecolor('white')
+        e_frame.set_edgecolor('black')
+        fig.gca().add_artist(r_legend)
+        return g
 
     @classmethod
     def from_hdf(cls, path):
