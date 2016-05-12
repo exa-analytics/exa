@@ -32,13 +32,14 @@ define([], function() {
         Returns:
             array (array): Array of values
         */
-        var step = (max - min) / (n - 1);
+        var n1 = n - 1;
+        var step = (max - min) / n1;
         var array = [min];
-        for (var i=0; i<n; i++) {
+        for (var i=0; i<n1; i++) {
             min += step;
             array.push(min);
         };
-        return array;
+        return new Float32Array(array);
     };
 
     var arange = function(min, max, step) {
@@ -47,11 +48,39 @@ define([], function() {
         ================
         */
         var array = [min];
-        while (min < max && min + step < max) {
+        while (min < max) {
             min += step;
             array.push(min);
         };
-        return array;
+        return new Float32Array(array);
+    };
+
+    var meshgrid3d = function(x, y, z) {
+        /*"""
+        meshgrid3d
+        ============
+        From three discrete dimensions, create a set of
+        3d gridpoints
+        */
+        var nx = x.length;
+        var ny = y.length;
+        var nz = z.length;
+        var n = nx * ny * nz;
+        var xx = new Float32Array(n);
+        var yy = new Float32Array(n);
+        var zz = new Float32Array(n);
+        var h = 0;
+        for (var i of x) {
+            for (var j of y) {
+                for (var k of z) {
+                    xx[h] = i;
+                    yy[h] = j;
+                    zz[h] = k;
+                    h += 1;
+                };
+            };
+        };
+        return {x: xx, y: yy, z: zz};
     };
 
     var ellipsoid = function(x, y, z, a, b, c) {
@@ -87,11 +116,12 @@ define([], function() {
     };
 
     return {
-        'linspace': linspace,
-        'arange': arange,
-        'sphere': sphere,
-        'ellipsoid': ellipsoid,
-        'torus': torus,
-        'function_list_3d': ['sphere', 'torus', 'ellipsoid'],
+        meshgrid3d: meshgrid3d,
+        linspace: linspace,
+        arange: arange,
+        sphere: sphere,
+        ellipsoid: ellipsoid,
+        torus: torus,
+        function_list_3d: ['sphere', 'torus', 'ellipsoid'],
     };
 });

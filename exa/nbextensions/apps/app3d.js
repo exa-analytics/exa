@@ -50,7 +50,7 @@ define([
 
             this.scene = new THREE.Scene();
 
-            this.camera = new THREE.PerspectiveCamera(30, this.width / this.height, 0.0001, 10000);
+            this.camera = new THREE.PerspectiveCamera(30, this.width / this.height, 1, 100000);
 
             this.controls = new TrackballControls(this.camera, this.canvas.get(0));
             this.controls.rotateSpeed = 10.0;
