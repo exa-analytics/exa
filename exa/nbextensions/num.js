@@ -32,9 +32,10 @@ define([], function() {
         Returns:
             array (array): Array of values
         */
-        var step = (max - min) / (n - 1);
+        var n1 = n - 1;
+        var step = (max - min) / n1;
         var array = [min];
-        for (var i=0; i<n; i++) {
+        for (var i=0; i<n1; i++) {
             min += step;
             array.push(min);
         };
@@ -47,7 +48,7 @@ define([], function() {
         ================
         */
         var array = [min];
-        while (min < max && min + step < max) {
+        while (min < max) {
             min += step;
             array.push(min);
         };
