@@ -8,6 +8,13 @@ Numerical utilities
 
 
 define([], function() {
+    var fac2 = function(number) {
+        /*"""
+        fac2
+        ============
+        */
+    };
+
     var hstack = function(arrays) {
         /*"""
         hstack
