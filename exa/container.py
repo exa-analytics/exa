@@ -564,7 +564,7 @@ class BaseContainer:
                 elif slce == slice(None):
                     kws[name] = df
                 else:
-                    keys = df.index[slce]
+                    keys = df.index.values[slce]
                     kws[name] = dfcls(df.iloc[keys, :])
         return cls(**kws)
 
