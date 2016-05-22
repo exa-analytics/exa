@@ -86,6 +86,9 @@ except:
 # Check what optional packages are available
 _conf['pkg_numba'] = False
 _conf['pkg_ipyparallel'] = False
+_conf['pkg_cython'] = False
+_conf['pkg_dask'] = False
+_conf['pkg_distributed'] = False
 try:
     import numba
     _conf['pkg_numba'] = True
