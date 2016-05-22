@@ -99,6 +99,21 @@ try:
     _conf['pkg_ipyparallel'] = True
 except:
     pass
+try:
+    import cython
+    _conf['pkg_cython'] = True
+except:
+    pass
+try:
+    import dask
+    _conf['pkg_dask'] = True
+except:
+    pass
+try:
+    import distributed
+    _conf['pkg_distributed'] = True
+except:
+    pass
 
 
 # Set default relational database

@@ -24,7 +24,7 @@ class _Meta(BaseMeta):
     _symbols_to_Z_map = None
 
     @property
-    def symbols_to_Z(self):
+    def symbols_to_Z_map(self):
         '''
         Generate (and store in memory) a quick mapping between symbol pairs
         (e.g OH) and multiplied Z values (8*1=8).

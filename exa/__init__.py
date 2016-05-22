@@ -11,7 +11,7 @@ from exa.log import log_names, log_head, log_tail
 from exa.test import run_doctests, run_unittests
 from exa import tests
 from exa.relational.container import Container
-from exa.analytical import Symbolic
+from exa.symbolic import Symbolic
 from exa.numerical import Series, DataFrame, Field3D, SparseDataFrame
 from exa.editor import Editor
 from exa import algorithms
