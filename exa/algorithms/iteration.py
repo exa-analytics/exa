@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-Loop Intensive Algorithms
+Hmmmm
 ==================================
 '''
 import numpy as np

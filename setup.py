@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 from exa import __version__
 
 
-dependencies = ['sphinxcontrib-autoanysrc']
+dependencies = ['sphinxcontrib-autoanysrc', 'xmltodict']
 
 
 try:
