@@ -43,14 +43,11 @@ their performance should not be directly compared.
 
 Below are some notes to consider when building scalable, parallelized functions.
 
-- Any threaded function's worker function (that is passed to executor.map or executor.submit)
-must release the GIL
-- Parallelization/distribution of the outermost loop is generally more performant because it
-requires less communication overhead
-- JIT compilation is almost always faster than AOT compilation
+- All threaded functions must release the GIL (or worker must release the GIL)
+- Parallelization/distribution of the outermost loop is generally more performant because it has less communication overhead
+- JIT compilation is almost always faster than AOT compilation (from a few percent to 5X+)
 - Multidimensional arrays are generally slower than 1D arrays
-- Rehsaping/raveling is faster than concatenation
+- Reshaping/raveling is faster than concatenation
 - Threading (CPU) vectorized functions is performant for arrays with length > ~5*10**5
 - Threading (GPU) vectorized functions should not be done
-- Vectorized GPU operations are performant for arrays with length > ~5*10**5 and where communication between
-devices is sparse
+- GPU computation is performant when the GPU has a lot of work to do but a small amount of data to transfer

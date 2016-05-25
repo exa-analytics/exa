@@ -6,13 +6,14 @@
 ##################
 exa
 ##################
-Data management, processing, and visualization.
+Base package for the `exa`_ data processing, analysis, and visualization ecosystem.
+
 
 Documentation is organized into three categories.
 
-    - :ref:`User Docs<user-docs>`
-    - :ref:`Developer Docs<dev-docs>`
-    - :ref:`Related Projects<rel-proj>`
+    - :ref:`User docs<user-docs>`
+    - :ref:`Developer docs<dev-docs>`
+    - :ref:`Related projects<rel-proj>`
 
 ****************
 Contents
@@ -26,8 +27,7 @@ Contents
 
     install.rst
     started.rst
-    api.rst
-    glossary.rst
+..    api.rst
 
 .. _dev-docs:
 
@@ -35,11 +35,11 @@ Contents
     :maxdepth: 2
     :caption: Developer Documentation
 
-    bugs.rst
-    proposal.rst
-    stack.rst
-    code.rst
-    contrib.rst
+..    bugs.rst
+..    proposal.rst
+..    stack.rst
+..    code.rst
+..    contrib.rst
 
 .. _rel-proj:
 
@@ -60,3 +60,5 @@ Indexes
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+.. _exa: https://exa-analytics.github.io/

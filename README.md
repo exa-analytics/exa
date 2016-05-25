@@ -1,5 +1,5 @@
+![Alt test](doc/source/_static/logo.png)
 # exa
-Data management, processing, and visualization.
 
 
 # Installation
