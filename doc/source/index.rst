@@ -6,7 +6,9 @@
 ##################
 exa
 ##################
-Base package for the `exa`_ data processing, analysis, and visualization ecosystem.
+*An ecosystem for data processing, analytics, and visualization.*
+
+
 
 
 Documentation is organized into three categories.
