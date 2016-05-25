@@ -41,14 +41,16 @@ Because of the inherent inefficiency with out of core algorithms (disk is slower
 than RAM), these operations are treated on different footing than in core work;
 their performance should not be directly compared.
 
-Python
---------------------
-Describe pure python algorithms for dataframe/series (i.e. container) manipulation.
+Below are some notes to consider when building scalable, parallelized functions.
 
-Cython/Numba
----------------------
-Describe cythonized/numbafied functions for dataframe/series manipulation.
-
-Distributed
--------------------
-Describe multinode algorithms for dataframe/series computations.
+- Any threaded function's worker function (that is passed to executor.map or executor.submit)
+must release the GIL
+- Parallelization/distribution of the outermost loop is generally more performant because it
+requires less communication overhead
+- JIT compilation is almost always faster than AOT compilation
+- Multidimensional arrays are generally slower than 1D arrays
+- Rehsaping/raveling is faster than concatenation
+- Threading (CPU) vectorized functions is performant for arrays with length > ~5*10**5
+- Threading (GPU) vectorized functions should not be done
+- Vectorized GPU operations are performant for arrays with length > ~5*10**5 and where communication between
+devices is sparse
