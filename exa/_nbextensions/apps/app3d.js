@@ -559,9 +559,9 @@ define([
             var xdir = new THREE.Vector3(1, 0, 0);
             var ydir = new THREE.Vector3(0, 1, 0);
             var zdir = new THREE.Vector3(0, 0, 1);
-            var x = new THREE.ArrowHelper(xdir, origin, 5.0, 0xFF0000);
-            var y = new THREE.ArrowHelper(ydir, origin, 5.0, 0x00FF00);
-            var z = new THREE.ArrowHelper(zdir, origin, 5.0, 0x0000FF);
+            var x = new THREE.ArrowHelper(xdir, origin, 1.0, 0xFF0000);
+            var y = new THREE.ArrowHelper(ydir, origin, 1.0, 0x00FF00);
+            var z = new THREE.ArrowHelper(zdir, origin, 1.0, 0x0000FF);
             this.scene.add(x);
             this.scene.add(y);
             this.scene.add(z);
