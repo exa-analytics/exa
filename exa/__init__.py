@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__exa_version__ = (0, 2, 1)    # Version number is defined here!
+__exa_version__ = (0, 2, 2)    # Version number is defined here!
 __version__ = '.'.join((str(v) for v in __exa_version__))
 
 
