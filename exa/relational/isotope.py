@@ -21,6 +21,23 @@ class _Meta(BaseMeta):
     _symbol_to_Z_map = None         # {'H': 1, ...}
     _symbol_to_radius_map = None
     _symbol_to_color_map = None
+    _symbols_to_Z_map = None
+
+    @property
+    def symbols_to_Z_map(self):
+        '''
+        Generate (and store in memory) a quick mapping between symbol pairs
+        (e.g OH) and multiplied Z values (8*1=8).
+        '''
+        if self._symbols_to_Z_map is None:
+            df = atomic.Isotope.table()[['symbol', 'Z']].drop_duplicates('symbol').dropna()
+            s = df['symbol'].values
+            z = df['Z'].values
+            sym_pairs = pd.Series([''.join(pair) for pair in product(s, s)])
+            Z_product = pd.Series([a*b for a, b in product(z, z)])
+            df = pd.DataFrame.from_dict({'symbols': sym_pairs, 'Z_product': Z_product}).set_index('symbols')['Z_product'].astype(np.int64)
+            self._symbols_to_Z_map = df
+        return self._symbols_to_Z_map
 
     @property
     def symbols_to_radii_map(self):
@@ -288,6 +305,10 @@ class Isotope(Base, metaclass=_Meta):
     @classmethod
     def symbol_to_Z(cls):
         return cls.symbol_to_Z_map
+
+    @classmethod
+    def symbols_to_Z(cls):
+        return cls.symbols_to_Z_map
 
     def __repr__(self):
         return '{0}{1}'.format(self.A, self.symbol)

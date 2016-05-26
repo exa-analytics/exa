@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 '''
-Loop Intensive Algorithms
+Hmmmm
 ==================================
 '''
 import numpy as np
+from exa import _conf
 
 
 def pdist(array):
@@ -72,7 +73,10 @@ def meshgrid3d(x, y, z):
     '''
     Expand x, y, and z into a volume of len(x) by len(y) by len(z) dimensions.
     '''
-    n = len(x) * len(y) * len(z)
+    nx = len(x)
+    ny = len(y)
+    nz = len(z)
+    n = nx * ny * nz
     xx = np.empty((n, ), dtype=np.float64)
     yy = np.empty((n, ), dtype=np.float64)
     zz = np.empty((n, ), dtype=np.float64)
@@ -85,3 +89,40 @@ def meshgrid3d(x, y, z):
                 zz[h] = k
                 h += 1
     return xx, yy, zz
+
+
+def pairwise_diff(array):
+    '''
+    Compute the pairwise difference vector between every pair of vectors in
+    the (2D) array.
+
+    Args:
+        array (array): 2D array
+
+    Returns:
+        tup (tuple): First index, second index, and difference vectors
+    '''
+    n, m = array.shape
+    nn = n*(n - 1)//2
+    values = np.empty((nn, m), dtype=np.float64)
+    index0 = np.empty((nn, ), dtype=np.int64)
+    index1 = np.empty((nn, ), dtype=np.int64)
+    h = 0
+    for i in range(n):
+        v0 = array[i]
+        for j in range(i + 1, n):
+            v1 = array[j]
+            for k in range(m):
+                values[h, k] = v0[k] - v1[k]
+            index0[h] = i
+            index1[h] = j
+            h += 1
+    return index0, index1, values
+
+
+if _conf['pkg_numba']:
+    from numba import jit
+    pdist = jit(nopython=True, cache=True)(pdist)
+    supercell3d = jit(nopython=True, cache=True)(supercell3d)
+    meshgrid3d = jit(nopython=True, cache=True)(meshgrid3d)
+    pairwise_diff = jit(nopython=True, cache=True)(pairwise_diff)

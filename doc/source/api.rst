@@ -23,6 +23,7 @@ Python
     modules/error_log_utility.rst
     relational.rst
     algorithms.rst
+    distributed.rst
     tests.rst
 
 JavaScript

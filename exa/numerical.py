@@ -246,12 +246,14 @@ class Field(DataFrame):
             field_values (list or Series or DataFrame): Field value data
         '''
         if isinstance(args[0], pd.Series):
-            args[0] = args[0].to_frame().T
+            args = (args[0].to_frame().T, )
         super().__init__(*args, **kwargs)
         if isinstance(field_values, list):
-            self.field_values = field_values
+            self.field_values = [Series(v) for v in field_values]
         else:
-            self.field_values = [field_values]
+            self.field_values = [Series(v) for v in field_values]
+        for i in range(len(field_values)):
+            self.field_values[i].name = i
 
 
 class Field3D(Field):
@@ -327,3 +329,23 @@ class SparseDataFrame(NDBase, pd.SparseDataFrame):
                     raise RequiredIndexError(missing, name)
                 else:
                     self.index.names = self._indices
+
+
+def get_indices_columns(obj):
+    '''
+    Compute a list of possible relational attributes of a given dataframe or
+    series object.
+    '''
+    indices = []
+    columns = []
+    #if hasattr(obj, 'index'):
+    #    indices += [name for name in obj.index.names if name is not None]
+    if hasattr(obj, '_indices'):
+        indices += obj._indices
+    if hasattr(obj, 'columns'):
+        columns += [name[:-1] if name[-1].isdigit() else name for name in obj.columns if name is not None]
+    if hasattr(obj, '_categories'):
+        columns += [name[:-1] if name[-1].isdigit() else name for name in obj._categories.keys()]
+    if hasattr(obj, '_groupbys'):
+        columns += obj._groupbys
+    return indices, columns

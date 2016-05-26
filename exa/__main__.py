@@ -11,7 +11,7 @@ import threading
 import sys
 import os
 sys.path.insert(0, os.path.abspath('./'))
-from exa.web import serve
+from exa._web import serve
 
 
 def get_args():
@@ -42,13 +42,9 @@ def main():
     '''
     Parse command line arguments and start the (web-based) application.
     '''
-    print('in main')
     args = get_args()
-    print(args)
     port = args.port
     browser = args.browser
     link = 'http://localhost:{port}'.format(port=port)
-    print(link)
-    print(browser)
     threading.Timer(0.5, lambda: webbrowser.get(browser).open(link)).start()
     serve(port=port)

@@ -62,15 +62,15 @@ _conf['logfile_max_count'] = 5
 
 # Internal package paths
 pkg = os.path.dirname(__file__)
-_conf['web_templates'] = mkp(pkg, 'web', 'templates')
-_conf['web_html'] = mkp(pkg, 'web', 'html')
-_conf['web_css'] = mkp(pkg, 'web', 'css')
-_conf['web_js'] = mkp(pkg, 'web', 'js')
-_conf['static_constants.json'] = mkp(pkg, 'static', 'constants.json')
-_conf['static_isotopes.json'] = mkp(pkg, 'static', 'isotopes.json')
-_conf['static_units.json'] = mkp(pkg, 'static', 'units.json')
-_conf['nbext_localdir'] = mkp(pkg, 'nbextensions')
-_conf['nbext_sysdir'] = mkp(jupyter_data_dir(), 'nbextensions', 'exa')
+_conf['web_templates'] = mkp(pkg, '_web', 'templates')
+_conf['web_html'] = mkp(pkg, '_web', 'html')
+_conf['web_css'] = mkp(pkg, '_web', 'css')
+_conf['web_js'] = mkp(pkg, '_web', 'js')
+_conf['static_constants.json'] = mkp(pkg, '_static', 'constants.json')
+_conf['static_isotopes.json'] = mkp(pkg, '_static', 'isotopes.json')
+_conf['static_units.json'] = mkp(pkg, '_static', 'units.json')
+_conf['nbext_localdir'] = mkp(pkg, '_nbextensions')
+_conf['nbext_sysdir'] = mkp(jupyter_data_dir(), '_nbextensions', 'exa')
 
 
 # Check what type of Python session this is (python/ipython or jupyter notebook)
@@ -86,6 +86,9 @@ except:
 # Check what optional packages are available
 _conf['pkg_numba'] = False
 _conf['pkg_ipyparallel'] = False
+_conf['pkg_cython'] = False
+_conf['pkg_dask'] = False
+_conf['pkg_distributed'] = False
 try:
     import numba
     _conf['pkg_numba'] = True
@@ -94,6 +97,21 @@ except:
 try:
     import ipyparallel
     _conf['pkg_ipyparallel'] = True
+except:
+    pass
+try:
+    import cython
+    _conf['pkg_cython'] = True
+except:
+    pass
+try:
+    import dask
+    _conf['pkg_dask'] = True
+except:
+    pass
+try:
+    import distributed
+    _conf['pkg_distributed'] = True
 except:
     pass
 

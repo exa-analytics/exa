@@ -5,23 +5,9 @@ if sys.version_info < (3, 4):
 from setuptools import setup, find_packages
 from exa import __version__
 
-dependencies = [
-    'numpy>=1.10.0',
-    'scipy>=0.17',
-    'pandas>=0.17',
-    'sqlalchemy>=1.0.0',
-    'scikit-learn>=0.17',
-    'networkx>=1.10',
-    'jupyter>=1.0.0',
-    'notebook>=4.1.0',
-    'ipython>=4.1.0',
-    'ipywidgets>=4.1.0',
-    'matplotlib>=1.5.0',
-    'seaborn>=0.7.0',
-    'sphinx>=1.3',
-    'sphinx_rtd_theme>=0.1.7',
-    'sphinxcontrib-autoanysrc'
-]
+
+dependencies = ['sphinxcontrib-autoanysrc', 'xmltodict']
+
 
 try:
     setup(
@@ -32,8 +18,8 @@ try:
         maintainer_email='exa.data.analytics@gmail.com',
         url='https://exa-analytics.github.io/website',
         packages=find_packages(),
-        package_data={'exa': ['static/*.json', 'nbextensions/*.js', 'nbextensions/libs/*.js',
-                              'nbextensions/apps/*.js']},
+        package_data={'exa': ['_static/*.json', '_nbextensions/*.js', '_nbextensions/libs/*.js',
+                              '_nbextensions/apps/*.js']},
         entry_points={'console_scripts': ['exa = exa.__main__:main']},
         include_package_data=True,
         install_requires=dependencies,
