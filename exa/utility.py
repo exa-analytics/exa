@@ -12,12 +12,12 @@ from datetime import datetime
 sep2 = os.sep + os.sep
 
 
-def datetime_header():
+def datetime_header(title=''):
     '''
     Creates a simple header string containing the current date/time stamp
     delimited using "=".
     '''
-    return '\n'.join(('=' * 80, str(datetime.now()), '=' * 80))
+    return '\n'.join(('=' * 80, title + ': ' + str(datetime.now()), '=' * 80))
 
 
 def mkp(*args, mk=False, exist_ok=True):

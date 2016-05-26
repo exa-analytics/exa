@@ -240,11 +240,11 @@ class Isotope(Base, metaclass=_Meta):
 
         >>> Isotope.symbol_to_radius().head()
         symbol
-        H     0.604712
-        D     0.604712
-        T     0.604712
-        He    0.869274
-        Li    2.513336
+        Dga    0.300000
+        H      0.604712
+        D      0.604712
+        T      0.604712
+        He     0.869274
         Name: radius, dtype: float64
 
         Note:
@@ -261,11 +261,11 @@ class Isotope(Base, metaclass=_Meta):
         covalent radii (in a.u.).
 
         >>> Isotope.symbols_to_radii().head()    # Try without .head()
-        HH     1.209425
-        HD     1.209425
-        HT     1.209425
-        HHe    1.473986
-        HLi    3.118048
+        DgaDga    0.600000
+        DgaH      0.904712
+        DgaD      0.904712
+        DgaT      0.904712
+        DgaHe     1.169274
         Name: radius, dtype: float64
         '''
         return cls.symbols_to_radii_map
@@ -277,11 +277,11 @@ class Isotope(Base, metaclass=_Meta):
 
         >>> Isotope.symbol_to_color().head()
         symbol
-        H            0
-        D            0
-        T            0
-        He    14286847
-        Li    13402367
+        Dga    16711935
+        H      10197915
+        D       5263440
+        T       4210752
+        He     14286847
         Name: color, dtype: int64
         '''
         return cls.symbol_to_color_map
@@ -293,11 +293,11 @@ class Isotope(Base, metaclass=_Meta):
 
         >>> Isotope.Z_to_symbol().head()
         Z
-        1     H
-        2    He
-        3    Li
-        4    Be
-        5     B
+        0    Dga
+        1      H
+        2     He
+        3     Li
+        4     Be
         Name: symbol, dtype: object
         '''
         return cls.Z_to_symbol_map

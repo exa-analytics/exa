@@ -8,11 +8,11 @@ inside the Jupyter notebook (interactive testing) and automatic logging.
 import sys
 import doctest
 import unittest
-from exa.log import get_logfile_path
+from exa.log import get_logger
 from exa.utility import datetime_header
 
 
-log_sys = get_logfile_path('log_sys')
+logger = get_logger('sys')
 
 
 class UnitTester(unittest.TestCase):
@@ -34,9 +34,7 @@ class UnitTester(unittest.TestCase):
         suite = unittest.TestLoader().loadTestsFromTestCase(cls)
         result = None
         if log:
-            with open(log_sys, 'a') as f:
-                f.write(datetime_header())
-                result = unittest.TextTestRunner(f, verbosity=2).run(suite)
+            result = unittest.TextTestRunner(logger.handlers[0].stream, verbosity=2).run(suite)
         else:
             result = unittest.TextTestRunner(verbosity=2).run(suite)
         return result
@@ -54,21 +52,19 @@ class TestTester(UnitTester):
         the root exa directory and relational database exist.
         '''
         import os
-        from exa._config import _conf
+        from exa import _conf
         self.assertIsInstance(_conf, dict)
         self.assertIn('exa_root', _conf)
         self.assertTrue(os.path.exists(_conf['exa_root']))
-        del os, _conf
 
     def test_log(self):
         '''
         Check that log file paths are accessible.
         '''
         import os
-        from exa.log import get_logfile_path
-        path = get_logfile_path(name='log_sys')
+        from exa import _conf
+        path = _conf['log_sys']
         self.assertTrue(os.path.exists(path))
-        del os, get_logfile_path
 
     def test_utility(self):
         '''
@@ -98,7 +94,7 @@ def run_doctests(verbose=True, log=False):
                     pass
                 else:
                     if f:
-                        f.write('\n'.join(('-' * 80, test.name, '-' * 80)))
+                        f.write('\n'.join(('-' * 80, test.name, '-' * 80, '\n')))
                         runner.run(test, out=f.write)
                     else:
                         print('\n'.join(('-' * 80, test.name, '-' * 80)))
@@ -108,9 +104,8 @@ def run_doctests(verbose=True, log=False):
     modules = [v for k, v in sys.modules.items() if k.startswith('exa')]
     modules.sort(key=lambda module: module.__file__)
     if log:
-        with open(log_sys, 'a') as f:
-            f.write(datetime_header())
-            tester(modules, runner, f=f)
+        logger.info('LOGGING DOCTTEST')
+        tester(modules, runner, f=logger.handlers[0].stream)
     else:
         tester(modules, runner)
 
@@ -124,7 +119,6 @@ def run_unittests(log=False):
     '''
     tests = UnitTester.__subclasses__()
     if log:
-        with open(testlog, 'a') as f:
-            f.write(datetime_header())
+        logger.info('LOGGING UNITTEST')
     for test in tests:
         test.run_interactively(log=log)

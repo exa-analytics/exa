@@ -1,2 +1,5 @@
-.. automodule:: exa.app
+.. automodule:: exa._config
+    :members:
+
+.. automodule:: exa._install
     :members:

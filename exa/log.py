@@ -22,6 +22,10 @@ from textwrap import wrap
 from exa import _conf
 
 
+log_files = {}
+loggers = {}
+
+
 class _LogFormat(logging.Formatter):
     '''
     Systematic log formatting (for all logging levels).
@@ -39,15 +43,6 @@ class _LogFormat(logging.Formatter):
         j = '\n' + self.spacing
         record.msg = j.join(wrap(record.msg, width=80))
         return fmt.format(record)
-
-
-def get_logfile_path(name):
-    '''
-    Get the log file path for the log with the given name.
-    '''
-    for log_file in log_files:
-        if name in log_file:
-            return log_files[log_file]
 
 
 def logfiles():
@@ -105,22 +100,30 @@ def _cleanup():
     '''
     handlers = logging.root.handlers[:]
     for handler in handlers:
-        handler.close()
+        try:
+            handler.close()
+        except:
+            pass
         logging.root.removeHandler(handler)
 
 
-log_files = dict((key, value) for key, value in _conf.items() if key.startswith('log_'))
-loggers = {}
-_cleanup()
-# Add custom handlers
-for key, path in log_files.items():
-    logger = logging.getLogger(key)
-    handler = RotatingFileHandler(path, maxBytes=_conf['logfile_max_bytes'],
-                                  backupCount=_conf['logfile_max_count'])
-    handler.setFormatter(_LogFormat())
-    logger.addHandler(handler)
-    if _conf['exa_persistent']:
-        logger.setLevel(logging.WARNING)
-    else:
-        logger.setLevel(logging.DEBUG)
-    loggers[key.replace('log_', '')] = logger
+def setup_loggers():
+    '''
+    Setup up loggers and (corresponding) file handlers
+    '''
+    _cleanup()
+    log_files = dict((key, value) for key, value in _conf.items() if key.startswith('log_'))
+    for key, path in log_files.items():
+        logger = logging.getLogger(key)
+        handler = RotatingFileHandler(path, maxBytes=_conf['logfile_max_bytes'],
+                                      backupCount=_conf['logfile_max_count'])
+        handler.setFormatter(_LogFormat())
+        logger.addHandler(handler)
+        if _conf['exa_persistent'] and _conf['debug'] == False:
+            logger.setLevel(logging.WARNING)
+        else:
+            logger.setLevel(logging.DEBUG)
+        loggers[key.replace('log_', '')] = logger
+
+
+setup_loggers()

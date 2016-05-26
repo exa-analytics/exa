@@ -22,6 +22,9 @@ from exa import _conf
 
 
 gen_uid = lambda: uuid4().hex    # Unique random id in db format
+engine_name = None
+engine = None
+SessionFactory = None
 
 
 class BaseMeta(DeclarativeMeta):
@@ -274,6 +277,15 @@ def session_scope(*args, **kwargs):
         session.close()    # Occurs regardless if an exception is raised or not
 
 
-engine_name = _conf['exa_relational']
-engine = create_engine(engine_name)
-SessionFactory = sessionmaker(bind=engine)
+def setup_db():
+    '''
+    Set up the relational engine and session factory.
+    '''
+    engine_name = _conf['exa_relational']
+    engine = create_engine(engine_name)
+    SessionFactory = sessionmaker(bind=engine)
+    print(engine_name)
+    print(engine)
+
+
+setup_db()

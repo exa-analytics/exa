@@ -25,7 +25,8 @@ Install some dependencies..
 
 .. code-block:: bash
 
-    conda install numpy scipy pandas seaborn jupyter notebook numba dask distributed ipywidgets sympy setuptools
+    conda install numpy scipy pandas seaborn jupyter notebook numba dask distributed ipywidgets sympy setuptools sphinx
+    pip install xmltodict sphinxcontrib-autoanysrc
 
 ..then install the package.
 

@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-The Container Module
+Container
 ===============================================
-This module provides the relational container object and a relationship table
-that connects containers to recrods representing files on disk.
 '''
 from sys import getsizeof
 from sqlalchemy import Column, String, ForeignKey, Table, Integer, event
