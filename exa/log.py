@@ -2,6 +2,18 @@
 '''
 Logging
 =====================
+This module provides three main log files, system, user, and database ('log_sys',
+'log_user', and 'log_db'). These files may be inspected interactively:
+
+.. code-block:: Python
+
+    exa.logfiles()             # default: ['log_sys', 'log_user', 'log_db']
+    exa.log_head('log_sys')    # prints the head of the system log
+    exa.log_tail('log_user')   # prints the tail of the user log
+
+- system: logs automatic messages performed by exa and its sub-packages
+- user: logs (non personally identifiable) user actions
+- database: logs database interactions
 '''
 import os
 import logging
@@ -38,14 +50,21 @@ def get_logfile_path(name):
             return log_files[log_file]
 
 
-def log_names():
+def logfiles():
     '''
     Lists available log names.
 
     Returns:
         names (list): List of available log names
     '''
-    return [handler.name for handler in logging.handlers]
+    return [handler.name for handler in logging.root.handlers]
+
+
+def get_logger(which):
+    '''
+    Get a log file handler ('sys', 'db', 'user').
+    '''
+    return loggers[which]
 
 
 def log_head(log='log_sys', n=10):
@@ -59,7 +78,7 @@ def log_head(log='log_sys', n=10):
     _print_log(log, n, True)
 
 
-def log_tail(log='log_sys', n=10):
+def log_tail(log='sys', n=10):
     '''
     Print the most recent log messages.
 
@@ -72,7 +91,7 @@ def log_tail(log='log_sys', n=10):
 
 def _print_log(log, n, head=True):
     lines = None
-    with open(_conf[log], 'r') as f:
+    with open(_conf['log_' + log], 'r') as f:
         lines = f.read().splitlines()
     if head:
         print('\n'.join(lines[:n]))
@@ -84,13 +103,6 @@ def _cleanup():
     '''
     Clean up logging file handlers.
     '''
-    _remove_handlers()
-
-
-def _remove_handlers():
-    '''
-    Clean up logging file handlers.
-    '''
     handlers = logging.root.handlers[:]
     for handler in handlers:
         handler.close()
@@ -98,12 +110,17 @@ def _remove_handlers():
 
 
 log_files = dict((key, value) for key, value in _conf.items() if key.startswith('log_'))
-_remove_handlers()
+loggers = {}
+_cleanup()
 # Add custom handlers
-for i, (key, path) in enumerate(log_files.items()):
+for key, path in log_files.items():
+    logger = logging.getLogger(key)
     handler = RotatingFileHandler(path, maxBytes=_conf['logfile_max_bytes'],
                                   backupCount=_conf['logfile_max_count'])
     handler.setFormatter(_LogFormat())
-    logging.root.addHandler(handler)
-    logging.root.handlers[i].setLevel(logging.DEBUG)
-    logging.root.handlers[i].set_name(key)
+    logger.addHandler(handler)
+    if _conf['exa_persistent']:
+        logger.setLevel(logging.WARNING)
+    else:
+        logger.setLevel(logging.DEBUG)
+    loggers[key.replace('log_', '')] = logger

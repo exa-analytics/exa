@@ -20,18 +20,6 @@ from exa.utility import mkp
 _filename = 'config.json'
 
 
-def show_conf():
-    '''
-    Read-only representation of the current configuration.
-
-    .. code-block:: Python
-
-        >>> 'exa_root' in _conf
-        True
-    '''
-    pprint.pprint(_conf)
-
-
 def _cleanup():
     '''
     Remove root directory in non-persistent session.
@@ -85,23 +73,11 @@ except:
 
 # Check what optional packages are available
 _conf['pkg_numba'] = False
-_conf['pkg_ipyparallel'] = False
-_conf['pkg_cython'] = False
 _conf['pkg_dask'] = False
 _conf['pkg_distributed'] = False
 try:
     import numba
     _conf['pkg_numba'] = True
-except:
-    pass
-try:
-    import ipyparallel
-    _conf['pkg_ipyparallel'] = True
-except:
-    pass
-try:
-    import cython
-    _conf['pkg_cython'] = True
 except:
     pass
 try:

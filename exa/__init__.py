@@ -6,8 +6,13 @@ __version__ = '.'.join((str(v) for v in __exa_version__))
 import atexit as _ae
 
 
-from exa._config import _conf, show_conf
-from exa.log import log_names, log_head, log_tail
+from exa._config import _conf
+from exa.log import logfiles, log_head, log_tail
+
+syslog = log.get_logger('sys')
+syslog.info('Starting exa with configuration:')
+syslog.info(str(_conf))
+
 from exa.test import run_doctests, run_unittests
 from exa import tests
 from exa.relational.container import Container

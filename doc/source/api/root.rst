@@ -1,0 +1,2 @@
+.. automodule:: exa.app
+    :members:

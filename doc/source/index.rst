@@ -24,19 +24,39 @@ following open source projects (among others):
     - `distributed`_: distributed computing
     - `dask`_: Out-of-core computing
     - `sympy`_: symbolic mathematics
+    - `paramiko`_: ssh support
+    - `mpi4py`_: MPI support
+
+Specifically, **exa** provides a system configuration, standalone (web-based)
+app framework, logging, content management, trait supporting dataframe/series
+objects, and the data specific **container** object. The **container** concept
+is the corner stone of this project (see :ref:`exa-overview`).
+
+##################
+Documentation
+##################
+
+.. toctree::
+    :maxdepth: 2
+
+    overview.rst
+    install.rst
+    api/api.rst
 
 .. toctree::
     :maxdepth: 2
     :caption: User Guide
 
-    install.rst
-    started.rst
-..    api.rst
+    user/user.rst
+..    user/started.rst
+..    user/examples.rst
+..    user/help.rst
 
 .. toctree::
     :maxdepth: 2
-    :caption: Developer Info
+    :caption: Contributor Guide
 
+    dev/dev.rst
 ..    bugs.rst
 ..    proposal.rst
 ..    stack.rst
@@ -44,9 +64,9 @@ following open source projects (among others):
 ..    contrib.rst
 
 
-=============
+##################
 Info
-=============
+##################
 :download:`License <../../LICENSE>`
 
 * :ref:`genindex`
@@ -66,3 +86,5 @@ Info
 .. _distributed: http://distributed.readthedocs.io/en/latest/
 .. _dask: http://dask.pydata.org/en/latest/
 .. _sympy: http://www.sympy.org/en/index.html
+.. _paramiko: http://www.paramiko.org/
+.. _mpi4py: https://pythonhosted.org/mpi4py/

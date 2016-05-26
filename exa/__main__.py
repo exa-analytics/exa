@@ -1,17 +1,16 @@
 #! /usr/bin/env python
 '''
-exa Web Application
+Standalone App
 =====================
-This module starts up the web GUI. Rather than having a standalone graphical
-client, exa's GUI is presented as a web client.
 '''
+import os
+import sys
 import argparse
 import webbrowser
 import threading
-import sys
-import os
+
 sys.path.insert(0, os.path.abspath('./'))
-from exa._web import serve
+from exa._app import serve
 
 
 def get_args():
@@ -48,3 +47,6 @@ def main():
     link = 'http://localhost:{port}'.format(port=port)
     threading.Timer(0.5, lambda: webbrowser.get(browser).open(link)).start()
     serve(port=port)
+
+if __name__ == '__main__':
+    main()
