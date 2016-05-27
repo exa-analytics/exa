@@ -18,7 +18,7 @@ class TestUnit(UnitTester):
         '''
         Check that the table can be converted to a :class:`~pandas.DataFrame`.
         '''
-        tbl = Acceleration.table()
+        tbl = Acceleration.to_frame()
         self.assertIsInstance(tbl, pd.DataFrame)
 
     def test_factor(self):

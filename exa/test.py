@@ -52,18 +52,18 @@ class TestTester(UnitTester):
         the root exa directory and relational database exist.
         '''
         import os
-        from exa import _conf
-        self.assertIsInstance(_conf, dict)
-        self.assertIn('exa_root', _conf)
-        self.assertTrue(os.path.exists(_conf['exa_root']))
+        from exa import global_config
+        self.assertIsInstance(global_config, dict)
+        self.assertIn('exa_root', global_config)
+        self.assertTrue(os.path.exists(global_config['exa_root']))
 
     def test_log(self):
         '''
         Check that log file paths are accessible.
         '''
         import os
-        from exa import _conf
-        path = _conf['log_sys']
+        from exa import global_config
+        path = global_config['log_sys']
         self.assertTrue(os.path.exists(path))
 
     def test_utility(self):

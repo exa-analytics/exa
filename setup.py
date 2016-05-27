@@ -8,7 +8,6 @@ from exa import __version__
 
 dependencies = ['sphinxcontrib-autoanysrc', 'xmltodict']
 
-
 setup(
     name='exa',
     version=__version__,

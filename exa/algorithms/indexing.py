@@ -5,7 +5,7 @@ Indexing Recipes and Array Creation
 Functions related to generating indices.
 '''
 import numpy as np
-from exa import exa_global_config
+from exa import global_config
 
 
 def arange1(initials, counts):
@@ -170,7 +170,7 @@ def unordered_pairing(x, y):
     return np.int64(x * y + np.trunc((np.abs(x - y) - 1)**2 / 4))
 
 
-if exa_global_config['pkg_numba']:
+if global_config['pkg_numba']:
     from numba import jit, vectorize, int32, int64, float32, float64
     arange1 = jit(nopython=True, cache=True)(arange1)
     arange2 = jit(nopython=True, cache=True)(arange2)

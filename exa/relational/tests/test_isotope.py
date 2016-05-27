@@ -16,7 +16,7 @@ class TestIsotope(UnitTester):
         '''
         Check that the table can be converted to a :class:`~pandas.DataFrame`.
         '''
-        self.assertIsInstance(Isotope.table(), pd.DataFrame)
+        self.assertIsInstance(Isotope.to_frame(), pd.DataFrame)
 
     def test_selections(self):
         '''

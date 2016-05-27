@@ -5,13 +5,13 @@ __version__ = '.'.join((str(v) for v in __exa_version__))
 
 # Setup up configuration, logging, testing
 import atexit as _ae
-from exa._config import config as exa_global_config
+from exa._config import config as global_config
 from exa._install import install
-from exa.log import logfiles, log_head, log_tail
+from exa.log import log_head, log_tail
 from exa.test import run_doctests, run_unittests
 syslog = log.get_logger('sys')
 syslog.info('Starting exa with configuration:')
-syslog.info(str(exa_global_config))
+syslog.info(str(global_config))
 
 
 # Import the container and trait supporting dataframe and series objects
@@ -28,15 +28,15 @@ from exa import tests
 
 
 # If dynamic (not persistent) session need to populate database tables
-if exa_global_config['exa_persistent'] == False:
+if global_config['exa_persistent'] == False:
     install(False)
 
 
 # If running in a Jupyter notebook set some reasonable defaults
-if exa_global_config['notebook']:
-    i = get_ipython()
-    c = i.config
-    c.InteractiveShellApp.matplotlib = 'inline'
+if global_config['notebook']:
+    _ipy = get_ipython()
+    _ipyconf = _ipy.config
+    _ipyconf.InteractiveShellApp.matplotlib = 'inline'
 
 
 # Register cleanup functions

@@ -19,7 +19,7 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 from textwrap import wrap
-from exa import exa_global_config
+from exa import global_config
 
 
 loggers = {}
@@ -85,7 +85,7 @@ def log_tail(log='sys', n=10):
 
 def print_log(log, n, head=True):
     lines = None
-    with open(exa_global_config['log_' + log], 'r') as f:
+    with open(global_config['log_' + log], 'r') as f:
         lines = f.read().splitlines()
     if head:
         print('\n'.join(lines[:n]))
@@ -97,10 +97,10 @@ def cleanup():
     '''
     Clean up logging file handlers.
     '''
-    handlers = logging.root.handlers[:]
-    for handler in handlers:
-        handler.close()
-        logging.root.removeHandler(handler)
+    for name, logger in loggers.items():
+        for handler in logger.handlers:
+            handler.close()
+        logger.handlers = []
 
 
 def setup_loggers():
@@ -109,15 +109,17 @@ def setup_loggers():
     '''
     global loggers
     cleanup()
-    log_files = dict((key, value) for key, value in exa_global_config.items() if key.startswith('log_'))
+    log_files = dict((key, value) for key, value in global_config.items() if key.startswith('log_'))
     for key, path in log_files.items():
-        logger = logging.getLogger(key)
-        handler = RotatingFileHandler(path, maxBytes=exa_global_config['logfile_max_bytes'],
-                                      backupCount=exa_global_config['logfile_max_count'])
+        logger = logging.getLogger('sqlalchemy') if 'db' in key else logging.getLogger(key)
+        handler = RotatingFileHandler(path, maxBytes=global_config['logfile_max_bytes'],
+                                      backupCount=global_config['logfile_max_count'])
         handler.setFormatter(LogFormat())
         logger.addHandler(handler)
-        if exa_global_config['exa_persistent'] and exa_global_config['debug'] == False:
+        if global_config['exa_persistent'] and global_config['runlevel'] == 0:
             logger.setLevel(logging.WARNING)
+        elif global_config['runlevel'] == 1:
+            logger.setLevel(logging.INFO)
         else:
             logger.setLevel(logging.DEBUG)
         loggers[key.replace('log_', '')] = logger

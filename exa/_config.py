@@ -13,6 +13,12 @@ the automatic content management. This module keeps track of working
 configuration options for persistent functionality such as content
 management.
 
+If using a persistent session (i.e. the ~/.exa directory is present), this
+configuration can be edited manually. Note that not all edits will be reflected
+because some configurations can only be set at runtime. Configuration options
+such as **runlevel** can safely be changed. **Note also that no exa session can
+be running while changing the config.json file in the ~/.exa directory.**
+
 The configuration object is a simple dictionary **config** with the following
 attributes (string keys in the config dictionary).
 
@@ -35,6 +41,7 @@ Attributes:
     pkg_dask (bool): True if `dask`_ is installed
     pkg_distributed (bool): True if `distributed`_ is installed
     pkg_numba (bool): True if `numba`_ is installed
+    runlevel (int): 0 - production, 1 - staging, 2 - debug
     static_constants.json (str): Location of the constants.json file
     static_isotopes.json (str): Location of the isotopes.json file
     static_units.json (str): Location of the units.json file
@@ -65,7 +72,8 @@ def save_config():
 
 def update_config():
     '''
-    Populates the exa's configuration dictionary, **config**.
+    Populates the exa's configuration dictionary, **config** (typically
+    aliased as **global_config**).
     '''
     global config
     dot_exa = None
@@ -79,15 +87,12 @@ def update_config():
         config['exa_persistent'] = True
     else:
         config['exa_root'] = mkdtemp()
-    config['debug'] = False
+    config['runlevel'] = 0
     config['log_db'] = mkp(config['exa_root'], 'db.log')
     config['log_sys'] = mkp(config['exa_root'], 'sys.log')
     config['log_user'] = mkp(config['exa_root'], 'user.log')
     config['logfile_max_bytes'] = 1048576
     config['logfile_max_count'] = 5
-
-
-    # Internal package paths
     pkg = os.path.dirname(__file__)
     config['app_templates'] = mkp(pkg, '_app', 'templates')
     config['app_html'] = mkp(pkg, '_app', 'html')
@@ -98,9 +103,6 @@ def update_config():
     config['static_units.json'] = mkp(pkg, '_static', 'units.json')
     config['nbext_localdir'] = mkp(pkg, '_nbextensions')
     config['nbext_sysdir'] = mkp(jupyter_data_dir(), '_nbextensions', 'exa')
-
-
-    # Check what type of Python session this is (python/ipython or jupyter notebook)
     config['notebook'] = False
     try:
         cfg = get_ipython().config
@@ -108,9 +110,6 @@ def update_config():
             config['notebook'] = True
     except:
         pass
-
-
-    # Check what optional packages are available
     config['pkg_numba'] = False
     config['pkg_dask'] = False
     config['pkg_distributed'] = False
@@ -129,20 +128,12 @@ def update_config():
         config['pkg_distributed'] = True
     except:
         pass
-
-
-    # Set default relational database
     config['exa_relational'] = 'sqlite:///{}'.format(mkp(config['exa_root'], 'exa.sqlite'))
-
-
-    # Update the configuration if existing configuration exists
-    existingconfig = mkp(config['exa_root'], _filename)
-    if config['exa_persistent'] and os.path.exists(existingconfig):
-        config = {}
-        with open(existingconfig) as f:
-            config = json.load(f)
-        # Not all configurations can simply be updated: handle them manually
-        config['debug'] = config['debug']
+    existing_config = mkp(config['exa_root'], _filename)
+    if config['exa_persistent'] and os.path.exists(existing_config):
+        with open(existing_config) as f:
+            econf = json.load(f)
+        config['runlevel'] = econf['runlevel']
 
 
 def cleanup():
@@ -153,5 +144,6 @@ def cleanup():
         save_config()
     else:
         shutil.rmtree(config['exa_root'])
+
 
 update_config()

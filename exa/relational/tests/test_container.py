@@ -35,7 +35,7 @@ class TestRelationalContainer(UnitTester):
         Like all relational tables we should be able to call the
         :func:`~exa.relational.base.Base.table` function.
         '''
-        self.assertIsInstance(Container.table(), pd.DataFrame)
+        self.assertIsInstance(Container.to_frame(), pd.DataFrame)
 
 
 class TestContainer(UnitTester):
@@ -49,6 +49,6 @@ class TestContainer(UnitTester):
         c = Container(name='test', description='created by TestContainer.test_save',
                       df=df)
         c.save(path)
-        self.assertTrue(c.pkid in c.table().index)
+        self.assertTrue(c.pkid in c.to_frame().index)
         self.assertTrue(os.path.exists(path))
         os.remove(path)

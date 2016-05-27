@@ -8,6 +8,7 @@ convenience methods for looking up database entries by common features and retur
 and corresponding dataframe or series object.
 '''
 import pandas as pd
+from numbers import Integral
 from sys import getsizeof
 from uuid import UUID, uuid4
 from datetime import datetime
@@ -16,46 +17,46 @@ from sqlalchemy import Column, Integer, String, DateTime, create_engine, event
 from sqlalchemy.orm import sessionmaker, mapper
 from sqlalchemy.orm.query import Query
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
-from exa import exa_global_config
+from exa import global_config
+from exa.log import get_logger
 
 
 gen_uid = lambda: uuid4().hex
-config = {'engine_name': None, 'engine': None, 'SessionFactory': None}
+engine_name = None
+engine = None
+SessionFactory = None
 
 
 class BaseMeta(DeclarativeMeta):
     '''
-    The base relational class object definition. The class object has convenience methods for
-    quick lookup and conversion of relational data to usable objects such as dataframes and series.
+    This is the base metaclass for all relational tables. It provides convient
+    lookup methods, bulk insert methods, and a conversion to dataframe.
     '''
-    def get_by_pkid(self, pkid):
+    def get_by_pkid(cls, pkid):
         '''
         Select a single entry using the primary key.
         '''
-        with scoped_session() as s:
-            obj = s.query(self).filter(self.pkid == pkid).one()
-        return obj
+        s = SessionFactory()
+        return s.query(cls).get(pkid)
 
-    def get_by_str(self, string):
+    def get_by_name(cls, name):
         '''
-        Select objects by name.
+        Select objects with the given name.
         '''
-        with scoped_session() as s:
-            objs = s.query(self).filter(self.name == string).all()
-        return objs
+        s = SessionFactory()
+        return s.query(cls).filter(cls.name == name).all()
 
-    def get_by_uid(self, uid):
+    def get_by_uid(cls, uid):
         '''
         Select an entry by unique ID.
         '''
         hexuid = uid
         if isinstance(uid, uuid.UUID):
             hexuid = uid.hex
-        with scoped_session() as s:
-            obj = s.query(self).filter(self.hexuid == hexuid).one()
-        return obj
+        s = SessionFactory()
+        return s.query(cls).filter(cls.hexuid == hexuid).one()
 
-    def _bulk_insert(self, data):
+    def bulk_insert(cls, mappings):
         '''
         Perform a `bulk insert`_ into a specific table.
 
@@ -65,58 +66,38 @@ class BaseMeta(DeclarativeMeta):
                         {'column1': 'fop', 'column2': 43, 'column3': 'baz'}]
             Table.bulk_insert(mappings)
 
-        Args:
-            data (list): List of records as dictionary objects
-
         .. _bulk insert: http://docs.sqlalchemy.org/en/latest/orm/session_api.html
         '''
-        with scoped_session() as session:
-            session.bulk_insert_mappings(self, data)
+        with scoped_session() as s:
+            s.bulk_insert_mappings(cls, mappings)
 
-    def table(self):
+    def to_frame(self):
         '''
         Create a DataFrame representation of the current table.
 
-        Returns:
-            df (:py:class:`~pandas.DataFrame`): In memory table copy
-
         Warning:
             If performing this action on a very large table, may raise a
-            memory error. In this case it is more effective to perform a
-            custom select query then convert the result to a DataFrame.
+            memory error. It is almost always more effective to query the
+            table for the specific records of interest.
         '''
         with scoped_session() as s:
-            df = pd.read_sql(s.query(self).statement, config['engine'])
+            statement = s.query(self).statement
+            df = pd.read_sql(statement, engine)
         if 'pkid' in df:
             df = df.set_index('pkid').sort_index()
         return df
 
-    def __contains__(self, obj):
-        tbl = self.table()
-        for col in tbl:
-            if obj in tbl[col]:
-                return True
-            elif hasattr(self, 'aliases'):
-                if obj in self.aliases:
-                    if self.aliases[obj] in tbl[col]:
-                        return True
-        return False
-
-    def __iter__(self):
-        with scoped_session() as s:
-            for item in s.query(self).all():
-                yield item
-
-    def __getitem__(self, key):
-        if hasattr(self, 'getitem'):
-            obj = self.getitem(key)
-        elif isinstance(key, int):
-            obj = self.get_by_pkid(key)
-        elif isinstance(key, str):
-            obj = self.get_by_str(key)
+    def __getitem__(cls, key):
+        if hasattr(cls, '_getitem'):
+            return cls._getitem(key)
+        elif isinstance(key, Integral):
+            return cls.get_by_pkid(key)
         elif isinstance(key, UUID):
-            obj = self.get_by_uid(key)
-        return obj
+            return cls.get_by_uid(key)
+        elif isinstance(key, str):
+            return cls.get_by_name(key)
+        else:
+            raise KeyError('Unknown key ({0}).'.format(key))
 
 
 @as_declarative(metaclass=BaseMeta)
@@ -132,13 +113,13 @@ class Base:
     def __tablename__(cls):
         return cls.__name__.lower()
 
-    def _save(self):
+    def to_series(self):
         '''
-        Save the relational object to the database.
+        Create a :class:`~exa.numerical.Series` object from the current record.
         '''
-        self._s = config['SessionFactory'](expire_on_commit=False)
-        self._s.add(self)
-        self._s.commit()
+        s = pd.Series(self.__dict__)
+        del s['_sa_instance_state']
+        return s
 
     def __repr__(cls):
         return '{0}(pkid: {1})'.format(cls.__class__.__name__, cls.pkid)
@@ -215,24 +196,26 @@ def create_tables():
         When this function is called, only class objects loaded in the current
         namespace will be created.
     '''
-    Base.metadata.create_all(config['engine'])
+    Base.metadata.create_all(engine)
 
 
 def init_db():
     '''
     Initialize the database connection and session factory.
     '''
-    global config
-    config['engine_name'] = exa_global_config['exa_relational']
-    config['engine'] = create_engine(config['engine_name'])
-    config['SessionFactory'] = sessionmaker(bind=config['engine'])
+    global engine_name
+    global engine
+    global SessionFactory
+    engine_name = global_config['exa_relational']
+    engine = create_engine(engine_name)
+    SessionFactory = sessionmaker(bind=engine)
 
 
 def cleanup():
     '''
     Cleanup the engine's connection pool before exiting.
     '''
-    config['engine'].dispose()
+    engine.dispose()
 
 
 @contextmanager
@@ -242,7 +225,7 @@ def scoped_session(*args, **kwargs):
 
     .. _context manager: http://docs.sqlalchemy.org/en/latest/orm/session_basics.html
     '''
-    session = config['SessionFactory'](*args, **kwargs)
+    session = SessionFactory(*args, **kwargs)
     try:
         yield session
         session.commit()
@@ -251,5 +234,6 @@ def scoped_session(*args, **kwargs):
         raise
     finally:
         session.close()
+
 
 init_db()

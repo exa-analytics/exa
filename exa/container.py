@@ -28,7 +28,7 @@ from collections import OrderedDict
 from traitlets import Bool
 from collections import defaultdict
 from sqlalchemy.orm.attributes import InstrumentedAttribute
-from exa import exa_global_config
+from exa import global_config
 from exa.widget import ContainerWidget
 from exa.numerical import NDBase, DataFrame, Field, SparseDataFrame, Series, get_indices_columns
 from exa.utility import del_keys
@@ -621,7 +621,7 @@ class BaseContainer:
                 value = self._enforce_df_type(key, value)
             setattr(self, key, value)
         self.meta = meta
-        self._widget = self._widget_class(self) if exa_global_config['notebook'] else None
+        self._widget = self._widget_class(self) if global_config['notebook'] else None
         if meta is None and len(kwargs) == 0 and len(self._numerical_dict()) == 0:
             self._test = True
             self.name = 'TestContainer'

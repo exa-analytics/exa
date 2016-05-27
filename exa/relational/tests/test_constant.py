@@ -17,7 +17,7 @@ class TestConstant(UnitTester):
         '''
         Check that the table can be converted to a :class:`~pandas.DataFrame`.
         '''
-        self.assertIsInstance(Constant.table(), pd.DataFrame)
+        self.assertIsInstance(Constant.to_frame(), pd.DataFrame)
 
     def test_value(self):
         '''

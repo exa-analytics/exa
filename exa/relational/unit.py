@@ -8,17 +8,17 @@ from sqlalchemy import and_, String, Float, Column
 from exa.relational.base import BaseMeta, Base, scoped_session
 
 
-class _Meta(BaseMeta):
+class Meta(BaseMeta):
+    '''
+    Special metaclass for unit objects supporting aliases. Aliases are
+    alternative names for standard symbols for units.
+    '''
     aliases = {}
 
     def _getitem(cls, key):
-        '''
-        Support is provided for common unit aliases.
-        '''
         if isinstance(key, tuple):
             f = cls.aliases[key[0]] if key[0] in cls.aliases else key[0]
             t = cls.aliases[key[1]] if key[1] in cls.aliases else key[1]
-            factor = None
             with scoped_session() as session:
                 factor = session.query(cls).filter(and_(cls.from_unit==f, cls.to_unit==t)).one().factor
             return factor
@@ -28,8 +28,7 @@ class _Meta(BaseMeta):
 
 class Dimension:
     '''
-    Generic class for physical dimension conversions. Doesn't do anything
-    by itself but is inherited by specific dimension classes.
+    Descriptive class for units.
 
     Attributes:
         from_unit (str): Unit to convert from
@@ -39,10 +38,9 @@ class Dimension:
     from_unit = Column(String(8), nullable=False)
     to_unit = Column(String(8), nullable=False)
     factor = Column(Float, nullable=False)
-    aliases = {}
 
 
-class Length(Base, Dimension, metaclass=_Meta):
+class Length(Base, Dimension, metaclass=Meta):
     '''
     >>> Length['angstrom', 'au']
     1.88971616463
@@ -62,7 +60,7 @@ class Length(Base, Dimension, metaclass=_Meta):
     }
 
 
-class Mass(Base, Dimension, metaclass=_Meta):
+class Mass(Base, Dimension, metaclass=Meta):
     '''
     >>> Mass['kg', 'lb']
     2.2046226218
@@ -74,7 +72,7 @@ class Mass(Base, Dimension, metaclass=_Meta):
     pass
 
 
-class Time(Base, Dimension, metaclass=_Meta):
+class Time(Base, Dimension, metaclass=Meta):
     '''
     >>> Time['min', 's']
     60.0000000000024
@@ -86,7 +84,7 @@ class Time(Base, Dimension, metaclass=_Meta):
     pass
 
 
-class Current(Base, Dimension, metaclass=_Meta):
+class Current(Base, Dimension, metaclass=Meta):
     '''
     >>> Current['A', 'C_s']
     1.0
@@ -96,7 +94,7 @@ class Current(Base, Dimension, metaclass=_Meta):
     pass
 
 
-class Amount(Base, Dimension, metaclass=_Meta):
+class Amount(Base, Dimension, metaclass=Meta):
     '''
     >>> Amount['gmol', 'mol']
     1.0
@@ -106,7 +104,7 @@ class Amount(Base, Dimension, metaclass=_Meta):
     pass
 
 
-class Luminosity(Base, Dimension, metaclass=_Meta):
+class Luminosity(Base, Dimension, metaclass=Meta):
     '''
     >>> Luminosity['cp', 'cd']
     0.9810000000433602
@@ -114,7 +112,7 @@ class Luminosity(Base, Dimension, metaclass=_Meta):
     pass
 
 
-class Dose(Base, Dimension, metaclass=_Meta):
+class Dose(Base, Dimension, metaclass=Meta):
     '''
     >>> Dose['Gy', 'rd']
     100.0
@@ -124,7 +122,7 @@ class Dose(Base, Dimension, metaclass=_Meta):
     pass
 
 
-class Acceleration(Base, Dimension, metaclass=_Meta):
+class Acceleration(Base, Dimension, metaclass=Meta):
     '''
     >>> Acceleration['m_s2', 'cm_s2']
     100.0
@@ -134,7 +132,7 @@ class Acceleration(Base, Dimension, metaclass=_Meta):
     pass
 
 
-class Charge(Base, Dimension, metaclass=_Meta):
+class Charge(Base, Dimension, metaclass=Meta):
     '''
     >>> Charge['e', 'C']
     1.6021765649999947e-19
@@ -142,7 +140,7 @@ class Charge(Base, Dimension, metaclass=_Meta):
     pass
 
 
-class Dipole(Base, Dimension, metaclass=_Meta):
+class Dipole(Base, Dimension, metaclass=Meta):
     '''
     >>> Dipole['yCm', 'D']
     299792.45817809016
@@ -150,7 +148,7 @@ class Dipole(Base, Dimension, metaclass=_Meta):
     pass
 
 
-class Energy(Base, Dimension, metaclass=_Meta):
+class Energy(Base, Dimension, metaclass=Meta):
     '''
     >>> Energy['J', 'cal']
     0.2388458966
@@ -162,7 +160,7 @@ class Energy(Base, Dimension, metaclass=_Meta):
     }
 
 
-class Force(Base, Dimension, metaclass=_Meta):
+class Force(Base, Dimension, metaclass=Meta):
     '''
     >>> Force['N', 'lbf']
     0.22480894310000002
@@ -170,7 +168,7 @@ class Force(Base, Dimension, metaclass=_Meta):
     pass
 
 
-class Frequency(Base, Dimension, metaclass=_Meta):
+class Frequency(Base, Dimension, metaclass=Meta):
     '''
     >>> Frequency['1_s', 'Hz']
     1.0
@@ -178,7 +176,7 @@ class Frequency(Base, Dimension, metaclass=_Meta):
     pass
 
 
-class MolarMass(Base, Dimension, metaclass=_Meta):
+class MolarMass(Base, Dimension, metaclass=Meta):
     '''
     >>> MolarMass['g_mol', 'kg_mol']
     0.001

@@ -3,4 +3,3 @@
 Tests for :mod:`~exa.frame`
 ====================================
 '''
-from exa.test import UnitTester
