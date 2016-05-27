@@ -22,6 +22,9 @@ from exa.editor import Editor
 
 # Import sub-packages
 from exa import algorithms
+from exa import distributed
+from exa import relational
+from exa import filetypes
 
 # Import tests
 from exa import tests
@@ -38,6 +41,9 @@ if global_config['notebook']:
     _ipyconf = _ipy.config
     _ipyconf.InteractiveShellApp.matplotlib = 'inline'
 
+
+# Run some dynamic commands
+relational.isotope.init_mappers()
 
 # Register cleanup functions
 _ae.register(_config.cleanup)          # Register functions in opposite desired

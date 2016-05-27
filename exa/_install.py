@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
 Installer
-====================
+########################
 This module allows a user to install exa in a persistent manner enabling some
 advanced content management features. Installation will create a permanent
 directory where exa's relational database will be housed (default ~/.exa).

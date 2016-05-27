@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-Base Container Class
-===============================================
+Base Container
+########################
 The :class:`~exa.container.BaseContainer` class is the primary object for
 data acquisition, management, and visualization. Containers are composed of
 n-dimensional dataframes (:class:`~pandas.DataFrame` and :class:`~pandas.Series`)

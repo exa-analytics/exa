@@ -32,12 +32,9 @@ app framework, logging, content management, trait supporting dataframe/series
 objects, and the data specific **container** object. The **container** concept
 is the corner stone of this project (see :ref:`exa-overview`).
 
-##################
-Documentation
-##################
-
 .. toctree::
     :maxdepth: 2
+    :caption: General Docs
 
     overview.rst
     install.rst

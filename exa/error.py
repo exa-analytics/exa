@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-Exceptions, Errors, and Warnings
-==================================
+Exceptions
+#################################
 All base level exceptions are defined here.
 '''
 import re

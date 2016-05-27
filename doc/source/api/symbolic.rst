@@ -1,0 +1,2 @@
+.. automodule:: exa.symbolic
+    :members:

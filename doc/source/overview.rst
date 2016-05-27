@@ -22,7 +22,7 @@ exploration that can be readily shared between collaborating scientists,
 professors, and students.
 
 Technologies
---------------------
+##########################
 This project is built on top of mature, open source, scientific computing
 technologies, and is `free as in speech and beer`_. The project uses the Python
 as the backend language. All high performance code is written in Python but
@@ -33,14 +33,14 @@ performance computing centers, this package has support for resource managers
 such as `SLURM`_.
 
 User Interfaces
--------------------
+##########################
 This project relies heavily on the `Jupyter notebook`_, an interactive web-based
 approach to scientific and technical computing. This interface enables data
 exploration, processing, and both 2D and 3D visualization. A second interface,
 currently under construction, provides a standalone desktop app.
 
 Usage
---------------------
+##########################
 Within the Jupyter notebook interface, the user is expected to know some
 basic Python syntax and be able to issue Python commands. This does not
 explicitly require programming knowledge or skills though some basic knowledge

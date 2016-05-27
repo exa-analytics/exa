@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-Container (Widget)
-=======================
+Base Widget
+##################
 Functionality for using Jupyter notebook extensions to visualize data speficic
 containers.
 '''

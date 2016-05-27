@@ -22,13 +22,13 @@ class TestIsotope(UnitTester):
         '''
         Check that isotopes can be selected in any manner.
         '''
-        self.assertIsInstance(Isotope['1H'], Isotope)
+        self.assertIsInstance(Isotope.get_by_strid('1H'), Isotope)
         self.assertIsInstance(Isotope[175], Isotope)
         self.assertIsInstance(Isotope[0], Isotope)
-        self.assertIsInstance(Isotope['H'], list)
+        self.assertIsInstance(Isotope.get_by_symbol('H'), list)
 
     def test_data(self):
         '''
         Test the integrity of the database data.
         '''
-        self.assertTrue(Isotope['1H'].Z == 1)
+        self.assertTrue(Isotope.get_by_strid('1H').Z == 1)

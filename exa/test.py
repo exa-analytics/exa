@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-Unit and Doc Testing Base Classes
-==================================
+Doc and Unit Testing
+#########################
 Extends the functionality of standard documentation and unit testing for use
 inside the Jupyter notebook (interactive testing) and automatic logging.
 '''

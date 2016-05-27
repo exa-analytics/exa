@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-Python Plotting Utilities
-==========================
+Matplotlib Utilities
+###############################
 '''
 import seaborn as sns
 

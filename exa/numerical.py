@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 '''
-Custom DataFrame (and Related) Classes
-=========================================
-The :class:`~exa.dataframe.DataFrame` inherits :class:`~pandas.DataFrame` and
+Trait Support for Data Structures
+###################################
+The :class:`~exa.numerical.DataFrame` inherits :class:`~pandas.DataFrame` and
 behaves just like it, but it provides special methods for extracting trait
 data from the frame. The trait data is used by :class:`~exa.widget.ContainerWidget`
 (and its subclasses) and the web gui to generate interactive data visualizations.
@@ -16,14 +16,14 @@ contents may be related (i.e. relational dataframes) so care must be taken to
 ensure no mangling of indices is performed. See the container module for more
 info.
 
-Note:
-    Enumerated are some conventions used by custom dataframes:
-        - use **_precision** to specify precision of floats sent to JS
-        - use **_traits** to specify (possible) column names that are sent to JS
-        - use **_columns** to specify required columns
-        - use **_groupbys** to specify columns on which to group (typically these columns are foreign keys to another frame with an index of the same name as the column name)
-        - use **_categories** to specify (possible) column names that are category dtype ({name: normal_type})
-        - an index of -1 means not applicable (or not possible to compute)
+Enumerated are some conventions used by custom dataframes:
+
+- use **_precision** to specify precision of floats sent to JS
+- use **_traits** to specify (possible) column names that are sent to JS
+- use **_columns** to specify required columns
+- use **_groupbys** to specify columns on which to group (typically these columns are foreign keys to another frame with an index of the same name as the column name)
+- use **_categories** to specify (possible) column names that are category dtype ({name: normal_type})
+- an index of -1 means not applicable (or not possible to compute)
 
 See Also:
     Modules :mod:`~exa.container` and :mod:`~exa.widget` may provide context

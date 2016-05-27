@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
 Editor
-====================================
+####################################
 Text-editor-like functionality for programatically manipulating raw text input
 and output files. Supports commonly used logic such as (simple or regular
 expression) search and replace, insert, and delete operations.

@@ -116,7 +116,7 @@ def setup_loggers():
                                       backupCount=global_config['logfile_max_count'])
         handler.setFormatter(LogFormat())
         logger.addHandler(handler)
-        if global_config['exa_persistent'] and global_config['runlevel'] == 0:
+        if global_config['runlevel'] == 0:
             logger.setLevel(logging.WARNING)
         elif global_config['runlevel'] == 1:
             logger.setLevel(logging.INFO)

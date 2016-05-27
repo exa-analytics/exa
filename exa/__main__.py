@@ -1,8 +1,4 @@
 #! /usr/bin/env python
-'''
-Standalone App
-=====================
-'''
 import os
 import sys
 import argparse

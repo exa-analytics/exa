@@ -1,21 +1,57 @@
 # -*- coding: utf-8 -*-
 '''
-Isotope Data
-===============================================
+Table of Isotopes
+###########################################
+This module provides an interface for interacting with isotopes of atoms; the
+extended periodic table. For convenience, functions are provided for obtaining
+traditionally used elements. This module also provides mappers for commonly
+used dataframe manipulations.
 '''
 import pandas as pd
 from itertools import product
 from sqlalchemy import String, Float
 from sqlalchemy import Column, Integer, String
-from exa.relational.base import BaseMeta, Base, scoped_session
+from exa.relational.base import BaseMeta, Base, SessionFactory
+from exa.iterative import product_sum_2f, product_add_2
 
 
-class _Meta(BaseMeta):
+# Mappers are series objects that appear in commonly used dataframe manipulations
+symbols_to_radii = None
+
+
+class Meta(BaseMeta):
     '''
     This class provides methods available to the :class:`~exa.relational.isotope.Isotope`
     class object used to efficiently look up data stored in the database.
     '''
-    pass
+    def get_by_strid(cls, strid):
+        '''
+        Get an isotope using a string id.
+        '''
+        s = SessionFactory()
+        return s.query(cls).filter(cls.strid == strid).one()
+
+    def get_by_symbol(cls, symbol):
+        '''
+        Get an isotope using a string id.
+        '''
+        s = SessionFactory()
+        return s.query(cls).filter(cls.symbol == symbol).all()
+
+    def get_element(cls, name_or_symbol):
+        '''
+        Get a
+        '''
+        pass
+
+    def _getitem(cls, key):
+        if isinstance(key, str):
+            if key[0].isdigit():
+                return cls.get_by_strid(key)
+            elif len(key) <= 3:
+                return cls.get_by_symbol(key)
+            return cls.get_by_name(key)
+
 #    _symbols_to_radii_map = None    # {'HH': 1.21, ...}
 #    _element_mass_map = None        # See the properties below: this pattern is
 #    _Z_to_symbol_map = None         # used so that we cache the result once computed.
@@ -40,19 +76,6 @@ class _Meta(BaseMeta):
 #            self._symbols_to_Z_map = df
 #        return self._symbols_to_Z_map
 #
-#    @property
-#    def symbols_to_radii_map(self):
-#        if self._symbols_to_radii_map is None:
-#            df = self.table()[['symbol', 'radius']].drop_duplicates('symbol')
-#            sum_radii = df['radius'].values
-#            sum_radii = [a + b for a, b in product(sum_radii, sum_radii)]
-#            symbol_pairs = df['symbol'].values
-#            symbol_pairs = [''.join(pair) for pair in product(symbol_pairs, symbol_pairs)]
-#            df = pd.DataFrame.from_dict({'symbols': symbol_pairs, 'radius': sum_radii})
-#            df.set_index('symbols', inplace=True)
-#            df.index.names = [None]
-#            self._symbols_to_radii_map = df['radius']
-#        return self._symbols_to_radii_map
 #
 #    @property
 #    def element_mass_map(self):
@@ -178,7 +201,7 @@ class _Meta(BaseMeta):
 #            raise TypeError('Key type {0} not supported.'.format(type(key)))
 
 
-class Isotope(Base, metaclass=_Meta):
+class Isotope(Base, metaclass=Meta):
     '''
     A variant of a chemical element with a specific proton and neutron count.
 
@@ -320,3 +343,26 @@ class Isotope(Base, metaclass=_Meta):
 #    def __repr__(self):
 #        return '{0}{1}'.format(self.A, self.symbol)
 #
+
+# Dynamically create a number of commonly used dataframe mappings after
+# static data has been loaded
+def init_mappers():
+    '''
+    Initialize commonly used dataframe mappers (in memory).
+    '''
+    isotopedf = Isotope.to_frame()
+    init_symbols_to_radii(isotopedf)
+
+
+def init_symbols_to_radii(isotopedf):
+    '''
+    Initialize the **symbols_to_radii** mapper
+    '''
+    global symbols_to_radii
+    df = isotopedf.drop_duplicates('symbol')
+    symbol = df['symbol'].values
+    radius = df['radius'].values
+    symbols = product_add_2(symbol, symbol)
+    radii = product_sum_2f(radius, radius)
+    symbols_to_radii = pd.Series(radii)
+    symbols_to_radii.index = symbols

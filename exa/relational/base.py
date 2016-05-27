@@ -88,16 +88,19 @@ class BaseMeta(DeclarativeMeta):
         return df
 
     def __getitem__(cls, key):
-        if hasattr(cls, '_getitem'):
-            return cls._getitem(key)
-        elif isinstance(key, Integral):
-            return cls.get_by_pkid(key)
-        elif isinstance(key, UUID):
-            return cls.get_by_uid(key)
-        elif isinstance(key, str):
-            return cls.get_by_name(key)
-        else:
-            raise KeyError('Unknown key ({0}).'.format(key))
+        obj = None
+        if hasattr(cls, '_getitem'):         # First try using custom getter
+            obj = cls._getitem(key)
+        if obj is None:                      # Fall back to default getters
+            if isinstance(key, Integral):
+                return cls.get_by_pkid(key)
+            elif isinstance(key, UUID):
+                return cls.get_by_uid(key)
+            elif isinstance(key, str):
+                return cls.get_by_name(key)
+            else:
+                raise KeyError('Unknown key ({0}).'.format(key))
+        return obj
 
 
 @as_declarative(metaclass=BaseMeta)
@@ -121,8 +124,16 @@ class Base:
         del s['_sa_instance_state']
         return s
 
-    def __repr__(cls):
-        return '{0}(pkid: {1})'.format(cls.__class__.__name__, cls.pkid)
+    def _save_record(self):
+        '''
+        Save the current object.
+        '''
+        s = SessionFactory()
+        s.add(self)
+        s.commit()
+
+    def __repr__(self):
+        return '{0}(pkid: {1})'.format(self.__class__.__name__, self.pkid)
 
 
 class Name:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-Utility Functions
-====================
+Utilities
+#####################
 These functions are simply syntactic sugar. They help cleanup the code base by
 providing a cleaner API for commonly used functions.
 '''
