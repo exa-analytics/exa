@@ -4,7 +4,7 @@ Hmmmm
 ==================================
 '''
 import numpy as np
-from exa import _conf
+from exa import exa_global_config
 
 
 def pdist(array):
@@ -120,7 +120,7 @@ def pairwise_diff(array):
     return index0, index1, values
 
 
-if _conf['pkg_numba']:
+if exa_global_config['pkg_numba']:
     from numba import jit
     pdist = jit(nopython=True, cache=True)(pdist)
     supercell3d = jit(nopython=True, cache=True)(supercell3d)

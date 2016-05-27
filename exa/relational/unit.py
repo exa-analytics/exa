@@ -5,7 +5,7 @@ Units and Dimensions
 This module provides relational classes for unit conversion tables.
 '''
 from sqlalchemy import and_, String, Float, Column
-from exa.relational.base import BaseMeta, Base, session_scope
+from exa.relational.base import BaseMeta, Base, scoped_session
 
 
 class _Meta(BaseMeta):
@@ -19,7 +19,7 @@ class _Meta(BaseMeta):
             f = cls.aliases[key[0]] if key[0] in cls.aliases else key[0]
             t = cls.aliases[key[1]] if key[1] in cls.aliases else key[1]
             factor = None
-            with session_scope() as session:
+            with scoped_session() as session:
                 factor = session.query(cls).filter(and_(cls.from_unit==f, cls.to_unit==t)).one().factor
             return factor
         else:

@@ -7,7 +7,7 @@ import pandas as pd
 from itertools import product
 from sqlalchemy import String, Float
 from sqlalchemy import Column, Integer, String
-from exa.relational.base import BaseMeta, Base, SessionFactory
+from exa.relational.base import BaseMeta, Base, scoped_session
 
 
 class _Meta(BaseMeta):
@@ -113,7 +113,9 @@ class _Meta(BaseMeta):
         Returns:
             isotope (:class:`~exa.relational.isotopes.Isotope`): Isotope object
         '''
-        return SessionFactory().query(self).filter(self.strid == strid).one()
+        with scoped_session() as s:
+            obj = s.query(self).filter(self.strid == strid).one()
+        return obj
 
     def get_by_symbol(self, symbol):
         '''
@@ -125,7 +127,9 @@ class _Meta(BaseMeta):
         Returns:
             isotopes (list): List of isotope with the given symbol
         '''
-        return SessionFactory().query(self).filter(self.symbol == symbol).all()
+        with scoped_session() as s:
+            obj = s.query(self).filter(self.symbol == symbol).all()
+        return obj
 
     def get_by_szuid(self, szuid):
         '''
@@ -137,7 +141,9 @@ class _Meta(BaseMeta):
         Returns:
             isotope (:class:`~exa.relational.isotopes.Isotope`): Isotope object
         '''
-        return SessionFactory().query(self).filter(self.szuid == szuid).one()
+        with scoped_session() as s:
+            obj = s.query(self).filter(self.szuid == szuid).one()
+        return obj
 
     def get_by_pkid(self, pkid):
         '''

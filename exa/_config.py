@@ -13,8 +13,8 @@ the automatic content management. This module keeps track of working
 configuration options for persistent functionality such as content
 management.
 
-The configuration object is a simple dictionary **_conf** with the following
-attributes (string keys in the _conf dictionary).
+The configuration object is a simple dictionary **config** with the following
+attributes (string keys in the config dictionary).
 
 Attributes:
     app_css (str): Location of the app's css directory
@@ -55,103 +55,103 @@ from exa.utility import mkp
 
 
 _filename = 'config.json'
-_conf = {}    # Global configuration object
+config = {}
 
 
 def save_config():
-    with open(mkp(_conf['exa_root'], _filename), 'w') as f:
-        json.dump(_conf, f)
+    with open(mkp(config['exa_root'], _filename), 'w') as f:
+        json.dump(config, f)
 
 
 def update_config():
     '''
-    Populates the exa's configuration dictionary, **_conf**.
+    Populates the exa's configuration dictionary, **config**.
     '''
+    global config
     dot_exa = None
-    _conf['exa_persistent'] = False
+    config['exa_persistent'] = False
     if platform.system().lower() == 'windows':
         dot_exa = mkp(os.getenv('USERPROFILE'), '.exa')
     else:
         dot_exa = mkp(os.getenv('HOME'), '.exa')
     if os.path.exists(dot_exa):
-        _conf['exa_root'] = dot_exa
-        _conf['exa_persistent'] = True
+        config['exa_root'] = dot_exa
+        config['exa_persistent'] = True
     else:
-        _conf['exa_root'] = mkdtemp()
-    _conf['debug'] = False
-    _conf['log_db'] = mkp(_conf['exa_root'], 'db.log')
-    _conf['log_sys'] = mkp(_conf['exa_root'], 'sys.log')
-    _conf['log_user'] = mkp(_conf['exa_root'], 'user.log')
-    _conf['logfile_max_bytes'] = 1048576
-    _conf['logfile_max_count'] = 5
+        config['exa_root'] = mkdtemp()
+    config['debug'] = False
+    config['log_db'] = mkp(config['exa_root'], 'db.log')
+    config['log_sys'] = mkp(config['exa_root'], 'sys.log')
+    config['log_user'] = mkp(config['exa_root'], 'user.log')
+    config['logfile_max_bytes'] = 1048576
+    config['logfile_max_count'] = 5
 
 
     # Internal package paths
     pkg = os.path.dirname(__file__)
-    _conf['app_templates'] = mkp(pkg, '_app', 'templates')
-    _conf['app_html'] = mkp(pkg, '_app', 'html')
-    _conf['app_css'] = mkp(pkg, '_app', 'css')
-    _conf['app_js'] = mkp(pkg, '_app', 'js')
-    _conf['static_constants.json'] = mkp(pkg, '_static', 'constants.json')
-    _conf['static_isotopes.json'] = mkp(pkg, '_static', 'isotopes.json')
-    _conf['static_units.json'] = mkp(pkg, '_static', 'units.json')
-    _conf['nbext_localdir'] = mkp(pkg, '_nbextensions')
-    _conf['nbext_sysdir'] = mkp(jupyter_data_dir(), '_nbextensions', 'exa')
+    config['app_templates'] = mkp(pkg, '_app', 'templates')
+    config['app_html'] = mkp(pkg, '_app', 'html')
+    config['app_css'] = mkp(pkg, '_app', 'css')
+    config['app_js'] = mkp(pkg, '_app', 'js')
+    config['static_constants.json'] = mkp(pkg, '_static', 'constants.json')
+    config['static_isotopes.json'] = mkp(pkg, '_static', 'isotopes.json')
+    config['static_units.json'] = mkp(pkg, '_static', 'units.json')
+    config['nbext_localdir'] = mkp(pkg, '_nbextensions')
+    config['nbext_sysdir'] = mkp(jupyter_data_dir(), '_nbextensions', 'exa')
 
 
     # Check what type of Python session this is (python/ipython or jupyter notebook)
-    _conf['notebook'] = False
+    config['notebook'] = False
     try:
         cfg = get_ipython().config
         if 'IPKernelApp' in cfg:
-            _conf['notebook'] = True
+            config['notebook'] = True
     except:
         pass
 
 
     # Check what optional packages are available
-    _conf['pkg_numba'] = False
-    _conf['pkg_dask'] = False
-    _conf['pkg_distributed'] = False
+    config['pkg_numba'] = False
+    config['pkg_dask'] = False
+    config['pkg_distributed'] = False
     try:
         import numba
-        _conf['pkg_numba'] = True
+        config['pkg_numba'] = True
     except:
         pass
     try:
         import dask
-        _conf['pkg_dask'] = True
+        config['pkg_dask'] = True
     except:
         pass
     try:
         import distributed
-        _conf['pkg_distributed'] = True
+        config['pkg_distributed'] = True
     except:
         pass
 
 
     # Set default relational database
-    _conf['exa_relational'] = 'sqlite:///{}'.format(mkp(_conf['exa_root'], 'exa.sqlite'))
+    config['exa_relational'] = 'sqlite:///{}'.format(mkp(config['exa_root'], 'exa.sqlite'))
 
 
-    # Update the _confuration if existing _confuration exists
-    existing_conf = mkp(_conf['exa_root'], _filename)
-    if _conf['exa_persistent'] and os.path.exists(existing_conf):
+    # Update the configuration if existing configuration exists
+    existingconfig = mkp(config['exa_root'], _filename)
+    if config['exa_persistent'] and os.path.exists(existingconfig):
         config = {}
-        with open(existing_conf) as f:
+        with open(existingconfig) as f:
             config = json.load(f)
         # Not all configurations can simply be updated: handle them manually
-        _conf['debug'] = config['debug']
+        config['debug'] = config['debug']
 
 
-def _cleanup():
+def cleanup():
     '''
     Remove root directory in non-persistent session.
     '''
-    if _conf['exa_persistent']:
+    if config['exa_persistent']:
         save_config()
     else:
-        shutil.rmtree(_conf['exa_root'])
+        shutil.rmtree(config['exa_root'])
 
-
-update_config()    # Populate the _conf variable
+update_config()

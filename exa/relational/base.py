@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 '''
-Base Table for Relational Objects
+Relational
 ===============================================
-This module outlines the event-based content management system established by exa and creates
-a complex base table (schema) class, :class:`~exa.relational.base.Base`. The schema base class's
-metaclass inherits the metaclass of :py:class:`~ipywidgets.DOMWidget` in order for certain
-tables to be able to have HTML representations (within the `Jupyter notebook`_).
-
-.. _Jupyter notebook: http://jupyter.org/
+This modules provides the base class for persitent relational objects such as the
+:class:`~exa.relational.container.Container` object. It defines a declarative base class that has
+convenience methods for looking up database entries by common features and returning and appropriate
+and corresponding dataframe or series object.
 '''
 import pandas as pd
 from sys import getsizeof
@@ -18,114 +16,46 @@ from sqlalchemy import Column, Integer, String, DateTime, create_engine, event
 from sqlalchemy.orm import sessionmaker, mapper
 from sqlalchemy.orm.query import Query
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
-from exa import _conf
+from exa import exa_global_config
 
 
-gen_uid = lambda: uuid4().hex    # Unique random id in db format
-engine_name = None
-engine = None
-SessionFactory = None
+gen_uid = lambda: uuid4().hex
+config = {'engine_name': None, 'engine': None, 'SessionFactory': None}
 
 
 class BaseMeta(DeclarativeMeta):
     '''
-    This class defines the behavior of the :class:`~exa.relational.base.Base`
-    object. It provides methods for convenient class level look up.
+    The base relational class object definition. The class object has convenience methods for
+    quick lookup and conversion of relational data to usable objects such as dataframes and series.
     '''
-    def _get_by_pkid(self, pkid):
+    def get_by_pkid(self, pkid):
         '''
         Select a single entry using the primary key.
-
-        Returns:
-            entry: Single entry with given pkid
         '''
-        return SessionFactory().query(self).filter(self.pkid == pkid).one()
-
-    def _get_by_str(self, string):
-        '''
-        Select entries using a string identifier: first tries to find objects
-        using the "name" field then by alternate fields.
-
-        Returns:
-            data (list): List of matching entries
-        '''
-        value = None
-        session = SessionFactory()
-        if hasattr(self, 'name'):
-            value = session.query(self).filter(self.name == string).all()
-        elif hasattr(self, 'symbol'):
-            value = session.query(self).filter(self.symbol == string).all()
-            if len(value) == 1:
-                value = value[0]
-        elif hasattr(self, 'from_unit'):
-            value = session.query(self).filter(self.from_unit == string).all()
-        else:
-            session.close_all()
-            raise TypeError('Selection by string arguments not supported for {}'.format(self.__name__))
-        return value
-
-    def _get_by_uid(self, uid):
-        '''
-        Select an entry using a unique ID.
-
-        Returns:
-            entry: Single entry with given uid
-        '''
-        if isinstance(uid, uuid.UUID):
-            return SessionFactory().query(self).filter(self.hexuid == uid.hex).one()
-        elif isinstance(uid, str):
-            return SessionFactory().query(self).filter(self.hexuid == uid).one()
-        else:
-            raise TypeError('uid must be of type str or UUID, not {}'.format(type(uid)))
-
-    def __contains__(self, obj):
-        '''
-        Can check if conversions for a specific unit exist.
-
-        .. code-block:: Python
-
-            'A' in exa.relational.Length
-        '''
-        if hasattr(self, 'from_unit'):
-            from_unit = self.table()['from_unit'].values
-            if obj in self.aliases:
-                obj = self.aliases[obj]
-            if obj in from_unit:
-                return True
-        else:
-            raise NotImplementedError()
-        return False
-
-    def __iter__(self):
-        for item in SessionFactory().query(self).all():
-            yield item
-
-    def __getitem__(self, key):
-        obj = None
-        if isinstance(key, int):
-            obj = self._get_by_pkid(key)
-        elif isinstance(key, str):
-            obj = self._get_by_str(key)
-        elif isinstance(key, UUID):
-            obj = self._get_by_uid(key)
-        if obj is None and hasattr(self, '_getitem'):
-            obj = self._getitem(key)
+        with scoped_session() as s:
+            obj = s.query(self).filter(self.pkid == pkid).one()
         return obj
 
+    def get_by_str(self, string):
+        '''
+        Select objects by name.
+        '''
+        with scoped_session() as s:
+            objs = s.query(self).filter(self.name == string).all()
+        return objs
 
-@as_declarative(metaclass=BaseMeta)
-class Base:
-    '''
-    Declarative base class (used by SQLAlchemy) to initialize relational tables.
-    '''
-    pkid = Column(Integer, primary_key=True)
+    def get_by_uid(self, uid):
+        '''
+        Select an entry by unique ID.
+        '''
+        hexuid = uid
+        if isinstance(uid, uuid.UUID):
+            hexuid = uid.hex
+        with scoped_session() as s:
+            obj = s.query(self).filter(self.hexuid == hexuid).one()
+        return obj
 
-    @declared_attr
-    def __tablename__(cls):
-        return cls.__name__.lower()
-
-    @classmethod
-    def _bulk_insert(cls, data):
+    def _bulk_insert(self, data):
         '''
         Perform a `bulk insert`_ into a specific table.
 
@@ -140,11 +70,10 @@ class Base:
 
         .. _bulk insert: http://docs.sqlalchemy.org/en/latest/orm/session_api.html
         '''
-        with session_scope() as session:
-            session.bulk_insert_mappings(cls, data)
+        with scoped_session() as session:
+            session.bulk_insert_mappings(self, data)
 
-    @classmethod
-    def table(cls):
+    def table(self):
         '''
         Create a DataFrame representation of the current table.
 
@@ -156,27 +85,60 @@ class Base:
             memory error. In this case it is more effective to perform a
             custom select query then convert the result to a DataFrame.
         '''
-        df = None
-        with session_scope() as session:
-            df = pd.read_sql(session.query(cls).statement, engine)
-        if 'pkid' in df.columns:
-            df.set_index('pkid', inplace=True)
-        for column in df.columns:    # Mask the auxiliary pkid columns if applicable
-            if 'id' in column and len(column) == 4:
-                if df.index.names == ['pkid']:
-                    del df[column]
-                else:
-                    df.set_index(column, inplace=True)
-                    df.index.names = ['pkid']
+        with scoped_session() as s:
+            df = pd.read_sql(s.query(self).statement, config['engine'])
+        if 'pkid' in df:
+            df = df.set_index('pkid').sort_index()
         return df
 
-    def _save_record(self):
+    def __contains__(self, obj):
+        tbl = self.table()
+        for col in tbl:
+            if obj in tbl[col]:
+                return True
+            elif hasattr(self, 'aliases'):
+                if obj in self.aliases:
+                    if self.aliases[obj] in tbl[col]:
+                        return True
+        return False
+
+    def __iter__(self):
+        with scoped_session() as s:
+            for item in s.query(self).all():
+                yield item
+
+    def __getitem__(self, key):
+        if hasattr(self, 'getitem'):
+            obj = self.getitem(key)
+        elif isinstance(key, int):
+            obj = self.get_by_pkid(key)
+        elif isinstance(key, str):
+            obj = self.get_by_str(key)
+        elif isinstance(key, UUID):
+            obj = self.get_by_uid(key)
+        return obj
+
+
+@as_declarative(metaclass=BaseMeta)
+class Base:
+    '''
+    The base class for all relational tables. Relational classes define both the database table
+    schema as well as an entry instance object. Relational classes have convience lookup methods
+    for fast, Python database querying, which abstracts away SQL interactions.
+    '''
+    pkid = Column(Integer, primary_key=True)
+
+    @declared_attr
+    def __tablename__(cls):
+        return cls.__name__.lower()
+
+    def _save(self):
         '''
         Save the relational object to the database.
         '''
-        session = SessionFactory(expire_on_commit=False)
-        session.add(self)
-        session.commit()
+        self._s = config['SessionFactory'](expire_on_commit=False)
+        self._s.add(self)
+        self._s.commit()
 
     def __repr__(cls):
         return '{0}(pkid: {1})'.format(cls.__class__.__name__, cls.pkid)
@@ -199,6 +161,9 @@ class HexUID:
     @property
     def uid(self):
         return UUID(self.hexuid)
+
+    def gen_uid(self):
+        return gen_uid()
 
 
 class Time:
@@ -241,32 +206,43 @@ class Disk:
             pass
 
 
-def _create_all():
+
+def create_tables():
     '''
     Create all tables if they do not already exist in the database.
 
-    Warning:
-        When this function is called only class objects loaded in the current
+    Note:
+        When this function is called, only class objects loaded in the current
         namespace will be created.
     '''
-    Base.metadata.create_all(engine)
+    Base.metadata.create_all(config['engine'])
 
 
-def _cleanup():
+def init_db():
+    '''
+    Initialize the database connection and session factory.
+    '''
+    global config
+    config['engine_name'] = exa_global_config['exa_relational']
+    config['engine'] = create_engine(config['engine_name'])
+    config['SessionFactory'] = sessionmaker(bind=config['engine'])
+
+
+def cleanup():
     '''
     Cleanup the engine's connection pool before exiting.
     '''
-    engine.dispose()
+    config['engine'].dispose()
 
 
 @contextmanager
-def session_scope(*args, **kwargs):
+def scoped_session(*args, **kwargs):
     '''
     Separation of transaction management from actual work using a `context manager`_.
 
     .. _context manager: http://docs.sqlalchemy.org/en/latest/orm/session_basics.html
     '''
-    session = SessionFactory(*args, **kwargs)
+    session = config['SessionFactory'](*args, **kwargs)
     try:
         yield session
         session.commit()
@@ -274,18 +250,6 @@ def session_scope(*args, **kwargs):
         session.rollback()
         raise
     finally:
-        session.close()    # Occurs regardless if an exception is raised or not
+        session.close()
 
-
-def setup_db():
-    '''
-    Set up the relational engine and session factory.
-    '''
-    engine_name = _conf['exa_relational']
-    engine = create_engine(engine_name)
-    SessionFactory = sessionmaker(bind=engine)
-    print(engine_name)
-    print(engine)
-
-
-setup_db()
+init_db()

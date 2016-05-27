@@ -5,17 +5,17 @@ __version__ = '.'.join((str(v) for v in __exa_version__))
 
 # Setup up configuration, logging, testing
 import atexit as _ae
-from exa._config import _conf
+from exa._config import config as exa_global_config
 from exa._install import install
 from exa.log import logfiles, log_head, log_tail
 from exa.test import run_doctests, run_unittests
 syslog = log.get_logger('sys')
 syslog.info('Starting exa with configuration:')
-syslog.info(str(_conf))
+syslog.info(str(exa_global_config))
 
 
 # Import the container and trait supporting dataframe and series objects
-from exa.relational.container import Container
+from exa.relational import Container
 from exa.numerical import Series, DataFrame
 from exa.symbolic import Symbolic
 from exa.editor import Editor
@@ -28,21 +28,18 @@ from exa import tests
 
 
 # If dynamic (not persistent) session need to populate database tables
-if not _conf['exa_persistent']:
-    from exa.relational.base import setup_db
-    from exa._install import install
-    setup_db()
-    install()
+if exa_global_config['exa_persistent'] == False:
+    install(False)
 
 
 # If running in a Jupyter notebook set some reasonable defaults
-if _conf['notebook']:
+if exa_global_config['notebook']:
     i = get_ipython()
     c = i.config
     c.InteractiveShellApp.matplotlib = 'inline'
 
 
 # Register cleanup functions
-_ae.register(_config._cleanup)          # Register functions in opposite desired
-_ae.register(log._cleanup)              # run order, first-in-last-out "FILO"
-_ae.register(relational.base._cleanup)
+_ae.register(_config.cleanup)          # Register functions in opposite desired
+_ae.register(log.cleanup)              # run order, first-in-last-out "FILO"
+_ae.register(relational.base.cleanup)

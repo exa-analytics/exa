@@ -19,14 +19,13 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 from textwrap import wrap
-from exa import _conf
+from exa import exa_global_config
 
 
-log_files = {}
 loggers = {}
 
 
-class _LogFormat(logging.Formatter):
+class LogFormat(logging.Formatter):
     '''
     Systematic log formatting (for all logging levels).
     '''
@@ -70,7 +69,7 @@ def log_head(log='log_sys', n=10):
         log (str): Log name
         n (int): Number of lines to print
     '''
-    _print_log(log, n, True)
+    print_log(log, n, True)
 
 
 def log_tail(log='sys', n=10):
@@ -81,12 +80,12 @@ def log_tail(log='sys', n=10):
         log (str): Log name
         n (int): Number of lines to print
     '''
-    _print_log(log, n, False)
+    print_log(log, n, False)
 
 
-def _print_log(log, n, head=True):
+def print_log(log, n, head=True):
     lines = None
-    with open(_conf['log_' + log], 'r') as f:
+    with open(exa_global_config['log_' + log], 'r') as f:
         lines = f.read().splitlines()
     if head:
         print('\n'.join(lines[:n]))
@@ -94,32 +93,30 @@ def _print_log(log, n, head=True):
         print('\n'.join(lines[-n:]))
 
 
-def _cleanup():
+def cleanup():
     '''
     Clean up logging file handlers.
     '''
     handlers = logging.root.handlers[:]
     for handler in handlers:
-        try:
-            handler.close()
-        except:
-            pass
+        handler.close()
         logging.root.removeHandler(handler)
 
 
 def setup_loggers():
     '''
-    Setup up loggers and (corresponding) file handlers
+    Setup up loggers and (corresponding) file handlers.
     '''
-    _cleanup()
-    log_files = dict((key, value) for key, value in _conf.items() if key.startswith('log_'))
+    global loggers
+    cleanup()
+    log_files = dict((key, value) for key, value in exa_global_config.items() if key.startswith('log_'))
     for key, path in log_files.items():
         logger = logging.getLogger(key)
-        handler = RotatingFileHandler(path, maxBytes=_conf['logfile_max_bytes'],
-                                      backupCount=_conf['logfile_max_count'])
-        handler.setFormatter(_LogFormat())
+        handler = RotatingFileHandler(path, maxBytes=exa_global_config['logfile_max_bytes'],
+                                      backupCount=exa_global_config['logfile_max_count'])
+        handler.setFormatter(LogFormat())
         logger.addHandler(handler)
-        if _conf['exa_persistent'] and _conf['debug'] == False:
+        if exa_global_config['exa_persistent'] and exa_global_config['debug'] == False:
             logger.setLevel(logging.WARNING)
         else:
             logger.setLevel(logging.DEBUG)

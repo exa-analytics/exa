@@ -13,10 +13,11 @@ import platform
 import pandas as pd
 from itertools import product
 from notebook import install_nbextension
-from exa._config import _conf, update_config, save_config
-from exa._config import _cleanup as _rmtmp
+from exa import exa_global_config
+from exa._config import update_config, save_config
 from exa.log import setup_loggers
-from exa.relational.base import _create_all, engine, _cleanup, setup_db
+from exa.relational.base import config as exa_relational_config
+from exa.relational.base import create_tables, cleanup, init_db
 from exa.utility import mkp
 
 
@@ -41,32 +42,32 @@ def install(persist=False):
         mkp(dot_exa, mk=True, exist_ok=False)
         update_config()
         save_config()
-        setup_db()
+        init_db()
         setup_loggers()
-    _create_all()
+    create_tables()
     load_isotope_data()
     load_unit_data()
     load_constant_data()
-    install_notebook_widgets(_conf['nbext_localdir'], _conf['nbext_sysdir'])
+    install_notebook_widgets(exa_global_config['nbext_localdir'], exa_global_config['nbext_sysdir'])
 
 
 def load_isotope_data():
     '''
     Load isotope data (from isotopes.json) into the database.
     '''
-    df = pd.read_json(_conf['static_isotopes.json'], orient='values')
+    df = pd.read_json(exa_global_config['static_isotopes.json'], orient='values')
     df.columns = ('A', 'Z', 'af', 'eaf', 'color', 'radius', 'gfactor', 'mass', 'emass',
                   'name', 'eneg', 'quadmom', 'spin', 'symbol', 'szuid', 'strid')
     df.index.names = ['pkid']
     df.reset_index(inplace=True)
-    df.to_sql(name='isotope', con=engine, index=False, if_exists='replace')
+    df.to_sql(name='isotope', con=exa_relational_config['engine'], index=False, if_exists='replace')
 
 
 def load_unit_data():
     '''
     Load unit conversions (from units.json) into the database.
     '''
-    df = pd.read_json(_conf['static_units.json'])
+    df = pd.read_json(exa_global_config['static_units.json'])
     for column in df.columns:
         series = df[column].copy().dropna()
         values = series.values
@@ -76,18 +77,18 @@ def load_unit_data():
         from_unit, to_unit = list(zip(*product(labels, labels)))
         df_to_save = pd.DataFrame.from_dict({'from_unit': from_unit, 'to_unit': to_unit, 'factor': factor})
         df_to_save['pkid'] = df_to_save.index
-        df_to_save.to_sql(name=column, con=engine, index=False, if_exists='replace')
+        df_to_save.to_sql(name=column, con=exa_relational_config['engine'], index=False, if_exists='replace')
 
 
 def load_constant_data():
     '''
     Load constants (from constants.json) into the database.
     '''
-    df = pd.read_json(_conf['static_constants.json'])
+    df = pd.read_json(exa_global_config['static_constants.json'])
     df.reset_index(inplace=True)
     df.columns = ['symbol', 'value']
     df['pkid'] = df.index
-    df.to_sql(name='constant', con=engine, index=False, if_exists='replace')
+    df.to_sql(name='constant', con=exa_relational_config['engine'], index=False, if_exists='replace')
 
 
 def install_notebook_widgets(origin_base, dest_base, verbose=False):
