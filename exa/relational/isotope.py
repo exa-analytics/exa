@@ -7,6 +7,7 @@ extended periodic table. For convenience, functions are provided for obtaining
 traditionally used elements. This module also provides mappers for commonly
 used dataframe manipulations.
 '''
+import numpy as np
 import pandas as pd
 from itertools import product
 from sqlalchemy import String, Float
@@ -16,7 +17,10 @@ from exa.iterative import product_sum_2f, product_add_2
 
 
 # Mappers are series objects that appear in commonly used dataframe manipulations
+symbol_to_radius = None
+symbol_to_color = None
 symbols_to_radii = None
+symbol_to_element_mass = None
 
 
 class Meta(BaseMeta):
@@ -108,24 +112,6 @@ class Meta(BaseMeta):
 #        return self._symbol_to_Z_map
 #
 #    @property
-#    def symbol_to_radius_map(self):
-#        '''
-#        Dictionary of symbol keys and covalent radii values.
-#        '''
-#        if self._symbol_to_radius_map is None:
-#            df = self.table()[['symbol', 'radius']].drop_duplicates('symbol').set_index('symbol')['radius']
-#            self._symbol_to_radius_map = df
-#        return self._symbol_to_radius_map
-#
-#    @property
-#    def symbol_to_color_map(self):
-#        '''
-#        Dictionary of symbol keys and isotope color values.
-#        '''
-#        if self._symbol_to_color_map is None:
-#            df = self.table()[['symbol', 'color']].drop_duplicates('symbol').set_index('symbol')['color']
-#            self._symbol_to_color_map = df
-#        return self._symbol_to_color_map
 #
 #    def get_by_strid(self, strid):
 #        '''
@@ -352,6 +338,9 @@ def init_mappers():
     '''
     isotopedf = Isotope.to_frame()
     init_symbols_to_radii(isotopedf)
+    init_symbol_to_element_mass(isotopedf)
+    init_symbol_to_radius(isotopedf)
+    init_symbol_to_color(isotopedf)
 
 
 def init_symbols_to_radii(isotopedf):
@@ -367,12 +356,37 @@ def init_symbols_to_radii(isotopedf):
     symbols_to_radii = pd.Series(radii)
     symbols_to_radii.index = symbols
 
-#    def element_mass_map(self):
-#        '''
-#        Dictionary of element keys and element mass values.
-#        '''
-#        if self._element_mass_map is None:
-#            df = self.table()[['symbol', 'mass', 'af']].dropna()
-#            df['fmass'] = df['mass'] * df['af']
-#            self._element_mass_map = df.groupby('symbol')['fmass'].sum()
-#        return self._element_mass_map
+
+def init_symbol_to_element_mass(isotopedf):
+    '''
+    Initialize the **symbol_to_element_mass** mapper.
+    '''
+    global symbol_to_element_mass
+    isotopedf['fmass'] = isotopedf['mass'] * isotopedf['af']
+    topes = isotopedf.groupby('name')
+    n = topes.ngroups
+    masses = np.empty((n, ), dtype=np.float64)
+    symbols = np.empty((n, ), dtype='O')
+    for i, (name, element) in enumerate(topes):
+        symbols[i] = element['symbol'].values[-1]
+        masses[i] = element['fmass'].sum()
+    symbol_to_element_mass = pd.Series(masses)
+    symbol_to_element_mass.index = symbols
+
+
+def init_symbol_to_radius(isotopedf):
+    '''
+    Initialize the **symbol_to_radius** mapper.
+    '''
+    global symbol_to_radius
+    symbol_to_radius = isotopedf.drop_duplicates('symbol')
+    symbol_to_radius = symbol_to_radius.set_index('symbol')['radius']
+
+
+def init_symbol_to_color(isotopedf):
+    '''
+    Initialize the **symbol_to_color** mapper.
+    '''
+    global symbol_to_color
+    symbol_to_color = isotopedf.drop_duplicates('symbol')
+    symbol_to_color = symbol_to_color.set_index('symbol')['color']
