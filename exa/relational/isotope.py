@@ -366,3 +366,13 @@ def init_symbols_to_radii(isotopedf):
     radii = product_sum_2f(radius, radius)
     symbols_to_radii = pd.Series(radii)
     symbols_to_radii.index = symbols
+
+#    def element_mass_map(self):
+#        '''
+#        Dictionary of element keys and element mass values.
+#        '''
+#        if self._element_mass_map is None:
+#            df = self.table()[['symbol', 'mass', 'af']].dropna()
+#            df['fmass'] = df['mass'] * df['af']
+#            self._element_mass_map = df.groupby('symbol')['fmass'].sum()
+#        return self._element_mass_map
