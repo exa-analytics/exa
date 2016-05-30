@@ -22,20 +22,17 @@ in practice. Scalable computations are organized by their ability to be distribu
 across multiple (network connected) computers (real or virtual), scalable
 across a multicore/multithread CPU and/or GPU, and propensity for ahead-of-time
 compilation (AOT) or just-in-time compilation (JIT) to C or C++ code (for example).
-The exa package provides the **distributed**, **parallel**, and **compiled**
-sub-packages for handling each of these domains. An additional consideration is
-out of core (out of RAM) algorithms, handled by the **nomem** package.
 
 From the least to the most computationally efficient, exa leverages:
 
 - python operators, iterators, generators, etc
 - numpy/pandas/scipy
 - cython/numba
-- distributed
+- ipyparallel
 
 For out of core work, exa leverages:
 
-- dask
+- numpy memory maps
 
 Because of the inherent inefficiency with out of core algorithms (disk is slower
 than RAM), these operations are treated on different footing than in core work;

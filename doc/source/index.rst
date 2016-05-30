@@ -18,11 +18,10 @@ following open source projects (among others):
     - `pandas`_: expressive and labeled n-dimensional data structures (built on numpy)
     - `jupyter`_ (notebook): web-based Python interpreter
     - `ipywidgets`_: interactive widgets in browser
+    - `ipyparallel`_: parallel processing
     - `sqlalchemy`_: access to SQL
     - `numba`_: just-in-time and ahead-of-time compilation of Python to machine code
     - `cudatoolkit`_: Nvidia CUDA GPU computing
-    - `distributed`_: distributed computing
-    - `dask`_: Out-of-core computing
     - `sympy`_: symbolic mathematics
     - `paramiko`_: ssh support
     - `mpi4py`_: MPI support
@@ -78,10 +77,9 @@ Info
 .. _sqlalchemy: http://www.sqlalchemy.org/
 .. _jupyter: http://jupyter.org/
 .. _ipywidgets: https://ipywidgets.readthedocs.io/en/latest/
+.. _ipyparallel: https://ipyparallel.readthedocs.io/en/latest/
 .. _numba: http://numba.pydata.org/
 .. _cudatoolkit: https://anaconda.org/sklam/cudatoolkit
-.. _distributed: http://distributed.readthedocs.io/en/latest/
-.. _dask: http://dask.pydata.org/en/latest/
 .. _sympy: http://www.sympy.org/en/index.html
 .. _paramiko: http://www.paramiko.org/
 .. _mpi4py: https://pythonhosted.org/mpi4py/
