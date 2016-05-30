@@ -9,31 +9,30 @@
 *An ecosystem for data processing, analytics, and visualization.*
 
 This project leverages Python's open source scientific computing
-environment to provide a high performance, processing,
-analytics, and visualization suite for specific data industries.
-The **exa** package provides the foundation on which these data
-specific applications are built. This suite makes use of the
-following open source projects (among others):
+environment to provide a high performance processing,
+analytics, and visualization framework on which packages suited
+for specific data industries can be built. This framework makes
+use of the following open source projects (among others):
     - `numpy`_, `scipy`_: fundamental n-dimensional array manipulation
     - `pandas`_: expressive and labeled n-dimensional data structures (built on numpy)
     - `jupyter`_ (notebook): web-based Python interpreter
     - `ipywidgets`_: interactive widgets in browser
     - `ipyparallel`_: parallel processing
     - `sqlalchemy`_: access to SQL
-    - `numba`_: just-in-time and ahead-of-time compilation of Python to machine code
-    - `cudatoolkit`_: Nvidia CUDA GPU computing
+    - `numba`_: just-in-time and ahead-of-time compilation, and GPU computing
     - `sympy`_: symbolic mathematics
     - `paramiko`_: ssh support
     - `mpi4py`_: MPI support
 
-Specifically, **exa** provides a system configuration, standalone (web-based)
-app framework, logging, content management, trait supporting dataframe/series
-objects, and the data specific **container** object. The **container** concept
-is the corner stone of this project (see :ref:`exa-overview`).
+Exa provides a high performance computing environment tailored to
+data specific containers (see :ref:`exa-overview`). These object
+based storage devices are the foundation of a content management
+system, flexible labeled data structure collection, and data
+specific application framework.
 
 .. toctree::
     :maxdepth: 2
-    :caption: General Docs
+    :caption: General Info
 
     overview.rst
     install.rst
@@ -79,7 +78,6 @@ Info
 .. _ipywidgets: https://ipywidgets.readthedocs.io/en/latest/
 .. _ipyparallel: https://ipyparallel.readthedocs.io/en/latest/
 .. _numba: http://numba.pydata.org/
-.. _cudatoolkit: https://anaconda.org/sklam/cudatoolkit
 .. _sympy: http://www.sympy.org/en/index.html
 .. _paramiko: http://www.paramiko.org/
 .. _mpi4py: https://pythonhosted.org/mpi4py/

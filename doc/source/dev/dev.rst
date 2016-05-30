@@ -3,4 +3,9 @@
 ###################
 Contributor Guide
 ###################
-stuffs and things
+
+
+.. toctree::
+    :maxdepth: 2
+
+    parallel.rst
