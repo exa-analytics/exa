@@ -9,6 +9,7 @@ from exa._config import config as global_config
 from exa._install import install
 from exa.log import log_head, log_tail
 from exa.test import run_doctests, run_unittests
+from exa import mpl, tex
 syslog = log.get_logger('sys')
 syslog.info('Starting exa with configuration:')
 syslog.info(str(global_config))

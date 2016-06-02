@@ -3,17 +3,11 @@
 Base Container
 ########################
 The :class:`~exa.container.BaseContainer` class is the primary object for
-data acquisition, management, and visualization. Containers are composed of
-n-dimensional dataframes (:class:`~pandas.DataFrame` and :class:`~pandas.Series`)
-objects whose columns often define variables of interest in visualization.
+data processing, analysis, and visualization. Containers are composed of
+n-dimensional spreadsheet-like (see :mod:`~exa.numerical`) objects whose
+columns contain data for 2D and 3D visualization.
 
-Data analysis requires three pillars: 1) data arrays (:mod:`~exa.numerical`
-and :mod:`~exa.analytical`), 2) visualization traits (:mod:`~exa.widget`), and
-3) containers (:mod:`~exa.container` and :mod:`~exa.relational.container`).
 
-The class provided by this module is the base class for data specific applications.
-Sub-packages utlize this class in order to leverage functionality such as data
-relationship analysis, saving and loading, and dynamic trait creation.
 
 See Also:
     :mod:`~exa.relational.container`
@@ -22,31 +16,23 @@ import os
 import numpy as np
 import pandas as pd
 import networkx as nx
-import seaborn as sns
 from sys import getsizeof
 from collections import OrderedDict
 from traitlets import Bool
 from collections import defaultdict
 from sqlalchemy.orm.attributes import InstrumentedAttribute
-from exa import global_config
+from exa import global_config, mpl
 from exa.widget import ContainerWidget
 from exa.numerical import NDBase, DataFrame, Field, SparseDataFrame, Series, get_indices_columns
 from exa.utility import del_keys
 
-rc = {'legend.frameon': True, 'legend.fancybox': True, 'patch.facecolor': 'white', 'patch.edgecolor': 'black',
-      'axes.formatter.useoffset': False}
-sns.set(context='poster', style='white', font_scale=1.3, font='serif', palette='viridis', rc=rc)
-
 
 class BaseContainer:
     '''
-    Foundational class for creating data containers. Inherited by
-    :class:`~exa.relational.container.Container`. This class should not be
-    inherited directly; rather :class:`~exa.relational.container.Container`
-    should be inherited.
+    Base container class responsible for all features related to data
+    management; relational features are in :class:`~exa.relational.container.Container`.
     '''
     _widget_class = ContainerWidget
-    _df_types = OrderedDict()
 
     @property
     def field_values(self):
@@ -119,117 +105,117 @@ class BaseContainer:
                 break
             n /= 1024
 
-    def data_network(self):
-        '''
-        Visualize the dataframe/series relationships and relative sizes.
-
-        A network graph representation of the current container is drawn. Nodes
-        are data objects (dataframes or series) attached to the current
-        container. Their relative size is proportional to the amount of data
-        they contain. The node color corresponds to the number of relationships
-        a given node has with other nodes. The edge color correspond to the
-        type of connection a given node has with another node (index to index,
-        index to column, or index to other).
-
-        If performed on an empty or test container, this function will display
-        the enforced data objects and their connectivity. No information about
-        the type of connectivity
-        '''
-        edges = []
-        nodes = []
-        node_sizes = {}
-        edge_colors = {}
-        edge_color_map = sns.color_palette('viridis', 4)
-        data = self._df_types.items()
-        if not self._test:
-            data = self._numerical_dict().items()
-        for i, (name0, df0) in enumerate(data):
-            n0 = name0[1:] if name0.startswith('_') else name0
-            indices0, columns0 = get_indices_columns(df0)
-            for name1, df1 in data:
-                if df0 is df1:
-                    continue
-                n1 = name1[1:] if name1.startswith('_') else name1
-                indices1, columns1 = get_indices_columns(df1)
-                key = (n0, n1)
-                if any([index in indices1 for index in indices0]):
-                    edges.append(key)
-                    edge_colors[key] = edge_color_map[0]
-                elif any([index in columns1 for index in indices0]):
-                    edges.append(key)
-                    edge_colors[key] = edge_color_map[1]
-                elif any([index in columns0 for index in indices1]):
-                    edges.append(key)
-                    edge_colors[key] = edge_color_map[1]
-                #elif (hasattr(df0, '_categories') and hasattr(df1, '_categories')):
-                #    if (np.any([index in  for index in df0._groupbys]) or
-                #        np.any([index in columns0 for index in df1._groupbys])):
-                #        edges.append(key)
-                #        edge_colors[key] = edge_color_map[2]
-            nodes.append(n0)
-            node_sizes[n0] = df0.size if isinstance(df0.size, np.int64) or isinstance(df0.size, int) else 0
-            if hasattr(df0, 'field_values'):
-                for i, field in enumerate(df0.field_values):
-                    key = (n0, 'field_values[*]'.format(i))
-                    if key[1] not in nodes:
-                        nodes.append(key[1])
-                        node_sizes[key[1]] = field.size if isinstance(field.size, np.int64) or isinstance(field.size, int) else 0
-                    else:
-                        node_sizes[key[1]] += field.size if isinstance(field.size, np.int64) or isinstance(field.size, int) else 0
-                    edges.append(key)
-                    edge_colors[key] = edge_color_map[3]
-                    key = (key[1], key[0])
-                    edges.append(key)
-                    edge_colors[key] = edge_color_map[2]
-        g = nx.Graph()
-        g.add_nodes_from(nodes)
-        g.add_edges_from(edges)
-        fig, ax = sns.plt.subplots(1, figsize=(13, 8), dpi=600)
-        ax.axis('off')
-        degree_values = np.unique(list(g.degree().values()))
-        enum_map = {v: k for k, v in enumerate(degree_values)}
-        node_colors = sns.color_palette('viridis', len(degree_values))
-        node_color = [node_colors[enum_map[g.degree()[node]]] for node in g.nodes()]
-        edge_color = [edge_colors[edge] for edge in g.edges()]
-        node_size = 3000
-        if not self._test:
-            node_size = np.log(np.array([node_sizes[node] for node in g.nodes()]))
-            node_size *= 13000 / node_size.max()
-            node_size += 2000
-        pos = nx.spring_layout(g)
-        f0 = nx.draw_networkx_nodes(g, pos=pos, node_size=node_size,
-                                    node_color=node_color, alpha=0.8, ax=ax)
-        f1 = nx.draw_networkx_labels(g, pos=pos, labels={k: k for k in g.nodes()},
-                                     font_size=15, font_weight='bold', ax=ax)
-        f2 = nx.draw_networkx_edges(g, pos=pos, edge_color=edge_color, width=2, ax=ax)
-        axbox = ax.get_position()
-        # Node color legend
-        degree_map = {v: k for k, v in enum_map.items()}
-        proxies = []
-        descriptions = []
-        for i, v in enumerate(degree_values):
-            line = sns.mpl.lines.Line2D([], [], linestyle='none', color=node_colors[enum_map[v]], marker='o')
-            proxies.append(line)
-            descriptions.append(degree_map[i])
-        r_legend = ax.legend(proxies, descriptions, title='Connections', loc=(1, 0), frameon=True)
-        r_frame = r_legend.get_frame()
-        r_frame.set_facecolor('white')
-        r_frame.set_edgecolor('black')
-        # Edge color legend
-        rel_types = {0: 'index - index', 1: 'index - column', 2: 'column - column',
-                     3: 'index - other'}
-        proxies = []
-        descriptions = []
-        for i, c in enumerate(edge_color_map):
-            line = sns.mpl.lines.Line2D([], [], linestyle='-', color=c)
-            proxies.append(line)
-            descriptions.append(rel_types[i])
-        e_legend = ax.legend(proxies, descriptions, title='Relationship Type', loc=(1, 0.7), frameon=True)
-        e_frame = r_legend.get_frame()
-        e_frame.set_facecolor('white')
-        e_frame.set_edgecolor('black')
-        fig.gca().add_artist(r_legend)
-        return g
+#    def data_network(self):
+#        '''
+#        Visualize the dataframe/series relationships and relative sizes.
+#
+#        A network graph representation of the current container is drawn. Nodes
+#        are data objects (dataframes or series) attached to the current
+#        container. Their relative size is proportional to the amount of data
+#        they contain. The node color corresponds to the number of relationships
+#        a given node has with other nodes. The edge color correspond to the
+#        type of connection a given node has with another node (index to index,
+#        index to column, or index to other).
+#
+#        If performed on an empty or test container, this function will display
+#        the enforced data objects and their connectivity. No information about
+#        the type of connectivity
+#        '''
+#        edges = []
+#        nodes = []
+#        node_sizes = {}
+#        edge_colors = {}
+#        edge_color_map = sns.color_palette('viridis', 4)
+#        data = self._df_types.items()
+#        if not self._test:
+#            data = self._numerical_dict().items()
+#        for i, (name0, df0) in enumerate(data):
+#            n0 = name0[1:] if name0.startswith('_') else name0
+#            indices0, columns0 = get_indices_columns(df0)
+#            for name1, df1 in data:
+#                if df0 is df1:
+#                    continue
+#                n1 = name1[1:] if name1.startswith('_') else name1
+#                indices1, columns1 = get_indices_columns(df1)
+#                key = (n0, n1)
+#                if any([index in indices1 for index in indices0]):
+#                    edges.append(key)
+#                    edge_colors[key] = edge_color_map[0]
+#                elif any([index in columns1 for index in indices0]):
+#                    edges.append(key)
+#                    edge_colors[key] = edge_color_map[1]
+#                elif any([index in columns0 for index in indices1]):
+#                    edges.append(key)
+#                    edge_colors[key] = edge_color_map[1]
+#                #elif (hasattr(df0, '_categories') and hasattr(df1, '_categories')):
+#                #    if (np.any([index in  for index in df0._groupbys]) or
+#                #        np.any([index in columns0 for index in df1._groupbys])):
+#                #        edges.append(key)
+#                #        edge_colors[key] = edge_color_map[2]
+#            nodes.append(n0)
+#            node_sizes[n0] = df0.size if isinstance(df0.size, np.int64) or isinstance(df0.size, int) else 0
+#            if hasattr(df0, 'field_values'):
+#                for i, field in enumerate(df0.field_values):
+#                    key = (n0, 'field_values[*]'.format(i))
+#                    if key[1] not in nodes:
+#                        nodes.append(key[1])
+#                        node_sizes[key[1]] = field.size if isinstance(field.size, np.int64) or isinstance(field.size, int) else 0
+#                    else:
+#                        node_sizes[key[1]] += field.size if isinstance(field.size, np.int64) or isinstance(field.size, int) else 0
+#                    edges.append(key)
+#                    edge_colors[key] = edge_color_map[3]
+#                    key = (key[1], key[0])
+#                    edges.append(key)
+#                    edge_colors[key] = edge_color_map[2]
+#        g = nx.Graph()
+#        g.add_nodes_from(nodes)
+#        g.add_edges_from(edges)
+#        fig, ax = sns.plt.subplots(1, figsize=(13, 8), dpi=600)
+#        ax.axis('off')
+#        degree_values = np.unique(list(g.degree().values()))
+#        enum_map = {v: k for k, v in enumerate(degree_values)}
+#        node_colors = sns.color_palette('viridis', len(degree_values))
+#        node_color = [node_colors[enum_map[g.degree()[node]]] for node in g.nodes()]
+#        edge_color = [edge_colors[edge] for edge in g.edges()]
+#        node_size = 3000
+#        if not self._test:
+#            node_size = np.log(np.array([node_sizes[node] for node in g.nodes()]))
+#            node_size *= 13000 / node_size.max()
+#            node_size += 2000
+#        pos = nx.spring_layout(g)
+#        f0 = nx.draw_networkx_nodes(g, pos=pos, node_size=node_size,
+#                                    node_color=node_color, alpha=0.8, ax=ax)
+#        f1 = nx.draw_networkx_labels(g, pos=pos, labels={k: k for k in g.nodes()},
+#                                     font_size=15, font_weight='bold', ax=ax)
+#        f2 = nx.draw_networkx_edges(g, pos=pos, edge_color=edge_color, width=2, ax=ax)
+#        axbox = ax.get_position()
+#        # Node color legend
+#        degree_map = {v: k for k, v in enum_map.items()}
+#        proxies = []
+#        descriptions = []
+#        for i, v in enumerate(degree_values):
+#            line = sns.mpl.lines.Line2D([], [], linestyle='none', color=node_colors[enum_map[v]], marker='o')
+#            proxies.append(line)
+#            descriptions.append(degree_map[i])
+#        r_legend = ax.legend(proxies, descriptions, title='Connections', loc=(1, 0), frameon=True)
+#        r_frame = r_legend.get_frame()
+#        r_frame.set_facecolor('white')
+#        r_frame.set_edgecolor('black')
+#        # Edge color legend
+#        rel_types = {0: 'index - index', 1: 'index - column', 2: 'column - column',
+#                     3: 'index - other'}
+#        proxies = []
+#        descriptions = []
+#        for i, c in enumerate(edge_color_map):
+#            line = sns.mpl.lines.Line2D([], [], linestyle='-', color=c)
+#            proxies.append(line)
+#            descriptions.append(rel_types[i])
+#        e_legend = ax.legend(proxies, descriptions, title='Relationship Type', loc=(1, 0.7), frameon=True)
+#        e_frame = r_legend.get_frame()
+#        e_frame.set_facecolor('white')
+#        e_frame.set_edgecolor('black')
+#        fig.gca().add_artist(r_legend)
+#        return g
 
     @classmethod
     def from_hdf(cls, path):
@@ -439,6 +425,7 @@ class BaseContainer:
                 for df_or_series in has_traits.values():
                     traits.update(df_or_series._get_traits())
             self._widget.add_traits(**traits)
+            self._traits_need_update = False
 
 
     def _is(self, name):
@@ -455,44 +442,44 @@ class BaseContainer:
             return True
         return False
 
-    def _enforce_df_type(self, name, value):
-        '''
-        Enforces dataframe type (or NoneType).
-        '''
-        if value is None:
-            return None
-        else:
-            cls = self._df_types[name]
-            if not isinstance(value, cls):
-                df = cls(value)
-                if hasattr(df, '_set_categories'):
-                    df._set_categories()
-                return df
-            return value
-
-    def _reconstruct_field(self, name, data, values):
-        '''
-        Enforces the field dataframe type.
-        '''
-        if data is None and values is None:
-            return None
-        elif hasattr(data, 'field_values'):
-            if hasattr(data, '_set_categories'):
-                data._set_categories()
-            return data
-        elif len(data) != len(values):
-            raise TypeError('Length of Field ({}) data and values don\'t match.'.format(name))
-        else:
-            cls = self._df_types[name]
-            for i in range(len(values)):
-                if not isinstance(values[i], DataFrame) and isinstance(values[i], pd.DataFrame):
-                    values[i] = DataFrame(values[i])
-                else:
-                    values[i] = Series(values[i])
-            df = cls(values, data)
-            if hasattr(df, '_set_categories'):
-                df._set_categories()
-            return df
+#    def _enforce_df_type(self, name, value):
+#        '''
+#        Enforces dataframe type (or NoneType).
+#        '''
+#        if value is None:
+#            return None
+#        else:
+#            cls = self._df_types[name]
+#            if not isinstance(value, cls):
+#                df = cls(value)
+#                if hasattr(df, '_set_categories'):
+#                    df._set_categories()
+#                return df
+#            return value
+#
+#    def _reconstruct_field(self, name, data, values):
+#        '''
+#        Enforces the field dataframe type.
+#        '''
+#        if data is None and values is None:
+#            return None
+#        elif hasattr(data, 'field_values'):
+#            if hasattr(data, '_set_categories'):
+#                data._set_categories()
+#            return data
+#        elif len(data) != len(values):
+#            raise TypeError('Length of Field ({}) data and values don\'t match.'.format(name))
+#        else:
+#            cls = self._df_types[name]
+#            for i in range(len(values)):
+#                if not isinstance(values[i], DataFrame) and isinstance(values[i], pd.DataFrame):
+#                    values[i] = DataFrame(values[i])
+#                else:
+#                    values[i] = Series(values[i])
+#            df = cls(values, data)
+#            if hasattr(df, '_set_categories'):
+#                df._set_categories()
+#            return df
 
     def _slice_with_int_or_string(self, key):
         '''
@@ -572,21 +559,6 @@ class BaseContainer:
         return 0
 
     def __getitem__(self, key):
-        '''
-        The key can be an integer, slice, list, tuple, or string. If integer,
-        this function will attempt to build a copy of this container object with
-        dataframes whose contents only contains the slice of the dataframe where
-        the **_groupby** attribute matches the integer value. If slice, list,
-        or tuple this function will do the same as for an integer but attempt
-        to select all matches in the _groupby field. Note that if the _groupby
-        attribute is empty, this will select by row index instead (not column
-        index!). If string, this function will attempt to get the attribute
-        matching that string.
-
-        Note:
-            Getting an attribute returns a reference to the attribute not a
-            copy of the attribute.
-        '''
         if isinstance(key, int):
             return self._slice_with_int_or_string(key)
         elif isinstance(key, str) and not hasattr(self, key):
@@ -613,20 +585,22 @@ class BaseContainer:
             kwtot += getsizeof(value)
         return dftot + kwtot + jstot + other
 
-    def __init__(self, meta=None, **kwargs):
+    def __delitem__(self, key):
+        del self[key]
+
+    def __init__(self, name=None, description=None, meta=None, **kwargs):
+        self.name = name
+        self.description = description
+        self.meta = meta
+        for key, value in kwargs.items():
+            setattr(self, key, value)
         self._test = False
         self._traits_need_update = True
-        for key, value in kwargs.items():
-            if key in self._df_types.keys():
-                value = self._enforce_df_type(key, value)
-            setattr(self, key, value)
-        self.meta = meta
         self._widget = self._widget_class(self) if global_config['notebook'] else None
         if meta is None and len(kwargs) == 0 and len(self._numerical_dict()) == 0:
             self._test = True
             self.name = 'TestContainer'
             self._update_traits()
-            self._traits_need_update = False
 
     def _repr_html_(self):
         if self._widget:
