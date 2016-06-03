@@ -7,10 +7,8 @@ data processing, analysis, and visualization. Containers are composed of
 n-dimensional spreadsheet-like (see :mod:`~exa.numerical`) objects whose
 columns contain data for 2D and 3D visualization.
 
-
-
 See Also:
-    :mod:`~exa.relational.container`
+    :mod:`~exa.relational.container` and :mod:`~exa.widget`
 '''
 import os
 import numpy as np
@@ -104,6 +102,19 @@ class BaseContainer:
                 print('size ({0}): {1}'.format(size, n))
                 break
             n /= 1024
+
+    def __sizeof__(self):
+        '''
+        Sum of the dataframe sizes, trait values, and relational data.
+        '''
+        jstot = self._widget_bytes()
+        dftot = self._df_bytes()
+        other = self._other_bytes()
+        kwtot = 0
+        for key, value in self._kw_dict().items():
+            kwtot += getsizeof(key)
+            kwtot += getsizeof(value)
+        return dftot + kwtot + jstot + other
 
 #    def data_network(self):
 #        '''
@@ -572,18 +583,6 @@ class BaseContainer:
         else:
             raise KeyError('No selection method for key {} of type {}'.format(key, type(key)))
 
-    def __sizeof__(self):
-        '''
-        Sum of the dataframe sizes, trait values, and relational data.
-        '''
-        jstot = self._widget_bytes()
-        dftot = self._df_bytes()
-        other = self._other_bytes()
-        kwtot = 0
-        for key, value in self._kw_dict().items():
-            kwtot += getsizeof(key)
-            kwtot += getsizeof(value)
-        return dftot + kwtot + jstot + other
 
     def __delitem__(self, key):
         del self[key]

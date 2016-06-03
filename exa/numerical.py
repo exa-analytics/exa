@@ -16,8 +16,7 @@ contents may be related (i.e. relational dataframes) so care must be taken to
 ensure no mangling of indices is performed. See the container module for more
 info.
 
-Enumerated are some conventions used by custom dataframes:
-
+Enumerated are some conventions used by trait supporting data objects:
 - use **_precision** to specify precision of floats sent to JS
 - use **_traits** to specify (possible) column names that are sent to JS
 - use **_columns** to specify required columns
@@ -33,18 +32,35 @@ See Also:
 '''
 import numpy as np
 import pandas as pd
+from numbers import Integral, Real
 from traitlets import Unicode, Integer, Float
 from exa.error import RequiredIndexError, RequiredColumnError
 
 
 class NDBase:
     '''
-    Base class for custom dataframe and series objects that have traits.
+    Base class for trait supporting dataframe/series objects.
     '''
     _precision = 3      # Default number of decimal places passed by traits
 
-    def _get_traits(self):
+    def copy(self, *args, **kwargs):
+        '''
+        Custom copy function returns same type
+        '''
+        return self.__class__(self._copy(*args, **kwargs))
+
+    def _get_custom_traits(self):
+        '''
+        Placeholder for custom trait creation (e.g. when multiple columns form a single trait).
+        '''
         return {}
+
+    def _get_traits(self):
+        '''
+        Empty default traits.
+        '''
+        traits = self._get_custom_traits()
+        return traits
 
     def __repr__(self):
         name = self.__class__.__name__
@@ -60,15 +76,6 @@ class Series(NDBase, pd.Series):
     Trait supporting analogue of :class:`~pandas.Series`.
     '''
     _copy = pd.Series.copy
-
-    def copy(self, *args, **kwargs):
-        '''
-        Custom copy function returns same type
-        '''
-        return self.__class__(self._copy(*args, **kwargs))
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
 
 class DataFrame(NDBase, pd.DataFrame):
@@ -86,20 +93,6 @@ class DataFrame(NDBase, pd.DataFrame):
     _categories = {}    # Column name, original type pairs ('label', int) that can be compressed to a category
     _traits = []        # Traits present as dataframe columns (or series values)
 
-    @property
-    def _fi(self):
-        return self.index[0]
-
-    @property
-    def _li(self):
-        return self.index[-1]
-
-    def copy(self, *args, **kwargs):
-        '''
-        Custom copy function returns same type
-        '''
-        return self.__class__(self._copy(*args, **kwargs))
-
     def _revert_categories(self):
         '''
         Change all columns of type category to their native type.
@@ -116,43 +109,19 @@ class DataFrame(NDBase, pd.DataFrame):
             if column in self.columns:
                 self[column] = self[column].astype('category')
 
-    def _get_custom_traits(self):
-        '''
-        Placeholder function to be overwritten when custom trait creation is
-        required
-        Returns:
-            traits (dict): Dictionary of traits to be added
-        '''
-        return {}
-
     def _get_traits(self):
         '''
         Generate trait objects from column data.
 
-        This function will group columns by the :class:`~exa.numerical.DataFrame`'s
-        **_groupbys** attribute, select the column (or columns) that specify a
-        single trait, and package that up as a trait to be used by the frontend.
+        This function will group columns (if applicable) and form JSON object strings
+        from columns which have been declared as traits (using the _traits attribute).
 
         Note:
-            This function decides what `trait type`_ to use. Typically, a
-            column (or columns) containing unique data is sent as a (grouped)
-            json string. If the column contains non-unique data, this function
-            will send a single value of the appropriate type (e.g. `Float`_) so
-            as to duplicate the least amount of data possible (and have the least
-            communication overhead possible).
-
-        See Also:
-            The collecting function of the JavaScript side of things is the
-            **get_trait** method in **container.js**.
-
-        Tip:
-            The algorithm's performance could be improved: in the case where
-            each group has *N* values that are the same to each other but
-            unique with respect to other groups' values all values are sent to
-            the frontend!
+            This function decides what `trait type`_ to use. This will almost always
+            be a JSON (unicode) string formatted to be parsed into an array like
+            structure in Javascript.
 
         .. _trait type: http://traitlets.readthedocs.org/en/stable/trait_types.html
-        .. _Float: http://traitlets.readthedocs.org/en/stable/trait_types.html#traitlets.Float
         '''
         traits = self._get_custom_traits()
         groups = None
@@ -162,13 +131,12 @@ class DataFrame(NDBase, pd.DataFrame):
             groups = self.groupby(self._groupbys)
         for name in self._traits:
             if name in self.columns:
-                trait_name = '_'.join((prefix, name))    # Name mangle to ensure uniqueness
-                if np.all(np.isclose(self[name], self.ix[self._fi, name])):
+                trait_name = '_'.join((prefix, str(name)))    # Name mangle to ensure uniqueness
+                if np.all(np.isclose(self[name], self.ix[self._fi, name])):    # Don't bother sending all elements if same
                     value = self.ix[self._fi, name]
-                    dtype = type(value)
-                    if dtype is np.int64 or dtype is np.int32 or dtype is int:
+                    if isinstance(value, Integral)
                         trait = Integer(int(value))
-                    elif dtype is np.float64 or dtype is np.float32 or dtype is float:
+                    elif isinstance(value, Real):
                         trait = Float(float(value))
                     else:
                         raise TypeError('Unknown type for {0} with type {1}'.format(name, dtype))
@@ -176,10 +144,11 @@ class DataFrame(NDBase, pd.DataFrame):
                     trait = Unicode(groups.apply(lambda g: g[name].values).to_json(orient='values', double_precision=self._precision))
                 else:                                     # Else send flat values
                     trait = self[name].to_json(orient='values', double_precision=self._precision)
-                traits[trait_name] = trait.tag(sync=True)
+                traits[trait_name] = trait
             elif name == self.index.names[0]:             # Otherwise, if index, send flat values
-                trait_name = '_'.join((prefix, name))
-                traits[trait_name] = Unicode(pd.Series(self.index).to_json(orient='values', double_precision=self._precision)).tag(sync=True)
+                trait_name = '_'.join((prefix, str(name)))
+                traits[trait_name] = Unicode(pd.Series(self.index).to_json(orient='values', double_precision=self._precision))
+            traits[trait_name].tag(sync=True)
         self._set_categories()
         return traits
 

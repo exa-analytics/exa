@@ -10,6 +10,8 @@ legend = {'legend.frameon': True, 'legend.facecolor': 'white',
           'patch.edgecolor': 'black'}
 axis = {'axes.formatter.useoffset': False}
 
-rc = {**legend, **axis}
+rc = legend
+rc.update(axis)
+#rc = {**legend, **axis}
 sns.set(context='poster', style='white', palette='viridis', font_scale=1.7,
         font='serif', rc=rc)

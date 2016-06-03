@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 '''
 Container
-===============================================
+#######################
+This module provides the front-facing Container object subclassing the
+:class:`~exa.container.BaseContainer`.
 '''
 from sys import getsizeof
 from sqlalchemy import Column, String, ForeignKey, Table, Integer, event
