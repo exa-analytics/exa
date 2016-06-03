@@ -7,6 +7,11 @@ data processing, analysis, and visualization. Containers are composed of
 n-dimensional spreadsheet-like (see :mod:`~exa.numerical`) objects whose
 columns contain data for 2D and 3D visualization.
 
+The :class:`~exa.container.BaseContainer` is akin to a :class:`~pandas.HDFStore`
+in that it is a container for dataframes (and saves to an HDF5 file). It is
+different in that it provides visualization tools access to the data contained
+via automated JSON strings, transferrable between languages.
+
 See Also:
     :mod:`~exa.relational.container` and :mod:`~exa.widget`
 '''
@@ -15,42 +20,127 @@ import numpy as np
 import pandas as pd
 import networkx as nx
 from sys import getsizeof
+from copy import deepcopy
 from collections import OrderedDict
 from traitlets import Bool
 from collections import defaultdict
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from exa import global_config, mpl
 from exa.widget import ContainerWidget
-from exa.numerical import NDBase, DataFrame, Field, SparseDataFrame, Series, get_indices_columns
+from exa.numerical import NDBase, DataFrame, Field, SparseDataFrame, Series
 from exa.utility import del_keys
+
+
+class TypedMeta(type):
+    '''
+    A metaclass for automatically generating properties for statically typed
+    class attributes. Useage is the following:
+
+    .. code-block:: Python
+
+        class TestMeta(TypedMeta):
+            attr1 = int
+            attr2 = DataFrame
+
+        class TestClass(metaclass=TestMeta):
+            def __init__(self, attr1, attr2):
+                self.attr1 = attr1
+                self.attr2 = attr2
+
+    Under the covers, this class creates code that looks like the following:
+
+    .. code-block:: Python
+
+        class TestClass:
+            @property
+            def attr1(self):
+                return self._attr1
+
+            @attr1.setter
+            def attr1(self, obj):
+                if not isinstance(obj, int):
+                    raise TypeError('attr1 must be int')
+                self._attr1 = obj
+
+            @attr1.deleter
+            def attr1(self):
+                del self._attr1
+
+            @property
+            def attr2(self):
+                return self._attr2
+
+            @attr2.setter
+            def attr2(self, obj):
+                if not isinstance(obj, DataFrame):
+                    raise TypeError('attr2 must be DataFrame')
+                self._attr2 = obj
+
+            @attr2.deleter
+            def attr2(self):
+                del self._attr2
+
+            def __init__(self, attr1, attr2):
+                self.attr1 = attr1
+                self.attr2 = attr2
+    '''
+    @staticmethod
+    def create_property(name, ptype):
+        '''
+        Creates a custom property with a getter that performs computing
+        functionality (if available) and raise a type error if setting
+        with the wrong type.
+
+        Note:
+            By default, the setter attempts to convert the object to the
+            correct type; a type error is raised if this fails.
+        '''
+        pname = '_' + name
+        def getter(self):
+            if not hasattr(self, pname) and hasattr(self, 'compute{}'.format(pname)):
+                self['compute{}'.format(pname)]()
+            if not hasattr(self, pname):
+                raise AttributeError('Please compute or set {} first.'.format(name))
+            return getattr(self, pname)
+        def setter(self, obj):
+            if not isinstance(obj, ptype):
+                try:
+                    obj = ptype(obj)
+                except:
+                    raise TypeError('Object {0} must instance of {1}'.format(name, ptype))
+            setattr(self, pname, obj)
+        def deleter(self):
+            del self[pname]
+        return property(getter, setter, deleter)
+
+    def __new__(metacls, name, bases, clsdict):
+        '''
+        Here we control the creation of the class definition. For every statically
+        typed attributed (see source code or docstring)
+        '''
+        for k, v in metacls.__dict__.items():
+            if isinstance(v, type) and k[0] != '_':
+                clsdict[k] = metacls.create_property(k, v)
+        return super().__new__(metacls, name, bases, clsdict)
 
 
 class BaseContainer:
     '''
     Base container class responsible for all features related to data
     management; relational features are in :class:`~exa.relational.container.Container`.
+
+    Note:
+        Due to the requirements of mixing metaclasses, a metaclass is
+        created in :mod:`~exa.relational.container` and assigned to the
+        "master" container object, :class:`~exa.relational.container.Container`.
     '''
     _widget_class = ContainerWidget
 
-    @property
-    def field_values(self):
-        '''
-        Retrieve values of a specific field.
+    def add_data(self, data):
+        pass
 
-        Args:
-            field (int): Field index (corresponding to the fields dataframe)
-
-        Returns:
-            data: Series or dataframe object containing field values
-        '''
-        if self._is('_field'):
-            return self._field.field_values
-
-    def append_numerical(self, frame_or_series):
-        '''
-        Attach a dataframe or series object to the current container.
-        '''
-        raise NotImplementedError()
+    def add_field(self, data, values=None):
+        pass
 
     def save(self, path=None):
         '''
@@ -70,7 +160,7 @@ class BaseContainer:
         '''
         cls = self.__class__
         kws = del_keys(self._kw_dict(copy=True))
-        dfs = self._numerical_dict(copy=True)
+        dfs = self._data(copy=True)
         kws.update(kwargs)
         kws.update(dfs)
         return cls(**kws)
@@ -84,37 +174,38 @@ class BaseContainer:
             For argument description, see :func:`~exa.container.concat`.
         '''
         raise NotImplementedError()
-        #return concat(self, *args, **kwargs)
 
     def info(self):
         '''
         Print human readable information about the container.
         '''
-        n = int(getsizeof(self))
         sizes = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB']
-        for size in sizes:
-            s = str(n).split('.')
-            if len(s) > 1:
-                if len(s[0]) <= 3 and len(s[1]) > 3:
-                    print('size ({0}): {1}'.format(size, n))
-                    break
-            elif len(s[0]) <= 3:
-                print('size ({0}): {1}'.format(size, n))
-                break
-            n /= 1024
+        mem_usage = self.memory_usage().sum()
+        n = np.rint(len(str(mem_usage))/4).astype(int)
+        info = pd.DataFrame.from_dict({'size ({0})'.format(sizes[n]): [mem_usage/(1024**n)],
+                                       'object_count': [len(self._data().keys())]}).T
+        info.columns = ['info']
+        return info
 
-    def __sizeof__(self):
+    def memory_usage(self):
         '''
-        Sum of the dataframe sizes, trait values, and relational data.
+        Get the memory usage (in bytes) of the container object.
         '''
-        jstot = self._widget_bytes()
-        dftot = self._df_bytes()
-        other = self._other_bytes()
-        kwtot = 0
-        for key, value in self._kw_dict().items():
-            kwtot += getsizeof(key)
-            kwtot += getsizeof(value)
-        return dftot + kwtot + jstot + other
+        data_mem = 0      # Memory due to data objects
+        rel_mem = 0       # Memory due to metadata/relational attributes
+        widget_mem = 0    # Memory due to widget data
+        for obj in self._data().values():
+            data_mem += getsizeof(obj)
+        for obj in self._rel().values():
+            rel_mem += getsizeof(obj)
+        if self._widget is not None:
+            for obj in self._widget._trait_values.values():
+                widget_mem += getsizeof(obj)
+        mem = pd.Series({'data': data_mem, 'base': rel_mem, 'widget': widget_mem})
+        mem.name = 'bytes'
+        return mem
+
+
 
 #    def data_network(self):
 #        '''
@@ -314,7 +405,7 @@ class BaseContainer:
             store['kwargs'] = pd.Series()
             store.get_storer('kwargs').attrs.metadata = kwargs
             fc = 0
-            for name, df in self._numerical_dict().items():
+            for name, df in self._data().items():
                 name = name[1:] if name.startswith('_') else name
                 if isinstance(df, Field):
                     df._revert_categories()
@@ -340,90 +431,59 @@ class BaseContainer:
                     store[name] = df
         return path
 
-    def _kw_dict(self, copy=False):
+    def _rel(self, copy=False):
         '''
-        Create kwargs from the available (non-null valued) relational arguments.
-
-        Args:
-            copy (bool): Return a copy of the attributes (default False)
-
-        Returns:
-            d (dict): Dictionary of non-null relational attributes.
+        Get all relational and metadata data of the container.
         '''
-        kws = {}
-        for name, value in self.__class__.__dict__.items():
-            if isinstance(value, InstrumentedAttribute):
-                obj = self[name]
-                if obj:
-                    kws[name] = obj
-        if copy:
-            return kws.copy()
-        return kws
-
-    def _numerical_dict(self, copy=False, cls_criteria=[pd.Series, pd.DataFrame]):
-        '''
-        Get the attached :class:`~exa.numerical.Series` and
-        :class:`~exa.numerical.DataFrame` objects.
-
-        Args:
-            copy (bool): Return an in memory copy
-            cls_criteria (class): List of class objects to identify by (default :class:`~pandas.DataFrame`)
-
-        Returns:
-            dfs (dict): Name, dataframe key-value pairs
-        '''
-        dfs = {}
-        for name, value in self.__dict__.items():
-            if any((isinstance(value, klass) for klass in cls_criteria)):
+        rel = {}
+        for key, obj in self.__dict__.items():
+            if not isinstance(obj, (pd.Series, pd.DataFrame)):
                 if copy:
-                    cls = value.__class__
-                    dfs[name] = cls(value.copy())
+                    rel[key] = deepcopy(obj)
                 else:
-                    dfs[name] = value
-        return dfs
+                    rel[key] = obj
+        return rel
 
-    def _active_trait_dfs(self):
+    def _data(self, copy=False):
         '''
-        Get only dataframes that have active traits.
+        Get all data associated with the container as key value pairs.
+        '''
+        data = {}
+        for key, obj in self.__dict__.items():
+            if isinstance(obj, (pd.Series, pd.DataFrame)):
+                if copy:
+                    data[key] = obj.copy()
+                else:
+                    data[key] = obj
+        return data
+
+    def _trait_data(self):
+        '''
+        Get all data that contains traits.
         '''
         active = {}
-        for name, value in self._numerical_dict().items():
-            if hasattr(value, '_traits'):
-                if len(value._traits) > 0:
-                    active[name] = value
+        for key, obj in self._data().items():
+            if hasattr(obj, '_traits'):
+                if len(obj._traits) > 0 and len(obj) > 0:
+                    active[name] = obj
         return active
 
-    def _df_bytes(self):
+    def _update_custom_traits(self):
         '''
-        Compute the size (in bytes) of all of the attached dataframes.
-        '''
-        total_bytes = 0
-        for df in self._numerical_dict().values():
-            total_bytes += np.sum(df.memory_usage())
-        return total_bytes
+        For generating custom traits dependent on multiple data objects.
 
-    def _widget_bytes(self):
-        '''
-        Compute the size (in bytes) of all of the attached traits.
-        '''
-        total_bytes = 0
-        if self._widget:
-            for value in self._widget._trait_values.values():
-                total_bytes += getsizeof(value)
-        return total_bytes
-
-    def _custom_container_traits(self):
-        '''
-        Used when a container is required to build specific trait objects.
+        See Also:
+            :func:`~exa.numerical.NDBase._update_custom_traits`
         '''
         return {}
 
     def _update_traits(self):
         '''
-        Update specific traits, given in the arguments.
+        Main entry point for updating all traits of the current container. This
+        function will make calls to every data object that contains traits.
 
-        Args:
-            traits (list): Names of traits to update
+        See Also:
+            :func:`~exa.numerical.NDBase._update_traits`
         '''
         if self._widget is not None:
             traits = {}
@@ -432,65 +492,11 @@ class BaseContainer:
             else:
                 traits['test'] = Bool(False).tag(sync=True)
                 traits.update(self._custom_container_traits())
-                has_traits = self._active_trait_dfs()
-                for df_or_series in has_traits.values():
-                    traits.update(df_or_series._get_traits())
+                has_traits = self._trait_data()
+                for obj in has_traits.values():
+                    traits.update(obj._update_traits())
             self._widget.add_traits(**traits)
             self._traits_need_update = False
-
-
-    def _is(self, name):
-        '''
-        Check if the dataframe or series object exists.
-
-        Args:
-            name (str): String name of the series or dataframe object
-
-        Returns:
-            exists (bool): True if it exists
-        '''
-        if hasattr(self[name], 'shape'):
-            return True
-        return False
-
-#    def _enforce_df_type(self, name, value):
-#        '''
-#        Enforces dataframe type (or NoneType).
-#        '''
-#        if value is None:
-#            return None
-#        else:
-#            cls = self._df_types[name]
-#            if not isinstance(value, cls):
-#                df = cls(value)
-#                if hasattr(df, '_set_categories'):
-#                    df._set_categories()
-#                return df
-#            return value
-#
-#    def _reconstruct_field(self, name, data, values):
-#        '''
-#        Enforces the field dataframe type.
-#        '''
-#        if data is None and values is None:
-#            return None
-#        elif hasattr(data, 'field_values'):
-#            if hasattr(data, '_set_categories'):
-#                data._set_categories()
-#            return data
-#        elif len(data) != len(values):
-#            raise TypeError('Length of Field ({}) data and values don\'t match.'.format(name))
-#        else:
-#            cls = self._df_types[name]
-#            for i in range(len(values)):
-#                if not isinstance(values[i], DataFrame) and isinstance(values[i], pd.DataFrame):
-#                    values[i] = DataFrame(values[i])
-#                else:
-#                    values[i] = Series(values[i])
-#            df = cls(values, data)
-#            if hasattr(df, '_set_categories'):
-#                df._set_categories()
-#            return df
 
     def _slice_with_int_or_string(self, key):
         '''
@@ -499,7 +505,7 @@ class BaseContainer:
         '''
         cls = self.__class__
         kws = del_keys(self._kw_dict(copy=True))
-        for name, df in self._numerical_dict(copy=True).items():
+        for name, df in self._data(copy=True).items():
             dfcls = df.__class__
             if hasattr(df, '_groupbys'):
                 if len(df._groupbys) > 0:
@@ -524,7 +530,7 @@ class BaseContainer:
         '''
         cls = self.__class__
         kws = del_keys(self._kw_dict(copy=True))
-        for name, df in self._numerical_dict(copy=True).items():
+        for name, df in self._data(copy=True).items():
             dfcls = df.__class__
             if hasattr(df, '_groupbys'):
                 if len(df._groupbys) > 0:
@@ -549,7 +555,7 @@ class BaseContainer:
         '''
         cls = self.__class__
         kws = del_keys(self._kw_dict(copy=True))
-        for name, df in self._numerical_dict(copy=True).items():
+        for name, df in self._data(copy=True).items():
             dfcls = df.__class__
             if hasattr(df, '_groupbys'):
                 if len(df._groupbys) > 0:
@@ -566,10 +572,12 @@ class BaseContainer:
                     kws[name] = dfcls(df.iloc[keys, :])
         return cls(**kws)
 
-    def _other_bytes(self):
-        return 0
-
     def __getitem__(self, key):
+        '''
+        Containers can be sliced in a number of different ways and the slicing
+        of the data values depends on the characteristics of the individual
+        data objects (i.e. presence of _groupbys).
+        '''
         if isinstance(key, int):
             return self._slice_with_int_or_string(key)
         elif isinstance(key, str) and not hasattr(self, key):
@@ -583,7 +591,6 @@ class BaseContainer:
         else:
             raise KeyError('No selection method for key {} of type {}'.format(key, type(key)))
 
-
     def __delitem__(self, key):
         del self[key]
 
@@ -596,7 +603,7 @@ class BaseContainer:
         self._test = False
         self._traits_need_update = True
         self._widget = self._widget_class(self) if global_config['notebook'] else None
-        if meta is None and len(kwargs) == 0 and len(self._numerical_dict()) == 0:
+        if meta is None and len(kwargs) == 0 and len(self._data()) == 0:
             self._test = True
             self.name = 'TestContainer'
             self._update_traits()
@@ -608,6 +615,9 @@ class BaseContainer:
             return self._widget._repr_html_()
         return None
 
+
+def slice_by_int():
+    pass
 
 #def concat(*containers, axis=0, join='outer', ingore_index=False):
 #    '''

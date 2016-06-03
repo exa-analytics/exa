@@ -49,23 +49,22 @@ class NDBase:
         '''
         return self.__class__(self._copy(*args, **kwargs))
 
-    def _get_custom_traits(self):
+    def _update_custom_traits(self):
         '''
         Placeholder for custom trait creation (e.g. when multiple columns form a single trait).
         '''
         return {}
 
-    def _get_traits(self):
+    def _update_traits(self):
         '''
         Empty default traits.
         '''
-        traits = self._get_custom_traits()
+        traits = self._update_custom_traits()
         return traits
 
     def __repr__(self):
         name = self.__class__.__name__
-        n = len(self)
-        return '{0}(len: {1})'.format(name, n)
+        return '{0}{1}'.format(name, self.shape)
 
     def __str__(self):
         return self.__repr__()
@@ -109,7 +108,7 @@ class DataFrame(NDBase, pd.DataFrame):
             if column in self.columns:
                 self[column] = self[column].astype('category')
 
-    def _get_traits(self):
+    def _update_traits(self):
         '''
         Generate trait objects from column data.
 
@@ -123,7 +122,7 @@ class DataFrame(NDBase, pd.DataFrame):
 
         .. _trait type: http://traitlets.readthedocs.org/en/stable/trait_types.html
         '''
-        traits = self._get_custom_traits()
+        traits = self._update_custom_traits()
         groups = None
         prefix = self.__class__.__name__.lower()
         self._revert_categories()
@@ -134,7 +133,7 @@ class DataFrame(NDBase, pd.DataFrame):
                 trait_name = '_'.join((prefix, str(name)))    # Name mangle to ensure uniqueness
                 if np.all(np.isclose(self[name], self.ix[self._fi, name])):    # Don't bother sending all elements if same
                     value = self.ix[self._fi, name]
-                    if isinstance(value, Integral)
+                    if isinstance(value, Integral):
                         trait = Integer(int(value))
                     elif isinstance(value, Real):
                         trait = Float(float(value))
@@ -170,16 +169,14 @@ class DataFrame(NDBase, pd.DataFrame):
 
 class Field(DataFrame):
     '''
-    A discrete field is described by its spatial discritization (field data)
-    where each discrete point has any number of attributes (field values). This
-    is a special type of dataframe because the dimensionality of the field
-    values may be different for different fields. This class, therefore, stores
-    the field dimensionality in one dataframe and field values in other data
-    frames.
+    Fields are a special dataframe that always have a **field_values**
+    attribute which is a list container series/dataframe objects that contain
+    the discrete field values - the :class:`~exa.numerical.Field` dataframe
+    itself contains the description of the field (e.g. number of grid points,
+    size).
     '''
     _precision = 4
     _indices = ['field']
-    _df_get_traits = DataFrame._get_traits
 
     def copy(self, *args, **kwargs):
         '''
@@ -189,34 +186,30 @@ class Field(DataFrame):
         field_values = [field.copy() for field in self.field_values]
         return self.__class__(field_values, df)
 
-    def _get_traits(self):
+    def _update_custom_traits(self):
         '''
-        Because the :class:`~exa.numerical.Field` object has attached vector
-        and scalar field values, trait creation is handled slightly differently.
+        Obtain field values using the custom trait getter (called automatically
+        by :func:`~exa.numerical.NDBase._update_traits`).
         '''
-        traits = self._df_get_traits()
-        self._revert_categories()
+        traits = {}
         if self._groupbys:
             grps = self.groupby(self._groupbys)
             string = str(list(grps.groups.values())).replace(' ', '')
-            #string = grps.apply(lambda g: g.index).to_json(orient='values')
             traits['field_indices'] = Unicode(string).tag(sync=True)
         else:
-            string = Series(self.index).to_json(orient='values')
+            string = pd.Series(self.index.values).to_json(orient='values')
             traits['field_indices'] = Unicode(string).tag(sync=True)
         s = pd.Series({i: field.values for i, field in enumerate(self.field_values)})
-        traits['field_values'] = Unicode(s.to_json(orient='values', double_precision=self._precision)).tag(sync=True)
-        self._set_categories()
+        json_string = s.to_json(orient='values', double_precision=self._precision)
+        traits['field_values'] = Unicode(json_string).tag(sync=True)
         return traits
 
-    def __init__(self, field_values, *args, **kwargs):
-        '''
-        Args:
-            field_values (list or Series or DataFrame): Field value data
-        '''
+    def __init__(self, *args, field_values=None, **kwargs):
         if isinstance(args[0], pd.Series):
             args = (args[0].to_frame().T, )
         super().__init__(*args, **kwargs)
+        if isinstance(field_values, pd.Series) and len(self) == 1:
+            self.field_values
         if isinstance(field_values, list):
             self.field_values = [Series(v) for v in field_values]
         else:
@@ -228,21 +221,15 @@ class Field(DataFrame):
 class Field3D(Field):
     '''
     Dataframe for storing dimensions of a scalar or vector field of 3D space.
-    The row index present in this dataframe should correspond to a
-    A dataframe for storing field (meta)data along with the actual field values.
-    The storage of field values may be in the form of a scalar field (via
-    :class:`~exa.numerical.Series`) or vector field (via
-    :class:`~exa.numerical.DataFrame`). The field index (of this dataframe)
-    corresponds to the index in the list of field value data.
 
     +-------------------+----------+-------------------------------------------+
     | Column            | Type     | Description                               |
     +===================+==========+===========================================+
-    | nx                | int      | number of dimensionsin x                  |
+    | nx                | int      | number of grid points in x                |
     +-------------------+----------+-------------------------------------------+
-    | ny                | int      | number of dimensionsin y                  |
+    | ny                | int      | number of grid points in y                |
     +-------------------+----------+-------------------------------------------+
-    | nz                | int      | number of dimensionsin z                  |
+    | nz                | int      | number of grid points in z                |
     +-------------------+----------+-------------------------------------------+
     | ox                | float    | field origin point in x                   |
     +-------------------+----------+-------------------------------------------+
@@ -276,6 +263,9 @@ class Field3D(Field):
         cases). This is sometimes called C-major order, C-style order, and has
         the last index changing the fastest and the first index changing the
         slowest.
+
+    See Also:
+        :class:`~exa.numerical.Field`
     '''
     _columns = ['nx', 'ny', 'nz', 'ox', 'oy', 'oz', 'xi', 'xj', 'xk',
                 'yi', 'yj', 'yk', 'zi', 'zj', 'zk']
@@ -283,38 +273,30 @@ class Field3D(Field):
                'yi', 'yj', 'yk', 'zi', 'zj', 'zk']
 
 
+class SparseSeries(NDBase, pd.SparseSeries):
+    '''
+    Trait supporting sparse series.
+    '''
+    _copy = pd.SparseSeries.copy
+
+
 class SparseDataFrame(NDBase, pd.SparseDataFrame):
     '''
-    Trait supporting sparse dataframe, typically used to update values in a
-    related dataframe.
+    Trait supporting sparse dataframe.
     '''
+    _copy = pd.SparseDataFrame.copy
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if len(self) > 0:
             name = self.__class__.__name__
+            if self._columns:
+                missing = set(self._columns).difference(self.columns)
+                if missing:
+                    raise RequiredColumnError(missing, name)
             if self._indices:
                 missing = set(self._indices).difference(self.index.names)
                 if missing and len(self.index.names) != len(self._indices):
                     raise RequiredIndexError(missing, name)
                 else:
                     self.index.names = self._indices
-
-
-def get_indices_columns(obj):
-    '''
-    Compute a list of possible relational attributes of a given dataframe or
-    series object.
-    '''
-    indices = []
-    columns = []
-    #if hasattr(obj, 'index'):
-    #    indices += [name for name in obj.index.names if name is not None]
-    if hasattr(obj, '_indices'):
-        indices += obj._indices
-    if hasattr(obj, 'columns'):
-        columns += [name[:-1] if name[-1].isdigit() else name for name in obj.columns if name is not None]
-    if hasattr(obj, '_categories'):
-        columns += [name[:-1] if name[-1].isdigit() else name for name in obj._categories.keys()]
-    if hasattr(obj, '_groupbys'):
-        columns += obj._groupbys
-    return indices, columns
