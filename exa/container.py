@@ -97,8 +97,8 @@ class TypedMeta(type):
         '''
         pname = '_' + name
         def getter(self):
-            if not hasattr(self, pname) and hasattr(self, 'compute{}'.format(pname)):
-                self['compute{}'.format(pname)]()
+            if not hasattr(self, pname) and hasattr(self, '{}{}'.format(self._getter_prefix, pname)):
+                self['{}{}'.format(self._getter_prefix, pname)]()
             if not hasattr(self, pname):
                 raise AttributeError('Please compute or set {} first.'.format(name))
             return getattr(self, pname)
@@ -135,6 +135,7 @@ class BaseContainer:
         "master" container object, :class:`~exa.relational.container.Container`.
     '''
     _widget_class = ContainerWidget
+    _getter_prefix = 'compute'
 
     def add_data(self, data):
         pass
@@ -182,10 +183,8 @@ class BaseContainer:
         sizes = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB']
         mem_usage = self.memory_usage().sum()
         n = np.rint(len(str(mem_usage))/4).astype(int)
-        info = pd.DataFrame.from_dict({'size ({0})'.format(sizes[n]): [mem_usage/(1024**n)],
-                                       'object_count': [len(self._data().keys())]}).T
-        info.columns = ['info']
-        return info
+        print('size ({0}):'.format(sizes[n]),  mem_usage/(1024**n))
+        print('object count:', len(self._data().keys()))
 
     def memory_usage(self):
         '''
