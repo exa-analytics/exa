@@ -598,7 +598,10 @@ class BaseContainer:
         self.description = description
         self.meta = meta
         for key, value in kwargs.items():
-            setattr(self, key, value)
+            try:
+                setattr(self, key, value)
+            except:
+                pass
         self._test = False
         self._traits_need_update = True
         self._widget = self._widget_class(self) if global_config['notebook'] else None
