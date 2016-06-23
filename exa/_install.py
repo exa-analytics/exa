@@ -15,7 +15,7 @@ from exa.relational.base import _create_all, engine
 from exa.utility import mkp
 
 
-def install(exa_root=None):
+def install(exa_root=None, verbose=False):
     '''
     Initializes exa's database and notebook widget features.
 
@@ -34,7 +34,7 @@ def install(exa_root=None):
         _load_isotope_data()
         _load_unit_data()
         _load_constant_data()
-        _install_notebook_widgets(_conf['nbext_localdir'], _conf['nbext_sysdir'])
+        _install_notebook_widgets(_conf['nbext_localdir'], _conf['nbext_sysdir'], verbose=verbose)
 
 
 def _load_isotope_data():

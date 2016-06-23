@@ -70,7 +70,7 @@ _conf['static_constants.json'] = mkp(pkg, '_static', 'constants.json')
 _conf['static_isotopes.json'] = mkp(pkg, '_static', 'isotopes.json')
 _conf['static_units.json'] = mkp(pkg, '_static', 'units.json')
 _conf['nbext_localdir'] = mkp(pkg, '_nbextensions')
-_conf['nbext_sysdir'] = mkp(jupyter_data_dir(), '_nbextensions', 'exa')
+_conf['nbext_sysdir'] = mkp(jupyter_data_dir(), 'nbextensions', 'exa')
 
 
 # Check what type of Python session this is (python/ipython or jupyter notebook)

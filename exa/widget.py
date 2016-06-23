@@ -31,11 +31,23 @@ class Widget(DOMWidget):
         mtype = msg['type']
         content = msg['data']
         if mtype == 'message':
-            self._handle_message(content)
+            try:
+                if content is not None:
+                    self._handle_message(content)
+            except:
+                print('{}: {}'.format('_handle_message did not handle', content))
         elif mtype == 'field':
-            self._handle_field(content)
+            try:
+                if content is not None:
+                    self._handle_field(content)
+            except:
+                print('{}: {}'.format('_handle_field did not handle', content))
         elif mtype == 'image':
-            self._handle_image(content)
+            try:
+                if content is not None:
+                    self._handle_image(content)
+            except:
+                print('{}: {}'.format('_handle_image did not handle', content))
         else:
             print(msg)
 

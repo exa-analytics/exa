@@ -56,7 +56,7 @@ define([
                 view_self.app.app3d.animate();
                 view_self.app.app3d.controls.handleResize();
             });
-            this.view.send({'type': 'message', 'app': 'TestApp', 'content': 'True'});
+            this.view.send({'type': 'message', 'app': 'TestApp', 'content': 'True', 'data': 'None'});
         };
 
         create_gui() {

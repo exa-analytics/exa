@@ -19,6 +19,7 @@ from exa import algorithms
 
 if not _conf['exa_persistent']:
     from exa._install import install
+    print('exa is installing nbextensions')
     install()
 
 
