@@ -1,21 +1,29 @@
 # -*- coding: utf-8 -*-
 '''
 Installer
-====================
-This module is responsible for initializing the database (whether in memory or
-on disk/elsewhere) and installing/updating the (Jupyter) notebook widgets.
+########################
+This module allows a user to install exa in a persistent manner enabling some
+advanced content management features. Installation will create a permanent
+directory where exa's relational database will be housed (default ~/.exa).
+All container creation, logging, and static data is housed in this directory.
 '''
 import os
 import shutil
+import platform
 import pandas as pd
 from itertools import product
 from notebook import install_nbextension
-from exa import _conf
-from exa.relational.base import _create_all, engine
+from exa import global_config
+from exa._config import update_config, save_config
+from exa._config import cleanup as config_cleanup
+from exa.log import setup_loggers
+from exa.relational.base import cleanup as rel_cleanup
+from exa.relational.base import create_tables, init_db, engine
+from exa.relational.update import drop_all_static_tables
 from exa.utility import mkp
 
 
-def install(exa_root=None, verbose=False):
+def install(persist=False, verbose=False):
     '''
     Initializes exa's database and notebook widget features.
 
@@ -26,22 +34,43 @@ def install(exa_root=None, verbose=False):
     Args:
         exa_root (str): If None assumes temporary session, otherwise directory path where the package will be installed
     '''
-    if exa_root:
+    if persist:
+        rel_cleanup()
+        config_cleanup()
+        if platform.system().lower() == 'windows':
+            dot_exa = mkp(os.getenv('USERPROFILE'), '.exa')
+        else:
+            dot_exa = mkp(os.getenv('HOME'), '.exa')
+        mkp(dot_exa, mk=True)
+        update_config()
+        save_config()
+        init_db()
+        global engine
+        from exa.relational.base import engine
+        setup_loggers()
+    update(verbose)
+
+
+def update(verbose=False):
+    '''
+    If upgrading to a new version of exa, update static databases as needed.
+    '''
+    try:
+        drop_all_static_tables()
+    except:
         pass
-        #raise NotImplementedError('Persistent state exa not yet working...')
-    else:
-        _create_all()
-        _load_isotope_data()
-        _load_unit_data()
-        _load_constant_data()
-        _install_notebook_widgets(_conf['nbext_localdir'], _conf['nbext_sysdir'], verbose=verbose)
+    create_tables()
+    load_isotope_data()
+    load_unit_data()
+    load_constant_data()
+    install_notebook_widgets(global_config['nbext_localdir'], global_config['nbext_sysdir'], verbose)
 
 
-def _load_isotope_data():
+def load_isotope_data():
     '''
-    Load static isotope data into the database.
+    Load isotope data (from isotopes.json) into the database.
     '''
-    df = pd.read_json(_conf['static_isotopes.json'], orient='values')
+    df = pd.read_json(global_config['static_isotopes.json'], orient='values')
     df.columns = ('A', 'Z', 'af', 'eaf', 'color', 'radius', 'gfactor', 'mass', 'emass',
                   'name', 'eneg', 'quadmom', 'spin', 'symbol', 'szuid', 'strid')
     df.index.names = ['pkid']
@@ -49,11 +78,11 @@ def _load_isotope_data():
     df.to_sql(name='isotope', con=engine, index=False, if_exists='replace')
 
 
-def _load_unit_data():
+def load_unit_data():
     '''
-    Load static unit conversions into the database.
+    Load unit conversions (from units.json) into the database.
     '''
-    df = pd.read_json(_conf['static_units.json'])
+    df = pd.read_json(global_config['static_units.json'])
     for column in df.columns:
         series = df[column].copy().dropna()
         values = series.values
@@ -66,18 +95,18 @@ def _load_unit_data():
         df_to_save.to_sql(name=column, con=engine, index=False, if_exists='replace')
 
 
-def _load_constant_data():
+def load_constant_data():
     '''
-    Load static constants into the database.
+    Load constants (from constants.json) into the database.
     '''
-    df = pd.read_json(_conf['static_constants.json'])
+    df = pd.read_json(global_config['static_constants.json'])
     df.reset_index(inplace=True)
     df.columns = ['symbol', 'value']
     df['pkid'] = df.index
     df.to_sql(name='constant', con=engine, index=False, if_exists='replace')
 
 
-def _install_notebook_widgets(origin_base, dest_base, verbose=False):
+def install_notebook_widgets(origin_base, dest_base, verbose=False):
     '''
     Convenience wrapper around :py:func:`~notebook.install_nbextension` that
     installs Jupyter notebook extensions using a systematic naming convention (
@@ -91,8 +120,6 @@ def _install_notebook_widgets(origin_base, dest_base, verbose=False):
         origin_base (str): Location of extension source code
         dest_base (str): Destination location (system and/or user specific)
         verbose (bool): Verbose installation (default False)
-
-    Note:
 
     See Also:
         The configuration module :mod:`~exa._config` describes the default

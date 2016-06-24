@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from exa.relational.base import _create_all, session_scope, SessionFactory
 from exa.relational.unit import (Length, Mass, Time, Current, Amount,
                                  Luminosity, Dose, Acceleration,
                                  Charge, Dipole, Energy, Force,
