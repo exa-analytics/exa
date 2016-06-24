@@ -91,28 +91,32 @@ define([
             this.fields = this.gui.addFolder('fields');
             this.fields['field type'] = '';
             this.fields['dx'] = 0.5;
-            this.fields['xmin'] = -2.0;
-            this.fields['xmax'] = 2.0;
             this.fields['dy'] = 0.5;
-            this.fields['ymin'] = -2.0;
-            this.fields['ymax'] = 2.0;
             this.fields['dz'] = 0.5;
+            this.fields['spacing'] = 0.5;
+            this.fields['xmin'] = -2.0;
+            this.fields['ymin'] = -2.0;
             this.fields['zmin'] = -2.0;
+            this.fields['xmax'] = 2.0;
+            this.fields['ymax'] = 2.0;
             this.fields['zmax'] = 2.0;
-            this.fields['isovalue'] = 0.03;
+            this.fields['isovalue'] = 0.50;
             this.fields['dual'] = false;
+//            var funcs = num.function_list_3d;
+  //          funcs.push('None');
             this.fields['field_type_dropdown'] = this.fields.add(this.fields, 'field type', num.function_list_3d);
             this.fields['isovalue_slider'] = this.fields.add(this.fields, 'isovalue', 0.0, 2.0);
+            this.fields['spacing_slider'] = this.fields.add(this.fields, 'spacing', 0.2, 1);
             this.fields['dual_checkbox'] = this.fields.add(this.fields, 'dual');
-            this.fields['dx_slider'] = this.fields.add(this.fields, 'dx', 0.05, 1.0);
-            this.fields['xmin_slider'] = this.fields.add(this.fields, 'xmin', -5.0, 5.0);
-            this.fields['xmax_slider'] = this.fields.add(this.fields, 'xmax', -5.0, 5.0);
+            /*this.fields['dx_slider'] = this.fields.add(this.fields, 'dx', 0.05, 1.0);
             this.fields['dy_slider'] = this.fields.add(this.fields, 'dy', 0.05, 1.0);
-            this.fields['ymin_slider'] = this.fields.add(this.fields, 'ymin', -5.0, 5.0);
-            this.fields['ymax_slider'] = this.fields.add(this.fields, 'ymax', -5.0, 5.0);
-            this.fields['dz_slider'] = this.fields.add(this.fields, 'dz', 0.05, 1.0);
-            this.fields['zmin_slider'] = this.fields.add(this.fields, 'zmin', -5.0, 5.0);
-            this.fields['zmax_slider'] = this.fields.add(this.fields, 'zmax', -5.0, 5.0);
+            this.fields['dz_slider'] = this.fields.add(this.fields, 'dz', 0.05, 1.0);*/
+            /*this.fields['xmin_slider'] = this.fields.add(this.fields, 'xmin', -5.0, -2.0);
+            this.fields['xmax_slider'] = this.fields.add(this.fields, 'xmax',  2.0,  5.0);
+            this.fields['ymin_slider'] = this.fields.add(this.fields, 'ymin', -5.0, -2.0);
+            this.fields['ymax_slider'] = this.fields.add(this.fields, 'ymax',  2.0,  5.0);
+            this.fields['zmin_slider'] = this.fields.add(this.fields, 'zmin', -5.0, -2.0);
+            this.fields['zmax_slider'] = this.fields.add(this.fields, 'zmax',  2.0,  5.0);*/
             this.fields.dimensions = {
                 'xmin': this.fields.xmin,
                 'xmax': this.fields.xmax,
@@ -132,6 +136,17 @@ define([
                 self.render_field();
             });
 
+            this.fields.spacing_slider.onFinishChange(function(spacing) {
+                self.app3d.remove_meshes(self.meshes);
+                self.fields.dx = spacing;
+                self.fields.dy = spacing;
+                self.fields.dz = spacing;
+                self.fields.field.new_dr({'dx': spacing});
+                self.fields.field.new_dr({'dy': spacing});
+                self.fields.field.new_dr({'dz': spacing});
+                self.render_field();
+            });
+
             this.fields.dual_checkbox.onChange(function(value) {
                 self.fields.dual = value;
                 self.fields.sides = self.fields.dual + 1;    //e.g. true + 1 === 2
@@ -142,7 +157,7 @@ define([
                 self.fields.isovalue = value;
                 self.render_field();
             });
-
+/*
             this.fields.dx_slider.onFinishChange(function(value) {
                 self.fields.dx = value;
                 self.fields.field.new_dr({'dx': value});
@@ -159,8 +174,8 @@ define([
                 self.fields.dz = value;
                 self.fields.field.new_dr({'dz': value});
                 self.render_field();
-            });
-
+            });*/
+            /*
             this.fields.xmin_slider.onFinishChange(function(value) {
                 self.fields.xmin = value;
                 self.fields.field.new_limits({'xmin': value});
@@ -195,7 +210,7 @@ define([
                 self.fields.zmax = value;
                 self.fields.field.new_limits({'zmax': value});
                 self.render_field();
-            });
+            });*/
         };
 
         resize() {

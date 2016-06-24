@@ -569,6 +569,7 @@ define([
         };
 
         march_cubes1(field, isovalue) {
+            console.log(field);
             /*"""
             march_cubes1
             ------------------------
@@ -697,7 +698,7 @@ define([
             /*"""
             march_cubes2
             ------------------------
-            Similar to the above but for finding dual geometries.
+            Similar to the above but for finding positive and negative surfaces.
             */
             console.log('march_cubes2');
             var nx = field.nx;
@@ -816,45 +817,28 @@ define([
             n_geometry.mergeVertices();
             n_geometry.computeFaceNormals();
             n_geometry.computeVertexNormals();
-            /*var p_material = new THREE.MeshLambertMaterial({
-                color: 0x003399,
-                transparent: true,
-                opacity: 0.7,
-                side: THREE.FrontSide
-            });
-            var n_material = new THREE.MeshLambertMaterial({
-                color: 0xFF9900,
-                transparent: true,
-                opacity: 0.8,
-                side: THREE.BackSide
-            });*/
             var p_material = new THREE.MeshPhongMaterial({
                 color: 0x003399,
                 specular: 0x003399,
+                transparent: true,
+                opacity: 0.7,
                 shininess: 30,
-                side: THREE.FrontSide
+                side: THREE.DoubleSide
             });
             var n_material = new THREE.MeshPhongMaterial({
                 color: 0xFF9900,
                 specular: 0xFF9900,
+                transparent: true,
+                opacity: 0.7,
                 shininess: 30,
-                side: THREE.BackSide
+                side: THREE.DoubleSide
             });
             var material1 = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
             var material2 = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
             var mesh1 = new THREE.Mesh(p_geometry, p_material);
             var mesh2 = new THREE.Mesh(n_geometry, n_material);
-            //var mesh3 = new THREE.Mesh(p_geometry, material1);
-            //var mesh4 = new THREE.Mesh(n_geometry, material2);
             this.scene.add(mesh1);
             this.scene.add(mesh2);
-            /*this.scene.add(mesh3);
-            this.scene.add(mesh4);
-            console.log(mesh3.geometry.vertices.length);
-            console.log(mesh3.geometry.faces.length);
-            console.log(mesh4.geometry.vertices.length);
-            console.log(mesh4.geometry.faces.length);
-            return [mesh1, mesh2, mesh3, mesh4];*/
             return [mesh1, mesh2];
         };
     };
@@ -1215,9 +1199,9 @@ define([
     ];
 
     App3D.prototype.cube_vertices = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0],
-                                          [0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1]];
+                                     [0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1]];
     App3D.prototype.cube_edges = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6],
-                                       [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]];
+                                  [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]];
     App3D.prototype.bits = [1, 2, 4, 8, 16, 32, 64, 128];
 
     return App3D;
