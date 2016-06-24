@@ -823,7 +823,7 @@ define([
                 transparent: true,
                 opacity: 0.7,
                 shininess: 30,
-                side: THREE.DoubleSide
+                side: THREE.FrontSide
             });
             var n_material = new THREE.MeshPhongMaterial({
                 color: 0xFF9900,
@@ -831,7 +831,7 @@ define([
                 transparent: true,
                 opacity: 0.7,
                 shininess: 30,
-                side: THREE.DoubleSide
+                side: THREE.BackSide
             });
             var material1 = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
             var material2 = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
