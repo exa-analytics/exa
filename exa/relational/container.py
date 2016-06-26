@@ -1,15 +1,20 @@
 # -*- coding: utf-8 -*-
 '''
-The Container Module
-===============================================
-This module provides the relational container object and a relationship table
-that connects containers to recrods representing files on disk.
+Container
+#######################
+This module provides the front-facing Container object subclassing the
+:class:`~exa.container.BaseContainer` and the static typing framework for
+relational class attributes, :class:`~exa.container.TypedRelationalMeta`.
+
+See Also:
+    :mod:`~exa.container`
 '''
 from sys import getsizeof
 from sqlalchemy import Column, String, ForeignKey, Table, Integer, event
 from sqlalchemy.orm import relationship, mapper
-from exa.relational.base import Base, Name, HexUID, Time, Disk
-from exa.container import BaseContainer
+from exa.relational.base import Base, Name, HexUID, Time, Disk, BaseMeta
+from exa.container import BaseContainer, TypedMeta
+from exa.widget import ContainerWidget
 
 
 ContainerFile = Table(
@@ -20,14 +25,21 @@ ContainerFile = Table(
 )
 
 
-class Container(BaseContainer, Name, HexUID, Time, Disk, Base):
+class TypedRelationalMeta(TypedMeta, BaseMeta):
     '''
-    The relational store and file controller that is inherited by data specific
-    containers to facilitate data processing, analysis, and visualization.
+    A metaclass for relational objects that have typed attributes.
+    '''
+    pass
+
+
+class Container(BaseContainer, Name, HexUID, Time, Disk, Base, metaclass=TypedRelationalMeta):
+    '''
+    The ("master") container class: this class combines relational and data
+    management features and wraps them into a single data object.
     '''
     files = relationship('File', secondary=ContainerFile, backref='containers', cascade='all, delete')
-    _ctype = Column(String(32), nullable=False)    # Container type == class name
-    __mapper_args__ = {'polymorphic_on': _ctype,
+    cname = Column(String(32), nullable=False)     # container class name
+    __mapper_args__ = {'polymorphic_on': cname,
                        'polymorphic_identity': 'container',
                        'with_polymorphic': '*'}
 
@@ -37,12 +49,3 @@ class Container(BaseContainer, Name, HexUID, Time, Disk, Base):
         n = self.name
         u = self.hexuid
         return '{0}({1}: {2}[{3}])'.format(c, p, n, u)
-
-
-@event.listens_for(Container, 'before_insert')
-def _before_insert(mapper, connection, target):
-    '''
-    Before insertion update the time stamp and size.
-    '''
-    target._update_size()
-    target._update_accessed()

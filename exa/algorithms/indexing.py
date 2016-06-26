@@ -5,6 +5,7 @@ Indexing Recipes and Array Creation
 Functions related to generating indices.
 '''
 import numpy as np
+from exa import global_config
 
 
 def arange1(initials, counts):
@@ -141,7 +142,7 @@ def indexes_sc2(starts, count):
     return (outer, inner, index)
 
 
-def unordered_pairing_single(x, y):
+def unordered_pairing(x, y):
     '''
     A `pairing function`_ for unordered (in magnitude) values.
 
@@ -169,5 +170,12 @@ def unordered_pairing_single(x, y):
     return np.int64(x * y + np.trunc((np.abs(x - y) - 1)**2 / 4))
 
 
-unordered_pairing = np.vectorize(unordered_pairing_single,
-                                 doc=unordered_pairing_single.__doc__)
+if global_config['pkg_numba']:
+    from numba import jit, vectorize, int32, int64, float32, float64
+    arange1 = jit(nopython=True, cache=True)(arange1)
+    arange2 = jit(nopython=True, cache=True)(arange2)
+    indexes_sc1 = jit(nopython=True, cache=True)(indexes_sc1)
+    indexes_sc2 = jit(nopython=True, cache=True)(indexes_sc2)
+    unordered_pairing = vectorize([int32(int32, int32), int64(int64, int64),
+                                   float32(float32, float32), float64(float64, float64)],
+                                   nopython=True)(unordered_pairing)

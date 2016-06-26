@@ -91,9 +91,11 @@ define([
             };
             this.n = this.nx * this.ny * this.nz;
             if (typeof func_or_values === 'function') {
+                console.log('field func');
                 this.func = func_or_values;
                 this.compute_field();
             } else {
+                console.log('values');
                 this.values = new Float32Array(func_or_values);
             };
         };
@@ -229,7 +231,7 @@ define([
                 for (var y of this.y) {
                     for (var z of this.z) {
                         this.values[i] = this.func(x, y, z);
-                        ++i;
+                        i += 1;
                     };
                 };
             };

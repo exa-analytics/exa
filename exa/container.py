@@ -1,65 +1,147 @@
 # -*- coding: utf-8 -*-
 '''
-Base Container Class
-===============================================
-The :class:`~exa.container.BaseContainer` class is the primary controller for
-data acquisition, management, and visualization. Containers are an object based
-storage device used to process, analyze, (visualize), and organize
-raw data stored as n-dimensional array objects (dataframes). Each Container
-object is aware of the dataframes attached to it and provides standard
-methods for common manipulations.
+Base Container
+########################
+The :class:`~exa.container.BaseContainer` class is the primary object for
+data processing, analysis, and visualization. Containers are composed of
+n-dimensional spreadsheet-like (see :mod:`~exa.numerical`) objects whose
+columns contain data for 2D and 3D visualization.
 
-Data specific containers (such as the Universe class which is provided by the
-atomic package, for example) are capable of advanced, automatic data analysis
-tailored to the specific data content at hand.
+The :class:`~exa.container.BaseContainer` is akin to a :class:`~pandas.HDFStore`
+in that it is a container for dataframes (and saves to an HDF5 file). It is
+different in that it provides visualization tools access to the data contained
+via automated JSON strings, transferrable between languages.
 
 See Also:
-    :mod:`~exa.relational.container`
+    :mod:`~exa.relational.container` and :mod:`~exa.widget`
 '''
 import os
 import numpy as np
 import pandas as pd
 import networkx as nx
 from sys import getsizeof
+from copy import deepcopy
 from collections import OrderedDict
 from traitlets import Bool
 from collections import defaultdict
 from sqlalchemy.orm.attributes import InstrumentedAttribute
-from exa import _conf
+from exa import global_config, mpl
 from exa.widget import ContainerWidget
 from exa.numerical import NDBase, DataFrame, Field, SparseDataFrame, Series
 from exa.utility import del_keys
 
 
+class TypedMeta(type):
+    '''
+    A metaclass for automatically generating properties for statically typed
+    class attributes. Useage is the following:
+
+    .. code-block:: Python
+
+        class TestMeta(TypedMeta):
+            attr1 = int
+            attr2 = DataFrame
+
+        class TestClass(metaclass=TestMeta):
+            def __init__(self, attr1, attr2):
+                self.attr1 = attr1
+                self.attr2 = attr2
+
+    Under the covers, this class creates code that looks like the following:
+
+    .. code-block:: Python
+
+        class TestClass:
+            @property
+            def attr1(self):
+                return self._attr1
+
+            @attr1.setter
+            def attr1(self, obj):
+                if not isinstance(obj, int):
+                    raise TypeError('attr1 must be int')
+                self._attr1 = obj
+
+            @attr1.deleter
+            def attr1(self):
+                del self._attr1
+
+            @property
+            def attr2(self):
+                return self._attr2
+
+            @attr2.setter
+            def attr2(self, obj):
+                if not isinstance(obj, DataFrame):
+                    raise TypeError('attr2 must be DataFrame')
+                self._attr2 = obj
+
+            @attr2.deleter
+            def attr2(self):
+                del self._attr2
+
+            def __init__(self, attr1, attr2):
+                self.attr1 = attr1
+                self.attr2 = attr2
+    '''
+    @staticmethod
+    def create_property(name, ptype):
+        '''
+        Creates a custom property with a getter that performs computing
+        functionality (if available) and raise a type error if setting
+        with the wrong type.
+
+        Note:
+            By default, the setter attempts to convert the object to the
+            correct type; a type error is raised if this fails.
+        '''
+        pname = '_' + name
+        def getter(self):
+            if not hasattr(self, pname) and hasattr(self, '{}{}'.format(self._getter_prefix, pname)):
+                self['{}{}'.format(self._getter_prefix, pname)]()
+            if not hasattr(self, pname):
+                raise AttributeError('Please compute or set {} first.'.format(name))
+            return getattr(self, pname)
+        def setter(self, obj):
+            if not isinstance(obj, ptype):
+                try:
+                    obj = ptype(obj)
+                except:
+                    raise TypeError('Object {0} must instance of {1}'.format(name, ptype))
+            setattr(self, pname, obj)
+        def deleter(self):
+            del self[pname]
+        return property(getter, setter, deleter)
+
+    def __new__(metacls, name, bases, clsdict):
+        '''
+        Here we control the creation of the class definition. For every statically
+        typed attributed (see source code or docstring)
+        '''
+        for k, v in metacls.__dict__.items():
+            if isinstance(v, type) and k[0] != '_':
+                clsdict[k] = metacls.create_property(k, v)
+        return super().__new__(metacls, name, bases, clsdict)
+
+
 class BaseContainer:
     '''
-    Foundational class for creating data containers. Inherited by
-    :class:`~exa.relational.container.Container`. This class should not be
-    inherited directly; rather :class:`~exa.relational.container.Container`
-    should be inherited.
+    Base container class responsible for all features related to data
+    management; relational features are in :class:`~exa.relational.container.Container`.
+
+    Note:
+        Due to the requirements of mixing metaclasses, a metaclass is
+        created in :mod:`~exa.relational.container` and assigned to the
+        "master" container object, :class:`~exa.relational.container.Container`.
     '''
     _widget_class = ContainerWidget
-    _df_types = OrderedDict()
+    _getter_prefix = 'compute'
 
-    @property
-    def field_values(self):
-        '''
-        Retrieve values of a specific field.
+    def add_data(self, data):
+        pass
 
-        Args:
-            field (int): Field index (corresponding to the fields dataframe)
-
-        Returns:
-            data: Series or dataframe object containing field values
-        '''
-        if self._is('_field'):
-            return self._field.field_values
-
-    def append_numerical(self, frame_or_series):
-        '''
-        Attach a dataframe or series object to the current container.
-        '''
-        raise NotImplementedError()
+    def append_field(self, data, values=None):
+        pass
 
     def save(self, path=None):
         '''
@@ -79,7 +161,7 @@ class BaseContainer:
         '''
         cls = self.__class__
         kws = del_keys(self._kw_dict(copy=True))
-        dfs = self._numerical_dict(copy=True)
+        dfs = self._data(copy=True)
         kws.update(kwargs)
         kws.update(dfs)
         return cls(**kws)
@@ -93,76 +175,148 @@ class BaseContainer:
             For argument description, see :func:`~exa.container.concat`.
         '''
         raise NotImplementedError()
-        #return concat(self, *args, **kwargs)
 
     def info(self):
         '''
         Print human readable information about the container.
         '''
-        n = getsizeof(self)
         sizes = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB']
-        for size in sizes:
-            s = str(n).split('.')
-            if len(s) > 1:
-                if len(s[0]) <= 3 and len(s[1]) > 3:
-                    print('size ({0}): {1}'.format(size, n))
-                    break
-            elif len(s[0]) <= 3:
-                print('size ({0}): {1}'.format(size, n))
-                break
-            n /= 1024
+        mem_usage = self.memory_usage().sum()
+        n = np.rint(len(str(mem_usage))/4).astype(int)
+        print('size ({0}):'.format(sizes[n]),  mem_usage/(1024**n))
+        print('object count:', len(self._data().keys()))
 
-    def network(self):
+    def memory_usage(self):
         '''
-        Visualize the dataframe relationships as a directed network graph. The
-        direction points toward the dataframe that contains the index and
-        away from the dataframe that contains the column. If no direction is
-        given the match is on column axis or if both directions are given the match
-        is on index axis.
+        Get the memory usage (in bytes) of the container object.
         '''
-        node_scheme = ['olivedrab', 'orange', 'firebrick']
-        edge_scheme = ['olive', 'gold', 'darkred']
-        nodes = {name: name[1:] if name.startswith('_') else name for name in self._numerical_dict().keys()}
-        edges = []
-        ncolors = defaultdict(int)
-        ecolors = defaultdict(int)
-        n = len(nodes)
-        for internal_name, pn in nodes.items():
-            df0 = self[internal_name]
-            if isinstance(df0, pd.Series):
-                continue
-            for internal_other, po in nodes.items():
-                df1 = self[internal_other]
-                if df0 is df1 or isinstance(df1, pd.Series):
-                    continue    # Skip if same
-                index0 = df0.index.names
-                index1 = df1.index.names
-                columns0 = df0.columns
-                columns1 = df1.columns
-                if np.any([idx0 in index1 for idx0 in index0]):
-                    edges.append((pn, po))
-                    ncolors[pn] = max([ncolors[pn], 2])
-                    ncolors[po] = max([ncolors[po], 2])
-                    ecolors[(pn, po)] = max([ecolors[(pn, po)], 2])
-                    ecolors[(po, pn)] = max([ecolors[(po, pn)], 2])
-                elif np.any([idx0 in columns1 for idx0 in index0]) or np.any([idx0 + '0' in columns1 for idx0 in index0]):
-                    edges.append((pn, po))
-                    ncolors[pn] = max([ncolors[pn], 2])
-                    ncolors[po] = max([ncolors[po], 1])
-                    ecolors[(pn, po)] = max([ecolors[(pn, po)], 1])
-                    ecolors[(po, pn)] = max([ecolors[(po, pn)], 1])
-                elif np.any([idx1 in columns0 for idx1 in index1]) or np.any([idx1 + '0' in columns0 for idx1 in index1]):
-                    edges.append((pn, po))
-                    ncolors[pn] = max([ncolors[pn], 1])
-                    ncolors[po] = max([ncolors[po], 2])
-                    ecolors[(pn, po)] = max([ecolors[(pn, po)], 1])
-                    ecolors[(po, pn)] = max([ecolors[(po, pn)], 1])
-        g = nx.Graph()
-        g.add_nodes_from(nodes.values())
-        g.add_edges_from(edges)
-        node_colors = [node_scheme[ncolors[node]] for node in g.nodes()]
-        edge_colors = [edge_scheme[ecolors[edge]] for edge in g.edges()]
-        nx.draw(g, with_labels=True, node_size=11000, font_size=15, node_color=node_colors, edge_colors=edge_colors)
+        data_mem = 0      # Memory due to data objects
+        rel_mem = 0       # Memory due to metadata/relational attributes
+        widget_mem = 0    # Memory due to widget data
+        for obj in self._data().values():
+            data_mem += getsizeof(obj)
+        for obj in self._rel().values():
+            rel_mem += getsizeof(obj)
+        if self._widget is not None:
+            for obj in self._widget._trait_values.values():
+                widget_mem += getsizeof(obj)
+        mem = pd.Series({'data': data_mem, 'base': rel_mem, 'widget': widget_mem})
+        mem.name = 'bytes'
+        return mem
+
+
+
+#    def data_network(self):
+#        '''
+#        Visualize the dataframe/series relationships and relative sizes.
+#
+#        A network graph representation of the current container is drawn. Nodes
+#        are data objects (dataframes or series) attached to the current
+#        container. Their relative size is proportional to the amount of data
+#        they contain. The node color corresponds to the number of relationships
+#        a given node has with other nodes. The edge color correspond to the
+#        type of connection a given node has with another node (index to index,
+#        index to column, or index to other).
+#
+#        If performed on an empty or test container, this function will display
+#        the enforced data objects and their connectivity. No information about
+#        the type of connectivity
+#        '''
+#        edges = []
+#        nodes = []
+#        node_sizes = {}
+#        edge_colors = {}
+#        edge_color_map = sns.color_palette('viridis', 4)
+#        data = self._df_types.items()
+#        if not self._test:
+#            data = self._numerical_dict().items()
+#        for i, (name0, df0) in enumerate(data):
+#            n0 = name0[1:] if name0.startswith('_') else name0
+#            indices0, columns0 = get_indices_columns(df0)
+#            for name1, df1 in data:
+#                if df0 is df1:
+#                    continue
+#                n1 = name1[1:] if name1.startswith('_') else name1
+#                indices1, columns1 = get_indices_columns(df1)
+#                key = (n0, n1)
+#                if any([index in indices1 for index in indices0]):
+#                    edges.append(key)
+#                    edge_colors[key] = edge_color_map[0]
+#                elif any([index in columns1 for index in indices0]):
+#                    edges.append(key)
+#                    edge_colors[key] = edge_color_map[1]
+#                elif any([index in columns0 for index in indices1]):
+#                    edges.append(key)
+#                    edge_colors[key] = edge_color_map[1]
+#                #elif (hasattr(df0, '_categories') and hasattr(df1, '_categories')):
+#                #    if (np.any([index in  for index in df0._groupbys]) or
+#                #        np.any([index in columns0 for index in df1._groupbys])):
+#                #        edges.append(key)
+#                #        edge_colors[key] = edge_color_map[2]
+#            nodes.append(n0)
+#            node_sizes[n0] = df0.size if isinstance(df0.size, np.int64) or isinstance(df0.size, int) else 0
+#            if hasattr(df0, 'field_values'):
+#                for i, field in enumerate(df0.field_values):
+#                    key = (n0, 'field_values[*]'.format(i))
+#                    if key[1] not in nodes:
+#                        nodes.append(key[1])
+#                        node_sizes[key[1]] = field.size if isinstance(field.size, np.int64) or isinstance(field.size, int) else 0
+#                    else:
+#                        node_sizes[key[1]] += field.size if isinstance(field.size, np.int64) or isinstance(field.size, int) else 0
+#                    edges.append(key)
+#                    edge_colors[key] = edge_color_map[3]
+#                    key = (key[1], key[0])
+#                    edges.append(key)
+#                    edge_colors[key] = edge_color_map[2]
+#        g = nx.Graph()
+#        g.add_nodes_from(nodes)
+#        g.add_edges_from(edges)
+#        fig, ax = sns.plt.subplots(1, figsize=(13, 8), dpi=600)
+#        ax.axis('off')
+#        degree_values = np.unique(list(g.degree().values()))
+#        enum_map = {v: k for k, v in enumerate(degree_values)}
+#        node_colors = sns.color_palette('viridis', len(degree_values))
+#        node_color = [node_colors[enum_map[g.degree()[node]]] for node in g.nodes()]
+#        edge_color = [edge_colors[edge] for edge in g.edges()]
+#        node_size = 3000
+#        if not self._test:
+#            node_size = np.log(np.array([node_sizes[node] for node in g.nodes()]))
+#            node_size *= 13000 / node_size.max()
+#            node_size += 2000
+#        pos = nx.spring_layout(g)
+#        f0 = nx.draw_networkx_nodes(g, pos=pos, node_size=node_size,
+#                                    node_color=node_color, alpha=0.8, ax=ax)
+#        f1 = nx.draw_networkx_labels(g, pos=pos, labels={k: k for k in g.nodes()},
+#                                     font_size=15, font_weight='bold', ax=ax)
+#        f2 = nx.draw_networkx_edges(g, pos=pos, edge_color=edge_color, width=2, ax=ax)
+#        axbox = ax.get_position()
+#        # Node color legend
+#        degree_map = {v: k for k, v in enum_map.items()}
+#        proxies = []
+#        descriptions = []
+#        for i, v in enumerate(degree_values):
+#            line = sns.mpl.lines.Line2D([], [], linestyle='none', color=node_colors[enum_map[v]], marker='o')
+#            proxies.append(line)
+#            descriptions.append(degree_map[i])
+#        r_legend = ax.legend(proxies, descriptions, title='Connections', loc=(1, 0), frameon=True)
+#        r_frame = r_legend.get_frame()
+#        r_frame.set_facecolor('white')
+#        r_frame.set_edgecolor('black')
+#        # Edge color legend
+#        rel_types = {0: 'index - index', 1: 'index - column', 2: 'column - column',
+#                     3: 'index - other'}
+#        proxies = []
+#        descriptions = []
+#        for i, c in enumerate(edge_color_map):
+#            line = sns.mpl.lines.Line2D([], [], linestyle='-', color=c)
+#            proxies.append(line)
+#            descriptions.append(rel_types[i])
+#        e_legend = ax.legend(proxies, descriptions, title='Relationship Type', loc=(1, 0.7), frameon=True)
+#        e_frame = r_legend.get_frame()
+#        e_frame.set_facecolor('white')
+#        e_frame.set_edgecolor('black')
+#        fig.gca().add_artist(r_legend)
+#        return g
 
     @classmethod
     def from_hdf(cls, path):
@@ -250,7 +404,7 @@ class BaseContainer:
             store['kwargs'] = pd.Series()
             store.get_storer('kwargs').attrs.metadata = kwargs
             fc = 0
-            for name, df in self._numerical_dict().items():
+            for name, df in self._data().items():
                 name = name[1:] if name.startswith('_') else name
                 if isinstance(df, Field):
                     df._revert_categories()
@@ -276,90 +430,59 @@ class BaseContainer:
                     store[name] = df
         return path
 
-    def _kw_dict(self, copy=False):
+    def _rel(self, copy=False):
         '''
-        Create kwargs from the available (non-null valued) relational arguments.
-
-        Args:
-            copy (bool): Return a copy of the attributes (default False)
-
-        Returns:
-            d (dict): Dictionary of non-null relational attributes.
+        Get all relational and metadata data of the container.
         '''
-        kws = {}
-        for name, value in self.__class__.__dict__.items():
-            if isinstance(value, InstrumentedAttribute):
-                obj = self[name]
-                if obj:
-                    kws[name] = obj
-        if copy:
-            return kws.copy()
-        return kws
-
-    def _numerical_dict(self, copy=False, cls_criteria=[pd.Series, pd.DataFrame]):
-        '''
-        Get the attached :class:`~exa.numerical.Series` and
-        :class:`~exa.numerical.DataFrame` objects.
-
-        Args:
-            copy (bool): Return an in memory copy
-            cls_criteria (class): List of class objects to identify by (default :class:`~pandas.DataFrame`)
-
-        Returns:
-            dfs (dict): Name, dataframe key-value pairs
-        '''
-        dfs = {}
-        for name, value in self.__dict__.items():
-            if any((isinstance(value, klass) for klass in cls_criteria)):
+        rel = {}
+        for key, obj in self.__dict__.items():
+            if not isinstance(obj, (pd.Series, pd.DataFrame)):
                 if copy:
-                    cls = value.__class__
-                    dfs[name] = cls(value.copy())
+                    rel[key] = deepcopy(obj)
                 else:
-                    dfs[name] = value
-        return dfs
+                    rel[key] = obj
+        return rel
 
-    def _active_trait_dfs(self):
+    def _data(self, copy=False):
         '''
-        Get only dataframes that have active traits.
+        Get all data associated with the container as key value pairs.
+        '''
+        data = {}
+        for key, obj in self.__dict__.items():
+            if isinstance(obj, (pd.Series, pd.DataFrame)):
+                if copy:
+                    data[key] = obj.copy()
+                else:
+                    data[key] = obj
+        return data
+
+    def _trait_data(self):
+        '''
+        Get all data that contains traits.
         '''
         active = {}
-        for name, value in self._numerical_dict().items():
-            if hasattr(value, '_traits'):
-                if len(value._traits) > 0:
-                    active[name] = value
+        for key, obj in self._data().items():
+            if hasattr(obj, '_traits'):
+                if len(obj._traits) > 0 and len(obj) > 0:
+                    active[key] = obj
         return active
 
-    def _df_bytes(self):
+    def _update_custom_traits(self):
         '''
-        Compute the size (in bytes) of all of the attached dataframes.
-        '''
-        total_bytes = 0
-        for df in self._numerical_dict().values():
-            total_bytes += np.sum(df.memory_usage())
-        return total_bytes
+        For generating custom traits dependent on multiple data objects.
 
-    def _widget_bytes(self):
-        '''
-        Compute the size (in bytes) of all of the attached traits.
-        '''
-        total_bytes = 0
-        if self._widget:
-            for value in self._widget._trait_values.values():
-                total_bytes += getsizeof(value)
-        return total_bytes
-
-    def _custom_container_traits(self):
-        '''
-        Used when a container is required to build specific trait objects.
+        See Also:
+            :func:`~exa.numerical.NDBase._update_custom_traits`
         '''
         return {}
 
     def _update_traits(self):
         '''
-        Update specific traits, given in the arguments.
+        Main entry point for updating all traits of the current container. This
+        function will make calls to every data object that contains traits.
 
-        Args:
-            traits (list): Names of traits to update
+        See Also:
+            :func:`~exa.numerical.NDBase._update_traits`
         '''
         if self._widget is not None:
             traits = {}
@@ -368,40 +491,61 @@ class BaseContainer:
             else:
                 traits['test'] = Bool(False).tag(sync=True)
                 traits.update(self._custom_container_traits())
-                has_traits = self._active_trait_dfs()
-                for df_or_series in has_traits.values():
-                    traits.update(df_or_series._get_traits())
+                has_traits = self._trait_data()
+                for obj in has_traits.values():
+                    traits.update(obj._update_traits())
             self._widget.add_traits(**traits)
+            self._traits_need_update = False
 
-
-    def _is(self, name):
+    def _slice_with_int_or_string(self, key):
         '''
-        Check if the dataframe or series object exists.
-
-        Args:
-            name (str): String name of the series or dataframe object
-
-        Returns:
-            exists (bool): True if it exists
+        Slices the current container selecting data that matches the key (either on _groupbys or
+        by row index).
         '''
-        if hasattr(self[name], 'shape'):
-            return True
-        return False
+        cls = self.__class__
+        kws = del_keys(self._kw_dict(copy=True))
+        for name, df in self._data(copy=True).items():
+            dfcls = df.__class__
+            if hasattr(df, '_groupbys'):
+                if len(df._groupbys) > 0:
+                    grps = df.groupby(df._groupbys)
+                    selector = sorted(grps.groups.keys())[key]
+                    kws[name] = dfcls(grps.get_group(selector))
+            if name not in kws:
+                selector = None
+                if isinstance(df, pd.SparseDataFrame) or isinstance(df, pd.SparseSeries):
+                    kws[name] = df
+                elif key > len(df.index):
+                    kws[name] = df
+                else:
+                    selector = df.index[key]
+                    kws[name] = dfcls(df.ix[[selector], :])
+        return cls(**kws)
 
-    def _enforce_df_type(self, name, value):
+    def _slice_with_list_or_tuple(self, keys):
         '''
-        Enforces dataframe type (or NoneType).
+        Slices the current container selecting data that matches the keys (either on _groupbys or
+        by row index).
         '''
-        if value is None:
-            return None
-        else:
-            cls = self._df_types[name]
-            if not isinstance(value, cls):
-                df = cls(value)
-                if hasattr(df, '_set_categories'):
-                    df._set_categories()
-                return df
-            return value
+        cls = self.__class__
+        kws = del_keys(self._kw_dict(copy=True))
+        for name, df in self._data(copy=True).items():
+            dfcls = df.__class__
+            if hasattr(df, '_groupbys'):
+                if len(df._groupbys) > 0:
+                    grps = df.groupby(df._groupbys)
+                    srtd = sorted(grps.groups.keys())
+                    selector = [srtd[key] for key in keys]
+                    kws[name] = dfcls(pd.concat([grps.get_group(key) for key in selector]))
+            if name not in kws:
+                if isinstance(df, pd.SparseDataFrame) or isinstance(df, pd.SparseSeries):
+                    kws[name] = df
+                elif max(keys) > len(df.index):
+                    kws[name] = df
+                else:
+                    selector = [df.index[key] for key in keys]
+                    kws[name] = dfcls(df.ix[selector, :])
+        return cls(**kws)
 
     def _reconstruct_field(self, name, data, values):
         '''
@@ -427,56 +571,6 @@ class BaseContainer:
                 df._set_categories()
             return df
 
-    def _slice_with_int_or_string(self, key):
-        '''
-        Slices the current container selecting data that matches the key (either on _groupbys or
-        by row index).
-        '''
-        cls = self.__class__
-        kws = del_keys(self._kw_dict(copy=True))
-        for name, df in self._numerical_dict(copy=True).items():
-            dfcls = df.__class__
-            if hasattr(df, '_groupbys'):
-                if len(df._groupbys) > 0:
-                    grps = df.groupby(df._groupbys)
-                    selector = sorted(grps.groups.keys())[key]
-                    kws[name] = dfcls(grps.get_group(selector))
-            if name not in kws:
-                selector = None
-                if isinstance(df, pd.SparseDataFrame) or isinstance(df, pd.SparseSeries):
-                    kws[name] = df
-                elif key > len(df.index):
-                    kws[name] = df
-                else:
-                    selector = df.index[key]
-                    kws[name] = dfcls(df.ix[[selector], :])
-        return cls(**kws)
-
-    def _slice_with_list_or_tuple(self, keys):
-        '''
-        Slices the current container selecting data that matches the keys (either on _groupbys or
-        by row index).
-        '''
-        cls = self.__class__
-        kws = del_keys(self._kw_dict(copy=True))
-        for name, df in self._numerical_dict(copy=True).items():
-            dfcls = df.__class__
-            if hasattr(df, '_groupbys'):
-                if len(df._groupbys) > 0:
-                    grps = df.groupby(df._groupbys)
-                    srtd = sorted(grps.groups.keys())
-                    selector = [srtd[key] for key in keys]
-                    kws[name] = dfcls(pd.concat([grps.get_group(key) for key in selector]))
-            if name not in kws:
-                if isinstance(df, pd.SparseDataFrame) or isinstance(df, pd.SparseSeries):
-                    kws[name] = df
-                elif max(keys) > len(df.index):
-                    kws[name] = df
-                else:
-                    selector = [df.index[key] for key in keys]
-                    kws[name] = dfcls(df.ix[selector, :])
-        return cls(**kws)
-
     def _slice_with_slice(self, slce):
         '''
         Slices the current container selecting data that matches the range given
@@ -484,7 +578,7 @@ class BaseContainer:
         '''
         cls = self.__class__
         kws = del_keys(self._kw_dict(copy=True))
-        for name, df in self._numerical_dict(copy=True).items():
+        for name, df in self._data(copy=True).items():
             dfcls = df.__class__
             if hasattr(df, '_groupbys'):
                 if len(df._groupbys) > 0:
@@ -497,28 +591,15 @@ class BaseContainer:
                 elif slce == slice(None):
                     kws[name] = df
                 else:
-                    keys = df.index[slce]
+                    keys = df.index.values[slce]
                     kws[name] = dfcls(df.iloc[keys, :])
         return cls(**kws)
 
-    def _other_bytes(self):
-        return 0
-
     def __getitem__(self, key):
         '''
-        The key can be an integer, slice, list, tuple, or string. If integer,
-        this function will attempt to build a copy of this container object with
-        dataframes whose contents only contains the slice of the dataframe where
-        the **_groupby** attribute matches the integer value. If slice, list,
-        or tuple this function will do the same as for an integer but attempt
-        to select all matches in the _groupby field. Note that if the _groupby
-        attribute is empty, this will select by row index instead (not column
-        index!). If string, this function will attempt to get the attribute
-        matching that string.
-
-        Note:
-            Getting an attribute returns a reference to the attribute not a
-            copy of the attribute.
+        Containers can be sliced in a number of different ways and the slicing
+        of the data values depends on the characteristics of the individual
+        data objects (i.e. presence of _groupbys).
         '''
         if isinstance(key, int):
             return self._slice_with_int_or_string(key)
@@ -533,37 +614,28 @@ class BaseContainer:
         else:
             raise KeyError('No selection method for key {} of type {}'.format(key, type(key)))
 
-    def __sizeof__(self):
-        '''
-        Sum of the dataframe sizes, trait values, and relational data.
+    def __delitem__(self, key):
+        del self[key]
 
-        Warning:
-            This function currently doesn't account for memory usage due to
-            traits (:class:`~exa.widget.ContainerWidget`).
-        '''
-        jstot = self._widget_bytes()
-        dftot = self._df_bytes()
-        other = self._other_bytes()
-        kwtot = 0
-        for key, value in self._kw_dict().items():
-            kwtot += getsizeof(key)
-            kwtot += getsizeof(value)
-        return dftot + kwtot + jstot + other
-
-    def __init__(self, meta=None, **kwargs):
+    def __init__(self, name=None, description=None, meta=None, **kwargs):
+        self.name = name
+        self.description = description
+        self.meta = meta
+        print(kwargs)
+        self._df_types = {}
+        for key, value in kwargs.items():
+            print(self)
+            print(key)
+            print(value)
+            setattr(self, key, value)
+            self._df_types[key] = value
         self._test = False
         self._traits_need_update = True
-        for key, value in kwargs.items():
-            if key in self._df_types.keys():
-                value = self._enforce_df_type(key, value)
-            setattr(self, key, value)
-        self.meta = meta
-        self._widget = self._widget_class(self) if _conf['notebook'] else None
-        if meta is None and len(kwargs) == 0 and len(self._numerical_dict()) == 0:
+        self._widget = self._widget_class(self) if global_config['notebook'] else None
+        if meta is None and len(kwargs) == 0 and len(self._data()) == 0:
             self._test = True
             self.name = 'TestContainer'
             self._update_traits()
-            self._traits_need_update = False
 
     def _repr_html_(self):
         if self._widget:
@@ -572,6 +644,9 @@ class BaseContainer:
             return self._widget._repr_html_()
         return None
 
+
+def slice_by_int():
+    pass
 
 #def concat(*containers, axis=0, join='outer', ingore_index=False):
 #    '''
