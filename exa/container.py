@@ -141,6 +141,8 @@ class BaseContainer:
         pass
 
     def add_field(self, data, values=None):
+
+    def append_field(self, data, values=None):
         pass
 
     def save(self, path=None):
@@ -464,7 +466,7 @@ class BaseContainer:
         for key, obj in self._data().items():
             if hasattr(obj, '_traits'):
                 if len(obj._traits) > 0 and len(obj) > 0:
-                    active[name] = obj
+                    active[key] = obj
         return active
 
     def _update_custom_traits(self):
@@ -546,6 +548,30 @@ class BaseContainer:
                     selector = [df.index[key] for key in keys]
                     kws[name] = dfcls(df.ix[selector, :])
         return cls(**kws)
+
+    def _reconstruct_field(self, name, data, values):
+        '''
+        Enforces the field dataframe type.
+        '''
+        if data is None and values is None:
+            return None
+        elif hasattr(data, 'field_values'):
+            if hasattr(data, '_set_categories'):
+                data._set_categories()
+            return data
+        elif len(data) != len(values):
+            raise TypeError('Length of Field ({}) data and values don\'t match.'.format(name))
+        else:
+            cls = self._df_types[name]
+            for i in range(len(values)):
+                if not isinstance(values[i], DataFrame) and isinstance(values[i], pd.DataFrame):
+                    values[i] = DataFrame(values[i])
+                else:
+                    values[i] = Series(values[i])
+            df = cls(values, data)
+            if hasattr(df, '_set_categories'):
+                df._set_categories()
+            return df
 
     def _slice_with_slice(self, slce):
         '''

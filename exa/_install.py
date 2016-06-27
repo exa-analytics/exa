@@ -51,7 +51,7 @@ def install(persist=False):
     update()
 
 
-def update():
+def update(verbose=False):
     '''
     If upgrading to a new version of exa, update static databases as needed.
     '''
@@ -63,7 +63,7 @@ def update():
     load_isotope_data()
     load_unit_data()
     load_constant_data()
-    install_notebook_widgets(global_config['nbext_localdir'], global_config['nbext_sysdir'])
+    install_notebook_widgets(global_config['nbext_localdir'], global_config['nbext_sysdir'], verbose)
 
 
 def load_isotope_data():

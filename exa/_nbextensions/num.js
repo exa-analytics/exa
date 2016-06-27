@@ -99,12 +99,12 @@ define([], function() {
             a = 2.0;
         };
         if (b === undefined) {
-            b = 0.5;
+            b = 1.75;
         };
         if (c === undefined) {
-            c = 5.0;
+            c = 1.5;
         };
-        return (x * x) / (a * a) + (y * y) / (b * b) + (z * z) / (c * c)
+        return 2 * ((x * x) / (a * a) + (y * y) / (b * b) + (z * z) / (c * c))
     };
 
     var sphere = function(x, y, z) {
@@ -112,14 +112,22 @@ define([], function() {
         sphere
         ================
         */
-        return x * x + y * y + z * z
+        return 0.5 * (x * x + y * y + z * z)
     }
 
     var torus = function(x, y, z, c) {
+        /*"""
+        torus
+        ================
+        */
         if (c === undefined) {
             c = 1.0;
         };
-        return Math.pow(c - Math.sqrt(x * x + y * y), 2) + z * z;
+        return  Math.pow(c - Math.sqrt(x * x + y * y), 2) + z * z;
+    }
+
+    var None = function(x, y, z) {
+        return 0
     };
 
     return {
@@ -129,6 +137,7 @@ define([], function() {
         sphere: sphere,
         ellipsoid: ellipsoid,
         torus: torus,
-        function_list_3d: ['sphere', 'torus', 'ellipsoid'],
+        None: None,
+        function_list_3d: ['None', 'sphere', 'torus', 'ellipsoid'],
     };
 });

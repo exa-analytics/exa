@@ -126,11 +126,12 @@ class DataFrame(NDBase, pd.DataFrame):
         groups = None
         prefix = self.__class__.__name__.lower()
         self._revert_categories()
+        self._fi = self.index[0]
         if self._groupbys:
             groups = self.groupby(self._groupbys)
         for name in self._traits:
+            trait_name = '_'.join((prefix, str(name)))    # Name mangle to ensure uniqueness
             if name in self.columns:
-                trait_name = '_'.join((prefix, str(name)))    # Name mangle to ensure uniqueness
                 if np.all(np.isclose(self[name], self.ix[self._fi, name])):    # Don't bother sending all elements if same
                     value = self.ix[self._fi, name]
                     if isinstance(value, Integral):

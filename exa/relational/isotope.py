@@ -19,6 +19,8 @@ from exa.iterative import product_sum_2f, product_add_2
 # Mappers are series objects that appear in commonly used dataframe manipulations
 symbol_to_radius = None
 symbol_to_color = None
+symbol_to_Z = None
+Z_to_symbol = None
 symbols_to_radii = None
 symbol_to_element_mass = None
 
@@ -341,6 +343,19 @@ def init_mappers():
     init_symbol_to_element_mass(isotopedf)
     init_symbol_to_radius(isotopedf)
     init_symbol_to_color(isotopedf)
+    init_symbol_to_Z(isotopedf)
+
+
+def init_symbol_to_Z(isotopedf):
+    '''
+    Initialize the **symbol_to_Z** mapper.
+    '''
+    global symbol_to_Z
+    global Z_to_symbol
+    symbol_to_Z = isotopedf.drop_duplicates('symbol')
+    symbol_to_Z = symbol_to_Z.set_index('symbol')['Z']
+    Z_to_symbol = isotopedf.drop_duplicates('Z')
+    Z_to_symbol = Z_to_symbol.set_index('Z')['symbol']
 
 
 def init_symbols_to_radii(isotopedf):
