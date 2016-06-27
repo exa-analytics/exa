@@ -23,7 +23,7 @@ from exa.relational.update import drop_all_static_tables
 from exa.utility import mkp
 
 
-def install(persist=False):
+def install(persist=False, verbose=False):
     '''
     Initializes exa's database and notebook widget features.
 
@@ -48,10 +48,10 @@ def install(persist=False):
         global engine
         from exa.relational.base import engine
         setup_loggers()
-    update()
+    update(verbose)
 
 
-def update():
+def update(verbose=False):
     '''
     If upgrading to a new version of exa, update static databases as needed.
     '''
@@ -63,7 +63,7 @@ def update():
     load_isotope_data()
     load_unit_data()
     load_constant_data()
-    install_notebook_widgets(global_config['nbext_localdir'], global_config['nbext_sysdir'])
+    install_notebook_widgets(global_config['nbext_localdir'], global_config['nbext_sysdir'], verbose)
 
 
 def load_isotope_data():

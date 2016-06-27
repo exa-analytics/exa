@@ -89,7 +89,6 @@ define([
                 this.z = num.arange(this.zmin, this.zmax, this.dz);
                 this.nz = this.z.length;
             };
-            console.log(this.nx);
             this.n = this.nx * this.ny * this.nz;
             if (typeof func_or_values === 'function') {
                 console.log('field func');
@@ -99,7 +98,6 @@ define([
                 console.log('values');
                 this.values = new Float32Array(func_or_values);
             };
-            console.log(this.values);
         };
 
         new_dr(d) {
