@@ -23,7 +23,7 @@ from exa.relational.update import drop_all_static_tables
 from exa.utility import mkp
 
 
-def install(persist=False):
+def install(persist=False, verbose=False):
     '''
     Initializes exa's database and notebook widget features.
 
@@ -48,7 +48,7 @@ def install(persist=False):
         global engine
         from exa.relational.base import engine
         setup_loggers()
-    update()
+    update(verbose)
 
 
 def update(verbose=False):

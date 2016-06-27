@@ -136,11 +136,8 @@ class BaseContainer:
     '''
     _widget_class = ContainerWidget
     _getter_prefix = 'compute'
-
     def add_data(self, data):
         pass
-
-    def add_field(self, data, values=None):
 
     def append_field(self, data, values=None):
         pass
@@ -623,11 +620,14 @@ class BaseContainer:
         self.name = name
         self.description = description
         self.meta = meta
+        print(kwargs)
+        self._df_types = {}
         for key, value in kwargs.items():
-            try:
-                setattr(self, key, value)
-            except:
-                pass
+            print(self)
+            print(key)
+            print(value)
+            setattr(self, key, value)
+            self._df_types[key] = value
         self._test = False
         self._traits_need_update = True
         self._widget = self._widget_class(self) if global_config['notebook'] else None
