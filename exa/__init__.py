@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__exa_version__ = (0, 2, 2)    # Version number is defined here!
+__exa_version__ = (0, 2, 3)    # Version number is defined here!
 __version__ = '.'.join((str(v) for v in __exa_version__))
 
 
@@ -22,10 +22,10 @@ from exa.symbolic import Symbolic
 from exa.editor import Editor
 
 # Import sub-packages
-from exa import algorithms
-from exa import distributed
-from exa import relational
-from exa import filetypes
+#from exa import algorithms
+#from exa import distributed
+#from exa import relational
+#from exa import filetypes
 
 # Import tests
 from exa import tests

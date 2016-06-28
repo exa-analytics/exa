@@ -32,7 +32,7 @@ class TypedRelationalMeta(TypedMeta, BaseMeta):
     pass
 
 
-class Container(BaseContainer, Name, HexUID, Time, Disk, Base, metaclass=TypedRelationalMeta):
+class Container(BaseContainer, Name, HexUID, Time, Disk, Base, metaclass=BaseMeta):
     '''
     The ("master") container class: this class combines relational and data
     management features and wraps them into a single data object.

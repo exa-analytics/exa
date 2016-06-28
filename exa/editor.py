@@ -148,7 +148,7 @@ class Editor:
             last_half = self._lines[n:]
             self._lines = first_half + [line] + last_half
 
-    def delete_blank(self):
+    def remove_blank_lines(self):
         '''
         Permanently removes blank lines from input.
         '''
@@ -167,7 +167,7 @@ class Editor:
             lines (list): List of integers corresponding to lines to delete
         '''
         for k, i in enumerate(lines):
-            del self[i - k]
+            del self[i-k]    # Accounts for the fact that len(self) decrease upon deletion
 
     def find(self, *strings):
         '''
@@ -370,6 +370,7 @@ class Editor:
 
     def __repr__(self):
         return self._line_repr(self._lines)
+
 
 def lines_from_file(path, as_interned=False):
     '''
