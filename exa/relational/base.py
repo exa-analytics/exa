@@ -128,7 +128,7 @@ class Base:
         '''
         Save the current object.
         '''
-        s = SessionFactory()
+        s = SessionFactory(expire_on_commit=False)
         s.add(self)
         s.commit()
 
@@ -196,7 +196,6 @@ class Disk:
             self.size = getsizeof(self)
         except:
             pass
-
 
 
 def create_tables():

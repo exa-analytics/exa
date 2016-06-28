@@ -25,23 +25,27 @@ ContainerFile = Table(
 )
 
 
-class TypedRelationalMeta(TypedMeta, BaseMeta):
-    '''
-    A metaclass for relational objects that have typed attributes.
-    '''
-    pass
-
-
 class Container(BaseContainer, Name, HexUID, Time, Disk, Base, metaclass=BaseMeta):
     '''
     The ("master") container class: this class combines relational and data
     management features and wraps them into a single data object.
     '''
     files = relationship('File', secondary=ContainerFile, backref='containers', cascade='all, delete')
-    cname = Column(String(32), nullable=False)     # container class name
-    __mapper_args__ = {'polymorphic_on': cname,
+    class_name = Column(String(32), nullable=False)     # container class name
+    __mapper_args__ = {'polymorphic_on': class_name,
                        'polymorphic_identity': 'container',
                        'with_polymorphic': '*'}
+
+    def save(self, path=None, typ='hdf5'):
+        '''
+        Save the current container for future use
+        .. code-block:: Python
+
+            container.save()  # Save to default location
+            container.save('my/location/file.name')  # Save HDF5 file at given path
+        '''
+        self._save_record()
+        self._save_data(path, typ=typ)
 
     def __repr__(self):
         c = self.__class__.__name__

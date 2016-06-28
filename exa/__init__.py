@@ -9,7 +9,6 @@ from exa._config import config as global_config
 from exa._install import install
 from exa.log import log_head, log_tail
 from exa.test import run_doctests, run_unittests
-from exa import mpl, tex
 syslog = log.get_logger('sys')
 syslog.info('Starting exa with configuration:')
 syslog.info(str(global_config))
@@ -22,10 +21,12 @@ from exa.symbolic import Symbolic
 from exa.editor import Editor
 
 # Import sub-packages
-#from exa import algorithms
-#from exa import distributed
-#from exa import relational
-#from exa import filetypes
+from exa import algorithms
+from exa import distributed
+from exa import relational
+from exa import filetypes
+from exa import mpl
+from exa import tex
 
 # Import tests
 from exa import tests

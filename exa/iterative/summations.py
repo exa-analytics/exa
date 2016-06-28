@@ -23,6 +23,8 @@ def product_sum_2f(a, b):
     >>> a = np.random.rand(3)
     >>> b = np.random.rand(3)
     >>> product_sum_2f(a, b)
+    array([ 0.72507695,  0.60545473,  0.87147971,  0.88437746,  0.76475524,
+            1.03078023,  0.93558421,  0.81596199,  1.08198697])
     '''
     return np.array([a + b for a, b in product(a, b)], dtype=np.float64)
 

@@ -1,0 +1,3 @@
+This data comes from http://data.giss.nasa.gov/gistemp/.
+See exa.tests.test.ComprehensiveTest and/or the gistemp.ipynb example notebook,
+in exa/doc/source/examples for more information.

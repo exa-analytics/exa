@@ -24,7 +24,7 @@ alphabetically with sub-packages appearing last.
     tests/editor.rst
     tests/container.rst
     tests/widget.rst
-
+    tests/test.rst
 
 
 .. toctree::

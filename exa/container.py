@@ -28,7 +28,7 @@ from sqlalchemy.orm.attributes import InstrumentedAttribute
 from exa import global_config, mpl
 from exa.widget import ContainerWidget
 from exa.numerical import NDBase, DataFrame, Field, SparseDataFrame, Series
-from exa.utility import del_keys
+from exa.utility import convert_bytes
 
 
 class TypedMeta(type):
@@ -95,28 +95,48 @@ class TypedMeta(type):
             By default, the setter attempts to convert the object to the
             correct type; a type error is raised if this fails.
         '''
-        pname = '_' + name
+        pname = '_' + name    # This will be where the data is store (e.g. self._name)
         def getter(self):
+            '''
+            This is the default property "getter" for container data objects.
+            If the property value is None, this function will check for a
+            convenience method with the signature, self.compute_name() and call
+            it prior to returning the property value.
+            '''
             if not hasattr(self, pname) and hasattr(self, '{}{}'.format(self._getter_prefix, pname)):
                 self['{}{}'.format(self._getter_prefix, pname)]()
             if not hasattr(self, pname):
                 raise AttributeError('Please compute or set {} first.'.format(name))
             return getattr(self, pname)
+
         def setter(self, obj):
+            '''
+            This is the default property "setter" for container data objects.
+            Prior to setting a property value, this function checks that the
+            object's type is correct.
+            '''
             if not isinstance(obj, ptype):
                 try:
                     obj = ptype(obj)
                 except:
                     raise TypeError('Object {0} must instance of {1}'.format(name, ptype))
             setattr(self, pname, obj)
+
         def deleter(self):
+            '''
+            Deletes the property's value.
+            '''
             del self[pname]
+
         return property(getter, setter, deleter)
 
     def __new__(metacls, name, bases, clsdict):
         '''
-        Here we control the creation of the class definition. For every statically
-        typed attributed (see source code or docstring)
+        This function modifies container class definitions (the class object
+        itself is altered, not instances of the class).
+        :func:`~exa.container.TypedMeta.create_property` is called on every
+        statically defined class attributed, which creates corresponding
+        property defined on the class object.
         '''
         for k, v in metacls.__dict__.items():
             if isinstance(v, type) and k[0] != '_':
@@ -136,33 +156,19 @@ class BaseContainer:
     '''
     _widget_class = ContainerWidget
     _getter_prefix = 'compute'
-    def add_data(self, data):
-        pass
 
-    def append_field(self, data, values=None):
-        pass
-
-    def save(self, path=None):
-        '''
-        Save the current working container to an HDF5 file.
-
-        .. code-block:: Python
-
-            container.save()  # Save to default location
-            container.save('my/location/file.name')  # Save HDF5 file at given path
-        '''
-        self._save_record()
-        self._save_data(path)
+    def add_data(self, data, field_values=None):
+        raise NotImplementedError()
 
     def copy(self, **kwargs):
         '''
         Create a copy of the current object.
         '''
         cls = self.__class__
-        kws = del_keys(self._kw_dict(copy=True))
+        kws = self._rel(copy=True)
         dfs = self._data(copy=True)
-        kws.update(kwargs)
-        kws.update(dfs)
+        kws.update(dfs)             # We updates kws in this order because we
+        kws.update(kwargs)          # want to respect the user's kwargs.
         return cls(**kws)
 
     def concat(self, *args, **kwargs):
@@ -183,27 +189,30 @@ class BaseContainer:
         mem_usage = self.memory_usage().sum()
         n = np.rint(len(str(mem_usage))/4).astype(int)
         print('size ({0}):'.format(sizes[n]),  mem_usage/(1024**n))
-        print('object count:', len(self._data().keys()))
+        print('data object count:', len(self._data().keys()))
 
     def memory_usage(self):
         '''
-        Get the memory usage (in bytes) of the container object.
+        Reports container memory usage in bytes. Objects with a leading underscore
+        represent composites of (in some cases) multiple attributes.
+
+        Note:
+            This is an approximation and should be checked against external
+            benchmarking and analysis tools for accuracy.
         '''
-        data_mem = 0      # Memory due to data objects
-        rel_mem = 0       # Memory due to metadata/relational attributes
-        widget_mem = 0    # Memory due to widget data
-        for obj in self._data().values():
-            data_mem += getsizeof(obj)
-        for obj in self._rel().values():
-            rel_mem += getsizeof(obj)
+        wid = 0
         if self._widget is not None:
             for obj in self._widget._trait_values.values():
-                widget_mem += getsizeof(obj)
-        mem = pd.Series({'data': data_mem, 'base': rel_mem, 'widget': widget_mem})
-        mem.name = 'bytes'
+                wid += getsizeof(obj)
+        rel = 0
+        for obj in self._rel().values():
+            rel += getsizeof(obj)
+        mem = {k: v.memory_usage().sum() for k, v in self._data().items()}
+        mem.update({'_widget': wid, '_relational': rel})
+        mem = pd.Series(mem)
+        mem.index.name = 'object'
+        mem.name = 'Bytes'
         return mem
-
-
 
 #    def data_network(self):
 #        '''
@@ -373,19 +382,20 @@ class BaseContainer:
         else:
             raise TypeError('The argument should be int or str, not {}.'.format(type(pkid_or_path)))
 
-    def _save_data(self, path=None, how='hdf'):
+    def _save_data(self, path=None, typ='hdf5'):
         '''
-        Save the dataframe (and related series) data to an `HDF5`_ file. This
-        file contains all of the dataframe data as well as the descriptive
-        relational data attached to the current container.
+        Save the dataframe (and related series) data to a standard format
+        (currently only HDF5 is supported). This file contains all of the
+        data and metadata about the container.
+
+        Args:
+            path (str): Filename
+            typ (str): Store type ('hdf5', )
         '''
-        kwargs = self._kw_dict()
-        kwargs['meta'] = str(self.meta) if self.meta else None
-        kwargs = del_keys(kwargs)
-        if how == 'hdf':
-            self._save_hdf(path, kwargs)
-        else:
+        if typ != 'hdf5':
             raise NotImplementedError('Currently only hdf5 is supported')
+        kwargs = self._rel()
+        self._save_hdf(path, kwargs)
 
     def _save_hdf(self, path, kwargs):
         '''
@@ -431,13 +441,17 @@ class BaseContainer:
 
     def _rel(self, copy=False):
         '''
-        Get all relational and metadata data of the container.
+        Get all (propagatable) relational and metadata data of the container.
+
+        Warning:
+            This function does not copy primary keys.
         '''
         rel = {}
         for key, obj in self.__dict__.items():
-            if not isinstance(obj, (pd.Series, pd.DataFrame)):
+            if not isinstance(obj, (pd.Series, pd.DataFrame)) and not key.startswith('_'):
                 if copy:
-                    rel[key] = deepcopy(obj)
+                    if 'id' not in key:
+                        rel[key] = deepcopy(obj)
                 else:
                     rel[key] = obj
         return rel
@@ -466,12 +480,9 @@ class BaseContainer:
                     active[key] = obj
         return active
 
-    def _update_custom_traits(self):
+    def _custom_container_traits(self):
         '''
         For generating custom traits dependent on multiple data objects.
-
-        See Also:
-            :func:`~exa.numerical.NDBase._update_custom_traits`
         '''
         return {}
 
@@ -502,7 +513,7 @@ class BaseContainer:
         by row index).
         '''
         cls = self.__class__
-        kws = del_keys(self._kw_dict(copy=True))
+        kws = del_keys(self._rel(copy=True))
         for name, df in self._data(copy=True).items():
             dfcls = df.__class__
             if hasattr(df, '_groupbys'):
@@ -527,7 +538,7 @@ class BaseContainer:
         by row index).
         '''
         cls = self.__class__
-        kws = del_keys(self._kw_dict(copy=True))
+        kws = del_keys(self._rel(copy=True))
         for name, df in self._data(copy=True).items():
             dfcls = df.__class__
             if hasattr(df, '_groupbys'):
@@ -546,37 +557,13 @@ class BaseContainer:
                     kws[name] = dfcls(df.ix[selector, :])
         return cls(**kws)
 
-    def _reconstruct_field(self, name, data, values):
-        '''
-        Enforces the field dataframe type.
-        '''
-        if data is None and values is None:
-            return None
-        elif hasattr(data, 'field_values'):
-            if hasattr(data, '_set_categories'):
-                data._set_categories()
-            return data
-        elif len(data) != len(values):
-            raise TypeError('Length of Field ({}) data and values don\'t match.'.format(name))
-        else:
-            cls = self._df_types[name]
-            for i in range(len(values)):
-                if not isinstance(values[i], DataFrame) and isinstance(values[i], pd.DataFrame):
-                    values[i] = DataFrame(values[i])
-                else:
-                    values[i] = Series(values[i])
-            df = cls(values, data)
-            if hasattr(df, '_set_categories'):
-                df._set_categories()
-            return df
-
     def _slice_with_slice(self, slce):
         '''
         Slices the current container selecting data that matches the range given
         by the slice object.
         '''
         cls = self.__class__
-        kws = del_keys(self._kw_dict(copy=True))
+        kws = del_keys(self._rel(copy=True))
         for name, df in self._data(copy=True).items():
             dfcls = df.__class__
             if hasattr(df, '_groupbys'):
@@ -620,14 +607,8 @@ class BaseContainer:
         self.name = name
         self.description = description
         self.meta = meta
-        print(kwargs)
-        self._df_types = {}
         for key, value in kwargs.items():
-            print(self)
-            print(key)
-            print(value)
             setattr(self, key, value)
-            self._df_types[key] = value
         self._test = False
         self._traits_need_update = True
         self._widget = self._widget_class(self) if global_config['notebook'] else None
@@ -641,7 +622,6 @@ class BaseContainer:
             if self._traits_need_update:
                 self._update_traits()
             return self._widget._repr_html_()
-        return None
 
 
 def slice_by_int():

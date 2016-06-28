@@ -157,14 +157,14 @@ class Editor:
             ln = line.strip()
             if ln == '':
                 to_remove.append(i)
-        self.delete(to_remove)
+        self.delete_lines(to_remove)
 
-    def delete(self, lines):
+    def delete_lines(self, lines):
         '''
         Delete the given line numbers.
 
         Args:
-            lines (list): List of integers corresponding to lines to delete
+            lines (list): List of integers corresponding to lines (line numbers) to delete
         '''
         for k, i in enumerate(lines):
             del self[i-k]    # Accounts for the fact that len(self) decrease upon deletion
@@ -209,7 +209,7 @@ class Editor:
         lines = self._lines[self._next_pos:]
         for i, line in enumerate(lines):
             if string in line:
-                self._next_pos += i + 1
+                self._next_pos = i + 1
                 tup = (self._next_pos - 1, line)
                 break
         self._prev_match = tup

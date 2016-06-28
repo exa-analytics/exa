@@ -6,10 +6,12 @@ These functions are simply syntactic sugar. They help cleanup the code base by
 providing a cleaner API for commonly used functions.
 '''
 import os
+import numpy as np
 from datetime import datetime
 
 
 sep2 = os.sep + os.sep
+sizes = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB']
 
 
 def datetime_header(title=''):
@@ -45,18 +47,15 @@ def mkp(*args, mk=False, exist_ok=True):
     return path
 
 
-def del_keys(kwargs, match='id'):
+def convert_bytes(value):
     '''
-    Delete certain keys in a dictionary containing a given string.
+    Reduces bytes to more convenient units (i.e. KiB, GiB, TiB, etc.).
 
     Args:
-        kwargs (dict): Dictionary to prune
-        match (str): Sting to match for each key
+        values (int): Value in Bytes
 
-    Return:
-        d (dict): Pruned dictionary
+    Returns:
+        tup (tuple): Tuple of value, unit (e.g. (10, 'MiB'))
     '''
-    keys = [key for key in kwargs.keys() if match in key]
-    for key in keys:
-        del kwargs[key]
-    return kwargs
+    n = np.rint(len(str(value))/4).astype(int)
+    return value/(1024**n), sizes[n]

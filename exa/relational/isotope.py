@@ -200,13 +200,11 @@ class Isotope(Base, metaclass=Meta):
     1
     >>> h.mass
     1.0078250321
-    >>> Isotope.symbol_to_mass()['H']
-    1.0076788974703454
     >>> Isotope['C']
     [8C, 9C, 10C, 11C, 12C, 13C, 14C, 15C, 16C, 17C, 18C, 19C, 20C, 21C, 22C]
     >>> Isotope['13C'].szuid
     175
-    >>> c = Isotope[175]
+    >>> c = Isotope[57]
     >>> c.A
     13
     >>> c.Z
@@ -230,6 +228,9 @@ class Isotope(Base, metaclass=Meta):
     symbol = Column(String(length=3))
     szuid = Column(Integer)
     strid = Column(Integer)
+    
+    def __repr__(self):
+        return '{0}{1}'.format(self.A, self.symbol)
 #
 #    @classmethod
 #    def symbol_to_mass(cls):
@@ -328,8 +329,6 @@ class Isotope(Base, metaclass=Meta):
 #    def symbols_to_Z(cls):
 #        return cls.symbols_to_Z_map
 #
-#    def __repr__(self):
-#        return '{0}{1}'.format(self.A, self.symbol)
 #
 
 # Dynamically create a number of commonly used dataframe mappings after
