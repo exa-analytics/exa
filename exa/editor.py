@@ -186,7 +186,7 @@ class Editor:
                     results[string][i] = line
         return results
 
-    def find_next(self, string):
+    def find_next(self, string, start=0, stop=-1):
         '''
         Find the subsequent line containing the given string.
 
@@ -205,13 +205,15 @@ class Editor:
             self._next_pos = 0
             self._next_string = string
             self._prev_match = None
+        if start: self._next_pos = start
         tup = ()
-        lines = self._lines[self._next_pos:]
+        lines = self._lines[self._next_pos:stop]
+        cnt = start
         for i, line in enumerate(lines):
             if string in line:
-                self._next_pos = i + 1
-                tup = (self._next_pos - 1, line)
+                tup = (self._next_pos, line)
                 break
+            self._next_pos = cnt + i
         self._prev_match = tup
         return tup
 
@@ -237,6 +239,20 @@ class Editor:
                     else:
                         results[pattern][i] = line
         return results
+
+    def replace(self, pattern, replacement):
+        '''
+        Replace all instances of a pattern with a replacement.
+
+        Args:
+            pattern (str): Pattern to replace
+            replacement (str): Text to insert
+        '''
+        for i in range(len(self)):
+            line = self[i]
+            while pattern in line:
+                line = line.replace(pattern, replacement)
+            self[i] = line
 
     @property
     def variables(self):

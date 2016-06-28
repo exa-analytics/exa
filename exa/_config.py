@@ -102,7 +102,7 @@ def update_config():
     config['static_isotopes.json'] = mkp(pkg, '_static', 'isotopes.json')
     config['static_units.json'] = mkp(pkg, '_static', 'units.json')
     config['nbext_localdir'] = mkp(pkg, '_nbextensions')
-    config['nbext_sysdir'] = mkp(jupyter_data_dir(), '_nbextensions', 'exa')
+    config['nbext_sysdir'] = mkp(jupyter_data_dir(), 'nbextensions', 'exa')
     config['notebook'] = False
     try:
         cfg = get_ipython().config
