@@ -621,14 +621,14 @@ class BaseContainer:
         self.name = name
         self.description = description
         self.meta = meta
-        print(kwargs)
-        self._df_types = {}
-        for key, value in kwargs.items():
-            print(self)
-            print(key)
-            print(value)
-            setattr(self, key, value)
-            self._df_types[key] = value
+        #print(kwargs)
+        #self._df_types = {}
+        #for key, value in kwargs.items():
+        #    print(self)
+        #    print(key)
+        #    print(value)
+        #    setattr(self, key, value)
+        #    self._df_types[key] = value
         self._test = False
         self._traits_need_update = True
         self._widget = self._widget_class(self) if global_config['notebook'] else None
