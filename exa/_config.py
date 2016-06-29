@@ -87,7 +87,7 @@ def update_config():
         config['exa_persistent'] = True
     else:
         config['exa_root'] = mkdtemp()
-    config['runlevel'] = 0
+    config['runlevel'] = 2
     config['log_db'] = mkp(config['exa_root'], 'db.log')
     config['log_sys'] = mkp(config['exa_root'], 'sys.log')
     config['log_user'] = mkp(config['exa_root'], 'user.log')
@@ -144,6 +144,7 @@ def cleanup():
     if config['exa_persistent']:
         save_config()
     else:
+        print('HDFJAKLJSDFKJASLDFKASJDLKASJDFKJ')
         shutil.rmtree(config['exa_root'])
 
 

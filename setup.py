@@ -20,7 +20,8 @@ setup(
     packages=find_packages(),
     package_data={'exa': ['_static/*.json', '_nbextensions/*.js',
                           '_nbextensions/libs/*.js', '_nbextensions/apps/*.js']},
-    entry_points={'console_scripts': ['exa = exa.__main__:main']},
+    entry_points={'console_scripts': ['exa = exa.__main__:gui',
+                                      'exw = exa.__main__:workflow']},
     include_package_data=True,
     install_requires=dependencies,
     license='Apache License Version 2.0'

@@ -69,7 +69,9 @@ class Mass(Base, Dimension, metaclass=Meta):
     >>> Mass['u', 'kg']
     1.660538921000011e-27
     '''
-    pass
+    aliases = {
+        'amu': 'u',
+    }
 
 
 class Time(Base, Dimension, metaclass=Meta):
