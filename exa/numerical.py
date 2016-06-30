@@ -1,34 +1,34 @@
 # -*- coding: utf-8 -*-
 '''
-Trait Support for Data Structures
+Trait Supporting Data Objects
 ###################################
-The :class:`~exa.numerical.DataFrame` inherits :class:`~pandas.DataFrame` and
-behaves just like it, but it provides special methods for extracting trait
-data from the frame. The trait data is used by :class:`~exa.widget.ContainerWidget`
-(and its subclasses) and the web gui to generate interactive data visualizations.
-Because these dataframes have context about their data, they also provide
-convience methods for in memory data compression (using `categories`_).
+The :class:`~exa.numerical.DataFrame` is an extension of the
+:class:`~pandas.DataFrame` object. It provides additional methods for creating
+traits.
 
-Another feature of these dataframes is that the _groupbys parameter provides a
-convenient algorithm for container slicing and concatenation/joining/merging.
-These types of operations are non-trivial when dealing with dataframes whose
-contents may be related (i.e. relational dataframes) so care must be taken to
-ensure no mangling of indices is performed. See the container module for more
-info.
+Note:
+    For further information on traits, see :mod:`~exa.widget`.
 
-Enumerated are some conventions used by trait supporting data objects:
-- use **_precision** to specify precision of floats sent to JS
-- use **_traits** to specify (possible) column names that are sent to JS
-- use **_columns** to specify required columns
-- use **_groupbys** to specify columns on which to group (typically these columns are foreign keys to another frame with an index of the same name as the column name)
-- use **_categories** to specify (possible) column names that are category dtype ({name: normal_type})
-- an index of -1 means not applicable (or not possible to compute)
+Additionally, :class:`~exa.numerical.DataFrame` and related objects (e.g
+:class:`~exa.numerical.Field`) provide attributes for defining their index and
+column names. This has the effect of creating relationships between different
+dataframes. They can be grouped into three types:
+
+1. index name (df1) matches index name (df2)
+2. index name (df1) matches column name (df2)
+3. column name (df1) matches column name (df2)
+
+Note:
+    These types correspond to one to one, one to many, and many to many relational
+    types, respectively.
+
+Finally, the objects contained in this module provide convenience methods for
+handling `categorical data`_.
 
 See Also:
-    Modules :mod:`~exa.container` and :mod:`~exa.widget` may provide context
-    and usage examples for these classes.
+    :mod:`~exa.container`, :mod:`~exa.widget`
 
-.. _categories: http://pandas-docs.github.io/pandas-docs-travis/categorical.html
+.. _categorical data: http://pandas-docs.github.io/pandas-docs-travis/categorical.html
 '''
 import numpy as np
 import pandas as pd
@@ -37,29 +37,23 @@ from traitlets import Unicode, Integer, Float
 from exa.error import RequiredIndexError, RequiredColumnError
 
 
-class NDBase:
+class Numerical:
     '''
-    Base class for trait supporting dataframe/series objects.
+    Base class for :class:`~exa.numerical.Series`, :class:`~exa.numerical.DataFrame`,
+    and :class:`~exa.numerical.Field` objects, providing default trait
+    functionality, shortened string representation, and in memory copying support.
     '''
-    _precision = 3      # Default number of decimal places passed by traits
-
     def copy(self, *args, **kwargs):
         '''
-        Custom copy function returns same type
+        Create a copy without mangling the (class) type.
         '''
         return self.__class__(self._copy(*args, **kwargs))
 
     def _update_custom_traits(self):
-        '''
-        Placeholder for custom trait creation (e.g. when multiple columns form a single trait).
-        '''
-        return {}
+        return {}    # Placeholder for custom traits: by default return empty dict
 
     def _update_traits(self):
-        '''
-        Empty default traits.
-        '''
-        traits = self._update_custom_traits()
+        traits = self._update_custom_traits()    # See comment above
         return traits
 
     def __repr__(self):
@@ -70,7 +64,7 @@ class NDBase:
         return self.__repr__()
 
 
-class Series(NDBase, pd.Series):
+class Series(Numerical, pd.Series):
     '''
     Trait supporting analogue of :class:`~pandas.Series`.
     '''
