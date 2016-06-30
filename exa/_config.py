@@ -38,8 +38,6 @@ Attributes:
     nbext_localdir (str): Package directory where (Jupyter) notebook extensions are contained
     nbext_sysdir (str): System wide notebook extensions should be installed
     notebook (bool): True if running a Jupyter notebook session or not
-    pkg_dask (bool): True if `dask`_ is installed
-    pkg_distributed (bool): True if `distributed`_ is installed
     pkg_numba (bool): True if `numba`_ is installed
     runlevel (int): 0 - production, 1 - staging, 2 - debug
     static_constants.json (str): Location of the constants.json file
@@ -111,21 +109,9 @@ def update_config():
     except:
         pass
     config['pkg_numba'] = False
-    config['pkg_dask'] = False
-    config['pkg_distributed'] = False
     try:
         import numba
         config['pkg_numba'] = True
-    except:
-        pass
-    try:
-        import dask
-        config['pkg_dask'] = True
-    except:
-        pass
-    try:
-        import distributed
-        config['pkg_distributed'] = True
     except:
         pass
     config['exa_relational'] = 'sqlite:///{}'.format(mkp(config['exa_root'], 'exa.sqlite'))

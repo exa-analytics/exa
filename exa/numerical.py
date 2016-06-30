@@ -71,7 +71,7 @@ class Series(Numerical, pd.Series):
     _copy = pd.Series.copy
 
 
-class DataFrame(NDBase, pd.DataFrame):
+class DataFrame(Numerical, pd.DataFrame):
     '''
     Trait supporting analogue of :class:`~pandas.DataFrame`.
 
@@ -83,8 +83,9 @@ class DataFrame(NDBase, pd.DataFrame):
     _groupbys = []      # Column names by which to group the data
     _indices = []       # Required index names (typically single valued list)
     _columns = []       # Required column entries
-    _categories = {}    # Column name, original type pairs ('label', int) that can be compressed to a category
     _traits = []        # Traits present as dataframe columns (or series values)
+    _categories = {}    # Column name, original type pairs ('label', int) that can be compressed to a category
+    _precision = {}     # Traits precision for JSON
 
     def _revert_categories(self):
         '''
@@ -171,6 +172,7 @@ class Field(DataFrame):
     '''
     _precision = 4
     _indices = ['field']
+    _memory_usage = DataFrame.memory_usage
 
     def copy(self, *args, **kwargs):
         '''
@@ -183,7 +185,7 @@ class Field(DataFrame):
     def _update_custom_traits(self):
         '''
         Obtain field values using the custom trait getter (called automatically
-        by :func:`~exa.numerical.NDBase._update_traits`).
+        by :func:`~exa.numerical.Numerical._update_traits`).
         '''
         traits = {}
         if self._groupbys:
@@ -197,6 +199,17 @@ class Field(DataFrame):
         json_string = s.to_json(orient='values', double_precision=self._precision)
         traits['field_values'] = Unicode(json_string).tag(sync=True)
         return traits
+
+    def memory_usage(self):
+        '''
+        Get the combined memory usage of the field data and field values.
+        '''
+        data = self._memory_usage()
+        values = 0
+        for value in self.field_values:
+            values += value.memory_usage()
+        data['field_values'] = values
+        return data
 
     def __init__(self, *args, field_values=None, **kwargs):
         if isinstance(args[0], pd.Series):
@@ -267,14 +280,14 @@ class Field3D(Field):
                'yi', 'yj', 'yk', 'zi', 'zj', 'zk']
 
 
-class SparseSeries(NDBase, pd.SparseSeries):
+class SparseSeries(Numerical, pd.SparseSeries):
     '''
     Trait supporting sparse series.
     '''
     _copy = pd.SparseSeries.copy
 
 
-class SparseDataFrame(NDBase, pd.SparseDataFrame):
+class SparseDataFrame(Numerical, pd.SparseDataFrame):
     '''
     Trait supporting sparse dataframe.
     '''

@@ -27,8 +27,18 @@ from collections import defaultdict
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from exa import global_config, mpl
 from exa.widget import ContainerWidget
-from exa.numerical import NDBase, DataFrame, Field, SparseDataFrame, Series
+from exa.numerical import Series, DataFrame, SparseSeries, SparseDataFrame, Field
 from exa.utility import convert_bytes
+
+
+edge_colors = mpl.sns.color_palette('viridis', 2)
+edge_types = ['idx-idx', 'idx-col']
+edge_color_map = dict(zip(edge_types, edge_colors))
+node_colors = mpl.sns.color_palette('viridis', 9)
+node_types = [Field, pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFrame, Series, DataFrame, SparseSeries, SparseDataFrame]
+node_color_map = list(zip(node_types, node_colors))
+r_node_color_map = {v: '.'.join((k.__module__, k.__name__)) for k, v in node_color_map}
+r_edge_color_map = {v: k for k, v in edge_color_map.items()}
 
 
 class TypedMeta(type):
@@ -123,9 +133,7 @@ class TypedMeta(type):
             setattr(self, pname, obj)
 
         def deleter(self):
-            '''
-            Deletes the property's value.
-            '''
+            '''Deletes the property's value.'''
             del self[pname]
 
         return property(getter, setter, deleter)
@@ -183,148 +191,105 @@ class BaseContainer:
 
     def info(self):
         '''
-        Print human readable information about the container.
-        '''
-        sizes = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB']
-        mem_usage = self.memory_usage().sum()
-        n = np.rint(len(str(mem_usage))/4).astype(int)
-        print('size ({0}):'.format(sizes[n]),  mem_usage/(1024**n))
-        print('data object count:', len(self._data().keys()))
-
-    def memory_usage(self):
-        '''
-        Reports container memory usage in bytes. Objects with a leading underscore
-        represent composites of (in some cases) multiple attributes.
+        Display information about the container's objects.
 
         Note:
-            This is an approximation and should be checked against external
-            benchmarking and analysis tools for accuracy.
+            Sizes are reported in bytes.
         '''
-        wid = 0
+        names = []
+        types = []
+        sizes = []
+        names.append('WIDGET')
+        types.append('-')
+        s = 0
         if self._widget is not None:
             for obj in self._widget._trait_values.values():
-                wid += getsizeof(obj)
-        rel = 0
+                s += getsizeof(obj)
+        sizes.append(s)
+        names.append('METADATA')
+        types.append('-')
+        s = 0
         for obj in self._rel().values():
-            rel += getsizeof(obj)
-        mem = {k: v.memory_usage().sum() for k, v in self._data().items()}
-        mem.update({'_widget': wid, '_relational': rel})
-        mem = pd.Series(mem)
-        mem.index.name = 'object'
-        mem.name = 'Bytes'
-        return mem
+            s += getsizeof(obj)
+        sizes.append(s)
+        for name, obj in self._data().items():
+            names.append(name[1:] if name.startswith('_') else name)
+            types.append('.'.join((obj.__module__, obj.__class__.__name__)))
+            sizes.append(obj.memory_usage().sum())
+        inf = pd.DataFrame.from_dict({'object': names, 'type': types, 'size': sizes})
+        inf.set_index('object', inplace=True)
+        return inf.sort_index()
 
-#    def data_network(self):
-#        '''
-#        Visualize the dataframe/series relationships and relative sizes.
-#
-#        A network graph representation of the current container is drawn. Nodes
-#        are data objects (dataframes or series) attached to the current
-#        container. Their relative size is proportional to the amount of data
-#        they contain. The node color corresponds to the number of relationships
-#        a given node has with other nodes. The edge color correspond to the
-#        type of connection a given node has with another node (index to index,
-#        index to column, or index to other).
-#
-#        If performed on an empty or test container, this function will display
-#        the enforced data objects and their connectivity. No information about
-#        the type of connectivity
-#        '''
-#        edges = []
-#        nodes = []
-#        node_sizes = {}
-#        edge_colors = {}
-#        edge_color_map = sns.color_palette('viridis', 4)
-#        data = self._df_types.items()
-#        if not self._test:
-#            data = self._numerical_dict().items()
-#        for i, (name0, df0) in enumerate(data):
-#            n0 = name0[1:] if name0.startswith('_') else name0
-#            indices0, columns0 = get_indices_columns(df0)
-#            for name1, df1 in data:
-#                if df0 is df1:
-#                    continue
-#                n1 = name1[1:] if name1.startswith('_') else name1
-#                indices1, columns1 = get_indices_columns(df1)
-#                key = (n0, n1)
-#                if any([index in indices1 for index in indices0]):
-#                    edges.append(key)
-#                    edge_colors[key] = edge_color_map[0]
-#                elif any([index in columns1 for index in indices0]):
-#                    edges.append(key)
-#                    edge_colors[key] = edge_color_map[1]
-#                elif any([index in columns0 for index in indices1]):
-#                    edges.append(key)
-#                    edge_colors[key] = edge_color_map[1]
-#                #elif (hasattr(df0, '_categories') and hasattr(df1, '_categories')):
-#                #    if (np.any([index in  for index in df0._groupbys]) or
-#                #        np.any([index in columns0 for index in df1._groupbys])):
-#                #        edges.append(key)
-#                #        edge_colors[key] = edge_color_map[2]
-#            nodes.append(n0)
-#            node_sizes[n0] = df0.size if isinstance(df0.size, np.int64) or isinstance(df0.size, int) else 0
-#            if hasattr(df0, 'field_values'):
-#                for i, field in enumerate(df0.field_values):
-#                    key = (n0, 'field_values[*]'.format(i))
-#                    if key[1] not in nodes:
-#                        nodes.append(key[1])
-#                        node_sizes[key[1]] = field.size if isinstance(field.size, np.int64) or isinstance(field.size, int) else 0
-#                    else:
-#                        node_sizes[key[1]] += field.size if isinstance(field.size, np.int64) or isinstance(field.size, int) else 0
-#                    edges.append(key)
-#                    edge_colors[key] = edge_color_map[3]
-#                    key = (key[1], key[0])
-#                    edges.append(key)
-#                    edge_colors[key] = edge_color_map[2]
-#        g = nx.Graph()
-#        g.add_nodes_from(nodes)
-#        g.add_edges_from(edges)
-#        fig, ax = sns.plt.subplots(1, figsize=(13, 8), dpi=600)
-#        ax.axis('off')
-#        degree_values = np.unique(list(g.degree().values()))
-#        enum_map = {v: k for k, v in enumerate(degree_values)}
-#        node_colors = sns.color_palette('viridis', len(degree_values))
-#        node_color = [node_colors[enum_map[g.degree()[node]]] for node in g.nodes()]
-#        edge_color = [edge_colors[edge] for edge in g.edges()]
-#        node_size = 3000
-#        if not self._test:
-#            node_size = np.log(np.array([node_sizes[node] for node in g.nodes()]))
-#            node_size *= 13000 / node_size.max()
-#            node_size += 2000
-#        pos = nx.spring_layout(g)
-#        f0 = nx.draw_networkx_nodes(g, pos=pos, node_size=node_size,
-#                                    node_color=node_color, alpha=0.8, ax=ax)
-#        f1 = nx.draw_networkx_labels(g, pos=pos, labels={k: k for k in g.nodes()},
-#                                     font_size=15, font_weight='bold', ax=ax)
-#        f2 = nx.draw_networkx_edges(g, pos=pos, edge_color=edge_color, width=2, ax=ax)
-#        axbox = ax.get_position()
-#        # Node color legend
-#        degree_map = {v: k for k, v in enum_map.items()}
-#        proxies = []
-#        descriptions = []
-#        for i, v in enumerate(degree_values):
-#            line = sns.mpl.lines.Line2D([], [], linestyle='none', color=node_colors[enum_map[v]], marker='o')
-#            proxies.append(line)
-#            descriptions.append(degree_map[i])
-#        r_legend = ax.legend(proxies, descriptions, title='Connections', loc=(1, 0), frameon=True)
-#        r_frame = r_legend.get_frame()
-#        r_frame.set_facecolor('white')
-#        r_frame.set_edgecolor('black')
-#        # Edge color legend
-#        rel_types = {0: 'index - index', 1: 'index - column', 2: 'column - column',
-#                     3: 'index - other'}
-#        proxies = []
-#        descriptions = []
-#        for i, c in enumerate(edge_color_map):
-#            line = sns.mpl.lines.Line2D([], [], linestyle='-', color=c)
-#            proxies.append(line)
-#            descriptions.append(rel_types[i])
-#        e_legend = ax.legend(proxies, descriptions, title='Relationship Type', loc=(1, 0.7), frameon=True)
-#        e_frame = r_legend.get_frame()
-#        e_frame.set_facecolor('white')
-#        e_frame.set_edgecolor('black')
-#        fig.gca().add_artist(r_legend)
-#        return g
+    def network(self):
+        '''
+        Display information about the container's object relationships.
+        '''
+        def get_color(obj):
+            '''Gets the color of a node based on the node's data type.'''
+            for k, v in node_color_map:
+                if isinstance(obj, k):
+                    return v
+            return 'gray'
+
+        def legend(items, mapper, title, loc, ax):
+            '''Legend creation helper'''
+            proxies = []
+            descriptions = []
+            for k in set(items):
+                if title == 'Data Type':
+                    line = mpl.sns.mpl.lines.Line2D([], [], linestyle='none', color=k, marker='o')
+                else:
+                    line = mpl.sns.mpl.lines.Line2D([], [], linestyle='-', color=k)
+                proxies.append(line)
+                descriptions.append(mapper[k])
+            leg = ax.legend(proxies, descriptions, title=title, loc=loc, frameon=True)
+            leg_frame = leg.get_frame()
+            leg_frame.set_facecolor('white')
+            leg_frame.set_edgecolor('black')
+            return leg, ax
+
+        inf = self.info()
+        inf = inf[inf['type'] != '-']
+        nodes = inf.index.values
+        node_sizes = inf['size']
+        node_sizes *= 13000/node_sizes.max()
+        node_sizes += 2000
+        node_colors = {}
+        edges = {}
+        items = self._data().items()
+        for k0, v0 in items:
+            n0 = k0[1:] if k0.startswith('_') else k0
+            node_colors[n0] = get_color(v0)
+            for k1, v1 in items:
+                if v0 is v1:
+                    continue
+                n1 = k1[1:] if k1.startswith('_') else k1
+                for name in v0.index.names:
+                    if name is None:
+                        continue
+                    if name in v1.index.names:
+                        edges[(n0, n1)] = edge_color_map['idx-idx']
+                        edges[(n1, n0)] = edge_color_map['idx-idx']
+                    for col in v1.columns:
+                        if name in col:
+                            edges[(n0, n1)] = edge_color_map['idx-col']
+                            edges[(n1, n0)] = edge_color_map['idx-col']
+        g = nx.Graph()
+        g.add_nodes_from(nodes)
+        g.add_edges_from(edges.keys())
+        node_size = [node_sizes[k] for k in g.nodes()]
+        node_color = [node_colors[k] for k in g.nodes()]
+        edge_color = [edges[k] for k in g.edges()]
+        labels = {k: k for k in g.nodes()}
+        fig, ax = mpl.sns.plt.subplots(1, figsize=(13, 8), dpi=300)
+        ax.axis('off')
+        pos = nx.spring_layout(g)
+        f0 = nx.draw_networkx_nodes(g, pos=pos, ax=ax, alpha=0.8, node_size=node_size, node_color=node_color)
+        f1 = nx.draw_networkx_labels(g, pos=pos, labels=labels, font_size=15, font_weight='bold', ax=ax)
+        f2 = nx.draw_networkx_edges(g, pos=pos, edge_color=edge_color, width=2, ax=ax)
+        l1, ax = legend(edge_color, r_edge_color_map, 'Connection', (1, 0), ax)
+        l2, ax = legend(node_color, r_node_color_map, 'Data Type', (1, 0.3), ax)
+        fig.gca().add_artist(l1)
 
     @classmethod
     def from_hdf(cls, path):
@@ -492,7 +457,7 @@ class BaseContainer:
         function will make calls to every data object that contains traits.
 
         See Also:
-            :func:`~exa.numerical.NDBase._update_traits`
+            :func:`~exa.numerical.Numerical._update_traits`
         '''
         if self._widget is not None:
             traits = {}
@@ -601,125 +566,24 @@ class BaseContainer:
             raise KeyError('No selection method for key {} of type {}'.format(key, type(key)))
 
     def __delitem__(self, key):
-        del self[key]
+        if key in self.__dict__:
+            del self.__dict__[key]
 
     def __init__(self, name=None, description=None, meta=None, **kwargs):
         self.name = name
         self.description = description
         self.meta = meta
         for key, value in kwargs.items():
-            try:
-                setattr(self, key, value)
-            except:
-                print(key, value)
-                raise
+            setattr(self, key, value)
         self._test = False
         self._traits_need_update = True
         self._widget = self._widget_class(self) if global_config['notebook'] else None
         if meta is None and len(kwargs) == 0 and len(self._data()) == 0:
             self._test = True
             self.name = 'TestContainer'
-            self._update_traits()
 
     def _repr_html_(self):
         if self._widget:
             if self._traits_need_update:
                 self._update_traits()
             return self._widget._repr_html_()
-
-
-def slice_by_int():
-    pass
-
-#def concat(*containers, axis=0, join='outer', ingore_index=False):
-#    '''
-#    Concatenate any number of container objects into a single container object.
-#
-#    Args:
-#        containers: A sequence of container or container like objects
-#        axis (int): Axis along which to concatenate (0: "hstack", 1: "vstack")
-#        join (str): How to handle indices on other axis (full outer join: "outer", inner join: "inner")
-#        ignore_index (bool): See warning below!
-#
-#    Returns:
-#        container: Concatenated container object
-#
-#    Note:
-#        The concatenated object will have a new unique id, primary, key, and
-#        its metadata will contain references to the original conatiners.
-#
-#    Warning:
-#        The ignore_index option is primarily for internal use. If set to true,
-#        may cause the resulting concatenated container object to not have
-#        meaningful indices or columns. Use with care.
-#    '''
-#    # In the simplest case, all of the containers have unique indices and should
-#    # simply be sorted and then their dataframe data appended
-#    cls = containers[0].__class__
-#    if not np.all([cls == container.__class__ for container in containers]):
-#        raise TypeError('Can only concatenate containers of the same type!')
-#    # Get the master list of dataframes and record pkids
-#    df_classes = {}
-#    meta = {'concat_pkid': []}
-#    for container in containers:
-#        meta['concat_pkid'].append(container.pkid)
-#        for key, value in container._numerical_dict().items():
-#            name = key[1:] if key.startswith('_') else key
-#            df_classes[name] = value.__class__
-#    # For each dataframe, concatentate first by groupbys then by index
-#    new_dfs = {}
-#    for name, cls in df_classes.items():
-#        dflist = [container[name] for container in containers]
-#        dftypes = [type(df) for df in dflist]
-#        df_type = dftypes[0]
-#        df0 = dflist[0]
-#        if np.any([dftype is not df_type for dftype in dftypes]):
-#            raise TypeError('Cannot concantenate dataframes ({}) with different types!'.format(name))
-#        if isinstance(df0, exa.numerical.Field):
-#            print('FIELD')
-#            news_dfs[name] = _concat_fields(dflist, cls, axis=axis, join=join)
-#        elif isinstance(df0, exa.numerical.Series):
-#            print('SERIES')
-#            new_dfs[name] = _concat_series(dflist, cls)
-#        elif isinstance(df0, exa.numerical.SparseDataFrame):
-#
-#            pass
-#        elif isinstance(df0, exa.numerical.DataFrame):
-#            pass
-#        else:
-#            pass
-#            #new_dfs[name] = _concat_reindex(dflist, cls)
-#    print(new_dfs.keys())
-#    kwargs.update(new_dfs)
-#    if 'meta' in kwargs:
-#        kwargs['meta'].update(meta)
-#    else:
-#        kwargs['meta'] = meta
-#    return kwargs
-#
-#def _concat_series(series, cls):
-#    '''
-#    '''
-#    return cls(pd.concat(series))
-#
-#def _concat_dataframes(dataframes, cls):
-#    '''
-#    '''
-#    grps = dataframes
-#
-#def _concat_fields(fields, cls, axis, join):
-#    '''
-#    '''
-#    grps = fields[0]._groupbys
-#    new_groupbys = {}
-#    for name in grps:
-#        if axis == 0:
-#            new_groupbys[name] = pd.Series([i for i in range(len(fields)) for j in range(len(fields[i]))], dtype='category')
-#        else:
-#            new_groupbys[name] = pd.Series([i for i in range(len(fields[0]))], dtype='category')
-#    field_values = [values for field in fields for values in field.field_values]
-#    field_data = pd.concat([pd.DataFrame(field) for field in fields], axis=axis, join=join)
-#    field_data.reset_index(inplace=True, drop=True)
-#    for name in grps:
-#        field_data[name] = new_groupbys[name]
-#    return cls(field_values, field_data)
