@@ -126,11 +126,9 @@ def cleanup():
     '''
     Remove root directory in non-persistent session.
     '''
-    print('cleanup config')
     if config['exa_persistent']:
         save_config()
     else:
-        print('HDFJAKLJSDFKJASLDFKASJDLKASJDFKJ')
         shutil.rmtree(config['exa_root'])
 
 

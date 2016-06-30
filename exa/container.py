@@ -434,147 +434,49 @@ class BaseContainer:
                     data[key] = obj
         return data
 
-    def _trait_data(self):
-        '''
-        Get all data that contains traits.
-        '''
-        active = {}
-        for key, obj in self._data().items():
-            if hasattr(obj, '_traits'):
-                if len(obj._traits) > 0 and len(obj) > 0:
-                    active[key] = obj
-        return active
 
-    def _custom_container_traits(self):
-        '''
-        For generating custom traits dependent on multiple data objects.
-        '''
+    def _custom_app_traits(self):
+        raise NotImplementedError('Support for web app not yet implemented')
+
+    def _update_app_traits(self):
+        raise NotImplementedError('Support for web app not yet implemented')
+
+    def _custom_widget_traits(self):
         return {}
 
-    def _update_traits(self):
+    def _update_widget_traits(self):
         '''
-        Main entry point for updating all traits of the current container. This
-        function will make calls to every data object that contains traits.
+        Jupyter notebook widgets require data to be available within a
+        :class:`~exa.widget.Widget` object. This allows notebook extensions
+        (nbextensions - written in JavaScript) to access backend (Python) data
+        via `ipywidgets`_.
 
-        See Also:
-            :func:`~exa.numerical.Numerical._update_traits`
+        .. _ipywidgets: https://ipywidgets.readthedocs.io/en/latest/
         '''
-        if self._widget is not None:
+        if self._widget is not None:    # If a corresponding widget exists, build traits
             traits = {}
             if self._test:
                 traits['test'] = Bool(True).tag(sync=True)
             else:
                 traits['test'] = Bool(False).tag(sync=True)
-                traits.update(self._custom_container_traits())
-                has_traits = self._trait_data()
-                for obj in has_traits.values():
-                    traits.update(obj._update_traits())
-            self._widget.add_traits(**traits)
-            self._traits_need_update = False
-
-    def _slice_with_int_or_string(self, key):
-        '''
-        Slices the current container selecting data that matches the key (either on _groupbys or
-        by row index).
-        '''
-        cls = self.__class__
-        kws = del_keys(self._rel(copy=True))
-        for name, df in self._data(copy=True).items():
-            dfcls = df.__class__
-            if hasattr(df, '_groupbys'):
-                if len(df._groupbys) > 0:
-                    grps = df.groupby(df._groupbys)
-                    selector = sorted(grps.groups.keys())[key]
-                    kws[name] = dfcls(grps.get_group(selector))
-            if name not in kws:
-                selector = None
-                if isinstance(df, pd.SparseDataFrame) or isinstance(df, pd.SparseSeries):
-                    kws[name] = df
-                elif key > len(df.index):
-                    kws[name] = df
-                else:
-                    selector = df.index[key]
-                    kws[name] = dfcls(df.ix[[selector], :])
-        return cls(**kws)
-
-    def _slice_with_list_or_tuple(self, keys):
-        '''
-        Slices the current container selecting data that matches the keys (either on _groupbys or
-        by row index).
-        '''
-        cls = self.__class__
-        kws = del_keys(self._rel(copy=True))
-        for name, df in self._data(copy=True).items():
-            dfcls = df.__class__
-            if hasattr(df, '_groupbys'):
-                if len(df._groupbys) > 0:
-                    grps = df.groupby(df._groupbys)
-                    srtd = sorted(grps.groups.keys())
-                    selector = [srtd[key] for key in keys]
-                    kws[name] = dfcls(pd.concat([grps.get_group(key) for key in selector]))
-            if name not in kws:
-                if isinstance(df, pd.SparseDataFrame) or isinstance(df, pd.SparseSeries):
-                    kws[name] = df
-                elif max(keys) > len(df.index):
-                    kws[name] = df
-                else:
-                    selector = [df.index[key] for key in keys]
-                    kws[name] = dfcls(df.ix[selector, :])
-        return cls(**kws)
-
-    def _slice_with_slice(self, slce):
-        '''
-        Slices the current container selecting data that matches the range given
-        by the slice object.
-        '''
-        cls = self.__class__
-        kws = del_keys(self._rel(copy=True))
-        for name, df in self._data(copy=True).items():
-            dfcls = df.__class__
-            if hasattr(df, '_groupbys'):
-                if len(df._groupbys) > 0:
-                    grps = df.groupby(df._groupbys)
-                    srtd = sorted(grps.groups.keys())
-                    kws[name] = dfcls(pd.concat([grps.get_group(key) for key in srtd[slce]]))
-            if name not in kws:
-                if isinstance(df, pd.SparseDataFrame) or isinstance(df, pd.SparseSeries):
-                    kws[name] = df
-                elif slce == slice(None):
-                    kws[name] = df
-                else:
-                    keys = df.index.values[slce]
-                    kws[name] = dfcls(df.iloc[keys, :])
-        return cls(**kws)
-
-    def __getitem__(self, key):
-        '''
-        Containers can be sliced in a number of different ways and the slicing
-        of the data values depends on the characteristics of the individual
-        data objects (i.e. presence of _groupbys).
-        '''
-        if isinstance(key, int):
-            return self._slice_with_int_or_string(key)
-        elif isinstance(key, str) and not hasattr(self, key):
-            return self._slice_with_int_or_string(key)
-        elif isinstance(key, list) or isinstance(key, tuple):
-            return self._slice_with_list_or_tuple(key)
-        elif isinstance(key, slice):
-            return self._slice_with_slice(key)
-        elif hasattr(self, key):
-            return getattr(self, key)
-        else:
-            raise KeyError('No selection method for key {} of type {}'.format(key, type(key)))
+                traits.update(self._custom_widget_traits())
+                for obj in self._data().values():
+                    if hasattr(obj, '_traits'):
+                        if len(obj._traits) > 0 and len(obj) > 0:
+                            traits.update(obj._update_widget_traits())
+            self._widget.add_traits(**traits)    # Adding traits to the widget makes
+            self._traits_need_update = False     # them accesible from nbextensions (JavaScript).
 
     def __delitem__(self, key):
         if key in self.__dict__:
             del self.__dict__[key]
 
     def __init__(self, name=None, description=None, meta=None, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
         self.name = name
         self.description = description
         self.meta = meta
-        for key, value in kwargs.items():
-            setattr(self, key, value)
         self._test = False
         self._traits_need_update = True
         self._widget = self._widget_class(self) if global_config['notebook'] else None
@@ -583,7 +485,99 @@ class BaseContainer:
             self.name = 'TestContainer'
 
     def _repr_html_(self):
-        if self._widget:
-            if self._traits_need_update:
-                self._update_traits()
-            return self._widget._repr_html_()
+        if self._widget is not None and self._traits_need_update:
+            self._update_widget_traits()
+        return self._widget._repr_html_()
+
+#    def _slice_with_int_or_string(self, key):
+#        '''
+#        Slices the current container selecting data that matches the key (either on _groupbys or
+#        by row index).
+#        '''
+#        cls = self.__class__
+#        kws = del_keys(self._rel(copy=True))
+#        for name, df in self._data(copy=True).items():
+#            dfcls = df.__class__
+#            if hasattr(df, '_groupbys'):
+#                if len(df._groupbys) > 0:
+#                    grps = df.groupby(df._groupbys)
+#                    selector = sorted(grps.groups.keys())[key]
+#                    kws[name] = dfcls(grps.get_group(selector))
+#            if name not in kws:
+#                selector = None
+#                if isinstance(df, pd.SparseDataFrame) or isinstance(df, pd.SparseSeries):
+#                    kws[name] = df
+#                elif key > len(df.index):
+#                    kws[name] = df
+#                else:
+#                    selector = df.index[key]
+#                    kws[name] = dfcls(df.ix[[selector], :])
+#        return cls(**kws)
+#
+#    def _slice_with_list_or_tuple(self, keys):
+#        '''
+#        Slices the current container selecting data that matches the keys (either on _groupbys or
+#        by row index).
+#        '''
+#        cls = self.__class__
+#        kws = del_keys(self._rel(copy=True))
+#        for name, df in self._data(copy=True).items():
+#            dfcls = df.__class__
+#            if hasattr(df, '_groupbys'):
+#                if len(df._groupbys) > 0:
+#                    grps = df.groupby(df._groupbys)
+#                    srtd = sorted(grps.groups.keys())
+#                    selector = [srtd[key] for key in keys]
+#                    kws[name] = dfcls(pd.concat([grps.get_group(key) for key in selector]))
+#            if name not in kws:
+#                if isinstance(df, pd.SparseDataFrame) or isinstance(df, pd.SparseSeries):
+#                    kws[name] = df
+#                elif max(keys) > len(df.index):
+#                    kws[name] = df
+#                else:
+#                    selector = [df.index[key] for key in keys]
+#                    kws[name] = dfcls(df.ix[selector, :])
+#        return cls(**kws)
+#
+#    def _slice_with_slice(self, slce):
+#        '''
+#        Slices the current container selecting data that matches the range given
+#        by the slice object.
+#        '''
+#        cls = self.__class__
+#        kws = del_keys(self._rel(copy=True))
+#        for name, df in self._data(copy=True).items():
+#            dfcls = df.__class__
+#            if hasattr(df, '_groupbys'):
+#                if len(df._groupbys) > 0:
+#                    grps = df.groupby(df._groupbys)
+#                    srtd = sorted(grps.groups.keys())
+#                    kws[name] = dfcls(pd.concat([grps.get_group(key) for key in srtd[slce]]))
+#            if name not in kws:
+#                if isinstance(df, pd.SparseDataFrame) or isinstance(df, pd.SparseSeries):
+#                    kws[name] = df
+#                elif slce == slice(None):
+#                    kws[name] = df
+#                else:
+#                    keys = df.index.values[slce]
+#                    kws[name] = dfcls(df.iloc[keys, :])
+#        return cls(**kws)
+#
+#    def __getitem__(self, key):
+#        '''
+#        Containers can be sliced in a number of different ways and the slicing
+#        of the data values depends on the characteristics of the individual
+#        data objects (i.e. presence of _groupbys).
+#        '''
+#        if isinstance(key, int):
+#            return self._slice_with_int_or_string(key)
+#        elif isinstance(key, str) and not hasattr(self, key):
+#            return self._slice_with_int_or_string(key)
+#        elif isinstance(key, list) or isinstance(key, tuple):
+#            return self._slice_with_list_or_tuple(key)
+#        elif isinstance(key, slice):
+#            return self._slice_with_slice(key)
+#        elif hasattr(self, key):
+#            return getattr(self, key)
+#        else:
+#            raise KeyError('No selection method for key {} of type {}'.format(key, type(key)))

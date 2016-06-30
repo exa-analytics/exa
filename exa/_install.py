@@ -25,30 +25,24 @@ from exa.utility import mkp
 
 def install(persist=False, verbose=False):
     '''
-    Initializes exa's database and notebook widget features.
-
-    By default, exa runs in memory. To take full advantage of exa's content
-    management features this function should be run. It will create a storage
-    location in **~/.exa** where all configuration, log, and data are housed.
+    Persistently installs the exa application and updates static data in the
+    database on package import.
 
     Args:
-        exa_root (str): If None assumes temporary session, otherwise directory path where the package will be installed
+        persist (bool): Persistent install (default false)
+        verbose (bool): Verbose installation (default false)
     '''
-    if persist:
+    if persist == True:
         rel_cleanup()
         config_cleanup()
-        if platform.system().lower() == 'windows':
-            dot_exa = mkp(os.getenv('USERPROFILE'), '.exa')
-        else:
-            dot_exa = mkp(os.getenv('HOME'), '.exa')
-        mkp(dot_exa, mk=True)
+        mkp(global_config['exa_root'], mk=True)
         update_config()
         save_config()
-        init_db()
-        global engine
-        from exa.relational.base import engine
-        setup_loggers()
-    update(verbose)
+        #init_db()
+        #global engine
+        #from exa.relational.base import engine
+        #setup_loggers()
+    #update(verbose)
 
 
 def update(verbose=False):

@@ -32,3 +32,9 @@ alphabetically with sub-packages appearing last.
     :caption: Relational
 
     relational/isotope.rst
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Extensions
+
+    _nbextensions/container.rst

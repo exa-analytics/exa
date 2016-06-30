@@ -5,24 +5,32 @@ if sys.version_info < (3, 4):
 from setuptools import setup, find_packages
 from exa import __version__
 
-
-dependencies = ['sphinxcontrib-autoanysrc', 'xmltodict']
-
-setup(
-    name='exa',
-    version=__version__,
-    description='Data industry specific, processing, analysis, and visualization',
-    author='Tom Duignan, Alex Marchenko',
-    author_email='exa.data.analytics@gmail.com',
-    maintainer_email='exa.data.analytics@gmail.com',
-    url='https://exa-analytics.github.io',
-    download_url = 'https://github.com/exa-analytics/exa/tarball/v{}'.format(__version__),
-    packages=find_packages(),
-    package_data={'exa': ['_static/*.json', '_nbextensions/*.js',
-                          '_nbextensions/libs/*.js', '_nbextensions/apps/*.js']},
-    entry_points={'console_scripts': ['exa = exa.__main__:gui',
-                                      'exw = exa.__main__:workflow']},
-    include_package_data=True,
-    install_requires=dependencies,
-    license='Apache License Version 2.0'
-)
+try:
+    import pypandoc
+    description = pypandoc.convert('README.md', 'rst')
+except:
+    with open('README.md') as f:
+        description = f.read()
+dependencies = ['sphinxcontrib-autoanysrc']
+try:
+    setup(
+        name='exa',
+        version=__version__,
+        description=description,
+        author='Tom Duignan, Alex Marchenko',
+        author_email='exa.data.analytics@gmail.com',
+        maintainer_email='exa.data.analytics@gmail.com',
+        url='https://exa-analytics.github.io',
+        download_url = 'https://github.com/exa-analytics/exa/tarball/v{}'.format(__version__),
+        packages=find_packages(),
+        package_data={'exa': ['_static/*.json', '_nbextensions/*.js', '_nbextensions/libs/*.js']},
+        entry_points={'console_scripts': ['exa = exa.__main__:notebook',
+                                          'exw = exa.__main__:workflow']},
+        include_package_data=True,
+        install_requires=dependencies,
+        license='Apache License Version 2.0'
+    )
+    from exa._install import install
+    install(persist=True)
+except:
+    raise

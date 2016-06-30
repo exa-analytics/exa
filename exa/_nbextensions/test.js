@@ -1,7 +1,6 @@
 /*"""
-===================================
-container.test.js
-===================================
+test.js
+##############
 A test application called when an empty container widget is rendered in a
 Jupyter notebook environment.
 */
@@ -10,11 +9,11 @@ Jupyter notebook environment.
 
 require.config({
     shim: {
-        'nbextensions/exa/apps/app3d': {
+        'nbextensions/exa/app3d': {
             exports: 'App3D'
         },
 
-        'nbextensions/exa/apps/gui': {
+        'nbextensions/exa/gui': {
             exports: 'ContainerGUI'
         },
 
@@ -56,7 +55,7 @@ define([
                 view_self.app.app3d.animate();
                 view_self.app.app3d.controls.handleResize();
             });
-            this.view.send({'type': 'message', 'app': 'TestApp', 'content': 'True', 'data': 'None'});
+            //this.view.send({'type': 'message', 'app': 'TestApp', 'content': 'True', 'data': 'None'});
         };
 
         create_gui() {

@@ -1,12 +1,6 @@
 #! /usr/bin/env python
-import os
-import sys
 import argparse
-import webbrowser
-import threading
 
-sys.path.insert(0, os.path.abspath('./'))
-from exa._app import serve
 
 
 def get_args():
@@ -49,27 +43,14 @@ def get_args():
     return parser.parse_args()
 
 
-def main():
-    '''
-    Main application entry point.
+def notebook():
+    '''exa notebook application'''
+    pass
 
-    The exa application has two modes; one starts a dynamic web application
-    for managing data, performing postprocessing
-    '''
-    args = get_args()
-    workflow = args.workflow    # When using a workflow, don't spawn the GUI
-    if workflow is None:
-        port = args.port
-        browser = args.browser
-        link = 'http://localhost:{port}'.format(port=port)
-        threading.Timer(0.5, lambda: webbrowser.get(browser).open(link)).start()
-        serve(port=port)
-    else:
-        # Here we have exa do high performance computing on a cluster
-        raise NotImplementedError()
-        hostnames = args.hosts
-        if hostnames is None:
-            raise NameError('hostnames are not defined, please use the -s option.')
+
+def workflow():
+    '''exa high performance computing'''
+    pass
 
 
 if __name__ == '__main__':

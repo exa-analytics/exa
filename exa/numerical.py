@@ -49,10 +49,16 @@ class Numerical:
         '''
         return self.__class__(self._copy(*args, **kwargs))
 
-    def _update_custom_traits(self):
-        return {}    # Placeholder for custom traits: by default return empty dict
+    def _custom_app_traits(self):
+        raise NotImplementedError('Support for web app not yet implemented')
 
-    def _update_traits(self):
+    def _update_app_traits(self):
+        raise NotImplementedError('Support for web app not yet implemented')
+
+    def _custom_widget_traits(self):
+        return {}
+
+    def _update_widget_traits(self):
         traits = self._update_custom_traits()    # See comment above
         return traits
 

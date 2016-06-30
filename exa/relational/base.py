@@ -225,7 +225,6 @@ def cleanup():
     '''
     Cleanup the engine's connection pool before exiting.
     '''
-    print('cleanup relational')
     engine.dispose()
 
 

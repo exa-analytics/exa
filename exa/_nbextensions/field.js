@@ -1,8 +1,9 @@
 /*"""
-===============
 field.js
-===============
-Provides the
+#####################
+This module provides infrastructure for storing and manipulating 3D fields. By
+standardizing how field data is stored, marching cubes (or other surface
+computing algorithms) are easier to work with.
 */
 'use strict';
 
@@ -23,15 +24,18 @@ define([
         /*"""
         Field
         ==============
-        Base class for dealing with scalar and vector field data
+        JavaScript counterpart for exa's Field.
 
         Args:
-            dimensions: {xmin: xmin, xmax: xmax, dx: dx, ...}
+            dimensions: {xmin: xmin, xmax: xmax, dx: dx, [nx: nx, x: x], ...}
+            func_or_values: Field function (if known) or discrete values
 
-        Note:
-            The dimensions argument can alternatively be
-            {xvalues: xvalues, yvalues: yvalues, ...} or
-            {xmin: xmin, xmax: xmax, nx: nx, ...}
+        The arugment dimensions is a dictionary like object that can contain
+        the x, y, and z arrays explicity, or can contain parameters, xmin, xmax,
+        and nx or dx, which are used to generate the (x) array (and similarly
+        for y and z). The argument func_or_values must be a JavaScript function
+        (of x, y, z) or pre-computed discrete values on the field described by
+        x, y, and z.
         */
         constructor(dimensions, func_or_values) {
             this.func = {};
@@ -220,11 +224,6 @@ define([
         };
 
         compute_field() {
-            /*"""
-            compute_field
-            --------------
-            */
-            console.log('computing field...');
             this.values = new Float32Array(this.n);
             var i = 0;
             for (var x of this.x) {
@@ -238,16 +237,13 @@ define([
         };
     };
 
+
     class ScalarField extends Field {
         constructor(dimensions, func_or_values) {
-            /*"""
-            ScalarField
-            =============
-            Representation of a scalar field.
-            */
             super(dimensions, func_or_values);
         };
     };
+
 
     return {
         Field: Field,
