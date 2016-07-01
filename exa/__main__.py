@@ -1,6 +1,10 @@
 #! /usr/bin/env python
+# -*- coding: utf-8 -*-
+'''
+Application Launchers
+########################
+'''
 import argparse
-
 
 
 def get_args():
@@ -50,7 +54,7 @@ def notebook():
 
 def workflow():
     '''exa high performance computing'''
-    pass
+    raise NotImplementedError('Workflows are currently unsupported.')
 
 
 if __name__ == '__main__':

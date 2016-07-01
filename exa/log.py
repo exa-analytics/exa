@@ -19,7 +19,7 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 from textwrap import wrap
-from exa import global_config
+from exa._config import config
 
 
 loggers = {}
@@ -85,7 +85,7 @@ def log_tail(log='sys', n=10):
 
 def print_log(log, n, head=True):
     lines = None
-    with open(global_config['log_' + log], 'r') as f:
+    with open(config['log_' + log], 'r') as f:
         lines = f.read().splitlines()
     if head:
         print('\n'.join(lines[:n]))
@@ -109,20 +109,17 @@ def setup_loggers():
     '''
     global loggers
     cleanup()
-    log_files = dict((key, value) for key, value in global_config.items() if key.startswith('log_'))
+    log_files = dict((key, value) for key, value in config.items() if key.startswith('log_'))
     for key, path in log_files.items():
         logger = logging.getLogger('sqlalchemy') if 'db' in key else logging.getLogger(key)
-        handler = RotatingFileHandler(path, maxBytes=global_config['logfile_max_bytes'],
-                                      backupCount=global_config['logfile_max_count'])
+        handler = RotatingFileHandler(path, maxBytes=config['logfile_max_bytes'],
+                                      backupCount=config['logfile_max_count'])
         handler.setFormatter(LogFormat())
         logger.addHandler(handler)
-        if global_config['runlevel'] == 0:
+        if config['runlevel'] == 0:
             logger.setLevel(logging.WARNING)
-        elif global_config['runlevel'] == 1:
+        elif config['runlevel'] == 1:
             logger.setLevel(logging.INFO)
         else:
             logger.setLevel(logging.DEBUG)
         loggers[key.replace('log_', '')] = logger
-
-
-setup_loggers()

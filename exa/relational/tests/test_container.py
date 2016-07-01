@@ -25,30 +25,31 @@ from exa.test import UnitTester
 from exa.relational.container import Container
 
 
-class TestRelationalContainer(UnitTester):
-    '''
-    Test methods of :class:`~exa.relational.container.Container` that are
-    independent of functionality inherited from :class:`~exa.container.BaseContainer`.
-    '''
-    def test_table(self):
-        '''
-        Like all relational tables we should be able to call the
-        :func:`~exa.relational.base.Base.table` function.
-        '''
-        self.assertIsInstance(Container.to_frame(), pd.DataFrame)
-
-
-class TestContainer(UnitTester):
-    '''
-    Comprehensive testing of :class:`~exa.relational.container.Container`
-    including inherited functionality dependent on :class:`~exa.container.BaseContainer`.
-    '''
-    def test_save(self):
-        fd, path = mkstemp(suffix='.hdf5')
-        df = pd.DataFrame(np.random.rand(5, 5))
-        c = Container(name='test', description='created by TestContainer.test_save',
-                      df=df)
-        c.save(path)
-        self.assertTrue(c.pkid in Container.to_frame().index)
-        self.assertTrue(os.path.exists(path))
-        os.remove(path)
+#class TestRelationalContainer(UnitTester):
+#    '''
+#    Test methods of :class:`~exa.relational.container.Container` that are
+#    independent of functionality inherited from :class:`~exa.container.BaseContainer`.
+#    '''
+#    def test_table(self):
+#        '''
+#        Like all relational tables we should be able to call the
+#        :func:`~exa.relational.base.Base.table` function.
+#        '''
+#        self.assertIsInstance(Container.to_frame(), pd.DataFrame)
+#
+#
+#class TestContainer(UnitTester):
+#    '''
+#    Comprehensive testing of :class:`~exa.relational.container.Container`
+#    including inherited functionality dependent on :class:`~exa.container.BaseContainer`.
+#    '''
+#    def test_save(self):
+#        fd, path = mkstemp(suffix='.hdf5')
+#        df = pd.DataFrame(np.random.rand(5, 5))
+#        c = Container(name='test', description='created by TestContainer.test_save',
+#                      df=df)
+#        c.save(path)
+#        self.assertTrue(c.pkid in Container.to_frame().index)
+#        self.assertTrue(os.path.exists(path))
+#        os.remove(path)
+#

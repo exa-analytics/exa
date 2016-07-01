@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-Relational
-===============================================
-This modules provides the base class for persitent relational objects such as the
-:class:`~exa.relational.container.Container` object. It defines a declarative base class that has
-convenience methods for looking up database entries by common features and returning and appropriate
-and corresponding dataframe or series object.
+Base Classes for Content Management
+#########################################
 '''
 import pandas as pd
 from numbers import Integral
@@ -17,11 +13,12 @@ from sqlalchemy import Column, Integer, String, DateTime, create_engine, event
 from sqlalchemy.orm import sessionmaker, mapper
 from sqlalchemy.orm.query import Query
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
-from exa import global_config
+from exa._config import config
 from exa.log import get_logger
 
 
 gen_uid = lambda: uuid4().hex
+#conn_data = {'n': None, 'e': None, 'f': None} # n = engine name, e = engine instance, f = SessionFactory
 engine_name = None
 engine = None
 SessionFactory = None
@@ -80,9 +77,10 @@ class BaseMeta(DeclarativeMeta):
             memory error. It is almost always more effective to query the
             table for the specific records of interest.
         '''
-        with scoped_session() as s:
-            statement = s.query(self).statement
-            df = pd.read_sql(statement, engine)
+        global engine
+        s = SessionFactory()
+        statement = s.query(self).statement
+        df = pd.read_sql(statement, engine)
         if 'pkid' in df:
             df = df.set_index('pkid').sort_index()
         return df
@@ -216,7 +214,7 @@ def init_db():
     global engine_name
     global engine
     global SessionFactory
-    engine_name = global_config['exa_relational']
+    engine_name = config['exa_relational']
     engine = create_engine(engine_name)
     SessionFactory = sessionmaker(bind=engine)
 
@@ -244,6 +242,3 @@ def scoped_session(*args, **kwargs):
         raise
     finally:
         session.close()
-
-
-init_db()

@@ -5,8 +5,8 @@ Summations
 Fast algorithms for iterative summations.
 '''
 import numpy as np
+from numba import jit
 from itertools import product
-from exa import global_config
 
 
 def product_add_2(a, b):
@@ -45,8 +45,6 @@ def _product_sum_2f(a, b):
     return sums
 
 
-if global_config['pkg_numba']:
-    from numba import jit
-    _product_sum_2f_py = product_sum_2f
-    product_sum_2f = jit(nopython=True)(_product_sum_2f)
-    product_sum_2f_ng = jit(nopython=True, nogil=True)(_product_sum_2f)
+_product_sum_2f_py = product_sum_2f
+product_sum_2f = jit(nopython=True)(_product_sum_2f)
+product_sum_2f_ng = jit(nopython=True, nogil=True)(_product_sum_2f)

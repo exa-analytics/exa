@@ -6,6 +6,9 @@ This module allows a user to install exa in a persistent manner enabling some
 advanced content management features. Installation will create a permanent
 directory where exa's relational database will be housed (default ~/.exa).
 All container creation, logging, and static data is housed in this directory.
+
+See Also:
+    :mod:`~exa._config`
 '''
 import os
 import shutil
@@ -13,58 +16,70 @@ import platform
 import pandas as pd
 from itertools import product
 from notebook import install_nbextension
-from exa import global_config
-from exa._config import update_config, save_config
+from exa._config import update_config, save_config, config
 from exa._config import cleanup as config_cleanup
 from exa.log import setup_loggers
 from exa.relational.base import cleanup as rel_cleanup
 from exa.relational.base import create_tables, init_db, engine
-from exa.relational.update import drop_all_static_tables
+from exa.relational.unit import (Length, Mass, Time, Current, Amount,
+                                 Luminosity, Dose, Acceleration,
+                                 Charge, Dipole, Energy, Force,
+                                 Frequency, MolarMass)
+from exa.relational.isotope import Isotope
+from exa.relational.constant import Constant
 from exa.utility import mkp
 
 
 def install(persist=False, verbose=False):
     '''
-    Persistently installs the exa application and updates static data in the
-    database on package import.
+    Sets up the database and Jupyter notebook extensions. If install with
+    persistence, will perform setup in the "exa_root" directory (see :mod:`~exa._config`).
 
     Args:
         persist (bool): Persistent install (default false)
         verbose (bool): Verbose installation (default false)
     '''
-    if persist == True:
-        rel_cleanup()
-        config_cleanup()
-        mkp(global_config['exa_root'], mk=True)
-        update_config()
-        save_config()
-        #init_db()
-        #global engine
-        #from exa.relational.base import engine
-        #setup_loggers()
-    #update(verbose)
+    if perisit == True:
+        raise NotImplementedError()
+    else:
+        temporary()
 
 
-def update(verbose=False):
+def install_static(drop=False, verbose=False):
     '''
-    If upgrading to a new version of exa, update static databases as needed.
+    Installs static data: database conversion tables and Jupyter notebook extensions
+
+    Args:
+        drop (bool): Drop static data before loading (required for persistent install)
+        verbose (bool): Verbose notebook extension installation
     '''
+    if drop == True:
+        try:
+            drop_all_static_tables()
+        except:
+            pass
+    init_db()
+    create_tables()
     try:
-        drop_all_static_tables()
+        load_isotope_data()
     except:
         pass
-    create_tables()
-    load_isotope_data()
-    load_unit_data()
-    load_constant_data()
-    install_notebook_widgets(global_config['nbext_localdir'], global_config['nbext_sysdir'], verbose)
+    try:
+        load_unit_data()
+    except:
+        pass
+    try:
+        load_constant_data()
+    except:
+        pass
+    install_notebook_widgets(config['nbext_localdir'], config['nbext_sysdir'], verbose)
 
 
 def load_isotope_data():
     '''
     Load isotope data (from isotopes.json) into the database.
     '''
-    df = pd.read_json(global_config['static_isotopes.json'], orient='values')
+    df = pd.read_json(mkp(config['static'], 'isotopes.json'), orient='values')
     df.columns = ('A', 'Z', 'af', 'eaf', 'color', 'radius', 'gfactor', 'mass', 'emass',
                   'name', 'eneg', 'quadmom', 'spin', 'symbol', 'szuid', 'strid')
     df.index.names = ['pkid']
@@ -76,7 +91,7 @@ def load_unit_data():
     '''
     Load unit conversions (from units.json) into the database.
     '''
-    df = pd.read_json(global_config['static_units.json'])
+    df = pd.read_json(mkp(config['static'], 'units.json'))
     for column in df.columns:
         series = df[column].copy().dropna()
         values = series.values
@@ -93,7 +108,7 @@ def load_constant_data():
     '''
     Load constants (from constants.json) into the database.
     '''
-    df = pd.read_json(global_config['static_constants.json'])
+    df = pd.read_json(mkp(config['static'], 'constants.json'))
     df.reset_index(inplace=True)
     df.columns = ['symbol', 'value']
     df['pkid'] = df.index
@@ -103,21 +118,8 @@ def load_constant_data():
 def install_notebook_widgets(origin_base, dest_base, verbose=False):
     '''
     Convenience wrapper around :py:func:`~notebook.install_nbextension` that
-    installs Jupyter notebook extensions using a systematic naming convention (
-    mimics the source directory and file name structure rather than installing
-    as a flat file set).
-
-    This function will read the special file "__paths__" to collect dependencies
-    not present in the nbextensions directory.
-
-    Args:
-        origin_base (str): Location of extension source code
-        dest_base (str): Destination location (system and/or user specific)
-        verbose (bool): Verbose installation (default False)
-
-    See Also:
-        The configuration module :mod:`~exa._config` describes the default
-        arguments used by :func:`~exa._install.install` during installation.
+    organizes notebook extensions for exa and related packages in a systematic
+    fashion.
     '''
     try:
         shutil.rmtree(dest_base)
@@ -129,3 +131,25 @@ def install_notebook_widgets(origin_base, dest_base, verbose=False):
             orig = mkp(root, filename)
             dest = mkp(dest_base, subdir, mk=True)
             install_nbextension(orig, verbose=verbose, overwrite=True, nbextensions_dir=dest)
+
+
+def drop_all_static_tables():
+    '''
+    Deletes all static (unit, isotope, and constant) tables.
+    '''
+    Length.__table__.drop(engine)
+    Mass.__table__.drop(engine)
+    Time.__table__.drop(engine)
+    Current.__table__.drop(engine)
+    Amount.__table__.drop(engine)
+    Luminosity.__table__.drop(engine)
+    Dose.__table__.drop(engine)
+    Acceleration.__table__.drop(engine)
+    Charge.__table__.drop(engine)
+    Dipole.__table__.drop(engine)
+    Energy.__table__.drop(engine)
+    Force.__table__.drop(engine)
+    Frequency.__table__.drop(engine)
+    MolarMass.__table__.drop(engine)
+    Isotope.__table__.drop(engine)
+    Constant.__table__.drop(engine)

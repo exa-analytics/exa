@@ -10,8 +10,8 @@ import sys
 sys.path.insert(0, os.path.abspath('.'))    # Allows code to run from repository
 from doctest import DocTestFinder, DocTestRunner
 from unittest import TestCase, TestLoader, TextTestRunner
+from exa._config import config
 from exa.log import get_logger
-from exa import global_config
 from exa.utility import datetime_header
 
 
@@ -56,15 +56,15 @@ class TestTester(UnitTester):
         Check that access to the configuration object is possible and that
         the root exa directory and relational database exist.
         '''
-        self.assertIsInstance(global_config, dict)
-        self.assertIn('exa_root', global_config)
-        self.assertTrue(os.path.exists(global_config['exa_root']))
+        self.assertIsInstance(config, dict)
+        self.assertIn('exa_root', config)
+        self.assertTrue(os.path.exists(config['exa_root']))
 
     def test_log(self):
         '''
         Check that log file paths are accessible.
         '''
-        path = global_config['log_sys']
+        path = config['log_sys']
         self.assertTrue(os.path.exists(path))
 
     def test_utility(self):
@@ -124,8 +124,3 @@ def run_unittests(log=False, verbosity=0):
         logger.info('LOGGING UNITTEST')
     for test in tests:
         test.run_interactively(log=log, verbosity=verbosity)
-
-
-if __name__ == '__main__':
-    run_unittests()
-    run_doctests()

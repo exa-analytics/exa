@@ -25,7 +25,8 @@ from collections import OrderedDict
 from traitlets import Bool
 from collections import defaultdict
 from sqlalchemy.orm.attributes import InstrumentedAttribute
-from exa import global_config, mpl
+from exa import mpl
+from exa._config import config
 from exa.widget import ContainerWidget
 from exa.numerical import Series, DataFrame, SparseSeries, SparseDataFrame, Field
 from exa.utility import convert_bytes
@@ -164,9 +165,6 @@ class BaseContainer:
     '''
     _widget_class = ContainerWidget
     _getter_prefix = 'compute'
-
-    def add_data(self, data, field_values=None):
-        raise NotImplementedError()
 
     def copy(self, **kwargs):
         '''
@@ -436,16 +434,14 @@ class BaseContainer:
                     data[key] = obj
         return data
 
-    def _custom_app_traits(self):
-        raise NotImplementedError('Support for web app not yet implemented')
-
-    def _update_app_traits(self):
-        raise NotImplementedError('Support for web app not yet implemented')
-
-    def _custom_widget_traits(self):
+    def _custom_traits(self):
+        '''
+        Placeholder for custom container traits (e.g. traits that are comprised
+        of data present in multiple data objects).
+        '''
         return {}
 
-    def _update_widget_traits(self):
+    def _update_traits(self):
         '''
         Jupyter notebook widgets require data to be available within a
         :class:`~exa.widget.Widget` object. This allows notebook extensions
@@ -456,15 +452,14 @@ class BaseContainer:
         '''
         if self._widget is not None:    # If a corresponding widget exists, build traits
             traits = {}
-            if self._test:
+            if len(self._data()) == 0:
                 traits['test'] = Bool(True).tag(sync=True)
             else:
                 traits['test'] = Bool(False).tag(sync=True)
-                traits.update(self._custom_widget_traits())
-                for obj in self._data().values():
-                    if hasattr(obj, '_traits'):
-                        if len(obj._traits) > 0 and len(obj) > 0:
-                            traits.update(obj._update_widget_traits())
+                traits.update(self._custom_traits())
+                for n, obj in self._data().items():
+                    if (hasattr(obj, '_traits') or isinstance(obj, (Series, SparseSeries))) and len(obj) > 0:
+                        traits.update(obj._update_traits())
             self._widget.add_traits(**traits)    # Adding traits to the widget makes
             self._traits_need_update = False     # them accesible from nbextensions (JavaScript).
 
@@ -478,12 +473,9 @@ class BaseContainer:
         self.name = name
         self.description = description
         self.meta = meta
-        self._test = False
         self._traits_need_update = True
-        self._widget = self._widget_class(self) if global_config['notebook'] else None
-        if meta is None and len(kwargs) == 0 and len(self._data()) == 0:
-            self._test = True
-            self.name = 'TestContainer'
+        # This will create an instance of the widget class (if present)
+        self._widget = self._widget_class(self) if config['notebook'] else None
 
     def _repr_html_(self):
         if self._widget is not None and self._traits_need_update:
