@@ -1,6 +1,4 @@
 ![Alt test](doc/source/_static/logo.png)
-# exa
-
 
 # Installation
 **Note** conda build coming soon! 
