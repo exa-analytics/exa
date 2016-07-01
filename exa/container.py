@@ -284,8 +284,9 @@ class BaseContainer:
         fig, ax = mpl.sns.plt.subplots(1, figsize=(13, 8), dpi=300)
         ax.axis('off')
         pos = nx.spring_layout(g)
-        f0 = nx.draw_networkx_nodes(g, pos=pos, ax=ax, alpha=0.8, node_size=node_size, node_color=node_color)
-        f1 = nx.draw_networkx_labels(g, pos=pos, labels=labels, font_size=15, font_weight='bold', ax=ax)
+        f0 = nx.draw_networkx_nodes(g, pos=pos, ax=ax, alpha=0.8, node_size=node_size,
+                                    node_color=node_color)
+        f1 = nx.draw_networkx_labels(g, pos=pos, labels=labels, font_size=17, ax=ax)
         f2 = nx.draw_networkx_edges(g, pos=pos, edge_color=edge_color, width=2, ax=ax)
         l1, ax = legend(edge_color, r_edge_color_map, 'Connection', (1, 0), ax)
         l2, ax = legend(node_color, r_node_color_map, 'Data Type', (1, 0.3), ax)
@@ -364,10 +365,12 @@ class BaseContainer:
 
     def _save_hdf(self, path, kwargs):
         '''
-        Save the container to an HDF5 file. Returns the saved file path upon
-        completion.
+        Save the container to an HDF5 file.
+
+        Args
+            path (str): String file path (if none, creates a unique path from container hexuid)
+            kwargs: Any additional (picklable) data to store
         '''
-        # Check the path
         if path is None:
             path = self.hexuid + '.hdf5'
         elif os.path.isdir(path):
@@ -402,7 +405,6 @@ class BaseContainer:
                     df._set_categories()
                 else:
                     store[name] = df
-        return path
 
     def _rel(self, copy=False):
         '''
@@ -433,7 +435,6 @@ class BaseContainer:
                 else:
                     data[key] = obj
         return data
-
 
     def _custom_app_traits(self):
         raise NotImplementedError('Support for web app not yet implemented')

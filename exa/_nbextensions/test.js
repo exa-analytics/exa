@@ -9,28 +9,17 @@ Jupyter notebook environment.
 
 require.config({
     shim: {
-        'nbextensions/exa/app3d': {
-            exports: 'App3D'
-        },
-
-        'nbextensions/exa/gui': {
-            exports: 'ContainerGUI'
-        },
-
-        'nbextensions/exa/num': {
-            exports: 'num'
-        },
-
-        'nbextensions/exa/field': {
-            exports: 'field'
-        },
+        'nbextensions/exa/app3d': {exports: 'App3D'},
+        'nbextensions/exa/gui': {exports: 'ContainerGUI'},
+        'nbextensions/exa/num': {exports: 'num'},
+        'nbextensions/exa/field': {exports: 'field'},
     },
 });
 
 
 define([
-    'nbextensions/exa/apps/app3d',
-    'nbextensions/exa/apps/gui',
+    'nbextensions/exa/app3d',
+    'nbextensions/exa/gui',
     'nbextensions/exa/num',
     'nbextensions/exa/field'
 ], function(App3D, ContainerGUI, num, field) {
