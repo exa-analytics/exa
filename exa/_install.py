@@ -19,14 +19,6 @@ from notebook import install_nbextension
 from exa._config import update_config, save_config, config
 from exa._config import cleanup as config_cleanup
 from exa.log import setup_loggers
-from exa.relational.base import cleanup as rel_cleanup
-from exa.relational.base import create_tables, init_db, engine
-from exa.relational.unit import (Length, Mass, Time, Current, Amount,
-                                 Luminosity, Dose, Acceleration,
-                                 Charge, Dipole, Energy, Force,
-                                 Frequency, MolarMass)
-from exa.relational.isotope import Isotope
-from exa.relational.constant import Constant
 from exa.utility import mkp
 
 

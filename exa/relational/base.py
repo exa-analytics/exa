@@ -2,6 +2,7 @@
 '''
 Base Classes for Content Management
 #########################################
+This module is the main connection point for
 '''
 import pandas as pd
 from numbers import Integral
@@ -18,7 +19,6 @@ from exa.log import get_logger
 
 
 gen_uid = lambda: uuid4().hex
-#conn_data = {'n': None, 'e': None, 'f': None} # n = engine name, e = engine instance, f = SessionFactory
 engine_name = None
 engine = None
 SessionFactory = None
