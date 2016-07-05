@@ -467,6 +467,9 @@ class BaseContainer:
         if key in self.__dict__:
             del self.__dict__[key]
 
+    def __sizeof__(self):
+        return self.info().sum()
+
     def __init__(self, name=None, description=None, meta=None, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -481,6 +484,7 @@ class BaseContainer:
         if self._widget is not None and self._traits_need_update:
             self._update_widget_traits()
         return self._widget._repr_html_()
+
 
 #    def _slice_with_int_or_string(self, key):
 #        '''

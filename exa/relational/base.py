@@ -2,7 +2,6 @@
 '''
 Base Classes for Content Management
 #########################################
-This module is the main connection point for
 '''
 import pandas as pd
 from numbers import Integral
@@ -10,8 +9,8 @@ from sys import getsizeof
 from uuid import UUID, uuid4
 from datetime import datetime
 from contextlib import contextmanager
-from sqlalchemy import Column, Integer, String, DateTime, create_engine, event
-from sqlalchemy.orm import sessionmaker, mapper
+from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.query import Query
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
 from exa._config import config
@@ -19,9 +18,6 @@ from exa.log import get_logger
 
 
 gen_uid = lambda: uuid4().hex
-engine_name = None
-engine = None
-SessionFactory = None
 
 
 class BaseMeta(DeclarativeMeta):
@@ -194,51 +190,3 @@ class Disk:
             self.size = getsizeof(self)
         except:
             pass
-
-
-def create_tables():
-    '''
-    Create all tables if they do not already exist in the database.
-
-    Note:
-        When this function is called, only class objects loaded in the current
-        namespace will be created.
-    '''
-    Base.metadata.create_all(engine)
-
-
-def init_db():
-    '''
-    Initialize the database connection and session factory.
-    '''
-    global engine_name
-    global engine
-    global SessionFactory
-    engine_name = config['exa_relational']
-    engine = create_engine(engine_name)
-    SessionFactory = sessionmaker(bind=engine)
-
-
-def cleanup():
-    '''
-    Cleanup the engine's connection pool before exiting.
-    '''
-    engine.dispose()
-
-
-@contextmanager
-def scoped_session(*args, **kwargs):
-    '''
-    Separation of transaction management from actual work using a `context manager`_.
-
-    .. _context manager: http://docs.sqlalchemy.org/en/latest/orm/session_basics.html
-    '''
-    session = SessionFactory(*args, **kwargs)
-    try:
-        yield session
-        session.commit()
-    except:
-        session.rollback()
-        raise
-    finally:
-        session.close()
