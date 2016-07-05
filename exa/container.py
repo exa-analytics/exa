@@ -505,7 +505,7 @@ class BaseContainer:
 
     def _repr_html_(self):
         if self._widget is not None and self._traits_need_update:
-            self._update_widget_traits()
+            self._update_traits()
         return self._widget._repr_html_()
 
 

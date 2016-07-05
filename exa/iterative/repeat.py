@@ -5,7 +5,7 @@ Repeat
 Functions for repeating arrays of varying dimensions.
 '''
 import numpy as np
-from exa import global_config
+from numba import jit
 
 
 def _repeat(array, counts):
@@ -39,9 +39,6 @@ def _repeat_2d(array, counts):
     return repeated
 
 
-if global_config['pkg_numba']:
+if True:
     repeat = jit(nopython=True, nogil=True, cache=True)(_repeat)
     repeat_2d = jit(nopython=True, nogil=True, cache=True)(_repeat_2d)
-else:
-    repeat = np.repeat
-    repeat_2d = np.repeat

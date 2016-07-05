@@ -56,6 +56,10 @@ class TestDataFrame(DataFrame):
     _precision = {'x': 2, 'y': 2, 'z': 2}
 
 
+class TestField(Field3D):
+    _vprecision = 6
+
+
 class TestContainerTypes(TypedMeta):
     '''Statically typed attributes'''
     s0 = TestSeries0

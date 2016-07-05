@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 '''
-Hmmmm
-==================================
+It.
+#################################
 '''
 import numpy as np
-from exa import global_config
 
 
 def pdist(array):
@@ -120,7 +119,7 @@ def pairwise_diff(array):
     return index0, index1, values
 
 
-if global_config['pkg_numba']:
+if True:
     from numba import jit
     pdist = jit(nopython=True, cache=True)(pdist)
     supercell3d = jit(nopython=True, cache=True)(supercell3d)

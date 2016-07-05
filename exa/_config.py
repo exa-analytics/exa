@@ -69,7 +69,7 @@ def update_config():
     config['logfile_max_count'] = 5
     pkg = os.path.dirname(__file__)
     config['static'] = mkp(pkg, '_static')
-    config['nbext_localdir'] = mkp(pkg, '_nbextensions')
+    config['nbext_localdir'] = mkp(pkg, '_nbextension')
     config['nbext_sysdir'] = mkp(jupyter_data_dir(), 'nbextensions', 'exa')  # System path
     config['notebook'] = False    # Check if running in Jupyter notebook
     try:

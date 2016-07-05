@@ -16,7 +16,7 @@
 import sys
 import os
 import shlex
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
 sys.path.insert(0, os.path.abspath(os.sep.join(('..', '..'))))
 from exa import __version__
 

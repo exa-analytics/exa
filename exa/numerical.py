@@ -209,17 +209,18 @@ class DataFrame(Numerical, pd.DataFrame):
                     raise RequiredIndexError(missing, name)
                 else:
                     self.index.names = self._indices
+        self._set_categories()
 
 
 class Field(DataFrame):
     '''
-    Fields are a special dataframe that always have a **field_values**
-    attribute which is a list container series/dataframe objects that contain
-    the discrete field values - the :class:`~exa.numerical.Field` dataframe
-    itself contains the description of the field (e.g. number of grid points,
-    size).
+    A field is composed of the field definition ("field_data") and values (
+    "field_values"). Field data define the shape and discretization of a field.
+    Field values are scalar magnitudes (or vectors) that describe the field at
+    each discretized point in space.
     '''
-    _precision = 4
+    _precision = None
+    _vprecision = 10      # values precision (for traits)
     _indices = ['field']
     _memory_usage = DataFrame.memory_usage
 
@@ -231,7 +232,7 @@ class Field(DataFrame):
         field_values = [field.copy() for field in self.field_values]
         return self.__class__(field_values, df)
 
-    def _update_custom_traits(self):
+    def _custom_traits(self):
         '''
         Obtain field values using the custom trait getter (called automatically
         by :func:`~exa.numerical.Numerical._update_traits`).
@@ -245,7 +246,7 @@ class Field(DataFrame):
             string = pd.Series(self.index.values).to_json(orient='values')
             traits['field_indices'] = Unicode(string).tag(sync=True)
         s = pd.Series({i: field.values for i, field in enumerate(self.field_values)})
-        json_string = s.to_json(orient='values', double_precision=self._precision)
+        json_string = s.to_json(orient='values', double_precision=self._vprecision)
         traits['field_values'] = Unicode(json_string).tag(sync=True)
         return traits
 
@@ -333,7 +334,6 @@ class SparseSeries(Numerical, pd.SparseSeries):
     '''
     Trait supporting sparse series.
     '''
-    _precision = None
     _copy = pd.SparseSeries.copy
 
 
