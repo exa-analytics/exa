@@ -9,7 +9,7 @@ from sys import getsizeof
 from uuid import UUID, uuid4
 from datetime import datetime
 from contextlib import contextmanager
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.query import Query
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
@@ -29,15 +29,15 @@ class BaseMeta(DeclarativeMeta):
         '''
         Select a single entry using the primary key.
         '''
-        s = SessionFactory()
-        return s.query(cls).get(pkid)
+        with scoped_session() as s:
+            return s.query(cls).get(pkid)
 
     def get_by_name(cls, name):
         '''
         Select objects with the given name.
         '''
-        s = SessionFactory()
-        return s.query(cls).filter(cls.name == name).all()
+        with scoped_session() as s:
+            return s.query(cls).filter(cls.name == name).all()
 
     def get_by_uid(cls, uid):
         '''
@@ -46,8 +46,8 @@ class BaseMeta(DeclarativeMeta):
         hexuid = uid
         if isinstance(uid, uuid.UUID):
             hexuid = uid.hex
-        s = SessionFactory()
-        return s.query(cls).filter(cls.hexuid == hexuid).one()
+        with scoped_session() as s:
+            return s.query(cls).filter(cls.hexuid == hexuid).one()
 
     def bulk_insert(cls, mappings):
         '''
@@ -73,13 +73,11 @@ class BaseMeta(DeclarativeMeta):
             memory error. It is almost always more effective to query the
             table for the specific records of interest.
         '''
-        global engine
-        s = SessionFactory()
-        statement = s.query(self).statement
-        df = pd.read_sql(statement, engine)
-        if 'pkid' in df:
-            df = df.set_index('pkid').sort_index()
-        return df
+        with scoped_session() as s:
+            df = pd.read_sql(s.query(self).statement, config['engine'])
+            if 'pkid' in df:
+                df = df.set_index('pkid').sort_index()
+            return df
 
     def __getitem__(cls, key):
         obj = None
@@ -122,9 +120,8 @@ class Base:
         '''
         Save the current object.
         '''
-        s = SessionFactory(expire_on_commit=False)
-        s.add(self)
-        s.commit()
+        with scoped_session(expire_on_commit=False) as s:
+            s.add(self)
 
     def __repr__(self):
         return '{0}(pkid: {1})'.format(self.__class__.__name__, self.pkid)
@@ -190,3 +187,39 @@ class Disk:
             self.size = getsizeof(self)
         except:
             pass
+
+
+def create_db():
+    '''
+    Modifies the package-wide configuration object (:mod:`~exa._config`),
+    adding the database engine and SessionFactory objects.
+    '''
+    global config
+    config['engine'] = create_engine(config['exa_relational'])
+    config['SessionFactory'] = sessionmaker(bind=config['engine'])
+    Base.metadata.create_all(config['engine'])
+
+
+def cleanup_db():
+    '''
+    Dispose the database engine.
+    '''
+    config['engine'].dispose()
+    del config['engine']
+    del config['SessionFactory']
+
+
+@contextmanager
+def scoped_session(*args, **kwargs):
+    '''
+    A thread scoped session object.
+    '''
+    session = config['SessionFactory'](*args, **kwargs)
+    try:
+        yield session
+        session.commit()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()

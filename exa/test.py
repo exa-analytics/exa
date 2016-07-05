@@ -7,7 +7,6 @@ inside the Jupyter notebook (interactive testing) and automatic logging.
 '''
 import os
 import sys
-sys.path.insert(0, os.path.abspath('.'))    # Allows code to run from repository
 from doctest import DocTestFinder, DocTestRunner
 from unittest import TestCase, TestLoader, TextTestRunner
 from exa._config import config

@@ -4,7 +4,7 @@ Physical Constants
 ===============================================
 '''
 from sqlalchemy import String, Float, Column
-from exa.relational.base import Base, BaseMeta, SessionFactory
+from exa.relational.base import Base, BaseMeta, scoped_session
 
 
 class Meta(BaseMeta):
@@ -15,8 +15,8 @@ class Meta(BaseMeta):
         '''
         Get a constant by symbol.
         '''
-        s = SessionFactory()
-        return s.query(cls).filter(cls.symbol == symbol).one()
+        with scoped_session(expire_on_commit=False) as s:
+            return s.query(cls).filter(cls.symbol == symbol).one()
 
     def _getitem(cls, symbol):
         return cls.get_by_symbol(symbol)

@@ -29,19 +29,33 @@ _filename = 'config.json'
 config = {}
 
 
+def dot_path(mk=False):
+    '''
+    Generate (and create if desired) the expected persistent exa path.
+    '''
+    if platform.system().lower() == 'windows':
+        dot_exa = mkp(os.getenv('USERPROFILE'), '.exa', mk=mk)
+    else:
+        dot_exa = mkp(os.getenv('HOME'), '.exa', mk=mk)
+    return dot_exa
+
+
 def save_config():
+    '''
+    Dump the (text) configuration to a file.
+    '''
     with open(mkp(config['exa_root'], _filename), 'w') as f:
         json.dump(config, f)
 
 
 def update_config():
+    '''
+    Update (or initialize) the global configuration dictionary.
+    '''
     global config
     dot_exa = None
     config['exa_persistent'] = False
-    if platform.system().lower() == 'windows':
-        dot_exa = mkp(os.getenv('USERPROFILE'), '.exa')
-    else:
-        dot_exa = mkp(os.getenv('HOME'), '.exa')
+    dot_exa = dot_path()
     if os.path.exists(dot_exa):
         config['exa_root'] = dot_exa
         config['exa_persistent'] = True

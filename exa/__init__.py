@@ -12,31 +12,26 @@ log.setup_loggers()
 syslog = log.get_logger('sys')
 syslog.info('Starting exa with configuration:')
 syslog.info(str(_config.config))
-from exa import relational
-from exa import test, tests
-from exa import _install
 
-# Top level api
+# User API
 from exa.relational import Container
-#from exa.numerical import Series, DataFrame
-#from exa.symbolic import Symbolic
-#from exa.editor import Editor
-#from exa.filetypes import CSV
-#from exa import distributed, mpl, tex, tests
-#
-#
-# If dynamic (not persistent) session need to populate database tables
+from exa.numerical import Series, DataFrame
+from exa.symbolic import Symbolic
+from exa.editor import Editor
+from exa.filetypes import CSV
+
+# Other API
+from exa import test, _install, tests
+
+# Finalize config and cleanup
 if _config.config['exa_persistent'] == False:
-    _install.install_static()
-## If running in a Jupyter notebook set some reasonable defaults
-#if global_config['notebook']:
-#    _ipy = get_ipython()
-#    _ipyconf = _ipy.config
-#    _ipyconf.InteractiveShellApp.matplotlib = 'inline'
-#relational.isotope.init_mappers()
-#
-## Register cleanup functions
+    _install.install()
+
+if _config.config['notebook']:
+    _ipy = get_ipython()
+    _ipyconf = _ipy.config
+    _ipyconf.InteractiveShellApp.matplotlib = 'inline'
+
 _ae.register(_config.cleanup)          # Register functions in opposite desired
-#_ae.register(log.cleanup)              # run order, first-in-last-out "FILO"
-#_ae.register(relational.base.cleanup)
-#
+_ae.register(log.cleanup)              # run order, first-in-last-out "FILO"
+_ae.register(relational.base.cleanup_db)

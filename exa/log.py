@@ -22,9 +22,6 @@ from textwrap import wrap
 from exa._config import config
 
 
-loggers = {}
-
-
 class LogFormat(logging.Formatter):
     '''
     Systematic log formatting (for all logging levels).
@@ -54,14 +51,14 @@ def logfiles():
     return [handler.name for handler in logging.root.handlers]
 
 
-def get_logger(which):
+def get_logger(which='sys'):
     '''
     Get a log file handler ('sys', 'db', 'user').
     '''
-    return loggers[which]
+    return config['loggers'][which]
 
 
-def log_head(log='log_sys', n=10):
+def head(log='log_sys', n=10):
     '''
     Print the oldest log messages.
 
@@ -72,7 +69,7 @@ def log_head(log='log_sys', n=10):
     print_log(log, n, True)
 
 
-def log_tail(log='sys', n=10):
+def tail(log='sys', n=10):
     '''
     Print the most recent log messages.
 
@@ -84,6 +81,12 @@ def log_tail(log='sys', n=10):
 
 
 def print_log(log, n, head=True):
+    '''
+    Print the head or tail of a given log file.
+
+    See Also:
+        :func:`~exa.log.head`, :func:`~exa.log.tail`
+    '''
     lines = None
     with open(config['log_' + log], 'r') as f:
         lines = f.read().splitlines()
@@ -97,18 +100,21 @@ def cleanup():
     '''
     Clean up logging file handlers.
     '''
-    for name, logger in loggers.items():
+    for name, logger in config['loggers'].items():
         for handler in logger.handlers:
             handler.close()
         logger.handlers = []
+    del config['loggers']
 
 
 def setup_loggers():
     '''
     Setup up loggers and (corresponding) file handlers.
     '''
-    global loggers
-    cleanup()
+    global config
+    if 'loggers' in config:
+        cleanup()
+    config['loggers'] = {}
     log_files = dict((key, value) for key, value in config.items() if key.startswith('log_'))
     for key, path in log_files.items():
         logger = logging.getLogger('sqlalchemy') if 'db' in key else logging.getLogger(key)
@@ -122,4 +128,4 @@ def setup_loggers():
             logger.setLevel(logging.INFO)
         else:
             logger.setLevel(logging.DEBUG)
-        loggers[key.replace('log_', '')] = logger
+        config['loggers'][key.replace('log_', '')] = logger

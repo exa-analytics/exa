@@ -5,11 +5,15 @@ Base Widget
 Functionality for using Jupyter notebook extensions to visualize data speficic
 containers.
 '''
+import os
+import shutil
 import numpy as np
 import pandas as pd
 from ipywidgets import DOMWidget
+from notebook import install_nbextension
 from traitlets import Instance, Type, Any, Float, Int
 from traitlets import Unicode, List, Integer, Bytes, CUnicode, Set, Tuple, Dict
+from exa.utility import mkp
 
 
 class Widget(DOMWidget):
@@ -54,3 +58,21 @@ class ContainerWidget(Widget):
         super().__init__(*args, **kwargs)
         self.container = container
         self.params = {'save_dir': '', 'file_name': ''}
+
+
+def install_notebook_widgets(origin_base, dest_base, verbose=False):
+    '''
+    Convenience wrapper around :py:func:`~notebook.install_nbextension` that
+    organizes notebook extensions for exa and related packages in a systematic
+    fashion.
+    '''
+    try:
+        shutil.rmtree(dest_base)
+    except:
+        pass
+    for root, subdirs, files in os.walk(origin_base):
+        for filename in files:
+            subdir = root.split('nbextensions')[-1]
+            orig = mkp(root, filename)
+            dest = mkp(dest_base, subdir, mk=True)
+            install_nbextension(orig, verbose=verbose, overwrite=True, nbextensions_dir=dest)

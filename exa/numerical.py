@@ -88,8 +88,8 @@ class Series(Numerical, pd.Series):
         '''
         traits = self._custom_traits()
         s = self
-        if isinstance(self.dtype, pd.types.dtypes.CategoricalDtype) and self._type is not None:
-            s = self.astype(self._type)
+        if isinstance(self.dtype, pd.types.dtypes.CategoricalDtype) and self._stype is not None:
+            s = self.astype(self._stype)
         prefix = '_'.join((self.__class__.__name__.lower(), self._name))
         p = 10 if self._precision is None else self._precision
         values = s.to_json(orient='values', double_precision=p)

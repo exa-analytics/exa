@@ -36,16 +36,16 @@ class Container(BaseContainer, Name, HexUID, Time, Disk, Base, metaclass=BaseMet
                        'polymorphic_identity': 'container',
                        'with_polymorphic': '*'}
 
-    def save(self, path=None, typ='hdf5'):
-        '''
-        Save the current container for future use
-        .. code-block:: Python
-
-            container.save()  # Save to default location
-            container.save('my/location/file.name')  # Save HDF5 file at given path
-        '''
-        self._save_record()
-        self._save_data(path, typ=typ)
+#    def save(self, path=None, typ='hdf5'):
+#        '''
+#        Save the current container for future use
+#        .. code-block:: Python
+#
+#            container.save()  # Save to default location
+#            container.save('my/location/file.name')  # Save HDF5 file at given path
+#        '''
+#        self._save_record()
+#        self._save_data(path, typ=typ)
 
     def __repr__(self):
         c = self.__class__.__name__
