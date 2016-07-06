@@ -1,2 +1,0 @@
-.. automodule:: exa.numerical
-    :members:

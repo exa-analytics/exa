@@ -22,28 +22,27 @@ def datetime_header(title=''):
     return '\n'.join(('=' * 80, title + ': ' + str(datetime.now()), '=' * 80))
 
 
-def mkp(*args, mk=False, exist_ok=True):
+def mkp(*args, mk=False):
     '''
     Generate a directory path, and create it if requested.
 
     .. code-block:: Python
 
-        filepath = mkpath('base', 'folder', 'file')
-        mkpath('base', 'folder', mkdir=True)
+        filepath = mkp('base', 'folder', 'file')
+        dirpath = mkp('root', 'path', 'folder', mk=True)
 
-    Args
+    Args:
         \*args: File or directory path segments to be concatenated
-        mk (bool): Make the directory (returns None)
-        exist_ok (bool): Don't raise warning if director already exists (default True)
+        mk (bool): Make the directory (if it doesn't exist)
 
-    Returns
-        path (str): OS aware file or directory path
+    Returns:
+        path (str): File or directory path
     '''
     path = os.sep.join(list(args))
     if mk:
         while sep2 in path:
             path = path.replace(sep2, os.sep)
-        os.makedirs(path, exist_ok=exist_ok)
+        os.makedirs(path, exist_ok=True)
     return path
 
 

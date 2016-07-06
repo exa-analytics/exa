@@ -1,2 +1,2 @@
 # -*- coding: utf-8 -*-
-from exa.tests.test_container import TestRandom
+from exa.test.tester import UnitTester, run_unittests, run_doctests

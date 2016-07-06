@@ -21,6 +21,8 @@ __version__ = '.'.join((str(v) for v in __exa_version__))
 
 
 from exa import _setup
+from exa import log
+from exa import test
 
 #from exa import _install
 #from exa import log

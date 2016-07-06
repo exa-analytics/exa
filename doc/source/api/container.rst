@@ -1,2 +1,0 @@
-.. automodule:: exa.container
-    :members:

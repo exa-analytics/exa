@@ -1,11 +1,11 @@
 [paths]
+# When changing these paths, please migrate data/notebooks to the new location
 data = None
-syslog = None
-dblog = None
-
-[db]
-uri = None
+notebooks = None
 
 [log]
 nlogs = 3
-nbtyes = 10485760
+nbytes = 10485760
+syslog = None
+dblog = None
+level = 0

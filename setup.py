@@ -30,5 +30,3 @@ setup(
     install_requires=dependencies,
     license='Apache License Version 2.0'
 )
-#from exa._install import install
-#install(persist=True)

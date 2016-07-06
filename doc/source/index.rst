@@ -21,14 +21,13 @@ exploration.
     :caption: General Info
 
     overview.rst
-..    install.rst
-..    api/api.rst
+    api/api.rst
 
 .. toctree::
     :maxdepth: 2
     :caption: User Guide
 
-    user/user.rst
+..    user/user.rst
 ..    user/started.rst
 ..    user/examples.rst
 ..    user/help.rst
@@ -37,7 +36,7 @@ exploration.
     :maxdepth: 2
     :caption: Contributor Guide
 
-    dev/dev.rst
+..    dev/dev.rst
 ..    bugs.rst
 ..    proposal.rst
 ..    stack.rst

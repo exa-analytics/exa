@@ -10,6 +10,7 @@ import sys
 import atexit
 import platform
 import configparser
+import warnings
 from exa.utility import mkp
 
 
@@ -21,47 +22,28 @@ def save():
         config.write(f)
 
 
-# Begin setup
 config = configparser.ConfigParser()              # Application configuration
 if platform.system().lower() == 'windows':        # Get exa's root directory
     home = os.getenv('USERPROFILE')
 else:
     home = os.getenv('HOME')
-root = mkp(home, '.exa', mk=True, exist_ok=True)  # Make the exa root dir (if needed)
-pkg = os.path.dirname(__file__)                   # Package source path
+root = mkp(home, '.exa', mk=True)                 # Make exa root directory
 config_file = mkp(root, 'config')                 # Config file path
+pkg = os.path.dirname(__file__)                   # Package source path
 if os.path.exists(config_file):
     config.read(config_file)                      # Read in existing config
 else:
     config.read(mkp(pkg, '_static', 'config'))    # Read in default config
-for path in config['paths'].items():              # Create required paths
-    print(path)
+# paths
+if config['paths']['data'] == 'None':
+    config['paths']['data'] = mkp(root, 'data', mk=True)
+if config['paths']['notebooks'] == 'None':
+    config['paths']['notebooks'] = mkp(root, 'notebooks', mk=True)
+# log
+if config['log']['syslog'] == 'None':
+    config['log']['syslog'] = mkp(root, 'sys.log')
+if config['log']['dblog'] == 'None':
+    config['log']['dblog'] = mkp(root, 'db.log')
 
 
-
-
-
-
-
-
-#from exa._config import config, dot_path
-#from exa.relational import install_db
-#from exa.widget import install_notebook_widgets
-#
-#
-#def install(persist=False, verbose=False):
-#    '''
-#    Sets up the database and Jupyter notebook extensions. If install with
-#    persistence, will perform setup in the "exa_root" directory (see :mod:`~exa._config`).
-#
-#    Args:
-#        persist (bool): Persistent install (default false)
-#        verbose (bool): Verbose installation (default false)
-#    '''
-#    global config    # Whenever you modify a "global" variable, need to explicitly state global
-#    if persist == True:
-#        print('here?')
-#        config['exa_root'] = dot_path(True)
-#    install_db()
-#    install_notebook_widgets(config['nbext_localdir'], config['nbext_sysdir'], verbose)
-#
+atexit.register(save)                             # Register

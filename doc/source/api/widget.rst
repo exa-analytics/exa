@@ -1,2 +1,0 @@
-.. automodule:: exa.widget
-    :members:
