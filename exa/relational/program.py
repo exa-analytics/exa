@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 '''
-Program
-===============================================
+Program Table
+######################
+Programs are essentially ongoing :class:`~exa.relational.project.Project`s.
 '''
 from sqlalchemy import String, DateTime, ForeignKey, Table
 from sqlalchemy.orm import relationship
@@ -41,7 +42,7 @@ ProgramFile = Table(
 )
 
 
-class Program(Base):
+class Program(Name, Time, Size, Base):
     '''
     Long term or on-going project
     '''

@@ -30,3 +30,5 @@ setup(
     install_requires=dependencies,
     license='Apache License Version 2.0'
 )
+import exa
+exa._config.config['db']['update'] = '1'

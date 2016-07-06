@@ -1,30 +1,17 @@
 # -*- coding: utf-8 -*-
 '''
-File
-===============================================
-This module provides relational information about tracking files; it doesn't
-itself manipulate files on disk, rather tracks metadata about manipulations
-performed.
-
-See Also:
-    :class:`~exa.container.BaseContainer`
+File Table
+###################
+This table keeps track of all files managed by exa. This includes containers
+(which are HDF5 files on disk) as well as raw data files of any type.
 '''
 from datetime import datetime
-from sqlalchemy import String, DateTime, Column, Integer
-from exa.relational.base import Base, gen_uid
+from sqlalchemy import String, Column
+from exa.relational.base import Base, generate_hexuid, Name, HexUID, Time
 
 
-class File(Base):
-    '''
-    Represents a pointer to a file on disk.
-
-    Contains information about file size and date modified/created/accessed.
-    '''
-    name = Column(String)
-    description = Column(String)
-    uid = Column(String(32), default=gen_uid)
-    extension = Column(String, nullable=False)    # This keeps track of file type
-    created = Column(DateTime, default=datetime.now)
-    modified = Column(DateTime, default=datetime.now)
-    accessed = Column(DateTime, default=datetime.now)
+class File(Name, HexUID, Time, Base):
+    '''Representation of a file on disk.'''
+    extension = Column(String, nullable=False)    # File extension
+    container = Column(String)                    # If a container, string class name
     size = Column(Integer)

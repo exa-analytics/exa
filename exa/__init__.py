@@ -20,9 +20,10 @@ __exa_version__ = (0, 2, 3)
 __version__ = '.'.join((str(v) for v in __exa_version__))
 
 
-from exa import _setup
+from exa import _config
 from exa import log
 from exa import test
+#from exa import relational
 
 #from exa import _install
 #from exa import log

@@ -2,8 +2,7 @@
 '''
 Utilities
 #####################
-These functions are simply syntactic sugar. They help cleanup the code base by
-providing a cleaner API for commonly used functions.
+Commonly used functions (primarily for convenience and repetition reduction).
 '''
 import os
 import numpy as np

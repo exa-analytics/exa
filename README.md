@@ -1,7 +1,4 @@
 ![exa](doc/source/_static/logo.png)
-# exa
-
-
 # Installation
 
 

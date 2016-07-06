@@ -1,0 +1,14 @@
+numpy
+scipy
+pandas
+scikit-learn
+sympy
+matplotlib
+seaborn
+jupyter
+notebook == 4.1.0
+ipywidgets
+ipyparallel
+sphinx
+sphinx_rtd_theme
+numba

@@ -13,37 +13,29 @@ from itertools import product
 from sqlalchemy import String, Float
 from sqlalchemy import Column, Integer, String
 from exa._config import config
-from exa.relational.base import BaseMeta, Base, scoped_session
+from exa.relational.base import BaseMeta, Base, SessionFactory
 from exa.iterative import product_sum_2f, product_add_2
-
-
-# Mappers are series objects that appear in commonly used dataframe manipulations
-symbol_to_radius = None
-symbol_to_color = None
-symbol_to_Z = None
-Z_to_symbol = None
-symbols_to_radii = None
-symbol_to_element_mass = None
 
 
 class Meta(BaseMeta):
     '''
-    This class provides methods available to the :class:`~exa.relational.isotope.Isotope`
-    class object used to efficiently look up data stored in the database.
+    Provides lookup methods for :class:`~exa.relational.isotope.Isotope`.
+
+    .. code-block:: Python
+
+        Isotope['1H']     # Returns
     '''
     def get_by_strid(cls, strid):
         '''
         Get an isotope using a string id.
         '''
-        with scoped_session(expire_on_commit=False) as s:
-            return s.query(cls).filter(cls.strid == strid).one()
+        return SessionFactory().query(cls).filter(cls.strid == strid).one()
 
     def get_by_symbol(cls, symbol):
         '''
         Get an isotope using a string id.
         '''
-        with scoped_session(expire_on_commit=False) as s:
-            return s.query(cls).filter(cls.symbol == symbol).all()
+        return SessionFactory().query(cls).filter(cls.symbol == symbol).all()
 
     def get_element(cls, name_or_symbol):
         '''
@@ -105,44 +97,43 @@ class Isotope(Base, metaclass=Meta):
         return '{0}{1}'.format(self.A, self.symbol)
 
 
-# Dynamically create a number of commonly used dataframe mappings after
-# static data has been loaded
-def init_mappers():
+def symbol_to_z():
     '''
-    Initialize commonly used dataframe mappers (in memory).
+    Create a "mapper" (:class:`~pandas.Series`) from element symbol to proton
+    number ("Z"). This object can be used to quickly transform element symbols
+    to proton number via:
+
+    .. code-block:: Python
+
+        mapper = symbol_to_z()
+        z_series = symbol_series.map(mapper)
     '''
-    isotopedf = Isotope.to_frame()
-    init_symbols_to_radii(isotopedf)
-    init_symbol_to_element_mass(isotopedf)
-    init_symbol_to_radius(isotopedf)
-    init_symbol_to_color(isotopedf)
-    init_symbol_to_Z(isotopedf)
+    df = Isotope.to_frame().drop_duplicates('symbol').sort_values('symbol')
+    return df.set_index('symbol')['Z']
 
 
-def init_symbol_to_Z(isotopedf):
+def z_to_symbol():
     '''
-    Initialize the **symbol_to_Z** mapper.
+    Create a mapper from proton number to element symbol.
+
+    See Also:
+        Opposite mapper of :func:`~exa.relational.isotope.symbol_to_z`.
     '''
-    global symbol_to_Z
-    global Z_to_symbol
-    symbol_to_Z = isotopedf.drop_duplicates('symbol')
-    symbol_to_Z = symbol_to_Z.set_index('symbol')['Z']
-    Z_to_symbol = isotopedf.drop_duplicates('Z')
-    Z_to_symbol = Z_to_symbol.set_index('Z')['symbol']
+    df = Isotope.to_frame().drop_duplicates('Z').sort_values('Z')
+    return df.set_index('Z')['symbol']
 
 
-def init_symbols_to_radii(isotopedf):
+def symbols_to_radii():
     '''
-    Initialize the **symbols_to_radii** mapper
+    Mapper from symbol pairs to sum of covalent radii.
     '''
-    global symbols_to_radii
-    df = isotopedf.drop_duplicates('symbol')
+    df = Isotope.to_frame().drop_duplicates('symbol')
     symbol = df['symbol'].values
     radius = df['radius'].values
-    symbols = product_add_2(symbol, symbol)
-    radii = product_sum_2f(radius, radius)
-    symbols_to_radii = pd.Series(radii)
-    symbols_to_radii.index = symbols
+    symbols = [x + y for x, y in product(symbol, symbol)]
+    s = pd.Series(sum_product_pair_f8(radius, radius))
+    s.index = symbols
+    return s
 
 
 def init_symbol_to_element_mass(isotopedf):

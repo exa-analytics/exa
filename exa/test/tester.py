@@ -10,7 +10,7 @@ import sys
 from doctest import DocTestFinder, DocTestRunner
 from unittest import TestCase, TestLoader, TextTestRunner
 from exa.log import loggers
-from exa._setup import config
+from exa._config import config
 from exa.utility import datetime_header
 
 
@@ -85,4 +85,8 @@ def run_unittests(log=False, verbosity=0):
     if log:
         logger.debug('LOGGING UNITTEST')
     for test in tests:
-        test.run_interactively(log=log, verbosity=verbosity)
+        test.run_interactively(log=log)
+
+
+if __name__ == '__main__':
+    run_unittests()

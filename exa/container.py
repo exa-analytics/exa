@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-Base Container
+Container
 ########################
 The :class:`~exa.container.BaseContainer` class is the primary object for
 data processing, analysis, and visualization. Containers are composed of
@@ -153,15 +153,9 @@ class TypedMeta(type):
         return super().__new__(metacls, name, bases, clsdict)
 
 
-class BaseContainer:
+class Container:
     '''
-    Base container class responsible for all features related to data
-    management; relational features are in :class:`~exa.relational.container.Container`.
-
-    Note:
-        Due to the requirements of mixing metaclasses, a metaclass is
-        created in :mod:`~exa.relational.container` and assigned to the
-        "master" container object, :class:`~exa.relational.container.Container`.
+    Container class responsible for all features related to data management.
     '''
     _widget_class = ContainerWidget
     _getter_prefix = 'compute'

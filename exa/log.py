@@ -15,7 +15,7 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 from textwrap import wrap
-from exa._setup import config
+from exa._config import config
 
 
 class LogFormat(logging.Formatter):
