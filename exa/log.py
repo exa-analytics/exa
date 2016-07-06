@@ -1,30 +1,44 @@
 # -*- coding: utf-8 -*-
 '''
 Logging
-=====================
-This module provides three main log files, system, user, and database ('log_sys',
-'log_user', and 'log_db'). These files may be inspected interactively:
-
-.. code-block:: Python
-
-    exa.logfiles()             # default: ['log_sys', 'log_user', 'log_db']
-    exa.log_head('log_sys')    # prints the head of the system log
-    exa.log_tail('log_user')   # prints the tail of the user log
-
-- system: logs automatic messages performed by exa and its sub-packages
-- user: logs (non personally identifiable) user actions
-- database: logs database interactions
+############
+There are two log files that exa writes to, the system log and the database log.
+The database log is used when the database backend does not provide its own
+logging solution.
 '''
 import os
 import logging
 from logging.handlers import RotatingFileHandler
 from textwrap import wrap
-from exa._config import config
+
+
+def setup_loggers():
+    '''
+    Setup up loggers and (corresponding) file handlers.
+    '''
+    global config
+    if 'loggers' in config:
+        cleanup()
+    config['loggers'] = {}
+    log_files = dict((key, value) for key, value in config.items() if key.startswith('log_'))
+    for key, path in log_files.items():
+        logger = logging.getLogger('sqlalchemy') if 'db' in key else logging.getLogger(key)
+        handler = RotatingFileHandler(path, maxBytes=config['logfile_max_bytes'],
+                                      backupCount=config['logfile_max_count'])
+        handler.setFormatter(LogFormat())
+        logger.addHandler(handler)
+        if config['runlevel'] == 0:
+            logger.setLevel(logging.WARNING)
+        elif config['runlevel'] == 1:
+            logger.setLevel(logging.INFO)
+        else:
+            logger.setLevel(logging.DEBUG)
+        config['loggers'][key.replace('log_', '')] = logger
 
 
 class LogFormat(logging.Formatter):
     '''
-    Systematic log formatting (for all logging levels).
+    Custom log format used by all loggers.
     '''
     spacing = '                                     '
     log_basic = '%(asctime)19s - %(levelname)8s'
@@ -105,27 +119,3 @@ def cleanup():
             handler.close()
         logger.handlers = []
     del config['loggers']
-
-
-def setup_loggers():
-    '''
-    Setup up loggers and (corresponding) file handlers.
-    '''
-    global config
-    if 'loggers' in config:
-        cleanup()
-    config['loggers'] = {}
-    log_files = dict((key, value) for key, value in config.items() if key.startswith('log_'))
-    for key, path in log_files.items():
-        logger = logging.getLogger('sqlalchemy') if 'db' in key else logging.getLogger(key)
-        handler = RotatingFileHandler(path, maxBytes=config['logfile_max_bytes'],
-                                      backupCount=config['logfile_max_count'])
-        handler.setFormatter(LogFormat())
-        logger.addHandler(handler)
-        if config['runlevel'] == 0:
-            logger.setLevel(logging.WARNING)
-        elif config['runlevel'] == 1:
-            logger.setLevel(logging.INFO)
-        else:
-            logger.setLevel(logging.DEBUG)
-        config['loggers'][key.replace('log_', '')] = logger

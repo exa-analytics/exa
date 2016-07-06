@@ -2,16 +2,7 @@
 '''
 Configuration
 ##################################
-This program can be run in a persistent or dynamic fashion. Persistent means
-that all data is created by a user is stored in an organized manner on disk.
-Dynamic means that no automatic content management is performed.
 
-If running in persistent mode, the database file, log files, container files
-(e.g. HDF5 files), and raw data files are stored in:`%USERPROFILE%/.exa` or
-`~/.exa` (Windows and Linux/MACOSX, respectively). If running in dynamic mode
-the database and logs are stored in a temporary folder that is deleted at the
-end of the session. Any objects created by the user are stored the in working
-directory or by the user's choosing.
 '''
 import os
 import platform

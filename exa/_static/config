@@ -1,0 +1,11 @@
+[paths]
+data = None
+syslog = None
+dblog = None
+
+[db]
+uri = None
+
+[log]
+nlogs = 3
+nbtyes = 10485760
