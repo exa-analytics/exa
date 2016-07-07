@@ -11,7 +11,8 @@ try:
 except:
     with open('README.md') as f:
         description = f.read()
-dependencies = ['sphinxcontrib-autoanysrc']
+with open('requirements.txt') as f:
+    dependencies = f.readlines()
 
 setup(
     name='exa',
