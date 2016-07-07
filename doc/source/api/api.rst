@@ -11,35 +11,47 @@ API
     :maxdepth: 2
     :caption: Base
 
-    setup.rst
-    test.rst
-    relational.rst
+    configuration.rst
+    base_api.rst
+    aux_api.rst
+    misc.rst
+    tester.rst
+    tests.rst
+
 
 .. toctree::
     :maxdepth: 2
     :caption: Relational
+
+    relational/base.rst
+    relational/cms.rst
+    relational/aux.rst
+    relational/tests.rst
 
 
 .. toctree::
     :maxdepth: 2
     :caption: Distributed
 
+    distributed/base.rst
+    distributed/workflow.rst
+
 
 .. toctree::
     :maxdepth: 2
     :caption: Math
+
+    math/base.rst
+    math/tests.rst
+    math/misc.rst
+    math/misc_tests.rst
 
 
 .. toctree::
     :maxdepth: 2
     :caption: Filetypes
 
-
-.. toctree::
-    :maxdepth: 2
-    :caption: Tests
-
-    tests/test_base.rst
+    filetypes/base.rst
 
 
 .. toctree::
