@@ -5,10 +5,10 @@ python:
     - "3.5"
     - "nightly"
 before_install:
-    - sudo apt-add-repository "deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu precise main"
-    - sudo apt-add-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.7 main"
+    - sudo apt-add-repository -s "deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu precise main"
+    - sudo apt-add-repository -s "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.7 main"
+    - sudo apt-get update
     - sudo apt-get install llvm-3.7
-    - sudo apt-get install cudatoolkit
 install:
     - pip install -r requirements.txt
 script:
