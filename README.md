@@ -27,4 +27,4 @@ make html    # .\make.bat html # Windows
 
 # Legal
 Copyright (c) 2015-2016, Exa Analytics Development Team <br />
-![License](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
+[![License](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
