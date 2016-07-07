@@ -24,3 +24,5 @@ Documentation is generated using [sphinx](http://sphinx-doc.org "Sphinx")
 cd doc
 make html    # .\make.bat html # Windows
 ```
+
+![License](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)

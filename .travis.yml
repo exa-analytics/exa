@@ -5,11 +5,12 @@ python:
     - "3.5"
     - "nightly"
 before_install:
+    - sudo apt-add-repository "deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu $(lsb_release -sc) main"
     - sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main universe"
     - sudo apt-add-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.7 main"
     - wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
     - sudo apt-get update
-    - sudo apt-get install -f libblas-dev liblapack-dev build-essential gfortran llvm-3.7
+    - sudo apt-get install libblas-dev liblapack-dev build-essential gfortran llvm-3.7
 install:
     - pip install -r requirements.txt
 script:
