@@ -7,7 +7,7 @@ matplotlib
 seaborn
 jupyter
 notebook==4.1
-ipywidgets
+ipywidgets==4.1
 ipyparallel
 sphinx
 sphinx_rtd_theme
