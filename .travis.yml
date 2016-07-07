@@ -11,7 +11,7 @@ before_install:
     - sudo apt-get update
     - sudo apt-get install llvm-3.7
 install:
-    - pip install -r requirements.txt
+    - cat requirements.txt | xargs pip install
 script:
     - python exa/test/tester.py
 after_success:
