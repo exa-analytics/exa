@@ -1,5 +1,6 @@
 ![exa](doc/source/_static/logo.png)
 [![Documentation Status](https://readthedocs.org/projects/exa/badge/?version=latest)](http://exa.readthedocs.io/en/latest/?badge=latest)
+[![Build Status](https://travis-ci.org/avmarchenko/exa.svg?branch=master)](https://travis-ci.org/avmarchenko/exa)
 # Installation
 **Note** conda build coming soon!
 The typical Python data stack is required (example using the **conda** package manager).
