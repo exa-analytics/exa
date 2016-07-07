@@ -136,31 +136,22 @@ def symbols_to_radii():
 
 def symbol_to_element_mass():
     '''Mapper from symbol to element mass.'''
-    isotopedf['fmass'] = isotopedf['mass'] * isotopedf['af']
-    topes = isotopedf.groupby('name')
-    n = topes.ngroups
-    masses = np.empty((n, ), dtype=np.float64)
-    symbols = np.empty((n, ), dtype='O')
-    for i, (name, element) in enumerate(topes):
-        symbols[i] = element['symbol'].values[-1]
-        masses[i] = element['fmass'].sum()
-    symbol_to_element_mass = pd.Series(masses)
-    symbol_to_element_mass.index = symbols
+    df = Isotope.to_frame()
+    df['fmass'] = df['mass'].mul(df['af'])
+    s = df.groupby('name').sum()
+    mapper = df.drop_duplicates('name').set_index('name')['symbol']
+    s.index = data.index.map(lambda x: mapper[x])
+    s = s['fmass']
+    return s
 
 
-def init_symbol_to_radius(isotopedf):
-    '''
-    Initialize the **symbol_to_radius** mapper.
-    '''
-    global symbol_to_radius
-    symbol_to_radius = isotopedf.drop_duplicates('symbol')
-    symbol_to_radius = symbol_to_radius.set_index('symbol')['radius']
+def symbol_to_radius(isotopedf):
+    '''Mapper from isotope symbol to covalent radius.'''
+    df = Isotope.to_frame().drop_duplicates('symbol')
+    return df.set_index('symbol')['radius']
 
 
-def init_symbol_to_color(isotopedf):
-    '''
-    Initialize the **symbol_to_color** mapper.
-    '''
-    global symbol_to_color
-    symbol_to_color = isotopedf.drop_duplicates('symbol')
-    symbol_to_color = symbol_to_color.set_index('symbol')['color']
+def symbol_to_color(isotopedf):
+    '''Mapper from isotope symbol to color.'''
+    df = Isotope.to_frame().drop_duplicates('symbol')
+    return df.set_index('symbol')['color']

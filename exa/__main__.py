@@ -4,6 +4,8 @@ Application Launchers
 ########################
 '''
 import subprocess
+import unittest
+import doctest
 from exa._setup import config
 
 

@@ -5,6 +5,7 @@ Utilities
 Commonly used functions (primarily for convenience and repetition reduction).
 '''
 import os
+import sys
 import numpy as np
 from datetime import datetime
 
@@ -57,3 +58,14 @@ def convert_bytes(value):
     '''
     n = np.rint(len(str(value))/4).astype(int)
     return value/(1024**n), sizes[n]
+
+
+def get_internal_modules(key='exa'):
+    '''
+    Get a list of modules belonging to the given package.
+
+    Args:
+        key (str): Package or library name (e.g. "exa")
+    '''
+    key += '.'
+    return [v for k, v in sys.modules.items() if k.startswith(key)]

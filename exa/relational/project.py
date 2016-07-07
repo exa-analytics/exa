@@ -1,45 +1,72 @@
 # -*- coding: utf-8 -*-
 '''
-Project
-===============================================
+Project Table
+#################
+A project represents a continuous or finite study of a subject matter. It is
+the highest level of categorical organization for the content management
+system.
+
+See Also:
+    :mod:`~exa.relational.job` and :mod:`~exa.relational.file`
 '''
-from sqlalchemy import String, DateTime, ForeignKey, Table
+from sqlalchemy import Integer, Column, ForeignKey, Table
 from sqlalchemy.orm import relationship
-from exa.utils import gen_uid
-from exa.relational.base import datetime, Base, Column, Integer
+from exa.relational.base import Base, Name, Time, Size
 
 
-ProjectJob = Table(
+projectjob = Table(   # Many to many relationship; Project - Job
     'projectjob',
     Base.metadata,
-    Column('project_pkid', Integer, ForeignKey('project.pkid', onupdate='CASCADE', ondelete='CASCADE')),
-    Column('job_pkid', Integer, ForeignKey('job.pkid', onupdate='CASCADE', ondelete='CASCADE'))
-)
-ProjectContainer = Table(
-    'projectcontainer',
-    Base.metadata,
-    Column('project_pkid', Integer, ForeignKey('project.pkid', onupdate='CASCADE', ondelete='CASCADE')),
-    Column('container_pkid', Integer, ForeignKey('container.pkid', onupdate='CASCADE', ondelete='CASCADE'))
-)
-ProjectFile = Table(
-    'projectfile',
-    Base.metadata,
-    Column('project_pkid', Integer, ForeignKey('project.pkid', onupdate='CASCADE', ondelete='CASCADE')),
-    Column('file_pkid', Integer, ForeignKey('file.pkid', onupdate='CASCADE', ondelete='CASCADE'))
+    Column(
+        'project_pkid',
+        Integer,
+        ForeignKey('project.pkid', onupdate='CASCADE', ondelete='CASCADE')
+    ),
+    Column(
+        'job_pkid',
+        Integer,
+        ForeignKey('job.pkid', onupdate='CASCADE', ondelete='CASCADE')
+    )
 )
 
 
-class Project(Base):
-    '''
-    Carefully planned enterprise to achieve a specific aim.
-    '''
-    name = Column(String)
-    description = Column(String)
-    created = Column(DateTime, default=datetime.now)
-    modified = Column(DateTime, default=datetime.now)
-    accessed = Column(DateTime, default=datetime.now)
-    size = Column(Integer)
-    file_count = Column(Integer)
-    jobs = relationship('Job', secondary=ProjectJob, backref='projects', cascade='all, delete')
-    containers = relationship('Container', secondary=ProjectContainer, backref='projects', cascade='all, delete')
-    files = relationship('File', secondary=ProjectFile, backref='projects', cascade='all, delete')
+projectdatafile = Table(    # Many to many relationship; Project - DataFile
+    'projectdatafile',
+    Base.metadata,
+    Column(
+        'project_pkid',
+        Integer,
+        ForeignKey('project.pkid', onupdate='CASCADE', ondelete='CASCADE')
+    ),
+    Column(
+        'datafile_pkid',
+        Integer,
+        ForeignKey('datafile.pkid', onupdate='CASCADE', ondelete='CASCADE')
+    )
+)
+
+
+projectcontainerfile = Table(    # Many to many relationship; Project - ContainerFile
+    'projectcontainerfile',
+    Base.metadata,
+    Column(
+        'project_pkid',
+        Integer,
+        ForeignKey('project.pkid', onupdate='CASCADE', ondelete='CASCADE')
+    ),
+    Column(
+        'containerfile_pkid',
+        Integer,
+        ForeignKey('containerfile.pkid', onupdate='CASCADE', ondelete='CASCADE')
+    )
+)
+
+
+class Project(Name, Time, Size, Base):
+    '''Continuous or finite study of a certain subject with a specific goal.'''
+    jobs = relationship('Job', secondary=projectjob, backref='projects',
+                        cascade='all, delete')
+    containerfiles = relationship('ContainerFile', secondary=projectcontainerfile,
+                                  backref='projects', cascade='all, delete')
+    datafiles = relationship('DataFile', secondary=projectdatafile,
+                             backref='projects', cascade='all, delete')

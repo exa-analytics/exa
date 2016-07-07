@@ -23,6 +23,7 @@ class TestConstant(UnitTester):
         '''
         Check data values.
         '''
-        Eh = Constant['Eh']
-        self.assertTrue(hasattr(Eh, 'value'))
-        self.assertTrue(np.isclose(Eh.value, 4.35974434*10**-18))
+        hartree = Constant['Eh']
+        self.assertTrue(np.isclose(hartree, 4.35974434*10**-18))
+        hartree = Constant['hartree']
+        self.assertTrue(np.isclose(hartree, 4.35974434*10**-18))

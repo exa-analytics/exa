@@ -13,11 +13,11 @@ class Meta(BaseMeta):
     Special metaclass for unit objects supporting aliases. Aliases are
     alternative names for standard symbols for units.
     '''
-    aliases = {}     # See aliases below
+    aliases = {}     # Note that all aliases should be lowercase (see below)
     def _getitem(cls, key):
         if isinstance(key, tuple):
-            f = cls.aliases[key[0]] if key[0] in cls.aliases else key[0]
-            t = cls.aliases[key[1]] if key[1] in cls.aliases else key[1]
+            f = cls.aliases[key[0].lower()] if key[0].lower() in cls.aliases else key[0]
+            t = cls.aliases[key[1].lower()] if key[1].lower() in cls.aliases else key[1]
             with scoped_session() as session:
                 return session.query(cls).filter(and_(cls.from_unit==f, cls.to_unit==t)).one().factor
         else:

@@ -11,7 +11,7 @@ from doctest import DocTestFinder, DocTestRunner
 from unittest import TestCase, TestLoader, TextTestRunner
 from exa.log import loggers
 from exa._config import config
-from exa.utility import datetime_header
+from exa.utility import datetime_header, get_internal_modules
 
 
 logger = loggers['syslog']    # Tests are written to the system log
@@ -64,8 +64,7 @@ def run_doctests(log=False):
                         runner.run(test)
 
     runner = DocTestRunner(verbose=verbose)
-    modules = [v for k, v in sys.modules.items() if k.startswith('exa')]
-    modules.sort(key=lambda module: module.__file__)
+    modules = get_internal_modules()
     if log:
         logger.debug('LOGGING DOCTEST')
         tester(modules, runner, f=logger.handlers[0].stream)
@@ -73,20 +72,14 @@ def run_doctests(log=False):
         tester(modules, runner)
 
 
-def run_unittests(log=False, verbosity=0):
+def run_unittests(log=False):
     '''
     Perform (interactive) unit testing logging the results.
 
     Args:
         log (bool): Send results to system log (default False)
-        verbosity (int): Level of verbosity for unit tests (0-2)
     '''
     tests = UnitTester.__subclasses__()
     if log:
         logger.debug('LOGGING UNITTEST')
-    for test in tests:
-        test.run_interactively(log=log)
-
-
-if __name__ == '__main__':
-    run_unittests()
+    return [test.run_interactively(log=log) for test in tests]

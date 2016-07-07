@@ -26,6 +26,7 @@ def save():
     '''
     Save the configuration file to disk on exit.
     '''
+    del config['paths']['pkgdir']    # Delete dynamic configurations
     with open(config_file, 'w') as f:
         config.write(f)
 
@@ -54,4 +55,6 @@ if config['log']['dblog'] == 'None':
     config['log']['dblog'] = mkp(root, 'db.log')
 # db
 if config['db']['uri'] == 'None':
-    config['db']['uri'] = 'sqlite://' + mkp(root, 'exa.sqlite') # SQLite by default
+    config['db']['uri'] = 'sqlite:///' + mkp(root, 'exa.sqlite') # SQLite by default
+# dynamically allocated configurations (these are deleted before saving)
+config['paths']['pkgdir'] = pkg
