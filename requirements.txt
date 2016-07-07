@@ -3,6 +3,7 @@ scipy
 matplotlib
 sqlalchemy
 pandas
+networkx
 sympy
 seaborn
 jupyter
