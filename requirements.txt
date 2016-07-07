@@ -1,7 +1,6 @@
 numpy
 scipy
 pandas
-scikit-learn
 sympy
 matplotlib
 seaborn
@@ -9,6 +8,7 @@ jupyter
 notebook==4.1
 ipywidgets==4.1
 ipyparallel
+scikit-learn
 sphinx
 sphinx_rtd_theme
 sphinxcontrib-autoanysrc
