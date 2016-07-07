@@ -49,6 +49,7 @@ def run_doctests(log=False):
     '''
     def tester(modules, runner, f=None):
         '''Runs tests for each module.'''
+        results = []
         for module in modules:
             tests = DocTestFinder().find(module)
             tests.sort(key=lambda test: test.name)
@@ -58,18 +59,18 @@ def run_doctests(log=False):
                 else:
                     if f:
                         f.write('\n'.join(('-' * 80, test.name, '-' * 80, '\n')))
-                        runner.run(test, out=f.write)
+                        results.append(runner.run(test, out=f.write))
                     else:
                         print('\n'.join(('-' * 80, test.name, '-' * 80)))
-                        runner.run(test)
+                        results.append(runner.run(test))
+        return results
 
     runner = DocTestRunner(verbose=verbose)
     modules = get_internal_modules()
     if log:
         logger.debug('LOGGING DOCTEST')
-        tester(modules, runner, f=logger.handlers[0].stream)
-    else:
-        tester(modules, runner)
+        return tester(modules, runner, f=logger.handlers[0].stream)
+    return tester(modules, runner)
 
 
 def run_unittests(log=False):

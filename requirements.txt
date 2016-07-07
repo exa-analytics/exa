@@ -1,6 +1,7 @@
 numpy
 scipy
 matplotlib
+sqlalchemy
 pandas
 sympy
 seaborn
