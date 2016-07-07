@@ -11,6 +11,7 @@ before_install:
     - sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main universe"
     - sudo apt-get update
     - sudo apt-get install libblas-dev liblapack-dev build-essential gfortran llvm-3.7
+    - export LLVM_CONFIG=/usr/bin/llvm-config-3.7
 install:
     - pip install -r requirements.txt
 script:
