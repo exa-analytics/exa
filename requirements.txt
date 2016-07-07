@@ -6,7 +6,7 @@ sympy
 matplotlib
 seaborn
 jupyter
-notebook == 4.1.0
+notebook==4.1
 ipywidgets
 ipyparallel
 sphinx
