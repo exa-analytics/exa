@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/avmarchenko/exa.svg?branch=master)](https://travis-ci.org/avmarchenko/exa) <br />
 [![Coverage](https://codecov.io/gh/avmarchenko/exa/branch/master/graph/badge.svg)](https://codecov.io/gh/avmarchenko/exa) <br />
 [![Code Issues](https://www.quantifiedcode.com/api/v1/project/3c8a5fe969f745f8b2f3554ad59590f0/badge.svg)](https://www.quantifiedcode.com/app/project/3c8a5fe969f745f8b2f3554ad59590f0)
+[![License](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 # Installation
 **Note** conda build coming soon!
@@ -27,4 +28,4 @@ make html    # .\make.bat html # Windows
 
 # Legal
 Copyright (c) 2015-2016, Exa Analytics Development Team <br />
-[![License](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
+Distributed under the terms of the Apache License 2.0
