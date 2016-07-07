@@ -468,7 +468,7 @@ class Container:
         .. _ipywidgets: https://ipywidgets.readthedocs.io/en/latest/
         '''
         if self._widget is not None:    # If a corresponding widget exists, build traits
-            traits = {}
+            traits = self._custom_traits()
             if len(self._data()) == 0:
                 traits['test'] = Bool(True).tag(sync=True)
             else:
