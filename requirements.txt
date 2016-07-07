@@ -3,7 +3,6 @@ scipy
 matplotlib
 pandas
 sympy
-scikit-learn
 seaborn
 jupyter
 notebook==4.1

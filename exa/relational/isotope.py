@@ -124,9 +124,7 @@ def z_to_symbol():
 
 
 def symbols_to_radii():
-    '''
-    Mapper from symbol pairs to sum of covalent radii.
-    '''
+    '''Mapper from symbol pairs to sum of covalent radii.'''
     df = Isotope.to_frame().drop_duplicates('symbol')
     symbol = df['symbol'].values
     radius = df['radius'].values
@@ -136,11 +134,8 @@ def symbols_to_radii():
     return s
 
 
-def init_symbol_to_element_mass(isotopedf):
-    '''
-    Initialize the **symbol_to_element_mass** mapper.
-    '''
-    global symbol_to_element_mass
+def symbol_to_element_mass():
+    '''Mapper from symbol to element mass.'''
     isotopedf['fmass'] = isotopedf['mass'] * isotopedf['af']
     topes = isotopedf.groupby('name')
     n = topes.ngroups
