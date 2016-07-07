@@ -13,3 +13,4 @@ nose
 sphinx
 sphinx_rtd_theme
 sphinxcontrib-autoanysrc
+numba
