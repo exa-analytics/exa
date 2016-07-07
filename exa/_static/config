@@ -12,3 +12,6 @@ level = 0
 [db]
 uri = None
 update = 1
+
+[js]
+update = 1

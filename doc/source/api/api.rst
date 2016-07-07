@@ -1,3 +1,6 @@
+.. Copyright (c) 2015-2016, Exa Analytics Development Team
+.. Distributed under the terms of the Apache License 2.0
+
 .. _exa-api:
 
 #####################################
@@ -8,7 +11,9 @@ API
     :maxdepth: 2
     :caption: Base
 
-    setup_log_utility_test.rst
+    setup.rst
+    test.rst
+    relational.rst
 
 .. toctree::
     :maxdepth: 2
@@ -35,3 +40,13 @@ API
     :caption: Tests
 
     tests/test_base.rst
+
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Extensions
+
+    js/container.rst
+    js/apps.rst
+    js/external.rst
+    js/utility.rst

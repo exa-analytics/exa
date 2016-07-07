@@ -1,19 +1,21 @@
+// Copyright (c) 2015-2016, Exa Analytics Development Team
+// Distributed under the terms of the Apache License 2.0
 /*"""
-======================================================
-3D Visualization Application for Jupyter Notebooks
-======================================================
+3D Visualization
+##################
+
 */
 'use strict';
 
 
 require.config({
     shim: {
-        'nbextensions/exa/libs/three.min': {
+        'nbextensions/exa/lib/three.min': {
             exports: 'THREE'
         },
 
-        'nbextensions/exa/libs/TrackballControls': {
-            deps: ['nbextensions/exa/libs/three.min'],
+        'nbextensions/exa/lib/TrackballControls': {
+            deps: ['nbextensions/exa/lib/three.min'],
             exports: 'THREE.TrackballControls'
         },
 
@@ -25,8 +27,8 @@ require.config({
 
 
 define([
-    'nbextensions/exa/libs/three.min',
-    'nbextensions/exa/libs/TrackballControls',
+    'nbextensions/exa/lib/three.min',
+    'nbextensions/exa/lib/TrackballControls',
     'nbextensions/exa/utility'
 ], function(THREE, TrackballControls, utility) {
     class App3D {

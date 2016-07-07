@@ -1,7 +1,8 @@
+// Copyright (c) 2015-2016, Exa Analytics Development Team
+// Distributed under the terms of the Apache License 2.0
 /*"""
-===========================
 gui.js
-===========================
+##############
 Basic gui for container views.
 */
 'use strict';
@@ -9,7 +10,7 @@ Basic gui for container views.
 
 require.config({
     shim: {
-        'nbextensions/exa/libs/dat.gui.min': {
+        'nbextensions/exa/lib/dat.gui.min': {
             exports: 'dat'
         },
     },
@@ -17,7 +18,7 @@ require.config({
 
 
 define([
-    'nbextensions/exa/libs/dat.gui.min',
+    'nbextensions/exa/lib/dat.gui.min',
 ], function(dat) {
     class ContainerGUI extends dat.GUI {
         /*"""

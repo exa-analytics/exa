@@ -1,3 +1,5 @@
+// Copyright (c) 2015-2016, Exa Analytics Development Team
+// Distributed under the terms of the Apache License 2.0
 /*"""
 container.js
 ###############
@@ -10,7 +12,8 @@ create_container) and then populate its canvas with an application ("app")
 appropriate to the type of container. If the (backend) container is empty, then
 populate the HTML widget with the test application. If the container is not
 empty but doesn't have a dedicated application, the info application (info.js)
-is used.*/
+is used.
+*/
 'use strict';
 
 

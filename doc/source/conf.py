@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Distributed under the terms of the Apache License 2.0
 #
 # exa documentation build configuration file, created by
 # sphinx-quickstart on Tue Jun 23 21:37:50 2015.
@@ -19,7 +21,6 @@ import shlex
 on_rtd = os.environ.get('READTHEDOCS') == 'True'
 sys.path.insert(0, os.path.abspath(os.sep.join(('..', '..'))))
 from exa import __version__
-
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

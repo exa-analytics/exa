@@ -1,3 +1,6 @@
+.. Copyright (c) 2015-2016, Exa Analytics Development Team
+.. Distributed under the terms of the Apache License 2.0
+
 #####################################
 Installation
 #####################################
@@ -7,35 +10,47 @@ Python applications that interact with them (pip and conda respectively).
 
 This project recommends using conda because it is both a package manager and
 a Python virtual environment manager. Anaconda also provides better cross
-platform support especially for Python packages that require compilation
-(e.g. `llvm`_).
+platform support especially for Python packages that require compiled external
+dependences.
 
 
-Using conda
+Anaconda
 #######################
+Using anaconda or miniconda...
 
 .. code-block:: bash
 
-    conda install exa
+    conda install numba exa
 
 
-Manually
+Pypi
 #######################
-Install some dependencies..
+Using pip...
 
 .. code-block:: bash
 
-    conda install numpy scipy pandas seaborn jupyter notebook numba dask distributed ipywidgets sympy setuptools sphinx
-    pip install xmltodict sphinxcontrib-autoanysrc
+    # sudo apt-get install llvm-3.7 or sudo yum install ... etc.
+    sudo pip install numba exa
 
-..then install the package.
+
+CUDA
+###################
+If working on a system with CUDA supported Nvidia GPUs...
 
 .. code-block:: bash
 
+    conda install cudatoolkit     # or via apt-get or yum etc.
+
+Repository
+#########################
+Manually...
+
+.. code-block:: bash
+
+    # install llvm, numba, cudatoolkit, and CPython3.x
+    git clone https://github.com/exa-analytics/exa
+    cd exa
     pip install .
-
-Note that in general it is not good practice to use both conda and pip to manage the same Python
-environment.
 
 
 What's Next?
@@ -47,4 +62,3 @@ What's Next?
 
 .. _pypi: https://pypi.python.org/pypi
 .. _anaconda: https://anaconda.org/anaconda/packages
-.. _llvm: https://anaconda.org/anaconda/llvm

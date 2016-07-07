@@ -1,3 +1,8 @@
+/*"""
+marchingsquares.js
+#######################
+
+*/
 'use strict';
 
 var Contour = function(data, dims, orig, scale, val, ncont, contlims, axis) {

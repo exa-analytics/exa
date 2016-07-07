@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Distributed under the terms of the Apache License 2.0
 '''
 Base Widget
 ##################
@@ -11,8 +13,9 @@ import numpy as np
 import pandas as pd
 from ipywidgets import DOMWidget
 from notebook import install_nbextension
-from traitlets import Instance, Type, Any, Float, Int
-from traitlets import Unicode, List, Integer, Bytes, CUnicode, Set, Tuple, Dict
+from notebook.nbextensions import jupyter_data_dir
+from traitlets import Unicode, Integer
+from exa._config import config
 from exa.utility import mkp
 
 
@@ -60,19 +63,31 @@ class ContainerWidget(Widget):
         self.params = {'save_dir': '', 'file_name': ''}
 
 
-def install_notebook_widgets(origin_base, dest_base, verbose=False):
+def install_notebook_widgets(pkg_nbext, sys_nbext, verbose=False):
     '''
     Convenience wrapper around :py:func:`~notebook.install_nbextension` that
     organizes notebook extensions for exa and related packages in a systematic
     fashion.
+
+    Args:
+        pkg_nbext (str): Path to the "_nbextension" directory in the source
+        sys_nbext (str): Path to the system "nbextensions" directory
+        verbose (bool): Verbose installation
     '''
     try:
-        shutil.rmtree(dest_base)
-    except:
+        shutil.rmtree(sys_nbext)
+    except FileNotFoundError:
         pass
-    for root, subdirs, files in os.walk(origin_base):
+    for root, subdirs, files in os.walk(pkg_nbext):
         for filename in files:
-            subdir = root.split('nbextensions')[-1]
+            subdir = root.split('_nbextension')[-1]
             orig = mkp(root, filename)
-            dest = mkp(dest_base, subdir, mk=True)
+            dest = mkp(sys_nbext, subdir, mk=True)
             install_nbextension(orig, verbose=verbose, overwrite=True, nbextensions_dir=dest)
+
+if config['js']['update'] == '1':
+    verbose = True if config['log']['level'] != '0' else False
+    pkg_nbext = mkp(config['dynamic']['pkgdir'], '_nbextension')
+    sys_nbext = mkp(jupyter_data_dir(), 'nbextensions', 'exa')
+    install_notebook_widgets(pkg_nbext, sys_nbext, verbose)
+    config['js']['update'] = '0'

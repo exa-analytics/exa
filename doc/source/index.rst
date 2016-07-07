@@ -1,3 +1,6 @@
+.. Copyright (c) 2015-2016, Exa Analytics Development Team
+.. Distributed under the terms of the Apache License 2.0
+
 .. exa documentation master file, created by
    sphinx-quickstart on Tue Jun 23 21:37:50 2015.
    You can adapt this file completely to your liking, but it should at least
@@ -21,27 +24,20 @@ exploration.
     :caption: General Info
 
     overview.rst
+    install.rst
     api/api.rst
 
 .. toctree::
     :maxdepth: 2
     :caption: User Guide
 
-..    user/user.rst
-..    user/started.rst
-..    user/examples.rst
-..    user/help.rst
 
 .. toctree::
     :maxdepth: 2
     :caption: Contributor Guide
 
-..    dev/dev.rst
-..    bugs.rst
-..    proposal.rst
-..    stack.rst
-..    code.rst
-..    contrib.rst
+    dev/overview.rst
+
 
 
 ##################

@@ -1,16 +1,29 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Distributed under the terms of the Apache License 2.0
 '''
 Configuration
 ########################
 This module generates the "~/.exa" directory where all databases, logs, notebooks,
-and data reside and creates the configuration object (config).
+and data reside. This configuration may be altered by editing the items below:
 
 paths:
-    - data (str): Path to the data directory (default ~/.exa/data)
-    - notebooks (str): Path to the notebooks directory (default ~/.exa/notebooks)
+    - data: Path to the data directory (default ~/.exa/data)
+    - notebooks: Path to the notebooks directory (default ~/.exa/notebooks)
 
 log:
-    - nlogs (int):
+    - nlogs: Number of log files to rotate
+    - nbytes: Max log file size (in bytes)
+    - syslog: System log file path
+    - dblog: Database log file path (if necessary)
+    - level: Logging level, 0: normal, 1: extra info, 2: debug
+
+db:
+    - uri: String URI for database connection
+    - update: If 1, refresh static database data (e.g. unit conversions)
+
+js:
+    - update: If 1, update JavaScript notebook extensions
 '''
 import os
 import sys
@@ -26,7 +39,7 @@ def save():
     '''
     Save the configuration file to disk on exit.
     '''
-    del config['paths']['pkgdir']    # Delete dynamic configurations
+    del config['dynamic']    # Delete dynamically assigned configuration options
     with open(config_file, 'w') as f:
         config.write(f)
 
@@ -57,4 +70,12 @@ if config['log']['dblog'] == 'None':
 if config['db']['uri'] == 'None':
     config['db']['uri'] = 'sqlite:///' + mkp(root, 'exa.sqlite') # SQLite by default
 # dynamically allocated configurations (these are deleted before saving)
-config['paths']['pkgdir'] = pkg
+config['dynamic'] = {}
+config['dynamic']['pkgdir'] = pkg
+nb = 'false'
+try:
+    import numba
+    nb = 'true'
+except ImportError:
+    pass
+config['dynamic']['numba'] = nb

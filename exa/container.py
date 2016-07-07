@@ -23,17 +23,14 @@ import pandas as pd
 import networkx as nx
 from sys import getsizeof
 from copy import deepcopy
-from collections import OrderedDict
 from traitlets import Bool
-from collections import defaultdict
-from sqlalchemy.orm.attributes import InstrumentedAttribute
 from exa import mpl
 from exa._config import config
 from exa.widget import ContainerWidget
 from exa.numerical import Series, DataFrame, SparseSeries, SparseDataFrame, Field
-from exa.utility import convert_bytes
 
 
+# These constants are used for data network visualization
 edge_colors = mpl.sns.color_palette('viridis', 2)
 edge_types = ['idx-idx', 'idx-col']
 edge_color_map = dict(zip(edge_types, edge_colors))
@@ -42,117 +39,6 @@ node_types = [Field, pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFram
 node_color_map = list(zip(node_types, node_colors))
 r_node_color_map = {v: '.'.join((k.__module__, k.__name__)) for k, v in node_color_map}
 r_edge_color_map = {v: k for k, v in edge_color_map.items()}
-
-
-class TypedMeta(type):
-    '''
-    A metaclass for automatically generating properties for statically typed
-    class attributes. Useage is the following:
-
-    .. code-block:: Python
-
-        class TestMeta(TypedMeta):
-            attr1 = int
-            attr2 = DataFrame
-
-        class TestClass(metaclass=TestMeta):
-            def __init__(self, attr1, attr2):
-                self.attr1 = attr1
-                self.attr2 = attr2
-
-    Under the covers, this class creates code that looks like the following:
-
-    .. code-block:: Python
-
-        class TestClass:
-            @property
-            def attr1(self):
-                return self._attr1
-
-            @attr1.setter
-            def attr1(self, obj):
-                if not isinstance(obj, int):
-                    raise TypeError('attr1 must be int')
-                self._attr1 = obj
-
-            @attr1.deleter
-            def attr1(self):
-                del self._attr1
-
-            @property
-            def attr2(self):
-                return self._attr2
-
-            @attr2.setter
-            def attr2(self, obj):
-                if not isinstance(obj, DataFrame):
-                    raise TypeError('attr2 must be DataFrame')
-                self._attr2 = obj
-
-            @attr2.deleter
-            def attr2(self):
-                del self._attr2
-
-            def __init__(self, attr1, attr2):
-                self.attr1 = attr1
-                self.attr2 = attr2
-    '''
-    @staticmethod
-    def create_property(name, ptype):
-        '''
-        Creates a custom property with a getter that performs computing
-        functionality (if available) and raise a type error if setting
-        with the wrong type.
-
-        Note:
-            By default, the setter attempts to convert the object to the
-            correct type; a type error is raised if this fails.
-        '''
-        pname = '_' + name    # This will be where the data is store (e.g. self._name)
-        def getter(self):
-            '''
-            This is the default property "getter" for container data objects.
-            If the property value is None, this function will check for a
-            convenience method with the signature, self.compute_name() and call
-            it prior to returning the property value.
-            '''
-            if not hasattr(self, pname) and hasattr(self, '{}{}'.format(self._getter_prefix, pname)):
-                self['{}{}'.format(self._getter_prefix, pname)]()
-            if not hasattr(self, pname):
-                raise AttributeError('Please compute or set {} first.'.format(name))
-            return getattr(self, pname)
-
-        def setter(self, obj):
-            '''
-            This is the default property "setter" for container data objects.
-            Prior to setting a property value, this function checks that the
-            object's type is correct.
-            '''
-            if not isinstance(obj, ptype):
-                try:
-                    obj = ptype(obj)
-                except:
-                    raise TypeError('Object {0} must instance of {1}'.format(name, ptype))
-            setattr(self, pname, obj)
-
-        def deleter(self):
-            '''Deletes the property's value.'''
-            del self[pname]
-
-        return property(getter, setter, deleter)
-
-    def __new__(metacls, name, bases, clsdict):
-        '''
-        This function modifies container class definitions (the class object
-        itself is altered, not instances of the class).
-        :func:`~exa.container.TypedMeta.create_property` is called on every
-        statically defined class attributed, which creates corresponding
-        property defined on the class object.
-        '''
-        for k, v in metacls.__dict__.items():
-            if isinstance(v, type) and k[0] != '_':
-                clsdict[k] = metacls.create_property(k, v)
-        return super().__new__(metacls, name, bases, clsdict)
 
 
 class Container:
@@ -503,6 +389,118 @@ class Container:
         if self._widget is not None and self._traits_need_update:
             self._update_traits()
         return self._widget._repr_html_()
+
+
+class TypedMeta(type):
+    '''
+    This metaclass creates statically typed class attributes using the property
+    framework.
+
+    .. code-block:: Python
+
+        class TestMeta(TypedMeta):
+            attr1 = (int, float)
+            attr2 = DataFrame
+
+        class TestClass(metaclass=TestMeta):
+            def __init__(self, attr1, attr2):
+                self.attr1 = attr1
+                self.attr2 = attr2
+
+    The above code dynamically creates code that looks like the following:
+
+    .. code-block:: Python
+
+        class TestClass:
+            @property
+            def attr1(self):
+                return self._attr1
+
+            @attr1.setter
+            def attr1(self, obj):
+                if not isinstance(obj, (int, float)):
+                    raise TypeError('attr1 must be int')
+                self._attr1 = obj
+
+            @attr1.deleter
+            def attr1(self):
+                del self._attr1
+
+            @property
+            def attr2(self):
+                return self._attr2
+
+            @attr2.setter
+            def attr2(self, obj):
+                if not isinstance(obj, DataFrame):
+                    raise TypeError('attr2 must be DataFrame')
+                self._attr2 = obj
+
+            @attr2.deleter
+            def attr2(self):
+                del self._attr2
+
+            def __init__(self, attr1, attr2):
+                self.attr1 = attr1
+                self.attr2 = attr2
+    '''
+    @staticmethod
+    def create_property(name, ptype):
+        '''
+        Creates a custom property with a getter that performs computing
+        functionality (if available) and raise a type error if setting
+        with the wrong type.
+
+        Note:
+            By default, the setter attempts to convert the object to the
+            correct type; a type error is raised if this fails.
+        '''
+        pname = '_' + name    # This will be where the data is store (e.g. self._name)
+        def getter(self):
+            '''
+            This is the default property "getter" for container data objects.
+            If the property value is None, this function will check for a
+            convenience method with the signature, self.compute_name() and call
+            it prior to returning the property value.
+            '''
+            if not hasattr(self, pname) and hasattr(self, '{}{}'.format(self._getter_prefix, pname)):
+                self['{}{}'.format(self._getter_prefix, pname)]()
+            if not hasattr(self, pname):
+                raise AttributeError('Please compute or set {} first.'.format(name))
+            return getattr(self, pname)
+
+        def setter(self, obj):
+            '''
+            This is the default property "setter" for container data objects.
+            Prior to setting a property value, this function checks that the
+            object's type is correct.
+            '''
+            if not isinstance(obj, ptype):
+                try:
+                    obj = ptype(obj)
+                except:
+                    raise TypeError('Object {0} must instance of {1}'.format(name, ptype))
+            setattr(self, pname, obj)
+
+        def deleter(self):
+            '''Deletes the property's value.'''
+            del self[pname]
+
+        return property(getter, setter, deleter)
+
+    def __new__(metacls, name, bases, clsdict):
+        '''
+        Modification of the class definition occurs here; we iterate over all
+        statically typed attributes and attach their property (see
+        :func:`~exa.container.TypedMeta.create_property`) definition, returning
+        the new class definition.
+        '''
+        for k, v in metacls.__dict__.items():
+            if isinstance(v, type) and k[0] != '_':
+                clsdict[k] = metacls.create_property(k, v)
+        return super().__new__(metacls, name, bases, clsdict)
+
+
 
 
 #    def _slice_with_int_or_string(self, key):

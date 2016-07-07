@@ -1,7 +1,12 @@
 #! /usr/bin/env python
+# -*- coding: utf-8 -*-
+# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Distributed under the terms of the Apache License 2.0
 '''
-Application Launchers
+Executables
 ########################
+Exa provides two executables; "exa" and "exw". For the graphical user interface,
+built on top of the Jupyter notebook environment, run "exa" on the command line.
 '''
 import subprocess
 import unittest

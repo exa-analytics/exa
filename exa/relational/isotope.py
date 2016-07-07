@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Distributed under the terms of the Apache License 2.0
 '''
 Table of Isotopes
 ###########################################
@@ -14,7 +16,7 @@ from sqlalchemy import String, Float
 from sqlalchemy import Column, Integer, String
 from exa._config import config
 from exa.relational.base import BaseMeta, Base, SessionFactory
-from exa.iterative import product_sum_2f, product_add_2
+from exa.math.misc.summation import sum_product_pair_f8, sum_product_pair
 
 
 class Meta(BaseMeta):
@@ -128,7 +130,7 @@ def symbols_to_radii():
     df = Isotope.to_frame().drop_duplicates('symbol')
     symbol = df['symbol'].values
     radius = df['radius'].values
-    symbols = [x + y for x, y in product(symbol, symbol)]
+    symbols = sum_product_pair(symbol, symbol)
     s = pd.Series(sum_product_pair_f8(radius, radius))
     s.index = symbols
     return s
