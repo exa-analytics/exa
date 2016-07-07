@@ -1,7 +1,5 @@
 ![exa](doc/source/_static/logo.png)
-# Installation
-
-
+[![Documentation Status](https://readthedocs.org/projects/exa/badge/?version=latest)](http://exa.readthedocs.io/en/latest/?badge=latest)
 # Installation
 **Note** conda build coming soon!
 The typical Python data stack is required (example using the **conda** package manager).
@@ -11,11 +9,6 @@ conda install numpy scipy pandas seaborn scikit-learn jupyter notebook ipywidget
 Currently there are some growing pains associated with our dependencies. Ensure that
 you have identical version numbers on ipywidgets and jupyter-client (eg. ipywidgets=4.1.1
 and jupyter-client=4.1.1).
-
-From inside the git repository, exa can be installed using:
-```
-pip install .
-```
 
 
 # Getting Started
