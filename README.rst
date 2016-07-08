@@ -1,22 +1,23 @@
-.. image:: doc/source/_static/logo.png)
+.. image:: doc/source/_static/logo.png
     :target: doc/source/_static/logo.png
     :alt: Logo
-
+<br />
 .. image:: https://travis-ci.org/avmarchenko/exa.svg?branch=master
     :target: https://travis-ci.org/avmarchenko/exa
     :alt: Build Status
-
+<br />
 .. image:: https://readthedocs.org/projects/exa/badge/?version=latest
     :target: http://exa.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
-
+<br />
 .. image:: https://www.quantifiedcode.com/api/v1/project/3c8a5fe969f745f8b2f3554ad59590f0/badge.svg
     :target: https://www.quantifiedcode.com/app/project/3c8a5fe969f745f8b2f3554ad59590f0
     :alt: Code Issues
-
+<br />
 .. image:: https://codecov.io/gh/avmarchenko/exa/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/avmarchenko/exa
     :alt: Code Coverage
+<br />
 
 Installation
 ##################
