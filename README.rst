@@ -1,9 +1,9 @@
-|logo|
-|build|
-|docs|
-|issues|
-|cov|
-|lic|
+| |logo|
+| |build|
+| |docs|
+| |issues|
+| |cov|
+| |lic|
 
 .. |logo| image:: doc/source/_static/logo.png
     :target: doc/source/_static/logo.png
