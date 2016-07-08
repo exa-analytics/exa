@@ -30,7 +30,7 @@ setup(
     include_package_data=True,
     install_requires=dependencies,
     license='Apache License Version 2.0',
-    keywords='analytics visualization big data'
+    keywords='analytics visualization big data',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Web Environment',
