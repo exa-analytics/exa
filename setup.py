@@ -15,7 +15,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='exa',
-    version=__version__,
+    version=''.join((__version__, 'dev1')),
     description='An ecosystem for data processing, analytics, and visualization.',
     long_description=description,
     author='Tom Duignan, Alex Marchenko',

@@ -2,12 +2,13 @@
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 '''
-Base Widget
+Widget
 ##################
 Functionality for using Jupyter notebook extensions to visualize data speficic
 containers.
 '''
 import os
+import atexit
 import shutil
 import numpy as np
 import pandas as pd
@@ -90,4 +91,4 @@ if config['js']['update'] == '1':
     pkg_nbext = mkp(config['dynamic']['pkgdir'], '_nbextension')
     sys_nbext = mkp(jupyter_data_dir(), 'nbextensions', 'exa')
     install_notebook_widgets(pkg_nbext, sys_nbext, verbose)
-    config['js']['update'] = '0'
+    atexit.register(lambda: config['js']['update'] = '0')

@@ -7,6 +7,7 @@ Relational
 This (sub)package is provides the content management framework for container
 objects and a collection of static data for reference and unit conversions.
 '''
+import atexit
 import pandas as pd
 from itertools import product
 from exa._config import config
@@ -79,4 +80,4 @@ if config['db']['update'] == '1':
     load_isotope_data()
     load_unit_data()
     load_constant_data()
-    config['db']['update'] = '0'    # Update config on successful db update
+    atexit.register(lambda: config['db']['update'] = '0')
