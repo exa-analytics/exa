@@ -79,3 +79,10 @@ try:
 except ImportError:
     pass
 config['dynamic']['numba'] = nb
+config['dynamic']['notebook'] = 'false'
+try:
+    cfg = get_ipython().config
+    if 'IPKernelApp' in cfg:
+        config['dynamic']['notebook'] = 'true'
+except NameError:
+    pass

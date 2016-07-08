@@ -35,7 +35,7 @@ def cleanup_engine():
 @contextmanager
 def scoped_session(*args, **kwargs):
     '''Safely commit relational objects.'''
-    session = SessionFactory(*args, **kwargs)
+    session = session_factory(*args, **kwargs)
     try:
         yield session
         session.commit()
@@ -53,18 +53,18 @@ class BaseMeta(DeclarativeMeta):
     '''
     def get_by_pkid(cls, pkid):
         '''Select an object by pkid.'''
-        return SessionFactory().query(cls).get(pkid)
+        return session_factory().query(cls).get(pkid)
 
     def get_by_name(cls, name):
         '''Select objects by name.'''
-        return SessionFactory().query(cls).filter(cls.name == name).all()
+        return session_factory().query(cls).filter(cls.name == name).all()
 
     def get_by_uid(cls, uid):
         '''Select an object by hexuid (as string)'''
         hexuid = uid
         if isinstance(uid, UUID):
             hexuid = uid.hex
-        return SessionFactory().query(cls).filter(cls.hexuid == hexuid).one()
+        return session_factory().query(cls).filter(cls.hexuid == hexuid).one()
 
     def bulk_insert(cls, mappings):
         '''
@@ -90,7 +90,7 @@ class BaseMeta(DeclarativeMeta):
             memory error. It is almost always more effective to query the
             table for the specific records of interest.
         '''
-        statement = SessionFactory().query(cls).statement
+        statement = session_factory().query(cls).statement
         df = pd.read_sql(statement, engine)
         if 'pkid' in df:
             df = df.set_index('pkid').sort_index()
@@ -148,7 +148,7 @@ class Base:
         '''
         Save the current object's relational information.
         '''
-        session = SessionFactory(expire_on_commit=False)
+        session = session_factory(expire_on_commit=False)
         session.add(self)
         session.commit()
 
@@ -196,4 +196,4 @@ class Size:
 
 logger = loggers['dblog']
 engine = create_engine(config['db']['uri'])
-SessionFactory = sessionmaker(bind=engine)
+session_factory = sessionmaker(bind=engine)

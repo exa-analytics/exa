@@ -11,7 +11,7 @@ import pandas as pd
 from itertools import product
 from exa._config import config
 from exa.utility import mkp
-from exa.relational.base import engine, Base
+from exa.relational.base import engine, Base, scoped_session, session_factory
 from exa.relational.unit import (Length, Mass, Time, Current, Amount, Luminosity,
                                  Dose, Acceleration, Charge, Dipole, Energy, Force,
                                  Frequency, MolarMass)

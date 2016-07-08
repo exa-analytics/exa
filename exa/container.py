@@ -28,6 +28,7 @@ from exa import mpl
 from exa._config import config
 from exa.widget import ContainerWidget
 from exa.numerical import Series, DataFrame, SparseSeries, SparseDataFrame, Field
+from exa.relational import ContainerFile, scoped_session
 
 
 # These constants are used for data network visualization
@@ -47,15 +48,6 @@ class Container:
     '''
     _widget_class = ContainerWidget
     _getter_prefix = 'compute'
-
-    def save(self, path):
-        '''
-        Save the container as an HDF5 archive.
-
-        Args:
-            path (str): Path where to save the container
-        '''
-        self._save_data(path, typ='hdf5')
 
     def copy(self, **kwargs):
         '''
@@ -181,84 +173,19 @@ class Container:
         l2, ax = legend(node_color, r_node_color_map, 'Data Type', (1, 0.3), ax)
         fig.gca().add_artist(l1)
 
-    @classmethod
-    def from_hdf(cls, path):
+    def save(self, path):
         '''
-        Load a container object from an HDF5 file.
+        Save the container as an HDF5 archive.
 
         Args:
-            path (str): Full file path to the container hdf5 file.
+            path (str): Path where to save the container
         '''
-        kwargs = {}
-        with pd.HDFStore(path) as store:
-            for key in store.keys():
-                if 'kwargs' in key:
-                    kwargs.update(store.get_storer(key).attrs.metadata)
-                else:
-                    name = str(key[1:])
-                    kwargs[name] = store[key]
-        # Process any fields
-        n = [int(key.split('_')[0].replace('FIELD', '')) for key in kwargs.keys() if 'FIELD' in key]
-        if len(n) != 0:
-            n = max(n)
-            to_del = []
-            for i in range(n + 1):
-                search = 'FIELD' + str(i)
-                names = [key for key in kwargs.keys() if search in key]
-                to_del += names
-                arg = names[0].replace(search + '_', '').split('/')[0]
-                field_values = [kwargs[key] for key in names if 'values' in key]
-                dkey = None
-                for name in names:
-                    if 'data' in name:
-                        dkey = name
-                field_data = kwargs[dkey]
-                kwargs[arg] = field_data
-                kwargs[arg + '_values'] = field_values
-            for name in to_del:
-                del kwargs[name]
-        return cls(**kwargs)
-
-    @classmethod
-    def load(cls, pkid_or_path=None):
-        '''
-        Load a container object from a persistent location or file path.
-
-        Args:
-            pkid_or_path: Integer pkid corresponding to the container table or file path
-
-        Returns:
-            container: The saved container object
-        '''
-        if isinstance(pkid_or_path, int):
-            raise NotImplementedError('Support for persistent storage coming soon...')
-        elif isinstance(pkid_or_path, str):
-            return cls.from_hdf(pkid_or_path)
-        else:
-            raise TypeError('The argument should be int or str, not {}.'.format(type(pkid_or_path)))
-
-    def _save_data(self, path=None, typ='hdf5'):
-        '''
-        Save the dataframe (and related series) data to a standard format
-        (currently only HDF5 is supported). This file contains all of the
-        data and metadata about the container.
-
-        Args:
-            path (str): Filename
-            typ (str): Store type ('hdf5', )
-        '''
-        if typ != 'hdf5':
-            raise NotImplementedError('Currently only hdf5 is supported')
-        self._save_hdf(path)
-
-    def _save_hdf(self, path):
-        '''
-        Save the container to an HDF5 file.
-
-        Args
-            path (str): String file path (if none, creates a unique path from container hexuid)
-            kwargs: Any additional (picklable) data to store
-        '''
+        # First save the file record
+        with scoped_session() as session:
+            cfile = ContainerFile(name=self.name, description=self.description,
+                                  size=getsizeof(self))
+            session.add(cfile)
+        # Second save the data
         if path is None:
             path = self.hexuid + '.hdf5'
         elif os.path.isdir(path):
@@ -309,12 +236,54 @@ class Container:
                 if hasattr(data, '_set_categories'):
                     data._set_categories()
 
+    @classmethod
+    def load(cls, pkid_or_path=None):
+        '''
+        Load a container object from a persistent location or file path.
+
+        Args:
+            pkid_or_path: Integer pkid corresponding to the container table or file path
+
+        Returns:
+            container: The saved container object
+        '''
+        path = pkid_or_path
+        if not os.path.isfile(pkid_or_path):
+            raise NotImplementedError('Cannot lookup automatic path yet..')
+        kwargs = {}
+        with pd.HDFStore(path) as store:
+            for key in store.keys():
+                if 'kwargs' in key:
+                    kwargs.update(store.get_storer(key).attrs.metadata)
+                else:
+                    name = str(key[1:])
+                    kwargs[name] = store[key]
+        # Process any fields
+        n = [int(key.split('_')[0].replace('FIELD', '')) for key in kwargs.keys() if 'FIELD' in key]
+        if len(n) != 0:
+            n = max(n)
+            to_del = []
+            for i in range(n + 1):
+                search = 'FIELD' + str(i)
+                names = [key for key in kwargs.keys() if search in key]
+                to_del += names
+                arg = names[0].replace(search + '_', '').split('/')[0]
+                field_values = [kwargs[key] for key in names if 'values' in key]
+                dkey = None
+                for name in names:
+                    if 'data' in name:
+                        dkey = name
+                field_data = kwargs[dkey]
+                kwargs[arg] = field_data
+                kwargs[arg + '_values'] = field_values
+            for name in to_del:
+                del kwargs[name]
+        return cls(**kwargs)
+
     def _rel(self, copy=False):
         '''
-        Get all (propagatable) relational and metadata data of the container.
-
-        Warning:
-            This function does not copy primary keys.
+        Get all (propagatable) relational and metadata data of the container (
+        primary keys are not propagatable).
         '''
         rel = {}
         for key, obj in self.__dict__.items():
@@ -373,7 +342,8 @@ class Container:
             del self.__dict__[key]
 
     def __sizeof__(self):
-        return self.info().sum()
+        '''Note that this function must return a Python integer.'''
+        return int(self.info()['size'].sum())
 
     def __init__(self, name=None, description=None, meta=None, **kwargs):
         for key, value in kwargs.items():
@@ -383,7 +353,7 @@ class Container:
         self.meta = meta
         self._traits_need_update = True
         # This will create an instance of the widget class (if present)
-        self._widget = self._widget_class(self) if config['notebook'] else None
+        self._widget = self._widget_class(self) if config['dynamic']['notebook'] else None
 
     def _repr_html_(self):
         if self._widget is not None and self._traits_need_update:
@@ -499,99 +469,3 @@ class TypedMeta(type):
             if isinstance(v, type) and k[0] != '_':
                 clsdict[k] = metacls.create_property(k, v)
         return super().__new__(metacls, name, bases, clsdict)
-
-
-
-
-#    def _slice_with_int_or_string(self, key):
-#        '''
-#        Slices the current container selecting data that matches the key (either on _groupbys or
-#        by row index).
-#        '''
-#        cls = self.__class__
-#        kws = del_keys(self._rel(copy=True))
-#        for name, df in self._data(copy=True).items():
-#            dfcls = df.__class__
-#            if hasattr(df, '_groupbys'):
-#                if len(df._groupbys) > 0:
-#                    grps = df.groupby(df._groupbys)
-#                    selector = sorted(grps.groups.keys())[key]
-#                    kws[name] = dfcls(grps.get_group(selector))
-#            if name not in kws:
-#                selector = None
-#                if isinstance(df, pd.SparseDataFrame) or isinstance(df, pd.SparseSeries):
-#                    kws[name] = df
-#                elif key > len(df.index):
-#                    kws[name] = df
-#                else:
-#                    selector = df.index[key]
-#                    kws[name] = dfcls(df.ix[[selector], :])
-#        return cls(**kws)
-#
-#    def _slice_with_list_or_tuple(self, keys):
-#        '''
-#        Slices the current container selecting data that matches the keys (either on _groupbys or
-#        by row index).
-#        '''
-#        cls = self.__class__
-#        kws = del_keys(self._rel(copy=True))
-#        for name, df in self._data(copy=True).items():
-#            dfcls = df.__class__
-#            if hasattr(df, '_groupbys'):
-#                if len(df._groupbys) > 0:
-#                    grps = df.groupby(df._groupbys)
-#                    srtd = sorted(grps.groups.keys())
-#                    selector = [srtd[key] for key in keys]
-#                    kws[name] = dfcls(pd.concat([grps.get_group(key) for key in selector]))
-#            if name not in kws:
-#                if isinstance(df, pd.SparseDataFrame) or isinstance(df, pd.SparseSeries):
-#                    kws[name] = df
-#                elif max(keys) > len(df.index):
-#                    kws[name] = df
-#                else:
-#                    selector = [df.index[key] for key in keys]
-#                    kws[name] = dfcls(df.ix[selector, :])
-#        return cls(**kws)
-#
-#    def _slice_with_slice(self, slce):
-#        '''
-#        Slices the current container selecting data that matches the range given
-#        by the slice object.
-#        '''
-#        cls = self.__class__
-#        kws = del_keys(self._rel(copy=True))
-#        for name, df in self._data(copy=True).items():
-#            dfcls = df.__class__
-#            if hasattr(df, '_groupbys'):
-#                if len(df._groupbys) > 0:
-#                    grps = df.groupby(df._groupbys)
-#                    srtd = sorted(grps.groups.keys())
-#                    kws[name] = dfcls(pd.concat([grps.get_group(key) for key in srtd[slce]]))
-#            if name not in kws:
-#                if isinstance(df, pd.SparseDataFrame) or isinstance(df, pd.SparseSeries):
-#                    kws[name] = df
-#                elif slce == slice(None):
-#                    kws[name] = df
-#                else:
-#                    keys = df.index.values[slce]
-#                    kws[name] = dfcls(df.iloc[keys, :])
-#        return cls(**kws)
-#
-#    def __getitem__(self, key):
-#        '''
-#        Containers can be sliced in a number of different ways and the slicing
-#        of the data values depends on the characteristics of the individual
-#        data objects (i.e. presence of _groupbys).
-#        '''
-#        if isinstance(key, int):
-#            return self._slice_with_int_or_string(key)
-#        elif isinstance(key, str) and not hasattr(self, key):
-#            return self._slice_with_int_or_string(key)
-#        elif isinstance(key, list) or isinstance(key, tuple):
-#            return self._slice_with_list_or_tuple(key)
-#        elif isinstance(key, slice):
-#            return self._slice_with_slice(key)
-#        elif hasattr(self, key):
-#            return getattr(self, key)
-#        else:
-#            raise KeyError('No selection method for key {} of type {}'.format(key, type(key)))

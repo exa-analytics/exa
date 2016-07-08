@@ -8,12 +8,8 @@ if sys.version_info < (3, 4):
 from setuptools import setup, find_packages
 from exa import __version__
 
-try:
-    import pypandoc
-    description = pypandoc.convert('README.md', 'rst')
-except:
-    with open('README.md') as f:
-        description = f.read()
+with open('README.md') as f:
+    description = f.read()
 with open('requirements.txt') as f:
     dependencies = f.readlines()
 

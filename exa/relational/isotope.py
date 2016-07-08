@@ -15,7 +15,7 @@ from itertools import product
 from sqlalchemy import String, Float
 from sqlalchemy import Column, Integer, String
 from exa._config import config
-from exa.relational.base import BaseMeta, Base, SessionFactory
+from exa.relational.base import BaseMeta, Base, session_factory
 from exa.math.misc.summation import sum_product_pair_f8, sum_product_pair
 
 
@@ -31,13 +31,13 @@ class Meta(BaseMeta):
         '''
         Get an isotope using a string id.
         '''
-        return SessionFactory().query(cls).filter(cls.strid == strid).one()
+        return session_factory().query(cls).filter(cls.strid == strid).one()
 
     def get_by_symbol(cls, symbol):
         '''
         Get an isotope using a string id.
         '''
-        return SessionFactory().query(cls).filter(cls.symbol == symbol).all()
+        return session_factory().query(cls).filter(cls.symbol == symbol).all()
 
     def get_element(cls, name_or_symbol):
         '''

@@ -32,7 +32,12 @@ class LogFormat(logging.Formatter):
     log_formats = {logging.DEBUG: debug_format, logging.INFO: info_format,
                    logging.WARNING: info_format, logging.ERROR: debug_format,
                    logging.CRITICAL: debug_format}
+
     def format(self, record):
+        '''
+        Overwrites the built-in format function (called when sending a message
+        to the logger) with the specific format defined by this class.
+        '''
         fmt = logging.Formatter(self.log_formats[record.levelno])
         j = '\n' + self.spacing
         record.msg = j.join(wrap(record.msg, width=80))
