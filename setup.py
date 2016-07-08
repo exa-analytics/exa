@@ -8,7 +8,7 @@ if sys.version_info < (3, 4):
 from setuptools import setup, find_packages
 from exa import __version__
 
-with open('README.md') as f:
+with open('README.rst') as f:
     description = f.read()
 with open('requirements.txt') as f:
     dependencies = f.readlines()
