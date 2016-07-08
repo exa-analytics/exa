@@ -16,7 +16,7 @@ with open('requirements.txt') as f:
 setup(
     name='exa',
     version=__version__,
-    description='An ecosystem for data processing, analytics, and visualization.'
+    description='An ecosystem for data processing, analytics, and visualization.',
     long_description=description,
     author='Tom Duignan, Alex Marchenko',
     author_email='exa.data.analytics@gmail.com',
