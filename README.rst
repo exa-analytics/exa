@@ -18,6 +18,10 @@
     :target: https://codecov.io/gh/avmarchenko/exa
     :alt: Code Coverage
 
+..  image:: https://img.shields.io/badge/license-Apache%202.0-${1:orange}.svg${2:?style=flat${3:-square}}
+    :target: http://www.apache.org/licenses/LICENSE-2.0
+    :alt: License
+
 Installation
 ##################
 **Note** conda build coming soon!
