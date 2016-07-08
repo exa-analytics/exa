@@ -6,9 +6,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-##################
-`exa`_
-##################
+#############################
+`Exa Analytics Framework`_
+#############################
 *An ecosystem for data processing, analytics, and visualization.*
 
 This package provides a framework for building packages tailored to specific

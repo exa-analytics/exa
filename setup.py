@@ -16,7 +16,8 @@ with open('requirements.txt') as f:
 setup(
     name='exa',
     version=__version__,
-    description=description,
+    description='An ecosystem for data processing, analytics, and visualization.'
+    long_description=description,
     author='Tom Duignan, Alex Marchenko',
     author_email='exa.data.analytics@gmail.com',
     maintainer_email='exa.data.analytics@gmail.com',
@@ -28,5 +29,22 @@ setup(
                                       'exw = exa.__main__:workflow']},
     include_package_data=True,
     install_requires=dependencies,
-    license='Apache License Version 2.0'
+    license='Apache License Version 2.0',
+    keywords='analytics visualization big data'
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+        'Environment :: Web Environment',
+        'Framework :: IPython',
+        'Intended Audience :: Science/Research',
+        'Intended Audience :: Financial and Insurance Industry',
+        'Intended Audience :: Healthcare Industry',
+        'Intended Audience :: Information Technology',
+        'Intended Audience :: Legal Industry',
+        'License :: OSI Approved :: Apache Software License',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Natural Language :: English',
+        'Topic :: Scientific/Engineering'
+    ]
 )
