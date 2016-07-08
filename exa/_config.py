@@ -37,17 +37,7 @@ from exa.utility import mkp
 @atexit.register
 def save():
     '''
-    Save the configuration file to disk on exit.
-    '''
-    del config['dynamic']    # Delete dynamically assigned configuration options
-    with open(config_file, 'w') as f:
-        config.write(f)
-
-
-@atexit.register
-def reset_updaters():
-    '''
-    Reset the updaters for extensions and static db data.
+    Save the configuration file to disk on exit, resetting update flags.
 
     Warning:
         This is a bit unsafe because we are not guarenteed to hit the updating
@@ -55,8 +45,11 @@ def reset_updaters():
         use **mock**), but it is advantageous in the case that multiple packages
         that use exa are running simultaneously.
     '''
+    del config['dynamic']    # Delete dynamically assigned configuration options
     config['db']['update'] = '0'
     config['js']['update'] = '0'
+    with open(config_file, 'w') as f:
+        config.write(f)
 
 
 config = configparser.ConfigParser()              # Application configuration

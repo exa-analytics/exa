@@ -8,7 +8,6 @@ Functionality for using Jupyter notebook extensions to visualize data speficic
 containers.
 '''
 import os
-import atexit
 import shutil
 import numpy as np
 import pandas as pd

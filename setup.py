@@ -15,7 +15,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='exa',
-    version=''.join((__version__, 'dev1')),
+    version=__version__,
     description='An ecosystem for data processing, analytics, and visualization.',
     long_description=description,
     author='Tom Duignan, Alex Marchenko',
@@ -48,3 +48,8 @@ setup(
         'Topic :: Scientific/Engineering'
     ]
 )
+
+from exa._config import config, save
+config['db']['update'] = '1'
+config['js']['update'] = '1'
+save()

@@ -49,5 +49,5 @@ Info
 * :ref:`modindex`
 * :ref:`search`
 
-.. _exa: https://exa-analytics.github.io/
+.. _Exa Analytics Framework: https://exa-analytics.github.io/
 .. _Jupyter notebook: http://jupyter.org/

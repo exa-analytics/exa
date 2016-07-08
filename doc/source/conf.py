@@ -17,7 +17,6 @@
 
 import sys
 import os
-import shlex
 sys.path.insert(0, os.path.abspath(os.sep.join(('..', '..'))))
 from exa import __version__
 
