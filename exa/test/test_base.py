@@ -2,21 +2,21 @@
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 '''
-Base Tests
+Basic Tests
 ##################################
-Tests for :mod:`~exa._setup`, :mod:`~exa.log`, and the suite of modules in the
+Tests for :mod:`~exa._config`, :mod:`~exa.log`, and the suite of modules in the
 test subpackage, :mod:`~exa.test.tester`, etc.
 '''
 from unittest import TestCase
 from configparser import ConfigParser
-from exa.test import UnitTester
 from exa._config import config
+from exa.test import UnitTester
 from exa.log import loggers
 
 
-class TestSetup(UnitTester):
+class TestConfig(UnitTester):
     '''
-    Tests for :mod:`~exa._setup`.
+    Tests for :mod:`~exa._config`.
     '''
     def test_type(self):
         '''
