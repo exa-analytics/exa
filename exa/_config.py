@@ -44,6 +44,21 @@ def save():
         config.write(f)
 
 
+@atexit.register
+def reset_updaters():
+    '''
+    Reset the updaters for extensions and static db data.
+
+    Warning:
+        This is a bit unsafe because we are not guarenteed to hit the updating
+        function during execution (that is what well written tests are for -
+        use **mock**), but it is advantageous in the case that multiple packages
+        that use exa are running simultaneously.
+    '''
+    config['db']['update'] = '0'
+    config['js']['update'] = '0'
+
+
 config = configparser.ConfigParser()              # Application configuration
 if platform.system().lower() == 'windows':        # Get exa's root directory
     home = os.getenv('USERPROFILE')

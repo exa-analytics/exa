@@ -86,9 +86,9 @@ def install_notebook_widgets(pkg_nbext, sys_nbext, verbose=False):
             dest = mkp(sys_nbext, subdir, mk=True)
             install_nbextension(orig, verbose=verbose, overwrite=True, nbextensions_dir=dest)
 
+
 if config['js']['update'] == '1':
     verbose = True if config['log']['level'] != '0' else False
     pkg_nbext = mkp(config['dynamic']['pkgdir'], '_nbextension')
     sys_nbext = mkp(jupyter_data_dir(), 'nbextensions', 'exa')
     install_notebook_widgets(pkg_nbext, sys_nbext, verbose)
-    atexit.register(lambda: config['js']['update'] = '0')

@@ -80,4 +80,3 @@ if config['db']['update'] == '1':
     load_isotope_data()
     load_unit_data()
     load_constant_data()
-    atexit.register(lambda: config['db']['update'] = '0')
