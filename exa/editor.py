@@ -190,6 +190,7 @@ class Editor:
 
         Args:
             string (str): String to search for from the current cursor position.
+            reverse (bool): Search in reverse (default false)
 
         Returns:
             tup (tuple): Tuple of cursor position and line or None if not found
@@ -201,8 +202,9 @@ class Editor:
         for start, stop in [(self.cursor, len(self)), (0, self.cursor)]:
             for i in range(start, stop):
                 if string in self[i]:
-                    self.cursor = i
-                    return (i, self[i])
+                    tup = (i, self[i])
+                    self.cursor = i + 1
+                    return tup
 
     def regex(self, *patterns, line=False):
         '''
@@ -283,14 +285,14 @@ class Editor:
 
     def __init__(self, path_stream_or_string, as_interned=False, nprint=30,
                  name=None, description=None, meta={}):
-        if len(data) < 256 and os.path.exists(data):
-            self._lines = lines_from_file(data, as_interned)
-        elif isinstance(data, list):
-            self._lines = data
-        elif isinstance(data, (TextIOWrapper, StringIO)):
-            self._lines = lines_from_stream(data, as_interned)
-        elif isinstance(data, str):
-            self._lines = lines_from_string(data, as_interned)
+        if len(path_stream_or_string) < 256 and os.path.exists(path_stream_or_string):
+            self._lines = lines_from_file(path_stream_or_string, as_interned)
+        elif isinstance(path_stream_or_string, list):
+            self._lines = path_stream_or_string
+        elif isinstance(path_stream_or_string, (TextIOWrapper, StringIO)):
+            self._lines = lines_from_stream(path_stream_or_string, as_interned)
+        elif isinstance(path_stream_or_string, str):
+            self._lines = lines_from_string(path_stream_or_string, as_interned)
         else:
             raise TypeError('Unknown type for arg data: {}'.format(type(data)))
         self.name = name
@@ -326,17 +328,17 @@ class Editor:
     def __repr__(self):
         r = ''
         nn = len(self)
-        n = len(str(len(lines)))
-        if nn > self._print_count * 2:
-            for i in range(self._print_count):
+        n = len(str(nn))
+        if nn > self.nprint * 2:
+            for i in range(self.nprint):
                 ln = str(i).rjust(n, ' ')
                 r += self._fmt(ln, self._lines[i])
             r += '...\n'.rjust(n, ' ')
-            for i in range(nn - self._print_count, nn):
+            for i in range(nn - self.nprint, nn):
                 ln = str(i).rjust(n, ' ')
                 r += self._fmt(ln, self._lines[i])
         else:
-            for i, line in enumerate(lines):
+            for i, line in enumerate(self):
                 ln = str(i).rjust(n, ' ')
                 r += self._fmt(ln, line)
         return r

@@ -43,10 +43,10 @@ class TestSumProductPair(UnitTester):
         self.assertEqual(len(r), 250000)
         r = sum_product_pair(self.n0, self.n1)
         self.assertEqual(len(r), 50000)
-        self.assertTrue(all(isinstance(rr, np.int64) for rr in r))
+        self.assertTrue(all(isinstance(rr, (np.int32, np.int64)) for rr in r))
         r = sum_product_pair(self.f0, self.f0)
         self.assertEqual(len(r), 250000)
-        self.assertTrue(all(isinstance(rr, np.float64) for rr in r))
+        self.assertTrue(all(isinstance(rr, (np.float32, np.float64)) for rr in r))
 
     def test_sum_product_pair_f8(self):
         '''
