@@ -25,7 +25,6 @@ API
 
     relational/base.rst
     relational/cms.rst
-    relational/aux.rst
     relational/tests.rst
 
 
