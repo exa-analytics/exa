@@ -31,13 +31,13 @@ exploration.
     :maxdepth: 2
     :caption: User Guide
 
+    user/overview.rst
 
 .. toctree::
     :maxdepth: 2
     :caption: Contributor Guide
 
     dev/overview.rst
-
 
 
 ##################

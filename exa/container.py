@@ -225,9 +225,8 @@ class Container:
                 elif isinstance(data, SparseDataFrame):
                     store[name] = pd.SparseDataFrame(data)
                 else:
-                    if hasattr(data, 'dtype'):
-                        if isinstance(data.dtype, pd.types.dtypes.CategoricalDtype):
-                            data = data.astype('O')
+                    if hasattr(data, 'dtype') and isinstance(data.dtype, pd.types.dtypes.CategoricalDtype):
+                        data = data.astype('O')
                     else:
                         for col in data:
                             if isinstance(data[col].dtype, pd.types.dtypes.CategoricalDtype):
@@ -288,9 +287,8 @@ class Container:
         rel = {}
         for key, obj in self.__dict__.items():
             if not isinstance(obj, (pd.Series, pd.DataFrame)) and not key.startswith('_'):
-                if copy:
-                    if 'id' not in key:
-                        rel[key] = deepcopy(obj)
+                if copy and 'id' not in key:
+                    rel[key] = deepcopy(obj)
                 else:
                     rel[key] = obj
         return rel

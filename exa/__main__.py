@@ -11,7 +11,7 @@ built on top of the Jupyter notebook environment, run "exa" on the command line.
 import subprocess
 import unittest
 import doctest
-from exa._setup import config
+from exa._config import config
 
 
 def notebook():

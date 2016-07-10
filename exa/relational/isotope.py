@@ -147,13 +147,13 @@ def symbol_to_element_mass():
     return s
 
 
-def symbol_to_radius(isotopedf):
+def symbol_to_radius():
     '''Mapper from isotope symbol to covalent radius.'''
     df = Isotope.to_frame().drop_duplicates('symbol')
     return df.set_index('symbol')['radius']
 
 
-def symbol_to_color(isotopedf):
+def symbol_to_color():
     '''Mapper from isotope symbol to color.'''
     df = Isotope.to_frame().drop_duplicates('symbol')
     return df.set_index('symbol')['color']

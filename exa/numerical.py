@@ -28,7 +28,8 @@ Finally, the objects contained in this module provide convenience methods for
 handling `categorical data`_.
 
 See Also:
-    :mod:`~exa.container`, :mod:`~exa.widget`
+    For information about traits and how they allow enable dynamic visualizations
+    see :mod:`~exa.widget`. For usage of numerical objects see :mod:`~exa.container`.
 
 .. _categorical data: http://pandas-docs.github.io/pandas-docs-travis/categorical.html
 '''
@@ -70,6 +71,20 @@ class Numerical:
 class Series(Numerical, pd.Series):
     '''
     Trait supporting analogue of :class:`~pandas.Series`.
+
+    .. code-block:: Python
+
+        import numpy as np
+
+        class MySeries(Series):
+            """Example usage of the exa.Series object."""
+            _sname = 'data'
+            _iname = 'data_index'
+            _precision = 2
+
+        s = MySeries(np.random.rand(10**5))
+        traits = s._update_traits()
+        type(traits)    # dict containing "myseries_values" as a Unicode trait
     '''
     _copy = pd.Series.copy
     # These attributes should be set when subclassing Series
@@ -116,13 +131,7 @@ class Series(Numerical, pd.Series):
 
 
 class DataFrame(Numerical, pd.DataFrame):
-    '''
-    Trait supporting analogue of :class:`~pandas.DataFrame`.
-
-    Note:
-        Columns, indices, etc. are only enforced if the dataframe has non-zero
-        length.
-    '''
+    '''Trait supporting analogue of :class:`~pandas.DataFrame`.'''
     _copy = pd.DataFrame.copy
     _groupbys = []      # Column names by which to group the data
     _indices = []       # Required index names

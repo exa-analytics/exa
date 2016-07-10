@@ -5,7 +5,11 @@
 Widget
 ##################
 Functionality for using Jupyter notebook extensions to visualize data speficic
-containers.
+containers. This module requires the infrastructure provided by the `traitlets`_
+and `ipywidgets`_ packages.
+
+.. _traitlets: https://traitlets.readthedocs.io/en/stable/
+.. _ipywidgets: https://ipywidgets.readthedocs.io/en/latest/
 '''
 import os
 import shutil
@@ -37,9 +41,6 @@ class Widget(DOMWidget):
         typ = data['type']
         content = data['content']
         # Logic to handle various types of messages...
-
-    def _repr_html_(self):
-        return self._ipython_display_()
 
 
 class ContainerWidget(Widget):

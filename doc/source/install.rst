@@ -55,8 +55,8 @@ Manually...
 
 What's Next?
 #####################
-- Users should check out the :ref:`exa-user-guide`
-- Contributors should check out the :ref:`exa-dev-guide`
+- Users should check out the :ref:`exa-user-overview`
+- Contributors should check out the :ref:`exa-dev-overview`
 - The :ref:`exa-api` contains usage and extension examples, and developer notes
 
 

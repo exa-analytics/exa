@@ -5,3 +5,12 @@
 Tests for :mod:`~exa.widget`
 ################################
 '''
+from exa.test import UnitTester
+from exa.widget import Widget, ContainerWidget
+
+
+class TestWidget(UnitTester):
+    '''
+    Test for the :class:`~exa.editor.Editor` are performed on the editor's
+    source code itself.
+    '''

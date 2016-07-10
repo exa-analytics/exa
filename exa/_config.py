@@ -87,6 +87,14 @@ try:
 except ImportError:
     pass
 config['dynamic']['numba'] = nb
+config['dynamic']['cuda'] = 'false'
+if config['dynamic']['numba'] == 'true':
+    try:
+        from numba import cuda
+        if len(cuda.devices.gpus) > 0:
+            config['dynamic']['cuda'] = 'true'
+    except:
+        pass
 config['dynamic']['notebook'] = 'false'
 try:
     cfg = get_ipython().config

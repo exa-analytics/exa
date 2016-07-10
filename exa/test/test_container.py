@@ -2,11 +2,11 @@
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 '''
-Comprehensive Test
+Tests for :mod:`~exa.container`
 ##################################
-This multifaceted test checks the ability of the base package to edit data
-and create a meaningful container object using the generic functionality
-provided by exa.
+The :class:`~exa.container.Container` object depends in a complex manner on
+much of the functionality of the framework; especially :mod:`~exa.numerical`
+and :mod:`~exa.widget`.
 '''
 #from io import StringIO
 #from urllib.error import HTTPError
@@ -25,41 +25,6 @@ provided by exa.
 #from exa.test import UnitTester
 #
 #
-#class TestSeries0(Series):
-#    '''
-#    Series object where the index name is always "idx".
-#    '''
-#    _precision = 2
-#    _sname = 's0'
-#
-#
-#class TestSeries1(Series):
-#    '''
-#    Series object where the index name is always "idx".
-#    '''
-#    _precision = 2
-#    _sname = 's1'
-#    _iname = 's1idx'
-#    _index_trait = True
-#    _stype = str
-#    _itype = np.int64
-#
-#
-#class TestDataFrame(DataFrame):
-#    '''
-#    Test dataframe object tracks 3D objects of a given shape at
-#    a given origin.
-#    '''
-#    _groupbys = ['group']
-#    _indices = ['obj']
-#    _columns = ['x', 'y', 'z', 'typ']
-#    _traits = ['x', 'y', 'z']
-#    _categories = {'group': np.int64, 'typ': str}
-#    _precision = {'x': 2, 'y': 2, 'z': 2}
-#
-#
-#class TestField(Field3D):
-#    _vprecision = 6
 #
 #
 #class TestContainerTypes(TypedMeta):
