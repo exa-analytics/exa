@@ -143,7 +143,7 @@ class DataFrame(NDBase, pd.DataFrame):
                 elif groups:                              # Else send grouped traits
                     trait = Unicode(groups.apply(lambda g: g[name].values).to_json(orient='values', double_precision=self._precision))
                 else:                                     # Else send flat values
-                    trait = self[name].to_json(orient='values', double_precision=self._precision)
+                    trait = Unicode(self[name].to_json(orient='values', double_precision=self._precision))
                 traits[trait_name] = trait
                 traits[trait_name].tag(sync=True)
             elif name == self.index.names[0]:             # Otherwise, if index, send flat values

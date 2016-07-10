@@ -56,7 +56,10 @@ define([
                 view_self.app.app3d.animate();
                 view_self.app.app3d.controls.handleResize();
             });
-            this.view.send({'type': 'message', 'app': 'TestApp', 'content': 'True', 'data': 'None'});
+            this.view.send({'type': 'message',
+                            'app': 'TestApp',
+                            'content': 'True',
+                            'data': 'test app message'});
         };
 
         create_gui() {
@@ -69,7 +72,7 @@ define([
             this.gui = new ContainerGUI(this.view.gui_width);
 
             // GUI levels are the heirarchy of folders in dat gui 0: top level
-            this.level0 = {
+            this.top = {
                 'clear': function() {
                     self.app3d.remove_meshes(self.meshes);
                 },
@@ -84,133 +87,73 @@ define([
                     self.meshes = self.app3d.test_mesh(true);
                 },
             };
-            this.level0.clear_button = this.gui.add(this.level0, 'clear');
-            this.level0.test_mesh_button = this.gui.add(this.level0, 'test mesh');
-            this.level0.test_phong_button = this.gui.add(this.level0, 'test phong');
+            this.top.clear_button = this.gui.add(this.top, 'clear');
+            this.top.test_mesh_button = this.gui.add(this.top, 'test mesh');
+            this.top.test_phong_button = this.gui.add(this.top, 'test phong');
 
-            this.fields = this.gui.addFolder('fields');
-            this.fields['field type'] = '';
-            this.fields['dx'] = 0.5;
-            this.fields['dy'] = 0.5;
-            this.fields['dz'] = 0.5;
-            this.fields['spacing'] = 0.5;
-            this.fields['xmin'] = -2.0;
-            this.fields['ymin'] = -2.0;
-            this.fields['zmin'] = -2.0;
-            this.fields['xmax'] = 2.0;
-            this.fields['ymax'] = 2.0;
-            this.fields['zmax'] = 2.0;
-            this.fields['isovalue'] = 0.50;
-            this.fields['dual'] = false;
-//            var funcs = num.function_list_3d;
-  //          funcs.push('None');
-            this.fields['field_type_dropdown'] = this.fields.add(this.fields, 'field type', num.function_list_3d);
-            this.fields['isovalue_slider'] = this.fields.add(this.fields, 'isovalue', 0.0, 2.0);
-            this.fields['spacing_slider'] = this.fields.add(this.fields, 'spacing', 0.2, 1);
-            this.fields['dual_checkbox'] = this.fields.add(this.fields, 'dual');
-            /*this.fields['dx_slider'] = this.fields.add(this.fields, 'dx', 0.05, 1.0);
-            this.fields['dy_slider'] = this.fields.add(this.fields, 'dy', 0.05, 1.0);
-            this.fields['dz_slider'] = this.fields.add(this.fields, 'dz', 0.05, 1.0);*/
-            /*this.fields['xmin_slider'] = this.fields.add(this.fields, 'xmin', -5.0, -2.0);
-            this.fields['xmax_slider'] = this.fields.add(this.fields, 'xmax',  2.0,  5.0);
-            this.fields['ymin_slider'] = this.fields.add(this.fields, 'ymin', -5.0, -2.0);
-            this.fields['ymax_slider'] = this.fields.add(this.fields, 'ymax',  2.0,  5.0);
-            this.fields['zmin_slider'] = this.fields.add(this.fields, 'zmin', -5.0, -2.0);
-            this.fields['zmax_slider'] = this.fields.add(this.fields, 'zmax',  2.0,  5.0);*/
-            this.fields.dimensions = {
-                'xmin': this.fields.xmin,
-                'xmax': this.fields.xmax,
-                'ymin': this.fields.ymin,
-                'ymax': this.fields.ymax,
-                'zmin': this.fields.zmin,
-                'zmax': this.fields.zmax,
-                'dx': this.fields.dx,
-                'dy': this.fields.dy,
-                'dz': this.fields.dz
+            this.fields = {
+                'nx': 13, 'ny': 13, 'nz': 13,
+                'isovalue': 1.0, 'boxsize': 3,
+                'ox': -3.0, 'oy': -3.0, 'oz': -3.0,
+                'fx':  3.0, 'fy':  3.0, 'fz':  3.0,
+                'dxi': 0.5, 'dyj': 0.5, 'dzk': 0.5,
+                'dxj': 0.0, 'dyi': 0.0, 'dzi': 0.0,
+                'dxk': 0.0, 'dyk': 0.0, 'dzj': 0.0,
+                'field type': null
             };
-
+            this.fields['folder'] = this.gui.addFolder('fields');
+            this.fields['isovalue_slider'] = this.fields.folder.add(this.fields, 'isovalue', 0.1, 10.0);
+            this.fields['field_type_dropdown'] = this.fields.folder.add(this.fields, 'field type', num.function_list_3d);
+            this.fields['boxsize_slider'] = this.fields.folder.add(this.fields, 'boxsize', 3, 5);
+            this.fields['nx_slider'] = this.fields.folder.add(this.fields, 'nx').min(5).max(25).step(1);
+            this.fields['ny_slider'] = this.fields.folder.add(this.fields, 'ny').min(5).max(25).step(1);
+            this.fields['nz_slider'] = this.fields.folder.add(this.fields, 'nz').min(5).max(25).step(1);
             this.fields.field_type_dropdown.onFinishChange(function(field_type) {
-                self.app3d.remove_meshes(self.meshes);
                 self.fields['field type'] = field_type;
-                self.fields.field = new field.ScalarField(self.fields.dimensions, num[field_type]);
+                self.fields.field = new field.ScalarField(self.fields, num[field_type]);
                 self.render_field();
             });
-
-            this.fields.spacing_slider.onFinishChange(function(spacing) {
-                self.app3d.remove_meshes(self.meshes);
-                self.fields.dx = spacing;
-                self.fields.dy = spacing;
-                self.fields.dz = spacing;
-                self.fields.field.new_dr({'dx': spacing});
-                self.fields.field.new_dr({'dy': spacing});
-                self.fields.field.new_dr({'dz': spacing});
-                self.render_field();
-            });
-
-            this.fields.dual_checkbox.onChange(function(value) {
-                self.fields.dual = value;
-                self.fields.sides = self.fields.dual + 1;    //e.g. true + 1 === 2
-                self.render_field();
-            });
-
             this.fields.isovalue_slider.onFinishChange(function(value) {
                 self.fields.isovalue = value;
                 self.render_field();
             });
-/*
-            this.fields.dx_slider.onFinishChange(function(value) {
-                self.fields.dx = value;
-                self.fields.field.new_dr({'dx': value});
+            this.fields.boxsize_slider.onFinishChange(function(value) {
+                self.fields.ox = -value;
+                self.fields.fx = value;
+                self.fields.oy = -value;
+                self.fields.fy = value;
+                self.fields.oz = -value;
+                self.fields.fz = value;
+                self.fields.field.x = num.linspace(self.fields.ox, self.fields.fx, self.fields.nx);
+                self.fields.field.y = num.linspace(self.fields.oy, self.fields.fy, self.fields.ny);
+                self.fields.field.z = num.linspace(self.fields.oz, self.fields.fz, self.fields.nz);
+                self.fields.field.update();
                 self.render_field();
             });
-
-            this.fields.dy_slider.onFinishChange(function(value) {
-                self.fields.dy = value;
-                self.fields.field.new_dr({'dy': value});
+            this.fields.nx_slider.onFinishChange(function(value) {
+                self.fields.nx = value;
+                self.fields.field.x = num.linspace(self.fields.ox,
+                                                   self.fields.fx,
+                                                   self.fields.nx);
+                self.fields.field.update();
                 self.render_field();
             });
-
-            this.fields.dz_slider.onFinishChange(function(value) {
-                self.fields.dz = value;
-                self.fields.field.new_dr({'dz': value});
-                self.render_field();
-            });*/
-            /*
-            this.fields.xmin_slider.onFinishChange(function(value) {
-                self.fields.xmin = value;
-                self.fields.field.new_limits({'xmin': value});
+            this.fields.ny_slider.onFinishChange(function(value) {
+                self.fields.ny = value;
+                self.fields.field.y = num.linspace(self.fields.oy,
+                                                   self.fields.fy,
+                                                   self.fields.ny);
+                self.fields.field.update();
                 self.render_field();
             });
-
-            this.fields.ymin_slider.onFinishChange(function(value) {
-                self.fields.ymin = value;
-                self.fields.field.new_limits({'ymin': value});
+            this.fields.nz_slider.onFinishChange(function(value) {
+                self.fields.nz = value;
+                self.fields.field.z = num.linspace(self.fields.oz,
+                                                   self.fields.fz,
+                                                   self.fields.nz);
+                self.fields.field.update();
                 self.render_field();
             });
-
-            this.fields.zmin_slider.onFinishChange(function(value) {
-                self.fields.zmin = value;
-                self.fields.field.new_limits({'zmin': value});
-                self.render_field();
-            });
-
-            this.fields.xmax_slider.onFinishChange(function(value) {
-                self.fields.xmax = value;
-                self.fields.field.new_limits({'xmax': value});
-                self.render_field();
-            });
-
-            this.fields.ymax_slider.onFinishChange(function(value) {
-                self.fields.ymax = value;
-                self.fields.field.new_limits({'ymax': value});
-                self.render_field();
-            });
-
-            this.fields.zmax_slider.onFinishChange(function(value) {
-                self.fields.zmax = value;
-                self.fields.field.new_limits({'zmax': value});
-                self.render_field();
-            });*/
         };
 
         resize() {
@@ -219,8 +162,12 @@ define([
 
         render_field() {
             this.app3d.remove_meshes(this.meshes);
+            console.log('rendering field with arrays array dimensions');
+            console.log('x length', this.fields.field.x.length);
+            console.log('y length', this.fields.field.y.length);
+            console.log('z length', this.fields.field.z.length);
             this.meshes = this.app3d.add_scalar_field(this.fields.field, this.fields.isovalue, this.fields.sides);
-            this.app3d.set_camera_from_mesh(this.meshes[0]);
+            this.app3d.set_camera({'x': 5.0, 'y': 5.0, 'z': 5.0});
         };
     };
 

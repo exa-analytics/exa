@@ -24,6 +24,29 @@ define([], function() {
         console.log('NotImplementedError')
     };
 
+    var minspace = function(min, space, n) {
+        /*"""
+        minspace
+        ================
+        Creates a linearly spaced array with knowledge of the length,
+        origin and spacing of the array.
+
+        Args:
+            min (number): origin
+            space (number): spacing
+            n (number): length of array
+
+        */
+        var n1 = n - 1;
+        var fol = min;
+        var arr = [min];
+        for (var i = 0; i < n1; i++) {
+            fol += space;
+            arr.push(fol);
+        };
+        return new Float32Array(arr);
+    };
+
     var linspace = function(min, max, n) {
         /*"""
         linspace
@@ -112,7 +135,7 @@ define([], function() {
         sphere
         ================
         */
-        return 0.5 * (x * x + y * y + z * z)
+        return (x * x + y * y + z * z) //* Math.exp( -0.5 * (x * x + y * y + z * z));
     }
 
     var torus = function(x, y, z, c) {
@@ -126,18 +149,57 @@ define([], function() {
         return  Math.pow(c - Math.sqrt(x * x + y * y), 2) + z * z;
     }
 
-    var None = function(x, y, z) {
-        return 0
+    var compute_field = function(xs, ys, zs, n, func) {
+        /*"""
+        compute_field
+        --------------
+        */
+        console.log('computing field...');
+        var values = new Float32Array(n);
+        var norm = 0;
+        var dv = (xs[1] - xs[0]) * (ys[1] - ys[0]) * (zs[1] - zs[0]);
+        var i = 0;
+        for (var x of xs) {
+            for (var y of ys) {
+                for (var z of zs) {
+                    var tmp = func(x, y, z);
+                    values[i] = tmp;
+                    norm += (tmp * tmp * dv);
+                    i += 1;
+                };
+            };
+        };
+        norm = 1 / Math.pow(norm, (1/2));
+        return {'values': values, 'norm': norm}
     };
+
+    var gen_array = function(nr, or, dx, dy, dz) {
+        /*"""
+        gen_array
+        =============
+        Generates discrete spatial points in space. Used to generate
+        x, y, z spatial values for the cube field. In most cases, for the x
+        basis vector, dy and dz are zero ("cube-like").
+        */
+        var r = new Float32Array(nr);
+        r[0] = or;
+        for (var i=1; i<nr; i++) {
+            r[i] = r[i-1] + dx + dy + dz;
+        };
+        return r;
+    };
+
 
     return {
         meshgrid3d: meshgrid3d,
         linspace: linspace,
+        minspace: minspace,
         arange: arange,
         sphere: sphere,
         ellipsoid: ellipsoid,
         torus: torus,
-        None: None,
-        function_list_3d: ['None', 'sphere', 'torus', 'ellipsoid'],
+        gen_array: gen_array,
+        compute_field: compute_field,
+        function_list_3d: [null, 'sphere', 'torus', 'ellipsoid'],
     };
 });

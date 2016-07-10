@@ -208,7 +208,7 @@ class Editor:
         if start: self._next_pos = start
         tup = ()
         lines = self._lines[self._next_pos:stop]
-        cnt = start
+        cnt = start + 1
         for i, line in enumerate(lines):
             if string in line:
                 tup = (self._next_pos, line)

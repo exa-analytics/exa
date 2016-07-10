@@ -429,7 +429,16 @@ define([
                     };
                 };
             };
-            for (var key of ['ox', 'oy', 'oz', 'rx', 'ry', 'rz']) {
+            for (var key of ['rx', 'ry', 'rz']) {
+                if (!kwargs.hasOwnProperty(key)) {
+                    kwargs[key] = 0.5;
+                } else {
+                    if (kwargs[key] === undefined || isNaN(kwargs[key]) || !isFinite(kwargs[key])) {
+                        kwargs[key] = 0.5;
+                    };
+                };
+            };
+            for (var key of ['ox', 'oy', 'oz']) {
                 if (!kwargs.hasOwnProperty(key)) {
                     kwargs[key] = 0.0;
                 } else {
@@ -438,6 +447,7 @@ define([
                     };
                 };
             };
+
             var x = kwargs['x'] + kwargs['rx'];
             var y = kwargs['y'] + kwargs['ry'];
             var z = kwargs['z'] + kwargs['rz'];
@@ -488,6 +498,8 @@ define([
             mesh.geometry.computeBoundingBox();
             var bbox = mesh.geometry.boundingBox;
             var xyz = bbox.max;
+            console.log(bbox);
+            console.log(xyz);
             xyz.x *= 1.2;
             xyz.x += rx;
             xyz.y *= 1.2;
@@ -496,6 +508,7 @@ define([
             xyz.z += rz;
             var kwargs = {'x': xyz.x, 'y': xyz.y, 'z': xyz.z,
                           'ox': oxyz[0], 'oy': oxyz[1], 'oz': oxyz[2]};
+            console.log(kwargs);
             this.set_camera(kwargs);
         };
 
@@ -569,7 +582,6 @@ define([
         };
 
         march_cubes1(field, isovalue) {
-            console.log(field);
             /*"""
             march_cubes1
             ------------------------
@@ -611,6 +623,8 @@ define([
                 **field.js**
             */
             console.log('march_cubes1');
+            console.log(Math.min(...field.values));
+            console.log(Math.max(...field.values));
             var nx = field.nx;
             var ny = field.ny;
             var nz = field.nz;
