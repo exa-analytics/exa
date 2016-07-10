@@ -8,7 +8,7 @@ API
 #####################################
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
     :caption: Base
 
     configuration.rst
@@ -18,9 +18,8 @@ API
     tester.rst
     tests.rst
 
-
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
     :caption: Relational
 
     relational/base.rst
@@ -30,7 +29,7 @@ API
 
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
     :caption: Distributed
 
     distributed/base.rst
