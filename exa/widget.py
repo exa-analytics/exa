@@ -42,6 +42,9 @@ class Widget(DOMWidget):
         content = data['content']
         # Logic to handle various types of messages...
 
+    def _repr_html_(self):
+        self._ipython_display_()
+
 
 class ContainerWidget(Widget):
     '''
