@@ -82,3 +82,4 @@ class TestEditor(UnitTester):
         self.assertTrue(formatted[0] == 'replaced')
         del self.fl[0]
         self.assertTrue(len(self.fl) == 4)
+

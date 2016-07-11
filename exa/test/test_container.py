@@ -16,7 +16,7 @@ from exa.numerical import DataFrame, Series
 
 class DummyDataFrame(DataFrame):
     _indices = ['index']
-    _groupbys = ['group']
+    #_groupbys = ['group']
     _categories = {'cat': str}
     _columns = ['x', 'y', 'z', 'cat', 'group']
 
@@ -49,7 +49,7 @@ class TestContainer(UnitTester):
         self.container.s0 = DummySeries(y)
         self.container.s1 = DummySeries(cat, dtype='category')
         self.container.df = pd.DataFrame.from_dict({'x': x, 'y': y, 'z': z, 'cat': cat, 'group': group})
-        self.container._update_traits()
+#        self.container._update_traits()
 
     def test_attributes(self):
         self.assertIsInstance(self.container.s0, DummySeries)
