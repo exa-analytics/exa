@@ -581,7 +581,6 @@ define([
         };
 
         march_cubes1(field, isovalue) {
-            console.log(field);
             /*"""
             march_cubes1
             ------------------------
@@ -623,6 +622,8 @@ define([
                 **field.js**
             */
             console.log('march_cubes1');
+            console.log(Math.min(...field.values));
+            console.log(Math.max(...field.values));
             var nx = field.nx;
             var ny = field.ny;
             var nz = field.nz;
