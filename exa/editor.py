@@ -53,6 +53,7 @@ class Editor:
         nrpint (int): Number of lines to display when printing
         cursor (int): Line number position of the cusor (see :func:`~exa.editor.Editor.find_next_any` and :func:`~exa.editor.Editor.find_next_string`)
     '''
+    _getter_prefix = 'parse'
     _fmt = '{0}: {1}\n'.format   # Format for printing lines (see __repr__)
 
     def write(self, path=None, *args, **kwargs):
