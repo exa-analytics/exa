@@ -56,7 +56,7 @@ class TestContainer(UnitTester):
         self.assertIsInstance(self.container.s1.dtype, pd.types.dtypes.CategoricalDtype) 
         self.assertIsInstance(self.container.df, DummyDataFrame)
 
-    def test_widget(self):
-        self.assertTrue(hasattr(self.container, '_widget'))
-        self.assertEqual(self.container._widget.df_x, '[[0,0],[0,0,0]]')
+    #def test_widget(self):
+    #    self.assertTrue(hasattr(self.container, '_widget'))
+    #    self.assertEqual(self.container._widget.df_x, '[[0,0],[0,0,0]]')
 
