@@ -305,8 +305,10 @@ class Editor:
     def __delitem__(self, line):
         del self._lines[line]     # "line" is the line number minus one
 
-    def __getitem__(self, line):
-        return self._lines[line]
+    def __getitem__(self, key):
+        if isinstance(key, str):
+            return getattr(self, key)
+        return self._lines[key]
 
     def __setitem__(self, line, value):
         self._lines[line] = value

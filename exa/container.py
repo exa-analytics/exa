@@ -343,6 +343,11 @@ class Container:
         '''Note that this function must return a Python integer.'''
         return int(self.info()['size'].sum())
 
+    def __getitem__(self, key):
+        if isinstance(key, str):
+            return getattr(self, key)
+        raise KeyError()
+
     def __init__(self, name=None, description=None, meta=None, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)

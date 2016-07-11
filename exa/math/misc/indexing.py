@@ -39,6 +39,43 @@ def starts_count(starts, count):
     return (outer, inner, index)
 
 
+def starts_counts(starts, counts):
+    '''
+    Generate a pseudo-sequential array from initial values and counts.
+
+    >>> import numpy
+    >>> starts = numpy.array([0, 4], dtype=numpy.int64)
+    >>> counts = numpy.array([4, 5], dtype=numpy.int64)
+    >>> values = arange1(starts, counts)
+    >>> values[0]
+    array([0, 0, 0, 0, 1, 1, 1, 1, 1])
+    >>> values[1]
+    array([0, 1, 2, 3, 0, 1, 2, 3, 4])
+    >>> values[2]
+    array([0, 1, 2, 3, 4, 5, 6, 7, 8])
+
+    Args:
+        starts (array): Starting points for array generation
+        counts (array): Values by which to increment from each starting point
+
+    Returns:
+        arrays (tuple): First index, second index, and indices to select, respectively
+    '''
+    n = np.sum(counts)
+    i_idx = np.empty((n, ), dtype=np.int64)
+    j_idx = i_idx.copy()
+    values = j_idx.copy()
+    h = 0
+    for i, start in enumerate(starts):
+        stop = start + counts[i]
+        for j, value in enumerate(range(start, stop)):
+            i_idx[h] = i
+            j_idx[h] = j
+            values[h] = value
+            h += 1
+    return (i_idx, j_idx, values)
+
 if config['dynamic']['numba'] == 'true':
     from numba import jit
     starts_count = jit(nopython=True, cache=True, nogil=True)(starts_count)
+    starts_counts = jit(nopython=True, cache=True, nogil=True)(starts_counts)
