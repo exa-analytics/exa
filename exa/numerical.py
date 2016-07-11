@@ -1,35 +1,39 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Distributed under the terms of the Apache License 2.0
 '''
-Trait Support for Data Structures
+Trait Supporting Data Objects
 ###################################
-The :class:`~exa.numerical.DataFrame` inherits :class:`~pandas.DataFrame` and
-behaves just like it, but it provides special methods for extracting trait
-data from the frame. The trait data is used by :class:`~exa.widget.ContainerWidget`
-(and its subclasses) and the web gui to generate interactive data visualizations.
-Because these dataframes have context about their data, they also provide
-convience methods for in memory data compression (using `categories`_).
+The :class:`~exa.numerical.DataFrame` is an extension of the
+:class:`~pandas.DataFrame` object. It provides additional methods for creating
+traits.
 
-Another feature of these dataframes is that the _groupbys parameter provides a
-convenient algorithm for container slicing and concatenation/joining/merging.
-These types of operations are non-trivial when dealing with dataframes whose
-contents may be related (i.e. relational dataframes) so care must be taken to
-ensure no mangling of indices is performed. See the container module for more
-info.
+Note:
+    For further information on traits, see :mod:`~exa.widget`.
 
-Enumerated are some conventions used by trait supporting data objects:
-- use **_precision** to specify precision of floats sent to JS
-- use **_traits** to specify (possible) column names that are sent to JS
-- use **_columns** to specify required columns
-- use **_groupbys** to specify columns on which to group (typically these columns are foreign keys to another frame with an index of the same name as the column name)
-- use **_categories** to specify (possible) column names that are category dtype ({name: normal_type})
-- an index of -1 means not applicable (or not possible to compute)
+Additionally, :class:`~exa.numerical.DataFrame` and related objects (e.g
+:class:`~exa.numerical.Field`) provide attributes for defining their index and
+column names. This has the effect of creating relationships between different
+dataframes. They can be grouped into three types:
+
+1. index name (df1) matches index name (df2)
+2. index name (df1) matches column name (df2)
+3. column name (df1) matches column name (df2)
+
+Note:
+    These types correspond to one to one, one to many, and many to many relational
+    types, respectively.
+
+Finally, the objects contained in this module provide convenience methods for
+handling `categorical data`_.
 
 See Also:
-    Modules :mod:`~exa.container` and :mod:`~exa.widget` may provide context
-    and usage examples for these classes.
+    For information about traits and how they allow enable dynamic visualizations
+    see :mod:`~exa.widget`. For usage of numerical objects see :mod:`~exa.container`.
 
-.. _categories: http://pandas-docs.github.io/pandas-docs-travis/categorical.html
+.. _categorical data: http://pandas-docs.github.io/pandas-docs-travis/categorical.html
 '''
+import warnings
 import numpy as np
 import pandas as pd
 from numbers import Integral, Real
@@ -37,29 +41,23 @@ from traitlets import Unicode, Integer, Float
 from exa.error import RequiredIndexError, RequiredColumnError
 
 
-class NDBase:
+class Numerical:
     '''
-    Base class for trait supporting dataframe/series objects.
+    Base class for :class:`~exa.numerical.Series`, :class:`~exa.numerical.DataFrame`,
+    and :class:`~exa.numerical.Field` objects, providing default trait
+    functionality, shortened string representation, and in memory copying support.
     '''
-    _precision = 3      # Default number of decimal places passed by traits
-
     def copy(self, *args, **kwargs):
         '''
-        Custom copy function returns same type
+        Create a copy without mangling the (class) type.
         '''
         return self.__class__(self._copy(*args, **kwargs))
 
-    def _update_custom_traits(self):
-        '''
-        Placeholder for custom trait creation (e.g. when multiple columns form a single trait).
-        '''
+    def _custom_traits(self):
         return {}
 
     def _update_traits(self):
-        '''
-        Empty default traits.
-        '''
-        traits = self._update_custom_traits()
+        traits = self._custom_traits()
         return traits
 
     def __repr__(self):
@@ -70,27 +68,77 @@ class NDBase:
         return self.__repr__()
 
 
-class Series(NDBase, pd.Series):
+class Series(Numerical, pd.Series):
     '''
     Trait supporting analogue of :class:`~pandas.Series`.
+
+    .. code-block:: Python
+
+        import numpy as np
+
+        class MySeries(Series):
+            """Example usage of the exa.Series object."""
+            _sname = 'data'
+            _iname = 'data_index'
+            _precision = 2
+
+        s = MySeries(np.random.rand(10**5))
+        traits = s._update_traits()
+        type(traits)    # dict containing "myseries_values" as a Unicode trait
     '''
     _copy = pd.Series.copy
+    # These attributes should be set when subclassing Series
+    _sname = None           # Series may have a required name
+    _iname = None           # Series may have a required index name
+    _stype = None           # Series may have a required value type
+    _itype = None           # Series may have a required index type
+    _precision = None       # Precision for JSON values
+    _index_trait = False    # Set to true if the index should be a trait
+
+    def _update_traits(self):
+        '''
+        By default, the trait representation is a unicode string of the values.
+        Series traits always have the format:
+
+        - values: "classnamelowercase_name_values"
+        - index: "classnamelowercase_name_index"
+        '''
+        traits = self._custom_traits()
+        s = self
+        if isinstance(self.dtype, pd.types.dtypes.CategoricalDtype) and self._stype is not None:
+            s = self.astype(self._stype)
+        prefix = '_'.join((self.__class__.__name__.lower(), self._name))
+        p = 10 if self._precision is None else self._precision
+        values = s.to_json(orient='values', double_precision=p)
+        up = {prefix + '_values': Unicode(values).tag(sync=True)}
+        if self._index_trait:
+            indices = pd.Series(s.index).to_json(orient='values')
+            up[prefix + '_index'] = Unicode(indices).tag(sync=True)
+        traits.update(up)
+        return traits
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Auto rename depending on class attributes (see above)
+        if self._sname is not None and self.name != self._sname:
+            if self.name is not None:
+                warnings.warn('Series name changed')
+            self.name = self._sname
+        if self._iname is not None and self.index.name != self._iname:
+            if self.index.name is not None:
+                warnings.warn('Series index name changed')
+            self.index.name = self._iname
 
 
-class DataFrame(NDBase, pd.DataFrame):
-    '''
-    Trait supporting analogue of :class:`~pandas.DataFrame`.
-
-    Note:
-        Columns, indices, etc. are only enforced if the dataframe has non-zero
-        length.
-    '''
+class DataFrame(Numerical, pd.DataFrame):
+    '''Trait supporting analogue of :class:`~pandas.DataFrame`.'''
     _copy = pd.DataFrame.copy
     _groupbys = []      # Column names by which to group the data
-    _indices = []       # Required index names (typically single valued list)
+    _indices = []       # Required index names
     _columns = []       # Required column entries
-    _categories = {}    # Column name, original type pairs ('label', int) that can be compressed to a category
     _traits = []        # Traits present as dataframe columns (or series values)
+    _categories = {}    # Column name, original type pairs ('label', int) that can be compressed to a category
+    _precision = {}     # Traits precision for JSON {col: prec, col1: prec, ...}
 
     def _revert_categories(self):
         '''
@@ -122,33 +170,39 @@ class DataFrame(NDBase, pd.DataFrame):
 
         .. _trait type: http://traitlets.readthedocs.org/en/stable/trait_types.html
         '''
-        traits = self._update_custom_traits()
+        self._revert_categories()
+        traits = self._custom_traits()
         groups = None
         prefix = self.__class__.__name__.lower()
-        self._revert_categories()
         self._fi = self.index[0]
         if self._groupbys:
             groups = self.groupby(self._groupbys)
         for name in self._traits:
             trait_name = '_'.join((prefix, str(name)))    # Name mangle to ensure uniqueness
             if name in self.columns:
-                if np.all(np.isclose(self[name], self.ix[self._fi, name])):    # Don't bother sending all elements if same
-                    value = self.ix[self._fi, name]
-                    if isinstance(value, Integral):
+                if np.all(np.isclose(self[name], self.ix[self._fi, name])):
+                    value = self.ix[self._fi, name]    # If all the entries are the same
+                    if isinstance(value, Integral):    # only send a single entry to JS.
                         trait = Integer(int(value))
                     elif isinstance(value, Real):
                         trait = Float(float(value))
                     else:
                         raise TypeError('Unknown type for {0} with type {1}'.format(name, dtype))
-                elif groups:                              # Else send grouped traits
-                    trait = Unicode(groups.apply(lambda g: g[name].values).to_json(orient='values', double_precision=self._precision))
-                else:                                     # Else send flat values
-                    trait = Unicode(self[name].to_json(orient='values', double_precision=self._precision))
-                traits[trait_name] = trait
-                traits[trait_name].tag(sync=True)
-            elif name == self.index.names[0]:             # Otherwise, if index, send flat values
-                traits[trait_name] = Unicode(pd.Series(self.index).to_json(orient='values', double_precision=self._precision))
-                traits[trait_name].tag(sync=True)
+                elif groups:    # If groups exist, make a list of list(s)
+                    p = 10
+                    if name in self._precision:
+                        p = self._precision[name]
+                    trait = Unicode(groups.apply(lambda g: g[name].values).to_json(orient='values', double_precision=p))
+                else:           # Otherwise, just send the flattened values
+                    p = 10
+                    if name in self._precision:
+                        p = self._precision[name]
+                    trait = Unicode(self[name].to_json(orient='values', double_precision=p))
+                traits[trait_name] = trait.tag(sync=True)
+            elif name == self.index.names[0]:   # If not in columns, but is index name, send index
+                trait_name = '_'.join((prefix, str(name)))
+                string = pd.Series(self.index.values).to_json(orient='values')
+                traits[trait_name] = Unicode(string).tag(sync=True)
         self._set_categories()
         return traits
 
@@ -166,18 +220,20 @@ class DataFrame(NDBase, pd.DataFrame):
                     raise RequiredIndexError(missing, name)
                 else:
                     self.index.names = self._indices
+        self._set_categories()
 
 
 class Field(DataFrame):
     '''
-    Fields are a special dataframe that always have a **field_values**
-    attribute which is a list container series/dataframe objects that contain
-    the discrete field values - the :class:`~exa.numerical.Field` dataframe
-    itself contains the description of the field (e.g. number of grid points,
-    size).
+    A field is composed of the field definition ("field_data") and values (
+    "field_values"). Field data define the shape and discretization of a field.
+    Field values are scalar magnitudes (or vectors) that describe the field at
+    each discretized point in space.
     '''
-    _precision = 4
+    _precision = None
+    _vprecision = 10      # values precision (for traits)
     _indices = ['field']
+    _memory_usage = DataFrame.memory_usage
 
     def copy(self, *args, **kwargs):
         '''
@@ -187,10 +243,10 @@ class Field(DataFrame):
         field_values = [field.copy() for field in self.field_values]
         return self.__class__(field_values, df)
 
-    def _update_custom_traits(self):
+    def _custom_traits(self):
         '''
         Obtain field values using the custom trait getter (called automatically
-        by :func:`~exa.numerical.NDBase._update_traits`).
+        by :func:`~exa.numerical.Numerical._update_traits`).
         '''
         traits = {}
         if self._groupbys:
@@ -201,9 +257,20 @@ class Field(DataFrame):
             string = pd.Series(self.index.values).to_json(orient='values')
             traits['field_indices'] = Unicode(string).tag(sync=True)
         s = pd.Series({i: field.values for i, field in enumerate(self.field_values)})
-        json_string = s.to_json(orient='values', double_precision=self._precision)
+        json_string = s.to_json(orient='values', double_precision=self._vprecision)
         traits['field_values'] = Unicode(json_string).tag(sync=True)
         return traits
+
+    def memory_usage(self):
+        '''
+        Get the combined memory usage of the field data and field values.
+        '''
+        data = self._memory_usage()
+        values = 0
+        for value in self.field_values:
+            values += value.memory_usage()
+        data['field_values'] = values
+        return data
 
     def __init__(self, *args, field_values=None, **kwargs):
         if isinstance(args[0], pd.Series):
@@ -274,14 +341,14 @@ class Field3D(Field):
                'yi', 'yj', 'yk', 'zi', 'zj', 'zk']
 
 
-class SparseSeries(NDBase, pd.SparseSeries):
+class SparseSeries(Numerical, pd.SparseSeries):
     '''
     Trait supporting sparse series.
     '''
     _copy = pd.SparseSeries.copy
 
 
-class SparseDataFrame(NDBase, pd.SparseDataFrame):
+class SparseDataFrame(Numerical, pd.SparseDataFrame):
     '''
     Trait supporting sparse dataframe.
     '''

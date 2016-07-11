@@ -1,30 +1,41 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Distributed under the terms of the Apache License 2.0
 '''
-File
-===============================================
-This module provides relational information about tracking files; it doesn't
-itself manipulate files on disk, rather tracks metadata about manipulations
-performed.
-
-See Also:
-    :class:`~exa.container.BaseContainer`
+File Tables
+###################
+There are two types of file tables, one for "raw" data files (those coming from
+third party software for example) and container objects on disk (stored as HDF5
+files). Because a container is typically comprised of multiple raw data files,
+there is a many to many relationship between raw data files and container files.
 '''
-from datetime import datetime
-from sqlalchemy import String, DateTime, Column, Integer
-from exa.relational.base import Base, gen_uid
+from sqlalchemy import String, Column, Integer, Table, ForeignKey
+from sqlalchemy.orm import relationship
+from exa.relational.base import Base, Name, HexUID, Time
 
 
-class File(Base):
+containerfiledatafile = Table(    # Many to many relationship; ContainerFile - DataFile
+    'containerfiledatafile',
+    Base.metadata,
+    Column('containerfile_pkid', Integer, ForeignKey('containerfile.pkid', onupdate='CASCADE', ondelete='CASCADE')),
+    Column('datafile_pkid', Integer, ForeignKey('datafile.pkid', onupdate='CASCADE', ondelete='CASCADE'))
+)
+
+
+class DataFile(Name, HexUID, Time, Base):
     '''
-    Represents a pointer to a file on disk.
-
-    Contains information about file size and date modified/created/accessed.
+    Representation of a non exa container file on disk. Provides content
+    management for "raw" data files.
     '''
-    name = Column(String)
-    description = Column(String)
-    uid = Column(String(32), default=gen_uid)
-    extension = Column(String, nullable=False)    # This keeps track of file type
-    created = Column(DateTime, default=datetime.now)
-    modified = Column(DateTime, default=datetime.now)
-    accessed = Column(DateTime, default=datetime.now)
+    extension = Column(String, nullable=False)    # File extension
     size = Column(Integer)
+
+
+class ContainerFile(Name, HexUID, Time, Base):
+    '''
+    Representation of an exa container object on disk. Containers are often
+    composed from multiple raw data files.
+    '''
+    size = Column(Integer)
+    datafiles = relationship('DataFile', secondary=containerfiledatafile,
+                             backref='containerfiles', cascade='all, delete')

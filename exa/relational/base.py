@@ -1,60 +1,70 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Distributed under the terms of the Apache License 2.0
 '''
-Relational
-===============================================
-This modules provides the base class for persitent relational objects such as the
-:class:`~exa.relational.container.Container` object. It defines a declarative base class that has
-convenience methods for looking up database entries by common features and returning and appropriate
-and corresponding dataframe or series object.
+Database Engine Configuration
+##################################################
+This module provides the base classes and metaclasses for relational tables
+created by exa. It also provides the database engine configuration and session
+class factory.
 '''
+import atexit
 import pandas as pd
-from numbers import Integral
 from sys import getsizeof
 from uuid import UUID, uuid4
+from numbers import Integral
 from datetime import datetime
 from contextlib import contextmanager
-from sqlalchemy import Column, Integer, String, DateTime, create_engine, event
-from sqlalchemy.orm import sessionmaker, mapper
-from sqlalchemy.orm.query import Query
+from sqlalchemy import Column, Integer, String, DateTime, create_engine
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
-from exa import global_config
-from exa.log import get_logger
+from exa._config import config
+from exa.log import loggers
 
 
-gen_uid = lambda: uuid4().hex
-engine_name = None
-engine = None
-SessionFactory = None
+def generate_hexuid():
+    '''Create a unique, random, hex string id.'''
+    return uuid4().hex
+
+
+def cleanup_engine():
+    '''At exit, cleanup connection pool.'''
+    engine.dispose()
+
+
+@contextmanager
+def scoped_session(*args, **kwargs):
+    '''Safely commit relational objects.'''
+    session = session_factory(*args, **kwargs)
+    try:
+        yield session
+        session.commit()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()
 
 
 class BaseMeta(DeclarativeMeta):
     '''
     This is the base metaclass for all relational tables. It provides convient
-    lookup methods, bulk insert methods, and a conversion to dataframe.
+    lookup methods, bulk insert methods, and conversions to other formats.
     '''
     def get_by_pkid(cls, pkid):
-        '''
-        Select a single entry using the primary key.
-        '''
-        s = SessionFactory()
-        return s.query(cls).get(pkid)
+        '''Select an object by pkid.'''
+        return session_factory().query(cls).get(pkid)
 
     def get_by_name(cls, name):
-        '''
-        Select objects with the given name.
-        '''
-        s = SessionFactory()
-        return s.query(cls).filter(cls.name == name).all()
+        '''Select objects by name.'''
+        return session_factory().query(cls).filter(cls.name == name).all()
 
     def get_by_uid(cls, uid):
-        '''
-        Select an entry by unique ID.
-        '''
+        '''Select an object by hexuid (as string)'''
         hexuid = uid
-        if isinstance(uid, uuid.UUID):
+        if isinstance(uid, UUID):
             hexuid = uid.hex
-        s = SessionFactory()
-        return s.query(cls).filter(cls.hexuid == hexuid).one()
+        return session_factory().query(cls).filter(cls.hexuid == hexuid).one()
 
     def bulk_insert(cls, mappings):
         '''
@@ -68,26 +78,36 @@ class BaseMeta(DeclarativeMeta):
 
         .. _bulk insert: http://docs.sqlalchemy.org/en/latest/orm/session_api.html
         '''
-        with scoped_session() as s:
-            s.bulk_insert_mappings(cls, mappings)
+        with scoped_session() as session:
+            session.bulk_insert_mappings(cls, mappings)
 
-    def to_frame(self):
+    def to_frame(cls):
         '''
-        Create a DataFrame representation of the current table.
+        Dump the table to a :class:`~pandas.DataFrame` object.
 
         Warning:
             If performing this action on a very large table, may raise a
             memory error. It is almost always more effective to query the
             table for the specific records of interest.
         '''
-        with scoped_session() as s:
-            statement = s.query(self).statement
-            df = pd.read_sql(statement, engine)
+        statement = session_factory().query(cls).statement
+        df = pd.read_sql(statement, engine)
         if 'pkid' in df:
             df = df.set_index('pkid').sort_index()
         return df
 
     def __getitem__(cls, key):
+        '''
+        Custom getter allows for the following convenient syntax:
+
+        .. code-block:: Python
+
+            exa.relational.File[1]            # Gets file with pkid == 1
+            exa.relational.File['name']       # Gets file with name == 'name'
+            exa.relational.Isotope['H']       # Gets isotopes with symbol == 'H'
+            exa.relational.Isotope['12C']     # Gets isotope with strid == '12C'
+            exa.relational.Length['m', 'km']  # Gets conversion factor meters to kilometers
+        '''
         obj = None
         if hasattr(cls, '_getitem'):         # First try using custom getter
             obj = cls._getitem(key)
@@ -106,9 +126,9 @@ class BaseMeta(DeclarativeMeta):
 @as_declarative(metaclass=BaseMeta)
 class Base:
     '''
-    The base class for all relational tables. Relational classes define both the database table
-    schema as well as an entry instance object. Relational classes have convience lookup methods
-    for fast, Python database querying, which abstracts away SQL interactions.
+    Base class for all relational tables. These classes behave as both the
+    definition of the table (the schema) as well as an object instance (in a
+    Python environment) of an entry (row) in the table.
     '''
     pkid = Column(Integer, primary_key=True)
 
@@ -118,7 +138,7 @@ class Base:
 
     def to_series(self):
         '''
-        Create a :class:`~exa.numerical.Series` object from the current record.
+        Create a series object from the given record entry.
         '''
         s = pd.Series(self.__dict__)
         del s['_sa_instance_state']
@@ -126,42 +146,34 @@ class Base:
 
     def _save_record(self):
         '''
-        Save the current object.
+        Save the current object's relational information.
         '''
-        s = SessionFactory()
-        s.add(self)
-        s.commit()
+        session = session_factory(expire_on_commit=False)
+        session.add(self)
+        session.commit()
 
     def __repr__(self):
         return '{0}(pkid: {1})'.format(self.__class__.__name__, self.pkid)
 
 
+# These are so-called "mix-in" classes that add specific fields to a table
 class Name:
-    '''
-    Mixin providing name and description fields.
-    '''
+    '''Name and description fields.'''
     name = Column(String)
     description = Column(String)
 
 
 class HexUID:
-    '''
-    Mixin providing a unique ID.
-    '''
-    hexuid = Column(String(32), default=gen_uid)
+    '''Hex-based unique id (uid) field.'''
+    hexuid = Column(String(32), default=generate_hexuid)
 
     @property
     def uid(self):
         return UUID(self.hexuid)
 
-    def gen_uid(self):
-        return gen_uid()
-
 
 class Time:
-    '''
-    Mixin providing timestamp information.
-    '''
+    '''Timestamp fields.'''
     created = Column(DateTime, default=datetime.now)
     modified = Column(DateTime, default=datetime.now)
     accessed = Column(DateTime, default=datetime.now, onupdate=datetime.now)
@@ -173,78 +185,15 @@ class Time:
         self.modified = datetime.now()
 
 
-class Disk:
-    '''
-    Mixin providing disk utilization information.
-
-    Attributes:
-        nfiles (int): Number of associated files (in the file table)
-        size (int): Total size on disk (in KiB) (of all files)
-
-    See Also:
-        :class:`~exa.relational.file.File`
-    '''
-    nfiles = Column(Integer)
+class Size:
+    '''Approximate size (on disk) and file count fields.'''
     size = Column(Integer)
+    nfiles = Column(Integer)
 
-    def _update_size(self):
-        '''
-        Attempts to call the instance's __sizeof__ to populate the value of
-        size.
-        '''
-        try:
-            self.size = getsizeof(self)
-        except:
-            pass
+    def _update(self):
+        self.size = getsizeof(self)
 
 
-
-def create_tables():
-    '''
-    Create all tables if they do not already exist in the database.
-
-    Note:
-        When this function is called, only class objects loaded in the current
-        namespace will be created.
-    '''
-    Base.metadata.create_all(engine)
-
-
-def init_db():
-    '''
-    Initialize the database connection and session factory.
-    '''
-    global engine_name
-    global engine
-    global SessionFactory
-    engine_name = global_config['exa_relational']
-    engine = create_engine(engine_name)
-    SessionFactory = sessionmaker(bind=engine)
-
-
-def cleanup():
-    '''
-    Cleanup the engine's connection pool before exiting.
-    '''
-    engine.dispose()
-
-
-@contextmanager
-def scoped_session(*args, **kwargs):
-    '''
-    Separation of transaction management from actual work using a `context manager`_.
-
-    .. _context manager: http://docs.sqlalchemy.org/en/latest/orm/session_basics.html
-    '''
-    session = SessionFactory(*args, **kwargs)
-    try:
-        yield session
-        session.commit()
-    except:
-        session.rollback()
-        raise
-    finally:
-        session.close()
-
-
-init_db()
+logger = loggers['dblog']
+engine = create_engine(config['db']['uri'])
+session_factory = sessionmaker(bind=engine)

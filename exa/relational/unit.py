@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Distributed under the terms of the Apache License 2.0
 '''
-Units and Dimensions
-===============================================
+Unit Conversions
+#########################
 This module provides relational classes for unit conversion tables.
 '''
 from sqlalchemy import and_, String, Float, Column
@@ -13,17 +15,15 @@ class Meta(BaseMeta):
     Special metaclass for unit objects supporting aliases. Aliases are
     alternative names for standard symbols for units.
     '''
-    aliases = {}
-
+    aliases = {}     # Note that all aliases should be lowercase (see below)
     def _getitem(cls, key):
         if isinstance(key, tuple):
-            f = cls.aliases[key[0]] if key[0] in cls.aliases else key[0]
-            t = cls.aliases[key[1]] if key[1] in cls.aliases else key[1]
+            f = cls.aliases[key[0].lower()] if key[0].lower() in cls.aliases else key[0]
+            t = cls.aliases[key[1].lower()] if key[1].lower() in cls.aliases else key[1]
             with scoped_session() as session:
-                factor = session.query(cls).filter(and_(cls.from_unit==f, cls.to_unit==t)).one().factor
-            return factor
+                return session.query(cls).filter(and_(cls.from_unit==f, cls.to_unit==t)).one().factor
         else:
-            raise TypeError('Usage requires syntax Class["from_unit", "to_unit"]')
+            raise TypeError('Usage requires syntax Dimension["from_unit", "to_unit"]')
 
 
 class Dimension:
@@ -69,7 +69,9 @@ class Mass(Base, Dimension, metaclass=Meta):
     >>> Mass['u', 'kg']
     1.660538921000011e-27
     '''
-    pass
+    aliases = {
+        'amu': 'u',
+    }
 
 
 class Time(Base, Dimension, metaclass=Meta):

@@ -1,62 +1,73 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Distributed under the terms of the Apache License 2.0
 '''
-Utility Functions
-====================
-These functions are simply syntactic sugar. They help cleanup the code base by
-providing a cleaner API for commonly used functions.
+Utilities
+#####################
+Commonly used functions (primarily for convenience and repetition reduction).
 '''
 import os
+import sys
+import numpy as np
 from datetime import datetime
 
 
 sep2 = os.sep + os.sep
+sizes = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB']
 
 
-def datetime_header():
+def datetime_header(title=''):
     '''
     Creates a simple header string containing the current date/time stamp
     delimited using "=".
     '''
-    return '\n'.join(('=' * 80, str(datetime.now()), '=' * 80))
+    return '\n'.join(('=' * 80, title + ': ' + str(datetime.now()), '=' * 80))
 
 
-def mkp(*args, mk=False, exist_ok=True):
+def mkp(*args, mk=False):
     '''
     Generate a directory path, and create it if requested.
 
     .. code-block:: Python
 
-        filepath = mkpath('base', 'folder', 'file')
-        mkpath('base', 'folder', mkdir=True)
+        filepath = mkp('base', 'folder', 'file')
+        dirpath = mkp('root', 'path', 'folder', mk=True)
 
-    Args
+    Args:
         \*args: File or directory path segments to be concatenated
-        mk (bool): Make the directory (returns None)
-        exist_ok (bool): Don't raise warning if director already exists (default True)
+        mk (bool): Make the directory (if it doesn't exist)
 
-    Returns
-        path (str): OS aware file or directory path
+    Returns:
+        path (str): File or directory path
     '''
     path = os.sep.join(list(args))
     if mk:
         while sep2 in path:
             path = path.replace(sep2, os.sep)
-        os.makedirs(path, exist_ok=exist_ok)
+        os.makedirs(path, exist_ok=True)
     return path
 
 
-def del_keys(kwargs, match='id'):
+def convert_bytes(value):
     '''
-    Delete certain keys in a dictionary containing a given string.
+    Reduces bytes to more convenient units (i.e. KiB, GiB, TiB, etc.).
 
     Args:
-        kwargs (dict): Dictionary to prune
-        match (str): Sting to match for each key
+        values (int): Value in Bytes
 
-    Return:
-        d (dict): Pruned dictionary
+    Returns:
+        tup (tuple): Tuple of value, unit (e.g. (10, 'MiB'))
     '''
-    keys = [key for key in kwargs.keys() if match in key]
-    for key in keys:
-        del kwargs[key]
-    return kwargs
+    n = np.rint(len(str(value))/4).astype(int)
+    return value/(1024**n), sizes[n]
+
+
+def get_internal_modules(key='exa'):
+    '''
+    Get a list of modules belonging to the given package.
+
+    Args:
+        key (str): Package or library name (e.g. "exa")
+    '''
+    key += '.'
+    return [v for k, v in sys.modules.items() if k.startswith(key)]
