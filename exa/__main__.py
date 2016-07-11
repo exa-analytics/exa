@@ -10,7 +10,7 @@ built on top of the Jupyter notebook environment, run "exa" on the command line.
 '''
 import argparse
 import subprocess
-from exa._config import set_update
+from exa._config import set_update, config
 
 
 def notebook():

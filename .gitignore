@@ -9,6 +9,7 @@ exa/nwchem/__pycache__/*
 *.nbc
 *.nbi
 
+# Comment to tag gitignore
 # Bower repositories
 exa/static/js/node_modules
 exa/static/js/bower_components
