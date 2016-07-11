@@ -26,226 +26,111 @@ define([
         /*"""
         Field
         ==============
-        JavaScript counterpart for exa's Field.
+        Base class for dealing with scalar and vector field data
 
         Args:
-            dimensions: {xmin: xmin, xmax: xmax, dx: dx, [nx: nx, x: x], ...}
-            func_or_values: Field function (if known) or discrete values
+            dimensions: {'ox': ox, 'nx': nx, 'dxi': dxi, 'dxj': dxj, 'dxk': dxk,
+                         'oy': oy, 'ny': ny, 'dyi': dyi, 'dyj': dyj, 'dyk': dyk,
+                         'oz': oz, 'nz': nz, 'dzi': dzi, 'dzj': dzj, 'dzk': dzk}
 
-        The arugment dimensions is a dictionary like object that can contain
-        the x, y, and z arrays explicity, or can contain parameters, xmin, xmax,
-        and nx or dx, which are used to generate the (x) array (and similarly
-        for y and z). The argument func_or_values must be a JavaScript function
-        (of x, y, z) or pre-computed discrete values on the field described by
-        x, y, and z.
+        Note:
+            The dimensions argument can alternatively be
+            {'x': xarray, 'y': yarray, 'z': zarray}
+            if they have already been constructed but in this
+            case the arrays should form cubic discrete points
         */
         constructor(dimensions, func_or_values) {
             this.func = {};
             if (dimensions.hasOwnProperty('x') === true) {
                 this.x = dimensions.x;
-                this.xmin = Math.min(...this.x);
-                this.xmax = Math.max(...this.x);
-                this.nx = dimensions.x.length;
-            } else if (dimensions.nx !== undefined) {
-                this.xmin = dimensions.xmin;
-                this.xmax = dimensions.xmax;
-                this.nx = dimensions.nx;
-                this.x = num.linspace(this.xmin, this.xmax, this.nx);
-                this.dx = this.x[1] - this.x[0];
-            } else {
-                this.xmin = dimensions.xmin;
-                this.xmax = dimensions.xmax;
-                this.dx = dimensions.dx;
-                this.x = num.arange(this.xmin, this.xmax, this.dx);
+                this.ox = Math.min(...this.x);
+                this.fx = Math.max(...this.x);
                 this.nx = this.x.length;
+                this.dxi = this.x[1] - this.x[0];
+                this.dxj = 0;
+                this.dxk = 0;
+            } else {
+                this.ox = dimensions.ox;
+                this.nx = dimensions.nx;
+                this.dxi = dimensions.dxi;
+                this.dxj = dimensions.dxj;
+                this.dxk = dimensions.dxk;
+                this.x = num.minspace(this.ox, this.dxi, this.nx);
+                this.fx = Math.max(...this.x);
             };
             if (dimensions.hasOwnProperty('y') === true) {
                 this.y = dimensions.y;
-                this.ymin = Math.min(...dimensions.y);
-                this.ymax = Math.max(...dimensions.y);
-                this.ny = dimensions.y.length;
-            } else if (dimensions.ny !== undefined) {
-                this.ymin = dimensions.ymin;
-                this.ymax = dimensions.ymax;
-                this.ny = dimensions.ny;
-                this.y = num.linspace(this.ymin, this.ymax, this.ny);
-                this.dy = this.y[1] - this.y[0];
-            } else {
-                this.ymin = dimensions.ymin;
-                this.ymax = dimensions.ymax;
-                this.dy = dimensions.dy;
-                this.y = num.arange(this.ymin, this.ymax, this.dy);
+                this.oy = Math.min(...this.y);
+                this.fy = Math.max(...this.y);
                 this.ny = this.y.length;
+                this.dyi = this.y[1] - this.y[0];
+                this.dyj = 0;
+                this.dyk = 0;
+            } else {
+                this.oy = dimensions.oy;
+                this.ny = dimensions.ny;
+                this.dyi = dimensions.dyi;
+                this.dyj = dimensions.dyj;
+                this.dyk = dimensions.dyk;
+                this.y = num.minspace(this.oy, this.dyj, this.ny);
+                this.fy = Math.max(...this.y);
             };
             if (dimensions.hasOwnProperty('z') === true) {
                 this.z = dimensions.z;
-                this.zmin = Math.min(...dimensions.z);
-                this.zmax = Math.max(...dimensions.z);
-                this.nz = dimensions.z.length;
-            } else if (dimensions.nz !== undefined) {
-                this.zmin = dimensions.zmin;
-                this.zmax = dimensions.zmax;
-                this.nz = dimensions.nz;
-                this.z = num.linspace(this.zmin, this.zmax, this.nz);
-                this.dz = this.z[1] - this.z[0];
-            } else {
-                this.zmin = dimensions.zmin;
-                this.zmax = dimensions.zmax;
-                this.dz = dimensions.dz;
-                this.z = num.arange(this.zmin, this.zmax, this.dz);
+                this.oz = Math.min(...this.z);
+                this.fz = Math.max(...this.z);
                 this.nz = this.z.length;
+                this.dzi = this.z[1] - this.z[0];
+                this.dzj = 0;
+                this.dzk = 0;
+            } else {
+                this.oz = dimensions.oz;
+                this.nz = dimensions.nz;
+                this.dzi = dimensions.dzi;
+                this.dzj = dimensions.dzj;
+                this.dzk = dimensions.dzk;
+                this.z = num.minspace(this.oz, this.dzk, this.nz);
+                this.fz = Math.max(...this.z);
             };
             this.n = this.nx * this.ny * this.nz;
             if (typeof func_or_values === 'function') {
-                console.log('field func');
                 this.func = func_or_values;
-                this.compute_field();
+                this.values = num.compute_field(this.x, this.y, this.z, this.n, this.func)['values'];
             } else {
-                console.log('values');
                 this.values = new Float32Array(func_or_values);
             };
         };
 
-        new_dr(d) {
+        update() {
             /*"""
-            new_dr
-            -------------
-            Updates the y array using the new step size.
-
-            Args:
-                d: {dx: dx, ...}
+            update
+            =========
+            Updates the field after establishing new x, y, z arrays
             */
-            if (typeof this.func === 'function') {
-                var all_equal = 0;
-                if (!d.hasOwnProperty('dx')) {
-                    d['dx'] = this.dx;
-                    ++all_equal;
-                } else {
-                    this.dx = d.dx;
-                    this.x = num.arange(this.xmin, this.xmax, this.dx);
-                    this.nx = this.x.length;
-                };
-                if (!d.hasOwnProperty('dy')) {
-                    d['dy'] = this.dy;
-                    ++all_equal;
-                } else {
-                    this.dy = d.dy;
-                    this.y = num.arange(this.ymin, this.ymax, this.dy);
-                    this.ny = this.y.length;
-                };
-                if (!d.hasOwnProperty('dz')) {
-                    d['dz'] = this.dz;
-                    ++all_equal;
-                } else {
-                    this.dz = d.dz;
-                    this.z = num.arange(this.zmin, this.zmax, this.dz);
-                    this.nz = this.z.length;
-                };
-                if (all_equal === 3) {
-                    return;
-                };
-                this.compute_field();
-            } else {
-                console.log('Cannot automatically update a field with no analytical form!');
-            };
+            this.nx = this.x.length;
+            this.ny = this.y.length;
+            this.nz = this.z.length;
+            this.ox = Math.min(...this.x);
+            this.oy = Math.min(...this.y);
+            this.oz = Math.min(...this.z);
+            this.fx = Math.max(...this.x);
+            this.fy = Math.max(...this.y);
+            this.fz = Math.max(...this.z);
+            this.values = num.compute_field(this.x, this.y, this.z, this.n, this.func)['values'];
         };
 
-        new_limits(limits) {
-            /*"""
-            new_limits
-            --------------
-            Args:
-                limits: {xmin: xmin, ymin: ymin, ...}
-            */
-            if (typeof this.func === 'function') {
-                var all_equal = 0;
-                var x = false;
-                var y = false;
-                var z = false;
-                if (!limits.hasOwnProperty('xmin')) {
-                    limits['xmin'] = this.xmin;
-                    ++all_equal;
-                } else {
-                    this.xmin = limits.xmin;
-                    x = true;
-                };
-                if (!limits.hasOwnProperty('ymin')) {
-                    limits['ymin'] = this.ymin;
-                    ++all_equal;
-                } else {
-                    this.ymin = limits.ymin;
-                    y = true;
-                };
-                if (!limits.hasOwnProperty('zmin')) {
-                    limits['zmin'] = this.zmin;
-                    ++all_equal;
-                } else {
-                    this.zmin = limits.zmin;
-                    z = true;
-                };
-                if (!limits.hasOwnProperty('xmax')) {
-                    limits['xmax'] = this.xmax;
-                    ++all_equal;
-                } else {
-                    this.xmax = limits.xmax;
-                    x = true;
-                };
-                if (!limits.hasOwnProperty('ymax')) {
-                    limits['ymax'] = this.ymax;
-                    ++all_equal;
-                } else {
-                    this.ymax = limits.ymax;
-                    y = true;
-                };
-                if (!limits.hasOwnProperty('zmax')) {
-                    limits['zmax'] = this.zmax;
-                    ++all_equal;
-                } else {
-                    this.zmax = limits.zmax;
-                    z = true;
-                };
-                if (all_equal === 6) {
-                    return;
-                };
-                if (x === true) {
-                    this.x = num.arange(this.xmin, this.xmax, this.dx);
-                    this.nx = this.x.length;
-                };
-                if (y === true) {
-                    this.y = num.arange(this.ymin, this.ymax, this.dy);
-                    this.ny = this.y.length;
-                };
-                if (z === true) {
-                    this.z = num.arange(this.zmin, this.zmax, this.dz);
-                    this.nz = this.z.length;
-                };
-                this.compute_field();
-            } else {
-                console.log('Cannot automatically update a field with no analytical form!');
-            };
-        };
-
-        compute_field() {
-            this.values = new Float32Array(this.n);
-            var i = 0;
-            for (var x of this.x) {
-                for (var y of this.y) {
-                    for (var z of this.z) {
-                        this.values[i] = this.func(x, y, z);
-                        i += 1;
-                    };
-                };
-            };
-        };
     };
-
 
     class ScalarField extends Field {
         constructor(dimensions, func_or_values) {
+            /*"""
+            ScalarField
+            =============
+            Representation of a scalar field.
+            */
             super(dimensions, func_or_values);
         };
     };
-
 
     return {
         Field: Field,
