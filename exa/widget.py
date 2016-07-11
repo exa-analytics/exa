@@ -20,7 +20,7 @@ from ipywidgets import DOMWidget
 from notebook import install_nbextension
 from notebook.nbextensions import jupyter_data_dir
 from traitlets import Unicode, Integer
-from exa._config import config
+from exa._config import config, del_update
 from exa.utility import mkp
 
 
