@@ -41,26 +41,44 @@ define([
         /*"""
         ContainerView
         ===============
-        JavaScript counterpart for exa's ContainerWidget.
+        Base view for creating data specific container widgets used within the
+        Jupyter notebook. All logic related to communication (between Python
+        and JavaScript) should be located here. This class provides a number
+        of commonly used functions for such logic.
+
+        Warning:
+            Do not override the DOMWidgetView constructor ("initialize").
         */
+
         render() {
-            /* Method is automatically called first and sets up the canvas and
-               elements which will be drawn in the widget. */
-            this.default_listeners();    // Set up default listeners
-            this.create_container();     // Create the widget HTML container
-            this.default_app = InfoApp;
-            this.init();                 // Populate the HTML container with an "app"
+            /*"""
+            render
+            -------------
+            Main entry point (called immediately after initialize) for
+            (ipywidgets) DOMWidgetView objects.
+
+            Note:
+                This function  can be overwritten by container specific code,
+                but it is more common to overwrite the **init** function.
+
+            See Also:
+                **init()**
+            */
+            this.default_listeners();
+            this.create_container();
+            this.init();              // Specific to the data container
             this.setElement(this.container);
         };
 
         init() {
-            // If test container run test app other run default application
-            var test = this.model.get('test');
-            if (test === true) {
-                this.app = new TestApp(this);
-            } else {
-                this.app = new this.default_app(this);
-            };
+            /*"""
+            init
+            -------------
+            Container view classes that extend this class can overwrite this
+            method to customize the behavior of their data specific view.
+            */
+            console.log('initial container init');
+            this.if_empty();
         };
 
         get_trait(name) {
@@ -68,7 +86,7 @@ define([
             get_trait
             -------------
             Wrapper around the DOMWidgetView (Backbone.js) "model.get" function,
-            that attempts to convert JSON strings to Object(s).
+            that attempts to convert JSON strings to objects.
             */
             var obj = this.model.get(name);
             if (typeof obj === 'string') {
@@ -98,8 +116,27 @@ define([
             this.model.set(name, value);
         };
 
+        if_empty() {
+            /*"""
+            if_empty
+            ----------------
+            If the (exa) container object is empty, render the test application
+            widget.
+            */
+            var check = this.get_trait('test');
+            if (check === true) {
+                console.log('Empty container, displaying test interface!');
+                this.app = new TestApp(this);
+            };
+        };
+
         default_listeners() {
-            // Default backend variable listeners
+            /*"""
+            default_listeners
+            -------------------
+            Set up listeners for basic variables related to the window dimensions
+            and system settings.
+            */
             this.get_width();
             this.get_height();
             this.get_gui_width();
@@ -115,7 +152,11 @@ define([
         };
 
         create_container() {
-            // Create a resizable HTML container for the widget
+            /*"""
+            create_container
+            ------------------
+            Create a resizable container.
+            */
             var self = this;
             this.container = $('<div/>').width(this.width).height(this.height).resizable({
                 aspectRatio: false,
@@ -130,9 +171,12 @@ define([
                 },
             });
         };
-
         create_canvas() {
-            // Helper for creating a 3D rendering canvas
+            /*"""
+            create_canvas
+            ----------------
+            Create a canvas for WebGL.
+            */
             this.canvas = $('<canvas/>').width(this.width - this.gui_width).height(this.height);
             this.canvas.css('position', 'absolute');
             this.canvas.css('top', 0);
@@ -162,7 +206,7 @@ define([
         get_field_indices() {
             this.field_indices = this.get_trait('field_indices');
         };
-    };
 
+    };
     return {ContainerView: ContainerView};
 });

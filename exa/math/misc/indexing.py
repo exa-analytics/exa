@@ -64,6 +64,7 @@ def starts_counts(starts, counts):
             h += 1
     return (i_idx, j_idx, values)
 
+
 if config['dynamic']['numba'] == 'true':
     from numba import jit
     starts_count = jit(nopython=True, cache=True, nogil=True)(starts_count)
