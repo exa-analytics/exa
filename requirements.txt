@@ -13,3 +13,4 @@ ipyparallel
 sphinx
 sphinxcontrib-autoanysrc
 nose
+
