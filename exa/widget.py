@@ -12,6 +12,7 @@ and `ipywidgets`_ packages.
 .. _ipywidgets: https://ipywidgets.readthedocs.io/en/latest/
 '''
 import os
+import atexit
 import shutil
 import numpy as np
 import pandas as pd
@@ -95,3 +96,4 @@ if config['js']['update'] == '1':
     pkg_nbext = mkp(config['dynamic']['pkgdir'], '_nbextension')
     sys_nbext = mkp(jupyter_data_dir(), 'nbextensions', 'exa')
     install_notebook_widgets(pkg_nbext, sys_nbext, verbose)
+    atexit.register(del_update)

@@ -25,8 +25,7 @@ setup(
     download_url = 'https://github.com/exa-analytics/exa/tarball/v{}'.format(__version__),
     packages=find_packages(),
     package_data={'exa': ['_static/*.json', '_nbextension/*.js', '_nbextensions/lib/*.js']},
-    entry_points={'console_scripts': ['exa = exa.__main__:notebook',
-                                      'exw = exa.__main__:workflow']},
+    entry_points={'console_scripts': ['exa = exa.__main__:main']},
     include_package_data=True,
     install_requires=dependencies,
     license='Apache License Version 2.0',
@@ -48,8 +47,3 @@ setup(
         'Topic :: Scientific/Engineering'
     ]
 )
-
-from exa._config import config, save
-config['db']['update'] = '1'
-config['js']['update'] = '1'
-save()

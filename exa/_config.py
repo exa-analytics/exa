@@ -46,10 +46,26 @@ def save():
         that use exa are running simultaneously.
     '''
     del config['dynamic']    # Delete dynamically assigned configuration options
-    config['db']['update'] = '0'
-    config['js']['update'] = '0'
     with open(config_file, 'w') as f:
         config.write(f)
+
+
+def set_update():
+    '''
+    Set update flags.
+    '''
+    config['paths']['update'] = '1'
+    config['js']['update'] = '1'
+    config['db']['update'] = '1'
+
+
+def del_update():
+    '''
+    Reset update flags.
+    '''
+    config['paths']['update'] = '0'
+    config['js']['update'] = '0'
+    config['db']['update'] = '0'
 
 
 config = configparser.ConfigParser()              # Application configuration

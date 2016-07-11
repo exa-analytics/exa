@@ -1,6 +1,7 @@
 [paths]
 data = None
 notebooks = None
+update = 1
 
 [log]
 nlogs = 3

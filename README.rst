@@ -34,6 +34,7 @@ Installation
 .. code-block:: bash
 
     conda install exa    # or pip install exa
+    exa -u               # Run to ensure updated notebook extensions
 
 
 Getting Started

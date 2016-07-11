@@ -10,7 +10,7 @@ objects and a collection of static data for reference and unit conversions.
 import atexit
 import pandas as pd
 from itertools import product
-from exa._config import config
+from exa._config import config, del_update
 from exa.utility import mkp
 from exa.relational.base import engine, Base, scoped_session, session_factory
 from exa.relational.unit import (Length, Mass, Time, Current, Amount, Luminosity,
@@ -80,3 +80,4 @@ if config['db']['update'] == '1':
     load_isotope_data()
     load_unit_data()
     load_constant_data()
+    atexit.register(del_update)
