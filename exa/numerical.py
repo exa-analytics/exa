@@ -197,7 +197,7 @@ class DataFrame(Numerical, pd.DataFrame):
                     p = 10
                     if name in self._precision:
                         p = self._precision[name]
-                    trait = self[name].to_json(orient='values', double_precision=p)
+                    trait = Unicode(self[name].to_json(orient='values', double_precision=p))
                 traits[trait_name] = trait.tag(sync=True)
             elif name == self.index.names[0]:   # If not in columns, but is index name, send index
                 trait_name = '_'.join((prefix, str(name)))

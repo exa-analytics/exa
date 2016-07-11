@@ -43,17 +43,6 @@ def starts_counts(starts, counts):
     '''
     Generate a pseudo-sequential array from initial values and counts.
 
-    >>> import numpy
-    >>> starts = numpy.array([0, 4], dtype=numpy.int64)
-    >>> counts = numpy.array([4, 5], dtype=numpy.int64)
-    >>> values = arange1(starts, counts)
-    >>> values[0]
-    array([0, 0, 0, 0, 1, 1, 1, 1, 1])
-    >>> values[1]
-    array([0, 1, 2, 3, 0, 1, 2, 3, 4])
-    >>> values[2]
-    array([0, 1, 2, 3, 4, 5, 6, 7, 8])
-
     Args:
         starts (array): Starting points for array generation
         counts (array): Values by which to increment from each starting point

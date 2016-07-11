@@ -431,7 +431,16 @@ define([
                     };
                 };
             };
-            for (var key of ['ox', 'oy', 'oz', 'rx', 'ry', 'rz']) {
+            for (var key of ['rx', 'ry', 'rz']) {
+                if (!kwargs.hasOwnProperty(key)) {
+                    kwargs[key] = 0.5;
+                } else {
+                    if (kwargs[key] === undefined || isNaN(kwargs[key]) || !isFinite(kwargs[key])) {
+                        kwargs[key] = 0.5;
+                    };
+                };
+            };
+            for (var key of ['ox', 'oy', 'oz']) {
                 if (!kwargs.hasOwnProperty(key)) {
                     kwargs[key] = 0.0;
                 } else {
@@ -440,6 +449,7 @@ define([
                     };
                 };
             };
+
             var x = kwargs['x'] + kwargs['rx'];
             var y = kwargs['y'] + kwargs['ry'];
             var z = kwargs['z'] + kwargs['rz'];
