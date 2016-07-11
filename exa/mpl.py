@@ -1,10 +1,16 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Distributed under the terms of the Apache License 2.0
 '''
-Python Plotting Utilities
-==========================
+Matplotlib Utilities
+###############################
 '''
 import seaborn as sns
 
+legend = {'legend.frameon': True, 'legend.facecolor': 'white',
+          'legend.fancybox': True, 'patch.facecolor': 'white',
+          'patch.edgecolor': 'black'}
+axis = {'axes.formatter.useoffset': False}
 mpl_legend = {'legend.frameon': True, 'legend.facecolor': 'white',
            'legend.edgecolor': 'black'}
 mpl_mathtext = {'mathtext.default': 'rm'}
@@ -16,11 +22,3 @@ mpl_rc.update(mpl_mathtext)
 mpl_rc.update(mpl_save)
 sns.set(context='poster', style='white', palette='colorblind', font_scale=1.3,
         font='serif', rc=mpl_rc)
-
-
-def savefig(path, ax, dpi=300, **kwargs):
-    '''
-    Save figure with sensible defaults.
-    '''
-    fig = ax.get_figure()
-    fig.savefig(path, dpi=300, **kwargs)

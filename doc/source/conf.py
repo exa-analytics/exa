@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Distributed under the terms of the Apache License 2.0
 #
 # exa documentation build configuration file, created by
 # sphinx-quickstart on Tue Jun 23 21:37:50 2015.
@@ -15,11 +17,8 @@
 
 import sys
 import os
-import shlex
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 sys.path.insert(0, os.path.abspath(os.sep.join(('..', '..'))))
 from exa import __version__
-
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -138,7 +137,7 @@ todo_include_todos = True
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -231,11 +230,6 @@ html_show_copyright = True
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'exadoc'
-
-if not on_rtd:
-    import sphinx_rtd_theme
-    html_theme = 'sphinx_rtd_theme'
-    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # -- Options for LaTeX output ---------------------------------------------
 

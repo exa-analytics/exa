@@ -1,91 +1,89 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Distributed under the terms of the Apache License 2.0
 '''
 Editor
-====================================
+####################################
 Text-editor-like functionality for programatically manipulating raw text input
-and output files. Supports commonly used logic such as (simple or regular
-expression) search and replace, insert, and delete operations.
+and output data and converting this data into container objects. This class
+does not behave like a fully fledged text editor but does have some basic find,
+replace, insert, etc. functionality.
 '''
-import sys
 import os
 import re
-from io import StringIO
+import sys
+from io import StringIO, TextIOWrapper
 from collections import OrderedDict
-from exa.utility import mkp
 
 
 class Editor:
     '''
-    An editor is the contents of a text file that can be programmatically
-    manipulated.
+    An editor is a representation of a text file on disk that can be
+    programmatically manipulated.
 
-    All lines are stored in memory; no file handles are kept open. For extremely
-    large files, this approach may not be feasible on a single machine (consider using the
-    as_interned option if appropriate). Finally, note that the purpose of this class is not to be
-    a full fledged text editor, rather it provides a programmatic interface for composing and
-    parsing documents (namely, its purpose is to facilitate parsing of complex text data).
+    Text lines are stored in memory; no files remain open. This class does not
+    strive to be a fully fledged text editor rather a base class for converting
+    input and output data from text on disk to some type of (exa framework)
+    container object (and vice versa).
 
     >>> template = "Hello World!\\nHello {user}"
     >>> editor = Editor(template)
-    >>> print(editor[0])
-    Hello World!
-    >>> print(editor.format(user='Bob'))
-    Hello World!
-    Hello Bob
-    >>> print(len(editor))
+    >>> editor[0]
+    'Hello World!'
+    >>> len(editor)
     2
     >>> del editor[0]
-    >>> print(len(editor))
+    >>> len(editor)
     1
     >>> editor.write(fullpath=None, user='Alice')
     Hello Alice
 
-    Note:
-        By default an editor object will only print (string representation)
-        60 rows (30 from the head and 30 from the tail of the file). To show
-        more lines on print, increase the *_print_count* value (use with
-        caution!).
-
     Tip:
-        Editor line numbers are 0 based just like Python. Because lines are
-        stored in a list-like object, indexing them is possible using the
-        standard (0 based) Python convention.
-    '''
-    _print_count = 30            # Default head and tail block length
-    _fmt = '{0}: {1}\n'.format   # The line format
+        Editor line numbers use a 0 base index. To increase the number of lines
+        displayed by the repr, increase the value of the **nprint** attribute.
 
-    def write(self, fullpath=None, *args, **kwargs):
+    Warning:
+        For large text with repeating strings be sure to use the **as_interned**
+        argument.
+
+    Attributes:
+        name (str): Data/file/misc name
+        description (str): Data/file/misc description
+        meta (dict): Additional metadata as key, value pairs
+        nrpint (int): Number of lines to display when printing
+        cursor (int): Line number position of the cusor (see :func:`~exa.editor.Editor.find_next_any` and :func:`~exa.editor.Editor.find_next_string`)
+    '''
+    _getter_prefix = 'parse'
+    _fmt = '{0}: {1}\n'.format   # Format for printing lines (see __repr__)
+
+    def write(self, path=None, *args, **kwargs):
         '''
-        Write the editor's contents to disk.
+        Perform formatting and write the formatted string to a file or stdout.
 
         Optional arguments can be used to format the editor's contents. If no
-        file path is given, prints to standard output (useful for debugging).
+        file path is given, prints to standard output.
 
         Args:
-            fullpath (str): Full file path, if no path given will write to stdout (default)
+            path (str): Full file path (default None, prints to stdout)
             *args: Positional arguments to format the editor with
             **kwargs: Keyword arguments to format the editor with
-
-        See Also:
-            :func:`~exa.editor.Editor.format`
         '''
-        if fullpath:
-            with open(fullpath, 'w') as f:
-                f.write(str(self).format(*args, **kwargs))
+        if path is None:
+            print(self.format(*args, **kwargs))
         else:
-            print(str(self).format(*args, **kwargs))
+            with open(path, 'w') as f:
+                f.write(self.format(*args, **kwargs))
 
-    def format(self, inplace=False, *args, **kwargs):
+    def format(self, *args, inplace=False, **kwargs):
         '''
         Format the string representation of the editor.
 
         Args:
             inplace (bool): If True, overwrite editor's contents with formatted contents
         '''
-        if inplace:
-            self._lines = str(self).format(*args, **kwargs).splitlines()
-        else:
+        if not inplace:
             return str(self).format(*args, **kwargs)
+        self._lines = str(self).format(*args, **kwargs).splitlines()
 
     def head(self, n=10):
         '''
@@ -135,12 +133,14 @@ class Editor:
 
     def insert(self, lines={}):
         '''
+        Insert lines into the editor.
+
         Note:
             To insert before the first line, use :func:`~exa.editor.Editor.preappend`
             (or key 0); to insert after the last line use :func:`~exa.editor.Editor.append`.
 
         Args:
-            lines (dict): Line number key, line string value dictionary to insert
+            lines (dict): Dictionary of lines of form (lineno, string) pairs
         '''
         for i, (key, line) in enumerate(lines.items()):
             n = key + i
@@ -148,26 +148,24 @@ class Editor:
             last_half = self._lines[n:]
             self._lines = first_half + [line] + last_half
 
-    def delete_blank(self):
-        '''
-        Permanently removes blank lines from input.
-        '''
+    def remove_blank_lines(self):
+        '''Remove all blank lines (blank lines are those with zero characters).'''
         to_remove = []
         for i, line in enumerate(self):
             ln = line.strip()
             if ln == '':
                 to_remove.append(i)
-        self.delete(to_remove)
+        self.delete_lines(to_remove)
 
-    def delete(self, lines):
+    def delete_lines(self, lines):
         '''
-        Delete the given line numbers.
+        Delete all lines with given line numbers.
 
         Args:
-            lines (list): List of integers corresponding to lines to delete
+            lines (list): List of integers corresponding to line numbers to delete
         '''
         for k, i in enumerate(lines):
-            del self[i - k]
+            del self[i-k]    # Accounts for the fact that len(self) decrease upon deletion
 
     def find(self, *strings):
         '''
@@ -186,36 +184,28 @@ class Editor:
                     results[string][i] = line
         return results
 
-    def find_next(self, string, start=0, stop=-1):
+    def find_next(self, string):
         '''
-        Find the subsequent line containing the given string.
+        From the editor's current cursor position find the next instance of the
+        given string.
 
         Args:
-            string (str): String to search for
+            string (str): String to search for from the current cursor position.
+            reverse (bool): Search in reverse (default false)
 
         Returns:
-            tup (tuple): String line, value pair
+            tup (tuple): Tuple of cursor position and line or None if not found
 
         Note:
-            This function is cyclic: if the same string is searched for that
-            was previously not found, the function will start a "new" search
-            from the beginning of the file.
+            This function cycles the entire editor (i.e. cursor to length of
+            editor to zero and back to cursor position).
         '''
-        if string != self._next_string or len(self._prev_match) == 0:
-            self._next_pos = 0
-            self._next_string = string
-            self._prev_match = None
-        if start: self._next_pos = start
-        tup = ()
-        lines = self._lines[self._next_pos:stop]
-        cnt = start
-        for i, line in enumerate(lines):
-            if string in line:
-                tup = (self._next_pos, line)
-                break
-            self._next_pos = cnt + i
-        self._prev_match = tup
-        return tup
+        for start, stop in [(self.cursor, len(self)), (0, self.cursor)]:
+            for i in range(start, stop):
+                if string in self[i]:
+                    tup = (i, self[i])
+                    self.cursor = i + 1
+                    return tup
 
     def regex(self, *patterns, line=False):
         '''
@@ -240,6 +230,20 @@ class Editor:
                         results[pattern][i] = line
         return results
 
+    def replace(self, pattern, replacement):
+        '''
+        Replace all instances of a pattern with a replacement.
+
+        Args:
+            pattern (str): Pattern to replace
+            replacement (str): Text to insert
+        '''
+        for i in range(len(self)):
+            line = self[i]
+            while pattern in line:
+                line = line.replace(pattern, replacement)
+            self[i] = line
+
     @property
     def variables(self):
         '''
@@ -259,98 +263,52 @@ class Editor:
 
     @classmethod
     def from_file(cls, path, **kwargs):
-        '''
-        Create an editor instance from a file on disk.
-        '''
-        filename = os.path.basename(path)
+        '''Create an editor instance from a file on disk.'''
         lines = lines_from_file(path)
-        return cls(lines, filename, **kwargs)
+        if 'meta' not in kwargs:
+            kwargs['meta'] = {}
+        kwargs['meta']['filepath'] = path
+        return cls(lines, **kwargs)
 
     @classmethod
     def from_stream(cls, f, **kwargs):
-        '''
-        Create an editor instance from a file stream.
-        '''
+        '''Create an editor instance from a file stream.'''
         lines = lines_from_stream(f)
-        filename = f.name if hasattr(f, 'name') else None
-        return cls(lines, filename, **kwargs)
+        if 'meta' not in kwargs:
+            kwargs['meta'] = {}
+        kwargs['meta']['filepath'] = f.name if hasattr(f, 'name') else None
+        return cls(lines, **kwargs)
 
     @classmethod
     def from_string(cls, string, **kwargs):
-        '''
-        Create an editor instance from a string template.
-        '''
+        '''Create an editor instance from a string template.'''
         return cls(lines_from_string(string), **kwargs)
 
-    def _line_repr(self, lines):
-        r = ''
-        nn = len(self)
-        n = len(str(len(lines)))
-        if nn > self._print_count * 2:
-            for i in range(self._print_count):
-                ln = str(i).rjust(n, ' ')
-                r += self._fmt(ln, self._lines[i])
-            r += '...\n'.rjust(n, ' ')
-            for i in range(nn - self._print_count, nn):
-                ln = str(i).rjust(n, ' ')
-                r += self._fmt(ln, self._lines[i])
-        else:
-            for i, line in enumerate(lines):
-                ln = str(i).rjust(n, ' ')
-                r += self._fmt(ln, line)
-        return r
-
-    def _dict_repr(self, lines):
-        r = None
-        n = len(str(max(lines.keys())))
-        for i, line in sorted(lines.items(), key=itemgetter(0)):
-            ln = str(i).rjust(n, ' ')
-            if r is None:
-                r = self._fmt(ln, line)
-            else:
-                r += self._fmt(ln, line)
-        return r
-
-    def __init__(self, data, filename=None, meta={}, as_interned=False, **kwargs):
-        '''
-        The constructor can be passed any valid data argument (file path,
-        stream, or string variable) and it will determine which construction
-        method to call.
-
-        Args:
-            data: File path, stream, or string text
-            filename: Name of file or None
-        '''
-        self._next_pos = None
-        self._next_string = None
-        self._prev_match = None
-        self.filename = filename
-        self.meta = meta
-        ispath = False
-        try:
-            ispath = os.path.exists(data)   # Long "file paths" (i.e. templates/strings) throw errors
-        except:
-            pass
-        if isinstance(data, list):
-            self._lines = data
-        elif ispath:
-            self._lines = lines_from_file(data, as_interned)
-            self.filename = os.path.basename(data)
-        elif isinstance(data, StringIO):
-            self._lines = lines_from_stream(data, as_interned)
-            self.filename = data.name if hasattr(data, 'name') else None
-        elif isinstance(data, str):
-            self._lines = lines_from_string(data, as_interned)
+    def __init__(self, path_stream_or_string, as_interned=False, nprint=30,
+                 name=None, description=None, meta={}):
+        if len(path_stream_or_string) < 256 and os.path.exists(path_stream_or_string):
+            self._lines = lines_from_file(path_stream_or_string, as_interned)
+        elif isinstance(path_stream_or_string, list):
+            self._lines = path_stream_or_string
+        elif isinstance(path_stream_or_string, (TextIOWrapper, StringIO)):
+            self._lines = lines_from_stream(path_stream_or_string, as_interned)
+        elif isinstance(path_stream_or_string, str):
+            self._lines = lines_from_string(path_stream_or_string, as_interned)
         else:
             raise TypeError('Unknown type for arg data: {}'.format(type(data)))
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+        self.name = name
+        self.description = description
+        self.meta = meta
+        self.nprint = 30
+        self.cursor = 0
 
     def __delitem__(self, line):
         del self._lines[line]     # "line" is the line number minus one
 
-    def __getitem__(self, line):
-        return self._lines[line]
+    def __getitem__(self, key):
+        if isinstance(key, str):
+            return getattr(self, key)
+        return self._lines[key]
 
     def __setitem__(self, line, value):
         self._lines[line] = value
@@ -371,18 +329,34 @@ class Editor:
                 return True
 
     def __repr__(self):
-        return self._line_repr(self._lines)
+        r = ''
+        nn = len(self)
+        n = len(str(nn))
+        if nn > self.nprint * 2:
+            for i in range(self.nprint):
+                ln = str(i).rjust(n, ' ')
+                r += self._fmt(ln, self._lines[i])
+            r += '...\n'.rjust(n, ' ')
+            for i in range(nn - self.nprint, nn):
+                ln = str(i).rjust(n, ' ')
+                r += self._fmt(ln, self._lines[i])
+        else:
+            for i, line in enumerate(self):
+                ln = str(i).rjust(n, ' ')
+                r += self._fmt(ln, line)
+        return r
+
 
 def lines_from_file(path, as_interned=False):
     '''
-    Get list of lines in file.
+    Create a list of file lines from a given filepath.
 
     Args:
         path (str): File path
         as_interned (bool): List of "interned" strings (default False)
 
     Returns:
-        strings (list): Line list
+        strings (list): File line list
     '''
     lines = None
     with open(path) as f:
@@ -395,33 +369,31 @@ def lines_from_file(path, as_interned=False):
 
 def lines_from_stream(f, as_interned=False):
     '''
-    Get list of lines in stream.
+    Create a list of file lines from a given file stream.
 
     Args:
-        path (str): File path
+        f (:class:`~io.TextIOWrapper): File stream
         as_interned (bool): List of "interned" strings (default False)
 
     Returns:
-        strings (list): Line list
+        strings (list): File line list
     '''
     if as_interned:
         return [sys.intern(line) for line in f.read().splitlines()]
-    else:
-        return f.read().splitlines()
+    return f.read().splitlines()
 
 
 def lines_from_string(string, as_interned=False):
     '''
-    Get list of lines in string.
+    Create a list of file lines from a given string.
 
     Args:
-        path (str): File path
+        string (str): File string
         as_interned (bool): List of "interned" strings (default False)
 
     Returns:
-        strings (list): Line list
+        strings (list): File line list
     '''
     if as_interned:
         return [sys.intern(line) for line in string.splitlines()]
-    else:
-        return string.splitlines()
+    return string.splitlines()

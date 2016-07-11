@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Distributed under the terms of the Apache License 2.0
 '''
 Distributed
-===================
-Containers store Series and DataFrame objects that have different levels of
-efficient parallelization dependent on their contents. This module provides
-functionality for efficient distributed computation on exa Containers as well
-as interfaces to common resource managers (e.g. `SLURM`_).
-
-.. _SLURM: http://slurm.schedmd.com/
+###################
+Provides the :class:`~exa.distributed.workflow.Workflow` class which systematizes
+remote and distributed computing.
 '''

@@ -1,50 +1,60 @@
 #! /usr/bin/env python
+# -*- coding: utf-8 -*-
+# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Distributed under the terms of the Apache License 2.0
 '''
-exa Web Application
-=====================
-This module starts up the web GUI. Rather than having a standalone graphical
-client, exa's GUI is presented as a web client.
+Executables
+########################
+Exa provides two executables; "exa" and "exw". For the graphical user interface,
+built on top of the Jupyter notebook environment, run "exa" on the command line.
 '''
 import argparse
-import webbrowser
-import threading
-import sys
-import os
-sys.path.insert(0, os.path.abspath('./'))
-from exa._web import serve
+import subprocess
+from exa._config import set_update
 
 
-def get_args():
+def notebook():
     '''
-    Command line argument parsing and usage documentation.
+    Start the exa notebook gui (a Jupyter notebook environment).
     '''
-    parser = argparse.ArgumentParser(description=None)
-    parser.add_argument(
-        '-p',
-        '--port',
-        type=str,
-        help='port (default 5000)',
-        required=False,
-        default=5000
-    )
-    parser.add_argument(
-        '-b',
-        '--browser',
-        type=str,
-        help='browser (system default)',
-        required=False,
-        default=None
-    )
-    return parser.parse_args()
+    subprocess.Popen(['jupyter notebook'], shell=True, cwd=config['paths']['notebooks'])
+
+
+def workflow(wkflw):
+    '''
+    Args:
+        wkflw: Path to workflow script or instance of workflow class.
+    '''
+    raise NotImplementedError('Workflows are currently unsupported.')
 
 
 def main():
     '''
-    Parse command line arguments and start the (web-based) application.
+    Main entry point for the application.
     '''
-    args = get_args()
-    port = args.port
-    browser = args.browser
-    link = 'http://localhost:{port}'.format(port=port)
-    threading.Timer(0.5, lambda: webbrowser.get(browser).open(link)).start()
-    serve(port=port)
+    parser = argparse.ArgumentParser(description=None)
+    parser.add_argument(
+        '-u',
+        '--update',
+        action='store_true',
+        help='Update static data and extensions (updates will occur on next import).'
+    )
+    parser.add_argument(
+        '-w',
+        '--workflow',
+        type=str,
+        help='Workflow not implemented',
+        required=False,
+        default=None
+    )
+    args = parser.parse_args()
+    if args.update == True:
+        set_update()
+    elif args.workflow is None:
+        notebook()
+    else:
+        workflow(args.workflow)
+
+
+if __name__ == '__main__':
+    main()
