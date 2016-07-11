@@ -14,6 +14,7 @@ rather than extending the DOMWidgetView class.
 'use strict';
 
 
+/*
 require.config({
     shim: {
         'nbextensions/exa/test.container': {
@@ -21,8 +22,14 @@ require.config({
         },
     },
 });
+*/
 
 
+/*define([
+    'widgets/js/widget',
+    'nbextensions/exa/test.container'
+], function(widget, TestApp) {
+*/
 define([
     'widgets/js/widget',
     'nbextensions/exa/test.container'
@@ -39,6 +46,7 @@ define([
         Warning:
             Do not override the DOMWidgetView constructor ("initialize").
         */
+
         render() {
             /*"""
             render
@@ -55,6 +63,10 @@ define([
             */
             this.default_listeners();
             this.create_container();
+            console.log('render exa base container');
+            console.log(this);
+            console.log('test app');
+            console.log(TestApp);
             this.init();              // Specific to the data container
             this.setElement(this.container);
         };
@@ -66,6 +78,7 @@ define([
             Container view classes that extend this class can overwrite this
             method to customize the behavior of their data specific view.
             */
+            console.log('initial container init');
             this.if_empty();
         };
 
@@ -114,8 +127,13 @@ define([
             var check = this.get_trait('test');
             if (check === true) {
                 console.log('Empty container, displaying test interface!');
+                console.log(this);
+                console.log(TestApp);
+                console.log(typeof TestApp);
                 this.app = new TestApp(this);
             };
+            console.log('check');
+            console.log(check);
         };
 
         default_listeners() {
@@ -159,7 +177,6 @@ define([
                 },
             });
         };
-
         create_canvas() {
             /*"""
             create_canvas
@@ -195,7 +212,7 @@ define([
         get_field_indices() {
             this.field_indices = this.get_trait('field_indices');
         };
-    };
 
+    };
     return {ContainerView: ContainerView};
 });

@@ -154,7 +154,6 @@ define([], function() {
         compute_field
         --------------
         */
-        console.log('computing field...');
         var values = new Float32Array(n);
         var norm = 0;
         var dv = (xs[1] - xs[0]) * (ys[1] - ys[0]) * (zs[1] - zs[0]);

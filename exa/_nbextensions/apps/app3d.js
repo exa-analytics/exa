@@ -498,8 +498,6 @@ define([
             mesh.geometry.computeBoundingBox();
             var bbox = mesh.geometry.boundingBox;
             var xyz = bbox.max;
-            console.log(bbox);
-            console.log(xyz);
             xyz.x *= 1.2;
             xyz.x += rx;
             xyz.y *= 1.2;
@@ -508,7 +506,6 @@ define([
             xyz.z += rz;
             var kwargs = {'x': xyz.x, 'y': xyz.y, 'z': xyz.z,
                           'ox': oxyz[0], 'oy': oxyz[1], 'oz': oxyz[2]};
-            console.log(kwargs);
             this.set_camera(kwargs);
         };
 

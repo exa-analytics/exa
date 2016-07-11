@@ -38,7 +38,6 @@ define([
         */
         constructor(dimensions, func_or_values) {
             console.log('in field constructor');
-            console.log(func_or_values);
             this.func = {};
             if (dimensions.hasOwnProperty('x') === true) {
                 this.x = dimensions.x;
