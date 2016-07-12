@@ -348,7 +348,7 @@ class Container:
             return getattr(self, key)
         raise KeyError()
 
-    def __init__(self, name=None, description=None, meta=None, **kwargs):
+    def __init__(self, name=None, description=None, meta={}, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
         self.name = name

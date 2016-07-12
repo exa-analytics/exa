@@ -2,7 +2,7 @@ numpy
 scipy
 matplotlib
 sqlalchemy
-pandas
+pandas>=0.18.1
 networkx
 sympy
 seaborn
@@ -13,4 +13,3 @@ ipyparallel
 sphinx
 sphinxcontrib-autoanysrc
 nose
-
