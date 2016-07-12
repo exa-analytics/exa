@@ -356,7 +356,8 @@ class Container:
         self.meta = meta
         self._traits_need_update = True
         # This will create an instance of the widget class (if present)
-        self._widget = self._widget_class(self) if config['dynamic']['notebook'] else None
+        self._widget = self._widget_class(self) if config['dynamic']['notebook'] == 'true' else None
+        print(self._widget)
 
     def _repr_html_(self):
         if self._widget is not None and self._traits_need_update:
