@@ -31,6 +31,7 @@ import atexit
 import platform
 import configparser
 import warnings
+import shutil
 from exa.utility import mkp
 
 
@@ -85,7 +86,8 @@ if config['paths']['data'] == 'None':
     config['paths']['data'] = mkp(root, 'data', mk=True)
 if config['paths']['notebooks'] == 'None':
     config['paths']['notebooks'] = mkp(root, 'notebooks', mk=True)
-# log
+    shutil.copyfile(mkp(pkg, '_static', 'exa_demo.ipynb'), mkp(root, 'notebooks', 'exa_demo.ipynb'))
+# log   shutil.copyfile(
 if config['log']['syslog'] == 'None':
     config['log']['syslog'] = mkp(root, 'sys.log')
 if config['log']['dblog'] == 'None':
