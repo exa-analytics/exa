@@ -48,6 +48,7 @@ class Container:
     '''
     _widget_class = ContainerWidget
     _getter_prefix = 'compute'
+    _cardinal_axis = None
 
     def copy(self, **kwargs):
         '''
@@ -69,6 +70,52 @@ class Container:
             For argument description, see :func:`~exa.container.concat`.
         '''
         raise NotImplementedError()
+
+    def slice_by_indices(self, key):
+        '''
+        Slice the container by series or dataframe index.
+
+        Warning:
+            Does not make a copy, must call the **.copy()** method on the
+            resulting container if a copy is needed.
+        '''
+        if isinstance(key, (int, np.int32, np.int64)):
+            key = [key]
+        kwargs = {}
+        for name, data in self._data().items():
+            k = name[1:] if name.startswith('_') else name
+            if isinstance(data, Field):
+                d = data.ix[key]
+                i = d.index.values
+                v = data.field_values[i]
+                kwargs[k] = data.__class__(d, field_values=v)
+            else:
+                kwargs[k] = data.ix[key]
+        return self.__class__(name=self.name, description=self.description,
+                              meta=self.meta, **kwargs)
+
+    def slice_by_cardinal_axis(self, key):
+        '''
+        Slice the container according to its cardinal axis.
+
+        See Also:
+            Note the warning in :func:`~exa.container.Container.slice_by_indices`.
+        '''
+        if isinstance(key, (int, np.int32, np.int64)):
+            key = [key]
+        elif isinstance(key, slice):
+            key = self[self._cardinal_axis].index.values[key]
+        kwargs = {}
+        for name, data in self._data().items():
+            k = name[1:] if name.startswith('_') else name
+            if self._cardinal_axis in data.index.names:
+                kwargs[k] = data.ix[key]
+            elif self._cardinal_axis in data.columns:
+                kwargs[k] = data[data[self._cardinal_axis].isin(key)]
+            else:
+                kwargs[k] = data
+        return self.__class__(name=self.name, description=self.description,
+                              meta=self.meta, **kwargs)
 
     def info(self):
         '''
@@ -299,7 +346,7 @@ class Container:
         '''
         data = {}
         for key, obj in self.__dict__.items():
-            if isinstance(obj, (pd.Series, pd.DataFrame)):
+            if isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFrame)):
                 if copy:
                     data[key] = obj.copy()
                 else:
@@ -346,6 +393,10 @@ class Container:
     def __getitem__(self, key):
         if isinstance(key, str):
             return getattr(self, key)
+        elif isinstance(key, (int, slice, list)) and self._cardinal_axis is None:
+            return self.slice_by_indices(key)
+        elif isinstance(key, (int, slice, list)) and self._cardinal_axis is not None:
+            return self.slice_by_cardinal_axis(key)
         raise KeyError()
 
     def __init__(self, name=None, description=None, meta={}, **kwargs):
