@@ -12,6 +12,7 @@ replace, insert, etc. functionality.
 import os
 import re
 import sys
+import pandas as pd
 from io import StringIO, TextIOWrapper
 from collections import OrderedDict
 
@@ -157,6 +158,19 @@ class Editor:
                 to_remove.append(i)
         self.delete_lines(to_remove)
 
+    def _data(self, copy=False):
+        '''
+        Get all data associated with the container as key value pairs.
+        '''
+        data = {}
+        for key, obj in self.__dict__.items():
+            if isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseDataFrame)):
+                if copy:
+                    data[key] = obj.copy()
+                else:
+                    data[key] = obj
+        return data
+
     def delete_lines(self, lines):
         '''
         Delete all lines with given line numbers.
@@ -243,6 +257,31 @@ class Editor:
             while pattern in line:
                 line = line.replace(pattern, replacement)
             self[i] = line
+
+    def pandas_dataframe(self, start, stop, ncol):
+        '''
+        Returns the result of tab-separated pandas.read_csv on
+        a subset of the file.
+
+        Args:
+            start (int): line number where structured data starts
+            stop (int): line number where structured data stops
+            ncol (int or list): the number of columns in the structured
+                data or a list of that length with column names
+
+        Returns:
+            pd.DataFrame: structured data
+        '''
+        try:
+            ncol = int(ncol)
+            return pd.read_csv(StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=range(ncol))
+        except TypeError:
+            try:
+                ncol = list(ncol)
+                return pd.read_csv(StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=ncol)
+            except TypeError:
+                print('Cannot pandas_dataframe if ncol is {}, must be int or list'.format(type(ncol)))
+
 
     @property
     def variables(self):
