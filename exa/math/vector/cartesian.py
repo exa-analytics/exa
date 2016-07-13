@@ -52,16 +52,16 @@ def magnitude_squared_xyz(x, y, z):
 
 if config['dynamic']['numba'] == 'true':
     from numba import vectorize, jit
-    types = ['int32(int32, int32, int32)', 'int64(int64, int64, int64)',
+    types3 = ['int32(int32, int32, int32)', 'int64(int64, int64, int64)',
              'float32(float32, float32, float32)', 'float64(float64, float64, float64)']
     _magnitude = magnitude
     magnitude = jit(nopython=True, cache=True, nogil=True)(magnitude)
     _magnitude_xyz = magnitude_xyz
-    magnitude_xyz = vectorize(types, nopython=True)(magnitude_xyz)
+    magnitude_xyz = vectorize(types3, nopython=True)(magnitude_xyz)
     _magnitude_squared = magnitude_squared
     magnitude_squared = jit(nopython=True, cache=True, nogil=True)(magnitude_squared)
     _magnitude_squared_xyz = magnitude_squared_xyz
-    magnitude_squared_xyz = vectorize(types, nopython=True)(magnitude_squared_xyz)
+    magnitude_squared_xyz = vectorize(types3, nopython=True)(magnitude_squared_xyz)
     if config['dynamic']['cuda'] == 'true':
-        magnitude_xyz_cuda = vectorize(types, target='cuda')(_magnitude_xyz)
-        magnitude_squared_xyz_cuda = vectorize(types, target='cuda')(_magnitude_squared_xyz)
+        magnitude_xyz_cuda = vectorize(types3, target='cuda')(_magnitude_xyz)
+        magnitude_squared_xyz_cuda = vectorize(types3, target='cuda')(_magnitude_squared_xyz)
