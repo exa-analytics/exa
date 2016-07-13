@@ -86,9 +86,11 @@ if config['paths']['data'] == 'None':
     config['paths']['data'] = mkp(root, 'data', mk=True)
 if config['paths']['notebooks'] == 'None':
     config['paths']['notebooks'] = mkp(root, 'notebooks', mk=True)
-    shutil.copyfile(mkp(pkg, '_static', 'exa_demo.ipynb'), mkp(root, 'notebooks', 'exa_demo.ipynb'))
+    shutil.copyfile(mkp(pkg, '_static', 'exa_demo.ipynb'),
+                    mkp(root, 'notebooks', 'exa_demo.ipynb'))
 if config['paths']['update'] == '1':
-    shutil.copyfile(mkp(pkg, '_static', 'exa_demo.ipynb'), mkp(root, 'notebooks', 'exa_demo.ipynb'))
+    shutil.copyfile(mkp(pkg, '_static', 'exa_demo.ipynb'),
+                    mkp(root, 'notebooks', 'exa_demo.ipynb'))
     atexit.register(del_update)
 #log
 if config['log']['syslog'] == 'None':

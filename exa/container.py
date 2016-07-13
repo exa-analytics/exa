@@ -29,6 +29,7 @@ from exa._config import config
 from exa.widget import ContainerWidget
 from exa.numerical import Series, DataFrame, SparseSeries, SparseDataFrame, Field
 from exa.relational import ContainerFile, scoped_session
+from exa.utility import convert_bytes
 
 
 # These constants are used for data network visualization
@@ -143,10 +144,20 @@ class Container:
         for name, obj in self._data().items():
             names.append(name[1:] if name.startswith('_') else name)
             types.append('.'.join((obj.__module__, obj.__class__.__name__)))
-            sizes.append(obj.memory_usage().sum())
+            if isinstance(obj, pd.Series):
+                sizes.append(obj.memory_usage())
+            else:
+                sizes.append(obj.memory_usage().sum())
         inf = pd.DataFrame.from_dict({'object': names, 'type': types, 'size': sizes})
         inf.set_index('object', inplace=True)
         return inf.sort_index()
+
+    def memory_usage(self):
+        '''
+        Estimate the memory usage of the entire container.
+        '''
+        n = getsizeof(self)
+        return ' '.join((str(s) for s in convert_bytes(n)))
 
     def network(self):
         '''
@@ -494,7 +505,7 @@ class TypedMeta(type):
             convenience method with the signature, self.compute_name() and call
             it prior to returning the property value.
             '''
-            if (not hasattr(self, pname) or getattr(self, pname) is None) and hasattr(self, '{}{}'.format(self._getter_prefix, pname)):
+            if not hasattr(self, pname) and hasattr(self, '{}{}'.format(self._getter_prefix, pname)):
                 self['{}{}'.format(self._getter_prefix, pname)]()
             if not hasattr(self, pname):
                 raise AttributeError('Please compute or set {} first.'.format(name))
@@ -506,8 +517,6 @@ class TypedMeta(type):
             Prior to setting a property value, this function checks that the
             object's type is correct.
             '''
-            if obj is None:
-                pass
             if not isinstance(obj, ptype):
                 try:
                     obj = ptype(obj)
