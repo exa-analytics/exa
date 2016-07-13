@@ -216,7 +216,7 @@ class Container:
                         edges[(n0, n1)] = edge_color_map['index-index']
                         edges[(n1, n0)] = edge_color_map['index-index']
                     for col in v1.columns:
-                        if name in col:
+                        if name in col and '_' not in col:    # Catches things like index name == 'index', column name == 'index0'
                             edges[(n0, n1)] = edge_color_map['index-column']
                             edges[(n1, n0)] = edge_color_map['index-column']
         g = nx.Graph()
@@ -520,8 +520,8 @@ class TypedMeta(type):
             if not isinstance(obj, ptype):
                 try:
                     obj = ptype(obj)
-                except:
-                    raise TypeError('Object {0} must instance of {1}'.format(name, ptype))
+                except Exception:
+                    raise TypeError('Must be able to convert object {0} to {1} (or must be of type {1})'.format(name, ptype))
             setattr(self, pname, obj)
 
         def deleter(self):
