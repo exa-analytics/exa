@@ -89,7 +89,8 @@ if config['paths']['notebooks'] == 'None':
     shutil.copyfile(mkp(pkg, '_static', 'exa_demo.ipynb'), mkp(root, 'notebooks', 'exa_demo.ipynb'))
 if config['paths']['update'] == '1':
     shutil.copyfile(mkp(pkg, '_static', 'exa_demo.ipynb'), mkp(root, 'notebooks', 'exa_demo.ipynb'))
-# log   shutil.copyfile(
+    atexit.register(del_update)
+#log
 if config['log']['syslog'] == 'None':
     config['log']['syslog'] = mkp(root, 'sys.log')
 if config['log']['dblog'] == 'None':
