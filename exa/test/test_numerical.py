@@ -81,3 +81,4 @@ class TestTestingSeries(UnitTester):
         '''
         self.assertTrue(self.s.name == TestingSeries._sname)
         self.assertTrue(self.s.index.name == TestingSeries._iname)
+

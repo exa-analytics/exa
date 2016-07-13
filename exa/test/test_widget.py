@@ -14,3 +14,4 @@ class TestWidget(UnitTester):
     Test for the :class:`~exa.editor.Editor` are performed on the editor's
     source code itself.
     '''
+    pass

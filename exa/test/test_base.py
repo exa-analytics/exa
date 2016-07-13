@@ -42,3 +42,4 @@ class TestTester(UnitTester):
         '''Test that the runners have been imported.'''
         self.assertIn('run_unittests', dir(exa.test))
         self.assertIn('run_doctests', dir(exa.test))
+
