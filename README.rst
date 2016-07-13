@@ -1,5 +1,6 @@
 | |logo|
 | |docs|
+| |gitter|
 | |build|
 | |issues|
 | |cov|
@@ -16,6 +17,10 @@
 .. |docs| image:: https://readthedocs.org/projects/exa/badge/?version=latest
     :target: http://exa.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
+
+.. |gitter| image:: https://badges.gitter.im/exa-analytics/exa.svg
+   :alt: Join the chat at https://gitter.im/exa-analytics/exa
+   :target: https://gitter.im/exa-analytics/exa?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 .. |issues| image:: https://www.quantifiedcode.com/api/v1/project/3c8a5fe969f745f8b2f3554ad59590f0/badge.svg
     :target: https://www.quantifiedcode.com/app/project/3c8a5fe969f745f8b2f3554ad59590f0
@@ -55,3 +60,4 @@ Legal
 ###############
 | Copyright (c) 2015-2016, Exa Analytics Development Team
 | Distributed under the terms of the Apache License 2.0
+
