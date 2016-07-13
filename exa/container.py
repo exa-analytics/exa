@@ -436,7 +436,7 @@ class TypedMeta(type):
             convenience method with the signature, self.compute_name() and call
             it prior to returning the property value.
             '''
-            if not hasattr(self, pname) and hasattr(self, '{}{}'.format(self._getter_prefix, pname)):
+            if (not hasattr(self, pname) or getattr(self, pname) is None) and hasattr(self, '{}{}'.format(self._getter_prefix, pname)):
                 self['{}{}'.format(self._getter_prefix, pname)]()
             if not hasattr(self, pname):
                 raise AttributeError('Please compute or set {} first.'.format(name))
@@ -448,6 +448,8 @@ class TypedMeta(type):
             Prior to setting a property value, this function checks that the
             object's type is correct.
             '''
+            if obj is None:
+                pass
             if not isinstance(obj, ptype):
                 try:
                     obj = ptype(obj)
