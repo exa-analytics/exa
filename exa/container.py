@@ -29,17 +29,18 @@ from exa._config import config
 from exa.widget import ContainerWidget
 from exa.numerical import Series, DataFrame, SparseSeries, SparseDataFrame, Field
 from exa.relational import ContainerFile, scoped_session
+from exa.utility import convert_bytes
 
 
 # These constants are used for data network visualization
 edge_colors = mpl.sns.color_palette('viridis', 2)
-edge_types = ['idx-idx', 'idx-col']
+edge_types = ['index-index', 'index-column']
 edge_color_map = dict(zip(edge_types, edge_colors))
-node_colors = mpl.sns.color_palette('viridis', 9)
-node_types = [Field, pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFrame, Series, DataFrame, SparseSeries, SparseDataFrame]
+r_edge_color_map = {v: k for k, v in edge_color_map.items()}
+node_colors = mpl.sns.color_palette('viridis', 7)
+node_types = [Field, SparseSeries, DataFrame, SparseDataFrame, Series, pd.DataFrame, pd.Series]
 node_color_map = list(zip(node_types, node_colors))
 r_node_color_map = {v: '.'.join((k.__module__, k.__name__)) for k, v in node_color_map}
-r_edge_color_map = {v: k for k, v in edge_color_map.items()}
 
 
 class Container:
@@ -48,6 +49,7 @@ class Container:
     '''
     _widget_class = ContainerWidget
     _getter_prefix = 'compute'
+    _cardinal_axis = None
 
     def copy(self, **kwargs):
         '''
@@ -69,6 +71,52 @@ class Container:
             For argument description, see :func:`~exa.container.concat`.
         '''
         raise NotImplementedError()
+
+    def slice_by_indices(self, key):
+        '''
+        Slice the container by series or dataframe index.
+
+        Warning:
+            Does not make a copy, must call the **.copy()** method on the
+            resulting container if a copy is needed.
+        '''
+        if isinstance(key, (int, np.int32, np.int64)):
+            key = [key]
+        kwargs = {}
+        for name, data in self._data().items():
+            k = name[1:] if name.startswith('_') else name
+            if isinstance(data, Field):
+                d = data.ix[key]
+                i = d.index.values
+                v = data.field_values[i]
+                kwargs[k] = data.__class__(d, field_values=v)
+            else:
+                kwargs[k] = data.ix[key]
+        return self.__class__(name=self.name, description=self.description,
+                              meta=self.meta, **kwargs)
+
+    def slice_by_cardinal_axis(self, key):
+        '''
+        Slice the container according to its cardinal axis.
+
+        See Also:
+            Note the warning in :func:`~exa.container.Container.slice_by_indices`.
+        '''
+        if isinstance(key, (int, np.int32, np.int64)):
+            key = [key]
+        elif isinstance(key, slice):
+            key = self[self._cardinal_axis].index.values[key]
+        kwargs = {}
+        for name, data in self._data().items():
+            k = name[1:] if name.startswith('_') else name
+            if self._cardinal_axis in data.index.names:
+                kwargs[k] = data.ix[key]
+            elif self._cardinal_axis in data.columns:
+                kwargs[k] = data[data[self._cardinal_axis].isin(key)]
+            else:
+                kwargs[k] = data
+        return self.__class__(name=self.name, description=self.description,
+                              meta=self.meta, **kwargs)
 
     def info(self):
         '''
@@ -96,14 +144,28 @@ class Container:
         for name, obj in self._data().items():
             names.append(name[1:] if name.startswith('_') else name)
             types.append('.'.join((obj.__module__, obj.__class__.__name__)))
-            sizes.append(obj.memory_usage().sum())
+            if isinstance(obj, pd.Series):
+                sizes.append(obj.memory_usage())
+            else:
+                sizes.append(obj.memory_usage().sum())
         inf = pd.DataFrame.from_dict({'object': names, 'type': types, 'size': sizes})
         inf.set_index('object', inplace=True)
         return inf.sort_index()
 
+    def memory_usage(self):
+        '''
+        Estimate the memory usage of the entire container.
+        '''
+        n = getsizeof(self)
+        return ' '.join((str(s) for s in convert_bytes(n)))
+
     def network(self):
         '''
         Display information about the container's object relationships.
+
+        Note:
+            Due to quirks of plotting, rerunning this command until a "pleasing"
+            visual is generated may be useful.
         '''
         def get_color(obj):
             '''Gets the color of a node based on the node's data type.'''
@@ -136,11 +198,13 @@ class Container:
         node_sizes *= 13000/node_sizes.max()
         node_sizes += 2000
         node_colors = {}
+        node_types = {}
         edges = {}
         items = self._data().items()
         for k0, v0 in items:
             n0 = k0[1:] if k0.startswith('_') else k0
             node_colors[n0] = get_color(v0)
+            node_types[n0] = '.'.join((v0.__class__.__module__, v0.__class__.__name__))
             for k1, v1 in items:
                 if v0 is v1:
                     continue
@@ -149,25 +213,26 @@ class Container:
                     if name is None:
                         continue
                     if name in v1.index.names:
-                        edges[(n0, n1)] = edge_color_map['idx-idx']
-                        edges[(n1, n0)] = edge_color_map['idx-idx']
+                        edges[(n0, n1)] = edge_color_map['index-index']
+                        edges[(n1, n0)] = edge_color_map['index-index']
                     for col in v1.columns:
-                        if name in col:
-                            edges[(n0, n1)] = edge_color_map['idx-col']
-                            edges[(n1, n0)] = edge_color_map['idx-col']
+                        if name in col and '_' not in col:    # Catches things like index name == 'index', column name == 'index0'
+                            edges[(n0, n1)] = edge_color_map['index-column']
+                            edges[(n1, n0)] = edge_color_map['index-column']
         g = nx.Graph()
         g.add_nodes_from(nodes)
         g.add_edges_from(edges.keys())
         node_size = [node_sizes[k] for k in g.nodes()]
         node_color = [node_colors[k] for k in g.nodes()]
         edge_color = [edges[k] for k in g.edges()]
-        labels = {k: k for k in g.nodes()}
-        fig, ax = mpl.sns.plt.subplots(1, figsize=(13, 8), dpi=300)
+        labels = {k: ' {}\n({})'.format(k, node_types[k]) for k in g.nodes()}
+        fig, ax = mpl.sns.plt.subplots(1, figsize=(14, 9), dpi=300)
         ax.axis('off')
         pos = nx.spring_layout(g)
-        f0 = nx.draw_networkx_nodes(g, pos=pos, ax=ax, alpha=0.8, node_size=node_size,
+        f0 = nx.draw_networkx_nodes(g, pos=pos, ax=ax, alpha=0.7, node_size=node_size,
                                     node_color=node_color)
-        f1 = nx.draw_networkx_labels(g, pos=pos, labels=labels, font_size=17, ax=ax)
+        f1 = nx.draw_networkx_labels(g, pos=pos, labels=labels, font_size=17,
+                                     font_weight='bold', ax=ax)
         f2 = nx.draw_networkx_edges(g, pos=pos, edge_color=edge_color, width=2, ax=ax)
         l1, ax = legend(edge_color, r_edge_color_map, 'Connection', (1, 0), ax)
         l2, ax = legend(node_color, r_node_color_map, 'Data Type', (1, 0.3), ax)
@@ -299,7 +364,7 @@ class Container:
         '''
         data = {}
         for key, obj in self.__dict__.items():
-            if isinstance(obj, (pd.Series, pd.DataFrame)):
+            if isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFrame)):
                 if copy:
                     data[key] = obj.copy()
                 else:
@@ -346,9 +411,13 @@ class Container:
     def __getitem__(self, key):
         if isinstance(key, str):
             return getattr(self, key)
+        elif isinstance(key, (int, slice, list)) and self._cardinal_axis is None:
+            return self.slice_by_indices(key)
+        elif isinstance(key, (int, slice, list)) and self._cardinal_axis is not None:
+            return self.slice_by_cardinal_axis(key)
         raise KeyError()
 
-    def __init__(self, name=None, description=None, meta=None, **kwargs):
+    def __init__(self, name=None, description=None, meta={}, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
         self.name = name
@@ -436,7 +505,7 @@ class TypedMeta(type):
             convenience method with the signature, self.compute_name() and call
             it prior to returning the property value.
             '''
-            if (not hasattr(self, pname) or getattr(self, pname) is None) and hasattr(self, '{}{}'.format(self._getter_prefix, pname)):
+            if not hasattr(self, pname) and hasattr(self, '{}{}'.format(self._getter_prefix, pname)):
                 self['{}{}'.format(self._getter_prefix, pname)]()
             if not hasattr(self, pname):
                 raise AttributeError('Please compute or set {} first.'.format(name))
@@ -448,13 +517,11 @@ class TypedMeta(type):
             Prior to setting a property value, this function checks that the
             object's type is correct.
             '''
-            if obj is None:
-                pass
             if not isinstance(obj, ptype):
                 try:
                     obj = ptype(obj)
-                except:
-                    raise TypeError('Object {0} must instance of {1}'.format(name, ptype))
+                except Exception:
+                    raise TypeError('Must be able to convert object {0} to {1} (or must be of type {1})'.format(name, ptype))
             setattr(self, pname, obj)
 
         def deleter(self):

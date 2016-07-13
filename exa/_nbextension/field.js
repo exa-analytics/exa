@@ -1,8 +1,9 @@
 // Copyright (c) 2015-2016, Exa Analytics Development Team
 // Distributed under the terms of the Apache License 2.0
 /*"""
+===============
 field.js
-#####################
+===============
 This module provides infrastructure for storing and manipulating 3D fields. By
 standardizing how field data is stored, marching cubes (or other surface
 computing algorithms) are easier to work with.

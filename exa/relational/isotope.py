@@ -142,7 +142,7 @@ def symbol_to_element_mass():
     df['fmass'] = df['mass'].mul(df['af'])
     s = df.groupby('name').sum()
     mapper = df.drop_duplicates('name').set_index('name')['symbol']
-    s.index = data.index.map(lambda x: mapper[x])
+    s.index = s.index.map(lambda x: mapper[x])
     s = s['fmass']
     return s
 

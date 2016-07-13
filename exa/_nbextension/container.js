@@ -1,8 +1,9 @@
 // Copyright (c) 2015-2016, Exa Analytics Development Team
 // Distributed under the terms of the Apache License 2.0
 /*"""
+=================
 container.js
-###############
+=================
 JavaScript "frontend" counterpart of exa's Container object for use within
 the Jupyter notebook interface. This "module" standardizes bidirectional
 communication logic for all container widget views.
