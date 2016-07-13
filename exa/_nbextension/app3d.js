@@ -549,6 +549,7 @@ define([
             if (sides === undefined) {
                 sides = 1;
             };
+
             if (algorithm == 'mc' && sides == 1) {
                 var field_mesh = this.march_cubes1(field, isovalue);
                 //this.scene.add(field_mesh);
@@ -714,6 +715,8 @@ define([
             Similar to the above but for finding positive and negative surfaces.
             */
             console.log('march_cubes2');
+            console.log(Math.min(...field));
+            console.log(Math.max(...field));
             var nx = field.nx;
             var ny = field.ny;
             var nz = field.nz;
@@ -850,6 +853,12 @@ define([
             var material2 = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
             var mesh1 = new THREE.Mesh(p_geometry, p_material);
             var mesh2 = new THREE.Mesh(n_geometry, n_material);
+            console.log('positive verts and faces');
+            console.log(frame.p_geometry.vertices.length);
+            console.log(frame.p_geometry.faces.length);
+            console.log('negative verts and faces');
+            console.log(frame.n_geometry.vertices.length);
+            console.log(frame.n_geometry.faces.length);
             this.scene.add(mesh1);
             this.scene.add(mesh2);
             return [mesh1, mesh2];
