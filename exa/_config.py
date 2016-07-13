@@ -24,6 +24,10 @@ db:
 
 js:
     - update: If 1, update JavaScript notebook extensions
+
+Warning:
+    The configuration file (~/.exa/config) should only be altered when no exa
+    notebooks are running (i.e. exa or any of its related packages are imported).
 '''
 import os
 import sys
