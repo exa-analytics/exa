@@ -68,6 +68,8 @@ def main():
         set_update()
         exatomic_up()
     if args.onlyupdate == True:
+        set_update()
+        exatomic_up()
         return
     if args.workflow is not None:
         workflow(args.workflow)
