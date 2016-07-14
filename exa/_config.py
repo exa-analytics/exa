@@ -121,7 +121,7 @@ if config['dynamic']['numba'] == 'true':
         from numba import cuda
         if len(cuda.devices.gpus) > 0:
             config['dynamic']['cuda'] = 'true'
-    except:
+    except Exception:
         pass
 config['dynamic']['notebook'] = 'false'
 try:
