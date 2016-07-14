@@ -17,6 +17,7 @@ def notebook():
     '''
     Start the exa notebook gui (a Jupyter notebook environment).
     '''
+    set_update()
     subprocess.Popen(['jupyter notebook'], shell=True, cwd=config['paths']['notebooks'])
 
 
