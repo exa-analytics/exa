@@ -133,6 +133,7 @@ class Series(Numerical, pd.Series):
 class DataFrame(Numerical, pd.DataFrame):
     '''Trait supporting analogue of :class:`~pandas.DataFrame`.'''
     _copy = pd.DataFrame.copy
+    _memory_usage = pd.DataFrame.memory_usage
     _groupbys = []      # Column names by which to group the data
     _indices = []       # Required index names
     _columns = []       # Required column entries
@@ -233,7 +234,6 @@ class Field(DataFrame):
     _precision = None
     _vprecision = 10      # values precision (for traits)
     _indices = ['field']
-    _memory_usage = DataFrame.memory_usage
 
     def copy(self, *args, **kwargs):
         '''

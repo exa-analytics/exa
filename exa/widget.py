@@ -38,10 +38,13 @@ class Widget(DOMWidget):
         '''
         Recieve and handle messages from notebook extensions ("frontend").
         '''
-        raise NotImplementedError('Handling custom message from JS not ready')
-        typ = data['type']
-        content = data['content']
+        #raise NotImplementedError('Handling custom message from JS not ready')
+        print(message.keys())
+        typ = message['type']
+        content = message['content']
         # Logic to handle various types of messages...
+        if typ == 'image':
+            self._handle_image(content)
 
     def _repr_html_(self):
         self._ipython_display_()
