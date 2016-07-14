@@ -1,9 +1,8 @@
 // Copyright (c) 2015-2016, Exa Analytics Development Team
 // Distributed under the terms of the Apache License 2.0
 /*"""
-====================
 3D Visualization
-====================
+##################
 
 */
 'use strict';
@@ -550,6 +549,7 @@ define([
             if (sides === undefined) {
                 sides = 1;
             };
+
             if (algorithm == 'mc' && sides == 1) {
                 var field_mesh = this.march_cubes1(field, isovalue);
                 //this.scene.add(field_mesh);
@@ -851,6 +851,12 @@ define([
             var material2 = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
             var mesh1 = new THREE.Mesh(p_geometry, p_material);
             var mesh2 = new THREE.Mesh(n_geometry, n_material);
+            console.log('positive verts and faces');
+            console.log(p_geometry.vertices.length);
+            console.log(p_geometry.faces.length);
+            console.log('negative verts and faces');
+            console.log(n_geometry.vertices.length);
+            console.log(n_geometry.faces.length);
             this.scene.add(mesh1);
             this.scene.add(mesh2);
             return [mesh1, mesh2];

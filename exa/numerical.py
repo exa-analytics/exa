@@ -256,6 +256,8 @@ class Field(DataFrame):
         else:
             string = pd.Series(self.index.values).to_json(orient='values')
             traits['field_indices'] = Unicode(string).tag(sync=True)
+        label_indices = self.groupby('frame').apply(lambda x: x[['label']]).to_json(orient='values')
+        traits['label_indices'] = Unicode(label_indices).tag(sync=True)
         s = pd.Series({i: field.values for i, field in enumerate(self.field_values)})
         json_string = s.to_json(orient='values', double_precision=self._vprecision)
         traits['field_values'] = Unicode(json_string).tag(sync=True)
