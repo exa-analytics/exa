@@ -10,8 +10,8 @@
     :target: doc/source/_static/logo.png
     :alt: Exa Analytics
 
-.. |build| image:: https://travis-ci.org/avmarchenko/exa.svg?branch=master
-    :target: https://travis-ci.org/avmarchenko/exa
+.. |build| image:: https://travis-ci.org/exa-analytics/exa.svg?branch=master
+    :target: https://travis-ci.org/exa-analytics/exa
     :alt: Build Status
 
 .. |docs| image:: https://readthedocs.org/projects/exa/badge/?version=latest
@@ -26,8 +26,8 @@
     :target: https://www.quantifiedcode.com/app/project/3c8a5fe969f745f8b2f3554ad59590f0
     :alt: Code Issues
 
-.. |cov| image:: https://codecov.io/gh/avmarchenko/exa/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/avmarchenko/exa
+.. |cov| image:: https://codecov.io/gh/exa-analytics/exa/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/exa-analytics/exa
     :alt: Code Coverage
 
 .. |lic| image:: http://img.shields.io/:license-apache-blue.svg?style=flat-square
@@ -60,4 +60,3 @@ Legal
 ###############
 | Copyright (c) 2015-2016, Exa Analytics Development Team
 | Distributed under the terms of the Apache License 2.0
-

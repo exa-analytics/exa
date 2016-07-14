@@ -107,6 +107,7 @@ if config['db']['uri'] == 'None':
 # dynamically allocated configurations (these are deleted before saving)
 config['dynamic'] = {}
 config['dynamic']['pkgdir'] = pkg
+config['dynamic']['exa_root'] = root
 nb = 'false'
 try:
     import numba
@@ -120,7 +121,7 @@ if config['dynamic']['numba'] == 'true':
         from numba import cuda
         if len(cuda.devices.gpus) > 0:
             config['dynamic']['cuda'] = 'true'
-    except:
+    except Exception:
         pass
 config['dynamic']['notebook'] = 'false'
 try:
