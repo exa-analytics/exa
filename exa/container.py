@@ -118,7 +118,7 @@ class Container:
             if self._cardinal_axis in data.index.names:
                 kwargs[k] = data.ix[key]
             elif self._cardinal_axis in data.columns:
-                kwargs[k] = data[data[self._cardinal_axis].isin(key)]
+                kwargs[k] = data[data[self._cardinal_axis].astype(np.int64).isin(key)]
             else:
                 kwargs[k] = data
         return self.__class__(name=self.name, description=self.description,
