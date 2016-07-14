@@ -38,15 +38,16 @@ Installation
 ##################
 .. code-block:: bash
 
-    conda install exa    # or pip install exa
-    exa -u               # Run to ensure updated notebook extensions
+    pip install exa
+    # coming soon!
+    # conda install exa
 
 
 Getting Started
 ##################
 .. code-block:: bash
 
-    exa    # Run in command line and click on "demo.ipynb"
+    exa -u   # Run command with the "-u" (--update) on first run
 
 
 Documentation

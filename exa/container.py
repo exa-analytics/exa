@@ -33,11 +33,17 @@ from exa.utility import convert_bytes
 
 
 # These constants are used for data network visualization
-edge_colors = mpl.sns.color_palette('viridis', 2)
+try:
+    edge_colors = mpl.sns.color_palette('viridis', 2)
+except ValueError:
+    edge_colors = mpl.sns.color_palette('jet', 2)
 edge_types = ['index-index', 'index-column']
 edge_color_map = dict(zip(edge_types, edge_colors))
 r_edge_color_map = {v: k for k, v in edge_color_map.items()}
-node_colors = mpl.sns.color_palette('viridis', 7)
+try:
+    node_colors = mpl.sns.color_palette('viridis', 7)
+except ValueError:
+    node_colors = mpl.sns.color_palette('jet', 7)
 node_types = [Field, SparseSeries, DataFrame, SparseDataFrame, Series, pd.DataFrame, pd.Series]
 node_color_map = list(zip(node_types, node_colors))
 r_node_color_map = {v: '.'.join((k.__module__, k.__name__)) for k, v in node_color_map}
@@ -216,7 +222,7 @@ class Container:
                         edges[(n0, n1)] = edge_color_map['index-index']
                         edges[(n1, n0)] = edge_color_map['index-index']
                     for col in v1.columns:
-                        if name in col and '_' not in col:    # Catches things like index name == 'index', column name == 'index0'
+                        if name == col or name == col[:-1]:    # Catches index "atom", column "atom1"
                             edges[(n0, n1)] = edge_color_map['index-column']
                             edges[(n1, n0)] = edge_color_map['index-column']
         g = nx.Graph()
