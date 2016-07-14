@@ -41,6 +41,12 @@ from traitlets import Unicode, Integer, Float
 from exa.error import RequiredIndexError, RequiredColumnError
 
 
+if not hasattr(pd.DataFrame, 'memory_usage'):
+    def memory_usage(self):
+        raise NotImplementedErrror()
+    pd.DataFrame.memory_usage = memory_usage
+
+
 class Numerical:
     '''
     Base class for :class:`~exa.numerical.Series`, :class:`~exa.numerical.DataFrame`,
