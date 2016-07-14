@@ -388,10 +388,10 @@ class Container:
         .. _ipywidgets: https://ipywidgets.readthedocs.io/en/latest/
         '''
         if self._widget is not None:    # If a corresponding widget exists, build traits
-            traits = self._custom_traits()
             if len(self._data()) == 0:
-                traits['test'] = Bool(True).tag(sync=True)
+                traits = {'test': Bool(True).tag(sync=True)}
             else:
+                traits = self._custom_traits()
                 traits['test'] = Bool(False).tag(sync=True)
                 traits.update(self._custom_traits())
                 for n, obj in self._data().items():
