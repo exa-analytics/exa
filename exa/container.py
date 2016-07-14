@@ -498,13 +498,11 @@ class TypedMeta(type):
             correct type; a type error is raised if this fails.
         '''
         pname = '_' + name    # This will be where the data is store (e.g. self._name)
+            # This is the default property "getter" for container data objects.
+            # If the property value is None, this function will check for a
+            # convenience method with the signature, self.compute_name() and call
+            # it prior to returning the property value.
         def getter(self):
-            '''
-            This is the default property "getter" for container data objects.
-            If the property value is None, this function will check for a
-            convenience method with the signature, self.compute_name() and call
-            it prior to returning the property value.
-            '''
             if not hasattr(self, pname) and hasattr(self, '{}{}'.format(self._getter_prefix, pname)):
                 self['{}{}'.format(self._getter_prefix, pname)]()
             if not hasattr(self, pname):
@@ -512,11 +510,9 @@ class TypedMeta(type):
             return getattr(self, pname)
 
         def setter(self, obj):
-            '''
-            This is the default property "setter" for container data objects.
-            Prior to setting a property value, this function checks that the
-            object's type is correct.
-            '''
+            # This is the default property "setter" for container data objects.
+            # Prior to setting a property value, this function checks that the
+            # object's type is correct.
             if not isinstance(obj, ptype):
                 try:
                     obj = ptype(obj)
@@ -525,7 +521,7 @@ class TypedMeta(type):
             setattr(self, pname, obj)
 
         def deleter(self):
-            '''Deletes the property's value.'''
+            # Deletes the property's value.
             del self[pname]
 
         return property(getter, setter, deleter)
