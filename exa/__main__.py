@@ -11,13 +11,18 @@ built on top of the Jupyter notebook environment, run "exa" on the command line.
 import argparse
 import subprocess
 from exa._config import set_update, config
+try:
+    from exatomic._config import set_update as exatomic_up
+except ImportError:
+    def tmp():
+        return
+    exatomic_up = tmp
 
 
 def notebook():
     '''
     Start the exa notebook gui (a Jupyter notebook environment).
     '''
-    set_update()
     subprocess.Popen(['jupyter notebook'], shell=True, cwd=config['paths']['notebooks'])
 
 
@@ -51,6 +56,7 @@ def main():
     args = parser.parse_args()
     if args.update == True:
         set_update()
+        exatomic_up()
     elif args.workflow is None:
         notebook()
     else:
