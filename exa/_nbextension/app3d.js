@@ -715,8 +715,6 @@ define([
             Similar to the above but for finding positive and negative surfaces.
             */
             console.log('march_cubes2');
-            console.log(Math.min(...field));
-            console.log(Math.max(...field));
             var nx = field.nx;
             var ny = field.ny;
             var nz = field.nz;
@@ -854,11 +852,11 @@ define([
             var mesh1 = new THREE.Mesh(p_geometry, p_material);
             var mesh2 = new THREE.Mesh(n_geometry, n_material);
             console.log('positive verts and faces');
-            console.log(frame.p_geometry.vertices.length);
-            console.log(frame.p_geometry.faces.length);
+            console.log(p_geometry.vertices.length);
+            console.log(p_geometry.faces.length);
             console.log('negative verts and faces');
-            console.log(frame.n_geometry.vertices.length);
-            console.log(frame.n_geometry.faces.length);
+            console.log(n_geometry.vertices.length);
+            console.log(n_geometry.faces.length);
             this.scene.add(mesh1);
             this.scene.add(mesh2);
             return [mesh1, mesh2];

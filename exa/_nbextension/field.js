@@ -96,10 +96,7 @@ define([
             this.n = this.nx * this.ny * this.nz;
             if (typeof func_or_values === 'function') {
                 this.func = func_or_values;
-                console.log('field constructor before computing field');
-                console.log(this);
                 this.values = num.compute_field(this.x, this.y, this.z, this.n, this.func)['values'];
-                console.log(this.values);
             } else {
                 this.values = new Float32Array(func_or_values);
             };
