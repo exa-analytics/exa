@@ -276,13 +276,15 @@ class Field(DataFrame):
         if isinstance(args[0], pd.Series):
             args = (args[0].to_frame().T, )
         super().__init__(*args, **kwargs)
-        if isinstance(field_values, pd.Series) and len(self) == 1:
-            self.field_values
-        if isinstance(field_values, list):
+        if isinstance(field_values, (list, tuple, np.ndarray)):
             self.field_values = [Series(v) for v in field_values]
+        elif field_values is None:
+            self.field_values = []
+        elif isinstance(field_values, pd.Series):
+            self.field_values = [Series(field_values)]
         else:
-            self.field_values = [Series(v) for v in field_values]
-        for i in range(len(field_values)):
+            raise TypeError('Wrong type for field_values with type {}'.format(type(field_values)))
+        for i in range(len(self.field_values)):
             self.field_values[i].name = i
 
 
