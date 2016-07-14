@@ -337,7 +337,7 @@ class Editor:
             raise TypeError('Unknown type for arg data: {}'.format(type(data)))
         self.name = name
         self.description = description
-        self.meta = meta
+        self.meta = {} if meta is None else meta
         self.nprint = 30
         self.cursor = 0
 

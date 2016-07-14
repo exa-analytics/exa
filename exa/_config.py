@@ -107,6 +107,7 @@ if config['db']['uri'] == 'None':
 # dynamically allocated configurations (these are deleted before saving)
 config['dynamic'] = {}
 config['dynamic']['pkgdir'] = pkg
+config['dynamic']['exa_root'] = root
 nb = 'false'
 try:
     import numba

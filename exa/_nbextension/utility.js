@@ -77,6 +77,19 @@ define([], function() {
         return array;
     };
 
+    var repeat_int = function(value, n) {
+        /*"""
+        repeat_float
+        ==================
+        Repeat a value n times.
+        */
+        var array = new Int32Array(n);
+        for (var i=0; i<n; i++) {
+            array[i] = value
+        };
+        return array;
+    };
+
     var repeat_object = function(value, n) {
         /*"""
         repeat_object
@@ -107,6 +120,7 @@ define([], function() {
         'flatten_to_array': flatten_to_array,
         'create_float_array_xyz': create_float_array_xyz,
         'repeat_float': repeat_float,
+        'repeat_int': repeat_int,
         'repeat_object': repeat_object,
         'mapper': mapper,
     };
