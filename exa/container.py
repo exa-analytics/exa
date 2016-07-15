@@ -372,7 +372,7 @@ class Container:
         for key, obj in self.__dict__.items():
             if isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFrame)):
                 if copy:
-                    data[key] = obj.copy()
+                    data[key] = obj.copy(deep=True)
                 else:
                     data[key] = obj
         return data

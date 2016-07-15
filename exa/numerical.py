@@ -53,11 +53,11 @@ class Numerical:
     and :class:`~exa.numerical.Field` objects, providing default trait
     functionality, shortened string representation, and in memory copying support.
     '''
-    def copy(self, *args, **kwargs):
-        '''
-        Create a copy without mangling the (class) type.
-        '''
-        return self.__class__(self._copy(*args, **kwargs))
+    #def copy(self, *args, **kwargs):
+    #    '''
+    #    Create a copy without mangling the (class) type.
+#        '''
+#        return self.__class__(self._copy(*args, **kwargs))
 
     def _custom_traits(self):
         return {}
@@ -146,6 +146,10 @@ class DataFrame(Numerical, pd.DataFrame):
     _traits = []        # Traits present as dataframe columns (or series values)
     _categories = {}    # Column name, original type pairs ('label', int) that can be compressed to a category
     _precision = {}     # Traits precision for JSON {col: prec, col1: prec, ...}
+
+    def copy(self, *args, **kwargs):
+        return self.copy(*args, **kwargs)
+        #return super().copy(*args, **kwargs)
 
     def _revert_categories(self):
         '''
