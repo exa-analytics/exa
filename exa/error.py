@@ -19,17 +19,6 @@ class ExaException(Exception):
         super().__init__(msg)
 
 
-class RequiredIndexError(ExaException):
-    '''
-    :class:`~exa.dataframe.DataFrame` index name error.
-    '''
-    _msg = 'Missing required index(ices), {0}, for creation of class {1} object.'
-
-    def __init__(self, missing, clsname):
-        msg = self._msg.format(missing, clsname)
-        super().__init__(msg)
-
-
 class RequiredColumnError(ExaException):
     '''
     :class:`~exa.dataframe.DataFrame` column error.

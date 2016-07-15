@@ -4,67 +4,40 @@
 '''
 Trait Supporting Data Objects
 ###################################
-The :class:`~exa.numerical.DataFrame` is an extension of the
-:class:`~pandas.DataFrame` object. It provides additional methods for creating
-traits.
-
-Note:
-    For further information on traits, see :mod:`~exa.widget`.
-
-Additionally, :class:`~exa.numerical.DataFrame` and related objects (e.g
-:class:`~exa.numerical.Field`) provide attributes for defining their index and
-column names. This has the effect of creating relationships between different
-dataframes. They can be grouped into three types:
-
-1. index name (df1) matches index name (df2)
-2. index name (df1) matches column name (df2)
-3. column name (df1) matches column name (df2)
-
-Note:
-    These types correspond to one to one, one to many, and many to many relational
-    types, respectively.
-
-Finally, the objects contained in this module provide convenience methods for
-handling `categorical data`_.
+Data objects are used to store typed data coming from an external source (for
+example a file on disk). There are three primary data objects provided by
+this module, :class:`~exa.numerical.Series`, :class:`~exa.numerical.DataFrame`,
+and :class:`~exa.numerical.Field`. The purpose of these objects is to facilitate
+conversion of data into "traits" used in visualization and enforce relationships
+between data objects in a given container. Any of the objects provided by this
+module may be extended.
 
 See Also:
     For information about traits and how they allow enable dynamic visualizations
-    see :mod:`~exa.widget`. For usage of numerical objects see :mod:`~exa.container`.
-
-.. _categorical data: http://pandas-docs.github.io/pandas-docs-travis/categorical.html
+    see :mod:`~exa.widget`. For usage in container objects, see :mod:`~exa.container`.
 '''
 import warnings
 import numpy as np
 import pandas as pd
 from numbers import Integral, Real
 from traitlets import Unicode, Integer, Float
-from exa.error import RequiredIndexError, RequiredColumnError
-
-
-if not hasattr(pd.DataFrame, 'memory_usage'):
-    def memory_usage(self):
-        raise NotImplementedErrror()
-    pd.DataFrame.memory_usage = memory_usage
+from exa.error import RequiredColumnError
 
 
 class Numerical:
     '''
     Base class for :class:`~exa.numerical.Series`, :class:`~exa.numerical.DataFrame`,
     and :class:`~exa.numerical.Field` objects, providing default trait
-    functionality, shortened string representation, and in memory copying support.
+    functionality and clean representations when present as part of containers.
     '''
-    #def copy(self, *args, **kwargs):
-    #    '''
-    #    Create a copy without mangling the (class) type.
-#        '''
-#        return self.__class__(self._copy(*args, **kwargs))
+    def slice_naive(self, key):
+        '''Naively slice this object by index.'''
+        cls = self.__class__
+        return cls(self.ix[key])
 
     def _custom_traits(self):
+        '''Placeholder for custom traits depending only on self.'''
         return {}
-
-    def _update_traits(self):
-        traits = self._custom_traits()
-        return traits
 
     def __repr__(self):
         name = self.__class__.__name__
@@ -80,26 +53,33 @@ class Series(Numerical, pd.Series):
 
     .. code-block:: Python
 
-        import numpy as np
+        class MySeries(exa.numerical.Series):
+            _sname = 'data'        # series default name
+            _iname = 'data_index'  # series default index name
+            _precision = 2         # series precision for generating traits (of values)
 
-        class MySeries(Series):
-            """Example usage of the exa.Series object."""
-            _sname = 'data'
-            _iname = 'data_index'
-            _precision = 2
-
-        s = MySeries(np.random.rand(10**5))
-        traits = s._update_traits()
-        type(traits)    # dict containing "myseries_values" as a Unicode trait
+        seri = MySeries(np.random.rand(10**5))
+        traits = seri._update_traits()   # dict of traits generated from seri's values
     '''
-    _copy = pd.Series.copy
-    # These attributes should be set when subclassing Series
+    # These attributes may be set when subclassing Series
     _sname = None           # Series may have a required name
     _iname = None           # Series may have a required index name
     _stype = None           # Series may have a required value type
     _itype = None           # Series may have a required index type
     _precision = None       # Precision for JSON values
     _index_trait = False    # Set to true if the index should be a trait
+
+    def copy(self, *args, **kwargs):
+        '''
+        Make a copy of this object.
+
+        See Also:
+            For arguments and description of behavior see `pandas docs`_.
+
+        .. _pandas docs: http://pandas.pydata.org/pandas-docs/stable/generated/pandas.Series.copy.html
+        '''
+        cls = self.__class__    # Note that type conversion does not perform copy
+        return cls(pd.Series(self).copy(*args, **kwargs))
 
     def _update_traits(self):
         '''
@@ -137,34 +117,66 @@ class Series(Numerical, pd.Series):
 
 
 class DataFrame(Numerical, pd.DataFrame):
-    '''Trait supporting analogue of :class:`~pandas.DataFrame`.'''
-    _copy = pd.DataFrame.copy
-    _memory_usage = pd.DataFrame.memory_usage
-    _groupbys = []      # Column names by which to group the data
-    _indices = []       # Required index names
-    _columns = []       # Required column entries
-    _traits = []        # Traits present as dataframe columns (or series values)
-    _categories = {}    # Column name, original type pairs ('label', int) that can be compressed to a category
-    _precision = {}     # Traits precision for JSON {col: prec, col1: prec, ...}
+    '''
+    Trait supporting analogue of :class:`~pandas.DataFrame`.
+
+    .. code-block:: Python
+
+        class MyDF(exa.numerical.DataFrame):
+            _groupby = ('cardinal', int)
+            _index = 'mydf_index'
+            _columns = ['x', 'y', 'z', 'symbol']
+            _traits = ['x', 'y', 'z']
+            _categories = {'symbol': str}
+            _precision = {'x': 2, 'y': 2, 'z': 3}
+
+    Note:
+        If the **_groupby** value is not none, it will automatically be added to
+        the **_categories** dictionary with raw type int.
+
+    Attributes:
+        _groupby (tuple): Tuple of column name and raw type that acts as foreign key to index of another table
+        _index (str): Name of index (may be used as foreign key in another table)
+        _columns (list): Required columns (excluding _groupby)
+        _categories (dict): Dict of column names, raw types that if present will be converted to and from categoricals automatically
+        _traits (list): List of columns that may (if present) be converted to traits on call to _update_traits
+        _precision (dict): Dict of column names, ints, that if present will have traits of the specified (float) precision
+    '''
+    _groupby = ()      # Tuple of column name and raw type that acts as foreign key to index of another table
+    _index = None      # Name of index (may be used as foreign key in another table)
+    _columns = []      # Required columns (excluding _groupby)
+    _categories = {}   # Dict of column names, raw types that if present will be converted to and from categoricals automatically
+    _traits = []       # List of columns that may (if present) be converted to traits on call to _update_traits
+    _precision = {}    # Dict of column names, ints, that if present will have traits of the specified (float) precision
 
     def copy(self, *args, **kwargs):
-        return self.copy(*args, **kwargs)
-        #return super().copy(*args, **kwargs)
+        '''
+        Make a copy of this object.
+
+        See Also:
+            For arguments and description of behavior see `pandas docs`_.
+
+        .. _pandas docs: http://pandas.pydata.org/pandas-docs/stable/generated/pandas.Series.copy.html
+        '''
+        cls = self.__class__    # Note that type conversion does not perform copy
+        return cls(pd.DataFrame(self).copy(*args, **kwargs))
 
     def _revert_categories(self):
         '''
-        Change all columns of type category to their native type.
+        Inplace conversion to categories.
         '''
         for column, dtype in self._categories.items():
-            if column in self.columns:
+            if column in self:
+                print('conv from ', column)
                 self[column] = self[column].astype(dtype)
 
     def _set_categories(self):
         '''
-        Change all category like columns from their native type to category type.
+        Inplace conversion from categories.
         '''
         for column, dtype in self._categories.items():
-            if column in self.columns:
+            if column in self:
+                print('conv to ', column)
                 self[column] = self[column].astype('category')
 
     def _update_traits(self):
@@ -185,30 +197,29 @@ class DataFrame(Numerical, pd.DataFrame):
         traits = self._custom_traits()
         groups = None
         prefix = self.__class__.__name__.lower()
-        self._fi = self.index[0]
-        if self._groupbys:
-            groups = self.groupby(self._groupbys)
+        fi = self.index.values[0]    # First index
+        if self._groupby:
+            groups = self.groupby(self._groupby[0])
         for name in self._traits:
             trait_name = '_'.join((prefix, str(name)))    # Name mangle to ensure uniqueness
-            if name in self.columns:
-                if np.all(np.isclose(self[name], self.ix[self._fi, name])):
-                    value = self.ix[self._fi, name]    # If all the entries are the same
+            p = self._precision[name] if name in self._precision else 10
+            if name in self:
+                if np.all(np.isclose(self[name], self.ix[fi, name])):
+                    value = self.ix[fi, name]          # If all the entries are the same
                     if isinstance(value, Integral):    # only send a single entry to JS.
                         trait = Integer(int(value))
                     elif isinstance(value, Real):
                         trait = Float(float(value))
+                    elif isinstance(value, str):
+                        trait = Unicode(str(value))
                     else:
                         raise TypeError('Unknown type for {0} with type {1}'.format(name, dtype))
                 elif groups:    # If groups exist, make a list of list(s)
-                    p = 10
-                    if name in self._precision:
-                        p = self._precision[name]
-                    trait = Unicode(groups.apply(lambda g: g[name].values).to_json(orient='values', double_precision=p))
+                    series = groups.apply(lambda g: g[name].values)    # Creats a "Series" of array like records
+                    trait = Unicode(series.to_json(orient='values', double_precision=p))
                 else:           # Otherwise, just send the flattened values
-                    p = 10
-                    if name in self._precision:
-                        p = self._precision[name]
-                    trait = Unicode(self[name].to_json(orient='values', double_precision=p))
+                    string = self[name].to_json(orient='values', double_precision=p)
+                    trait = Unicode(string)
                 traits[trait_name] = trait.tag(sync=True)
             elif name == self.index.names[0]:   # If not in columns, but is index name, send index
                 trait_name = '_'.join((prefix, str(name)))
@@ -225,71 +236,114 @@ class DataFrame(Numerical, pd.DataFrame):
                 missing = set(self._columns).difference(self.columns)
                 if missing:
                     raise RequiredColumnError(missing, name)
-            if self._indices:
-                missing = set(self._indices).difference(self.index.names)
-                if missing and len(self.index.names) != len(self._indices):
-                    raise RequiredIndexError(missing, name)
-                else:
-                    self.index.names = self._indices
-        self._set_categories()
+            if self.index.name != self._index:
+                if self.index.name is not None:
+                    warnings.warn('DataFrame index name changed from {} to {}'.format(self.index.name, self._index))
+                self.index.name = self._index
+        if self._groupby != ():
+            self._categories[self._groupby[0]] = self._groupby[1]
+        self._set_categories()    # Set all available categoricals
 
 
 class Field(DataFrame):
     '''
-    A field is composed of the field definition ("field_data") and values (
-    "field_values"). Field data define the shape and discretization of a field.
-    Field values are scalar magnitudes (or vectors) that describe the field at
-    each discretized point in space.
+    A field is defined by field data and field values. Field data defines the
+    discretization of the field (i.e. its origin in a given space, number of
+    steps/step spaceing, and endpoint for example). Field values can be scalar
+    (series) and/or vector (dataframe) data defining the magnitude and/or direction
+    at each given point.
+
+    Note:
+        The convention for generating the discrete field data and ordering of
+        the field values must be the same (e.g. discrete field points are
+        generated x, y, then z and scalar field values are a series object
+        ordered looping first over x then y, then z).
+
+    In addition to the :class:`~exa.numerical.DataFrame` attributes, this object
+    has the following:
+
+    Attributes:
+        _values_precision (int): Precision in values passed as traits
     '''
-    _precision = None
-    _vprecision = 10      # values precision (for traits)
-    _indices = ['field']
+    _values_precision = 10    # Floating point precision for values as traits
 
     def copy(self, *args, **kwargs):
         '''
-        Copy the field dataframe, including the field values
-        '''
-        df = self._copy(*args, **kwargs)
-        field_values = [field.copy() for field in self.field_values]
-        return self.__class__(field_values, df)
+        Make a copy of this object.
 
-    def _custom_traits(self):
+        Note:
+            Copies both field data and field values.
+
+        See Also:
+            For arguments and description of behavior see `pandas docs`_.
+
+        .. _pandas docs: http://pandas.pydata.org/pandas-docs/stable/generated/pandas.Series.copy.html
         '''
-        Obtain field values using the custom trait getter (called automatically
-        by :func:`~exa.numerical.Numerical._update_traits`).
-        '''
-        traits = {}
-        if self._groupbys:
-            grps = self.groupby(self._groupbys)
-            string = str(list(grps.groups.values())).replace(' ', '')
-            traits['field_indices'] = Unicode(string).tag(sync=True)
-        else:
-            string = pd.Series(self.index.values).to_json(orient='values')
-            traits['field_indices'] = Unicode(string).tag(sync=True)
-        label_indices = self.groupby('frame').apply(lambda x: x[['label']]).to_json(orient='values')
-        traits['label_indices'] = Unicode(label_indices).tag(sync=True)
-        s = pd.Series({i: field.values for i, field in enumerate(self.field_values)})
-        json_string = s.to_json(orient='values', double_precision=self._vprecision)
-        traits['field_values'] = Unicode(json_string).tag(sync=True)
-        return traits
+        cls = self.__class__    # Note that type conversion does not perform copy
+        data = pd.DataFrame(self).copy(*args, **kwargs)
+        values = [field.copy() for field in self.field_values]
+        return cls(data, field_values=values)
 
     def memory_usage(self):
         '''
         Get the combined memory usage of the field data and field values.
         '''
-        data = self._memory_usage()
+        data = pd.DataFrame(self).memory_usage()
         values = 0
         for value in self.field_values:
             values += value.memory_usage()
         data['field_values'] = values
         return data
 
+    def slice_naive(self, key):
+        '''
+        Naively (on index) slice the field data and values.
+
+        Args:
+            key: Int, slice, or iterable to select data and values
+
+        Returns:
+            field: Sliced field object
+        '''
+        cls = self.__class__
+        value_indices, data_indices = list(zip(*enumerate(self.index.values)))
+        data_indices = data_indices[key]
+        value_indices = value_indices[key]
+        data = self.ix[data_indices]
+        values = self.field_values[value_indices]
+        return cls(data, field_values=values)
+
+    def _custom_traits(self):
+        '''
+        Obtain field values using the custom trait getter (called automatically
+        by :func:`~exa.numerical.Numerical._update_traits`).
+        '''
+        self._revert_categories()
+        traits = {}
+        if self._groupby:
+            grps = self.groupby(self._groupby[0])
+            string = str(list(grps.groups.values())).replace(' ', '')
+            traits['field_indices'] = Unicode(string).tag(sync=True)
+        else:
+            string = pd.Series(self.index.values).to_json(orient='values')
+            traits['field_indices'] = Unicode(string).tag(sync=True)
+        # What are the next to lines used for???????????
+        #label_indices = self.groupby('frame').apply(lambda x: x[['label']]).to_json(orient='values')
+        #traits['label_indices'] = Unicode(label_indices).tag(sync=True)
+        s = pd.Series({i: field.values for i, field in enumerate(self.field_values)})
+        json_string = s.to_json(orient='values', double_precision=self._vprecision)
+        traits['field_values'] = Unicode(json_string).tag(sync=True)
+        self._set_categories()
+        return traits
+
     def __init__(self, *args, field_values=None, **kwargs):
+        # The following check allows creation of a single field (whose field data
+        # comes from a series object and field values from another series object).
         if isinstance(args[0], pd.Series):
             args = (args[0].to_frame().T, )
         super().__init__(*args, **kwargs)
         if isinstance(field_values, (list, tuple, np.ndarray)):
-            self.field_values = [Series(v) for v in field_values]
+            self.field_values = [Series(v) for v in field_values]    # Convert type for nice repr
         elif field_values is None:
             self.field_values = []
         elif isinstance(field_values, pd.Series):

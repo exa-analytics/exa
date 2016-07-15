@@ -5,17 +5,13 @@
 Container
 ########################
 The :class:`~exa.container.BaseContainer` class is the primary object for
-data processing, analysis, and visualization. Containers are composed of
-n-dimensional spreadsheet-like (see :mod:`~exa.numerical`) objects whose
-columns contain data for 2D and 3D visualization.
-
-The :class:`~exa.container.BaseContainer` is akin to a :class:`~pandas.HDFStore`
-in that it is a container for dataframes (and saves to an HDF5 file). It is
-different in that it provides visualization tools access to the data contained
-via automated JSON strings, transferrable between languages.
+data processing, analysis, and visualization. In brief, containers are composed
+of data objects whose contents are used for 2D and 3D visualization. Containers
+also provide some content management and data relationship features.
 
 See Also:
-    :mod:`~exa.relational.container` and :mod:`~exa.widget`
+    For a description of data objects see :mod:`~exa.numerical`. For a
+    description of visualization of containers, see :mod:`~exa.widget`.
 '''
 import os
 import numpy as np
@@ -32,41 +28,29 @@ from exa.relational import ContainerFile, scoped_session
 from exa.utility import convert_bytes
 
 
-# These constants are used for data network visualization
-try:
-    edge_colors = mpl.sns.color_palette('viridis', 2)
-except ValueError:
-    edge_colors = mpl.sns.color_palette('jet', 2)
-edge_types = ['index-index', 'index-column']
-edge_color_map = dict(zip(edge_types, edge_colors))
-r_edge_color_map = {v: k for k, v in edge_color_map.items()}
-try:
-    node_colors = mpl.sns.color_palette('viridis', 7)
-except ValueError:
-    node_colors = mpl.sns.color_palette('jet', 7)
-node_types = [Field, SparseSeries, DataFrame, SparseDataFrame, Series, pd.DataFrame, pd.Series]
-node_color_map = list(zip(node_types, node_colors))
-r_node_color_map = {v: '.'.join((k.__module__, k.__name__)) for k, v in node_color_map}
-
-
 class Container:
     '''
     Container class responsible for all features related to data management.
     '''
     _widget_class = ContainerWidget
     _getter_prefix = 'compute'
-    _cardinal_axis = None
+    _cardinal = None    # Name of the cardinal data table
 
-    def copy(self, **kwargs):
+    def copy(self, name=None, description=None, meta=None):
         '''
-        Create a copy of the current object.
+        Create a copy of the current object (may alter the container's name,
+        description, and update the metadata if needed).
         '''
         cls = self.__class__
-        kws = self._rel(copy=True)
-        dfs = self._data(copy=True)
-        kws.update(dfs)             # We updates kws in this order because we
-        kws.update(kwargs)          # want to respect the user's kwargs.
-        return cls(**kws)
+        kwargs = self._rel(copy=True)
+        kwargs.update(self._data(copy=True))
+        if name is not None:
+            kwargs['name'] = name
+        if description is not None:
+            kwargs['description'] = description
+        if isinstance(meta, dict):
+            kwargs['meta'].update(meta)
+        return cls(**kwargs)
 
     def concat(self, *args, **kwargs):
         '''
@@ -78,26 +62,29 @@ class Container:
         '''
         raise NotImplementedError()
 
-    def slice_by_indices(self, key):
+    def slice_naive(self, key):
         '''
-        Slice the container by series or dataframe index.
+        Naively slice each data object in the container by the object's index.
+
+        Args:
+            key: Int, slice, or list by which to extra "sub"-container
+
+        Returns:
+            sub: Sub container of the same format with a view of the data
 
         Warning:
-            Does not make a copy, must call the **.copy()** method on the
-            resulting container if a copy is needed.
+            To ensure that a new container is created, use the copy method.
+
+            .. code-block:: Python
+
+                mycontainer[slice].copy()
         '''
         if isinstance(key, (int, np.int32, np.int64)):
             key = [key]
         kwargs = {}
         for name, data in self._data().items():
             k = name[1:] if name.startswith('_') else name
-            if isinstance(data, Field):
-                d = data.ix[key]
-                i = d.index.values
-                v = data.field_values[i]
-                kwargs[k] = data.__class__(d, field_values=v)
-            else:
-                kwargs[k] = data.ix[key]
+            kwargs[k] = data.slice_naive(key)
         return self.__class__(name=self.name, description=self.description,
                               meta=self.meta, **kwargs)
 
@@ -126,7 +113,8 @@ class Container:
 
     def info(self):
         '''
-        Display information about the container's objects.
+        Display information about the container's data objects (note that info
+        on metadata and visualization objects is also provided).
 
         Note:
             Sizes are reported in bytes.
@@ -158,91 +146,121 @@ class Container:
         inf.set_index('object', inplace=True)
         return inf.sort_index()
 
-    def memory_usage(self):
+    def memory_usage(self, string=False):
         '''
-        Estimate the memory usage of the entire container.
-        '''
-        n = getsizeof(self)
-        return ' '.join((str(s) for s in convert_bytes(n)))
+        Get the memory usage estimate of the container.
 
-    def network(self):
+        Args:
+            string (bool): Human readable string (default false)
+
+        See Also:
+            :func:`~exa.container.Container.info`
+        '''
+        if string:
+            n = getsizeof(self)
+            return ' '.join((str(s) for s in convert_bytes(n)))
+        return self.info()['size']
+
+    def network(self, figsize=(14, 9)):
         '''
         Display information about the container's object relationships.
 
-        Note:
-            Due to quirks of plotting, rerunning this command until a "pleasing"
-            visual is generated may be useful.
-        '''
-        def get_color(obj):
-            '''Gets the color of a node based on the node's data type.'''
-            for k, v in node_color_map:
-                if isinstance(obj, k):
-                    return v
-            return 'gray'
+        Nodes correspond to data objects. The size of the node corresponds
+        to the size of the table in memory. The color of the node corresponds
+        to its fundamental data type. Nodes are labeled by their container
+        name; class information is listed below. The color of the connections
+        correspond to the type of relationship; either an index of one table
+        corresponds to a column in another table or the two tables share an
+        index.
 
-        def legend(items, mapper, title, loc, ax):
-            '''Legend creation helper'''
+        Args:
+            figsize (tuple): Tuple containing figure dimensions
+
+        Returns:
+            graph: Network graph object containing data relationships
+        '''
+        conn_types = ['index-index', 'index-column']
+        conn_colors = mpl.sns.color_palette('viridis', len(conn_types))
+        conn = dict(zip(conn_types, conn_colors))
+
+        def get_node_type_color(obj):
+            '''Gets the color of a node based on the node's (sub)type.'''
+            typs = [Field, SparseSeries, DataFrame, SparseDataFrame, Series, pd.DataFrame, pd.Series]
+            cols = mpl.sns.color_palette('viridis', len(typs))
+            for typ, col in zip(typs, cols):
+                if isinstance(obj, typ):
+                    return '.'.join((typ.__module__, typ.__name__)), col
+            return 'other', 'gray'
+
+        def legend(items, name, loc, ax):
+            '''Legend creation helper function.'''
             proxies = []
             descriptions = []
-            for k in set(items):
-                if title == 'Data Type':
-                    line = mpl.sns.mpl.lines.Line2D([], [], linestyle='none', color=k, marker='o')
+            for label, color in items:
+                if label == 'column-index':
+                    continue
+                if name == 'Data Type':
+                    line = mpl.sns.mpl.lines.Line2D([], [], linestyle='none', color=color, marker='o')
                 else:
-                    line = mpl.sns.mpl.lines.Line2D([], [], linestyle='-', color=k)
+                    line = mpl.sns.mpl.lines.Line2D([], [], linestyle='-', color=color)
                 proxies.append(line)
-                descriptions.append(mapper[k])
-            leg = ax.legend(proxies, descriptions, title=title, loc=loc, frameon=True)
-            leg_frame = leg.get_frame()
-            leg_frame.set_facecolor('white')
-            leg_frame.set_edgecolor('black')
-            return leg, ax
+                descriptions.append(label)
+            lgnd = ax.legend(proxies, descriptions, title=name, loc=loc, frameon=True)
+            lgnd_frame = lgnd.get_frame()
+            lgnd_frame.set_facecolor('white')
+            lgnd_frame.set_edgecolor('black')
+            return lgnd, ax
 
-        inf = self.info()
-        inf = inf[inf['type'] != '-']
-        nodes = inf.index.values
-        node_sizes = inf['size']
-        node_sizes *= 13000/node_sizes.max()
-        node_sizes += 2000
-        node_colors = {}
-        node_types = {}
-        edges = {}
+        info = self.info()
+        info = info[info['type'] != '-']
+        info['size'] *= 13000/info['size'].max()
+        info['size'] += 2000
+        node_size_dict = info['size'].to_dict()      # Can pull all nodes from keys
+        node_class_name_dict = info['type'].to_dict()
+        node_type_dict = {}    # Values are tuple of "underlying" type and color
+        node_conn_dict = {}    # Values are tuple of connection type and color
         items = self._data().items()
         for k0, v0 in items:
             n0 = k0[1:] if k0.startswith('_') else k0
-            node_colors[n0] = get_color(v0)
-            node_types[n0] = '.'.join((v0.__class__.__module__, v0.__class__.__name__))
+            node_type_dict[n0] = get_node_type_color(v0)
             for k1, v1 in items:
                 if v0 is v1:
                     continue
                 n1 = k1[1:] if k1.startswith('_') else k1
-                for name in v0.index.names:
-                    if name is None:
+                for name in v0.index.names:    # Check the index of data object 0 against the index
+                    if name is None:           # and columns of data object 1
                         continue
                     if name in v1.index.names:
-                        edges[(n0, n1)] = edge_color_map['index-index']
-                        edges[(n1, n0)] = edge_color_map['index-index']
+                        contyp = 'index-index'
+                        node_conn_dict[(n0, n1)] = (contyp, conn[contyp])
+                        node_conn_dict[(n1, n0)] = (contyp, conn[contyp])
                     for col in v1.columns:
-                        if name == col or name == col[:-1]:    # Catches index "atom", column "atom1"
-                            edges[(n0, n1)] = edge_color_map['index-column']
-                            edges[(n1, n0)] = edge_color_map['index-column']
+                        # Catches index "atom", column "atom1"; does not catch atom10
+                        if name == col or (name == col[:-1] and name[-1].isdigit()):
+                            contyp = 'index-column'
+                            node_conn_dict[(n0, n1)] = (contyp, conn[contyp])
+                            node_conn_dict[(n1, n0)] = ('column-index', conn[contyp])
         g = nx.Graph()
-        g.add_nodes_from(nodes)
-        g.add_edges_from(edges.keys())
-        node_size = [node_sizes[k] for k in g.nodes()]
-        node_color = [node_colors[k] for k in g.nodes()]
-        edge_color = [edges[k] for k in g.edges()]
-        labels = {k: ' {}\n({})'.format(k, node_types[k]) for k in g.nodes()}
-        fig, ax = mpl.sns.plt.subplots(1, figsize=(14, 9), dpi=300)
+        g.add_nodes_from(node_size_dict.keys())
+        g.add_edges_from(node_conn_dict.keys())
+        node_sizes = [node_size_dict[node] for node in g.nodes()]
+        node_labels = {node: ' {}\n({})'.format(node, node_class_name_dict[node]) for node in g.nodes()}
+        node_colors = [node_type_dict[node][1] for node in g.nodes()]
+        edge_colors = [node_conn_dict[edge][1] for edge in g.edges()]
+        # Build the figure and legends
+        fig, ax = mpl.sns.plt.subplots(1, figsize=figsize)
         ax.axis('off')
         pos = nx.spring_layout(g)
-        f0 = nx.draw_networkx_nodes(g, pos=pos, ax=ax, alpha=0.7, node_size=node_size,
-                                    node_color=node_color)
-        f1 = nx.draw_networkx_labels(g, pos=pos, labels=labels, font_size=17,
+        f0 = nx.draw_networkx_nodes(g, pos=pos, ax=ax, alpha=0.7, node_size=node_sizes,
+                                    node_color=node_colors)
+        f1 = nx.draw_networkx_labels(g, pos=pos, labels=node_labels, font_size=17,
                                      font_weight='bold', ax=ax)
-        f2 = nx.draw_networkx_edges(g, pos=pos, edge_color=edge_color, width=2, ax=ax)
-        l1, ax = legend(edge_color, r_edge_color_map, 'Connection', (1, 0), ax)
-        l2, ax = legend(node_color, r_node_color_map, 'Data Type', (1, 0.3), ax)
+        f2 = nx.draw_networkx_edges(g, pos=pos, edge_color=edge_colors, width=2, ax=ax)
+        l1, ax = legend(set(node_conn_dict.values()), 'Connection', (1, 0), ax)
+        l2, ax = legend(set(node_type_dict.values()), 'Data Type', (1, 0.3), ax)
         fig.gca().add_artist(l1)
+        g.edge_types = {node: value[0] for node, value in node_conn_dict.items()}  # Attached connection information to network graph
+        return g
 
     def save(self, path):
         '''
@@ -318,8 +336,10 @@ class Container:
             container: The saved container object
         '''
         path = pkid_or_path
-        if not os.path.isfile(pkid_or_path):
-            raise NotImplementedError('Cannot lookup automatic path yet..')
+        if isinstance(path, (int, np.int32, np.in64)):
+            raise NotImplementedError('Lookup via CMS not implemented.')
+        elif not os.path.isfile(path):
+            raise FileNotFoundError('File {} not found.'.format(path))
         kwargs = {}
         with pd.HDFStore(path) as store:
             for key in store.keys():
@@ -352,11 +372,10 @@ class Container:
 
     def _rel(self, copy=False):
         '''
-        Get all (propagatable) relational and metadata data of the container (
-        primary keys are not propagatable).
+        Get descriptive kwargs of the container (e.g. name, description, meta).
         '''
         rel = {}
-        for key, obj in self.__dict__.items():
+        for key, obj in vars(self).items():
             if not isinstance(obj, (pd.Series, pd.DataFrame)) and not key.startswith('_'):
                 if copy and 'id' not in key:
                     rel[key] = deepcopy(obj)
@@ -366,10 +385,10 @@ class Container:
 
     def _data(self, copy=False):
         '''
-        Get all data associated with the container as key value pairs.
+        Get data kwargs of the container (i.e. dataframe and series objects).
         '''
         data = {}
-        for key, obj in self.__dict__.items():
+        for key, obj in vars(self).items():
             if isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFrame)):
                 if copy:
                     data[key] = obj.copy(deep=True)
@@ -397,7 +416,7 @@ class Container:
             if len(self._data()) == 0:
                 traits = {'test': Bool(True).tag(sync=True)}
             else:
-                traits = self._custom_traits()
+                traits = self._custom_traits()    # Start with custom traits
                 traits['test'] = Bool(False).tag(sync=True)
                 traits.update(self._custom_traits())
                 for n, obj in self._data().items():
@@ -407,7 +426,7 @@ class Container:
             self._traits_need_update = False     # them accesible from nbextensions (JavaScript).
 
     def __delitem__(self, key):
-        if key in self.__dict__:
+        if key in vars(self):
             del self.__dict__[key]
 
     def __sizeof__(self):
@@ -430,8 +449,9 @@ class Container:
         self.description = description
         self.meta = {} if meta is None else meta
         self._traits_need_update = True
-        # This will create an instance of the widget class (if present)
-        self._widget = self._widget_class(self) if config['dynamic']['notebook'] == 'true' else None
+        self._widget = None
+        if config['dynamic']['notebook'] == 'true':
+            self._widget = self._widget_class(self)
 
     def _repr_html_(self):
         if self._widget is not None and self._traits_need_update:
@@ -503,12 +523,13 @@ class TypedMeta(type):
             By default, the setter attempts to convert the object to the
             correct type; a type error is raised if this fails.
         '''
-        pname = '_' + name    # This will be where the data is store (e.g. self._name)
+        pname = '_' + name
+        def getter(self):
+            # This will be where the data is store (e.g. self._name)
             # This is the default property "getter" for container data objects.
             # If the property value is None, this function will check for a
             # convenience method with the signature, self.compute_name() and call
             # it prior to returning the property value.
-        def getter(self):
             if not hasattr(self, pname) and hasattr(self, '{}{}'.format(self._getter_prefix, pname)):
                 self['{}{}'.format(self._getter_prefix, pname)]()
             if not hasattr(self, pname):
@@ -539,7 +560,7 @@ class TypedMeta(type):
         :func:`~exa.container.TypedMeta.create_property`) definition, returning
         the new class definition.
         '''
-        for k, v in metacls.__dict__.items():
+        for k, v in vars(metacls).items():
             if isinstance(v, type) and k[0] != '_':
                 clsdict[k] = metacls.create_property(k, v)
         return super().__new__(metacls, name, bases, clsdict)

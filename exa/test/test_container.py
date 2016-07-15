@@ -14,29 +14,32 @@ from exa.test import UnitTester
 from exa.relational.base import BaseMeta
 from exa.numerical import DataFrame, Series
 
+
 class DummyDataFrame(DataFrame):
-    _indices = ['index']
-    #_groupbys = ['group']
+    _index = 'index'
     _categories = {'cat': str}
-    _columns = ['x', 'y', 'z', 'cat', 'group']
+    _columns = ['x', 'y', 'z', 'cat']
+
 
 class DummySeries(Series):
     _precision = 3
     _sname = 'field'
     _iname = 'value'
 
-class DummyContainerTypes(TypedMeta):
-    '''Statically typed attributes'''
+
+class DummyMeta(TypedMeta):
     s0 = DummySeries
     s1 = DummySeries
     df = DummyDataFrame
 
-class DummyContainer(Container, metaclass=DummyContainerTypes):
-    '''The test container.'''
+
+class DummyContainer(Container, metaclass=DummyMeta):
     pass
 
-class TestContainer(UnitTester):
 
+class TestContainer(UnitTester):
+    '''
+    '''
     def setUp(self):
         w = [0, 1, 2, 3, 4]
         x = [0, 0, 0, 0, 0]
@@ -49,14 +52,8 @@ class TestContainer(UnitTester):
         self.container.s0 = DummySeries(y)
         self.container.s1 = DummySeries(cat, dtype='category')
         self.container.df = pd.DataFrame.from_dict({'x': x, 'y': y, 'z': z, 'cat': cat, 'group': group})
-#        self.container._update_traits()
 
     def test_attributes(self):
         self.assertIsInstance(self.container.s0, DummySeries)
-        self.assertIsInstance(self.container.s1.dtype, pd.types.dtypes.CategoricalDtype) 
+        self.assertIsInstance(self.container.s1.dtype, pd.types.dtypes.CategoricalDtype)
         self.assertIsInstance(self.container.df, DummyDataFrame)
-
-    #def test_widget(self):
-    #    self.assertTrue(hasattr(self.container, '_widget'))
-    #    self.assertEqual(self.container._widget.df_x, '[[0,0],[0,0,0]]')
-
