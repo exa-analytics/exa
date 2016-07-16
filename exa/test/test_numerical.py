@@ -138,10 +138,16 @@ class TestTestingDF1(UnitTester):
 
     def test_categories(self):
         '''Test that categoricals are being handled correctly.'''
-        self.assertIsInstance(self.df['type'], pd.types.dtypes.CategoricalDtype)
+        self.assertIsInstance(self.df['type'].dtype, pd.types.dtypes.CategoricalDtype)
+
+    def test_traits(self):
+        '''Test trait generation.'''
+        traits = self.df._update_traits()
+        self.assertIsInstance(traits, dict)
+        self.assertIn('testingdf1_column', traits)
 
 
-class TestTestingDF1(UnitTester):
+class TestTestingDF2(UnitTester):
     '''
     Test an example instance of :class:`~exa.numerical.DataFrame` with groupby.
     '''
@@ -163,4 +169,13 @@ class TestTestingDF1(UnitTester):
 
     def test_categories(self):
         '''Test that categoricals are being handled correctly.'''
-        self.assertIsInstance(self.df['type'], pd.types.dtypes.CategoricalDtype)
+        self.assertIsInstance(self.df['type'].dtype, pd.types.dtypes.CategoricalDtype)
+        self.assertIsInstance(self.df['group'].dtype, pd.types.dtypes.CategoricalDtype)
+
+    def test_traits(self):
+        '''Test trait generation.'''
+        traits = self.df._update_traits()
+        self.assertIsInstance(traits, dict)
+        self.assertIn('testingdf2_x', traits)
+        self.assertIn('testingdf2_y', traits)
+        self.assertIn('testingdf2_z', traits)

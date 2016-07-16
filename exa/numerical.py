@@ -149,6 +149,17 @@ class DataFrame(Numerical, pd.DataFrame):
     _traits = []       # List of columns that may (if present) be converted to traits on call to _update_traits
     _precision = {}    # Dict of column names, ints, that if present will have traits of the specified (float) precision
 
+    @property
+    def grpd(self):
+        '''
+        Group this object on it cardinal dimension (**_groupby**).
+
+        Returns:
+            grouped: Pandas groupby object (grouped on **_groupby**)
+        '''
+        # Because this line of code comes up so often, we alias it...
+        return self.groupby(self._groupby)
+
     def copy(self, *args, **kwargs):
         '''
         Make a copy of this object.
@@ -167,7 +178,6 @@ class DataFrame(Numerical, pd.DataFrame):
         '''
         for column, dtype in self._categories.items():
             if column in self:
-                print('conv from ', column)
                 self[column] = self[column].astype(dtype)
 
     def _set_categories(self):
@@ -176,7 +186,6 @@ class DataFrame(Numerical, pd.DataFrame):
         '''
         for column, dtype in self._categories.items():
             if column in self:
-                print('conv to ', column)
                 self[column] = self[column].astype('category')
 
     def _update_traits(self):
