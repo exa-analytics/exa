@@ -22,7 +22,7 @@ setup(
     author_email="exa.data.analytics@gmail.com",
     maintainer_email="exa.data.analytics@gmail.com",
     url="https://exa-analytics.github.io",
-    download_url="https://github.com/exa-analytics/exa/tarball/v{}"".format(__version__),
+    download_url="https://github.com/exa-analytics/exa/tarball/v{}".format(__version__),
     packages=find_packages(),
     package_data={'exa': ["_static/*.json", "_nbextension/*.js", "_nbextensions/lib/*.js"]},
     entry_points={'console_scripts': ['exa=exa.__main__:main']},
