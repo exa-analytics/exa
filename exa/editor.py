@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
-'''
+"""
 Editor
 ####################################
 Text-editor-like functionality for programatically manipulating raw text input
 and output data and converting this data into container objects. This class
 does not behave like a fully fledged text editor but does have some basic find,
 replace, insert, etc. functionality.
-'''
+"""
 import os
 import re
 import sys
@@ -18,7 +18,7 @@ from collections import OrderedDict
 
 
 class Editor:
-    '''
+    """
     An editor is a representation of a text file on disk that can be
     programmatically manipulated.
 
@@ -53,12 +53,12 @@ class Editor:
         meta (dict): Additional metadata as key, value pairs
         nrpint (int): Number of lines to display when printing
         cursor (int): Line number position of the cusor (see :func:`~exa.editor.Editor.find_next_any` and :func:`~exa.editor.Editor.find_next_string`)
-    '''
+    """
     _getter_prefix = 'parse'
     _fmt = '{0}: {1}\n'.format   # Format for printing lines (see __repr__)
 
     def write(self, path=None, *args, **kwargs):
-        '''
+        """
         Perform formatting and write the formatted string to a file or stdout.
 
         Optional arguments can be used to format the editor's contents. If no
@@ -68,7 +68,7 @@ class Editor:
             path (str): Full file path (default None, prints to stdout)
             *args: Positional arguments to format the editor with
             **kwargs: Keyword arguments to format the editor with
-        '''
+        """
         if path is None:
             print(self.format(*args, **kwargs))
         else:
@@ -76,41 +76,41 @@ class Editor:
                 f.write(self.format(*args, **kwargs))
 
     def format(self, *args, inplace=False, **kwargs):
-        '''
+        """
         Format the string representation of the editor.
 
         Args:
             inplace (bool): If True, overwrite editor's contents with formatted contents
-        '''
+        """
         if not inplace:
             return str(self).format(*args, **kwargs)
         self._lines = str(self).format(*args, **kwargs).splitlines()
 
     def head(self, n=10):
-        '''
+        """
         Display the top of the file.
 
         Args:
             n (int): Number of lines to display
-        '''
+        """
         r = self.__repr__().split('\n')
         print('\n'.join(r[:n]), end=' ')
 
     def tail(self, n=10):
-        '''
+        """
         Display the bottom of the file.
 
         Args:
             n (int): Number of lines to display
-        '''
+        """
         r = self.__repr__().split('\n')
         print('\n'.join(r[-n:]), end=' ')
 
     def append(self, lines):
-        '''
+        """
         Args:
             lines (list): List of line strings to append to the end of the editor
-        '''
+        """
         if isinstance(lines, list):
             self._lines = self._lines + lines
         elif isinstance(lines, str):
@@ -120,10 +120,10 @@ class Editor:
             raise TypeError('Unsupported type {0} for lines.'.format(type(lines)))
 
     def prepend(self, lines):
-        '''
+        """
         Args:
             lines (list): List of line strings to insert at the beginning of the editor
-        '''
+        """
         if isinstance(lines, list):
             self._lines = lines + self._lines
         elif isinstance(lines, str):
@@ -133,7 +133,7 @@ class Editor:
             raise TypeError('Unsupported type {0} for lines.'.format(type(lines)))
 
     def insert(self, lines={}):
-        '''
+        """
         Insert lines into the editor.
 
         Note:
@@ -142,7 +142,7 @@ class Editor:
 
         Args:
             lines (dict): Dictionary of lines of form (lineno, string) pairs
-        '''
+        """
         for i, (key, line) in enumerate(lines.items()):
             n = key + i
             first_half = self._lines[:n]
@@ -150,7 +150,7 @@ class Editor:
             self._lines = first_half + [line] + last_half
 
     def remove_blank_lines(self):
-        '''Remove all blank lines (blank lines are those with zero characters).'''
+        """Remove all blank lines (blank lines are those with zero characters)."""
         to_remove = []
         for i, line in enumerate(self):
             ln = line.strip()
@@ -159,9 +159,9 @@ class Editor:
         self.delete_lines(to_remove)
 
     def _data(self, copy=False):
-        '''
+        """
         Get all data associated with the container as key value pairs.
-        '''
+        """
         data = {}
         for key, obj in self.__dict__.items():
             if isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseDataFrame)):
@@ -172,17 +172,17 @@ class Editor:
         return data
 
     def delete_lines(self, lines):
-        '''
+        """
         Delete all lines with given line numbers.
 
         Args:
             lines (list): List of integers corresponding to line numbers to delete
-        '''
+        """
         for k, i in enumerate(lines):
             del self[i-k]    # Accounts for the fact that len(self) decrease upon deletion
 
     def find(self, *strings):
-        '''
+        """
         Search the entire editor for lines that match the string.
 
         Args:
@@ -190,7 +190,7 @@ class Editor:
 
         Returns:
             results (dict): Dictionary of string key, line values.
-        '''
+        """
         results = {string: OrderedDict() for string in strings}
         for i, line in enumerate(self):
             for string in strings:
@@ -199,7 +199,7 @@ class Editor:
         return results
 
     def find_next(self, string):
-        '''
+        """
         From the editor's current cursor position find the next instance of the
         given string.
 
@@ -213,7 +213,7 @@ class Editor:
         Note:
             This function cycles the entire editor (i.e. cursor to length of
             editor to zero and back to cursor position).
-        '''
+        """
         for start, stop in [(self.cursor, len(self)), (0, self.cursor)]:
             for i in range(start, stop):
                 if string in self[i]:
@@ -222,7 +222,7 @@ class Editor:
                     return tup
 
     def regex(self, *patterns, line=False):
-        '''
+        """
         Search the editor for lines matching the regular expression.
 
         Args:
@@ -231,7 +231,7 @@ class Editor:
 
         Returns:
             results (dict): Dictionary of pattern keys, line values (or groups - default)
-        '''
+        """
         results = {pattern: OrderedDict() for pattern in patterns}
         for i, line in enumerate(self):
             for pattern in patterns:
@@ -245,13 +245,13 @@ class Editor:
         return results
 
     def replace(self, pattern, replacement):
-        '''
+        """
         Replace all instances of a pattern with a replacement.
 
         Args:
             pattern (str): Pattern to replace
             replacement (str): Text to insert
-        '''
+        """
         for i in range(len(self)):
             line = self[i]
             while pattern in line:
@@ -259,7 +259,7 @@ class Editor:
             self[i] = line
 
     def pandas_dataframe(self, start, stop, ncol):
-        '''
+        """
         Returns the result of tab-separated pandas.read_csv on
         a subset of the file.
 
@@ -271,7 +271,7 @@ class Editor:
 
         Returns:
             pd.DataFrame: structured data
-        '''
+        """
         try:
             ncol = int(ncol)
             return pd.read_csv(StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=range(ncol))
@@ -285,7 +285,7 @@ class Editor:
 
     @property
     def variables(self):
-        '''
+        """
         Display a list of templatable variables present in the file.
 
         Templating is accomplished by creating a bracketed object in the same
@@ -294,7 +294,7 @@ class Editor:
         positional arguments.
 
         .. _string formatting: https://docs.python.org/3.6/library/string.html
-        '''
+        """
         string = str(self)
         constants = [match[1:-1] for match in re.findall('{{[A-z0-9]}}', string)]
         variables = re.findall('{[A-z0-9]*}', string)
@@ -302,7 +302,7 @@ class Editor:
 
     @classmethod
     def from_file(cls, path, **kwargs):
-        '''Create an editor instance from a file on disk.'''
+        """Create an editor instance from a file on disk."""
         lines = lines_from_file(path)
         if 'meta' not in kwargs:
             kwargs['meta'] = {}
@@ -311,7 +311,7 @@ class Editor:
 
     @classmethod
     def from_stream(cls, f, **kwargs):
-        '''Create an editor instance from a file stream.'''
+        """Create an editor instance from a file stream."""
         lines = lines_from_stream(f)
         if 'meta' not in kwargs:
             kwargs['meta'] = {}
@@ -320,7 +320,7 @@ class Editor:
 
     @classmethod
     def from_string(cls, string, **kwargs):
-        '''Create an editor instance from a string template.'''
+        """Create an editor instance from a string template."""
         return cls(lines_from_string(string), **kwargs)
 
     def __init__(self, path_stream_or_string, as_interned=False, nprint=30,
@@ -387,7 +387,7 @@ class Editor:
 
 
 def lines_from_file(path, as_interned=False):
-    '''
+    """
     Create a list of file lines from a given filepath.
 
     Args:
@@ -396,7 +396,7 @@ def lines_from_file(path, as_interned=False):
 
     Returns:
         strings (list): File line list
-    '''
+    """
     lines = None
     with open(path) as f:
         if as_interned:
@@ -407,7 +407,7 @@ def lines_from_file(path, as_interned=False):
 
 
 def lines_from_stream(f, as_interned=False):
-    '''
+    """
     Create a list of file lines from a given file stream.
 
     Args:
@@ -416,14 +416,14 @@ def lines_from_stream(f, as_interned=False):
 
     Returns:
         strings (list): File line list
-    '''
+    """
     if as_interned:
         return [sys.intern(line) for line in f.read().splitlines()]
     return f.read().splitlines()
 
 
 def lines_from_string(string, as_interned=False):
-    '''
+    """
     Create a list of file lines from a given string.
 
     Args:
@@ -432,7 +432,7 @@ def lines_from_string(string, as_interned=False):
 
     Returns:
         strings (list): File line list
-    '''
+    """
     if as_interned:
         return [sys.intern(line) for line in string.splitlines()]
     return string.splitlines()

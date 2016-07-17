@@ -12,19 +12,19 @@ Jupyter notebook environment.
 
 require.config({
     shim: {
-        'nbextensions/exa/app3d': {exports: 'App3D'},
-        'nbextensions/exa/gui': {exports: 'ContainerGUI'},
-        'nbextensions/exa/num': {exports: 'num'},
-        'nbextensions/exa/field': {exports: 'field'},
+        "nbextensions/exa/app3d": {exports: 'App3D'},
+        "nbextensions/exa/gui": {exports: 'ContainerGUI'},
+        "nbextensions/exa/num": {exports: 'num'},
+        "nbextensions/exa/field": {exports: 'field'},
     },
 });
 
 
 define([
-    'nbextensions/exa/app3d',
-    'nbextensions/exa/gui',
-    'nbextensions/exa/num',
-    'nbextensions/exa/field'
+    "nbextensions/exa/app3d",
+    "nbextensions/exa/gui",
+    "nbextensions/exa/num",
+    "nbextensions/exa/field"
 ], function(App3D, ContainerGUI, num, field) {
     class TestApp {
         /*"""
@@ -33,7 +33,6 @@ define([
         A test application for the container
         */
         constructor(view) {
-            console.log('constructing testapp');
             this.view = view;
             this.view.create_canvas();
             this.meshes = [];
@@ -162,5 +161,6 @@ define([
             this.app3d.set_camera({'x': 5.0, 'y': 5.0, 'z': 5.0});
         };
     };
+    
     return TestApp;
 });

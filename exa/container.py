@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
-'''
+"""
 Container
 ########################
 The :class:`~exa.container.BaseContainer` class is the primary object for
@@ -12,7 +12,7 @@ also provide some content management and data relationship features.
 See Also:
     For a description of data objects see :mod:`~exa.numerical`. For a
     description of visualization of containers, see :mod:`~exa.widget`.
-'''
+"""
 import os
 import numpy as np
 import pandas as pd
@@ -29,18 +29,18 @@ from exa.utility import convert_bytes
 
 
 class Container:
-    '''
+    """
     Container class responsible for all features related to data management.
-    '''
+    """
     _widget_class = ContainerWidget
     _getter_prefix = 'compute'
     _cardinal = None    # Name of the cardinal data table
 
     def copy(self, name=None, description=None, meta=None):
-        '''
+        """
         Create a copy of the current object (may alter the container's name,
         description, and update the metadata if needed).
-        '''
+        """
         cls = self.__class__
         kwargs = self._rel(copy=True)
         kwargs.update(self._data(copy=True))
@@ -53,17 +53,17 @@ class Container:
         return cls(**kwargs)
 
     def concat(self, *args, **kwargs):
-        '''
+        """
         Concatenate any number of container objects with the current object into
         a single container object.
 
         See Also:
             For argument description, see :func:`~exa.container.concat`.
-        '''
+        """
         raise NotImplementedError()
 
     def slice_naive(self, key):
-        '''
+        """
         Naively slice each data object in the container by the object's index.
 
         Args:
@@ -78,7 +78,7 @@ class Container:
             .. code-block:: Python
 
                 mycontainer[slice].copy()
-        '''
+        """
         if isinstance(key, (int, np.int32, np.int64)):
             key = [key]
         kwargs = {}
@@ -89,12 +89,12 @@ class Container:
                               meta=self.meta, **kwargs)
 
     def slice_by_cardinal_axis(self, key):
-        '''
+        """
         Slice the container according to its cardinal axis.
 
         See Also:
             Note the warning in :func:`~exa.container.Container.slice_by_indices`.
-        '''
+        """
         if isinstance(key, (int, np.int32, np.int64)):
             key = [key]
         elif isinstance(key, slice):
@@ -112,13 +112,13 @@ class Container:
                               meta=self.meta, **kwargs)
 
     def info(self):
-        '''
+        """
         Display information about the container's data objects (note that info
         on metadata and visualization objects is also provided).
 
         Note:
             Sizes are reported in bytes.
-        '''
+        """
         names = []
         types = []
         sizes = []
@@ -147,7 +147,7 @@ class Container:
         return inf.sort_index()
 
     def memory_usage(self, string=False):
-        '''
+        """
         Get the memory usage estimate of the container.
 
         Args:
@@ -155,14 +155,14 @@ class Container:
 
         See Also:
             :func:`~exa.container.Container.info`
-        '''
+        """
         if string:
             n = getsizeof(self)
             return ' '.join((str(s) for s in convert_bytes(n)))
         return self.info()['size']
 
     def network(self, figsize=(14, 9)):
-        '''
+        """
         Display information about the container's object relationships.
 
         Nodes correspond to data objects. The size of the node corresponds
@@ -178,13 +178,13 @@ class Container:
 
         Returns:
             graph: Network graph object containing data relationships
-        '''
+        """
         conn_types = ['index-index', 'index-column']
         conn_colors = mpl.sns.color_palette('viridis', len(conn_types))
         conn = dict(zip(conn_types, conn_colors))
 
         def get_node_type_color(obj):
-            '''Gets the color of a node based on the node's (sub)type.'''
+            """Gets the color of a node based on the node's (sub)type."""
             typs = [Field, SparseSeries, DataFrame, SparseDataFrame, Series, pd.DataFrame, pd.Series]
             cols = mpl.sns.color_palette('viridis', len(typs))
             for typ, col in zip(typs, cols):
@@ -193,7 +193,7 @@ class Container:
             return 'other', 'gray'
 
         def legend(items, name, loc, ax):
-            '''Legend creation helper function.'''
+            """Legend creation helper function."""
             proxies = []
             descriptions = []
             for label, color in items:
@@ -263,12 +263,12 @@ class Container:
         return g
 
     def save(self, path):
-        '''
+        """
         Save the container as an HDF5 archive.
 
         Args:
             path (str): Path where to save the container
-        '''
+        """
         # First save the file record
         with scoped_session() as session:
             cfile = ContainerFile(name=self.name, description=self.description,
@@ -326,7 +326,7 @@ class Container:
 
     @classmethod
     def load(cls, pkid_or_path=None):
-        '''
+        """
         Load a container object from a persistent location or file path.
 
         Args:
@@ -334,7 +334,7 @@ class Container:
 
         Returns:
             container: The saved container object
-        '''
+        """
         path = pkid_or_path
         if isinstance(path, (int, np.int32, np.in64)):
             raise NotImplementedError('Lookup via CMS not implemented.')
@@ -371,9 +371,9 @@ class Container:
         return cls(**kwargs)
 
     def _rel(self, copy=False):
-        '''
+        """
         Get descriptive kwargs of the container (e.g. name, description, meta).
-        '''
+        """
         rel = {}
         for key, obj in vars(self).items():
             if not isinstance(obj, (pd.Series, pd.DataFrame)) and not key.startswith('_'):
@@ -384,9 +384,9 @@ class Container:
         return rel
 
     def _data(self, copy=False):
-        '''
+        """
         Get data kwargs of the container (i.e. dataframe and series objects).
-        '''
+        """
         data = {}
         for key, obj in vars(self).items():
             if isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFrame)):
@@ -397,21 +397,21 @@ class Container:
         return data
 
     def _custom_traits(self):
-        '''
+        """
         Placeholder for custom container traits (e.g. traits that are comprised
         of data present in multiple data objects).
-        '''
+        """
         return {}
 
     def _update_traits(self):
-        '''
+        """
         Jupyter notebook widgets require data to be available within a
         :class:`~exa.widget.Widget` object. This allows notebook extensions
         (nbextensions - written in JavaScript) to access backend (Python) data
         via `ipywidgets`_.
 
         .. _ipywidgets: https://ipywidgets.readthedocs.io/en/latest/
-        '''
+        """
         if self._widget is not None:    # If a corresponding widget exists, build traits
             if len(self._data()) == 0:
                 traits = {'test': Bool(True).tag(sync=True)}
@@ -430,7 +430,7 @@ class Container:
             del self.__dict__[key]
 
     def __sizeof__(self):
-        '''Note that this function must return a Python integer.'''
+        """Note that this function must return a Python integer."""
         return int(self.info()['size'].sum())
 
     def __getitem__(self, key):
@@ -460,7 +460,7 @@ class Container:
 
 
 class TypedMeta(type):
-    '''
+    """
     This metaclass creates statically typed class attributes using the property
     framework.
 
@@ -511,10 +511,10 @@ class TypedMeta(type):
             def __init__(self, attr1, attr2):
                 self.attr1 = attr1
                 self.attr2 = attr2
-    '''
+    """
     @staticmethod
     def create_property(name, ptype):
-        '''
+        """
         Creates a custom property with a getter that performs computing
         functionality (if available) and raise a type error if setting
         with the wrong type.
@@ -522,7 +522,7 @@ class TypedMeta(type):
         Note:
             By default, the setter attempts to convert the object to the
             correct type; a type error is raised if this fails.
-        '''
+        """
         pname = '_' + name
         def getter(self):
             # This will be where the data is store (e.g. self._name)
@@ -554,12 +554,12 @@ class TypedMeta(type):
         return property(getter, setter, deleter)
 
     def __new__(metacls, name, bases, clsdict):
-        '''
+        """
         Modification of the class definition occurs here; we iterate over all
         statically typed attributes and attach their property (see
         :func:`~exa.container.TypedMeta.create_property`) definition, returning
         the new class definition.
-        '''
+        """
         for k, v in vars(metacls).items():
             if isinstance(v, type) and k[0] != '_':
                 clsdict[k] = metacls.create_property(k, v)

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
-'''
+"""
 Logging
 ############
 There are two log files that exa writes to, the system log and the database log.
@@ -12,7 +12,7 @@ Levels:
     - 0: default (>= WARNING messages are logged)
     - 1: info    (>= INFO messages are logged)
     - 2: debug   (all messages are logged)
-'''
+"""
 import os
 import logging
 from logging.handlers import RotatingFileHandler
@@ -21,23 +21,23 @@ from exa._config import config
 
 
 class LogFormat(logging.Formatter):
-    '''
+    """
     Custom log format used by all loggers.
-    '''
+    """
     spacing = '                                     '
     log_basic = '%(asctime)19s - %(levelname)8s'
-    debug_format = '''%(asctime)19s - %(levelname)8s - %(pathname)s:%(lineno)d
-                                     %(message)s'''
-    info_format = '''%(asctime)19s - %(levelname)8s - %(message)s'''
+    debug_format = """%(asctime)19s - %(levelname)8s - %(pathname)s:%(lineno)d
+                                     %(message)s"""
+    info_format = """%(asctime)19s - %(levelname)8s - %(message)s"""
     log_formats = {logging.DEBUG: debug_format, logging.INFO: info_format,
                    logging.WARNING: info_format, logging.ERROR: debug_format,
                    logging.CRITICAL: debug_format}
 
     def format(self, record):
-        '''
+        """
         Overwrites the built-in format function (called when sending a message
         to the logger) with the specific format defined by this class.
-        '''
+        """
         fmt = logging.Formatter(self.log_formats[record.levelno])
         j = '\n' + self.spacing
         record.msg = j.join(wrap(record.msg, width=80))
@@ -45,9 +45,9 @@ class LogFormat(logging.Formatter):
 
 
 def create_logger(name):
-    '''
+    """
     Create a logger with a given name.
-    '''
+    """
     logger = logging.getLogger(name)
     handler = RotatingFileHandler(config['log'][name],
                                   maxBytes=int(config['log']['nbytes']),
@@ -65,9 +65,9 @@ def create_logger(name):
 loggers = {name: create_logger(name) for name in config['log'].keys() if name.endswith('log')}
 
 #def setup_loggers():
-#    '''
+#    """
 #    Setup up loggers and (corresponding) file handlers.
-#    '''
+#    """
 #    global config
 #    if 'loggers' in config:
 #        cleanup()
@@ -89,49 +89,49 @@ loggers = {name: create_logger(name) for name in config['log'].keys() if name.en
 #
 #
 #def logfiles():
-#    '''
+#    """
 #    Lists available log names.
 #
 #    Returns:
 #        names (list): List of available log names
-#    '''
+#    """
 #    return [handler.name for handler in logging.root.handlers]
 #
 #
 #def get_logger(which='sys'):
-#    '''
+#    """
 #    Get a log file handler ('sys', 'db', 'user').
-#    '''
+#    """
 #    return config['loggers'][which]
 #
 #
 #def head(log='log_sys', n=10):
-#    '''
+#    """
 #    Print the oldest log messages.
 #
 #    Args:
 #        log (str): Log name
 #        n (int): Number of lines to print
-#    '''
+#    """
 #    print_log(log, n, True)
 #
 #
 #def tail(log='sys', n=10):
-#    '''
+#    """
 #    Print the most recent log messages.
 #
 #    Args:
 #        log (str): Log name
 #        n (int): Number of lines to print
-#    '''
+#    """
 #    print_log(log, n, False)
 #
 #
 #def print_log(log, n, head=True):
-#    '''
+#    """
 #    Print the head or tail of a given log file (see :func:`~exa.log.head`
 #    and :func:`~exa.log.tail`).
-#    '''
+#    """
 #    lines = None
 #    with open(config['log_' + log], 'r') as f:
 #        lines = f.read().splitlines()
@@ -142,9 +142,9 @@ loggers = {name: create_logger(name) for name in config['log'].keys() if name.en
 #
 #
 #def cleanup():
-#    '''
+#    """
 #    Clean up logging file handlers.
-#    '''
+#    """
 #    for name, logger in config['loggers'].items():
 #        for handler in logger.handlers:
 #            handler.close()

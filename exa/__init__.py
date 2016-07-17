@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
-'''
+"""
 Exa
 #########
 This package creates a systematic infrastructure for an ecosystem of packages,
@@ -17,7 +17,7 @@ analysis, and visualization within the `Jupyter notebook`_ environment.
 
 .. _pandas: http://pandas.pydata.org/pandas-docs/stable/index.html
 .. _Jupyter notebook: http://jupyter.org/
-'''
+"""
 __exa_version__ = (0, 2, 12)
 __version__ = '.'.join((str(v) for v in __exa_version__))
 

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
-'''
+"""
 Tests for :mod:`~exa.container`
 ##################################
 The :class:`~exa.container.Container` object depends in a complex manner on
 much of the functionality of the framework; especially :mod:`~exa.numerical`
 and :mod:`~exa.widget`.
-'''
+"""
 import pandas as pd
 from exa.container import Container, TypedMeta
 from exa.test import UnitTester
@@ -38,8 +38,8 @@ class DummyContainer(Container, metaclass=DummyMeta):
 
 
 class TestContainer(UnitTester):
-    '''
-    '''
+    """
+    """
     def setUp(self):
         w = [0, 1, 2, 3, 4]
         x = [0, 0, 0, 0, 0]
