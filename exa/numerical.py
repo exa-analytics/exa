@@ -135,22 +135,6 @@ class BaseDataFrame(Numerical):
         # Because this line of code comes up so often, we alias it...
         return self.groupby(self._groupby[0])
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if len(self) > 0:
-            name = self.__class__.__name__
-            if self._columns:
-                missing = set(self._columns).difference(self.columns)
-                if missing:
-                    raise RequiredColumnError(missing, name)
-            if self.index.name != self._index:
-                if self.index.name is not None:
-                    warnings.warn("Object's index name changed from {} to {}".format(self.index.name, self._index))
-                self.index.name = self._index
-        if self._groupby != ():
-            self._categories[self._groupby[0]] = self._groupby[1]
-        self._set_categories()    # Set all available categoricals
-
 
 class Series(BaseSeries, pd.Series):
     """
@@ -269,6 +253,22 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
                 traits[trait_name] = Unicode(string).tag(sync=True)
         self._set_categories()
         return traits
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if len(self) > 0:
+            name = self.__class__.__name__
+            if self._columns:
+                missing = set(self._columns).difference(self.columns)
+                if missing:
+                    raise RequiredColumnError(missing, name)
+            if self.index.name != self._index:
+                if self.index.name is not None:
+                    warnings.warn("Object's index name changed from {} to {}".format(self.index.name, self._index))
+                self.index.name = self._index
+        if self._groupby != ():
+            self._categories[self._groupby[0]] = self._groupby[1]
+        self._set_categories()    # Set all available categoricals
 
 
 class Field(DataFrame):
@@ -457,3 +457,16 @@ class SparseDataFrame(BaseDataFrame, pd.SparseDataFrame):
         """
         cls = self.__class__
         return cls(pd.SparseDataFrame(self).copy(*args, **kwargs))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if len(self) > 0:
+            name = self.__class__.__name__
+            if self._columns:
+                missing = set(self._columns).difference(self.columns)
+                if missing:
+                    raise RequiredColumnError(missing, name)
+            if self.index.name != self._index:
+                if self.index.name is not None:
+                    warnings.warn("Object's index name changed from {} to {}".format(self.index.name, self._index))
+                self.index.name = self._index

@@ -236,7 +236,7 @@ class Container:
                         node_conn_dict[(n1, n0)] = (contyp, conn[contyp])
                     for col in v1.columns:
                         # Catches index "atom", column "atom1"; does not catch atom10
-                        if name == col or (name == col[:-1] and name[-1].isdigit()):
+                        if name == col or (name == col[:-1] and col[-1].isdigit()):
                             contyp = 'index-column'
                             node_conn_dict[(n0, n1)] = (contyp, conn[contyp])
                             node_conn_dict[(n1, n0)] = ('column-index', conn[contyp])
