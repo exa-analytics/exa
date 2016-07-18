@@ -133,7 +133,11 @@ class BaseDataFrame(Numerical):
             grouped: Pandas groupby object (grouped on **_groupby**)
         """
         # Because this line of code comes up so often, we alias it...
-        return self.groupby(self._groupby[0])
+        g, t = self._groupby
+        self[g] = self[g].astype(t)
+        grps = self.groupby(g)
+        self[g] = self[g].astype('category')
+        return grps
 
 
 class Series(BaseSeries, pd.Series):
@@ -446,6 +450,16 @@ class SparseSeries(BaseSeries, pd.SparseSeries):
         cls = self.__class__
         return cls(pd.SparseSeries(self).copy(*args, **kwargs))
 
+    def _custom_traits(self):
+        '''Placeholder for custom traits.'''
+        return {}
+
+    def _update_traits(self):
+        '''
+        '''
+        traits = self._custom_traits()
+        return traits
+
 
 class SparseDataFrame(BaseDataFrame, pd.SparseDataFrame):
     """
@@ -457,6 +471,16 @@ class SparseDataFrame(BaseDataFrame, pd.SparseDataFrame):
         """
         cls = self.__class__
         return cls(pd.SparseDataFrame(self).copy(*args, **kwargs))
+
+    def _custom_traits(self):
+        '''Placeholder for custom traits.'''
+        return {}
+
+    def _update_traits(self):
+        '''
+        '''
+        traits = self._custom_traits()
+        return traits
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

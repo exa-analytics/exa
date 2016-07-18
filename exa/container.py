@@ -88,26 +88,63 @@ class Container:
         return self.__class__(name=self.name, description=self.description,
                               meta=self.meta, **kwargs)
 
-    def slice_by_cardinal_axis(self, key):
+    def slice_by_cardinal(self, key):
         """
-        Slice the container according to its cardinal axis.
+        Slice the container according to its (primary) cardinal axis.
+
+        The "cardinal" axis can have any name so long as the name matches a
+        data object attached to the container. The index name for this object
+        should also match the value of the cardinal axis.
+
+        The algorithm builds a network graph representing the data relationships
+        (including information about the type of relationship) and then traverses
+        the edge tree (starting from the cardinal table). Each subsequent child
+        object in the tree is sliced based on its relationship with its parent.
+
+        Note:
+            Breadth first traversal is performed.
+
+        Warning:
+            This function does not make a copy (if possible): to ensure a new
+            object is created (a copy) use :func:`~exa.container.Container.copy`
+            after slicing.
+
+            .. code-block:: Python
+
+                myslice = mycontainer[::2].copy()
 
         See Also:
-            Note the warning in :func:`~exa.container.Container.slice_by_indices`.
+            For data network generation, see :func:`~exa.container.Container.network`.
+            For information about relationships between data objects see
+            :mod:`~exa.numerical`.
         """
         if isinstance(key, (int, np.int32, np.int64)):
             key = [key]
         elif isinstance(key, slice):
-            key = self[self._cardinal_axis].index.values[key]
-        kwargs = {}
-        for name, data in self._data().items():
-            k = name[1:] if name.startswith('_') else name
-            if self._cardinal_axis in data.index.names:
-                kwargs[k] = data.ix[key]
-            elif self._cardinal_axis in data.columns:
-                kwargs[k] = data[data[self._cardinal_axis].astype(np.int64).isin(key)]
-            else:
-                kwargs[k] = data
+            key = self[self._cardinal].index.values[key]
+        g = self.network(fig=False)
+        # First add the cardinal table
+        kwargs = {self._cardinal: self[self._cardinal].ix[key]}
+        # Next traverse, breadth first, all data objects
+        for parent, child in nx.bfs_edges(g, self._cardinal):
+            typ = g.edge_types[(parent, child)]
+            if typ == 'index-index':
+                # Select from the child on the parent's index (the parent is
+                # in the kwargs already).
+                kwargs[child] = self[child].ix[kwargs[parent].index.values]
+            elif typ == 'index-column':
+                # Select from the child where the column (of the same name as
+                # the parent) is in the parent's index values
+                cdf = self[child]
+                kwargs[child] = cdf[cdf[parent].isin(kwargs[parent].index.values)]
+            elif typ == 'column-index':
+                # Select from the child where the child's index is in the
+                # column of the parent. Note that this relationship
+                cdf = self[child]
+                cin = cdf.index.name
+                cols = [col for col in kwargs[parent] if cin == col or (cin == col[:-1] and col[-1].isdigit())]
+                index = kwargs[parent][cols].stack().astype(np.int64).values
+                kwargs[child] = cdf[cdf.index.isin(index)]
         return self.__class__(name=self.name, description=self.description,
                               meta=self.meta, **kwargs)
 
@@ -161,7 +198,7 @@ class Container:
             return ' '.join((str(s) for s in convert_bytes(n)))
         return self.info()['size']
 
-    def network(self, figsize=(14, 9)):
+    def network(self, figsize=(14, 9), fig=True):
         """
         Display information about the container's object relationships.
 
@@ -175,6 +212,7 @@ class Container:
 
         Args:
             figsize (tuple): Tuple containing figure dimensions
+            fig (bool): Generate the figure (default true)
 
         Returns:
             graph: Network graph object containing data relationships
@@ -248,17 +286,18 @@ class Container:
         node_colors = [node_type_dict[node][1] for node in g.nodes()]
         edge_colors = [node_conn_dict[edge][1] for edge in g.edges()]
         # Build the figure and legends
-        fig, ax = mpl.sns.plt.subplots(1, figsize=figsize)
-        ax.axis('off')
-        pos = nx.spring_layout(g)
-        f0 = nx.draw_networkx_nodes(g, pos=pos, ax=ax, alpha=0.7, node_size=node_sizes,
-                                    node_color=node_colors)
-        f1 = nx.draw_networkx_labels(g, pos=pos, labels=node_labels, font_size=17,
-                                     font_weight='bold', ax=ax)
-        f2 = nx.draw_networkx_edges(g, pos=pos, edge_color=edge_colors, width=2, ax=ax)
-        l1, ax = legend(set(node_conn_dict.values()), 'Connection', (1, 0), ax)
-        l2, ax = legend(set(node_type_dict.values()), 'Data Type', (1, 0.3), ax)
-        fig.gca().add_artist(l1)
+        if fig:
+            fig, ax = mpl.sns.plt.subplots(1, figsize=figsize)
+            ax.axis('off')
+            pos = nx.spring_layout(g)
+            f0 = nx.draw_networkx_nodes(g, pos=pos, ax=ax, alpha=0.7, node_size=node_sizes,
+                                        node_color=node_colors)
+            f1 = nx.draw_networkx_labels(g, pos=pos, labels=node_labels, font_size=17,
+                                         font_weight='bold', ax=ax)
+            f2 = nx.draw_networkx_edges(g, pos=pos, edge_color=edge_colors, width=2, ax=ax)
+            l1, ax = legend(set(node_conn_dict.values()), 'Connection', (1, 0), ax)
+            l2, ax = legend(set(node_type_dict.values()), 'Data Type', (1, 0.3), ax)
+            fig.gca().add_artist(l1)
         g.edge_types = {node: value[0] for node, value in node_conn_dict.items()}  # Attached connection information to network graph
         return g
 
@@ -420,7 +459,7 @@ class Container:
                 traits['test'] = Bool(False).tag(sync=True)
                 traits.update(self._custom_traits())
                 for n, obj in self._data().items():
-                    if (hasattr(obj, '_traits') or isinstance(obj, (Series, SparseSeries))) and len(obj) > 0:
+                    if hasattr(obj, '_traits'): # or isinstance(obj, (Series, SparseSeries))) and len(obj) > 0:
                         traits.update(obj._update_traits())
             self._widget.add_traits(**traits)    # Adding traits to the widget makes
             self._traits_need_update = False     # them accesible from nbextensions (JavaScript).
@@ -436,10 +475,10 @@ class Container:
     def __getitem__(self, key):
         if isinstance(key, str):
             return getattr(self, key)
-        elif isinstance(key, (int, slice, list)) and self._cardinal_axis is None:
+        elif isinstance(key, (int, slice, list)) and self._cardinal is None:
             return self.slice_by_indices(key)
-        elif isinstance(key, (int, slice, list)) and self._cardinal_axis is not None:
-            return self.slice_by_cardinal_axis(key)
+        elif isinstance(key, (int, slice, list)) and self._cardinal is not None:
+            return self.slice_by_cardinal(key)
         raise KeyError()
 
     def __init__(self, name=None, description=None, meta=None, **kwargs):
