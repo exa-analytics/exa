@@ -260,6 +260,9 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if self._groupby != ():
+            self._categories[self._groupby[0]] = self._groupby[1]
+            self._columns.append(self._groupby[0])
         if len(self) > 0:
             name = self.__class__.__name__
             if self._columns:
@@ -270,8 +273,6 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
                 if self.index.name is not None:
                     warnings.warn("Object's index name changed from {} to {}".format(self.index.name, self._index))
                 self.index.name = self._index
-        if self._groupby != ():
-            self._categories[self._groupby[0]] = self._groupby[1]
         self._set_categories()    # Set all available categoricals
 
 
