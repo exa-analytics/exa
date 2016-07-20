@@ -375,7 +375,7 @@ class Container:
             container: The saved container object
         """
         path = pkid_or_path
-        if isinstance(path, (int, np.int32, np.in64)):
+        if isinstance(path, (int, np.int32, np.int64)):
             raise NotImplementedError('Lookup via CMS not implemented.')
         elif not os.path.isfile(path):
             raise FileNotFoundError('File {} not found.'.format(path))
