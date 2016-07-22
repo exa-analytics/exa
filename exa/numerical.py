@@ -124,8 +124,7 @@ class BaseDataFrame(Numerical):
     _traits = []       # List of columns that may (if present) be converted to traits on call to _update_traits
     _precision = {}    # Dict of column names, ints, that if present will have traits of the specified (float) precision
 
-    @property
-    def grpd(self):
+    def grouped(self):
         """
         Group this object on it cardinal dimension (**_groupby**).
 
