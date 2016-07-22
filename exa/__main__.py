@@ -8,16 +8,26 @@ Executables
 Exa provides two executables; "exa" and "exw". For the graphical user interface,
 built on top of the Jupyter notebook environment, run "exa" on the command line.
 '''
+import platform
 import argparse
 import subprocess
 from exa._config import set_update, config
+try:
+    from exatomic._config import set_update as exatomic_up
+except ImportError:
+    def tmp():
+        return
+    exatomic_up = tmp
 
 
 def notebook():
     '''
     Start the exa notebook gui (a Jupyter notebook environment).
     '''
-    subprocess.Popen(['jupyter notebook'], shell=True, cwd=config['paths']['notebooks'])
+    if platform.system().lower() == 'windows':
+        subprocess.Popen(['jupyter', 'notebook'], shell=True, cwd=config['paths']['notebooks'])
+    else:
+        subprocess.Popen(['jupyter notebook'], shell=True, cwd=config['paths']['notebooks'])
 
 
 def workflow(wkflw):
@@ -37,6 +47,12 @@ def main():
         '-u',
         '--update',
         action='store_true',
+        help='Update static data and extensions and launch Jupyter notebook.'
+    )
+    parser.add_argument(
+        '-uu',
+        '--onlyupdate',
+        action='store_true',
         help='Update static data and extensions (updates will occur on next import).'
     )
     parser.add_argument(
@@ -50,10 +66,14 @@ def main():
     args = parser.parse_args()
     if args.update == True:
         set_update()
-    elif args.workflow is None:
-        notebook()
-    else:
+        exatomic_up()
+    if args.onlyupdate == True:
+        set_update()
+        exatomic_up()
+        return
+    if args.workflow is not None:
         workflow(args.workflow)
+    notebook()
 
 
 if __name__ == '__main__':

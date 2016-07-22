@@ -92,6 +92,7 @@ if config['paths']['notebooks'] == 'None':
     config['paths']['notebooks'] = mkp(root, 'notebooks', mk=True)
     shutil.copyfile(mkp(pkg, '_static', 'exa_demo.ipynb'),
                     mkp(root, 'notebooks', 'exa_demo.ipynb'))
+mkp(config['paths']['data'], 'examples', mk=True)  # Ensure the example dir is made
 if config['paths']['update'] == '1':
     shutil.copyfile(mkp(pkg, '_static', 'exa_demo.ipynb'),
                     mkp(root, 'notebooks', 'exa_demo.ipynb'))
@@ -107,6 +108,7 @@ if config['db']['uri'] == 'None':
 # dynamically allocated configurations (these are deleted before saving)
 config['dynamic'] = {}
 config['dynamic']['pkgdir'] = pkg
+config['dynamic']['exa_root'] = root
 nb = 'false'
 try:
     import numba
@@ -120,7 +122,7 @@ if config['dynamic']['numba'] == 'true':
         from numba import cuda
         if len(cuda.devices.gpus) > 0:
             config['dynamic']['cuda'] = 'true'
-    except:
+    except Exception:
         pass
 config['dynamic']['notebook'] = 'false'
 try:

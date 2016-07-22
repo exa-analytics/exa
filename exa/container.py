@@ -33,11 +33,17 @@ from exa.utility import convert_bytes
 
 
 # These constants are used for data network visualization
-edge_colors = mpl.sns.color_palette('viridis', 2)
+try:
+    edge_colors = mpl.sns.color_palette('viridis', 2)
+except ValueError:
+    edge_colors = mpl.sns.color_palette('jet', 2)
 edge_types = ['index-index', 'index-column']
 edge_color_map = dict(zip(edge_types, edge_colors))
 r_edge_color_map = {v: k for k, v in edge_color_map.items()}
-node_colors = mpl.sns.color_palette('viridis', 7)
+try:
+    node_colors = mpl.sns.color_palette('viridis', 7)
+except ValueError:
+    node_colors = mpl.sns.color_palette('jet', 7)
 node_types = [Field, SparseSeries, DataFrame, SparseDataFrame, Series, pd.DataFrame, pd.Series]
 node_color_map = list(zip(node_types, node_colors))
 r_node_color_map = {v: '.'.join((k.__module__, k.__name__)) for k, v in node_color_map}
@@ -216,7 +222,7 @@ class Container:
                         edges[(n0, n1)] = edge_color_map['index-index']
                         edges[(n1, n0)] = edge_color_map['index-index']
                     for col in v1.columns:
-                        if name in col and '_' not in col:    # Catches things like index name == 'index', column name == 'index0'
+                        if name == col or name == col[:-1]:    # Catches index "atom", column "atom1"
                             edges[(n0, n1)] = edge_color_map['index-column']
                             edges[(n1, n0)] = edge_color_map['index-column']
         g = nx.Graph()
@@ -388,10 +394,10 @@ class Container:
         .. _ipywidgets: https://ipywidgets.readthedocs.io/en/latest/
         '''
         if self._widget is not None:    # If a corresponding widget exists, build traits
-            traits = self._custom_traits()
             if len(self._data()) == 0:
-                traits['test'] = Bool(True).tag(sync=True)
+                traits = {'test': Bool(True).tag(sync=True)}
             else:
+                traits = self._custom_traits()
                 traits['test'] = Bool(False).tag(sync=True)
                 traits.update(self._custom_traits())
                 for n, obj in self._data().items():
@@ -417,12 +423,12 @@ class Container:
             return self.slice_by_cardinal_axis(key)
         raise KeyError()
 
-    def __init__(self, name=None, description=None, meta={}, **kwargs):
+    def __init__(self, name=None, description=None, meta=None, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
         self.name = name
         self.description = description
-        self.meta = meta
+        self.meta = {} if meta is None else meta
         self._traits_need_update = True
         # This will create an instance of the widget class (if present)
         self._widget = self._widget_class(self) if config['dynamic']['notebook'] == 'true' else None
@@ -498,13 +504,11 @@ class TypedMeta(type):
             correct type; a type error is raised if this fails.
         '''
         pname = '_' + name    # This will be where the data is store (e.g. self._name)
+            # This is the default property "getter" for container data objects.
+            # If the property value is None, this function will check for a
+            # convenience method with the signature, self.compute_name() and call
+            # it prior to returning the property value.
         def getter(self):
-            '''
-            This is the default property "getter" for container data objects.
-            If the property value is None, this function will check for a
-            convenience method with the signature, self.compute_name() and call
-            it prior to returning the property value.
-            '''
             if not hasattr(self, pname) and hasattr(self, '{}{}'.format(self._getter_prefix, pname)):
                 self['{}{}'.format(self._getter_prefix, pname)]()
             if not hasattr(self, pname):
@@ -512,11 +516,9 @@ class TypedMeta(type):
             return getattr(self, pname)
 
         def setter(self, obj):
-            '''
-            This is the default property "setter" for container data objects.
-            Prior to setting a property value, this function checks that the
-            object's type is correct.
-            '''
+            # This is the default property "setter" for container data objects.
+            # Prior to setting a property value, this function checks that the
+            # object's type is correct.
             if not isinstance(obj, ptype):
                 try:
                     obj = ptype(obj)
@@ -525,7 +527,7 @@ class TypedMeta(type):
             setattr(self, pname, obj)
 
         def deleter(self):
-            '''Deletes the property's value.'''
+            # Deletes the property's value.
             del self[pname]
 
         return property(getter, setter, deleter)
