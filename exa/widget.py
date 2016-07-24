@@ -39,7 +39,6 @@ class Widget(DOMWidget):
         Recieve and handle messages from notebook extensions ("frontend").
         """
         #raise NotImplementedError('Handling custom message from JS not ready')
-        print(message.keys())
         typ = message['type']
         content = message['content']
         # Logic to handle various types of messages...
@@ -87,7 +86,6 @@ def install_notebook_widgets(pkg_nbext, sys_nbext, verbose=False):
     except FileNotFoundError:
         pass
     for root, subdirs, files in os.walk(pkg_nbext):
-        print(files)
         for filename in files:
             subdir = root.split('_nbextension')[-1]
             orig = mkp(root, filename)
@@ -96,9 +94,7 @@ def install_notebook_widgets(pkg_nbext, sys_nbext, verbose=False):
 
 
 if config['js']['update'] == '1':
-    print('here')
     verbose = True if config['log']['level'] != '0' else False
-    print(verbose)
     pkg_nbext = mkp(config['dynamic']['pkgdir'], '_nbextension')
     sys_nbext = mkp(jupyter_data_dir(), 'nbextensions', 'exa')
     install_notebook_widgets(pkg_nbext, sys_nbext, verbose)
