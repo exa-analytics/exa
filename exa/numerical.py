@@ -268,7 +268,7 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
                 missing = set(self._columns).difference(self.columns)
                 if missing:
                     raise RequiredColumnError(missing, name)
-            if self.index.name != self._index:
+            if self.index.name != self._index and self._index is not None:
                 if self.index.name is not None:
                     warnings.warn("Object's index name changed from {} to {}".format(self.index.name, self._index))
                 self.index.name = self._index
@@ -490,7 +490,7 @@ class SparseDataFrame(BaseDataFrame, pd.SparseDataFrame):
                 missing = set(self._columns).difference(self.columns)
                 if missing:
                     raise RequiredColumnError(missing, name)
-            if self.index.name != self._index:
+            if self.index.name != self._index and self._index is not None:
                 if self.index.name is not None:
                     warnings.warn("Object's index name changed from {} to {}".format(self.index.name, self._index))
                 self.index.name = self._index
