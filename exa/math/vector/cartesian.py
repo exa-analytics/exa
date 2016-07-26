@@ -136,7 +136,7 @@ def periodic_pdist_euc_dxyz_idx(ux, uy, uz, rx, ry, rz, indexes):
     """
     m = [-1, 0, 1]
     n = len(ux)
-    nn = 27*n*(n - 1)//2
+    nn = n*(n - 1)//2
     dx = np.empty((nn, ), dtype=np.float64)    # Two body distance component x
     dy = np.empty((nn, ), dtype=np.float64)    # within corresponding periodic
     dz = np.empty((nn, ), dtype=np.float64)    # unit cell
