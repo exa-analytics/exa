@@ -262,6 +262,7 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
         if self._groupby != ():
             self._categories[self._groupby[0]] = self._groupby[1]
             self._columns.append(self._groupby[0])
+        self._set_categories()
         if len(self) > 0:
             name = self.__class__.__name__
             if self._columns:
@@ -272,7 +273,6 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
                 if self.index.name is not None:
                     warnings.warn("Object's index name changed from {} to {}".format(self.index.name, self._index))
                 self.index.name = self._index
-        self._set_categories()    # Set all available categoricals
 
 
 class Field(DataFrame):
