@@ -119,7 +119,10 @@ class Container:
             :mod:`~exa.numerical`.
         """
         if isinstance(key, (int, np.int32, np.int64)):
-            key = [key]
+            if key < 0:
+                key = [self[self._cardinal].index.values[key]]
+            else:
+                key = [key]
         elif isinstance(key, slice):
             key = self[self._cardinal].index.values[key]
         g = self.network(fig=False)
