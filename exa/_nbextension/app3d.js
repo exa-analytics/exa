@@ -10,16 +10,16 @@
 
 require.config({
     shim: {
-        'nbextensions/exa/lib/three.min': {
+        "nbextensions/exa/lib/three.min": {
             exports: 'THREE'
         },
 
-        'nbextensions/exa/lib/TrackballControls': {
-            deps: ['nbextensions/exa/lib/three.min'],
+        "nbextensions/exa/lib/TrackballControls": {
+            deps: ["nbextensions/exa/lib/three.min"],
             exports: 'THREE.TrackballControls'
         },
 
-        'nbextensions/exa/utility': {
+        "nbextensions/exa/utility": {
             exports: 'utility'
         },
     },
@@ -27,9 +27,9 @@ require.config({
 
 
 define([
-    'nbextensions/exa/lib/three.min',
-    'nbextensions/exa/lib/TrackballControls',
-    'nbextensions/exa/utility'
+    "nbextensions/exa/lib/three.min",
+    "nbextensions/exa/lib/TrackballControls",
+    "nbextensions/exa/utility"
 ], function(THREE, TrackballControls, utility) {
     class App3D {
         /*"""
@@ -851,12 +851,6 @@ define([
             var material2 = new THREE.MeshBasicMaterial({color: 0x909090, wireframe: true});
             var mesh1 = new THREE.Mesh(p_geometry, p_material);
             var mesh2 = new THREE.Mesh(n_geometry, n_material);
-            console.log('positive verts and faces');
-            console.log(p_geometry.vertices.length);
-            console.log(p_geometry.faces.length);
-            console.log('negative verts and faces');
-            console.log(n_geometry.vertices.length);
-            console.log(n_geometry.faces.length);
             this.scene.add(mesh1);
             this.scene.add(mesh2);
             return [mesh1, mesh2];

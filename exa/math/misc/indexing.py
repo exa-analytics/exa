@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
-'''
+"""
 Indexing
 #######################
 Algorithms for generating indices.
-'''
+"""
 import numpy as np
 from exa._config import config
 
 
 def starts_count(starts, count):
-    '''
+    """
     Generate sequential indices (for 2 dimensions) from starting values and
     lengths (counts).
 
@@ -23,7 +23,7 @@ def starts_count(starts, count):
 
     Returns:
         objs (tuple): Outer sequential index, inner sequential index, resulting indicies
-    '''
+    """
     n = len(starts) * count
     outer = np.empty((n, ), dtype=np.int64)
     inner = outer.copy()
@@ -40,7 +40,7 @@ def starts_count(starts, count):
 
 
 def starts_counts(starts, counts):
-    '''
+    """
     Generate a pseudo-sequential array from initial values and counts.
 
     Args:
@@ -49,7 +49,7 @@ def starts_counts(starts, counts):
 
     Returns:
         arrays (tuple): First index, second index, and indices to select, respectively
-    '''
+    """
     n = np.sum(counts)
     i_idx = np.empty((n, ), dtype=np.int64)
     j_idx = i_idx.copy()

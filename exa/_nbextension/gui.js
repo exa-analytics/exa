@@ -11,7 +11,7 @@ Basic gui for container views.
 
 require.config({
     shim: {
-        'nbextensions/exa/lib/dat.gui.min': {
+        "nbextensions/exa/lib/dat.gui.min": {
             exports: 'dat'
         },
     },
@@ -19,7 +19,7 @@ require.config({
 
 
 define([
-    'nbextensions/exa/lib/dat.gui.min',
+    "nbextensions/exa/lib/dat.gui.min",
 ], function(dat) {
     class ContainerGUI extends dat.GUI {
         /*"""

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
-'''
+"""
 Tester
 #########################
 Custom tester class for running interactive (i.e. within the Jupyter notebook
 environment) tests.
-'''
+"""
 import os
 import sys
 from doctest import DocTestFinder, DocTestRunner
@@ -22,17 +22,17 @@ verbose = True if verbosity > 0 else False
 
 
 class UnitTester(TestCase):
-    '''
+    """
     The custom tester class which provides an alternative test runner.
-    '''
+    """
     @classmethod
     def run_interactively(cls, log=False):
-        '''
+        """
         Run a test suite in a Jupyter notebook environment or shell.
 
         Args:
             log (bool): Write output to a log file instead of to stdout
-        '''
+        """
         suite = TestLoader().loadTestsFromTestCase(cls)
         if log:
             result = TextTestRunner(logger.handlers[0].stream,
@@ -43,14 +43,14 @@ class UnitTester(TestCase):
 
 
 def run_doctests(log=False):
-    '''
+    """
     Run all docstring tests.
 
     Args:
         log (bool): Write test results to system log (default false)
-    '''
+    """
     def tester(modules, runner, f=None):
-        '''Runs tests for each module.'''
+        """Runs tests for each module."""
         results = []
         for module in modules:
             tests = DocTestFinder().find(module)
@@ -76,12 +76,12 @@ def run_doctests(log=False):
 
 
 def run_unittests(log=False):
-    '''
+    """
     Perform (interactive) unit testing logging the results.
 
     Args:
         log (bool): Send results to system log (default False)
-    '''
+    """
     tests = UnitTester.__subclasses__()
     if log:
         logger.debug('LOGGING UNITTEST')

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
-'''
+"""
 Configuration
 ########################
 This module generates the "~/.exa" directory where all databases, logs, notebooks,
@@ -28,7 +28,7 @@ js:
 Warning:
     The configuration file (~/.exa/config) should only be altered when no exa
     notebooks are running (i.e. exa or any of its related packages are imported).
-'''
+"""
 import os
 import sys
 import atexit
@@ -41,7 +41,7 @@ from exa.utility import mkp
 
 @atexit.register
 def save():
-    '''
+    """
     Save the configuration file to disk on exit, resetting update flags.
 
     Warning:
@@ -49,25 +49,25 @@ def save():
         function during execution (that is what well written tests are for -
         use **mock**), but it is advantageous in the case that multiple packages
         that use exa are running simultaneously.
-    '''
+    """
     del config['dynamic']    # Delete dynamically assigned configuration options
     with open(config_file, 'w') as f:
         config.write(f)
 
 
 def set_update():
-    '''
+    """
     Set update flags.
-    '''
+    """
     config['paths']['update'] = '1'
     config['js']['update'] = '1'
     config['db']['update'] = '1'
 
 
 def del_update():
-    '''
+    """
     Reset update flags.
-    '''
+    """
     config['paths']['update'] = '0'
     config['js']['update'] = '0'
     config['db']['update'] = '0'
