@@ -222,11 +222,11 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
 
         .. _trait type: http://traitlets.readthedocs.org/en/stable/trait_types.html
         """
-        self._revert_categories()
         traits = self._custom_traits()
+        self._revert_categories()
         groups = None
         prefix = self.__class__.__name__.lower()
-        fi = self.index.values[0]    # First index
+        fi = self.index[0]
         if self._groupby:
             groups = self.grouped()
         for name in self._traits:
