@@ -80,8 +80,6 @@ var Contour = function(data, dims, orig, scale, val, ncont, contlims, axis) {
             };
         };
 
-        console.log(idx);
-
         if (axis == 'z') {
             for(var nx = 0; nx < dims[0]; nx++) {
                 var tmp = [];

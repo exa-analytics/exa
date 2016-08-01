@@ -13,7 +13,7 @@ computing algorithms) are easier to work with.
 
 require.config({
     shim: {
-        'nbextensions/exa/num': {
+        "nbextensions/exa/num": {
             exports: 'num'
         },
     },
@@ -21,7 +21,7 @@ require.config({
 
 
 define([
-    'nbextensions/exa/num',
+    "nbextensions/exa/num",
 ], function(num) {
     class Field {
         /*"""

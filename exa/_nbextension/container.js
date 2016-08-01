@@ -20,10 +20,10 @@ is used.
 
 require.config({
     shim: {
-        'nbextensions/exa/test': {
+        "nbextensions/exa/test": {
             exports: 'TestApp'
         },
-        'nbextensions/exa/info': {
+        "nbextensions/exa/info": {
             exports: 'InfoApp'
         }
     },
@@ -33,10 +33,9 @@ require.config({
 // THIS WILL HAVE TO CHANGE with updates to ipywidgets and notebook packages
 // define('ContainerView', ["jupyter-js-widgets"], function(widgets) {})
 define([
-    'widgets/js/widget',
-    'nbextensions/exa/test',
-    'nbextensions/exa/info'
-
+    "widgets/js/widget",
+    "nbextensions/exa/test",
+    "nbextensions/exa/info"
 ], function(widget, TestApp, InfoApp) {
     class ContainerView extends widget.DOMWidgetView {
         /*"""
@@ -78,7 +77,6 @@ define([
             Container view classes that extend this class can overwrite this
             method to customize the behavior of their data specific view.
             */
-            console.log('initial container init');
             this.if_empty();
         };
 
@@ -126,7 +124,7 @@ define([
             */
             var check = this.get_trait('test');
             if (check === true) {
-                console.log('Empty container, displaying test interface!');
+                console.log("Empty container, displaying test interface!");
                 this.app = new TestApp(this);
             };
         };
@@ -209,5 +207,6 @@ define([
         };
 
     };
+    
     return {ContainerView: ContainerView};
 });

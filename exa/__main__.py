@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
-'''
+"""
 Executables
 ########################
 Exa provides two executables; "exa" and "exw". For the graphical user interface,
 built on top of the Jupyter notebook environment, run "exa" on the command line.
-'''
+"""
 import platform
 import argparse
 import subprocess
@@ -21,9 +21,9 @@ except ImportError:
 
 
 def notebook():
-    '''
+    """
     Start the exa notebook gui (a Jupyter notebook environment).
-    '''
+    """
     if platform.system().lower() == 'windows':
         subprocess.Popen(['jupyter', 'notebook'], shell=True, cwd=config['paths']['notebooks'])
     else:
@@ -31,17 +31,17 @@ def notebook():
 
 
 def workflow(wkflw):
-    '''
+    """
     Args:
         wkflw: Path to workflow script or instance of workflow class.
-    '''
+    """
     raise NotImplementedError('Workflows are currently unsupported.')
 
 
 def main():
-    '''
+    """
     Main entry point for the application.
-    '''
+    """
     parser = argparse.ArgumentParser(description=None)
     parser.add_argument(
         '-u',
