@@ -226,8 +226,8 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
         self._revert_categories()
         groups = None
         prefix = self.__class__.__name__.lower()
-        self._fi = self.index[0]
-        if self._groupbys:
+        fi = self.index[0]
+        if self._groupby:
             groups = self.grouped()
         for name in self._traits:
             trait_name = '_'.join((prefix, str(name)))    # Name mangle to ensure uniqueness
