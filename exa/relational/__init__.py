@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
-'''
+"""
 Relational
 ####################
 This (sub)package is provides the content management framework for container
 objects and a collection of static data for reference and unit conversions.
-'''
+"""
 import atexit
 import pandas as pd
 from itertools import product
@@ -27,7 +27,7 @@ from exa.relational import test
 # Static data loaders and table configuration (see below) are performed here
 # because we import all of the table schemas here.
 def load_isotope_data():
-    '''Load isotope data into the database (replacing existing).'''
+    """Load isotope data into the database (replacing existing)."""
     path = mkp(config['dynamic']['pkgdir'], '_static', 'isotopes.json')
     df = pd.read_json(path, orient='values')
     df.columns = ('A', 'Z', 'af', 'eaf', 'color', 'radius', 'gfactor', 'mass',
@@ -39,13 +39,13 @@ def load_isotope_data():
 
 
 def load_unit_data():
-    '''
+    """
     Load unit conversions into the database (replacing existing).
 
     Note:
         This function actually computes (prior to bulk inserting data)
         conversion factors.
-    '''
+    """
     path = mkp(config['dynamic']['pkgdir'], '_static', 'units.json')
     df = pd.read_json(path)
     for column in df.columns:
@@ -63,7 +63,7 @@ def load_unit_data():
 
 
 def load_constant_data():
-    '''Load constants into the database (replacing existing).'''
+    """Load constants into the database (replacing existing)."""
     path = mkp(config['dynamic']['pkgdir'], '_static', 'constants.json')
     df = pd.read_json(path)
     df.reset_index(inplace=True)

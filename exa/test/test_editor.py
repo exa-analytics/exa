@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
-'''
+"""
 Tests for :mod:`~exa.editor`
 #################################
 Test the features and functionality of the :class:`~exa.editor.Editor` object.
-'''
+"""
 from collections import OrderedDict
 from exa._config import config
 from exa.test import UnitTester
@@ -14,25 +14,25 @@ from exa.utility import mkp
 
 
 class TestEditor(UnitTester):
-    '''
+    """
     Test for the :class:`~exa.editor.Editor` are performed on the editor's
     source code itself.
-    '''
+    """
     def setUp(self):
-        '''
+        """
         Generate the file path to the exa.editor module (which will be used as
         the test for the :class:`~exa.editor.Editor` class that it provides).
-        '''
+        """
         self.path = mkp(config['dynamic']['pkgdir'], 'editor.py')
         with open(self.path) as f:
             self.lines = f.readlines()
         self.fl = Editor.from_file(self.path)
 
     def test_loaders(self):
-        '''
+        """
         The editor provides there different methods for instantiation; from a
         file on disk, from a file stream, or from a string.
-        '''
+        """
         fl = Editor.from_file(self.path)
         with open(self.path) as f:
             tm = Editor.from_stream(f)
@@ -42,10 +42,10 @@ class TestEditor(UnitTester):
         self.assertTrue(all(fl[i] == tm[i] == tr[i] for i in range(len(self.lines))))
 
     def test_find_regex(self):
-        '''
+        """
         Test :func:`~exa.editor.Editor.find`, :func:`~exa.editor.Editor.regex`,
         and :func:`~exa.editor.Editor.find_next`. Also checks cursor behavior.
-        '''
+        """
         od = self.fl.find('Args:')
         self.assertIsInstance(od, dict)
         self.assertIsInstance(od['Args:'], OrderedDict)
@@ -64,12 +64,12 @@ class TestEditor(UnitTester):
         self.assertTrue(od == od1)    # True in this case; depends on regex used
 
     def test_insert_format_plus(self):
-        '''
+        """
         Test :func:`~exa.editor.Editor.insert` and :func:`~exa.editor.Editor.format`
         functions. Also checks item deletion, :func:`~exa.editor.Editor.delete_lines`,
         and __repr__, __iter__, __len__, __setitem__, __getitem__, and __str__.
         Finally checks the variables property.
-        '''
+        """
         n = len(self.fl)
         lines = {0: '{INSERTED}'}
         self.fl.insert(lines)
@@ -82,4 +82,3 @@ class TestEditor(UnitTester):
         self.assertTrue(formatted[0] == 'replaced')
         del self.fl[0]
         self.assertTrue(len(self.fl) == 4)
-
