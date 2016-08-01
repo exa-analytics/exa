@@ -184,7 +184,10 @@ class DataFrame(Numerical, pd.DataFrame):
         self._fi = self.index[0]
         if self._groupbys:
             groups = self.groupby(self._groupbys)
+        print(len(groups))
+        print(groups)
         for name in self._traits:
+            print(name)
             trait_name = '_'.join((prefix, str(name)))    # Name mangle to ensure uniqueness
             if name in self.columns:
                 if np.all(np.isclose(self[name], self.ix[self._fi, name])):
