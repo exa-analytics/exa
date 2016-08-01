@@ -228,7 +228,7 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
         prefix = self.__class__.__name__.lower()
         fi = self.index.values[0]    # First index
         if self._groupby:
-            groups = self.groupby(self._groupby[0])
+            groups = self.grouped()
         for name in self._traits:
             trait_name = '_'.join((prefix, str(name)))    # Name mangle to ensure uniqueness
             p = self._precision[name] if name in self._precision else 10
