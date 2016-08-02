@@ -11,7 +11,7 @@ build:
 
 requirements:
   build:
-    - python >=3.4
+    - python
     - numpy
     - scipy
     - matplotlib
@@ -21,13 +21,13 @@ requirements:
     - sympy
     - seaborn
     - jupyter
-    - notebook ==4.1.0
-    - ipywidgets ==4.1.1
+    - notebook ==4.1
+    - ipywidgets ==4.1
     - ipyparallel
     - sphinx
     - nose
   run:
-    - python >=3.4
+    - python
     - numpy
     - scipy
     - matplotlib
