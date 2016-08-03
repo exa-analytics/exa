@@ -4,7 +4,7 @@
 # Distributed under the terms of the Apache License 2.0
 import sys
 if sys.version_info < (3, 4):
-    raise Exception('exa requires Python 3.4+')
+    raise Exception('Python 3.4+ required.')
 from setuptools import setup, find_packages
 from exa import __version__
 
@@ -16,7 +16,7 @@ with open('requirements.txt') as f:
 setup(
     name='exa',
     version=__version__,
-    description="An ecosystem for data processing, analytics, and visualization.",
+    description="A framework for data processing, analytics, and visualization.",
     long_description=description,
     author="Tom Duignan, Alex Marchenko",
     author_email="exa.data.analytics@gmail.com",
@@ -29,7 +29,7 @@ setup(
     include_package_data=True,
     install_requires=dependencies,
     license="Apache License Version 2.0",
-    keywords="analytics visualization big data",
+    keywords="big data analytics visualization",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Web Environment",
@@ -42,7 +42,6 @@ setup(
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
         "Natural Language :: English",
         "Topic :: Scientific/Engineering"
     ]
