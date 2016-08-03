@@ -75,8 +75,8 @@ Legal
     :target: https://www.quantifiedcode.com/app/project/3c8a5fe969f745f8b2f3554ad59590f0
     :alt: Code Issues
 
-.. |cov| image:: https://codecov.io/gh/exa-analytics/exa/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/exa-analytics/exa
+.. |cov| image:: https://coveralls.io/repos/github/exa-analytics/exa/badge.svg
+    :target: https://coveralls.io/github/exa-analytics/exa
     :alt: Code Coverage
 
 .. |lic| image:: http://img.shields.io/:license-apache-blue.svg?style=flat-square
