@@ -8,7 +8,7 @@ Exa is available through `anaconda`_,
 
 .. code-block:: bash
 
-    conda install exa
+    conda install -c exaanalytics exa
 
 or `pypi`_.
 
@@ -59,8 +59,8 @@ Legal
     :target: http://exa.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-.. |conda| image:: https://anaconda.org/anaconda/anaconda/badges/version.svg
-    :target: https://anaconda.org/exaanalytics/exa
+.. |conda| image:: https://anaconda.org/exaanalytics/exa/badges/installer/conda.svg
+    :target: https://conda.anaconda.org/exaanalytics
     :alt: Anaconda Version
 
 .. |pypi| image:: https://badge.fury.io/py/exa.svg
