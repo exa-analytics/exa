@@ -44,6 +44,8 @@ Legal
 
 .. _anaconda: https://www.continuum.io/downloads
 .. _pypi: https://pypi.python.org/pypi
+.. _sphinx: http://www.sphinx-doc.org/en/stable/
+
 
 .. |logo| image:: doc/source/_static/logo.png
     :target: doc/source/_static/logo.png

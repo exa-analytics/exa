@@ -9,8 +9,10 @@ before_install:
     - export PATH=/home/travis/miniconda3/bin:$PATH
     - conda update --yes conda
 install:
-    - conda install --yes python=$TRAVIS_PYTHON_VERSION exa exatomic
-    - pip install sphinxcontrib-autoanysrc coveralls
+    - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy pandas
+    - conda install --yes sqlalchemy matplotlib networkx sympy seaborn jupyter
+    - conda install --yes notebook==4.1 ipywidgets==4.1 ipyparallel sphinx nose
+    - pip install sphinxcontrib-autoanysrc coverage python-coveralls
 script:
     - nosetests --with-doctest --with-coverage
 after_success:
