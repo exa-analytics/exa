@@ -8,9 +8,21 @@ source:
 
 requirements:
   build:
-    - python >=3.4
+    - python x.x
     - numpy
+    - scipy
+    - matplotlib
+    - sqlalchemy
     - pandas >=0.18.1
+    - networkx
+    - sympy
+    - seaborn
+    - jupyter
+    - notebook ==4.1
+    - ipywidgets ==4.1
+    - ipyparallel
+    - sphinx
+    - nose
 
   run:
     - python
@@ -23,8 +35,8 @@ requirements:
     - sympy
     - seaborn
     - jupyter
-    - notebook ==4.1
-    - ipywidgets ==4.1
+    - notebook
+    - ipywidgets
     - ipyparallel
     - sphinx
     - nose

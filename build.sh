@@ -1,2 +1,2 @@
-pip install -r sphinxcontrib-autoanysrc
+pip install sphinxcontrib-autoanysrc
 $PYTHON setup.py install
