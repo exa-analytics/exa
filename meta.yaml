@@ -1,47 +1,48 @@
 package:
-  name: exa
-  version: "0.2.14"
+    name: exa
+    version: "0.2.14"
 
 source:
-  git_rev: v0.2.14
-  git_url: https://github.com/exa-analytics/exa.git
+    git_rev: v0.2.14
+    git_url: https://github.com/exa-analytics/exa.git
 
 requirements:
-  build:
-    - python x.x
-    - numpy
-    - scipy
-    - matplotlib
-    - sqlalchemy
-    - pandas >=0.18.1
-    - networkx
-    - sympy
-    - seaborn
-    - jupyter
-    - notebook ==4.1
-    - ipywidgets ==4.1
-    - ipyparallel
-    - sphinx
-    - nose
+    build:
+        - python x.x
+        - numpy
+        - scipy
+        - matplotlib
+        - sqlalchemy
+        - pandas >=0.18.1
+        - networkx
+        - sympy
+        - seaborn
+        - jupyter
+        - notebook ==4.1
+        - ipywidgets ==4.1
+        - ipyparallel
+        - sphinx
+        - nose
 
-  run:
-    - python
-    - numpy
-    - scipy
-    - matplotlib
-    - sqlalchemy
-    - pandas
-    - networkx
-    - sympy
-    - seaborn
-    - jupyter
-    - notebook
-    - ipywidgets
-    - ipyparallel
-    - sphinx
-    - nose
+    run:
+        - python
+        - numpy
+        - scipy
+        - matplotlib
+        - sqlalchemy
+        - pandas
+        - networkx
+        - sympy
+        - seaborn
+        - jupyter
+        - notebook
+        - ipywidgets
+        - ipyparallel
+        - sphinx
+        - nose
 
 about:
-  home: https://github.com/exa-analytics/exa
-  license: Apache 2.0
-  license_file: LICENSE
+    home: https://exa-analytics.github.io
+    license: Apache 2.0
+    license_file: LICENSE
+    summary: A framework for data processing, analytics, and visualization.
