@@ -1,12 +1,4 @@
 | |logo|
-| |docs|
-| |gitter|
-| |conda|
-| |pypi|
-| |build|
-| |issues|
-| |cov|
-| |lic|
 
 .. |logo| image:: doc/source/_static/logo.png
     :target: doc/source/_static/logo.png
@@ -46,28 +38,34 @@
 
 Installation
 ##################
+| |conda|
+| |pypi|
+
 .. code-block:: bash
 
-    pip install exa
-    # coming soon!
-    # conda install exa
+    conda install exa
 
+.. code-block:: bash
+
+    pip instal exa
 
 Getting Started
-##################
-.. code-block:: bash
-
-    exa -u   # Run command with the "-u" (--update) on first run
-
-
-Documentation
 ###################
+| |docs|
+| |gitter|
 .. code-block:: bash
 
     cd doc
     make html    # .\make.bat html # Windows
 
+Support/Status
+##################
+| |build|
+| |issues|
+| |cov|
+
 Legal
 ###############
 | Copyright (c) 2015-2016, Exa Analytics Development Team
 | Distributed under the terms of the Apache License 2.0
+| |lic|
