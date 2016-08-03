@@ -1,6 +1,8 @@
 | |logo|
 | |docs|
 | |gitter|
+| |conda|
+| |pypi|
 | |build|
 | |issues|
 | |cov|
@@ -17,6 +19,14 @@
 .. |docs| image:: https://readthedocs.org/projects/exa/badge/?version=latest
     :target: http://exa.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
+
+.. |conda| image:: https://anaconda.org/anaconda/anaconda/badges/version.svg
+    :target: https://anaconda.org/exaanalytics/exa
+    :alt: Anaconda Version
+
+.. |pypi| image:: https://badge.fury.io/py/exa.svg
+    :target: https://badge.fury.io/py/exa
+    :alt: PyPI Version
 
 .. |gitter| image:: https://badges.gitter.im/exa-analytics/exa.svg
    :alt: Join the chat at https://gitter.im/exa-analytics/exa
