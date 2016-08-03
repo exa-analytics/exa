@@ -13,6 +13,7 @@ install:
     - conda install --yes sqlalchemy matplotlib networkx sympy seaborn jupyter
     - conda install --yes notebook==4.1 ipywidgets==4.1 ipyparallel sphinx nose
     - pip install sphinxcontrib-autoanysrc coverage python-coveralls
+    - exa -uu
 script:
     - nosetests --with-doctest --with-coverage
 after_success:
