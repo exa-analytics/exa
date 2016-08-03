@@ -1,4 +1,49 @@
 | |logo|
+##################
+Installation
+##################
+| |conda|
+| |pypi|
+Exa is available through `anaconda`_,
+
+.. code-block:: bash
+
+    conda install exa
+
+or `pypi`_.
+
+.. code-block:: bash
+
+    pip install exa
+
+###################
+Getting Started
+###################
+| |docs|
+| |gitter|
+Documentation can be built using `sphinx`_:
+
+.. code-block:: bash
+
+    cd doc
+    make html    # or .\make.bat html
+
+##################
+Status
+##################
+| |build|
+| |issues|
+| |cov|
+
+###############
+Legal
+###############
+| |lic|
+| Copyright (c) 2015-2016, Exa Analytics Development Team
+| Distributed under the terms of the Apache License 2.0
+
+.. _anaconda: https://www.continuum.io/downloads
+.. _pypi: https://pypi.python.org/pypi
 
 .. |logo| image:: doc/source/_static/logo.png
     :target: doc/source/_static/logo.png
@@ -35,37 +80,3 @@
 .. |lic| image:: http://img.shields.io/:license-apache-blue.svg?style=flat-square
     :target: http://www.apache.org/licenses/LICENSE-2.0
     :alt: License
-
-Installation
-##################
-| |conda|
-| |pypi|
-
-.. code-block:: bash
-
-    conda install exa
-
-.. code-block:: bash
-
-    pip instal exa
-
-Getting Started
-###################
-| |docs|
-| |gitter|
-.. code-block:: bash
-
-    cd doc
-    make html    # .\make.bat html # Windows
-
-Support/Status
-##################
-| |build|
-| |issues|
-| |cov|
-
-Legal
-###############
-| Copyright (c) 2015-2016, Exa Analytics Development Team
-| Distributed under the terms of the Apache License 2.0
-| |lic|
