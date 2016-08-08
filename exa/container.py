@@ -79,8 +79,6 @@ class Container:
 
                 mycontainer[slice].copy()
         """
-        if isinstance(key, (int, np.int32, np.int64)):
-            key = [key]
         kwargs = {}
         for name, data in self._data().items():
             k = name[1:] if name.startswith('_') else name

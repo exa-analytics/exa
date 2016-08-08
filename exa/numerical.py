@@ -30,8 +30,13 @@ class Numerical:
     and :class:`~exa.numerical.Field` objects, providing default trait
     functionality and clean representations when present as part of containers.
     """
-    def slice_naive(self, key):
-        """Naively slice this object by index."""
+    def slice_ix(self, key):
+        """Naively slice this object by index by index (ix)."""
+        # Convert the key(s) to indices
+        if isinstance(key, (int, np.int32, np.int64)):
+            key = [key]
+        elif isinstance(key, slice):
+            key = self.index.values[key]
         cls = self.__class__
         return cls(self.ix[key])
 
@@ -106,33 +111,33 @@ class BaseDataFrame(Numerical):
     Base class for dense and sparse dataframe objects (labeled matrices).
 
     Note:
-        If the **_groupby** value is not none, it will automatically be added to
-        the **_categories** dictionary with raw type int.
+        If the _cardinal attribute is populated, it will automatically be added
+        to the _categories and _columns attributes.
 
     Attributes:
-        _groupby (tuple): Tuple of column name and raw type that acts as foreign key to index of another table
+        _cardinal (tuple): Tuple of column name and raw type that acts as foreign key to index of another table
         _index (str): Name of index (may be used as foreign key in another table)
-        _columns (list): Required columns (excluding _groupby)
+        _columns (list): Required columns
         _categories (dict): Dict of column names, raw types that if present will be converted to and from categoricals automatically
         _traits (list): List of columns that may (if present) be converted to traits on call to _update_traits
         _precision (dict): Dict of column names, ints, that if present will have traits of the specified (float) precision
     """
-    _groupby = ()      # Tuple of column name and raw type that acts as foreign key to index of another table
+    _cardinal = ()     # Tuple of column name and raw type that acts as foreign key to index of another table
     _index = None      # Name of index (may be used as foreign key in another table)
-    _columns = []      # Required columns (excluding _groupby)
+    _columns = []      # Required columns
     _categories = {}   # Dict of column names, raw types that if present will be converted to and from categoricals automatically
     _traits = []       # List of columns that may (if present) be converted to traits on call to _update_traits
     _precision = {}    # Dict of column names, ints, that if present will have traits of the specified (float) precision
 
-    def grouped(self):
+    @property
+    def cardinal_groups(self):
         """
-        Group this object on it cardinal dimension (**_groupby**).
+        Group this object on it cardinal dimension (_cardinal).
 
         Returns:
-            grouped: Pandas groupby object (grouped on **_groupby**)
+            grouped: Pandas groupby object (grouped on _cardinal)
         """
-        # Because this line of code comes up so often, we alias it...
-        g, t = self._groupby
+        g, t = self._cardinal
         self[g] = self[g].astype(t)
         grps = self.groupby(g)
         self[g] = self[g].astype('category')
@@ -173,7 +178,7 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
     .. code-block:: Python
 
         class MyDF(exa.numerical.DataFrame):
-            _groupby = ('cardinal', int)
+            _cardinal = ('cardinal', int)
             _index = 'mydf_index'
             _columns = ['x', 'y', 'z', 'symbol']
             _traits = ['x', 'y', 'z']
@@ -227,7 +232,7 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
         groups = None
         prefix = self.__class__.__name__.lower()
         fi = self.index[0]
-        if self._groupby:
+        if self._cardinal:
             groups = self.grouped()
         for name in self._traits:
             trait_name = '_'.join((prefix, str(name)))    # Name mangle to ensure uniqueness
@@ -259,9 +264,9 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self._groupby != ():
-            self._categories[self._groupby[0]] = self._groupby[1]
-            self._columns.append(self._groupby[0])
+        if self._cardinal:
+            self._categories[self._cardinal[0]] = self._cardinal[1]
+            self._columns.append(self._cardinal[0])
         self._set_categories()
         if len(self) > 0:
             name = self.__class__.__name__
@@ -350,8 +355,8 @@ class Field(DataFrame):
         """
         self._revert_categories()
         traits = {}
-        if self._groupby:
-            grps = self.groupby(self._groupby[0])
+        if self._cardinal:
+            grps = self.groupby(self._cardinal[0])
             string = str(list(grps.groups.values())).replace(' ', '')
             traits['field_indices'] = Unicode(string).tag(sync=True)
         else:

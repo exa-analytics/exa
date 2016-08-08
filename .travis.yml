@@ -10,12 +10,13 @@ before_install:
     - conda update --yes conda
 install:
     - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy pandas
-    - conda install --yes sqlalchemy matplotlib networkx sympy seaborn jupyter
-    - conda install --yes notebook==4.1 ipywidgets==4.1 ipyparallel sphinx nose
+    - conda install --yes sqlalchemy matplotlib networkx sympy seaborn sphinx nose
+    - conda install -c conda-forge --yes jupyter notebook ipywidgets ipyparallel jupyterlab
     - pip install sphinxcontrib-autoanysrc coverage python-coveralls
     - python setup.py install
     - exa -uu
 script:
     - nosetests --with-doctest --with-coverage
 after_success:
+    - codecov
     - coveralls
