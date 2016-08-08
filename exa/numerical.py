@@ -127,7 +127,7 @@ class BaseDataFrame(Numerical):
         _traits (list): List of columns that may (if present) be converted to traits on call to _update_traits
         _precision (dict): Dict of column names, ints, that if present will have traits of the specified (float) precision
     """
-    _cardinal = ()     # Tuple of column name and raw type that acts as foreign key to index of another table
+    _cardinal = None     # Tuple of column name and raw type that acts as foreign key to index of another table
     _index = None      # Name of index (may be used as foreign key in another table)
     _columns = []      # Required columns
     _categories = {}   # Dict of column names, raw types that if present will be converted to and from categoricals automatically
