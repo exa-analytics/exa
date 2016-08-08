@@ -2,6 +2,9 @@ package:
     name: exa
     version: "0.2.14"
 
+app:
+    entry: exa
+
 source:
     git_rev: v0.2.14
     git_url: https://github.com/exa-analytics/exa.git

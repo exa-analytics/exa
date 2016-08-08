@@ -60,14 +60,14 @@ class ContainerWidget(Widget):
     See Also:
         :mod:`~exa.container`, :mod:`~exa.relational.container`
     """
-    _view_module = Unicode('nbextensions/exa/container').tag(sync=True)
+    _view_module = Unicode("nbextensions/exa/container").tag(sync=True)
     _view_name = Unicode('ContainerView').tag(sync=True)
     gui_width = Integer(250).tag(sync=True)
 
     def __init__(self, container, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.container = container
-        self.params = {'save_dir': '', 'file_name': ''}
+        self.params = {'save_dir': "", 'file_name': ""}
 
 
 def install_notebook_widgets(pkg_nbext, sys_nbext, verbose=False):
@@ -94,8 +94,8 @@ def install_notebook_widgets(pkg_nbext, sys_nbext, verbose=False):
 
 
 if config['js']['update'] == '1':
-    verbose = True if config['log']['level'] != '0' else False
-    pkg_nbext = mkp(config['dynamic']['pkgdir'], '_nbextension')
-    sys_nbext = mkp(jupyter_data_dir(), 'nbextensions', 'exa')
+    verbose = True if config['log']['level'] != "0" else False
+    pkg_nbext = mkp(config['dynamic']['pkgdir'], "_nbextension")
+    sys_nbext = mkp(jupyter_data_dir(), "nbextensions", "exa")
     install_notebook_widgets(pkg_nbext, sys_nbext, verbose)
     atexit.register(del_update)
