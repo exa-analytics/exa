@@ -42,7 +42,7 @@ class Numerical:
             data: Slice of self
         """
         cls = self.__class__
-        key = check_key(key)
+        key = check_key(self, key)
         return cls(self.ix[key])
 
     def _custom_traits(self):
@@ -354,7 +354,7 @@ class Field(DataFrame):
             field: Sliced field object
         """
         cls = self.__class__
-        key = self._check_key(key)
+        key = check_key(self, key)
         enum = pd.Series(range(len(self)))
         enum.index = self.index
         values = self.field_values[enum[key].values]
