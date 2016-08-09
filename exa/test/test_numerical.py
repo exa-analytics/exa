@@ -40,7 +40,7 @@ class TestingDF1(DataFrame):
     Note:
         Integer groupby.
     """
-    _groupby = ('group', np.int64)
+    _cardinal = ('group', np.int64)
     _index = 'index'
     _columns = ['column', 'type']
     _traits = ['column']
@@ -56,7 +56,7 @@ class TestingDF2(DataFrame):
     Note:
         String groupby.
     """
-    _groupby = ('group', str)
+    _cardinal = ('group', str)
     _index = 'index'
     _columns = ['x', 'y', 'z', 'type']
     _traits = ['x', 'y', 'z']
