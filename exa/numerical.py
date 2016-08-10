@@ -154,7 +154,7 @@ class BaseDataFrame(Numerical):
         """
         cls = self.__class__
         key = check_key(self, key, cardinal=True)
-        return cls(self[self[self._cardinal].isin(key)])
+        return cls(self[self[self._cardinal[0]].isin(key)])
 
 
 class Series(BaseSeries, pd.Series):
@@ -245,7 +245,7 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
         prefix = self.__class__.__name__.lower()
         fi = self.index[0]
         grpby = None
-        if self._cardinal:
+        if self._cardinal is not None:
             grpby = self.cardinal_groupby()
         for name in self._traits:
             trait_name = '_'.join((prefix, str(name)))    # Name mangle to ensure uniqueness
@@ -277,7 +277,7 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self._cardinal:
+        if self._cardinal is not None:
             self._categories[self._cardinal[0]] = self._cardinal[1]
             self._columns.append(self._cardinal[0])
         self._set_categories()
@@ -375,7 +375,7 @@ class Field(DataFrame):
         """
         self._revert_categories()
         traits = {}
-        if self._cardinal:
+        if self._cardinal is not None:
             grpby = self.cardinal_groupby()
             string = str(list(grpby.groups.values())).replace(' ', '')
             traits['field_indices'] = Unicode(string).tag(sync=True)
@@ -512,11 +512,11 @@ def check_key(data_object, key, cardinal=False):
     Update the value of an index key by matching values or getting positionals.
     """
     itype = (int, np.int32, np.int64)
-    if not isinstance(key, itype + (slice, tuple, list)):
+    if not isinstance(key, itype + (slice, tuple, list, np.ndarray)):
         raise KeyError("Unknown key type {} for key {}".format(type(key), key))
-    keys = data_object.index.unique()
-    if cardinal:
-        keys = data_object[data_object._cardinal].unique()
+    keys = data_object.index.values
+    if cardinal and data_object._cardinal is not None:
+        keys = data_object[data_object._cardinal[0]].unique()
     elif isinstance(key, itype) and key in keys:
         key = [data_object.index.values[key]]
     elif isinstance(key, itype) and key < 0:

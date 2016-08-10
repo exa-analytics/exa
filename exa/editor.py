@@ -72,7 +72,7 @@ class Editor:
         if path is None:
             print(self.format(*args, **kwargs))
         else:
-            with open(path, 'w') as f:
+            with open(path, 'w', newline="") as f:
                 f.write(self.format(*args, **kwargs))
 
     def format(self, *args, inplace=False, **kwargs):
