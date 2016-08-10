@@ -1,12 +1,12 @@
 package:
     name: exa
-    version: "0.2.14"
+    version: "0.2.15"
 
 app:
     entry: exa
 
 source:
-    git_rev: v0.2.14
+    git_rev: v0.2.15
     git_url: https://github.com/exa-analytics/exa.git
 
 requirements:
