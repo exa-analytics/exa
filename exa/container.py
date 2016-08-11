@@ -462,7 +462,7 @@ class Container:
                 traits['test'] = Bool(False).tag(sync=True)
                 traits.update(self._custom_traits())
                 for n, obj in self._data().items():
-                    if hasattr(obj, '_traits'): # or isinstance(obj, (Series, SparseSeries))) and len(obj) > 0:
+                    if hasattr(obj, '_traits') and len(obj) > 0: # or isinstance(obj, (Series, SparseSeries))) and len(obj) > 0:
                         traits.update(obj._update_traits())
             self._widget.add_traits(**traits)    # Adding traits to the widget makes
             self._traits_need_update = False     # them accesible from nbextensions (JavaScript).

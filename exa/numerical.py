@@ -366,6 +366,7 @@ class Field(DataFrame):
         self._set_categories()
         return traits
 
+
     def __init__(self, *args, field_values=None, **kwargs):
         # The following check allows creation of a single field (whose field data
         # comes from a series object and field values from another series object).
@@ -426,7 +427,7 @@ class Field3D(Field):
         Each field should be flattened into an N x 1 (scalar) or N x 3 (vector)
         series or dataframe respectively. The orientation of the flattening
         should have x as the outer loop and z values as the inner loop (for both
-        cases). This is sometimes called C-major order, C-style order, and has
+        cases). This is sometimes called C-major or C-style order, and has
         the last index changing the fastest and the first index changing the
         slowest.
 
