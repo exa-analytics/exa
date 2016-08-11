@@ -338,7 +338,7 @@ class Editor:
         return cls(lines_from_string(string), **kwargs)
 
     def __init__(self, path_stream_or_string, as_interned=False, nprint=30,
-                 name=None, description=None, meta={}):
+                 name=None, description=None, meta=None):
         if len(path_stream_or_string) < 256 and os.path.exists(path_stream_or_string):
             self._lines = lines_from_file(path_stream_or_string, as_interned)
         elif isinstance(path_stream_or_string, list):

@@ -49,8 +49,8 @@ class Container:
             kwargs['name'] = name
         if description is not None:
             kwargs['description'] = description
-        if isinstance(meta, dict):
-            kwargs['meta'].update(meta)
+        if meta is not None:
+            kwargs['meta'] = meta
         return cls(**kwargs)
 
     def concat(self, *args, **kwargs):
@@ -452,7 +452,7 @@ class Container:
         """
         rel = {}
         for key, obj in vars(self).items():
-            if not isinstance(obj, (pd.Series, pd.DataFrame)) and not key.startswith('_'):
+            if not isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFrame)) and not key.startswith('_'):
                 if copy and 'id' not in key:
                     rel[key] = deepcopy(obj)
                 else:
@@ -518,7 +518,7 @@ class Container:
             return self.slice_cardinal(key)
         raise KeyError()
 
-    def __init__(self, name=None, description=None, meta={}, **kwargs):
+    def __init__(self, name=None, description=None, meta=None, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
         self.name = name
