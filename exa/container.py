@@ -518,12 +518,12 @@ class Container:
             return self.slice_cardinal(key)
         raise KeyError()
 
-    def __init__(self, name=None, description=None, meta=None, **kwargs):
+    def __init__(self, name=None, description=None, meta={}, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
         self.name = name
         self.description = description
-        self.meta = {} if meta is None else meta
+        self.meta = meta
         self._traits_need_update = True
         self._widget = None
         if config['dynamic']['notebook'] == 'true':

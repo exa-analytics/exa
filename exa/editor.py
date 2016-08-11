@@ -14,7 +14,6 @@ import re
 import sys
 import pandas as pd
 from io import StringIO, TextIOWrapper
-from collections import OrderedDict
 
 
 class Editor:
@@ -181,21 +180,36 @@ class Editor:
         for k, i in enumerate(lines):
             del self[i-k]    # Accounts for the fact that len(self) decrease upon deletion
 
-    def find(self, *strings):
+    def find(self, *strings, keys_only=False):
         """
         Search the entire editor for lines that match the string.
 
+        .. code-block:: Python
+
+            string = '''word one
+            word two
+            three'''
+            ed = Editor(string)
+            ed.find('word')          # [(0, "word one"), (1, "word two")]
+            ed.find('word', 'three') # {'word': [...], 'three': [(2, "three")]}
+
         Args:
-            \*strings: Any number of strings to search for
+            \*strings (str): Any number of strings to search for
+            keys_only (bool): Only return keys
 
         Returns:
-            results (dict): Dictionary of string key, line values.
+            results: If multiple strings searched a dictionary of string key, (line number, line) values (else just values)
         """
-        results = {string: OrderedDict() for string in strings}
+        results = {string: [] for string in strings}
         for i, line in enumerate(self):
             for string in strings:
                 if string in line:
-                    results[string][i] = line
+                    if keys_only:
+                        results[string].append(i)
+                    else:
+                        results[string].append((i, line))
+        if len(strings) == 1:
+            return results[strings[0]]
         return results
 
     def find_next(self, string):
@@ -337,7 +351,7 @@ class Editor:
             raise TypeError('Unknown type for arg data: {}'.format(type(data)))
         self.name = name
         self.description = description
-        self.meta = {} if meta is None else meta
+        self.meta = meta
         self.nprint = 30
         self.cursor = 0
 
