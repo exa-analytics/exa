@@ -343,7 +343,7 @@ class Editor:
     def __init__(self, path_stream_or_string, as_interned=False, nprint=30,
                  name=None, description=None, meta=None):
         if len(path_stream_or_string) < 256 and os.path.exists(path_stream_or_string):
-            self._lines = lines_from_file(path_stream_or_string, as_interned)
+            self._lines = lines_from_file(path_stream_or_string, as_interned, encoding)
         elif isinstance(path_stream_or_string, list):
             self._lines = path_stream_or_string
         elif isinstance(path_stream_or_string, (TextIOWrapper, StringIO)):
@@ -351,7 +351,7 @@ class Editor:
         elif isinstance(path_stream_or_string, str):
             self._lines = lines_from_string(path_stream_or_string, as_interned)
         else:
-            raise TypeError('Unknown type for arg data: {}'.format(type(data)))
+            raise TypeError('Unknown type for arg data: {}'.format(type(path_stream_or_string)))
         self.name = name
         self.description = description
         self.meta = meta
@@ -403,7 +403,7 @@ class Editor:
         return r
 
 
-def lines_from_file(path, as_interned=False):
+def lines_from_file(path, as_interned=False, encoding=None):
     """
     Create a list of file lines from a given filepath.
 
@@ -415,7 +415,7 @@ def lines_from_file(path, as_interned=False):
         strings (list): File line list
     """
     lines = None
-    with open(path) as f:
+    with open(path, **{'encoding': encoding}) as f:
         if as_interned:
             lines = [sys.intern(line) for line in f.read().splitlines()]
         else:

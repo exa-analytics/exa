@@ -575,6 +575,12 @@ define([
             var x = new THREE.ArrowHelper(xdir, origin, 1.0, 0xFF0000);
             var y = new THREE.ArrowHelper(ydir, origin, 1.0, 0x00FF00);
             var z = new THREE.ArrowHelper(zdir, origin, 1.0, 0x0000FF);
+            //var x = new THREE.ArrowHelper(xdir, origin, 6.0, 0xFF0000, 1.5, 1.5);
+            //var y = new THREE.ArrowHelper(ydir, origin, 6.0, 0x00FF00, 1.5, 1.5);
+            //var z = new THREE.ArrowHelper(zdir, origin, 6.0, 0x0000FF, 1.5, 1.5);
+            x.line.material.linewidth = 5;
+            y.line.material.linewidth = 5;
+            z.line.material.linewidth = 5;
             this.scene.add(x);
             this.scene.add(y);
             this.scene.add(z);
