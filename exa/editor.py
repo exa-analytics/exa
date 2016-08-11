@@ -235,27 +235,30 @@ class Editor:
                     self.cursor = i + 1
                     return tup
 
-    def regex(self, *patterns, line=False):
+    def regex(self, *patterns, keys_only=False):
         """
         Search the editor for lines matching the regular expression.
 
         Args:
             \*patterns: Regular expressions to search each line for
-            line (bool): Return the whole line or the matched groups (groups default)
+            keys_only (bool): Only return keys
 
         Returns:
             results (dict): Dictionary of pattern keys, line values (or groups - default)
         """
-        results = {pattern: OrderedDict() for pattern in patterns}
+        results = {pattern: [] for pattern in patterns}
         for i, line in enumerate(self):
             for pattern in patterns:
                 grps = re.search(pattern, line)
-                if grps:
-                    grps = grps.groups()
-                    if grps:
-                        results[pattern][i] = grps
-                    else:
-                        results[pattern][i] = line
+                if grps and keys_only:
+                    results[pattern].append(i)
+                elif grps and grps.groups():
+                    for group in grps.groups():
+                        results[pattern].append((i, group))
+                elif grps:
+                    results[pattern].append((i, line))
+        if len(patterns) == 1:
+            return results[patterns[0]]
         return results
 
     def replace(self, pattern, replacement):
