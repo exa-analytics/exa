@@ -131,7 +131,7 @@ class Editor:
         else:
             raise TypeError('Unsupported type {0} for lines.'.format(type(lines)))
 
-    def insert(self, lines={}):
+    def insert(self, lines=None):
         """
         Insert lines into the editor.
 
@@ -163,7 +163,7 @@ class Editor:
         """
         data = {}
         for key, obj in self.__dict__.items():
-            if isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseDataFrame)):
+            if isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFrame)):
                 if copy:
                     data[key] = obj.copy()
                 else:
@@ -319,7 +319,7 @@ class Editor:
         """Create an editor instance from a file on disk."""
         lines = lines_from_file(path)
         if 'meta' not in kwargs:
-            kwargs['meta'] = {}
+            kwargs['meta'] = {'from': 'file'}
         kwargs['meta']['filepath'] = path
         return cls(lines, **kwargs)
 
@@ -328,7 +328,7 @@ class Editor:
         """Create an editor instance from a file stream."""
         lines = lines_from_stream(f)
         if 'meta' not in kwargs:
-            kwargs['meta'] = {}
+            kwargs['meta'] = {'from': 'stream'}
         kwargs['meta']['filepath'] = f.name if hasattr(f, 'name') else None
         return cls(lines, **kwargs)
 
