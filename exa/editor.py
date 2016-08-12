@@ -14,7 +14,6 @@ import re
 import sys
 import pandas as pd
 from io import StringIO, TextIOWrapper
-from collections import OrderedDict
 
 
 class Editor:
@@ -72,7 +71,7 @@ class Editor:
         if path is None:
             print(self.format(*args, **kwargs))
         else:
-            with open(path, 'w') as f:
+            with open(path, 'w', newline="") as f:
                 f.write(self.format(*args, **kwargs))
 
     def format(self, *args, inplace=False, **kwargs):
@@ -132,7 +131,7 @@ class Editor:
         else:
             raise TypeError('Unsupported type {0} for lines.'.format(type(lines)))
 
-    def insert(self, lines={}):
+    def insert(self, lines=None):
         """
         Insert lines into the editor.
 
@@ -164,7 +163,7 @@ class Editor:
         """
         data = {}
         for key, obj in self.__dict__.items():
-            if isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseDataFrame)):
+            if isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFrame)):
                 if copy:
                     data[key] = obj.copy()
                 else:
@@ -181,21 +180,36 @@ class Editor:
         for k, i in enumerate(lines):
             del self[i-k]    # Accounts for the fact that len(self) decrease upon deletion
 
-    def find(self, *strings):
+    def find(self, *strings, keys_only=False):
         """
         Search the entire editor for lines that match the string.
 
+        .. code-block:: Python
+
+            string = '''word one
+            word two
+            three'''
+            ed = Editor(string)
+            ed.find('word')          # [(0, "word one"), (1, "word two")]
+            ed.find('word', 'three') # {'word': [...], 'three': [(2, "three")]}
+
         Args:
-            \*strings: Any number of strings to search for
+            \*strings (str): Any number of strings to search for
+            keys_only (bool): Only return keys
 
         Returns:
-            results (dict): Dictionary of string key, line values.
+            results: If multiple strings searched a dictionary of string key, (line number, line) values (else just values)
         """
-        results = {string: OrderedDict() for string in strings}
+        results = {string: [] for string in strings}
         for i, line in enumerate(self):
             for string in strings:
                 if string in line:
-                    results[string][i] = line
+                    if keys_only:
+                        results[string].append(i)
+                    else:
+                        results[string].append((i, line))
+        if len(strings) == 1:
+            return results[strings[0]]
         return results
 
     def find_next(self, string):
@@ -221,27 +235,30 @@ class Editor:
                     self.cursor = i + 1
                     return tup
 
-    def regex(self, *patterns, line=False):
+    def regex(self, *patterns, keys_only=False):
         """
         Search the editor for lines matching the regular expression.
 
         Args:
             \*patterns: Regular expressions to search each line for
-            line (bool): Return the whole line or the matched groups (groups default)
+            keys_only (bool): Only return keys
 
         Returns:
             results (dict): Dictionary of pattern keys, line values (or groups - default)
         """
-        results = {pattern: OrderedDict() for pattern in patterns}
+        results = {pattern: [] for pattern in patterns}
         for i, line in enumerate(self):
             for pattern in patterns:
                 grps = re.search(pattern, line)
-                if grps:
-                    grps = grps.groups()
-                    if grps:
-                        results[pattern][i] = grps
-                    else:
-                        results[pattern][i] = line
+                if grps and keys_only:
+                    results[pattern].append(i)
+                elif grps and grps.groups():
+                    for group in grps.groups():
+                        results[pattern].append((i, group))
+                elif grps:
+                    results[pattern].append((i, line))
+        if len(patterns) == 1:
+            return results[patterns[0]]
         return results
 
     def replace(self, pattern, replacement):
@@ -305,7 +322,7 @@ class Editor:
         """Create an editor instance from a file on disk."""
         lines = lines_from_file(path)
         if 'meta' not in kwargs:
-            kwargs['meta'] = {}
+            kwargs['meta'] = {'from': 'file'}
         kwargs['meta']['filepath'] = path
         return cls(lines, **kwargs)
 
@@ -314,7 +331,7 @@ class Editor:
         """Create an editor instance from a file stream."""
         lines = lines_from_stream(f)
         if 'meta' not in kwargs:
-            kwargs['meta'] = {}
+            kwargs['meta'] = {'from': 'stream'}
         kwargs['meta']['filepath'] = f.name if hasattr(f, 'name') else None
         return cls(lines, **kwargs)
 
@@ -324,7 +341,7 @@ class Editor:
         return cls(lines_from_string(string), **kwargs)
 
     def __init__(self, path_stream_or_string, as_interned=False, nprint=30,
-                 name=None, description=None, meta={}, encoding=None):
+                 name=None, description=None, meta=None, encoding=None):
         if len(path_stream_or_string) < 256 and os.path.exists(path_stream_or_string):
             self._lines = lines_from_file(path_stream_or_string, as_interned, encoding)
         elif isinstance(path_stream_or_string, list):

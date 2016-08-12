@@ -30,14 +30,12 @@ require.config({
 });
 
 
-// THIS WILL HAVE TO CHANGE with updates to ipywidgets and notebook packages
-// define('ContainerView', ["jupyter-js-widgets"], function(widgets) {})
 define([
-    "widgets/js/widget",
+    "jupyter-js-widgets",
     "nbextensions/exa/test",
     "nbextensions/exa/info"
-], function(widget, TestApp, InfoApp) {
-    class ContainerView extends widget.DOMWidgetView {
+], function(widgets, TestApp, InfoApp) {
+    class ContainerView extends widgets.DOMWidgetView {
         /*"""
         ContainerView
         ===============
@@ -207,6 +205,6 @@ define([
         };
 
     };
-    
+
     return {ContainerView: ContainerView};
 });

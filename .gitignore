@@ -1,21 +1,8 @@
 # Byte-compiled / optimized / DLL files
-_pycache__*
-__pycache__/*
-exa/__pycache__/*
-exa/atomic/__pycache__/*
-exa/qe/__pycahce__/*
-exa/nwchem/__pycache__/*
+__pycache__/
 *.py[cod]
 *.nbc
 *.nbi
-
-# Comment to tag gitignore
-# Bower repositories
-exa/static/js/node_modules
-exa/static/js/bower_components
-exa/static/js/test
-exa/static/js/tests
-
 
 # C extensions
 *.so
@@ -67,7 +54,7 @@ coverage.xml
 *.log
 
 # Sphinx documentation
-doc/build/*
+doc/build/
 
 # PyBuilder
 target/*
@@ -78,5 +65,4 @@ target/*
 .settings/*
 *.swp
 .ipynb*
-*.py~
-*.un~
+*~

@@ -23,7 +23,8 @@ from traitlets import Bool
 from exa import mpl
 from exa._config import config
 from exa.widget import ContainerWidget
-from exa.numerical import Series, DataFrame, SparseSeries, SparseDataFrame, Field
+from exa.numerical import (Series, DataFrame, SparseSeries, SparseDataFrame,
+                           Field, check_key)
 from exa.relational import ContainerFile, scoped_session
 from exa.utility import convert_bytes
 
@@ -48,8 +49,8 @@ class Container:
             kwargs['name'] = name
         if description is not None:
             kwargs['description'] = description
-        if isinstance(meta, dict):
-            kwargs['meta'].update(meta)
+        if meta is not None:
+            kwargs['meta'] = meta
         return cls(**kwargs)
 
     def concat(self, *args, **kwargs):
@@ -79,16 +80,13 @@ class Container:
 
                 mycontainer[slice].copy()
         """
-        if isinstance(key, (int, np.int32, np.int64)):
-            key = [key]
-        kwargs = {}
+        kwargs = {'name': self.name, 'description': self.description, 'meta': self.meta}
         for name, data in self._data().items():
             k = name[1:] if name.startswith('_') else name
             kwargs[k] = data.slice_naive(key)
-        return self.__class__(name=self.name, description=self.description,
-                              meta=self.meta, **kwargs)
+        return self.__class__(**kwargs)
 
-    def slice_by_cardinal(self, key):
+    def slice_cardinal(self, key):
         """
         Slice the container according to its (primary) cardinal axis.
 
@@ -118,38 +116,74 @@ class Container:
             For information about relationships between data objects see
             :mod:`~exa.numerical`.
         """
-        if isinstance(key, (int, np.int32, np.int64)):
-            if key < 0:
-                key = [self[self._cardinal].index.values[key]]
-            else:
-                key = [key]
-        elif isinstance(key, slice):
-            key = self[self._cardinal].index.values[key]
-        g = self.network(fig=False)
-        # First add the cardinal table
-        kwargs = {self._cardinal: self[self._cardinal].ix[key]}
-        # Next traverse, breadth first, all data objects
-        for parent, child in nx.bfs_edges(g, self._cardinal):
-            typ = g.edge_types[(parent, child)]
-            if typ == 'index-index':
-                # Select from the child on the parent's index (the parent is
-                # in the kwargs already).
-                kwargs[child] = self[child].ix[kwargs[parent].index.values]
-            elif typ == 'index-column':
-                # Select from the child where the column (of the same name as
-                # the parent) is in the parent's index values
-                cdf = self[child]
-                kwargs[child] = cdf[cdf[parent].isin(kwargs[parent].index.values)]
-            elif typ == 'column-index':
-                # Select from the child where the child's index is in the
-                # column of the parent. Note that this relationship
-                cdf = self[child]
-                cin = cdf.index.name
-                cols = [col for col in kwargs[parent] if cin == col or (cin == col[:-1] and col[-1].isdigit())]
-                index = kwargs[parent][cols].stack().astype(np.int64).values
-                kwargs[child] = cdf[cdf.index.isin(index)]
-        return self.__class__(name=self.name, description=self.description,
-                              meta=self.meta, **kwargs)
+        if self._cardinal:
+            cls = self.__class__
+            key = check_key(self[self._cardinal], key, cardinal=True)
+            g = self.network(fig=False)
+            kwargs = {self._cardinal: self[self._cardinal].ix[key], 'name': self.name,
+                      'description': self.description, 'meta': self.meta}
+            # Next traverse, breadth first, all data objects
+            for parent, child in nx.bfs_edges(g, self._cardinal):
+                if child in kwargs:
+                    continue
+                typ = g.edge_types[(parent, child)]
+                if self._cardinal in self[child].columns and hasattr(self[child], 'slice_cardinal'):
+                    kwargs[child] = self[child].slice_cardinal(key)
+                elif typ == 'index-index':
+                    # Select from the child on the parent's index (the parent is
+                    # in the kwargs already).
+                    kwargs[child] = self[child].ix[kwargs[parent].index.values]
+                elif typ == 'index-column':
+                    # Select from the child where the column (of the same name as
+                    # the parent) is in the parent's index values
+                    cdf = self[child]
+                    kwargs[child] = cdf[cdf[parent].isin(kwargs[parent].index.values)]
+                elif typ == 'column-index':
+                    # Select from the child where the child's index is in the
+                    # column of the parent. Note that this relationship
+                    cdf = self[child]
+                    cin = cdf.index.name
+                    cols = [col for col in kwargs[parent] if cin == col or (cin == col[:-1] and col[-1].isdigit())]
+                    index = kwargs[parent][cols].stack().astype(np.int64).values
+                    kwargs[child] = cdf[cdf.index.isin(index)]
+            return cls(**kwargs)
+
+    def cardinal_groupby(self):
+        """
+        Create an instance of this class for every step in the cardinal dimension.
+        """
+        if self._cardinal:
+            g = self.network(fig=False)
+            cardinal_indexes = self[self._cardinal].index.values
+            selfs = {}
+            cls = self.__class__
+            for cardinal_index in cardinal_indexes:
+                kwargs = {self._cardinal: self[self._cardinal].ix[[cardinal_index]]}
+                for parent, child in nx.bfs_edges(g):
+                    if child in kwargs:
+                        continue
+                    typ = g.edge_types[(parent, child)]
+                    if self._cardinal in self[child].columns and hasattr(self[child], 'slice_cardinal'):
+                        kwargs[child] = self[child].slice_cardinal(key)
+                    elif typ == 'index-index':
+                        # Select from the child on the parent's index (the parent is
+                        # in the kwargs already).
+                        kwargs[child] = self[child].ix[kwargs[parent].index.values]
+                    elif typ == 'index-column':
+                        # Select from the child where the column (of the same name as
+                        # the parent) is in the parent's index values
+                        cdf = self[child]
+                        kwargs[child] = cdf[cdf[parent].isin(kwargs[parent].index.values)]
+                    elif typ == 'column-index':
+                        # Select from the child where the child's index is in the
+                        # column of the parent. Note that this relationship
+                        cdf = self[child]
+                        cin = cdf.index.name
+                        cols = [col for col in kwargs[parent] if cin == col or (cin == col[:-1] and col[-1].isdigit())]
+                        index = kwargs[parent][cols].stack().astype(np.int64).values
+                        kwargs[child] = cdf[cdf.index.isin(index)]
+                selfs[cardinal_index] = cls(**kwargs)
+        return selfs
 
     def info(self):
         """
@@ -418,7 +452,7 @@ class Container:
         """
         rel = {}
         for key, obj in vars(self).items():
-            if not isinstance(obj, (pd.Series, pd.DataFrame)) and not key.startswith('_'):
+            if not isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFrame)) and not key.startswith('_'):
                 if copy and 'id' not in key:
                     rel[key] = deepcopy(obj)
                 else:
@@ -462,7 +496,7 @@ class Container:
                 traits['test'] = Bool(False).tag(sync=True)
                 traits.update(self._custom_traits())
                 for n, obj in self._data().items():
-                    if hasattr(obj, '_traits') and len(obj) > 0: # or isinstance(obj, (Series, SparseSeries))) and len(obj) > 0:
+                    if hasattr(obj, '_traits') and len(obj) > 0:
                         traits.update(obj._update_traits())
             self._widget.add_traits(**traits)    # Adding traits to the widget makes
             self._traits_need_update = False     # them accesible from nbextensions (JavaScript).
@@ -479,9 +513,9 @@ class Container:
         if isinstance(key, str):
             return getattr(self, key)
         elif isinstance(key, (int, slice, list)) and self._cardinal is None:
-            return self.slice_by_indices(key)
+            return self.slice_naive(key)
         elif isinstance(key, (int, slice, list)) and self._cardinal is not None:
-            return self.slice_by_cardinal(key)
+            return self.slice_cardinal(key)
         raise KeyError()
 
     def __init__(self, name=None, description=None, meta=None, **kwargs):
@@ -489,7 +523,7 @@ class Container:
             setattr(self, key, value)
         self.name = name
         self.description = description
-        self.meta = {} if meta is None else meta
+        self.meta = meta
         self._traits_need_update = True
         self._widget = None
         if config['dynamic']['notebook'] == 'true':
