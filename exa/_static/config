@@ -1,7 +1,7 @@
 [paths]
 data = None
 notebooks = None
-update = 0
+update = 1
 
 [log]
 nlogs = 3
@@ -12,7 +12,7 @@ level = 0
 
 [db]
 uri = None
-update = 0
+update = 1
 
 [js]
-update = 0
+update = 1

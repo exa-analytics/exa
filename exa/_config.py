@@ -81,10 +81,11 @@ else:
 root = mkp(home, '.exa', mk=True)                 # Make exa root directory
 config_file = mkp(root, 'config')                 # Config file path
 pkg = os.path.dirname(__file__)                   # Package source path
+config.read(mkp(pkg, '_static', 'config'))        # Read in default config
 if os.path.exists(config_file):
-    config.read(config_file)                      # Read in existing config
-else:
-    config.read(mkp(pkg, '_static', 'config'))    # Read in default config
+    stats = os.stat(config_file)
+    if stats.st_size > 180:
+        config.read(config_file)                  # Read in existing config
 # paths
 if config['paths']['data'] == 'None':
     config['paths']['data'] = mkp(root, 'data', mk=True)

@@ -31,8 +31,18 @@ class Numerical:
     functionality and clean representations when present as part of containers.
     """
     def slice_naive(self, key):
-        """Naively slice this object by index."""
+        """
+        Slice a data object based on its index, either by value (.ix) or
+        position (.iloc).
+
+        Args:
+            key: Single index value, slice, tuple, or list of indices/positionals
+
+        Returns:
+            data: Slice of self
+        """
         cls = self.__class__
+        key = check_key(self, key)
         return cls(self.ix[key])
 
     def _custom_traits(self):
@@ -106,37 +116,45 @@ class BaseDataFrame(Numerical):
     Base class for dense and sparse dataframe objects (labeled matrices).
 
     Note:
-        If the **_groupby** value is not none, it will automatically be added to
-        the **_categories** dictionary with raw type int.
+        If the _cardinal attribute is populated, it will automatically be added
+        to the _categories and _columns attributes.
 
     Attributes:
-        _groupby (tuple): Tuple of column name and raw type that acts as foreign key to index of another table
+        _cardinal (tuple): Tuple of column name and raw type that acts as foreign key to index of another table
         _index (str): Name of index (may be used as foreign key in another table)
-        _columns (list): Required columns (excluding _groupby)
+        _columns (list): Required columns
         _categories (dict): Dict of column names, raw types that if present will be converted to and from categoricals automatically
         _traits (list): List of columns that may (if present) be converted to traits on call to _update_traits
         _precision (dict): Dict of column names, ints, that if present will have traits of the specified (float) precision
     """
-    _groupby = ()      # Tuple of column name and raw type that acts as foreign key to index of another table
+    _cardinal = None     # Tuple of column name and raw type that acts as foreign key to index of another table
     _index = None      # Name of index (may be used as foreign key in another table)
-    _columns = []      # Required columns (excluding _groupby)
+    _columns = []      # Required columns
     _categories = {}   # Dict of column names, raw types that if present will be converted to and from categoricals automatically
     _traits = []       # List of columns that may (if present) be converted to traits on call to _update_traits
     _precision = {}    # Dict of column names, ints, that if present will have traits of the specified (float) precision
 
-    def grouped(self):
+    def cardinal_groupby(self):
         """
-        Group this object on it cardinal dimension (**_groupby**).
+        Group this object on it cardinal dimension (_cardinal).
 
         Returns:
-            grouped: Pandas groupby object (grouped on **_groupby**)
+            grpby: Pandas groupby object (grouped on _cardinal)
         """
-        # Because this line of code comes up so often, we alias it...
-        g, t = self._groupby
+        g, t = self._cardinal
         self[g] = self[g].astype(t)
-        grps = self.groupby(g)
+        grpby = self.groupby(g)
         self[g] = self[g].astype('category')
-        return grps
+        return grpby
+
+    def slice_cardinal(self, key):
+        """
+        Get the slice of this object by the value or values of the cardinal
+        dimension.
+        """
+        cls = self.__class__
+        key = check_key(self, key, cardinal=True)
+        return cls(self[self[self._cardinal[0]].isin(key)])
 
 
 class Series(BaseSeries, pd.Series):
@@ -173,7 +191,7 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
     .. code-block:: Python
 
         class MyDF(exa.numerical.DataFrame):
-            _groupby = ('cardinal', int)
+            _cardinal = ('cardinal', int)
             _index = 'mydf_index'
             _columns = ['x', 'y', 'z', 'symbol']
             _traits = ['x', 'y', 'z']
@@ -197,7 +215,7 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
         Inplace conversion to categories.
         """
         for column, dtype in self._categories.items():
-            if column in self:
+            if column in self.columns:
                 self[column] = self[column].astype(dtype)
 
     def _set_categories(self):
@@ -205,7 +223,7 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
         Inplace conversion from categories.
         """
         for column, dtype in self._categories.items():
-            if column in self:
+            if column in self.columns:
                 self[column] = self[column].astype('category')
 
     def _update_traits(self):
@@ -224,11 +242,11 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
         """
         traits = self._custom_traits()
         self._revert_categories()
-        groups = None
         prefix = self.__class__.__name__.lower()
         fi = self.index[0]
-        if self._groupby:
-            groups = self.grouped()
+        grpby = None
+        if self._cardinal is not None:
+            grpby = self.cardinal_groupby()
         for name in self._traits:
             trait_name = '_'.join((prefix, str(name)))    # Name mangle to ensure uniqueness
             p = self._precision[name] if name in self._precision else 10
@@ -243,8 +261,8 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
                         trait = Unicode(str(value))
                     else:
                         raise TypeError("Unknown type for {0} with type {1}".format(name, dtype))
-                elif groups:    # If groups exist, make a list of list(s)
-                    series = groups.apply(lambda g: g[name].values)    # Creats a "Series" of array like records
+                elif grpby:    # If groups exist, make a list of list(s)
+                    series = grpby.apply(lambda g: g[name].values)    # Creats a "Series" of array like records
                     trait = Unicode(series.to_json(orient='values', double_precision=p))
                 else:           # Otherwise, just send the flattened values
                     string = self[name].to_json(orient='values', double_precision=p)
@@ -259,9 +277,9 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if self._groupby != ():
-            self._categories[self._groupby[0]] = self._groupby[1]
-            self._columns.append(self._groupby[0])
+        if self._cardinal is not None:
+            self._categories[self._cardinal[0]] = self._cardinal[1]
+            self._columns.append(self._cardinal[0])
         self._set_categories()
         if len(self) > 0:
             name = self.__class__.__name__
@@ -336,12 +354,19 @@ class Field(DataFrame):
             field: Sliced field object
         """
         cls = self.__class__
-        value_indices, data_indices = list(zip(*enumerate(self.index.values)))
-        data_indices = data_indices[key]
-        value_indices = value_indices[key]
-        data = self.ix[data_indices]
-        values = self.field_values[value_indices]
+        key = check_key(self, key)
+        enum = pd.Series(range(len(self)))
+        enum.index = self.index
+        values = self.field_values[enum[key].values]
+        data = self.ix[key]
         return cls(data, field_values=values)
+
+    def slice_cardinal(self, key):
+        """
+        """
+        cls = self.__class__
+        grpby = self.cardinal_groupby()
+
 
     def _custom_traits(self):
         """
@@ -350,21 +375,19 @@ class Field(DataFrame):
         """
         self._revert_categories()
         traits = {}
-        if self._groupby:
-            grps = self.groupby(self._groupby[0])
-            string = str(list(grps.groups.values())).replace(' ', '')
+        if self._cardinal is not None:
+            grpby = self.cardinal_groupby()
+            string = str(list(grpby.groups.values())).replace(' ', '')
             traits['field_indices'] = Unicode(string).tag(sync=True)
         else:
             string = pd.Series(self.index.values).to_json(orient='values')
             traits['field_indices'] = Unicode(string).tag(sync=True)
-        # What are the next to lines used for?
-        #label_indices = self.groupby('frame').apply(lambda x: x[['label']]).to_json(orient='values')
-        #traits['label_indices'] = Unicode(label_indices).tag(sync=True)
         s = pd.Series({i: field.values for i, field in enumerate(self.field_values)})
         json_string = s.to_json(orient='values', double_precision=self._values_precision)
         traits['field_values'] = Unicode(json_string).tag(sync=True)
         self._set_categories()
         return traits
+
 
     def __init__(self, *args, field_values=None, **kwargs):
         # The following check allows creation of a single field (whose field data
@@ -426,7 +449,7 @@ class Field3D(Field):
         Each field should be flattened into an N x 1 (scalar) or N x 3 (vector)
         series or dataframe respectively. The orientation of the flattening
         should have x as the outer loop and z values as the inner loop (for both
-        cases). This is sometimes called C-major order, C-style order, and has
+        cases). This is sometimes called C-major or C-style order, and has
         the last index changing the fastest and the first index changing the
         slowest.
 
@@ -440,45 +463,35 @@ class Field3D(Field):
 
 
 class SparseSeries(BaseSeries, pd.SparseSeries):
-    """
-    Sparse implementation of :class:`~exa.numerical.Series`.
-    """
+    """Sparse implementation of :class:`~exa.numerical.Series`."""
     def copy(self, *args, **kwargs):
-        """
-        Make a copy of this object.
-        """
+        """Make a copy of this object."""
         cls = self.__class__
         return cls(pd.SparseSeries(self).copy(*args, **kwargs))
 
     def _custom_traits(self):
-        '''Placeholder for custom traits.'''
+        """Placeholder for custom traits."""
         return {}
 
     def _update_traits(self):
-        '''
-        '''
+        """Sparse values can be traits."""
         traits = self._custom_traits()
         return traits
 
 
 class SparseDataFrame(BaseDataFrame, pd.SparseDataFrame):
-    """
-    Trait supporting sparse dataframe.
-    """
+    """Trait supporting sparse dataframe."""
     def copy(self, *args, **kwargs):
-        """
-        Make a copy of this object.
-        """
+        """Make a copy of this object."""
         cls = self.__class__
         return cls(pd.SparseDataFrame(self).copy(*args, **kwargs))
 
     def _custom_traits(self):
-        '''Placeholder for custom traits.'''
+        """Placeholder for custom traits."""
         return {}
 
     def _update_traits(self):
-        '''
-        '''
+        """Sparse columns that act as traits."""
         traits = self._custom_traits()
         return traits
 
@@ -494,3 +507,25 @@ class SparseDataFrame(BaseDataFrame, pd.SparseDataFrame):
                 if self.index.name is not None:
                     warnings.warn("Object's index name changed from {} to {}".format(self.index.name, self._index))
                 self.index.name = self._index
+
+def check_key(data_object, key, cardinal=False):
+    """
+    Update the value of an index key by matching values or getting positionals.
+    """
+    itype = (int, np.int32, np.int64)
+    if not isinstance(key, itype + (slice, tuple, list, np.ndarray)):
+        raise KeyError("Unknown key type {} for key {}".format(type(key), key))
+    keys = data_object.index.values
+    if cardinal and data_object._cardinal is not None:
+        keys = data_object[data_object._cardinal[0]].unique()
+    elif isinstance(key, itype) and key in keys:
+        key = [data_object.index.values[key]]
+    elif isinstance(key, itype) and key < 0:
+        key = [data_object.index.values[key]]
+    elif isinstance(key, itype):
+        key = [key]
+    elif isinstance(key, slice):
+        key = data_object.index.values[key]
+    elif isinstance(key, (tuple, list)) and not np.all(k in keys for k in key):
+        key = data_object.index.values[key]
+    return key
