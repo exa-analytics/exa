@@ -526,6 +526,6 @@ def check_key(data_object, key, cardinal=False):
         key = [key]
     elif isinstance(key, slice):
         key = data_object.index.values[key]
-    elif isinstance(key, (tuple, list)) and not np.all(k in keys for k in key):
+    elif isinstance(key, (tuple, list, pd.Index)) and not np.all(k in keys for k in key):
         key = data_object.index.values[key]
     return key
