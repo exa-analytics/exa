@@ -519,13 +519,13 @@ def check_key(data_object, key, cardinal=False):
     if cardinal and data_object._cardinal is not None:
         keys = data_object[data_object._cardinal[0]].unique()
     elif isinstance(key, itype) and key in keys:
-        key = [data_object.index.values[key]]
+        key = list(sorted(data_object.index.values[key]))
     elif isinstance(key, itype) and key < 0:
-        key = [data_object.index.values[key]]
+        key = list(sorted(data_object.index.values[key]))
     elif isinstance(key, itype):
         key = [key]
     elif isinstance(key, slice):
-        key = data_object.index.values[key]
+        key = list(sorted(data_object.index.values[key]))
     elif isinstance(key, (tuple, list, pd.Index)) and not np.all(k in keys for k in key):
-        key = data_object.index.values[key]
+        key = list(sorted(data_object.index.values[key]))
     return key
