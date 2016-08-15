@@ -229,7 +229,7 @@ define([], function() {
         gen_array: gen_array,
         compute_field: compute_field,
         factorial2: factorial2,
-        normalize_gaussian: normaliz_gaussian,
+        normalize_gaussian: normalize_gaussian,
         function_list_3d: [null, 'sphere', 'torus', 'ellipsoid'],
     };
 });
