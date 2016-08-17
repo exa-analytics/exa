@@ -260,7 +260,7 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
                     elif isinstance(value, str):
                         trait = Unicode(str(value))
                     else:
-                        raise TypeError("Unknown type for {0} with type {1}".format(name, dtype))
+                        raise TypeError("Unknown type for {0} with type {1}".format(name, type(value)))
                 elif grpby:    # If groups exist, make a list of list(s)
                     series = grpby.apply(lambda g: g[name].values)    # Creats a "Series" of array like records
                     trait = Unicode(series.to_json(orient='values', double_precision=p))
