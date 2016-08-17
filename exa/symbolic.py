@@ -25,10 +25,10 @@ class SymbolicFunction(sy.Function):
         """
         if self._discrete_func is None or recompile == True:
             npfunc = sy.lambdify(sorted(self.free_symbols), self, 'numpy')
-            if self.compile_type == "jit":
+            if self._compile_type == "jit":
                 self._discrete_func = jit(nopython=True)(npfunc)
-            elif self.compile_type == "vectorize":
-                self._discrete_func = vectorize(nopython=True)(npfunc)
+            elif self._compile_type == "vectorize":
+                self._discrete_func = vectorize([], nopython=True)(npfunc)
             else:
                 raise NotImplementedError()
         return self._discrete_func
@@ -46,7 +46,7 @@ class SymbolicFunction(sy.Function):
             expression: Any valid sympy expression
             compile_type (str): One of "jit" or "vectorize" corresponding to numba compile type
         """
-        expression.__class__.compile_type = compile_type
-        expression.__class__.signature = signature
+        expression.__class__._compile_type = compile_type
+        expression.__class__._signature = signature
         expression.__class__.__call__ = cls.__call__
         return expression
