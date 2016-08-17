@@ -275,7 +275,7 @@ class Editor:
                 line = line.replace(pattern, replacement)
             self[i] = line
 
-    def pandas_dataframe(self, start, stop, ncol):
+    def pandas_dataframe(self, start, stop, ncol, **kwargs):
         """
         Returns the result of tab-separated pandas.read_csv on
         a subset of the file.
@@ -291,11 +291,11 @@ class Editor:
         """
         try:
             ncol = int(ncol)
-            return pd.read_csv(StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=range(ncol))
+            return pd.read_csv(StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=range(ncol), **kwargs)
         except TypeError:
             try:
                 ncol = list(ncol)
-                return pd.read_csv(StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=ncol)
+                return pd.read_csv(StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=ncol, **kwargs)
             except TypeError:
                 print('Cannot pandas_dataframe if ncol is {}, must be int or list'.format(type(ncol)))
 

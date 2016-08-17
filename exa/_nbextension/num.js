@@ -10,12 +10,6 @@ Numerical utilities
 
 
 define([], function() {
-    var fac2 = function(number) {
-        /*"""
-        fac2
-        ============
-        */
-    };
 
     var hstack = function(arrays) {
         /*"""
@@ -154,7 +148,7 @@ define([], function() {
     var compute_field = function(xs, ys, zs, n, func) {
         /*"""
         compute_field
-        --------------
+        ==============
         */
         var values = new Float32Array(n);
         var norm = 0;
@@ -190,6 +184,39 @@ define([], function() {
         return r;
     };
 
+    var normalize_gaussian = function(alpha, L) {
+        /*"""
+        normalize_gaussian
+        ===================
+        Given an exponent and a pre-exponential power, return the
+        normalization constant of a given gaussian type function.
+        */
+        var prefac = Math.pow((2 / Math.PI), 0.75);
+        var numer = Math.pow(2, L) * Math.pow(alpha, ((L + 1.5) / 2));
+        var denom = Math.pow(this.factorial2(2 * L - 1), 0.5);
+        return prefac * numer / denom;
+    };
+
+    var factorial2 = function(n) {
+        /*"""
+        factorial2
+        ============
+        Returns the factorial2 of an integer.
+        */
+        if (n < -1) {
+            return 0;
+        } else if (n < 2) {
+            return 1;
+        } else {
+            var prod = 1;
+            while (n > 0) {
+                prod *= n;
+                n -= 2;
+            };
+            return prod;
+        };  
+    };
+
 
     return {
         meshgrid3d: meshgrid3d,
@@ -201,6 +228,8 @@ define([], function() {
         torus: torus,
         gen_array: gen_array,
         compute_field: compute_field,
+        factorial2: factorial2,
+        normalize_gaussian: normalize_gaussian,
         function_list_3d: [null, 'sphere', 'torus', 'ellipsoid'],
     };
 });
