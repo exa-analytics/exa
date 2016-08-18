@@ -65,7 +65,7 @@ def check(pkg, version, pys):
     """
     Human check for publication.
     """
-    v = ".".join([version)
+    v = ".".join([str(i) for i in version])
     py = ", ".join([py.replace("'", "") for py in ps])
     inp = "Deploy '{}' {} for python {} on all platforms (y/N): ".format(pkg, v, py)
     chk = input(inp)
