@@ -16,6 +16,12 @@ or `pypi`_.
 
     pip install exa
 
+After installation, run the following to set up visualization.
+
+.. code-block:: bash
+
+    exa -u
+
 ###################
 Getting Started
 ###################

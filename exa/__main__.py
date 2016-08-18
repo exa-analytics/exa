@@ -50,12 +50,6 @@ def main():
         help='Update static data and extensions and launch Jupyter notebook.'
     )
     parser.add_argument(
-        '-uu',
-        '--onlyupdate',
-        action='store_true',
-        help='Update static data and extensions (updates will occur on next import).'
-    )
-    parser.add_argument(
         '-w',
         '--workflow',
         type=str,
@@ -65,9 +59,6 @@ def main():
     )
     args = parser.parse_args()
     if args.update == True:
-        set_update()
-        exatomic_up()
-    if args.onlyupdate == True:
         set_update()
         exatomic_up()
         return
