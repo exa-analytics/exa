@@ -18,7 +18,7 @@ analysis, and visualization within the `Jupyter notebook`_ environment.
 .. _pandas: http://pandas.pydata.org/pandas-docs/stable/index.html
 .. _Jupyter notebook: http://jupyter.org/
 """
-__exa_version__ = (0, 2, 15)
+__exa_version__ = (0, 2, 16)
 __version__ = '.'.join((str(v) for v in __exa_version__))
 
 
