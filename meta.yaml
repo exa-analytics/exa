@@ -25,6 +25,7 @@ requirements:
         - ipywidgets
         - ipyparallel
         - sphinx
+        - pytables
         - nose
 
     run:
@@ -42,6 +43,7 @@ requirements:
         - ipywidgets
         - ipyparallel
         - sphinx
+        - pytables
         - nose
 
 about:
