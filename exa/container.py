@@ -477,7 +477,7 @@ class Container:
         Placeholder for custom container traits (e.g. traits that are comprised
         of data present in multiple data objects).
         """
-        return {}
+        return dict()
 
     def _update_traits(self):
         """
