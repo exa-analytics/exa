@@ -30,6 +30,14 @@ def notebook():
         subprocess.Popen(['jupyter notebook'], shell=True, cwd=config['paths']['notebooks'])
 
 
+def update():
+    """
+    Update
+    """
+    set_update()
+    exatomic_up()
+
+
 def workflow(wkflw):
     """
     Args:
@@ -42,7 +50,7 @@ def main():
     """
     Main entry point for the application.
     """
-    parser = argparse.ArgumentParser(description=None)
+    parser = argparse.ArgumentParser(description="Launcher for exa")
     parser.add_argument(
         '-u',
         '--update',
@@ -59,12 +67,11 @@ def main():
     )
     args = parser.parse_args()
     if args.update == True:
-        set_update()
-        exatomic_up()
-        return
-    if args.workflow is not None:
+        update()
+    elif args.workflow is not None:
         workflow(args.workflow)
-    notebook()
+    else:
+        notebook()
 
 
 if __name__ == '__main__':
