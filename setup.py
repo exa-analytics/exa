@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
-import sys
-if sys.version_info < (3, 4):
-    raise Exception('Python 3.4+ required.')
 from setuptools import setup, find_packages
 from exa import __version__
 
