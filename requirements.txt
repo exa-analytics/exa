@@ -6,10 +6,12 @@ pandas
 networkx
 sympy
 seaborn
+traitlets
 jupyter
 notebook
 ipywidgets
 ipyparallel
 sphinx
 nose
+numba
 sphinxcontrib-autoanysrc
