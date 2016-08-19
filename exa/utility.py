@@ -45,7 +45,10 @@ def mkp(*args, **kwargs):
     if mk:
         while sep2 in path:
             path = path.replace(sep2, os.sep)
-        os.makedirs(path, exist_ok=True)
+        try:
+            os.makedirs(path)
+        except FileExistsError:
+            pass
     return path
 
 
