@@ -7,18 +7,23 @@ Matplotlib Utilities
 """
 import seaborn as sns
 
+
+def color_palette(name='plasma', n=8):
+    """
+    """
+    return sns.color_palette(name, n)
+
+
 legend = {'legend.frameon': True, 'legend.facecolor': 'white',
           'legend.fancybox': True, 'patch.facecolor': 'white',
           'patch.edgecolor': 'black'}
 axis = {'axes.formatter.useoffset': False}
 mpl_legend = {'legend.frameon': True, 'legend.facecolor': 'white',
-           'legend.edgecolor': 'black'}
-mpl_mathtext = {'mathtext.default': 'rm'}
-mpl_save = {'savefig.format': 'pdf', 'savefig.bbox': 'tight',
-         'savefig.transparent': True, 'savefig.pad_inches': 0.1,
-         'pdf.compression': 9}
+              'legend.edgecolor': 'black'}
+mpl_mathtext = {'mathtext.default': 'rm', 'mathtext.fontset': 'stix'}
+mpl_save = {'savefig.bbox': 'tight'}
 mpl_rc = mpl_legend
 mpl_rc.update(mpl_mathtext)
 mpl_rc.update(mpl_save)
-sns.set(context='poster', style='white', palette='colorblind', font_scale=1.3,
-        font='serif', rc=mpl_rc)
+sns.set(context='poster', style='white', palette='plasma',
+        font_scale=1.3, font='serif', rc=mpl_rc)

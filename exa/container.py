@@ -255,13 +255,13 @@ class Container:
             graph: Network graph object containing data relationships
         """
         conn_types = ['index-index', 'index-column']
-        conn_colors = mpl.sns.color_palette('viridis', len(conn_types))
+        conn_colors = mpl.color_palette(n=len(conn_types))
         conn = dict(zip(conn_types, conn_colors))
 
         def get_node_type_color(obj):
             """Gets the color of a node based on the node's (sub)type."""
             typs = [Field, SparseSeries, DataFrame, SparseDataFrame, Series, pd.DataFrame, pd.Series]
-            cols = mpl.sns.color_palette('viridis', len(typs))
+            cols = mpl.color_palette(n=len(typs))
             for typ, col in zip(typs, cols):
                 if isinstance(obj, typ):
                     return '.'.join((typ.__module__, typ.__name__)), col
@@ -279,7 +279,7 @@ class Container:
                 else:
                     line = mpl.sns.mpl.lines.Line2D([], [], linestyle='-', color=color)
                 proxies.append(line)
-                descriptions.append(label)
+                descriptions.append(label.split('.')[-1])
             lgnd = ax.legend(proxies, descriptions, title=name, loc=loc, frameon=True)
             lgnd_frame = lgnd.get_frame()
             lgnd_frame.set_facecolor('white')
@@ -288,8 +288,8 @@ class Container:
 
         info = self.info()
         info = info[info['type'] != '-']
-        info['size'] *= 13000/info['size'].max()
-        info['size'] += 2000
+        info['size'] *= 18000/info['size'].max()
+        info['size'] += 8000
         node_size_dict = info['size'].to_dict()      # Can pull all nodes from keys
         node_class_name_dict = info['type'].to_dict()
         node_type_dict = {}    # Values are tuple of "underlying" type and color
