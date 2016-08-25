@@ -279,7 +279,7 @@ class Container:
                 else:
                     line = mpl.sns.mpl.lines.Line2D([], [], linestyle='-', color=color)
                 proxies.append(line)
-                descriptions.append(label.split('.')[-1])
+                descriptions.append(label)
             lgnd = ax.legend(proxies, descriptions, title=name, loc=loc, frameon=True)
             lgnd_frame = lgnd.get_frame()
             lgnd_frame.set_facecolor('white')
@@ -288,8 +288,8 @@ class Container:
 
         info = self.info()
         info = info[info['type'] != '-']
-        info['size'] *= 18000/info['size'].max()
-        info['size'] += 8000
+        info['size'] *= 15000/info['size'].max()
+        info['size'] += 5000
         node_size_dict = info['size'].to_dict()      # Can pull all nodes from keys
         node_class_name_dict = info['type'].to_dict()
         node_type_dict = {}    # Values are tuple of "underlying" type and color
@@ -311,7 +311,12 @@ class Container:
                         node_conn_dict[(n1, n0)] = (contyp, conn[contyp])
                     for col in v1.columns:
                         # Catches index "atom", column "atom1"; does not catch atom10
-                        if name == col or (name == col[:-1] and col[-1].isdigit()):
+                        isrelated = False
+                        if name == col:
+                            isrelated = True
+                        elif isinstance(col, str) and (name == col[:-1] and col[-1].isdigit()):
+                            isrelated = True
+                        if isrelated == True:
                             contyp = 'index-column'
                             node_conn_dict[(n0, n1)] = (contyp, conn[contyp])
                             node_conn_dict[(n1, n0)] = ('column-index', conn[contyp])
@@ -329,7 +334,7 @@ class Container:
             pos = nx.spring_layout(g)
             f0 = nx.draw_networkx_nodes(g, pos=pos, ax=ax, alpha=0.7, node_size=node_sizes,
                                         node_color=node_colors)
-            f1 = nx.draw_networkx_labels(g, pos=pos, labels=node_labels, font_size=17,
+            f1 = nx.draw_networkx_labels(g, pos=pos, labels=node_labels, font_size=16,
                                          font_weight='bold', ax=ax)
             f2 = nx.draw_networkx_edges(g, pos=pos, edge_color=edge_colors, width=2, ax=ax)
             l1, ax = legend(set(node_conn_dict.values()), 'Connection', (1, 0), ax)

@@ -26,4 +26,4 @@ mpl_rc = mpl_legend
 mpl_rc.update(mpl_mathtext)
 mpl_rc.update(mpl_save)
 sns.set(context='poster', style='white', palette='plasma',
-        font_scale=1.3, font='serif', rc=mpl_rc)
+        font_scale=1.6, font='serif', rc=mpl_rc)
