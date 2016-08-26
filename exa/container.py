@@ -22,7 +22,7 @@ from copy import deepcopy
 from traitlets import Bool
 from exa import mpl
 from exa._config import config
-from exa.widget import ContainerWidget
+from exa.widget import ContainerRenderer
 from exa.numerical import (Series, DataFrame, SparseSeries, SparseDataFrame,
                            Field, check_key)
 from exa.relational import ContainerFile, scoped_session
@@ -33,7 +33,7 @@ class Container:
     """
     Container class responsible for all features related to data management.
     """
-    _widget_class = ContainerWidget
+    #_widget_class = ContainerRenderer
     _getter_prefix = 'compute'
     _cardinal = None    # Name of the cardinal data table
 
@@ -530,14 +530,16 @@ class Container:
         self.description = description
         self.meta = meta
         self._traits_need_update = True
-        self._widget = None
-        if config['dynamic']['notebook'] == 'true':
-            self._widget = self._widget_class(self)
+        self._widget = ContainerRenderer(self)
+
+#        if config['dynamic']['notebook'] == 'true':
+#            self._widget = self._widget_class(self)
 
     def _repr_html_(self):
         if self._widget is not None and self._traits_need_update:
             self._update_traits()
-        return self._widget._repr_html_()
+        return self._widget
+        #return self._widget._repr_html_()
 
 
 class TypedMeta(type):
