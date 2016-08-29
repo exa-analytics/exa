@@ -2,51 +2,100 @@
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
+Widget
 ##################
+Functionality for using Jupyter notebook extensions to visualize data speficic
+containers. This module requires the infrastructure provided by the `traitlets`_
+and `ipywidgets`_ packages.
+
+.. _traitlets: https://traitlets.readthedocs.io/en/stable/
+.. _ipywidgets: https://ipywidgets.readthedocs.io/en/latest/
 """
-from pythreejs import ParametricGeometry, LambertMaterial
-from pythreejs import DirectionalLight, AmbientLight
-from pythreejs import Scene, Renderer, Mesh
-from pythreejs import PerspectiveCamera, TrackballControls
+import os
+import atexit
+import shutil
+import numpy as np
+import pandas as pd
+from ipywidgets import DOMWidget
+from notebook import install_nbextension
+from notebook.nbextensions import jupyter_data_dir
+from traitlets import Unicode, Integer
+from exa._config import config, del_update
+from exa.utility import mkp
 
 
-func = """function f(origu,origv) {
-    var u = 2*Math.PI*origu;
-    var v = 2*Math.PI*origv;
-    var x = Math.sin(u);
-    var y = Math.cos(v);
-    var z = Math.cos(u+v);
-    return new THREE.Vector3(x,y,z)
-}"""
-
-class ContainerRenderer:
+class Widget(DOMWidget):
     """
+    Base widget class for Jupyter notebook widgets provided by exa. Standardizes
+    bidirectional communication handling between notebook extensions' frontend
+    JavaScript and backend Python.
     """
-    def render(self):
-        """
-        """
-        kwargs = {'camera': self.camera, 'scene': self.scene,
-                  'controls': [TrackballControls(controlling=self.camera)],
-                  'width': self.width,
-                  'height': self.height}
-        return Renderer(**kwargs)
+    width = Integer(850).tag(sync=True)
+    height = Integer(500).tag(sync=True)
+    fps = Integer(24).tag(sync=True)
 
-    def __init__(self, container, width=850, height=500):
-        self.container = container
-        self.width = width
-        self.height = height
-        self.pgeom = ParametricGeometry(func=func)
-        print(self.pgeom)
-        mat1 = LambertMaterial(color='green', side='FrontSide')
-        mat2 = LambertMaterial(color='yellow', side='BackSide')
-        print(mat1)
-        print(mat2)
-        self.surf = Mesh(geometry=self.pgeom, material=mat1)
-        self.surf2 = Mesh(geometry=self.pgeom, masterial=mat2)
-        self.scene = Scene(children=[self.surf, self.surf2, AmbientLight(color='#777777')])
-        self.camera = PerspectiveCamera(position=[5, 5, 3], up=[0, 0, 1],
-                                        children=[DirectionalLight(color='white',
-                                                                   position=[3, 5, 1],
-                                                                   intensity=0.6)])
+    def _handle_custom_msg(self, message, callback):
+        """
+        Recieve and handle messages from notebook extensions ("frontend").
+        """
+        #raise NotImplementedError('Handling custom message from JS not ready')
+        typ = message['type']
+        content = message['content']
+        # Logic to handle various types of messages...
+        if typ == 'image':
+            self._handle_image(content)
+
     def _repr_html_(self):
-        return self.render()
+        self._ipython_display_()
+
+
+class ContainerWidget(Widget):
+    """
+    Jupyter notebook widget representation of an exa Container. The widget
+    accepts a (reference to a) container and parameters and creates a suitable
+    display. By default a container displays an interactive graphic containing
+    information provided by :func:`~exa.container.BaseContainer.info` and
+    :func:`~exa.contianer.BaseContainer.network`.
+
+    See Also:
+        :mod:`~exa.container`, :mod:`~exa.relational.container`
+    """
+    _view_module = Unicode("nbextensions/exa/container").tag(sync=True)
+    _view_name = Unicode('ContainerView').tag(sync=True)
+    gui_width = Integer(250).tag(sync=True)
+
+    def __init__(self, container, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.container = container
+        self.params = {'save_dir': "", 'file_name': ""}
+
+
+def install_notebook_widgets(pkg_nbext, sys_nbext, verbose=False):
+    """
+    Convenience wrapper around :py:func:`~notebook.install_nbextension` that
+    organizes notebook extensions for exa and related packages in a systematic
+    fashion.
+
+    Args:
+        pkg_nbext (str): Path to the "_nbextension" directory in the source
+        sys_nbext (str): Path to the system "nbextensions" directory
+        verbose (bool): Verbose installation
+    """
+    try:
+        shutil.rmtree(sys_nbext)
+    except FileNotFoundError:
+        pass
+    for root, subdirs, files in os.walk(pkg_nbext):
+        for filename in files:
+            subdir = root.split('_nbextension')[-1]
+            orig = mkp(root, filename)
+            dest = mkp(sys_nbext, subdir, mk=True)
+            install_nbextension(orig, verbose=verbose, overwrite=True, nbextensions_dir=dest)
+
+
+if config['js']['update'] == '1':
+    verbose = True if config['log']['level'] != "0" else False
+    pkg_nbext = mkp(config['dynamic']['pkgdir'], "_nbextension")
+    sys_nbext = mkp(jupyter_data_dir(), "nbextensions", "exa")
+    install_notebook_widgets(pkg_nbext, sys_nbext, verbose)
+    atexit.register(del_update)

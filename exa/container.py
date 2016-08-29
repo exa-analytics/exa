@@ -22,7 +22,7 @@ from copy import deepcopy
 from traitlets import Bool
 from exa import mpl
 from exa._config import config
-from exa.widget import ContainerRenderer
+from exa.widget import ContainerWidget
 from exa.numerical import (Series, DataFrame, SparseSeries, SparseDataFrame,
                            Field, check_key)
 from exa.relational import ContainerFile, scoped_session
@@ -530,10 +530,8 @@ class Container:
         self.description = description
         self.meta = meta
         self._traits_need_update = True
-        self._widget = ContainerRenderer(self)
-
-#        if config['dynamic']['notebook'] == 'true':
-#            self._widget = self._widget_class(self)
+        if config['dynamic']['notebook'] == 'true':
+            self._widget = self._widget_class(self)
 
     def _repr_html_(self):
         if self._widget is not None and self._traits_need_update:
