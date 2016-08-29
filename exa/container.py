@@ -33,7 +33,7 @@ class Container:
     """
     Container class responsible for all features related to data management.
     """
-    #_widget_class = ContainerRenderer
+    _widget_class = ContainerWidget
     _getter_prefix = 'compute'
     _cardinal = None    # Name of the cardinal data table
 
@@ -530,14 +530,20 @@ class Container:
         self.description = description
         self.meta = meta
         self._traits_need_update = True
+        self._widget = None
         if config['dynamic']['notebook'] == 'true':
             self._widget = self._widget_class(self)
 
     def _repr_html_(self):
         if self._widget is not None and self._traits_need_update:
             self._update_traits()
-        return self._widget
-        #return self._widget._repr_html_()
+        #return self._widget
+        return self._widget._repr_html_()
+
+    def __repr__(self):
+        if config['dynamic']['notebook'] == 'true':
+            return self._repr_html_()
+        return "{}('{}', {})".format(self.__class__.__name__, self.name, self.memory_usage(True))
 
 
 class TypedMeta(type):
