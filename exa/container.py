@@ -537,12 +537,9 @@ class Container:
     def _repr_html_(self):
         if self._widget is not None and self._traits_need_update:
             self._update_traits()
-        #return self._widget
         return self._widget._repr_html_()
 
     def __repr__(self):
-        if config['dynamic']['notebook'] == 'true':
-            return self._repr_html_()
         return "{}('{}', {})".format(self.__class__.__name__, self.name, self.memory_usage(True))
 
 
