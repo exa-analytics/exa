@@ -427,7 +427,7 @@ def lines_from_file(path, as_interned=False, encoding='utf-8'):
         f = open(path, encoding=encoding)
     read = f.read()
     try:
-        read = read.decode(encoding)
+        read = read.decode(encoding)    # For .gz and .bz2 files
     except AttributeError:
         pass
     if as_interned:
