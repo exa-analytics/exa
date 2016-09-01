@@ -437,13 +437,6 @@ def lines_from_file(path, as_interned=False, encoding='utf-8'):
     f.close()
     return lines
 
-#    with open(path, **{'encoding': encoding}) as f:
-#        if as_interned:
-#            lines = [sys.intern(line) for line in f.read().splitlines()]
-#        else:
-#            lines = f.read().splitlines()
-#    return lines
-
 
 def lines_from_stream(f, as_interned=False):
     """
