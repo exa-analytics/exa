@@ -13,6 +13,8 @@ import os
 import re
 import sys
 import pandas as pd
+import gzip
+import bz2
 from io import StringIO, TextIOWrapper
 
 
@@ -343,7 +345,7 @@ class Editor:
         return cls(lines_from_string(string), **kwargs)
 
     def __init__(self, path_stream_or_string, as_interned=False, nprint=30,
-                 name=None, description=None, meta=None, encoding=None):
+                 name=None, description=None, meta=None, encoding='utf-8'):
         if len(path_stream_or_string) < 256 and os.path.exists(path_stream_or_string):
             self._lines = lines_from_file(path_stream_or_string, as_interned, encoding)
         elif isinstance(path_stream_or_string, list):
@@ -405,7 +407,7 @@ class Editor:
         return r
 
 
-def lines_from_file(path, as_interned=False, encoding=None):
+def lines_from_file(path, as_interned=False, encoding='utf-8'):
     """
     Create a list of file lines from a given filepath.
 
@@ -417,12 +419,30 @@ def lines_from_file(path, as_interned=False, encoding=None):
         strings (list): File line list
     """
     lines = None
-    with open(path, **{'encoding': encoding}) as f:
-        if as_interned:
-            lines = [sys.intern(line) for line in f.read().splitlines()]
-        else:
-            lines = f.read().splitlines()
+    if path.endswith(".gz"):
+        f = gzip.open(path)
+    elif path.endswith(".bz2"):
+        f = bz2.open(path)
+    else:
+        f = open(path, encoding=encoding)
+    read = f.read()
+    try:
+        read = read.decode(encoding)
+    except AttributeError:
+        pass
+    if as_interned:
+        lines = [sys.intern(line) for line in read.splitlines()]
+    else:
+        lines = read.splitlines()
+    f.close()
     return lines
+
+#    with open(path, **{'encoding': encoding}) as f:
+#        if as_interned:
+#            lines = [sys.intern(line) for line in f.read().splitlines()]
+#        else:
+#            lines = f.read().splitlines()
+#    return lines
 
 
 def lines_from_stream(f, as_interned=False):
