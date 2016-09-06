@@ -11,7 +11,7 @@ before_install:
 install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION
   - conda install --yes -c conda-forge `cat requirements.txt`
-  - pip install sphinxcontrib-autoanysrc coverage python-coveralls travis-sphinx
+  - pip install sphinxcontrib-autoanysrc sphinx_rtd_theme coverage python-coveralls travis-sphinx codacy-coverage
   - python setup.py install
 script:
   - nosetests --with-doctest --with-coverage
@@ -19,4 +19,6 @@ script:
 after_success:
   - codecov
   - coveralls
+  - coverage xml
+  - python-codacy-coverage -r coverage.xml
   - travis-sphinx deploy
