@@ -26,13 +26,14 @@ osx-64/
 doc/build/
 target/
 .settings/
+node_modules/
 
 # Compiled
 *.py[cod]
 *.nb[ci]
 *.so
 
-# IDE and temp
+# IDE and misc
 *.manifest
 *.spec
 pip-log.txt
@@ -47,6 +48,7 @@ coverage.xml
 *.pydevproject
 *.swp
 *~
+*.DS_Store*
 
 # LaTeX
 *.aux
@@ -58,3 +60,6 @@ coverage.xml
 *.lot
 *.synctex.*
 *.toc
+
+# Project specific
+exa/static/
