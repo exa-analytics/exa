@@ -1,22 +1,22 @@
 language: python
 python:
-    - "3.4"
-    - "3.5"
+  - "3.4"
+  - "3.5"
 before_install:
-    - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-    - chmod +x miniconda.sh
-    - ./miniconda.sh -b
-    - export PATH=/home/travis/miniconda3/bin:$PATH
-    - conda update --yes conda
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b
+  - export PATH=/home/travis/miniconda3/bin:$PATH
+  - conda update --yes conda
 install:
-    - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy pandas numba
-    - conda install --yes sqlalchemy matplotlib networkx sympy seaborn sphinx nose
-    - conda install -c conda-forge --yes jupyter notebook ipywidgets ipyparallel
-    - pip install sphinxcontrib-autoanysrc coverage python-coveralls
-    - python setup.py install
-    - exa -uu
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION
+  - conda install --yes -c conda-forge `cat requirements.txt`
+  - pip install sphinxcontrib-autoanysrc coverage python-coveralls travis-sphinx
+  - python setup.py install
 script:
-    - nosetests --with-doctest --with-coverage
+  - nosetests --with-doctest --with-coverage
+  - travis-sphinx build
 after_success:
-    - codecov
-    - coveralls
+  - codecov
+  - coveralls
+  - travis-sphinx deploy
