@@ -19,7 +19,7 @@ with open("requirements.txt") as f:
 setup(
     name='exa',
     version=__version__,
-    description="A exa framework for data processing, analytics, and visualization.",
+    description="The exa framework for data processing, analytics, and visualization.",
     long_description=long_description,
     author="Tom Duignan, Alex Marchenko",
     author_email="exa.data.analytics@gmail.com",
