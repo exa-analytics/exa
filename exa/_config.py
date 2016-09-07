@@ -50,10 +50,7 @@ def save():
         use **mock**), but it is advantageous in the case that multiple packages
         that use exa are running simultaneously.
     """
-    try:
-        del config['dynamic']    # Delete dynamically assigned configuration options
-    except KeyError:
-        pass
+    del config['dynamic']    # Delete dynamically assigned configuration options
     with open(config_file, 'w') as f:
         config.write(f)
 
@@ -84,7 +81,7 @@ else:
 root = mkp(home, '.exa', mk=True)                 # Make exa root directory
 config_file = mkp(root, 'config')                 # Config file path
 pkg = os.path.dirname(__file__)                   # Package source path
-config.read(mkp(pkg, '_static', 'config'))        # Read in default config
+config.read(mkp(pkg, "..", "data", "config"))        # Read in default config
 if os.path.exists(config_file):
     stats = os.stat(config_file)
     if stats.st_size > 180:
@@ -94,12 +91,12 @@ if config['paths']['data'] == 'None':
     config['paths']['data'] = mkp(root, 'data', mk=True)
 if config['paths']['notebooks'] == 'None':
     config['paths']['notebooks'] = mkp(root, 'notebooks', mk=True)
-    shutil.copyfile(mkp(pkg, '_static', 'exa_demo.ipynb'),
-                    mkp(root, 'notebooks', 'exa_demo.ipynb'))
+    shutil.copyfile(mkp(pkg, "..", "examples", 'tutorial.ipynb'),
+                    mkp(root, 'notebooks', 'tutorial.ipynb'))
 mkp(config['paths']['data'], 'examples', mk=True)  # Ensure the example dir is made
 if config['paths']['update'] == '1':
-    shutil.copyfile(mkp(pkg, '_static', 'exa_demo.ipynb'),
-                    mkp(root, 'notebooks', 'exa_demo.ipynb'))
+    shutil.copyfile(mkp(pkg, "..", "examples", 'tutorial.ipynb'),
+                    mkp(root, 'notebooks', 'tutorial.ipynb'))
     atexit.register(del_update)
 #log
 if config['log']['syslog'] == 'None':
