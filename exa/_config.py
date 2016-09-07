@@ -50,7 +50,10 @@ def save():
         use **mock**), but it is advantageous in the case that multiple packages
         that use exa are running simultaneously.
     """
-    del config['dynamic']    # Delete dynamically assigned configuration options
+    try:
+        del config['dynamic']    # Delete dynamically assigned configuration options
+    except KeyError:
+        pass
     with open(config_file, 'w') as f:
         config.write(f)
 
