@@ -16,9 +16,9 @@ jupyter nbextension enable --py --sys-prefix exa
 
 Getting Started
 ==================
-[![readthedocs](https://readthedocs.org/projects/exa/badge/?version=latest)](http://exa.readthedocs.io/en/latest/?badge=latest)  
+[![docs](https://readthedocs.org/projects/exa/badge/?version=latest)](https://exa-analytics.github.io/exa/)  
 [![gitter](https://badges.gitter.im/exa-analytics/exa.svg)](https://gitter.im/exa-analytics/exa)  
-Building the docs requires [sphinx](http://www.sphinx-doc.org/en/stable)
+Building the docs requires [sphinx](http://www.sphinx-doc.org/en/stable) and [recommonmark](https://github.com/rtfd/recommonmark).
 ```
 cd doc
 make html    # `.\make.bat html` on windows
