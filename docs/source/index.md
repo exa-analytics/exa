@@ -1,13 +1,12 @@
-.. Copyright (c) 2015-2016, Exa Analytics Development Team
-.. Distributed under the terms of the Apache License 2.0
+<!-- Copyright (c) 2015-2016, Exa Analytics Development Team
+     Distributed under the terms of the Apache License 2.0 -->
 
-.. exa documentation master file, created by
-   sphinx-quickstart on Tue Jun 23 21:37:50 2015.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+# [Exa Analytics Framework](https://exa-analytics.github.io)
+***The exa framework for data management, processing, and visualization.***
 
-#############################
-`Exa Analytics Framework`_
+
+
+<!--
 #############################
 *An ecosystem for data processing, analytics, and visualization.*
 
@@ -24,7 +23,7 @@ software, and uses the `Jupyter notebook`_ environment for interactive data
 exploration.
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     :caption: General Info
 
     overview.rst
@@ -32,13 +31,13 @@ exploration.
     api/api.rst
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     :caption: User Guide
 
     user/overview.rst
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     :caption: Contributor Guide
 
     dev/overview.rst
@@ -57,3 +56,5 @@ Info
 .. _Jupyter notebook: http://jupyter.org/
 .. _series: http://pandas.pydata.org/pandas-docs/stable/generated/pandas.Series.html
 .. _dataframes: http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html
+
+-->
