@@ -1,10 +1,10 @@
-[![exa logo](doc/source/_static/logo.png)](https://exa-analytics.github.io)
+[![exa logo](doc/source/_static/logo.png)](https://exa-analytics.github.io)  
 
 Installation
 ===================
-[![conda Badge](https://anaconda.org/exaanalytics/exa/badges/installer/conda.svg)](https://conda.anaconda.org/exaanalytics)
-[![pypi badge](https://badge.fury.io/py/exa.svg)](https://badge.fury.io/py/exa)
-Exa is available through [anaconda](https://www.continuum.io/downloads)
+[![conda Badge](https://anaconda.org/exaanalytics/exa/badges/installer/conda.svg)](https://conda.anaconda.org/exaanalytics)  
+[![pypi badge](https://badge.fury.io/py/exa.svg)](https://badge.fury.io/py/exa)  
+Exa is available through [anaconda](https://www.continuum.io/downloads)  
 ```
 conda install -c exaanalytics exa
 ```
@@ -55,4 +55,3 @@ Legal
 [![Apache License 2.0](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0)
 Copyright (c) 2015-2016, Exa Analytics Development Team
 Distributed under the terms of the Apache License 2.0
-
