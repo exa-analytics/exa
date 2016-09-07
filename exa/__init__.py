@@ -19,18 +19,18 @@ analysis, and visualization within the `Jupyter notebook`_ environment.
 .. _Jupyter notebook: http://jupyter.org/
 """
 from exa import _config
-from exa._version import __version__, version_info
-from exa import log
-from exa import test
-from exa import relational
-from exa import widget
-from exa import math
-from exa import distributed
-from exa import mpl, tex
-from exa import error
+from exa._version import __version__
+#from exa import log
+#from exa import test
+#from exa import relational
+#from exa import widget
+#from exa import math
+#from exa import distributed
+#from exa import mpl, tex
+#from exa import error
 
 # User API
-from exa.numerical import Series, DataFrame, Field3D, SparseSeries, SparseDataFrame
-from exa.container import Container
-from exa.editor import Editor
-from exa.filetypes import CSV
+#from exa.numerical import Series, DataFrame, Field3D, SparseSeries, SparseDataFrame
+#from exa.container import Container
+#from exa.editor import Editor
+#from exa.filetypes import CSV
