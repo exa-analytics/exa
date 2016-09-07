@@ -18,11 +18,8 @@ analysis, and visualization within the `Jupyter notebook`_ environment.
 .. _pandas: http://pandas.pydata.org/pandas-docs/stable/index.html
 .. _Jupyter notebook: http://jupyter.org/
 """
-__exa_version__ = (0, 2, 18)
-__version__ = '.'.join((str(v) for v in __exa_version__))
-
-
 from exa import _config
+from exa._version import __version__, version_info
 from exa import log
 from exa import test
 from exa import relational
