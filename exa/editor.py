@@ -443,7 +443,7 @@ def lines_from_stream(f, as_interned=False):
     Create a list of file lines from a given file stream.
 
     Args:
-        f (:class:`~io.TextIOWrapper): File stream
+        f (:class:`~io.TextIOWrapper`): File stream
         as_interned (bool): List of "interned" strings (default False)
 
     Returns:
