@@ -28,7 +28,7 @@ from exa.relational import test
 # because we import all of the table schemas here.
 def load_isotope_data():
     """Load isotope data into the database (replacing existing)."""
-    path = mkp(config['dynamic']['pkgdir'], '_static', 'isotopes.json')
+    path = mkp(config['dynamic']['pkgdir'], '..', "data", 'isotopes.json')
     df = pd.read_json(path, orient='values')
     df.columns = ('A', 'Z', 'af', 'eaf', 'color', 'radius', 'gfactor', 'mass',
                   'emass', 'name', 'eneg', 'quadmom', 'spin', 'symbol', 'szuid',
@@ -46,7 +46,7 @@ def load_unit_data():
         This function actually computes (prior to bulk inserting data)
         conversion factors.
     """
-    path = mkp(config['dynamic']['pkgdir'], '_static', 'units.json')
+    path = mkp(config['dynamic']['pkgdir'], '..', 'data' 'units.json')
     df = pd.read_json(path)
     for column in df.columns:
         series = df[column].dropna()
@@ -64,7 +64,7 @@ def load_unit_data():
 
 def load_constant_data():
     """Load constants into the database (replacing existing)."""
-    path = mkp(config['dynamic']['pkgdir'], '_static', 'constants.json')
+    path = mkp(config['dynamic']['pkgdir'], '..', 'data', 'constants.json')
     df = pd.read_json(path)
     df.reset_index(inplace=True)
     df.columns = ['symbol', 'value']
