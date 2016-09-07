@@ -5,16 +5,22 @@
 from setuptools import setup, find_packages
 from exa import __version__
 
-with open('README.rst') as f:
-    description = f.read()
-with open('requirements.txt') as f:
-    dependencies = f.readlines()
+
+try:
+    import pypandoc
+    long_description = pypandoc.convert("README.md", "rst")
+except ImportError:
+    with open("README.md") as f:
+        long_description = f.read()
+with open("requirements.txt") as f:
+    dependencies = f.read().splitlines()
+
 
 setup(
     name='exa',
     version=__version__,
     description="A framework for data processing, analytics, and visualization.",
-    long_description=description,
+    long_description=long_description,
     author="Tom Duignan, Alex Marchenko",
     author_email="exa.data.analytics@gmail.com",
     maintainer_email="exa.data.analytics@gmail.com",
