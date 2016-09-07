@@ -46,7 +46,7 @@ def load_unit_data():
         This function actually computes (prior to bulk inserting data)
         conversion factors.
     """
-    path = mkp(config['dynamic']['pkgdir'], '..', 'data' 'units.json')
+    path = mkp(config['dynamic']['pkgdir'], '..', 'data', 'units.json')
     df = pd.read_json(path)
     for column in df.columns:
         series = df[column].dropna()
