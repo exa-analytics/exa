@@ -50,7 +50,7 @@ def mkdir(path):
     """
     try:    # This approach supports Python 2 and Python 3
         os.makedirs(path)
-    except FileExistsError:
+    except OSError:
         pass
 
 
