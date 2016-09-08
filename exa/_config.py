@@ -5,29 +5,21 @@
 Configuration
 ########################
 This module generates the "~/.exa" directory where all databases, logs, notebooks,
-and data reside. This configuration may be altered by editing the items below:
+and data reside by default.
 
-paths:
-    - data: Path to the data directory (default ~/.exa/data)
-    - notebooks: Path to the notebooks directory (default ~/.exa/notebooks)
+[DEFAULT]
+data: Path to the data directory (default ~/.exa/data)
+notebooks: Path to the notebooks directory (default ~/.exa/notebooks)
 
-log:
-    - nlogs: Number of log files to rotate
-    - nbytes: Max log file size (in bytes)
-    - syslog: System log file path
-    - dblog: Database log file path (if necessary)
-    - level: Logging level, 0: normal, 1: extra info, 2: debug
+[LOGGING]
+nlogs: Number of log files to rotate
+nbytes: Max log file size (in bytes)
+syslog: System log file path
+dblog: Database log file path (if necessary)
+level: Logging level, 0: normal, 1: extra info, 2: debug
 
-db:
-    - uri: String URI for database connection
-    - update: If 1, refresh static database data (e.g. unit conversions)
-
-js:
-    - update: If 1, update JavaScript notebook extensions
-
-Warning:
-    The configuration file (~/.exa/config) should only be altered when no exa
-    notebooks are running (i.e. exa or any of its related packages are imported).
+[DB]
+uri: String URI for database connection
 """
 import os
 import sys
@@ -42,43 +34,29 @@ from exa.utility import mkp
 @atexit.register
 def save():
     """
-    Save the configuration file to disk on exit, resetting update flags.
+    Save the configuration file to disk (occurs automatically on exit).
 
     Warning:
-        This is a bit unsafe because we are not guarenteed to hit the updating
-        function during execution (that is what well written tests are for -
-        use **mock**), but it is advantageous in the case that multiple packages
-        that use exa are running simultaneously.
+        To ensure that changes to the configuration persist, only alter the
+        configuration from one instance of exa, or by hand when exa has not
+        been imported.
     """
     del config['dynamic']    # Delete dynamically assigned configuration options
     with open(config_file, 'w') as f:
         config.write(f)
 
 
-def set_update():
-    """
-    Set update flags.
-    """
-    config['paths']['update'] = '1'
-    config['js']['update'] = '1'
-    config['db']['update'] = '1'
+# The following sets up the configuration variable, config
+config = configparser.ConfigParser()
 
-
-def del_update():
-    """
-    Reset update flags.
-    """
-    config['paths']['update'] = '0'
-    config['js']['update'] = '0'
-    config['db']['update'] = '0'
-
-
-config = configparser.ConfigParser()              # Application configuration
-if platform.system().lower() == 'windows':        # Get exa's root directory
-    home = os.getenv('USERPROFILE')
-else:
-    home = os.getenv('HOME')
-root = mkp(home, '.exa', mk=True)                 # Make exa root directory
+# Get exa's root directory (e.g. /home/[username]/.exa, C:\\Users\[username]\\.exa)
+home = os.getenv('USERPROFILE') if platform.system().lower() == 'windows' else os.getenv('HOME')
+root = os.path.join(home, '.exa')
+try:
+    os.makedirs(root)      # We mkdir like this to ensure py2 compatibility
+except FileExistsError:
+    pass
+os.makedirs(root, exist_ok=True)
 config_file = mkp(root, 'config')                 # Config file path
 pkg = os.path.dirname(__file__)                   # Package source path
 config.read(mkp(pkg, "..", "data", "config"))        # Read in default config
