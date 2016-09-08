@@ -62,6 +62,16 @@ def init():
     tutorial_source = os.path.join(config["dynamic"]["pkg"], "..", "examples", tut)
     tutorial_dest = os.path.join(config["PATHS"]["notebooks"], tut)
     shutil.copy(tutorial_source, tutorial_dest)
+    # Load isotope static data (replacing existing data)
+    isotopes = os.path.join(config['dynamic']['pkg'], '..', 'data', 'isotopes.json')
+    df = pd.read_json(isotopes, orient='values')
+    df.columns = ('A', 'Z', 'af', 'eaf', 'color', 'radius', 'gfactor', 'mass',
+                  'emass', 'name', 'eneg', 'quadmom', 'spin', 'symbol', 'szuid',
+                  'strid')
+    df.index.names = ['pkid']
+    df.reset_index(inplace=True)
+    df.to_sql(name='isotope', con=engine, index=False, if_exists='replace')
+
 
 
 # The following sets up the configuration variable, config

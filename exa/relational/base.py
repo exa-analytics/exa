@@ -8,7 +8,6 @@ This module provides the base classes and metaclasses for relational tables
 created by exa. It also provides the database engine configuration and session
 class factory.
 """
-import atexit
 import pandas as pd
 from sys import getsizeof
 from uuid import UUID, uuid4
