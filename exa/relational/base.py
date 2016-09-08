@@ -194,6 +194,6 @@ class Size:
         self.size = getsizeof(self)
 
 
-logger = loggers['dblog']
-engine = create_engine(config['db']['uri'])
+logger = loggers['db']
+engine = create_engine(config['DB']['uri'])
 session_factory = sessionmaker(bind=engine)

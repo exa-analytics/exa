@@ -60,9 +60,9 @@ def _create_logger(name):
         print(lines)
     logger = logging.getLogger(name)
     logger.setLevel(logging.WARNING)
-    handler = RotatingFileHandler(config['LOGGING'][name],
-                                  maxBytes=int(config['LOGGING']['nbytes']),
-                                  backupCount=int(config['LOGGING']['nlogs']))
+    kwargs = {'maxBytes': int(config['LOGGING']['nbytes']),
+              'backupCount': int(config['LOGGING']['nlogs'])}
+    handler = logging.handlers.RotatingFileHandler(config['LOGGING'][name], **kwargs)
     handler.setFormatter(LogFormat())
     logger.addHandler(handler)
     logger.head = head
