@@ -7,7 +7,7 @@ Configuration
 This module generates the "~/.exa" directory where all databases, logs, notebooks,
 and data reside by default.
 
-[DEFAULT]
+[PATHS]
 data: Path to the data directory (default ~/.exa/data)
 notebooks: Path to the notebooks directory (default ~/.exa/notebooks)
 
@@ -26,9 +26,7 @@ import sys
 import atexit
 import platform
 import configparser
-import warnings
 import shutil
-from exa.utility import mkp
 
 
 @atexit.register
@@ -41,72 +39,80 @@ def save():
         configuration from one instance of exa, or by hand when exa has not
         been imported.
     """
-    del config['dynamic']    # Delete dynamically assigned configuration options
-    with open(config_file, 'w') as f:
+    del config["dynamic"]    # Delete dynamically assigned configuration options
+    with open(config_file, "w") as f:
         config.write(f)
+
+
+def mkdir(path):
+    """
+    Safely create a directory.
+    """
+    try:    # This approach supports Python 2 and Python 3
+        os.makedirs(path)
+    except FileExistsError:
+        pass
+
+
+def init():
+    """
+    Copy tutorial.ipynb to the notebooks directory and update static DB data.
+    """
+    tutorial_source = os.path.join(config["dynamic"]["pkg"], "..", "examples", "tutorial.ipynb")
+    tutorial_dest = os.path.join(config["PATHS"]["notebooks"], "tutorial.ipynb")
+    shutil.copy(tutorial_source, tutorial_dest)
 
 
 # The following sets up the configuration variable, config
 config = configparser.ConfigParser()
-
-# Get exa's root directory (e.g. /home/[username]/.exa, C:\\Users\[username]\\.exa)
-home = os.getenv('USERPROFILE') if platform.system().lower() == 'windows' else os.getenv('HOME')
-root = os.path.join(home, '.exa')
-try:
-    os.makedirs(root)      # We mkdir like this to ensure py2 compatibility
-except FileExistsError:
-    pass
-os.makedirs(root, exist_ok=True)
-config_file = mkp(root, 'config')                 # Config file path
-pkg = os.path.dirname(__file__)                   # Package source path
-config.read(mkp(pkg, "..", "data", "config"))        # Read in default config
+# Get exa"s root directory (e.g. /home/[username]/.exa, C:\\Users\[username]\\.exa)
+home = os.getenv("USERPROFILE") if platform.system().lower() == "windows" else os.getenv("HOME")
+root = os.path.join(home, ".exa")
+mkdir(root)
+# Check for existing config or build one anew
+config_file = os.path.join(root, "config")
 if os.path.exists(config_file):
     stats = os.stat(config_file)
-    if stats.st_size > 180:
-        config.read(config_file)                  # Read in existing config
-# paths
-if config['paths']['data'] == 'None':
-    config['paths']['data'] = mkp(root, 'data', mk=True)
-if config['paths']['notebooks'] == 'None':
-    config['paths']['notebooks'] = mkp(root, 'notebooks', mk=True)
-    shutil.copyfile(mkp(pkg, "..", "examples", 'tutorial.ipynb'),
-                    mkp(root, 'notebooks', 'tutorial.ipynb'))
-mkp(config['paths']['data'], 'examples', mk=True)  # Ensure the example dir is made
-if config['paths']['update'] == '1':
-    shutil.copyfile(mkp(pkg, "..", "examples", 'tutorial.ipynb'),
-                    mkp(root, 'notebooks', 'tutorial.ipynb'))
-    atexit.register(del_update)
-#log
-if config['log']['syslog'] == 'None':
-    config['log']['syslog'] = mkp(root, 'sys.log')
-if config['log']['dblog'] == 'None':
-    config['log']['dblog'] = mkp(root, 'db.log')
-# db
-if config['db']['uri'] == 'None':
-    config['db']['uri'] = 'sqlite:///' + mkp(root, 'exa.sqlite') # SQLite by default
-# dynamically allocated configurations (these are deleted before saving)
-config['dynamic'] = {}
-config['dynamic']['pkgdir'] = pkg
-config['dynamic']['exa_root'] = root
-nb = 'false'
+    if stats.st_size > 180:      # Check that the file size > 180 bytes
+        config.read(config_file)
+else:
+    # PATHS
+    config["PATHS"] = {}
+    config["PATHS"]["data"] = os.path.join(root, "data")
+    config["PATHS"]["notebooks"] = os.path.join(root, "notebooks")
+    mkdir(config["PATHS"]["data"])
+    mkdir(config["PATHS"]["notebooks"])
+    # LOGGING
+    config["LOGGING"] = {}
+    config["LOGGING"]["nlogs"] = "3"
+    config["LOGGING"]["nbytes"] = str(10*1024*1024)    # 10 MiB
+    config["LOGGING"]["syslog"] = "sys.log"
+    config["LOGGING"]["dblog"] = "db.log"
+    config["LOGGING"]["level"] = "0"
+    # DB
+    config["DB"] = {}
+    config["DB"]["uri"] = "sqlite:///" + os.path.join(root, "exa.sqplite")
+# Finally set up some dynamic ("live") parameters
+config["dynamic"] = {}
+config["dynamic"]["pkg"] = os.path.abspath(__file__)
+config["dynamic"]["root"] = root
+config["dynamic"]["numba"] = "false"
+config["dynamic"]["cuda"] = "false"
+config["dynamic"]["notebook"] = "false"
 try:
     import numba
-    nb = 'true'
+    config["dynamic"]["numba"] = "true"
 except ImportError:
     pass
-config['dynamic']['numba'] = nb
-config['dynamic']['cuda'] = 'false'
-if config['dynamic']['numba'] == 'true':
-    try:
-        from numba import cuda
-        if len(cuda.devices.gpus) > 0:
-            config['dynamic']['cuda'] = 'true'
-    except Exception:
-        pass
-config['dynamic']['notebook'] = 'false'
+try:
+    from numba import cuda
+    if len(cuda.devices.gpus) > 0:
+        config["dynamic"]["cuda"] = "true"
+except (AttributeError, ImportError):
+    pass
 try:
     cfg = get_ipython().config
-    if 'IPKernelApp' in cfg:
-        config['dynamic']['notebook'] = 'true'
+    if "IPKernelApp" in cfg:
+        config["dynamic"]["notebook"] = "true"
 except NameError:
     pass
