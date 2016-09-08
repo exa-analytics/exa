@@ -58,8 +58,9 @@ def init():
     """
     Copy tutorial.ipynb to the notebooks directory and update static DB data.
     """
-    tutorial_source = os.path.join(config["dynamic"]["pkg"], "..", "examples", "tutorial.ipynb")
-    tutorial_dest = os.path.join(config["PATHS"]["notebooks"], "tutorial.ipynb")
+    tut = "tutorial.ipynb"
+    tutorial_source = os.path.join(config["dynamic"]["pkg"], "..", "examples", tut)
+    tutorial_dest = os.path.join(config["PATHS"]["notebooks"], tut)
     shutil.copy(tutorial_source, tutorial_dest)
 
 
