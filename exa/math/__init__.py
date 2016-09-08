@@ -25,4 +25,4 @@ Warning:
 .. _numba: http://numba.pydata.org/numba-doc/latest/index.html
 .. _numpy: http://www.numpy.org/
 """
-from exa.math import misc, vector
+#from exa.math import misc, vector

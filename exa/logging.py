@@ -4,14 +4,14 @@
 """
 Logging
 ############
-There are two log files that exa writes to, the system log and the database log.
-The database log is used when the database backend does not provide its own
-logging solution.
+By default exa provides two loggers, "db" and "sys". Both are accessible via the
+loggers attribute. The system log is records all messages related to container,
+editor, and workflow actions. The database log keeps track of all content
+management actions (it is used when a 3rd party database logging solution is not
+used).
 
-Levels:
-    - 0: default (>= WARNING messages are logged)
-    - 1: info    (>= INFO messages are logged)
-    - 2: debug   (all messages are logged)
+Attributes:
+    loggers (dict): Available loggers for use (defaults: "db" and "sys")
 """
 import os
 import logging
@@ -44,25 +44,40 @@ class LogFormat(logging.Formatter):
         return fmt.format(record)
 
 
-def create_logger(name):
+def _create_logger(name):
     """
     Create a logger with a given name.
     """
+    def head(n=10):
+        # Custom head function that we attach to the logging.Logger class
+        with open(config["LOGGING"][name], 'r') as f:
+            lines = "".join(f.readlines()[:n])
+        print(lines)
+    def tail(n=10):
+        # Custom tail function that we attach to the logging.Logger class
+        with open(config["LOGGING"][name], 'r') as f:
+            lines = "".join(f.readlines()[-n:])
+        print(lines)
     logger = logging.getLogger(name)
-    handler = RotatingFileHandler(config['log'][name],
-                                  maxBytes=int(config['log']['nbytes']),
-                                  backupCount=int(config['log']['nlogs']))
+    logger.setLevel(logging.WARNING)
+    handler = RotatingFileHandler(config['LOGGING'][name],
+                                  maxBytes=int(config['LOGGING']['nbytes']),
+                                  backupCount=int(config['LOGGING']['nlogs']))
     handler.setFormatter(LogFormat())
     logger.addHandler(handler)
-    logger.setLevel(logging.WARNING)  # Default level (logging message less severe than this are ignored)
-    if config['log']['level'] == '1':
+    logger.head = head
+    logger.tail = tail
+    if config['LOGGING']['level'] == '1':
         logger.setLevel(logging.INFO)
-    elif config['log']['level'] == '2':
+    elif config['LOGGING']['level'] == '2':
         logger.setLevel(logging.NOTSET)
     return logger
 
 
-loggers = {name: create_logger(name) for name in config['log'].keys() if name.endswith('log')}
+loggers = {}
+for name in config["LOGGING"].keys():
+    if name.endswith("log"):
+        loggers[name.replace("log", "")] = _create_logger(name)
 
 #def setup_loggers():
 #    """

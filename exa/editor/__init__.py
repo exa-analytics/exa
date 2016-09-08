@@ -6,4 +6,4 @@ Filetypes
 ##################
 Editors for common file types.
 """
-from exa.filetypes.csv import CSV
+#from exa.filetypes.csv import CSV

@@ -66,36 +66,15 @@ def init():
 
 # The following sets up the configuration variable, config
 config = configparser.ConfigParser()
+
 # Get exa"s root directory (e.g. /home/[username]/.exa, C:\\Users\[username]\\.exa)
 home = os.getenv("USERPROFILE") if platform.system().lower() == "windows" else os.getenv("HOME")
 root = os.path.join(home, ".exa")
 mkdir(root)
-# Check for existing config or build one anew
-config_file = os.path.join(root, "config")
-if os.path.exists(config_file):
-    stats = os.stat(config_file)
-    if stats.st_size > 180:      # Check that the file size > 180 bytes
-        config.read(config_file)
-else:
-    # PATHS
-    config["PATHS"] = {}
-    config["PATHS"]["data"] = os.path.join(root, "data")
-    config["PATHS"]["notebooks"] = os.path.join(root, "notebooks")
-    mkdir(config["PATHS"]["data"])
-    mkdir(config["PATHS"]["notebooks"])
-    # LOGGING
-    config["LOGGING"] = {}
-    config["LOGGING"]["nlogs"] = "3"
-    config["LOGGING"]["nbytes"] = str(10*1024*1024)    # 10 MiB
-    config["LOGGING"]["syslog"] = "sys.log"
-    config["LOGGING"]["dblog"] = "db.log"
-    config["LOGGING"]["level"] = "0"
-    # DB
-    config["DB"] = {}
-    config["DB"]["uri"] = "sqlite:///" + os.path.join(root, "exa.sqplite")
-# Finally set up some dynamic ("live") parameters
+
+# Get the dynamic (system/installation/dev dependent) configuration
 config["dynamic"] = {}
-config["dynamic"]["pkg"] = os.path.abspath(__file__)
+config["dynamic"]["pkg"] = os.path.dirname(os.path.realpath(__file__))
 config["dynamic"]["root"] = root
 config["dynamic"]["numba"] = "false"
 config["dynamic"]["cuda"] = "false"
@@ -117,3 +96,29 @@ try:
         config["dynamic"]["notebook"] = "true"
 except NameError:
     pass
+
+# Check for existing config or build one anew
+config_file = os.path.join(root, "config")
+if os.path.exists(config_file):
+    stats = os.stat(config_file)
+    if stats.st_size > 180:      # Check that the file size > 180 bytes
+        config.read(config_file)
+else:
+    # PATHS
+    config["PATHS"] = {}
+    config["PATHS"]["data"] = os.path.join(root, "data")
+    config["PATHS"]["notebooks"] = os.path.join(root, "notebooks")
+    mkdir(config["PATHS"]["data"])
+    mkdir(config["PATHS"]["notebooks"])
+    # LOGGING
+    config["LOGGING"] = {}
+    config["LOGGING"]["nlogs"] = "3"
+    config["LOGGING"]["nbytes"] = str(10*1024*1024)    # 10 MiB
+    config["LOGGING"]["syslog"] = os.path.join(root, "sys.log")
+    config["LOGGING"]["dblog"] = os.path.join(root, "db.log")
+    config["LOGGING"]["level"] = "0"
+    # DB
+    config["DB"] = {}
+    config["DB"]["uri"] = "sqlite:///" + os.path.join(root, "exa.sqplite")
+    # Initialize static data
+    init()

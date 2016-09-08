@@ -11,31 +11,32 @@ built on top of the Jupyter notebook environment, run "exa" on the command line.
 import platform
 import argparse
 import subprocess
-from exa._config import set_update, config
-try:
-    from exatomic._config import set_update as exatomic_up
-except ImportError:
-    def tmp():
-        return
-    exatomic_up = tmp
+from exa._config import init, config
+#from exa._config import set_update, config
+#try:
+#    from exatomic._config import set_update as exatomic_up
+#except ImportError:
+#    def tmp():
+#        return
+#    exatomic_up = tmp
 
 
 def notebook():
     """
     Start the exa notebook gui (a Jupyter notebook environment).
     """
-    if platform.system().lower() == 'windows':
-        subprocess.Popen(['jupyter', 'notebook'], shell=True, cwd=config['paths']['notebooks'])
+    if platform.system().lower() == "windows":
+        subprocess.Popen(["jupyter", "notebook"], shell=True, cwd=config["paths"]["notebooks"])
     else:
-        subprocess.Popen(['jupyter notebook'], shell=True, cwd=config['paths']['notebooks'])
+        subprocess.Popen(["jupyter notebook"], shell=True, cwd=config["paths"]["notebooks"])
 
 
-def update():
-    """
-    Update
-    """
-    set_update()
-    exatomic_up()
+#def update():
+#    """
+#    Update
+#    """
+#    set_update()
+#    exatomic_up()
 
 
 def workflow(wkflw):
@@ -43,36 +44,35 @@ def workflow(wkflw):
     Args:
         wkflw: Path to workflow script or instance of workflow class.
     """
-    raise NotImplementedError('Workflows are currently unsupported.')
+    raise NotImplementedError("Workflows are currently unsupported.")
 
 
 def main():
     """
-    Main entry point for the application.
+    Defines the possible arguments for the application.
     """
     parser = argparse.ArgumentParser(description="Launcher for exa")
     parser.add_argument(
-        '-u',
-        '--update',
-        action='store_true',
-        help='Update static data and extensions and launch Jupyter notebook.'
+        "-up",
+        "--update",
+        action="store_true",
+        help="Update static data and extensions and launch Jupyter notebook.",
+        default=False
     )
     parser.add_argument(
-        '-w',
-        '--workflow',
-        type=str,
-        help='Workflow not implemented',
+        "-nb",
+        "--notebook",
+        action="store_true",
+        help="Starts a Jupyter notebook server in the exa root directory.",
         required=False,
-        default=None
+        default=False
     )
     args = parser.parse_args()
     if args.update == True:
-        update()
-    elif args.workflow is not None:
-        workflow(args.workflow)
-    else:
+        init()
+    if args.notebook == True:
         notebook()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
