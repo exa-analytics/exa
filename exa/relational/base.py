@@ -14,10 +14,10 @@ from uuid import UUID, uuid4
 from numbers import Integral
 from datetime import datetime
 from contextlib import contextmanager
-from sqlalchemy import Column, Integer, String, DateTime, create_engine
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
-from exa._config import config
+from exa._config import config, engine
 from exa.log import loggers
 
 
@@ -194,5 +194,4 @@ class Size:
 
 
 logger = loggers['db']
-engine = create_engine(config['DB']['uri'])
 session_factory = sessionmaker(bind=engine)

@@ -18,16 +18,16 @@ analysis, and visualization within the `Jupyter notebook`_ environment.
 .. _pandas: http://pandas.pydata.org/pandas-docs/stable/index.html
 .. _Jupyter notebook: http://jupyter.org/
 """
-from exa import _config
 from exa._version import __version__
+from exa import _config
 from exa import logging
-#from exa import test
 #from exa import relational
 #from exa import widget
 #from exa import math
 #from exa import distributed
 #from exa import mpl, tex
 #from exa import error
+#from exa import test
 
 # User API
 #from exa.numerical import Series, DataFrame, Field3D, SparseSeries, SparseDataFrame
