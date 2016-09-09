@@ -42,6 +42,7 @@ def save():
         configuration from one instance of exa, or by hand when exa has not
         been imported.
     """
+    config_file = config['dynamic']['config_file']
     del config['dynamic']    # Delete dynamically assigned configuration options
     with open(config_file, "w") as f:
         config.write(f)
@@ -57,7 +58,7 @@ def mkdir(path):
         pass
 
 
-def init():
+def initialize():
     """
     Copy tutorial.ipynb to the notebooks directory and update static db data.
     """
@@ -66,7 +67,7 @@ def init():
     tutorial_dest = os.path.join(config['paths']['notebooks'], tut)
     shutil.copy(tutorial_source, tutorial_dest)
     # Load isotope static data (replacing existing data)
-    isotopes = os.path.join(config['dynamic']['data'], 'isotopes.json')
+    isotopes = os.path.join(config['dynamic']['data'], "isotopes.json")
     df = pd.read_json(isotopes, orient='values')
     df.columns = ('A', 'Z', 'af', 'eaf', 'color', 'radius', 'gfactor', 'mass',
                   'emass', 'name', 'eneg', 'quadmom', 'spin', 'symbol', 'szuid',
@@ -75,7 +76,7 @@ def init():
     df.reset_index(inplace=True)
     df.to_sql(name='isotope', con=engine, index=False, if_exists='replace')
     # Compute and load unit conversions
-    path = os.path.join(config['dynamic']['data'], 'units.json')
+    path = os.path.join(config['dynamic']['data'], "units.json")
     df = pd.read_json(path)
     for column in df.columns:
         series = df[column].dropna()
@@ -89,6 +90,13 @@ def init():
                                              'factor': factor})
         df_to_save['pkid'] = df_to_save.index
         df_to_save.to_sql(name=column, con=engine, index=False, if_exists='replace')
+    # Load physical constants
+    path = os.path.join(config['dynamic']['data'], "constants.json")
+    df = pd.read_json(path)
+    df.reset_index(inplace=True)
+    df.columns = ['symbol', 'value']
+    df['pkid'] = df.index
+    df.to_sql(name='constant', con=engine, index=False, if_exists='replace')
 
 
 def reconfigure(rootname=".exa"):
@@ -128,8 +136,10 @@ def reconfigure(rootname=".exa"):
         init_flag = True
     # Get the dynamic (system/installation/dev dependent) configuration
     config['dynamic'] = {}
-    config['dynamic']['pkg'] = os.path.dirname(os.path.realpath(__file__))
     config['dynamic']['root'] = root
+    config['dynamic']['home'] = home
+    config['dynamic']['config_file'] = config_file
+    config['dynamic']['pkg'] = os.path.dirname(os.path.realpath(__file__))
     config['dynamic']['data'] = os.path.join(config['dynamic']['pkg'], "..", "data")
     config['dynamic']['examples'] = os.path.join(config['dynamic']['pkg'], "..", "examples")
     config['dynamic']['numba'] = "false"
@@ -159,7 +169,7 @@ def reconfigure(rootname=".exa"):
         pass
     engine = create_engine(config['db']['uri'])
     if init_flag:
-        init()    # Inject static data into the database
+        initialize()    # Inject static data into the database
 
 
 # The following sets up the configuration variable and database engine

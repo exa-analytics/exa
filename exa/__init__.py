@@ -35,4 +35,4 @@ from exa import tester
 #from exa.editor import Editor
 #from exa.filetypes import CSV
 
-#from exa import tests
+from exa import tests

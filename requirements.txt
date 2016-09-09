@@ -2,6 +2,7 @@ numpy
 matplotlib
 sqlalchemy
 pandas
+h5py
 networkx
 sympy
 seaborn
@@ -15,4 +16,3 @@ ipyparallel
 sphinx
 nose
 numba
-blaze
