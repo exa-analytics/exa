@@ -7,18 +7,18 @@ Configuration
 This module generates the "~/.exa" directory where all databases, logs, notebooks,
 and data reside by default.
 
-[PATHS]
+[paths]
 data: Path to the data directory (default ~/.exa/data)
 notebooks: Path to the notebooks directory (default ~/.exa/notebooks)
 
-[LOGGING]
+[logging]
 nlogs: Number of log files to rotate
 nbytes: Max log file size (in bytes)
 syslog: System log file path
 dblog: Database log file path (if necessary)
 level: Logging level, 0: normal, 1: extra info, 2: debug
 
-[DB]
+[db]
 uri: String URI for database connection
 """
 import os
@@ -27,6 +27,7 @@ import atexit
 import platform
 import configparser
 import shutil
+import pandas as pd
 
 
 @atexit.register
@@ -56,11 +57,11 @@ def mkdir(path):
 
 def init():
     """
-    Copy tutorial.ipynb to the notebooks directory and update static DB data.
+    Copy tutorial.ipynb to the notebooks directory and update static db data.
     """
     tut = "tutorial.ipynb"
     tutorial_source = os.path.join(config["dynamic"]["pkg"], "..", "examples", tut)
-    tutorial_dest = os.path.join(config["PATHS"]["notebooks"], tut)
+    tutorial_dest = os.path.join(config["paths"]["notebooks"], tut)
     shutil.copy(tutorial_source, tutorial_dest)
     # Load isotope static data (replacing existing data)
     isotopes = os.path.join(config['dynamic']['pkg'], '..', 'data', 'isotopes.json')
@@ -114,21 +115,21 @@ if os.path.exists(config_file):
     if stats.st_size > 180:      # Check that the file size > 180 bytes
         config.read(config_file)
 else:
-    # PATHS
-    config["PATHS"] = {}
-    config["PATHS"]["data"] = os.path.join(root, "data")
-    config["PATHS"]["notebooks"] = os.path.join(root, "notebooks")
-    mkdir(config["PATHS"]["data"])
-    mkdir(config["PATHS"]["notebooks"])
-    # LOGGING
-    config["LOGGING"] = {}
-    config["LOGGING"]["nlogs"] = "3"
-    config["LOGGING"]["nbytes"] = str(10*1024*1024)    # 10 MiB
-    config["LOGGING"]["syslog"] = os.path.join(root, "sys.log")
-    config["LOGGING"]["dblog"] = os.path.join(root, "db.log")
-    config["LOGGING"]["level"] = "0"
-    # DB
-    config["DB"] = {}
-    config["DB"]["uri"] = "sqlite:///" + os.path.join(root, "exa.sqplite")
+    # paths
+    config["paths"] = {}
+    config["paths"]["data"] = os.path.join(root, "data")
+    config["paths"]["notebooks"] = os.path.join(root, "notebooks")
+    mkdir(config["paths"]["data"])
+    mkdir(config["paths"]["notebooks"])
+    # logging
+    config["logging"] = {}
+    config["logging"]["nlogs"] = "3"
+    config["logging"]["nbytes"] = str(10*1024*1024)    # 10 MiB
+    config["logging"]["syslog"] = os.path.join(root, "sys.log")
+    config["logging"]["dblog"] = os.path.join(root, "db.log")
+    config["logging"]["level"] = "0"
+    # db
+    config["db"] = {}
+    config["db"]["uri"] = "sqlite:///" + os.path.join(root, "exa.sqplite")
     # Initialize static data
     init()
