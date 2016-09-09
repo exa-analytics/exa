@@ -11,8 +11,7 @@ import os
 import sys
 from doctest import DocTestFinder, DocTestRunner
 from unittest import TestCase, TestLoader, TextTestRunner
-from exa._config import config
-from exa.log import loggers
+from exa._config import config, loggers
 
 
 logger = loggers['sys']
@@ -67,7 +66,7 @@ def run_doctests(log=False):
     Args:
         log (bool): Write test results to system log (default false)
     """
-    def tester(modules, runner, f=None):
+    def tester(modules, runner):
         """Runs tests for each module."""
         results = []
         for module in modules:
@@ -76,20 +75,16 @@ def run_doctests(log=False):
             for test in tests:
                 if test.examples == []:    # Skip empty tests
                     pass
+                elif log != False:
+                    f = log.handlers[0].stream
+                    f.write('\n'.join(('-' * 80, test.name, '-' * 80, '\n')))
+                    results.append(runner.run(test, out=f))
                 else:
-                    if f:
-                        f.write('\n'.join(('-' * 80, test.name, '-' * 80, '\n')))
-                        results.append(runner.run(test, out=f.write))
-                    else:
-                        print('\n'.join(('-' * 80, test.name, '-' * 80)))
-                        results.append(runner.run(test))
+                    print('\n'.join(('-' * 80, test.name, '-' * 80)))
+                    results.append(runner.run(test))
         return results
-
     runner = DocTestRunner(verbose=verbose)
     modules = get_internal_modules()
-    if log:
-        logger.debug('LOGGING DOCTEST')
-        return tester(modules, runner, f=logger.handlers[0].stream)
     return tester(modules, runner)
 
 
@@ -101,6 +96,4 @@ def run_unittests(log=False):
         log (bool): Send results to system log (default False)
     """
     tests = UnitTester.__subclasses__()
-    if log:
-        logger.debug('LOGGING UNITTEST')
     return [test.run_interactively(log=log) for test in tests]
