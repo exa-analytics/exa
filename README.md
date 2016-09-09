@@ -24,11 +24,12 @@ make html    # `.\make.bat html` on windows
 
 # Contributing
 [![travis](https://travis-ci.org/exa-analytics/exa.svg?branch=master)](https://travis-ci.org/exa-analytics/exa)  
-[![codecov](https://codecov.io/gh/exa-analytics/exa/branch/master/graph/badge.svg)](https://codecov.io/gh/exa-analytics/exa)  
+[![Coverage](https://coveralls.io/repos/github/avmarchenko/exa/badge.svg?branch=master)](https://coveralls.io/github/avmarchenko/exa?branch=master)  
 [![Codacy](https://api.codacy.com/project/badge/Grade/221e700665c74c85b8255e5b399490d4)](https://www.codacy.com/app/alexvmarch/exa?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=avmarchenko/exa&amp;utm_campaign=Badge_Grade)  
 Note that development requires [npm](https://nodejs.org/en/).
 
-# Legal
+# Miscellaneous
+[![DOI](https://zenodo.org/badge/23807/exa-analytics/exa.svg)](https://zenodo.org/badge/latestdoi/23807/exa-analytics/exa)  
 [![Apache License 2.0](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0)  
 Copyright (c) 2015-2016, Exa Analytics Development Team  
 Distributed under the terms of the Apache License 2.0  

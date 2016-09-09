@@ -91,68 +91,78 @@ def init():
         df_to_save.to_sql(name=column, con=engine, index=False, if_exists='replace')
 
 
+def reconfigure(rootname=".exa"):
+    """
+    Read in the configuration (or generate a new configuration) and set the
+    dynamic configuration for the current session.
+    """
+    global config, engine
+    # Get exa"s root directory (e.g. /home/[username]/.exa, C:\\Users\[username]\\.exa)
+    home = os.getenv("USERPROFILE") if platform.system().lower() == "windows" else os.getenv("HOME")
+    root = os.path.join(home, rootname)
+    mkdir(root)
+    # Check for existing config or build one anew
+    config_file = os.path.join(root, "config")
+    init_flag = False
+    if os.path.exists(config_file) and rootname == ".exa":
+        stats = os.stat(config_file)
+        if stats.st_size > 180:      # Check that the file size > 180 bytes
+            config.read(config_file)
+    else:
+        # paths
+        config['paths'] = {}
+        config['paths']['data'] = os.path.join(root, "data")
+        config['paths']['notebooks'] = os.path.join(root, "notebooks")
+        mkdir(config['paths']['data'])
+        mkdir(config['paths']['notebooks'])
+        # logging
+        config['logging'] = {}
+        config['logging']['nlogs'] = "3"
+        config['logging']['nbytes'] = str(10*1024*1024)    # 10 MiB
+        config['logging']['syslog'] = os.path.join(root, "sys.log")
+        config['logging']['dblog'] = os.path.join(root, "db.log")
+        config['logging']['level'] = "0"
+        # db
+        config['db'] = {}
+        config['db']['uri'] = "sqlite:///" + os.path.join(root, "exa.sqlite")
+        init_flag = True
+    # Get the dynamic (system/installation/dev dependent) configuration
+    config['dynamic'] = {}
+    config['dynamic']['pkg'] = os.path.dirname(os.path.realpath(__file__))
+    config['dynamic']['root'] = root
+    config['dynamic']['data'] = os.path.join(config['dynamic']['pkg'], "..", "data")
+    config['dynamic']['examples'] = os.path.join(config['dynamic']['pkg'], "..", "examples")
+    config['dynamic']['numba'] = "false"
+    config['dynamic']['cuda'] = "false"
+    config['dynamic']['notebook'] = "false"
+    try:
+        import numba
+        config['dynamic']['numba'] = "true"
+    except ImportError:
+        pass
+    try:
+        from numba import cuda
+        if len(cuda.devices.gpus) > 0:
+            config['dynamic']['cuda'] = "true"
+    except (AttributeError, ImportError):
+        pass
+    try:
+        cfg = get_ipython().config
+        if "IPKernelApp" in cfg:
+            config['dynamic']['notebook'] = "true"
+    except NameError:
+        pass
+    # Database engine
+    try:
+        engine.dispose()
+    except AttributeError:
+        pass
+    engine = create_engine(config['db']['uri'])
+    if init_flag:
+        init()    # Inject static data into the database
+
+
 # The following sets up the configuration variable and database engine
 config = configparser.ConfigParser()
-# Get exa"s root directory (e.g. /home/[username]/.exa, C:\\Users\[username]\\.exa)
-home = os.getenv("USERPROFILE") if platform.system().lower() == "windows" else os.getenv("HOME")
-root = os.path.join(home, ".exa")
-mkdir(root)
-# Check for existing config or build one anew
-config_file = os.path.join(root, "config")
-init_flag = False
-if os.path.exists(config_file):
-    stats = os.stat(config_file)
-    if stats.st_size > 180:      # Check that the file size > 180 bytes
-        config.read(config_file)
-else:
-    # paths
-    config['paths'] = {}
-    config['paths']['data'] = os.path.join(root, "data")
-    config['paths']['notebooks'] = os.path.join(root, "notebooks")
-    mkdir(config['paths']['data'])
-    mkdir(config['paths']['notebooks'])
-    # logging
-    config['logging'] = {}
-    config['logging']['nlogs'] = "3"
-    config['logging']['nbytes'] = str(10*1024*1024)    # 10 MiB
-    config['logging']['syslog'] = os.path.join(root, "sys.log")
-    config['logging']['dblog'] = os.path.join(root, "db.log")
-    config['logging']['level'] = "0"
-    # db
-    config['db'] = {}
-    config['db']['uri'] = "sqlite:///" + os.path.join(root, "exa.sqplite")
-    init_flag = True
-
-# Get the dynamic (system/installation/dev dependent) configuration
-config['dynamic'] = {}
-config['dynamic']['pkg'] = os.path.dirname(os.path.realpath(__file__))
-config['dynamic']['root'] = root
-config['dynamic']['data'] = os.path.join(config['dynamic']['pkg'], "..", "data")
-config['dynamic']['examples'] = os.path.join(config['dynamic']['pkg'], "..", "examples")
-config['dynamic']['numba'] = "false"
-config['dynamic']['cuda'] = "false"
-config['dynamic']['notebook'] = "false"
-try:
-    import numba
-    config['dynamic']['numba'] = "true"
-except ImportError:
-    pass
-try:
-    from numba import cuda
-    if len(cuda.devices.gpus) > 0:
-        config['dynamic']['cuda'] = "true"
-except (AttributeError, ImportError):
-    pass
-try:
-    cfg = get_ipython().config
-    if "IPKernelApp" in cfg:
-        config['dynamic']['notebook'] = "true"
-except NameError:
-    pass
-
-# Database engine
-engine = create_engine(config['db']['uri'])
-
-if init_flag:
-    # Initialize static data
-    init()
+engine = None
+reconfigure()
