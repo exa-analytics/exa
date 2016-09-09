@@ -75,7 +75,7 @@ def init():
     df.reset_index(inplace=True)
     df.to_sql(name='isotope', con=engine, index=False, if_exists='replace')
     # Compute and load unit conversions
-    path = mkp(config['dynamic']['data'], 'units.json')
+    path = os.path.join(config['dynamic']['data'], 'units.json')
     df = pd.read_json(path)
     for column in df.columns:
         series = df[column].dropna()
