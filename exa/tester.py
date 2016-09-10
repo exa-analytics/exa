@@ -50,8 +50,11 @@ def run_doctests(log=False, mock=False):
         """Runs tests for each module."""
         results = []
         for module in modules:
-            tests = DocTestFinder().find(module)
-            tests.sort(key=lambda test: test.name)
+            try:
+                tests = DocTestFinder().find(module)
+                tests.sort(key=lambda test: test.name)
+            except ValueError:
+                tests = []
             for test in tests:
                 if mock:
                     results.append(None)

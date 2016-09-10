@@ -6,9 +6,13 @@ Test for :mod:`~exa._config`
 ##################################
 """
 import os
+import sys
 import shutil
 import pandas as pd
-from io import StringIO
+if sys.version[0] == 2:
+    from io import BytesIO as StringIO
+else:
+    from io import StringIO
 from sqlalchemy.exc import OperationalError
 from exa import _config
 from exa.tester import UnitTester
@@ -78,5 +82,5 @@ class TestConfig(UnitTester):
         """
         out = StringIO()
         _config.print_config(out=out)
-        out = out.getvalue().strip()
+        out = out.getvalue()
         self.assertIn("[DEFAULT]", out)
