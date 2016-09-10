@@ -92,8 +92,5 @@ class TestConfig(UnitTester):
         """
         _config.loggers['sys'].warning("test warning")
         out = StringIO()
-        _config.loggers['sys'].head(out=out)
-        self.assertIn("test warning", out.getvalue().strip())
-        out = StringIO()
         _config.loggers['sys'].tail(out=out)
         self.assertIn("test warning", out.getvalue().strip())
