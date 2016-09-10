@@ -90,15 +90,10 @@ class TestConfig(UnitTester):
         Tests for custom `head` and `tail` methods on the loggers attribute of
         :mod:`~exa._config`.
         """
-        lvl = _config.loggers['sys'].level
-        _config.loggers['sys'].setLevel(_config.logging.DEBUG)
-        _config.loggers['sys'].handlers[0].setLevel(_config.logging.DEBUG)
-        _config.loggers['sys'].debug("test_logger_head_tail")
-        _config.loggers['sys'].setLevel(lvl)
-        _config.loggers['sys'].handlers[0].setLevel(lvl)
+        _config.loggers['sys'].warning("test warning")
         out = StringIO()
         _config.loggers['sys'].head(out=out)
-        self.assertIn("test_logger_head_tail", out.getvalue().strip())
+        self.assertIn("test warning", out.getvalue().strip())
         out = StringIO()
         _config.loggers['sys'].tail(out=out)
-        self.assertIn("test_logger_head_tail", out.getvalue().strip())
+        self.assertIn("test warning", out.getvalue().strip())
