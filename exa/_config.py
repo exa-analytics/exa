@@ -87,7 +87,7 @@ def print_config(out=sys.stdout):
     for name, section in config.items():
         out.write(u"[{}]\n".format(name))
         for key, value in section.items():
-            out.write(unicode(key + " = " + value + "\n"))
+            out.write(key + u" = " + value + u"\n")
         out.write(u"\n")
 
 
@@ -95,16 +95,18 @@ def create_logger(name):
     """
     Create a logger with a given name.
     """
-    def head(n=10):
+    def head(n=10, out=sys.stdout):
         # Custom head function that we attach to the logging.Logger class
         with open(config["logging"][name], 'r') as f:
-            lines = "".join(f.readlines()[:n])
-        print(lines)
-    def tail(n=10):
+            lines = u"".join(f.readlines()[:n])
+        out.write(lines)
+
+    def tail(n=10, out=sys.stdout):
         # Custom tail function that we attach to the logging.Logger class
         with open(config["logging"][name], 'r') as f:
-            lines = "".join(f.readlines()[-n:])
-        print(lines)
+            lines = u"".join(f.readlines()[-n:])
+        out.write(lines)
+
     logging.basicConfig()
     root = logging.getLogger()
     map(root.removeHandler, root.handlers[:])
