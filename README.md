@@ -18,7 +18,7 @@ jupyter nbextension enable --py --sys-prefix exa
 [![gitter](https://badges.gitter.im/exa-analytics/exa.svg)](https://gitter.im/exa-analytics/exa)  
 Building the docs requires [sphinx](http://www.sphinx-doc.org/en/stable).
 ```
-cd doc
+cd docs
 make html    # `.\make.bat html` on windows
 ```
 

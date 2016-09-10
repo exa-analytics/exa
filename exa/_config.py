@@ -80,15 +80,15 @@ def mkdir(path):
         pass
 
 
-def print_config():
+def print_config(out=sys.stdout):
     """
     Print the configuration.
     """
     for name, section in config.items():
-        print("[{}]".format(name))
+        out.write("[{}]\n".format(name))
         for key, value in section.items():
-            print(key, "=", value)
-        print()
+            out.write(key + " = " + value + "\n")
+        out.write("\n")
 
 
 def create_logger(name):
@@ -105,6 +105,10 @@ def create_logger(name):
         with open(config["logging"][name], 'r') as f:
             lines = "".join(f.readlines()[-n:])
         print(lines)
+    logging.basicConfig()
+    root = logging.getLogger()
+    map(root.removeHandler, root.handlers[:])
+    map(root.removeFilter, root.filters[:])
     kwargs = {'maxBytes': int(config['logging']['nbytes']),
               'backupCount': int(config['logging']['nlogs'])}
     handler = logging.handlers.RotatingFileHandler(config['logging'][name], **kwargs)

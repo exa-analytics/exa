@@ -8,6 +8,7 @@ Test for :mod:`~exa._config`
 import os
 import shutil
 import pandas as pd
+from io import StringIO
 from sqlalchemy.exc import OperationalError
 from exa import _config
 from exa.tester import UnitTester
@@ -37,7 +38,10 @@ class TestConfig(UnitTester):
         """
         to_be_deleted = _config.config['dynamic']['root']
         _config.reconfigure()
-        shutil.rmtree(to_be_deleted)
+        try:
+            shutil.rmtree(to_be_deleted)
+        except OSError:
+            pass
 
     def test_mkdir(self):
         """
@@ -67,3 +71,12 @@ class TestConfig(UnitTester):
         except OperationalError:
             self.fail("Failed to select constant data at {}.".format(_config.engine))
         self.assertTrue(len(df) > 29)
+
+    def test_print(self):
+        """
+        Test :func:`~exa._config.print_config`.
+        """
+        out = StringIO()
+        _config.print_config(out=out)
+        out = out.getvalue().strip()
+        self.assertIn("[DEFAULT]", out)

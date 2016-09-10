@@ -9,6 +9,7 @@ environment) tests.
 """
 import os
 import sys
+from datetime import datetime
 from doctest import DocTestFinder, DocTestRunner
 from unittest import TestCase, TestLoader, TextTestRunner
 from exa._config import config, loggers
@@ -17,27 +18,6 @@ from exa._config import config, loggers
 logger = loggers['sys']
 verbosity = int(config['logging']['level'])
 verbose = True if verbosity > 0 else False
-
-
-class UnitTester(TestCase):
-    """
-    The custom tester class which provides an alternative test runner.
-    """
-    @classmethod
-    def run_interactively(cls, log=False):
-        """
-        Run a test suite in a Jupyter notebook environment or shell.
-
-        Args:
-            log (bool): Write output to a log file instead of to stdout
-        """
-        suite = TestLoader().loadTestsFromTestCase(cls)
-        if log:
-            result = TextTestRunner(logger.handlers[0].stream,
-                                    verbosity=verbosity).run(suite)
-        else:
-            result = TextTestRunner(verbosity=verbosity).run(suite)
-        return result
 
 
 def datetime_header(title=''):
@@ -59,7 +39,7 @@ def get_internal_modules(key='exa'):
     return [v for k, v in sys.modules.items() if k.startswith(key)]
 
 
-def run_doctests(log=False):
+def run_doctests(log=False, mock=False):
     """
     Run all docstring tests.
 
@@ -73,7 +53,9 @@ def run_doctests(log=False):
             tests = DocTestFinder().find(module)
             tests.sort(key=lambda test: test.name)
             for test in tests:
-                if test.examples == []:    # Skip empty tests
+                if mock:
+                    results.append(None)
+                elif test.examples == []:    # Skip empty tests
                     pass
                 elif log != False:
                     f = log.handlers[0].stream
@@ -88,7 +70,7 @@ def run_doctests(log=False):
     return tester(modules, runner)
 
 
-def run_unittests(log=False):
+def run_unittests(log=False, mock=False):
     """
     Perform (interactive) unit testing logging the results.
 
@@ -96,4 +78,27 @@ def run_unittests(log=False):
         log (bool): Send results to system log (default False)
     """
     tests = UnitTester.__subclasses__()
+    if mock:
+        return tests
     return [test.run_interactively(log=log) for test in tests]
+
+
+class UnitTester(TestCase):
+    """
+    The custom tester class which provides an alternative test runner.
+    """
+    @classmethod
+    def run_interactively(cls, log=False):
+        """
+        Run a test suite in a Jupyter notebook environment or shell.
+
+        Args:
+            log (bool): Write output to a log file instead of to stdout
+        """
+        suite = TestLoader().loadTestsFromTestCase(cls)
+        if log:
+            result = TextTestRunner(logger.handlers[0].stream,
+                                    verbosity=verbosity).run(suite)
+        else:
+            result = TextTestRunner(verbosity=verbosity).run(suite)
+        return result
