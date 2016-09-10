@@ -85,10 +85,10 @@ def print_config(out=sys.stdout):
     Print the configuration.
     """
     for name, section in config.items():
-        out.write("[{}]\n".format(name))
+        out.write(u"[{}]\n".format(name))
         for key, value in section.items():
-            out.write(key + " = " + value + "\n")
-        out.write("\n")
+            out.write(unicode(key + " = " + value + "\n"))
+        out.write(u"\n")
 
 
 def create_logger(name):

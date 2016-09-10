@@ -343,18 +343,20 @@ class Editor:
         """Create an editor instance from a string template."""
         return cls(lines_from_string(string), **kwargs)
 
-    def __init__(self, path_stream_or_string, as_interned=False, nprint=30,
+    def __init__(self, data, as_interned=False, nprint=30,
                  name=None, description=None, meta=None, encoding='utf-8'):
-        if len(path_stream_or_string) < 256 and os.path.exists(path_stream_or_string):
-            self._lines = lines_from_file(path_stream_or_string, as_interned, encoding)
-        elif isinstance(path_stream_or_string, list):
-            self._lines = path_stream_or_string
-        elif isinstance(path_stream_or_string, (TextIOWrapper, StringIO)):
-            self._lines = lines_from_stream(path_stream_or_string, as_interned)
-        elif isinstance(path_stream_or_string, str):
-            self._lines = lines_from_string(path_stream_or_string, as_interned)
+        if len(data) < 256 and os.path.exists(data):
+            self._lines = lines_from_file(data, as_interned, encoding)
+        elif isinstance(data, list):
+            self._lines = data
+        elif isinstance(data, (TextIOWrapper, StringIO)):
+            self._lines = lines_from_stream(data, as_interned)
+        elif isinstance(data, str):
+            self._lines = lines_from_string(data, as_interned)
+        elif isinstance(data, (list, tuple)):
+            self._lines = list(data[:])
         else:
-            raise TypeError('Unknown type for arg data: {}'.format(type(path_stream_or_string)))
+            raise TypeError('Unknown type for arg data: {}'.format(type(data)))
         self.name = name
         self.description = description
         self.meta = meta
@@ -367,7 +369,7 @@ class Editor:
     def __getitem__(self, key):
         if isinstance(key, str):
             return getattr(self, key)
-        return self._lines[key]
+        return self.__class__(self._lines[key])
 
     def __setitem__(self, line, value):
         self._lines[line] = value
