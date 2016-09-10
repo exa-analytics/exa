@@ -90,7 +90,7 @@ class TestConfig(UnitTester):
         Tests for custom `head` and `tail` methods on the loggers attribute of
         :mod:`~exa._config`.
         """
-        _config.loggers['sys'].warning("test warning")
+        _config.loggers['sys'].warning("DISREGARD: THIS IS ONLY A TEST")
         out = StringIO()
         _config.loggers['sys'].tail(out=out)
-        self.assertIn("test warning", out.getvalue().strip())
+        self.assertIn("DISREGARD: THIS IS ONLY A TEST", out.getvalue().strip())

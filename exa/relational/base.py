@@ -18,7 +18,6 @@ from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
 from exa._config import config, engine
-from exa.log import loggers
 
 
 def generate_hexuid():
@@ -43,6 +42,12 @@ def scoped_session(*args, **kwargs):
         raise
     finally:
         session.close()
+
+
+def _bind_session_factory():
+    """Internal function for binding the session_factory attribute to the engine."""
+    global session_factory
+    session_factory = sessionmaker(bind=engine)
 
 
 class BaseMeta(DeclarativeMeta):
@@ -193,5 +198,5 @@ class Size:
         self.size = getsizeof(self)
 
 
-logger = loggers['db']
-session_factory = sessionmaker(bind=engine)
+session_factory = None
+_bind_session_factory()

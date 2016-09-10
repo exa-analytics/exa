@@ -20,9 +20,8 @@ analysis, and visualization within the `Jupyter notebook`_ environment.
 """
 from exa._version import __version__
 from exa import _config
-#from exa import log
 from exa import tester
-#from exa import relational
+from exa import relational
 #from exa import widget
 #from exa import math
 #from exa import distributed
