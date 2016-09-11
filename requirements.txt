@@ -15,4 +15,5 @@ bqplot
 ipyparallel
 sphinx
 nose
+multipledispatch
 numba
