@@ -29,7 +29,10 @@ try:
 except ImportError:
     from inspect import getargspec
     def signature(func):
-        return len(getargspec(func).args)
+        obj = getargspec(func)
+        obj.parameters = dict([(name, None) for name in obj.args])
+        return obj
+
 
 _dispatched = dict()    # Global to keep track of all dispatched functions
 
@@ -38,8 +41,9 @@ class Dispatcher:
     """
     Put examples here
     """
-    def register(self, types, func, layout=None, jit=False, vectorize=False, nopython=False,
-                 nogil=False, cache=False, rtype=None, target='cpu', outcore=False, distrib=False):
+    def register(self, types, func, layout=None, jit=False, vectorize=False,
+                 nopython=False, nogil=False, cache=False, rtype=None,
+                 target='cpu', outcore=False, distrib=False):
         """
         Args:
             types (tuple): Type(s) for each argument
