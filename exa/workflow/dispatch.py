@@ -18,14 +18,18 @@ Warning:
 import numpy as np
 import pandas as pd
 from sys import getsizeof
-from inspect import signature
 from itertools import product
 from exa._config import config
 try:
     import numba as nb    # Don't make numba a hard dependency
 except ImportError:
     nb = None
-
+try:
+    from inspect import signature
+except ImportError:
+    from inspect import getargspec
+    def signature(func):
+        return len(getargspec(func).args)
 
 _dispatched = dict()    # Global to keep track of all dispatched functions
 
