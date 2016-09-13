@@ -27,11 +27,7 @@ except ImportError:
 try:
     from inspect import signature
 except ImportError:
-    from inspect import getargspec
-    def signature(func):
-        obj = getargspec(func)
-        obj.parameters = dict([(name, None) for name in obj.args])
-        return obj
+    from inspect import getargspec as signature
 
 
 _dispatched = dict()    # Global to keep track of all dispatched functions
@@ -39,8 +35,31 @@ _dispatched = dict()    # Global to keep track of all dispatched functions
 
 class Dispatcher:
     """
-    Put examples here
     """
+    def to_frame(self):
+        """
+        Generate an organized table of dispatched functions.
+        """
+        proc = []
+        mem = []
+        parallel = []
+        types = []
+        exists = []
+        for sig in self.functions.keys():
+            p, m, l = sig[:3]
+            typ = tuple(sig[3:])
+            proc.append(p)
+            mem.append(m)
+            parallel.append(l)
+            types.append("(" + ", ".join([t.__name__ for t in typ]) + ")")
+            exists.append(True)
+        df = pd.DataFrame.from_dict({'types': types, 'proc': proc, 'mem': mem,
+                                     'parallel': parallel, 'exists': exists})
+        df = df.pivot_table(values='exists', index=['proc', 'mem', 'parallel'],
+                            columns='types')
+        df.fillna(False, inplace=True)
+        return df
+
     def register(self, types, func, layout=None, jit=False, vectorize=False,
                  nopython=False, nogil=False, cache=False, rtype=None,
                  target='cpu', outcore=False, distrib=False):
@@ -59,7 +78,7 @@ class Dispatcher:
             outcore (bool): If the function designed for out-of-core execution
             distrib (bool): True if function desiged for distributed execution
         """
-        nargs = len(signature(func).parameters.keys())
+        nargs = get_nargs(func)
         ntyps = len(types)
         if nargs != ntyps:
             raise ValueError("Function has {} args but signature has {} entries!".format(nargs, ntyps))
@@ -97,7 +116,7 @@ class Dispatcher:
     @property
     def __doc__(self):
         doc = "Dispatched method {}".format(self.name)
-        for func in self.funcs.values():
+        for func in self.functions.values():
             doc += func.__doc__
             doc += "="*80 + r"\n\n"
         return doc
@@ -136,25 +155,7 @@ class Dispatcher:
         return self.__repr__()
 
     def _repr_html_(self):
-        proc = []
-        mem = []
-        parallel = []
-        types = []
-        exists = []
-        for sig in self.functions.keys():
-            p, m, l = sig[:3]
-            typ = tuple(sig[3:])
-            proc.append(p)
-            mem.append(m)
-            parallel.append(l)
-            types.append("(" + ", ".join([t.__name__ for t in typ]) + ")")
-            exists.append(True)
-        df = pd.DataFrame.from_dict({'types': types, 'proc': proc, 'mem': mem,
-                                     'parallel': parallel, 'exists': exists})
-        df = df.pivot_table(values='exists', index=['proc', 'mem', 'parallel'],
-                            columns='types')
-        df.fillna(False, inplace=True)
-        return df._repr_html_()
+        return self.to_frame()._repr_html_()
 
 
 def dispatch(*types, **flags):
@@ -173,3 +174,12 @@ def dispatch(*types, **flags):
         dispatcher.register(types, func, **flags)
         return dispatcher
     return dispatched_func
+
+def get_nargs(func):
+    """
+    Get the count of function args.
+    """
+    spec = signature(func)
+    if hasattr(spec, "parameters"):
+        return len(spec.parameters.keys())
+    return len(spec.args)
