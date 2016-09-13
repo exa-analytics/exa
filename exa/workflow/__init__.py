@@ -5,3 +5,4 @@
 Workflow
 ##############
 """
+from exa.workflow import dispatch
