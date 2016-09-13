@@ -386,9 +386,9 @@ epub_use_index = True
 #intersphinx_mapping = {"https://docs.python.org/": None}
 intersphinx_mapping = {
     "python": ("http://docs.python.org/3/", None),
-    "numpy": ("https://docs.scipy.org/doc/numpy/", None),
-    "scipy": ("https://scipy.github.io/devdocs/", None),
-    "pandas": ("https://pandas-docs.github.io/pandas-docs-travis/", None)
+    "numpy": ("http://docs.scipy.org/doc/numpy/", None),
+    "scipy": ("http://scipy.github.io/devdocs/", None),
+    "pandas": ("http://pandas-docs.github.io/pandas-docs-travis/", None)
 }
 
 autodoc_member_order = "bysource"
