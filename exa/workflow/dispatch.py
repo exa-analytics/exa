@@ -96,7 +96,7 @@ class Dispatcher:
         for typ in types:
             if not isinstance(typ, type):
                 raise TypeError("Not a type: {}".format(typ))
-        sig = (0, 0, 0, )
+        sig = [0, 0, 0]
         if outcore:
             sig[1] = 1
         if nogil or vectorize:
@@ -105,12 +105,13 @@ class Dispatcher:
             sig[2] = 2
         if target == 'cuda':
             sig[0] = 1
+        sig = tuple(sig)
+        sig += types
         if jit and nb is not None:
-            raise NotImplementedError()
+            self.functions[sig] = func
         elif vectorize and nb is not None:
-            raise NotImplementedError()
+            self.functions[sig] = func
         else:
-            sig += types
             self.functions[sig] = func
 
     @property
