@@ -180,7 +180,7 @@ class Editor:
         for k, i in enumerate(lines):
             del self[i-k]    # Accounts for the fact that len(self) decrease upon deletion
 
-    def find(self, *strings, keys_only=False):
+    def find(self, *strings, start=0, stop=None, keys_only=False):
         """
         Search the entire editor for lines that match the string.
 
@@ -196,12 +196,15 @@ class Editor:
         Args:
             \*strings (str): Any number of strings to search for
             keys_only (bool): Only return keys
+            start (int): Optional line to start searching on
+            stop (int): Optional line to stop searching on
 
         Returns:
             results: If multiple strings searched a dictionary of string key, (line number, line) values (else just values)
         """
         results = {string: [] for string in strings}
-        for i, line in enumerate(self):
+        stop = len(self) if stop is None else stop
+        for i, line in enumerate(self[start:stop]):
             for string in strings:
                 if string in line:
                     if keys_only:
