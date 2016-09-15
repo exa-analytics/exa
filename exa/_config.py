@@ -108,7 +108,7 @@ def print_config(out=sys.stdout):
     """
     Display the complete configuration (read-only).
     """
-    out.write("(exa {})\n\n\n".format(__version__))
+    out.write(u"(exa {})\n\n\n".format(__version__))
     for name, section in config.items():
         out.write(u"[{}]\n".format(name))
         for key, value in section.items():
