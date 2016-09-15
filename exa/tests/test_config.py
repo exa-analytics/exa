@@ -2,7 +2,7 @@
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Test for :mod:`~exa._config`
+Tests for :mod:`~exa._config`
 ##################################
 """
 import os
@@ -90,7 +90,7 @@ class TestConfig(UnitTester):
         Tests for custom `head` and `tail` methods on the loggers attribute of
         :mod:`~exa._config`.
         """
-        _config.loggers['sys'].warning("DISREGARD: THIS IS ONLY A TEST")
+        _config.loggers['sys'].warning("THIS IS A TEST")
         out = StringIO()
         _config.loggers['sys'].tail(out=out)
-        self.assertIn("DISREGARD: THIS IS ONLY A TEST", out.getvalue().strip())
+        self.assertIn("THIS IS A TEST", out.getvalue().strip())

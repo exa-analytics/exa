@@ -5,15 +5,18 @@
 Dispatched Functions
 ########################
 This module provides the :class:`~exa.workflow.dispatcher.Dispatcher` object
-and the :func:`~exa.workflow.dispatcher.dispatch` decorator. These two objects
-are used to generate multiply dispatched function (aliases) that can be efficiently
-used within complex workflows.
+and the :func:`~exa.workflow.dispatcher.dispatch` decorator. The class provides
+an interface for creating `multiply dispatched`_ functions. In addition to this
+programming paradigm, the :class:`~exa.workflow.dispatcher.Dispatcher` will
+attempt to compile the dispatched, typed functions down to byte code using
+`numba`_.
 
-Warning:
-    This module makes performance possible through the use of `numba`_. Though
-    not a required dependecy, without it, performance is not guarenteed.
+Compilation allows for high performance processing within the workflow scheme
+(see :mod:`~exa.workflow.workflow`), including multithreaded/multiprocess code,
+GPU code, and distributed parallelism.
 
 .. _numba: http://numba.pydata.org/
+.. _multiply dispatched: https://en.wikipedia.org/wiki/Multiple_dispatch
 """
 import numpy as np
 import pandas as pd
@@ -35,10 +38,14 @@ _dispatched = dict()    # Global to keep track of all dispatched functions
 
 class Dispatcher:
     """
+    Class that wraps functions with specific argument types into a single,
+    multiply dispatched interface.
     """
     def to_frame(self):
         """
-        Generate an organized table of dispatched functions.
+        Check dispatch and execution support (i.e. what types are supported and
+        whether gpus, out of core, and parallel/distributed architectures are
+        supported).
         """
         proc = []
         mem = []

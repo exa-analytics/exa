@@ -2,11 +2,13 @@
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Relational
+Management
 ####################
-This (sub)package is provides the content management framework for container
-objects and a collection of static data for reference and unit conversions.
+This sub-package contains all data management features of the exa framework:
+
+- :class:`~exa.management.editor.Editor`: Programmatic manipulation of files on persistent storage
 """
+from exa.management import editor
 #from exa.relational.isotope import Isotope
 #from exa.relational.constant import Constant
 #from exa.relational.unit import Length, Mass, Time, Current, Amount, Luminosity

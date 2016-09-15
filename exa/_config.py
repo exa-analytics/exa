@@ -2,35 +2,57 @@
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Configuration and Logging
+Configuration
 ############################
-This module generates the root ("~/.exa") directory where all databases, logs,
-notebooks, and data reside by default. The log file has the following format::
+The configuration file (**~/.exa/config**) has the following structure:
+
+.. code-block:: text
 
     [paths]
     data: Path to the data directory (default ~/.exa/data)
     notebooks: Path to the notebooks directory (default ~/.exa/notebooks)
 
     [logging]
-    nlogs: Number of log files to rotate
-    nbytes: Max log file size (in bytes)
-    syslog: System log file path
-    dblog: Database log file path (if necessary)
-    level: Logging level, 0: normal, 1: extra info, 2: debug
+    nlogs: Number of log files to rotate (default 3)
+    nbytes: Max log file size (in bytes, default 10 MiB)
+    syslog: System log file path (default ~/.exa/sys.log)
+    dblog: Database log file path (if necessary, default ~/.exa/db.log)
+    level: Logging level, 0: warnings, 1: info, 2: debug
 
     [db]
     uri: String URI for database connection
 
-By default exa provides two loggers, "db" and "sys". Both are accessible via the
-loggers attribute. The system log is records all messages related to container,
+The configuration file is can be updated manually:
+
+.. code-block:: Python
+
+    exa._config.config['log']['nlogs'] = '4'
+    #exa._config.save()
+
+Note that the value must be a string and will be saved on exit or if called
+manually (as commented out in the example). If multiple **exa** processes are running
+simultaneously (e.g. multiple Jupyter notebooks or Python interpreter consoles)
+the last one to exit will write the final configuration file. Automatic saving
+can be unregistered if necessary:
+
+.. code-block:: Python
+
+    exa._config.atexit.unregister(exa._config.save)
+
+Finally only edit the configuration file manually when no **exa** (Python) processes
+are running or make sure to unregister all automatic saving prior to editing.
+
+Logging
+###############
+By default **exa** provides two loggers, **db** and **sys**. Both are accessible via
+the loggers attribute. The system log is records all messages related to container,
 editor, and workflow actions. The database log keeps track of all content
-management actions (it is used when a 3rd party database logging solution is not
-used).
+management actions.
 
 Attributes:
-    config (:class:`~configparser.ConfigParser`): Global configuration
-    loggers (dict): Available loggers for use (defaults: "db" and "sys")
-    engine (:class:`~sqlalchemy.engine.base.Engine`): Database engine
+    config (:class:`~configparser.ConfigParser`): Framework configuration
+    loggers (dict): Dictionary of loggers
+    engine (:class:`~sqlalchemy.engine.base.Engine`): Sqlalchemy database engine
 """
 import os
 import sys
@@ -44,11 +66,12 @@ from textwrap import wrap
 from itertools import product
 from sqlalchemy import create_engine
 from logging.handlers import RotatingFileHandler
+from exa._version import __version__
 
 
 class LogFormat(logging.Formatter):
     """
-    Custom log format used by all loggers.
+    Custom logging format for systematic, parsable, and human readable log files.
     """
     spacing = '                                     '
     log_basic = '%(asctime)19s - %(levelname)8s'
@@ -72,7 +95,8 @@ class LogFormat(logging.Formatter):
 
 def mkdir(path):
     """
-    Safely create a directory.
+    Create a directory on disk (supports Python 2 and 3). No exception is raised
+    if the directory already exists.
     """
     try:    # This approach supports Python 2 and Python 3
         os.makedirs(path)
@@ -82,8 +106,9 @@ def mkdir(path):
 
 def print_config(out=sys.stdout):
     """
-    Print the configuration.
+    Display the complete configuration (read-only).
     """
+    out.write("(exa {})\n\n\n".format(__version__))
     for name, section in config.items():
         out.write(u"[{}]\n".format(name))
         for key, value in section.items():
@@ -93,7 +118,7 @@ def print_config(out=sys.stdout):
 
 def create_logger(name):
     """
-    Create a logger with a given name.
+    Construct a custom logger with rotating file handlers and custom format.
     """
     def head(n=10, out=sys.stdout):
         # Custom head function that we attach to the logging.Logger class
