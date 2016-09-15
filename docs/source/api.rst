@@ -13,8 +13,19 @@ of important framework concepts can also be found within this documentation.
 
     base/config.rst
     base/testing.rst
+    base/utilities.rst
 
 
 .. toctree::
     :maxdepth: 1
-    :caption: Container
+    :caption: Management
+
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Analytics
+
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Computation
