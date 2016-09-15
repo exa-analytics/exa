@@ -6,8 +6,6 @@ h5py
 networkx
 sympy
 seaborn
-traitlets
-jupyter
 notebook
 ipywidgets>=5.2.2
 pythreejs
@@ -15,5 +13,4 @@ bqplot
 ipyparallel
 sphinx
 nose
-multipledispatch
 numba

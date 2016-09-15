@@ -4,10 +4,21 @@
 """
 Editor
 ####################################
-Text-editor-like functionality for programatically manipulating raw text input
-and output data and converting this data into container objects. This class
-does not behave like a fully fledged text editor but does have some basic find,
-replace, insert, etc. functionality.
+The :class:`~exa.management.editor.Editor` class is a way for programmatic text-
+editor-like manipulation of files on disk. It does not strive to be a full
+featured text editor. A large number of Pythonic operations can be performed on
+editors:
+
+.. code-block:: Python
+
+    editor = Editor(file.txt)       # Create an editor from a file
+    editor = Editor(file.txt.gz)    # Automatically decompress
+    editor = Editor(file.txt.bz2)
+    for line in editor:          # Iterate over lines in the file
+        pass
+
+Text lines are stored in memory; file handles are only open during reading and
+writing. For large repetitive files, memoization can reduce the memory footprint.
 """
 import os
 import re
@@ -20,25 +31,7 @@ from io import StringIO, TextIOWrapper
 
 class Editor:
     """
-    An editor is a representation of a text file on disk that can be
-    programmatically manipulated.
-
-    Text lines are stored in memory; no files remain open. This class does not
-    strive to be a fully fledged text editor rather a base class for converting
-    input and output data from text on disk to some type of (exa framework)
-    container object (and vice versa).
-
-    >>> template = "Hello World!\\nHello {user}"
-    >>> editor = Editor(template)
-    >>> editor[0]
-    'Hello World!'
-    >>> len(editor)
-    2
-    >>> del editor[0]
-    >>> len(editor)
-    1
-    >>> editor.write(fullpath=None, user='Alice')
-    Hello Alice
+    An in memory copy of a file on disk that can be programmatically manipulated.
 
     Tip:
         Editor line numbers use a 0 base index. To increase the number of lines
