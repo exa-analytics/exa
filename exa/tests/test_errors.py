@@ -11,9 +11,11 @@ from exa.errors import ExaException
 
 class TestExceptions(UnitTester):
     """
+    Test that base exceptions can be raised.
     """
     def test_generic(self):
         """
+        Test for :class:`~exa.errors.ExaException`.
         """
         with self.assertRaises(ExaException):
             raise ExaException()
