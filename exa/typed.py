@@ -11,6 +11,7 @@ mechanism. A usage example is given below:
 .. code-block:: Python
 
     class Meta(TypedMeta):
+        _getter_prefix = "compute"
         attr1 = (int, float)
         attr2 = DataFrame
 
@@ -27,11 +28,13 @@ calls when a missing (but computable or parsable) attribute is requested.
 .. code-block:: Python
 
     class Klass:
-        # The following enforces the type of "attr1"
         @property
         def attr1(self):
-            if self.
-            return self._attr1
+            if not hasattr(self, attr1) and hasattr(self, 'compute_attr1'):
+                self['compute_attr1']()
+            if not hasattr(self, _attr1):
+                raise AttributeError("Please compute or set attr1 first.")
+            return getattr(self, "attr1")
 
         @attr1.setter
         def attr1(self, obj):
@@ -39,18 +42,8 @@ calls when a missing (but computable or parsable) attribute is requested.
                 raise TypeError('attr1 must be int')
             self._attr1 = obj
 
-        @property
-        def attr2(self):
-            ...
-            ...
-
-        def __init__(self, attr1, attr2):
-            ...
-
-
-.. code-block:: Python
-
-    class Meta(TypedMeta)
+        ...
+        
 """
 
 
