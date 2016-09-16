@@ -16,6 +16,7 @@ mechanism. A usage example is given below:
         attr2 = DataFrame
 
     class Klass(metaclass=Meta):
+        #_getter_prefix = "compute"  # Alternatively can define the prefix here
         def __init__(self, attr1, attr2):
             self.attr1 = attr1
             self.attr2 = attr2
@@ -43,7 +44,10 @@ calls when a missing (but computable or parsable) attribute is requested.
             self._attr1 = obj
 
         ...
-        
+
+Strong typing helps exa containers ensure the correct data object types are
+attached. This, in turn, ensures things such as visualization and content
+management behave as expected.
 """
 
 
@@ -68,11 +72,13 @@ class TypedMeta(type):
         """
         pname = '_' + name
         def getter(self):
-            # This will be where the data is store (e.g. self._name)
-            # This is the default property "getter" for container data objects.
-            # If the property value is None, this function will check for a
-            # convenience method with the signature, self.compute_name() and call
-            # it prior to returning the property value.
+            """
+            This will be where the data is store (e.g. self._name)
+            This is the default property "getter" for container data objects.
+            If the property value is None, this function will check for a
+            convenience method with the signature, self.[_getter_prefix]_name()
+            and call it prior to returning the property value.
+            """
             if not hasattr(self, pname) and hasattr(self, '{}{}'.format(self._getter_prefix, pname)):
                 self['{}{}'.format(self._getter_prefix, pname)]()
             if not hasattr(self, pname):
@@ -80,9 +86,11 @@ class TypedMeta(type):
             return getattr(self, pname)
 
         def setter(self, obj):
-            # This is the default property "setter" for container data objects.
-            # Prior to setting a property value, this function checks that the
-            # object's type is correct.
+            """
+            This is the default property "setter" for container data objects.
+            Prior to setting a property value, this function checks that the
+            object's type is correct.
+            """
             if not isinstance(obj, ptype):
                 try:
                     obj = ptype(obj)
@@ -91,8 +99,7 @@ class TypedMeta(type):
             setattr(self, pname, obj)
 
         def deleter(self):
-            # Deletes the property's value.
-            del self[pname]
+            del self[pname]    # Deletes the property's value.
 
         return property(getter, setter, deleter)
 
@@ -100,8 +107,8 @@ class TypedMeta(type):
         """
         Modification of the class definition occurs here; we iterate over all
         statically typed attributes and attach their property (see
-        :func:`~exa.container.TypedMeta.create_property`) definition, returning
-        the new class definition.
+        :func:`~exa.typed.TypedMeta.create_property`) definition, returning
+        the modified (i.e. property containing) class definition.
         """
         for k, v in vars(metacls).items():
             if isinstance(v, type) and k[0] != '_':

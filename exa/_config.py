@@ -11,6 +11,7 @@ The configuration file (**~/.exa/config**) has the following structure:
     [paths]
     data: Path to the data directory (default ~/.exa/data)
     notebooks: Path to the notebooks directory (default ~/.exa/notebooks)
+    tmp: Path to temporary directory (default ~/.exa/tmp)
 
     [logging]
     nlogs: Number of log files to rotate (default 3)
@@ -132,10 +133,6 @@ def create_logger(name):
             lines = u"".join(f.readlines()[-n:])
         out.write(lines)
 
-    logging.basicConfig()
-    root = logging.getLogger()
-    map(root.removeHandler, root.handlers[:])
-    map(root.removeFilter, root.filters[:])
     kwargs = {'maxBytes': int(config['logging']['nbytes']),
               'backupCount': int(config['logging']['nlogs'])}
     handler = logging.handlers.RotatingFileHandler(config['logging'][name], **kwargs)
@@ -193,8 +190,10 @@ def reconfigure(rootname=".exa"):
         # paths
         config['paths'] = {}
         config['paths']['data'] = os.path.join(root, "data")
+        config['paths']['tmp'] = os.path.join(root, "tmp")
         config['paths']['notebooks'] = os.path.join(root, "notebooks")
         mkdir(config['paths']['data'])
+        mkdir(config['paths']['tmp'])
         mkdir(config['paths']['notebooks'])
         # logging
         config['logging'] = {}
@@ -213,7 +212,7 @@ def reconfigure(rootname=".exa"):
     config['dynamic']['home'] = home
     config['dynamic']['config_file'] = config_file
     config['dynamic']['pkg'] = os.path.dirname(os.path.realpath(__file__))
-    config['dynamic']['data'] = os.path.join(config['dynamic']['pkg'], "..", "data")
+    config['dynamic']['static'] = os.path.join(config['dynamic']['pkg'], "..", "static")
     config['dynamic']['examples'] = os.path.join(config['dynamic']['pkg'], "..", "examples")
     config['dynamic']['numba'] = "false"
     config['dynamic']['cuda'] = "false"
@@ -242,6 +241,10 @@ def reconfigure(rootname=".exa"):
         pass
     engine = create_engine(config['db']['uri'], echo=False)
     # Loggers
+    logging.basicConfig()
+    root = logging.getLogger()
+    map(root.removeHandler, root.handlers[:])
+    map(root.removeFilter, root.filters[:])
     for name in config["logging"].keys():
         if name.endswith("log"):
             loggers[name.replace("log", "")] = create_logger(name)
@@ -258,7 +261,7 @@ def initialize():
     tutorial_dest = os.path.join(config['paths']['notebooks'], tut)
     shutil.copy(tutorial_source, tutorial_dest)
     # Load isotope static data (replacing existing data)
-    isotopes = os.path.join(config['dynamic']['data'], "isotopes.json")
+    isotopes = os.path.join(config['dynamic']['static'], "isotopes.json")
     df = pd.read_json(isotopes, orient='values')
     df.columns = ('A', 'Z', 'af', 'eaf', 'color', 'radius', 'gfactor', 'mass',
                   'emass', 'name', 'eneg', 'quadmom', 'spin', 'symbol', 'szuid',
@@ -267,7 +270,7 @@ def initialize():
     df.reset_index(inplace=True)
     df.to_sql(name='isotope', con=engine, index=False, if_exists='replace')
     # Compute and load unit conversions
-    path = os.path.join(config['dynamic']['data'], "units.json")
+    path = os.path.join(config['dynamic']['static'], "units.json")
     df = pd.read_json(path)
     for column in df.columns:
         series = df[column].dropna()
@@ -282,7 +285,7 @@ def initialize():
         df_to_save['pkid'] = df_to_save.index
         df_to_save.to_sql(name=column, con=engine, index=False, if_exists='replace')
     # Load physical constants
-    path = os.path.join(config['dynamic']['data'], "constants.json")
+    path = os.path.join(config['dynamic']['static'], "constants.json")
     df = pd.read_json(path)
     df.reset_index(inplace=True)
     df.columns = ['symbol', 'value']
@@ -291,7 +294,6 @@ def initialize():
 
 
 # Create the config, db engine, and loggers
-logging.basicConfig()
 config = configparser.ConfigParser()
 engine = None
 loggers = {}
