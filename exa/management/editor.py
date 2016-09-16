@@ -18,14 +18,15 @@ editors:
         pass
 
 Text lines are stored in memory; file handles are only open during reading and
-writing. For large repetitive files, memoization can reduce the memory footprint.
+writing. For large repetitive files, memoization can reduce the memory footprint
+(see the **as_interned** kwarg).
 """
 import os
 import re
 import sys
-import pandas as pd
 import gzip
 import bz2
+import pandas as pd
 from io import StringIO, TextIOWrapper
 
 
@@ -33,22 +34,19 @@ class Editor:
     """
     An in memory copy of a file on disk that can be programmatically manipulated.
 
-    Tip:
-        Editor line numbers use a 0 base index. To increase the number of lines
-        displayed by the repr, increase the value of the **nprint** attribute.
+    Editor line numbers use a 0 base index. To increase the number of lines
+    displayed by the repr, increase the value of the **nprint** attribute.
+    For large text with repeating strings be sure to use the **as_interned**
+    argument.
 
-    Warning:
-        For large text with repeating strings be sure to use the **as_interned**
-        argument.
-
-    Attributes:
+    Args:
         name (str): Data/file/misc name
         description (str): Data/file/misc description
         meta (dict): Additional metadata as key, value pairs
         nrpint (int): Number of lines to display when printing
         cursor (int): Line number position of the cusor (see :func:`~exa.editor.Editor.find_next_any` and :func:`~exa.editor.Editor.find_next_string`)
     """
-    _getter_prefix = 'parse'
+    _getter_prefix = 'parse'     # See :class:`~exa.typed.Typed`
     _fmt = '{0}: {1}\n'.format   # Format for printing lines (see __repr__)
 
     def write(self, path=None, *args, **kwargs):

@@ -11,6 +11,7 @@ of important framework concepts can also be found within this documentation.
     :maxdepth: 1
     :caption: Base
 
+    base/main.rst
     base/config.rst
     base/testing.rst
     base/utilities.rst
@@ -19,6 +20,8 @@ of important framework concepts can also be found within this documentation.
 .. toctree::
     :maxdepth: 1
     :caption: Management
+
+    management/editor.rst
 
 
 .. toctree::
