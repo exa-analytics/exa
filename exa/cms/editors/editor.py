@@ -26,10 +26,10 @@ writing. For large repetitive files, memoization can reduce the memory footprint
 import os
 import re
 import sys
-import gzip
 import bz2
+import six
+import gzip
 import pandas as pd
-from builtins import bytes
 from copy import copy, deepcopy
 from operator import add
 from collections import Counter
@@ -422,14 +422,14 @@ class Editor:
     def __init__(self, data, as_interned=False, nprint=30, name=None,
                  description=None, meta=None, encoding='utf-8'):
         filepath = None
-        if isinstance(data, str) and os.path.exists(data):
+        if isinstance(data, six.string_types) and os.path.exists(data):
             self._lines = read_file(data, as_interned, encoding)
             filepath = data
-        elif isinstance(data, str):
+        elif isinstance(data, six.string_types):
             self._lines = read_string(data, as_interned)
         elif isinstance(data, (TextIOWrapper, StringIO)):
             self._lines = read_stream(data, as_interned)
-        elif isinstance(data, list) and all(isinstance(dat, str) for dat in data):
+        elif isinstance(data, list) and all(isinstance(dat, six.string_types) for dat in data):
             self._lines = data
         else:
             raise TypeError('Unknown type for arg data: {}'.format(type(data)))

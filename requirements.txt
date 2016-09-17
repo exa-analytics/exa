@@ -13,4 +13,5 @@ bqplot
 ipyparallel
 sphinx
 nose
+six
 numba
