@@ -22,10 +22,10 @@ class TestCSV(UnitTester):
         """
         Generate csv data to test.
         """
-        self.csv = CSV(pd.DataFrame(np.random.rand(10, 3)).to_csv())
+        self.csv = CSV(pd.DataFrame(np.random.rand(10, 3)).to_csv(index=None))
 
     def test_base(self):
         """
         Test that the editor was created (read in) correctly.
         """
-        self.assertEqual(len(self.csv), 10)
+        self.assertEqual(len(self.csv), 11)

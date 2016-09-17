@@ -34,6 +34,8 @@ class CSV(Editor):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.remove_blank_lines()
-        #dialect = csv.Sniffer().sniff(str(self[1]))
-        #self.delimiter = dialect.delimiter
-        #self.separator = dialect.separator
+        dialect = csv.Sniffer().sniff(self._lines[1])
+        self.delimiter = dialect.delimiter
+        self.quoting = dialect.quoting
+        self.escapechar = dialect.escapechar
+        self.quotechar = dialect.quotechar
