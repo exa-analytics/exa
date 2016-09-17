@@ -29,6 +29,7 @@ import sys
 import gzip
 import bz2
 import pandas as pd
+from builtins import bytes
 from copy import copy, deepcopy
 from operator import add
 from collections import Counter
