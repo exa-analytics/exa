@@ -260,7 +260,7 @@ class Editor:
         """
         if isinstance(lines, list):
             self._lines += lines
-        elif isinstance(lines, str):
+        elif isinstance(lines, six.string_types):
             self._lines += lines.splitlines()
         else:
             raise TypeError("Unsupported type {} for lines.".format(type(lines)))
@@ -274,7 +274,7 @@ class Editor:
         """
         if isinstance(lines, list):
             self._lines = lines + self._lines
-        elif isinstance(lines, str):
+        elif isinstance(lines, six.string_types):
             self._lines = lines.splitlines() + self._lines
         else:
             raise TypeError("Unsupported type {} for lines.".format(type(lines)))
@@ -287,7 +287,7 @@ class Editor:
             no (int): Line number after which to insert lines
             lines (list, str): List of lines or str text to append to the editor
         """
-        if isinstance(lines, str):
+        if isinstance(lines, six.string_types):
             lines = lines.splitlines()
         elif not isinstance(lines, list):
             raise TypeError("Unsupported type {} for lines.".format(type(lines)))
@@ -412,7 +412,7 @@ class Editor:
         del self._lines[line]     # "line" is the line number minus one
 
     def __getitem__(self, key):
-        if isinstance(key, str):
+        if isinstance(key, six.string_types):
             return getattr(self, key)
         return self.__class__(self._lines[key])
 

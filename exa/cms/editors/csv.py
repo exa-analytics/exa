@@ -8,6 +8,7 @@ Provides an editor with convenience methods tailored specifically for comma
 separated value (CSV) files.
 """
 import re
+import csv
 import pandas as pd
 from io import StringIO
 from exa.cms.editors.editor import Editor
@@ -31,16 +32,8 @@ class CSV(Editor):
         return pd.read_csv(StringIO(str(self)))
 
     def __init__(self, *args, **kwargs):
-        super().__init(*args, **kwargs)
-        self.remove_blank_lines()    # Remove blank lines
-        # Attempt to determine the separator and delimter
-        line1 = str(self[1].strip())
-        # Determine the delimiter and separator
-        # Determine if a header exists
-        line0 = str(self[0]).strip()
-        if line0.startswith("#"):
-            pass
-
-        # Determine the internal separator and delimiter
-
-        # Now determine the internal separator, delimiter
+        super().__init__(*args, **kwargs)
+        self.remove_blank_lines()
+        #dialect = csv.Sniffer().sniff(str(self[1]))
+        #self.delimiter = dialect.delimiter
+        #self.separator = dialect.separator

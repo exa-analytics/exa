@@ -18,7 +18,7 @@ if not hasattr(bz2, "open"):
     bz2.open = bz2.BZ2File
 
 
-editor_string = """This string is used as the test for the editor class.
+editor_string = u"""This string is used as the test for the editor class.
 
 That was a blank line
 It contains templates: {template}

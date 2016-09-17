@@ -4,7 +4,8 @@
 ########################
 Editors
 ########################
-.. automodule:: exa.cms.editors.__init__
-
 .. automodule:: exa.cms.editors.editor
+    :members:
+
+.. automodule:: exa.cms.editors.csv
     :members:
