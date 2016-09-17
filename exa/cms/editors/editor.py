@@ -93,7 +93,7 @@ class Editor:
         constants = [match[2:-2] for match in self.regex(csnt, which='values')[csnt]]
         return sorted(constants)
 
-    def regex(self, *patterns, which=None, flags=re.MULTILINE|re.DOTALL):
+    def regex(self, *patterns, **kwargs):
         """
         Match a line or lines by the specified regular expression(s).
 
@@ -111,6 +111,8 @@ class Editor:
 
         .. _Regular expressions: https://en.wikipedia.org/wiki/Regular_expression
         """
+        which = kwargs.pop('which', None)
+        flags = kwargs.pop('flags', re.MULTILINE|re.DOTALL)
         results = {}
         self_str = str(self)
         for pattern in patterns:
@@ -126,7 +128,7 @@ class Editor:
             results[match.pattern] = pattern_results
         return results
 
-    def find(self, *patterns, which=None):
+    def find(self, *patterns, **kwargs):
         """
         Search each line for a specified pattern(s).
 
@@ -137,6 +139,7 @@ class Editor:
         Returns:
             results (dict): Dictionary with pattern keys and list of (lineno, line) values
         """
+        which = kwargs.pop('which', None)
         results = {pattern: [] for pattern in patterns}
         for i, line in enumerate(self):
             for pattern in patterns:

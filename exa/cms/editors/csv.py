@@ -9,11 +9,12 @@ separated value (CSV) files.
 """
 import pandas as pd
 from io import StringIO
-from exa.editor import Editor
+from exa.cms.editors.editor import Editor
 
 
 class CSV(Editor):
     """
+    A convenience class for manipulating CSV (or CSV like) files on disk.
     """
     def clean(self):
         """
@@ -27,3 +28,7 @@ class CSV(Editor):
         Create a :class:`~exa.numerical.DataFrame` from this file.
         """
         return pd.read_csv(StringIO(str(self)))
+
+    def __init__(self, *args, **kwargs):
+        super().__init(*args, **kwargs)
+        # Now determine the internal separator, delimiter

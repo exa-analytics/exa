@@ -2,11 +2,9 @@
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Management
-####################
 This sub-package contains all data management features of the exa framework:
 
-- :class:`~exa.management.editor.Editor`: Programmatic manipulation of files on persistent storage
+- :class:`~exa.cms.editors.editor.Editor`: Programmatic manipulation of files on persistent storage
 """
 from exa.cms import editors, tests
 #from exa.relational.isotope import Isotope
