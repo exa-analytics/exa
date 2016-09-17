@@ -30,6 +30,7 @@ import gzip
 import bz2
 import pandas as pd
 from copy import copy, deepcopy
+from collections import Counter
 from io import StringIO, TextIOWrapper
 
 
@@ -149,8 +150,43 @@ class Editor:
                     elif which == "values":
                         results[pattern].append(line)
                     else:
-                        results[string].append((i, line))
+                        results[pattern].append((i, line))
         return results
+
+    def find_next(self, pattern, which=None, reverse=False):
+        """
+        From the current cursor position, find the next occurrence of the pattern.
+
+        Args:
+            pattern (str): String to search for from the current cursor position
+            which (str): If none, return values as (lineno, match), if "keys" return lineno only, if "values" return lines only
+            reverse (bool): Find next in reverse
+
+        Returns:
+            tup (tuple): Tuple of line number and line of next occurrence
+
+        Note:
+            Searching will cycle the file and continue if an occurrence is not
+            found.
+        """
+        n = len(self)
+        n1 = n - 1
+        if reverse:
+            self.cursor = 0 if self.cursor == 0 else self.cursor - 1
+            positions = [(self.cursor - 1, 0, -1), (n1, self.cursor, -1)]
+        else:
+            self.cursor = 0 if self.cursor == n1 else self.cursor + 1
+            positions = [(self.cursor, n, 1), (0, self.cursor, 1)]
+        for start, stop, inc in positions:
+            for i in range(start, stop, inc):
+                if pattern in str(self[i]):
+                    self.cursor = i
+                    if which == "keys":
+                        return i
+                    elif which == "values":
+                        return str(self[i])
+                    else:
+                        return (i, str(self[i]))
 
     def copy(self):
         """
@@ -268,15 +304,15 @@ class Editor:
                 line = line.replace(pattern, replacement)
             self[i] = line
 
-#    def remove_blank_lines(self):
-#        """Remove all blank lines (blank lines are those with zero characters)."""
-#        to_remove = []
-#        for i, line in enumerate(self):
-#            ln = line.strip()
-#            if ln == '':
-#                to_remove.append(i)
-#        self.delete_lines(to_remove)
-#
+    def remove_blank_lines(self):
+        """Remove all blank lines (blank lines are those with zero characters)."""
+        to_remove = []
+        for i, line in enumerate(self):
+            ln = line.strip()
+            if ln == '':
+                to_remove.append(i)
+        self.delete_lines(to_remove)
+
 #    def _data(self, copy=False):
 #        """
 #        Get all data associated with the container as key value pairs.
@@ -290,42 +326,17 @@ class Editor:
 #                    data[key] = obj
 #        return data
 #
-#    def delete_lines(self, lines):
-#        """
-#        Delete all lines with given line numbers.
-#
-#        Args:
-#            lines (list): List of integers corresponding to line numbers to delete
-#        """
-#        for k, i in enumerate(lines):
-#            del self[i-k]    # Accounts for the fact that len(self) decrease upon deletion
-#
-#
-#    def find_next(self, string):
-#        """
-#        From the editor's current cursor position find the next instance of the
-#        given string.
-#
-#        Args:
-#            string (str): String to search for from the current cursor position.
-#            reverse (bool): Search in reverse (default false)
-#
-#        Returns:
-#            tup (tuple): Tuple of cursor position and line or None if not found
-#
-#        Note:
-#            This function cycles the entire editor (i.e. cursor to length of
-#            editor to zero and back to cursor position).
-#        """
-#        for start, stop in [(self.cursor, len(self)), (0, self.cursor)]:
-#            for i in range(start, stop):
-#                if string in self[i]:
-#                    tup = (i, self[i])
-#                    self.cursor = i + 1
-#                    return tup
-#
-#
-#
+    def delete_lines(self, lines):
+        """
+        Delete all lines with given line numbers.
+
+        Args:
+            lines (list): List of integers corresponding to line numbers to delete
+        """
+        for k, i in enumerate(lines):
+            del self[i-k]    # Accounts for the fact that len(self) decrease upon deletion
+
+
 #    def pandas_dataframe(self, start, stop, ncol, **kwargs):
 #        """
 #        Returns the result of tab-separated pandas.read_csv on
@@ -426,6 +437,7 @@ class Editor:
         self.nprint = 30
         self.as_interned = as_interned
         self.encoding = encoding
+        self.cursor = 0
         if self.meta is None and filepath is not None:
             self.meta = {'filepath': filepath}
         elif filepath is not None and 'filepath' not in self.meta:
@@ -513,5 +525,18 @@ def read_string(string, as_interned=False):
     return string.splitlines()
 
 
-def concat():
-    raise NotImplementedError()
+def concat(*editors, **kwargs):
+    """
+    Concatenate a collection of editors into a single editor.
+
+    Args:
+        \*editors: Collection of editors (in order) to be concatenated
+        \*\*kwargs: Arguments for editor creation
+
+    Returns:
+        editor: An instance of an editor
+    """
+    classes = [ed.__class__ for ed in editors]
+    cls = Counter(classes).most_common(1)[0][0]
+    lines = sum([ed._lines for ed in editors])
+    return cls(lines, **kwargs)

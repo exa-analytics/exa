@@ -7,6 +7,7 @@ Generic CSV Support
 Provides an editor with convenience methods tailored specifically for comma
 separated value (CSV) files.
 """
+import re
 import pandas as pd
 from io import StringIO
 from exa.cms.editors.editor import Editor
@@ -31,4 +32,15 @@ class CSV(Editor):
 
     def __init__(self, *args, **kwargs):
         super().__init(*args, **kwargs)
+        self.remove_blank_lines()
+        # Attempt to determine the separator and delimter
+        line1 = str(self[1].strip())
+        # Determine the delimiter and separator
+        # Determine if a header exists
+        line0 = str(self[0]).strip()
+        if line0.startswith("#"):
+            self.header = line0.
+
+        # Determine the internal separator and delimiter
+
         # Now determine the internal separator, delimiter
