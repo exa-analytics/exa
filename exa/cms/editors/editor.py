@@ -477,11 +477,11 @@ def read_file(path, as_interned=False, encoding='utf-8'):
     """
     lines = None
     if path.endswith(".gz"):
-        f = gzip.open(path)
+        f = gzip.open(path, 'rb')
     elif path.endswith(".bz2"):
-        f = bz2.open(path)
+        f = bz2.open(path, 'rb')
     else:
-        f = open(path, encoding=encoding)
+        f = open(path, 'rb')
     read = f.read()
     try:
         read = read.decode(encoding)    # For .gz and .bz2 files
