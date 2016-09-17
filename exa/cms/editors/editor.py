@@ -30,6 +30,7 @@ import gzip
 import bz2
 import pandas as pd
 from copy import copy, deepcopy
+from operator import add
 from collections import Counter
 from io import StringIO, TextIOWrapper
 
@@ -231,11 +232,11 @@ class Editor:
             *args: Positional arguments to format the editor with
             **kwargs: Keyword arguments to format the editor with
         """
-        with open(path, "w", newline="") as f:
+        with open(path, "wb") as f:
             if len(args) > 0 or len(kwargs) > 0:
-                f.write(str(self.format(*args, **kwargs)))
+                f.write(str.encode(str(self.format(*args, **kwargs))))
             else:
-                f.write(str(self))
+                f.write(str.encode(str(self)))
 
     def head(self, n=10):
         """
@@ -538,5 +539,7 @@ def concat(*editors, **kwargs):
     """
     classes = [ed.__class__ for ed in editors]
     cls = Counter(classes).most_common(1)[0][0]
-    lines = sum([ed._lines for ed in editors])
+    lines = []
+    for ed in editors:
+        lines += ed._lines
     return cls(lines, **kwargs)

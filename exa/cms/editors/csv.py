@@ -32,14 +32,14 @@ class CSV(Editor):
 
     def __init__(self, *args, **kwargs):
         super().__init(*args, **kwargs)
-        self.remove_blank_lines()
+        self.remove_blank_lines()    # Remove blank lines
         # Attempt to determine the separator and delimter
         line1 = str(self[1].strip())
         # Determine the delimiter and separator
         # Determine if a header exists
         line0 = str(self[0]).strip()
         if line0.startswith("#"):
-            self.header = line0.
+            pass
 
         # Determine the internal separator and delimiter
 

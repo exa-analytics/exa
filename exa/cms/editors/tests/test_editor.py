@@ -13,7 +13,7 @@ from io import StringIO
 from uuid import uuid4
 from exa._config import config
 from exa.tester import UnitTester
-from exa.cms.editors.editor import Editor
+from exa.cms.editors.editor import Editor, concat
 
 
 editor_string = """This string is used as the test for the editor class.
@@ -37,16 +37,16 @@ class TestEditor(UnitTester):
         from a file, from a stream, and from a string.
         """
         self.path = os.path.join(config['paths']['tmp'], uuid4().hex)
-        with open(self.path, 'w', newline='') as f:
-            f.write(editor_string)
+        with open(self.path, 'wb') as f:
+            f.write(str.encode(editor_string))
         with open(self.path, "rb") as f_in:
             with gzip.open(self.path + ".gz", "wb") as f_out:
                 shutil.copyfileobj(f_in, f_out)
         with open(self.path, "rb") as f_in:
             with bz2.open(self.path + ".bz2", "wb") as f_out:
                 shutil.copyfileobj(f_in, f_out)
-        with open(self.path + '.iso-8859-1', 'w', newline='', encoding='iso-8859-1') as f:
-            f.write(editor_string)
+        with open(self.path + '.iso-8859-1', 'wb') as f:
+            f.write(str.encode(editor_string, encoding='iso-8859-1'))
         self.from_file = Editor(self.path)
         self.from_file_enc = Editor(self.path, encoding='iso-8859-1')
         self.from_gzip = Editor(self.path + ".gz")
@@ -123,9 +123,23 @@ class TestEditor(UnitTester):
 
     def test_find_next(self):
         """
-        Test :func:`~exa`
+        Test :func:`~exa.cms.editors.editor.Editor.find_next`.
         """
         rp = "That was a blank line"
         self.assertEqual(self.from_file.find_next(rp, "keys", True), 6)  # Cursor 0 -> 6
         self.assertEqual(self.from_file.find_next(rp, "keys"), 2)        # 6 -> 2
         self.assertEqual(self.from_file.find_next(rp, "keys"), 6)        # 2 -> 6
+
+    def test_concat(self):
+        """
+        Test :func:`~exa.cms.editors.editor.concat`.
+        """
+        ed = concat(self.from_file, self.from_file)
+        self.assertEqual(len(ed), 2*len(self.from_file))
+
+    def test_remove_blank_lines(self):
+        """
+        Test :func:`~exa.cms.editors.editor.Editor.remove_blank_lines`.
+        """
+        self.from_gzip.remove_blank_lines()
+        self.assertEqual(len(self.from_gzip), len(self.from_file) - 2)
