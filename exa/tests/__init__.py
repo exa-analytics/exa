@@ -3,5 +3,5 @@
 # Distributed under the terms of the Apache License 2.0
 from exa._config import config
 from exa.tests import test_tester, test_errors
-if int(config['logging']['level']) > 0:    # Only load if info/debug level
+if int(config['logging']['level']) > 1:    # Only load if info/debug level
     from exa.tests import test_config

@@ -21,7 +21,8 @@ of important framework concepts can also be found within this documentation.
     :maxdepth: 1
     :caption: Management
 
-    management/editor.rst
+    cms/main.rst
+    cms/editor.rst
 
 
 .. toctree::

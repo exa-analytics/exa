@@ -40,10 +40,16 @@ class TestConfig(UnitTester):
         """
         Reset to the default configuration.
         """
-        to_be_deleted = _config.config['dynamic']['root']
+        tbd = _config.config['dynamic']['root']
         _config.reconfigure()
         try:
-            shutil.rmtree(to_be_deleted)
+            os.unlink(os.path.join(tbd, "config"))
+            os.unlink(os.path.join(tbd, "config"))
+            os.unlink(os.path.join(tbd, "exa.sqlite"))
+            os.unlink(os.path.join(tbd, "db.log"))
+            os.unlink(os.path.join(tbd, "sys.log"))
+            os.unlink(os.path.join(tbd, "notebooks",  "tutorial.log"))
+            shutil.rmtree(tbd)
         except OSError:
             pass
 

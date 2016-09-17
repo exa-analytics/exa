@@ -13,12 +13,13 @@ from io import StringIO
 from uuid import uuid4
 from exa._config import config
 from exa.tester import UnitTester
-from exa.management.editor import Editor
+from exa.cms.editors.editor import Editor
 
 
 editor_string = """This string is used as the test for the editor class.
 
 It contains templates: {template}
+and constants: {{constant}}
 """
 
 
@@ -71,3 +72,49 @@ class TestEditor(UnitTester):
         self.assertEqual(self.from_file, self.from_bz2)
         self.assertEqual(self.from_file, self.from_stream)
         self.assertEqual(self.from_file, self.from_string)
+
+    def test_tmpl_cnst(self):
+        """
+        Test :func:`~exa.management.editor.Editor.templates` and
+        :func:`~exa.management.editor.Editor.constants`.
+        """
+        self.assertEqual(self.from_file.templates, ['template'])
+        self.assertEqual(self.from_file.constants, ['constant'])
+
+    def test_head_tail(self):
+        """
+        Test :func:`~exa.management.editor.Editor.head` and
+        :func:`~exa.management.editor.Editor.tail`.
+        """
+        self.assertEqual(self.from_file.head(1), self.from_file._lines[0])
+        self.assertEqual(self.from_file.tail(1), self.from_file._lines[-1])
+
+    def test_insert(self):
+        """
+        Test :func:`~exa.management.editor.Editor.append`,
+        Test :func:`~exa.management.editor.Editor.prepend`, and
+        :func:`~exa.management.editor.Editor.insert`.
+        """
+        test = "new\nlines"
+        self.from_file.append(test)
+        self.assertEqual(str(self.from_file[-1]), "lines")
+        self.from_file.prepend(test)
+        self.assertEqual(str(self.from_file[1]), "lines")
+        del self.from_file[0]
+        del self.from_file[0]
+        del self.from_file[-1]
+        del self.from_file[-1]
+        self.from_file.insert(-1, test)
+        self.assertEqual(str(self.from_file[-2]), "lines")
+        del self.from_file[-2]
+        del self.from_file[-2]
+
+    def test_replace(self):
+        """
+        Test :func:`~exa.management.editors.editor.Editor.replace`.
+        """
+        rp0 = "This string is used as the test for the editor class."
+        rp1 = "replacement"
+        self.from_file.replace(rp0, rp1)
+        self.assertEqual(str(self.from_file[0]), rp1)
+        self.from_file.replace(rp1, rp0)

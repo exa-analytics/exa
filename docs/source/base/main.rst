@@ -4,10 +4,7 @@
 #############################################
 Introduction
 #############################################
-This package creates a framework for data management, computation, and analytics
-and visualization. It is built atop the Python data stack (for more info see
-`PyData`_) utilizing the `Jupyter notebook`_ interface as a GUI. It is written
-with extensibility in mind.
+.. automodule:: exa.__init__
 
 
 .. automodule:: exa.__main__

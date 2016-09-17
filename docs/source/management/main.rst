@@ -2,9 +2,6 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ########################
-Editors
+Content Management
 ########################
-.. automodule:: exa.cms.editors.__init__
-
-.. automodule:: exa.cms.editors.editor
-    :members:
+.. automodule:: exa.cms.__init__
