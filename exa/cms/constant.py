@@ -7,7 +7,7 @@ Physical Constants
 Table of reference physical constants in SI units.
 """
 from sqlalchemy import String, Float, Column
-from exa.relational.base import Base, BaseMeta, scoped_session
+from exa.cms.base import Base, BaseMeta, scoped_session
 
 
 class Meta(BaseMeta):
@@ -29,21 +29,25 @@ class Constant(Base, metaclass=Meta):
     """
     Physical constants and their values in SI units.
 
-    >>> hartree = Constant['Eh']
-    >>> hartree
-    4.35974434e-18
+        >>> Constant['Eh']
+        4.35974434e-18
+        >>> Constant['NA']
+        6.022141290000001e+23
+        >>> Constant['G']
+        6.67384e-11
 
-    Note:
-        Available constants can be inspected by calling:
+    To see available values:
 
-        .. code-block:: Python
+    .. code-block:: Python
 
-            Constant.to_frame()
+        Constant.to_frame()
     """
     symbol = Column(String, nullable=False)
     value = Column(Float, nullable=False)
     aliases = {'hartree': 'Eh',    # Note that all aliases should be lowercase (see above)
-               'faraday': 'F'}
+               'faraday': 'F',
+               "avogadro's number": 'NA',
+               "avogadro number": 'NA'}
 
     def __repr__(self):
         return 'Constant({0}: {1})'.format(self.symbol, self.value)

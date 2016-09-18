@@ -2,11 +2,9 @@
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Database Engine Configuration
+Base Table Model
 ##################################################
-This module provides the base classes and metaclasses for relational tables
-created by exa. It also provides the database engine configuration and session
-class factory.
+This module provides the base classes and metaclasses for database tables.
 """
 import pandas as pd
 from sys import getsizeof
@@ -17,17 +15,12 @@ from contextlib import contextmanager
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
-from exa._config import config, engine
+from exa._config import engine
 
 
 def generate_hexuid():
     """Create a unique, random, hex string id."""
     return uuid4().hex
-
-
-def cleanup_engine():
-    """At exit, cleanup connection pool."""
-    engine.dispose()
 
 
 @contextmanager
@@ -44,7 +37,7 @@ def scoped_session(*args, **kwargs):
         session.close()
 
 
-def _bind_session_factory():
+def reconfigure_session_factory():
     """Internal function for binding the session_factory attribute to the engine."""
     global session_factory
     session_factory = sessionmaker(bind=engine)
@@ -160,7 +153,6 @@ class Base:
         return '{0}(pkid: {1})'.format(self.__class__.__name__, self.pkid)
 
 
-# These are so-called "mix-in" classes that add specific fields to a table
 class Name:
     """Name and description fields."""
     name = Column(String)
@@ -199,4 +191,4 @@ class Size:
 
 
 session_factory = None
-_bind_session_factory()
+reconfigure_session_factory()

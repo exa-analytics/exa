@@ -5,15 +5,10 @@
 Dispatched Functions
 ########################
 This module provides the :class:`~exa.workflow.dispatcher.Dispatcher` object
-and the :func:`~exa.workflow.dispatcher.dispatch` decorator. The class provides
-an interface for creating `multiply dispatched`_ functions. In addition to this
-programming paradigm, the :class:`~exa.workflow.dispatcher.Dispatcher` will
-attempt to compile the dispatched, typed functions down to byte code using
-`numba`_.
-
-Compilation allows for high performance processing within the workflow scheme
-(see :mod:`~exa.workflow.workflow`), including multithreaded/multiprocess code,
-GPU code, and distributed parallelism.
+and the :func:`~exa.workflow.dispatcher.dispatch` decorator. The purpose of the
+dispatcher is not only to enable a `multiply dispatched`_ paradigm but also to
+compile functions compatible with :class:`~exa.prc.workflow.Workflow` class.
+Compilation is performed by `numba`_ if available.
 
 .. _numba: http://numba.pydata.org/
 .. _multiply dispatched: https://en.wikipedia.org/wiki/Multiple_dispatch
@@ -41,12 +36,9 @@ class Dispatcher:
     Class that wraps functions with specific argument types into a single,
     multiply dispatched interface.
     """
-    def to_frame(self):
-        """
-        Check dispatch and execution support (i.e. what types are supported and
-        whether gpus, out of core, and parallel/distributed architectures are
-        supported).
-        """
+    @property
+    def avail(self):
+        """Check avaiable function signatures."""
         proc = []
         mem = []
         parallel = []
@@ -71,6 +63,12 @@ class Dispatcher:
                  nopython=False, nogil=False, cache=False, rtype=None,
                  target='cpu', outcore=False, distrib=False):
         """
+        Register a new function signature.
+
+        In addition to accepting the required types (function signature), this
+        method can request the function be compiled according to option arguments
+        specified.
+
         Args:
             types (tuple): Type(s) for each argument
             func (function): Function to be registered

@@ -15,13 +15,13 @@ from itertools import product
 from sqlalchemy import String, Float
 from sqlalchemy import Column, Integer, String
 from exa._config import config
-from exa.relational.base import BaseMeta, Base, session_factory
-from exa.math.misc.summation import sum_product_pair_f8, sum_product_pair
+from exa.cms.base import BaseMeta, Base, session_factory
+#from exa.math.misc.summation import sum_product_pair_f8, sum_product_pair
 
 
 class Meta(BaseMeta):
     """
-    Provides lookup methods for :class:`~exa.relational.isotope.Isotope`.
+    Provides lookup methods for :class:`~exa.cms.isotope.Isotope`.
 
     .. code-block:: Python
 
@@ -59,24 +59,24 @@ class Isotope(Base, metaclass=Meta):
     """
     A variant of a chemical element with a specific proton and neutron count.
 
-    >>> h = Isotope['1H']
-    >>> h.A
-    1
-    >>> h.Z
-    1
-    >>> h.mass
-    1.0078250321
-    >>> Isotope['C']
-    [8C, 9C, 10C, 11C, 12C, 13C, 14C, 15C, 16C, 17C, 18C, 19C, 20C, 21C, 22C]
-    >>> Isotope['13C'].szuid
-    175
-    >>> c = Isotope[57]
-    >>> c.A
-    13
-    >>> c.Z
-    6
-    >>> c.strid
-    '13C'
+        >>> h = Isotope['1H']
+        >>> h.A
+        1
+        >>> h.Z
+        1
+        >>> h.mass
+        1.0078250321
+        >>> Isotope['C']
+        [8C, 9C, 10C, 11C, 12C, 13C, 14C, 15C, 16C, 17C, 18C, 19C, 20C, 21C, 22C]
+        >>> Isotope['13C'].szuid
+        175
+        >>> c = Isotope[57]
+        >>> c.A
+        13
+        >>> c.Z
+        6
+        >>> c.strid
+        '13C'
     """
     A = Column(Integer, nullable=False)
     Z = Column(Integer, nullable=False)
@@ -119,7 +119,7 @@ def z_to_symbol():
     Create a mapper from proton number to element symbol.
 
     See Also:
-        Opposite mapper of :func:`~exa.relational.isotope.symbol_to_z`.
+        Opposite mapper of :func:`~exa.cms.isotope.symbol_to_z`.
     """
     df = Isotope.to_frame().drop_duplicates('Z').sort_values('Z')
     return df.set_index('Z')['symbol']

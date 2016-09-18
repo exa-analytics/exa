@@ -298,3 +298,4 @@ config = configparser.ConfigParser()
 engine = None
 loggers = {}
 reconfigure()
+atexit.register(engine.dispose)
