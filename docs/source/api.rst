@@ -16,22 +16,23 @@ of important framework concepts can also be found within this documentation.
     base/testing.rst
     base/utilities.rst
 
-
 .. toctree::
     :maxdepth: 1
     :caption: Management
 
     cms/main.rst
-    cms/editor.rst
-    cms/base.rst
     cms/static.rst
-
+    cms/org.rst
+    cms/editor.rst
 
 .. toctree::
     :maxdepth: 1
     :caption: Analytics
 
+    dtr/main.rst
 
 .. toctree::
     :maxdepth: 1
     :caption: Computation
+
+    prc/main.rst

@@ -2,10 +2,6 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ########################
-Content Management
+Computation
 ########################
-.. automodule:: exa.cms.__init__
-
-.. automodule:: exa.cms.base
-    :members:
-    
+.. automodule:: exa.prc.__init__

@@ -2,10 +2,5 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ########################
-Content Management
+Data Organization
 ########################
-.. automodule:: exa.cms.__init__
-
-.. automodule:: exa.cms.base
-    :members:
-    

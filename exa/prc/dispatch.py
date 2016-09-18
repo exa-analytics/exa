@@ -17,11 +17,12 @@ import numpy as np
 import pandas as pd
 from sys import getsizeof
 from itertools import product
-from exa._config import config
 try:
     from inspect import signature
 except ImportError:
     from inspect import getargspec as signature
+from exa._config import config
+from exa.prc.compilation import compile_func
 
 
 _dispatched = dict()    # Global to keep track of all dispatched functions
@@ -33,7 +34,7 @@ class Dispatcher(object):
     multiply dispatched interface.
     """
     @property
-    def avail(self):
+    def dispatched(self):
         """Check avaiable function signatures."""
         proc = []
         mem = []
@@ -56,8 +57,8 @@ class Dispatcher(object):
         return df
 
     def register(self, types, func, layout=None, jit=False, vectorize=False,
-                 nopython=False, nogil=False, cache=False, rtype=None,
-                 target='cpu', outcore=False, distrib=False):
+                 guvectorize=False, nopython=False, nogil=False, cache=False,
+                 rtype=None, target='cpu', outcore=False, distrib=False):
         """
         Register a new function signature.
 
@@ -97,23 +98,11 @@ class Dispatcher(object):
         for typ in types:
             if not isinstance(typ, type):
                 raise TypeError("Not a type: {}".format(typ))
-        sig = [0, 0, 0]
-        if outcore:
-            sig[1] = 1
-        if nogil or vectorize:
-            sig[2] = 1
-        if distrib:
-            sig[2] = 2
-        if target == 'cuda':
-            sig[0] = 1
-        sig = tuple(sig)
-        sig += types
-        if jit and nb is not None:
-            self.functions[sig] = func
-        elif vectorize and nb is not None:
-            self.functions[sig] = func
-        else:
-            self.functions[sig] = func
+        cmp = False
+        reg = (0, 0, 0, ) + tuple(types)
+        if jit or vectorize or guvectorize:
+            reg, func = compile_func(func)
+        self.functions[reg] = func
 
     @property
     def __doc__(self):

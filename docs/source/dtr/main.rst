@@ -2,7 +2,6 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ########################
-Base Table Model
+Analytics
 ########################
-.. automodule:: exa.cms.base
-    :members:
+.. automodule:: exa.dtr.__init__
