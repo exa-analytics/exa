@@ -6,6 +6,7 @@ Unit Conversions
 #########################
 This module provides relational classes for unit conversion tables.
 """
+import six
 from sqlalchemy import and_, String, Float, Column
 from exa.relational.base import BaseMeta, Base, scoped_session
 
@@ -26,7 +27,7 @@ class Meta(BaseMeta):
             raise TypeError('Usage requires syntax Dimension["from_unit", "to_unit"]')
 
 
-class Dimension:
+class Dimension(object):
     """
     Descriptive class for units.
 
@@ -40,7 +41,7 @@ class Dimension:
     factor = Column(Float, nullable=False)
 
 
-class Length(Base, Dimension, metaclass=Meta):
+class Length(six.with_metaclass(Meta, Base, Dimension)):
     """
     >>> Length['angstrom', 'au']
     1.88971616463
@@ -60,7 +61,7 @@ class Length(Base, Dimension, metaclass=Meta):
     }
 
 
-class Mass(Base, Dimension, metaclass=Meta):
+class Mass(six.with_metaclass(Meta, Base, Dimension)):
     """
     >>> Mass['kg', 'lb']
     2.2046226218
@@ -74,7 +75,7 @@ class Mass(Base, Dimension, metaclass=Meta):
     }
 
 
-class Time(Base, Dimension, metaclass=Meta):
+class Time(six.with_metaclass(Meta, Base, Dimension)):
     """
     >>> Time['min', 's']
     60.0000000000024
@@ -86,7 +87,7 @@ class Time(Base, Dimension, metaclass=Meta):
     pass
 
 
-class Current(Base, Dimension, metaclass=Meta):
+class Current(six.with_metaclass(Meta, Base, Dimension)):
     """
     >>> Current['A', 'C_s']
     1.0
@@ -96,7 +97,7 @@ class Current(Base, Dimension, metaclass=Meta):
     pass
 
 
-class Amount(Base, Dimension, metaclass=Meta):
+class Amount(six.with_metaclass(Meta, Base, Dimension)):
     """
     >>> Amount['gmol', 'mol']
     1.0
@@ -106,7 +107,7 @@ class Amount(Base, Dimension, metaclass=Meta):
     pass
 
 
-class Luminosity(Base, Dimension, metaclass=Meta):
+class Luminosity(six.with_metaclass(Meta, Base, Dimension)):
     """
     >>> Luminosity['cp', 'cd']
     0.9810000000433602
@@ -114,7 +115,7 @@ class Luminosity(Base, Dimension, metaclass=Meta):
     pass
 
 
-class Dose(Base, Dimension, metaclass=Meta):
+class Dose(six.with_metaclass(Meta, Base, Dimension)):
     """
     >>> Dose['Gy', 'rd']
     100.0
@@ -124,7 +125,7 @@ class Dose(Base, Dimension, metaclass=Meta):
     pass
 
 
-class Acceleration(Base, Dimension, metaclass=Meta):
+class Acceleration(six.with_metaclass(Meta, Base, Dimension)):
     """
     >>> Acceleration['m_s2', 'cm_s2']
     100.0
@@ -134,7 +135,7 @@ class Acceleration(Base, Dimension, metaclass=Meta):
     pass
 
 
-class Charge(Base, Dimension, metaclass=Meta):
+class Charge(six.with_metaclass(Meta, Base, Dimension)):
     """
     >>> Charge['e', 'C']
     1.6021765649999947e-19
@@ -142,7 +143,7 @@ class Charge(Base, Dimension, metaclass=Meta):
     pass
 
 
-class Dipole(Base, Dimension, metaclass=Meta):
+class Dipole(six.with_metaclass(Meta, Base, Dimension)):
     """
     >>> Dipole['yCm', 'D']
     299792.45817809016
@@ -150,7 +151,7 @@ class Dipole(Base, Dimension, metaclass=Meta):
     pass
 
 
-class Energy(Base, Dimension, metaclass=Meta):
+class Energy(six.with_metaclass(Meta, Base, Dimension)):
     """
     >>> Energy['J', 'cal']
     0.2388458966
@@ -162,7 +163,7 @@ class Energy(Base, Dimension, metaclass=Meta):
     }
 
 
-class Force(Base, Dimension, metaclass=Meta):
+class Force(six.with_metaclass(Meta, Base, Dimension)):
     """
     >>> Force['N', 'lbf']
     0.22480894310000002
@@ -170,7 +171,7 @@ class Force(Base, Dimension, metaclass=Meta):
     pass
 
 
-class Frequency(Base, Dimension, metaclass=Meta):
+class Frequency(six.with_metaclass(Meta, Base, Dimension)):
     """
     >>> Frequency['1_s', 'Hz']
     1.0
@@ -178,7 +179,7 @@ class Frequency(Base, Dimension, metaclass=Meta):
     pass
 
 
-class MolarMass(Base, Dimension, metaclass=Meta):
+class MolarMass(six.with_metaclass(Meta, Base, Dimension)):
     """
     >>> MolarMass['g_mol', 'kg_mol']
     0.001
