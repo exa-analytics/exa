@@ -9,6 +9,7 @@ extended periodic table. For convenience, functions are provided for obtaining
 traditionally used elements. This module also provides mappers for commonly
 used dataframe manipulations.
 """
+import six
 import numpy as np
 import pandas as pd
 from itertools import product
@@ -55,7 +56,7 @@ class Meta(BaseMeta):
             return cls.get_by_name(key)
 
 
-class Isotope(Base, metaclass=Meta):
+class Isotope(six.with_metaclass(Meta, Base)):
     """
     A variant of a chemical element with a specific proton and neutron count.
 

@@ -6,6 +6,7 @@ Physical Constants
 #######################
 Table of reference physical constants in SI units.
 """
+import six
 from sqlalchemy import String, Float, Column
 from exa.cms.base import Base, BaseMeta, scoped_session
 
@@ -25,7 +26,7 @@ class Meta(BaseMeta):
         return cls.get_by_symbol(symbol)
 
 
-class Constant(Base, metaclass=Meta):
+class Constant(six.with_metaclass(Meta, Base)):
     """
     Physical constants and their values in SI units.
 

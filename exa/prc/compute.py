@@ -17,7 +17,7 @@ class MIC(object):
     pass
 
 
-class Resource:
+class Resource(object):
     """A computing resource ("node")."""
     def __init__(self, id, tasks, gpus, mics, mem):
         self.id = id
@@ -27,5 +27,5 @@ class Resource:
         self.mem = mem
 
 
-class ComputeResources:
+class ComputeResources(object):
     pass

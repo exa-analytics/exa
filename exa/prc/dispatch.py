@@ -8,7 +8,7 @@ This module provides the :class:`~exa.workflow.dispatcher.Dispatcher` object
 and the :func:`~exa.workflow.dispatcher.dispatch` decorator. The purpose of the
 dispatcher is not only to enable a `multiply dispatched`_ paradigm but also to
 compile functions compatible with :class:`~exa.prc.workflow.Workflow` class.
-Compilation is performed by `numba`_ if available.
+Compilation is performed by `numba`_ if available (see :mod:`~exa.prc.compile`).
 
 .. _numba: http://numba.pydata.org/
 .. _multiply dispatched: https://en.wikipedia.org/wiki/Multiple_dispatch
@@ -19,10 +19,6 @@ from sys import getsizeof
 from itertools import product
 from exa._config import config
 try:
-    import numba as nb    # Don't make numba a hard dependency
-except ImportError:
-    nb = None
-try:
     from inspect import signature
 except ImportError:
     from inspect import getargspec as signature
@@ -31,7 +27,7 @@ except ImportError:
 _dispatched = dict()    # Global to keep track of all dispatched functions
 
 
-class Dispatcher:
+class Dispatcher(object):
     """
     Class that wraps functions with specific argument types into a single,
     multiply dispatched interface.
