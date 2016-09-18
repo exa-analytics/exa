@@ -10,7 +10,6 @@ useful where the analytical form of a :class:`~exa.numerical.Field` is known,
 but visualization requires evaluation of the field on a discrete grid. This
 module provides functionality to support such situations.
 """
-import numpy as np
 import sympy as sy
 from numba import vectorize, jit
 

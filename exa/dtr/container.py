@@ -349,6 +349,7 @@ class Container:
             f1 = nx.draw_networkx_labels(g, pos=pos, labels=node_labels, font_size=16,
                                          font_weight='bold', ax=ax)
             f2 = nx.draw_networkx_edges(g, pos=pos, edge_color=edge_colors, width=2, ax=ax)
+            del f1, f2
             l1, ax = legend(set(node_conn_dict.values()), 'Connection', (1, 0), ax)
             l2, ax = legend(set(node_type_dict.values()), 'Data Type', (1, 0.3), ax)
             fig.gca().add_artist(l1)

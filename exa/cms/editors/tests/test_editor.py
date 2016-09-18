@@ -182,9 +182,6 @@ class TestEditor(UnitTester):
         self.from_gzip.format(template='formatted', inplace=True)
         self.assertTrue("formatted" in fmt)
         self.assertFalse(self.from_file == self.from_gzip)
-
-    def test_format(self):
-        """Test :func:`~exa.cms.editors.editor.Editor.write`."""
         path = self.path + ".tmp"
         self.from_bz2.write(path)
         self.assertTrue(os.path.exists(path))

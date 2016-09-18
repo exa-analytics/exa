@@ -10,12 +10,9 @@ traditionally used elements. This module also provides mappers for commonly
 used dataframe manipulations.
 """
 import six
-import numpy as np
 import pandas as pd
 from itertools import product
-from sqlalchemy import String, Float
-from sqlalchemy import Column, Integer, String
-from exa._config import config
+from sqlalchemy import String, Float, Integer, Column
 from exa.cms.base import BaseMeta, Base, session_factory
 #from exa.math.misc.summation import sum_product_pair_f8, sum_product_pair
 

@@ -7,7 +7,6 @@ Generic CSV Support
 Provides an editor with convenience methods tailored specifically for comma
 separated value (CSV) files.
 """
-import re
 import csv
 import pandas as pd
 from io import StringIO

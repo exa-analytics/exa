@@ -5,4 +5,3 @@
 Tests for :mod:`~exa.workflow.dispatch`
 ##########################################
 """
-import numpy as np

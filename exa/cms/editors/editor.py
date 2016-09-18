@@ -31,7 +31,6 @@ import six
 import gzip
 import pandas as pd
 from copy import copy, deepcopy
-from operator import add
 from collections import Counter
 from io import StringIO, TextIOWrapper
 

@@ -16,7 +16,7 @@ except ImportError:
     nb = None
 
 
-def compile():
+def compile_func():
     """
     """
     pass
@@ -26,9 +26,10 @@ def compile_jit(func, sig=None, nopython=False, nogil=False, cache=False):
     """
     """
     raise NotImplementedError()
+    return nb.jit(func)
 
 
-def compile_vectorize(func, signatures=[], identity=None, nopython=True, target='cpu'):
+def compile_vectorize(func, signatures=list(), identity=None, nopython=True, target='cpu'):
     """
     """
     raise NotImplementedError()

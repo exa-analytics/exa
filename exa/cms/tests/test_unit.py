@@ -6,7 +6,6 @@ Tests for :mod:`~exa.relational.unit`
 ========================================
 Test availablility of unit conversions.
 """
-import numpy as np
 #import pandas as pd
 #from exa.test import UnitTester
 #from exa.relational import Acceleration, Length
