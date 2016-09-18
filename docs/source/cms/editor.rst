@@ -7,5 +7,5 @@ Editors
 .. automodule:: exa.cms.editors.editor
     :members:
 
-.. automodule:: exa.cms.editors.csv
+.. automodule:: exa.cms.editors.ssv
     :members:
