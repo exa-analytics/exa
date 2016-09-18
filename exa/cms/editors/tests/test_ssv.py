@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from exa._config import config
 from exa.tester import UnitTester
-from exa.cms.editors.csv import CSV
+from exa.cms.editors.ssv import CSV
 
 
 class TestCSV(UnitTester):

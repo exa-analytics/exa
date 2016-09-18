@@ -18,4 +18,4 @@ from exa._version import __version__
 from exa._config import print_config
 from exa.mpl import color_palette
 from exa.cms.editors.editor import Editor
-from exa.cms.editors.csv import CSV
+from exa.cms.editors.ssv import CSV

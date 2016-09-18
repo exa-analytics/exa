@@ -6,7 +6,7 @@ This sub-package provides the main :class:`~exa.cms.editors.editor.Editor` class
 which is used to programmatically manipulate files on persistent storage.
 """
 # Import modules
-from exa.cms.editors import editor, csv
+from exa.cms.editors import editor, ssv
 
 # Import sub-packages
 from exa.cms.editors import tests
