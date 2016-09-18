@@ -32,7 +32,7 @@ class CSV(Editor):
         return pd.read_csv(StringIO(str(self)))
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(CSV, self).__init__(*args, **kwargs)
         self.remove_blank_lines()
         dialect = csv.Sniffer().sniff(self._lines[1])
         self.delimiter = dialect.delimiter

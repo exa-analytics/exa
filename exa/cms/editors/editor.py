@@ -36,7 +36,7 @@ from collections import Counter
 from io import StringIO, TextIOWrapper
 
 
-class Editor:
+class Editor(object):
     """
     An in memory copy of a file on disk that can be programmatically manipulated.
 
