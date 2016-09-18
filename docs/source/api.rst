@@ -23,6 +23,8 @@ of important framework concepts can also be found within this documentation.
 
     cms/main.rst
     cms/editor.rst
+    cms/base.rst
+    cms/static.rst
 
 
 .. toctree::
