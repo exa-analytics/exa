@@ -181,6 +181,7 @@ def dispatch(*types, **flags):
         return dispatcher
     return dispatched_func
 
+
 def get_nargs(func):
     """
     Get the count of function args.

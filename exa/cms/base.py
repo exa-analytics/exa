@@ -121,7 +121,7 @@ class BaseMeta(DeclarativeMeta):
 
 
 @as_declarative(metaclass=BaseMeta)
-class Base:
+class Base(object):
     """
     Base class for all relational tables. These classes behave as both the
     definition of the table (the schema) as well as an object instance (in a
@@ -153,13 +153,13 @@ class Base:
         return '{0}(pkid: {1})'.format(self.__class__.__name__, self.pkid)
 
 
-class Name:
+class Name(object):
     """Name and description fields."""
     name = Column(String)
     description = Column(String)
 
 
-class HexUID:
+class HexUID(object):
     """Hex-based unique id (uid) field."""
     hexuid = Column(String(32), default=generate_hexuid)
 
@@ -168,7 +168,7 @@ class HexUID:
         return UUID(self.hexuid)
 
 
-class Time:
+class Time(object):
     """Timestamp fields."""
     created = Column(DateTime, default=datetime.now)
     modified = Column(DateTime, default=datetime.now)
@@ -181,7 +181,7 @@ class Time:
         self.modified = datetime.now()
 
 
-class Size:
+class Size(object):
     """Approximate size (on disk) and file count fields."""
     size = Column(Integer)
     nfiles = Column(Integer)
