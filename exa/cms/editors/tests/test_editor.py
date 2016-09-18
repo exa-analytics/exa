@@ -7,6 +7,7 @@ Tests for :mod:`~exa.cms.editor`
 Test the functionality of the :class:`~exa.cms.editor.Editor` class and
 related functions.
 """
+import six
 import shutil
 import os, gzip, bz2
 from io import StringIO, open
@@ -40,7 +41,7 @@ class TestEditor(UnitTester):
         """
         self.path = os.path.join(config['paths']['tmp'], uuid4().hex)
         with open(self.path, 'wb') as f:
-            f.write(str.encode(editor_string))
+            f.write(editor_string.encode())
         with open(self.path, "rb") as f_in:
             with gzip.open(self.path + ".gz", "wb") as f_out:
                 shutil.copyfileobj(f_in, f_out)
@@ -48,7 +49,7 @@ class TestEditor(UnitTester):
             with bz2.open(self.path + ".bz2", "wb") as f_out:
                 shutil.copyfileobj(f_in, f_out)
         with open(self.path + '.iso-8859-1', 'wb') as f:
-            f.write(str.encode(editor_string, encoding='iso-8859-1'))
+            f.write(editor_string.encode('iso-8859-1'))
         self.from_file = Editor(self.path)
         self.from_file_enc = Editor(self.path, encoding='iso-8859-1')
         self.from_gzip = Editor(self.path + ".gz")

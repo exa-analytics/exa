@@ -235,9 +235,9 @@ class Editor:
         """
         with open(path, "wb") as f:
             if len(args) > 0 or len(kwargs) > 0:
-                f.write(str.encode(str(self.format(*args, **kwargs))))
+                f.write(six.b(str(self.format(*args, **kwargs))))
             else:
-                f.write(str.encode(str(self)))
+                f.write(six.b(str(self)))
 
     def head(self, n=10):
         """
