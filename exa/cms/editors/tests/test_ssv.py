@@ -22,10 +22,25 @@ class TestCSV(UnitTester):
         """
         Generate csv data to test.
         """
-        self.csv = CSV(pd.DataFrame(np.random.rand(10, 3)).to_csv(index=None))
+        self.csv = CSV(pd.DataFrame(np.random.rand(10, 3),
+                                    columns=['c1', 'c2', 'c3']).to_csv(index=None))
+        self.tsv = CSV(pd.DataFrame(np.random.rand(10, 3),
+                                    columns=['c1', 'c2', 'c3']).to_csv(index=None,
+                                                                       sep=" ",
+                                                                       quotechar=" ",
+                                                                       quoting=0,
+                                                                       escapechar=" "))
 
     def test_base(self):
         """
         Test that the editor was created (read in) correctly.
         """
         self.assertEqual(len(self.csv), 11)
+        self.assertEqual(len(self.tsv), 11)
+
+    def test_sniffer(self):
+        """
+        Test the known sniffers
+        """
+        self.assertEqual(self.csv.delimiter, ",")
+        self.assertEqual(self.tsv.delimiter, " ")

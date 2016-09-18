@@ -16,25 +16,23 @@ from exa.cms.editors.editor import Editor
 
 class CSV(Editor):
     """
-    A convenience class for manipulating CSV (or CSV like) files on disk.
+    A convenience class for manipulating CSV (or CSV like, including tab, space,
+    etc. separated) files on disk.
     """
-    def clean(self):
-        """
-        Remove extra whitespace, and replace commonly used null characters with
-        nothing.
-        """
-        self.replace('*', ' ')
-
     def to_frame(self):
         """
         Create a :class:`~exa.numerical.DataFrame` from this file.
         """
-        return pd.read_csv(StringIO(str(self)))
+        if self.header:
+            return pd.read_csv(StringIO(str(self)), sep=self.delimiter, names=self[0])
+        return pd.read_csv(StringIO(str(self)), sep=self.delimiter)
 
     def __init__(self, *args, **kwargs):
         super(CSV, self).__init__(*args, **kwargs)
         self.remove_blank_lines()
-        dialect = csv.Sniffer().sniff(self._lines[1])
+        sniffer = csv.Sniffer()
+        dialect = sniffer.sniff(self._lines[1])
+        self.header = sniffer.has_header(str(self))
         self.delimiter = dialect.delimiter
         self.quoting = dialect.quoting
         self.escapechar = dialect.escapechar
