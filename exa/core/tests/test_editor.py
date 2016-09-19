@@ -2,9 +2,9 @@
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Tests for :mod:`~exa.cms.editors.editor`
+Tests for :mod:`~exa.core.editor`
 #############################################
-Test the functionality of the :class:`~exa.cms.editors.editor.Editor` class and
+Test the functionality of the :class:`~exa.core.editor.Editor` class and
 related functions.
 """
 import six
@@ -32,11 +32,11 @@ class TestEditor(UnitTester):
     """
     The tester reads in a contrived example in the root "tests" directory and
     proceeds to test the various functions provided by
-    :class:`~exa.cms.editor.Editor`.
+    :class:`~exa.core.editor.Editor`.
     """
     def setUp(self):
         """
-        A :class:`~exa.cms.editor.Editor` can be create in three ways,
+        A :class:`~exa.core.editor.Editor` can be create in three ways,
         from a file, from a stream, and from a string.
         """
         self.path = os.path.join(config['paths']['tmp'], uuid4().hex)
@@ -68,7 +68,7 @@ class TestEditor(UnitTester):
         """
         Test to make sure all the support input (**read_\***) were read in
         correctly. This function actually tests
-        :func:`~exa.cms.editor.Editor.__eq__`.
+        :func:`~exa.core.editor.Editor.__eq__`.
         """
         self.assertEqual(self.from_file, self.from_file_enc)
         self.assertEqual(self.from_file, self.from_gzip)
@@ -78,9 +78,9 @@ class TestEditor(UnitTester):
 
     def test_tmpl_cnst(self):
         """
-        Test :func:`~exa.cms.editors.editor.Editor.templates`,
-        :func:`~exa.cms.editors.editor.Editor.constants`,
-        and, by proxy, :func:`~exa.cms.editors.editor.Editor.regex`.
+        Test :func:`~exa.core.editor.Editor.templates`,
+        :func:`~exa.core.editor.Editor.constants`,
+        and, by proxy, :func:`~exa.core.editor.Editor.regex`.
         """
         self.assertEqual(self.from_file.templates, ['template'])
         self.assertEqual(self.from_file.constants, ['constant'])
@@ -93,17 +93,17 @@ class TestEditor(UnitTester):
 
     def test_head_tail(self):
         """
-        Test :func:`~exa.cms.editors.editor.Editor.head` and
-        :func:`~exa.cms.editor.Editor.tail`.
+        Test :func:`~exa.core.editor.Editor.head` and
+        :func:`~exa.core.editor.Editor.tail`.
         """
         self.assertEqual(self.from_file.head(1), self.from_file._lines[0])
         self.assertEqual(self.from_file.tail(1), self.from_file._lines[-1])
 
     def test_insert(self):
         """
-        Test :func:`~exa.cms.editors.editor.Editor.append`,
-        Test :func:`~exa.cms.editors.editor.Editor.prepend`, and
-        :func:`~exa.cms.editors.editor.Editor.insert`.
+        Test :func:`~exa.core.editor.Editor.append`,
+        Test :func:`~exa.core.editor.Editor.prepend`, and
+        :func:`~exa.core.editor.Editor.insert`.
         """
         test = "new\nlines"
         self.from_file.append(test)
@@ -139,7 +139,7 @@ class TestEditor(UnitTester):
             self.from_file.prepend(10)
 
     def test_replace(self):
-        """Test :func:`~exa.cms.editors.editor.Editor.replace`."""
+        """Test :func:`~exa.core.editor.Editor.replace`."""
         rp0 = "This string is used as the test for the editor class."
         rp1 = "replacement"
         self.from_file.replace(rp0, rp1)
@@ -147,14 +147,14 @@ class TestEditor(UnitTester):
         self.from_file.replace(rp1, rp0)
 
     def test_find(self):
-        """Test :func:`~exa.cms.editors.editor.Editor.find`."""
+        """Test :func:`~exa.core.editor.Editor.find`."""
         rp = "That was a blank line"
         self.assertEqual(len(self.from_file.find(rp)[rp]), 2)
         self.assertEqual(len(self.from_file.find(rp, which="keys")[rp]), 2)
         self.assertEqual(len(self.from_file.find(rp, which="values")[rp]), 2)
 
     def test_find_next(self):
-        """Test :func:`~exa.cms.editors.editor.Editor.find_next`."""
+        """Test :func:`~exa.core.editor.Editor.find_next`."""
         rp = "That was a blank line"
         self.assertEqual(self.from_file.find_next(rp, "keys", True), 6)  # Cursor 0 -> 6
         self.assertEqual(self.from_file.find_next(rp, "keys"), 2)        # 6 -> 2
@@ -163,26 +163,26 @@ class TestEditor(UnitTester):
         self.assertEqual(self.from_file.find_next(rp), (6, rp))
 
     def test_concat(self):
-        """Test :func:`~exa.cms.editors.editor.concat`."""
+        """Test :func:`~exa.core.editor.concat`."""
         ed = concat(self.from_file, self.from_file)
         self.assertEqual(len(ed), 2*len(self.from_file))
 
     def test_remove_blank_lines(self):
-        """Test :func:`~exa.cms.editors.editor.Editor.remove_blank_lines`."""
+        """Test :func:`~exa.core.editor.Editor.remove_blank_lines`."""
         self.from_gzip.remove_blank_lines()
         self.assertEqual(len(self.from_gzip), len(self.from_file) - 2)
 
     def test_copy(self):
-        """Test :func:`~exa.cms.editors.editor.Editor.copy`."""
+        """Test :func:`~exa.core.editor.Editor.copy`."""
         cp = self.from_file.copy()
         self.assertEqual(self.from_file, cp)
         self.assertFalse(cp is self.from_file)
 
     def test_format(self):
         """
-        Test :func:`~exa.cms.editors.editor.Editor.format` and by proxy test,
-        :func:`~exa.cms.editors.editor.Editor.__contains__` and
-        :func:`~exa.cms.editors.editor.Editor.__eq__` (false).
+        Test :func:`~exa.core.editor.Editor.format` and by proxy test,
+        :func:`~exa.core.editor.Editor.__contains__` and
+        :func:`~exa.core.editor.Editor.__eq__` (false).
         """
         fmt = self.from_file.format(template="formatted")
         self.assertTrue("formatted" in fmt)
@@ -198,7 +198,7 @@ class TestEditor(UnitTester):
         os.remove(path)
 
     def test_repr(self):
-        """Test :func:`~exa.cms.editors.editor.Editor.__repr__`."""
+        """Test :func:`~exa.core.editor.Editor.__repr__`."""
         self.assertIsInstance(self.from_file.__repr__(), six.string_types)
         self.from_gzip.nprint = 2
         self.assertIsInstance(self.from_gzip.__repr__(), six.string_types)

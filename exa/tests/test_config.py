@@ -43,12 +43,11 @@ class TestConfig(UnitTester):
         tbd = _config.config['dynamic']['root']
         _config.reconfigure()
         try:
-            os.unlink(os.path.join(tbd, "config"))
-            os.unlink(os.path.join(tbd, "config"))
-            os.unlink(os.path.join(tbd, "exa.sqlite"))
-            os.unlink(os.path.join(tbd, "db.log"))
-            os.unlink(os.path.join(tbd, "sys.log"))
-            os.unlink(os.path.join(tbd, "notebooks",  "tutorial.log"))
+            os.remove(os.path.join(tbd, "config"))
+            os.remove(os.path.join(tbd, "exa.sqlite"))
+            os.remove(os.path.join(tbd, "db.log"))
+            os.remove(os.path.join(tbd, "sys.log"))
+            os.remove(os.path.join(tbd, "notebooks",  "tutorial.log"))
             shutil.rmtree(tbd)
         except OSError:
             pass
@@ -102,4 +101,4 @@ class TestConfig(UnitTester):
         try:
             _config.save(True)
         except Exception as e:
-            self.fail(e.msg)
+            self.fail(str(e))
