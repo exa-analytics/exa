@@ -22,7 +22,6 @@ try:
 except ImportError:
     from inspect import getargspec as signature
 from exa._config import config
-from exa.prc.compilation import compile_func
 
 
 _dispatched = dict()    # Global to keep track of all dispatched functions

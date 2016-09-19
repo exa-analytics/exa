@@ -100,6 +100,6 @@ class TestConfig(UnitTester):
     def test_save(self):
         """Test :func:`~exa._config.save`."""
         try:
-            _config.save()
+            _config.save(True)
         except Exception as e:
             self.fail(e.msg)

@@ -32,8 +32,6 @@ class Constant(six.with_metaclass(Meta, Base)):
 
         >>> Constant['Eh']
         4.35974434e-18
-        >>> Constant['NA']
-        6.022141290000001e+23
         >>> Constant['G']
         6.67384e-11
 

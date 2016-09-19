@@ -10,7 +10,7 @@ This sub-package contains the core functionality of exa:
 # Import base modules
 from exa.core import typed, editor, ssv
 
-from exa.core import tests
 # Import sub-packages
+from exa.core import tests
 
 # Import user/dev API

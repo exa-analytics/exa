@@ -154,17 +154,17 @@ def create_logger(name):
 
 
 @atexit.register
-def save():
+def save(nodel=False):
     """
     Save the configuration file to disk (occurs automatically on exit).
 
     Warning:
-        To ensure that changes to the configuration persist, only alter the
-        configuration from one instance of exa, or by hand when exa has not
-        been imported.
+        Setting nodel to true may cause unstable behavior; it is used for test
+        pursposes only.
     """
     config_file = config['dynamic']['config_file']
-    del config['dynamic']    # Delete dynamically assigned configuration options
+    if not nodel:
+        del config['dynamic']    # Delete dynamically assigned config options
     with open(config_file, "w") as f:
         config.write(f)
 
