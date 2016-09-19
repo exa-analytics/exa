@@ -7,6 +7,5 @@ This sub-package contains all user organization tables.
 # Import modules
 
 # Import sub-packages
-from exa.cms.org import tests
 
 # Import API

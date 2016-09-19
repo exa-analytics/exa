@@ -54,9 +54,7 @@ class TestConfig(UnitTester):
             pass
 
     def test_mkdir(self):
-        """
-        Test that config created the new configuration directory.
-        """
+        """Test that config created the new configuration directory."""
         self.assertTrue(os.path.exists(_config.config['dynamic']['root']))
 
     def test_db(self):
@@ -83,9 +81,7 @@ class TestConfig(UnitTester):
         self.assertTrue(len(df) > 29)
 
     def test_print(self):
-        """
-        Test :func:`~exa._config.print_config`.
-        """
+        """Test :func:`~exa._config.print_config`."""
         out = StringIO()
         _config.print_config(out=out)
         out = out.getvalue()
@@ -100,3 +96,10 @@ class TestConfig(UnitTester):
         out = StringIO()
         _config.loggers['sys'].tail(out=out)
         self.assertIn("THIS IS A TEST", out.getvalue().strip())
+
+    def test_save(self):
+        """Test :func:`~exa._config.save`."""
+        try:
+            _config.save()
+        except Exception as e:
+            self.fail(e.msg)

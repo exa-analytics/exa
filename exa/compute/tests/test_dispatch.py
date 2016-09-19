@@ -5,10 +5,11 @@
 Tests for :mod:`~exa.prc.dispatch`
 ##########################################
 """
-from exa.prc.dispatch import dispatch
+from exa.compute.dispatch import dispatch
 from exa.tester import UnitTester
 
 
 class TestDispatcher(UnitTester):
     """
     """
+    pass
