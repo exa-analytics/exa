@@ -88,6 +88,8 @@ class TestEditor(UnitTester):
         self.assertEqual(len(self.from_file.regex(cnst)[cnst]), 1)
         cnst = u"{[\w\d]*}"
         self.assertEqual(len(self.from_file.regex(cnst)[cnst]), 2)
+        cnst = u"{[\w\d]*}"
+        self.assertEqual(len(self.from_file.regex(cnst, which='keys')[cnst]), 2)
 
     def test_head_tail(self):
         """
@@ -131,6 +133,10 @@ class TestEditor(UnitTester):
         del self.from_file[-2]
         with self.assertRaises(TypeError):
             self.from_file.insert(2, 10)
+        with self.assertRaises(TypeError):
+            self.from_file.append(10)
+        with self.assertRaises(TypeError):
+            self.from_file.prepend(10)
 
     def test_replace(self):
         """Test :func:`~exa.cms.editors.editor.Editor.replace`."""
@@ -154,6 +160,7 @@ class TestEditor(UnitTester):
         self.assertEqual(self.from_file.find_next(rp, "keys"), 2)        # 6 -> 2
         self.assertEqual(self.from_file.find_next(rp, "keys"), 6)        # 2 -> 6
         self.assertEqual(self.from_file.find_next(rp, "values"), rp)     # 2 -> 6
+        self.assertEqual(self.from_file.find_next(rp), (6, rp))
 
     def test_concat(self):
         """Test :func:`~exa.cms.editors.editor.concat`."""
@@ -193,3 +200,5 @@ class TestEditor(UnitTester):
     def test_repr(self):
         """Test :func:`~exa.cms.editors.editor.Editor.__repr__`."""
         self.assertIsInstance(self.from_file.__repr__(), six.string_types)
+        self.from_gzip.nprint = 2
+        self.assertIsInstance(self.from_gzip.__repr__(), six.string_types)
