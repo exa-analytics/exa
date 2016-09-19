@@ -14,5 +14,4 @@ ipyparallel
 sphinx
 nose
 six
-argparse
 numba

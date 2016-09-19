@@ -71,6 +71,7 @@ class TypedMeta(type):
             correct type; a type error is raised if this fails.
         """
         pname = '_' + name
+
         def getter(self):
             """
             This will be where the data is store (e.g. self._name)
@@ -80,7 +81,7 @@ class TypedMeta(type):
             and call it prior to returning the property value.
             """
             if not hasattr(self, pname) and hasattr(self, '{}{}'.format(self._getter_prefix, pname)):
-                self['{}{}'.format(self._getter_prefix, pname)]()
+                getattr(self, '{}{}'.format(self._getter_prefix, pname))()
             if not hasattr(self, pname):
                 raise AttributeError('Please compute or set {} first.'.format(name))
             return getattr(self, pname)

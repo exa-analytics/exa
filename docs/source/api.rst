@@ -1,11 +1,11 @@
 .. Copyright (c) 2015-2016, Exa Analytics Development Team
 .. Distributed under the terms of the Apache License 2.0
-
 ########################
 Full API
 ########################
 This section provides a complete description of the framework API. A description
 of important framework concepts can also be found within this documentation.
+
 
 .. toctree::
     :maxdepth: 1
@@ -16,11 +16,13 @@ of important framework concepts can also be found within this documentation.
     base/testing.rst
     base/utilities.rst
 
+
 .. toctree::
     :maxdepth: 1
     :caption: Containers and Editors
 
     core/main.rst
+
 
 .. toctree::
     :maxdepth: 1
@@ -30,6 +32,7 @@ of important framework concepts can also be found within this documentation.
     assets/static.rst
     assets/cmm.rst
     assets/editor.rst
+
 
 .. toctree::
     :maxdepth: 1
