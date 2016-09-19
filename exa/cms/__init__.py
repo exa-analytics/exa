@@ -7,12 +7,16 @@ This sub-package contains all data management features of the exa framework:
 - :class:`~exa.cms.editors.editor.Editor`: Programmatic manipulation of files on persistent storage
 """
 # Import modules
-from exa.cms import base, constant, isotope
+from exa.cms import base, constant, isotope, unit
 
 # Import sub-packages
 from exa.cms import editors, tests
 
 # Import API
+from exa.cms.constant import Constant
+from exa.cms.unit import (Length, Mass, Time, Current, Amount, Luminosity, Dose,
+                          Acceleration, Charge, Dipole, Energy, Force, Frequency,
+                          MolarMass)
 
 #from exa.relational.isotope import Isotope
 #from exa.relational.constant import Constant

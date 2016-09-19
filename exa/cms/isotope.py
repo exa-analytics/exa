@@ -11,7 +11,6 @@ used dataframe manipulations.
 """
 import six
 import pandas as pd
-from itertools import product
 from sqlalchemy import String, Float, Integer, Column
 from exa.cms.base import BaseMeta, Base, session_factory
 #from exa.math.misc.summation import sum_product_pair_f8, sum_product_pair

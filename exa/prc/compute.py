@@ -9,8 +9,8 @@ Computational Resources
 
 class GPU(object):
     """Graphics Processing Unit."""
-    def __init__(self, id):
-        self.id = id
+    def __init__(self, name):
+        self.name = name
 
 class MIC(object):
     """Many Integrated Core processors (e.g. Intel MIC, )."""
@@ -19,8 +19,8 @@ class MIC(object):
 
 class Resource(object):
     """A computing resource ("node")."""
-    def __init__(self, id, tasks, gpus, mics, mem):
-        self.id = id
+    def __init__(self, name, tasks, gpus, mics, mem):
+        self.name = name
         self.tasks = tasks
         self.gpus = gpus
         self.mics = mics

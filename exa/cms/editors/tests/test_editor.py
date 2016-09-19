@@ -10,7 +10,7 @@ related functions.
 import six
 import shutil
 import os, gzip, bz2
-from io import StringIO, open
+from io import StringIO
 from uuid import uuid4
 from exa._config import config
 from exa.tester import UnitTester
