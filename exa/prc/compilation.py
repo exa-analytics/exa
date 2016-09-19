@@ -29,7 +29,7 @@ def compile_jit(func, sig=None, nopython=False, nogil=False, cache=False):
     return nb.jit(func)
 
 
-def compile_vectorize(func, signatures=list(), identity=None, nopython=True, target='cpu'):
+def compile_vectorize(func, signatures=None, identity=None, nopython=True, target='cpu'):
     """
     """
     raise NotImplementedError()
