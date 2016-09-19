@@ -10,7 +10,7 @@ separated value (CSV) files.
 import csv
 import pandas as pd
 from io import StringIO
-from exa.cms.editors.editor import Editor
+from exa.core.editor import Editor
 
 
 class CSV(Editor):

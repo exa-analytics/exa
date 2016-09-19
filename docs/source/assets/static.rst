@@ -2,5 +2,13 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ########################
-Data Organization
+Static Data
 ########################
+.. automodule:: exa.assets.constant
+    :members:
+
+.. automodule:: exa.assets.unit
+    :members:
+
+.. automodule:: exa.assets.isotope
+    :members:

@@ -8,7 +8,7 @@ Table of reference physical constants in SI units.
 """
 import six
 from sqlalchemy import String, Float, Column
-from exa.cms.base import Base, BaseMeta, scoped_session
+from exa.assets.base import Base, BaseMeta, scoped_session
 
 
 class Meta(BaseMeta):

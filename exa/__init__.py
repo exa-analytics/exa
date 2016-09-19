@@ -11,11 +11,11 @@ with extensibility in mind.
 from exa import _version, _config, tester, errors, mpl, tex
 
 # Import sub-packages
-from exa import cms, dtr, prc, tests
+from exa import assets, compute, core, tests
 
-# Import top level API
+# Import user/dev API
 from exa._version import __version__
 from exa._config import print_config
 from exa.mpl import color_palette
-from exa.cms.editors.editor import Editor
-from exa.cms.editors.ssv import CSV
+from exa.core.editor import Editor
+from exa.core.ssv import CSV

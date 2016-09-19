@@ -9,7 +9,7 @@ of important framework concepts can also be found within this documentation.
 
 .. toctree::
     :maxdepth: 1
-    :caption: Base
+    :caption: Base Functionality
 
     base/main.rst
     base/config.rst
@@ -18,21 +18,21 @@ of important framework concepts can also be found within this documentation.
 
 .. toctree::
     :maxdepth: 1
-    :caption: Management
+    :caption: Containers and Editors
 
-    cms/main.rst
-    cms/static.rst
-    cms/org.rst
-    cms/editor.rst
+    core/main.rst
 
 .. toctree::
     :maxdepth: 1
-    :caption: Analytics
+    :caption: Asset Management
 
-    dtr/main.rst
+    assets/main.rst
+    assets/static.rst
+    assets/cmm.rst
+    assets/editor.rst
 
 .. toctree::
     :maxdepth: 1
     :caption: Computation
 
-    prc/main.rst
+    compute/main.rst

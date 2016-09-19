@@ -2,13 +2,6 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ########################
-Static Database Data
+Computation
 ########################
-.. automodule:: exa.cms.constant
-    :members:
-
-.. automodule:: exa.cms.unit
-    :members:
-
-.. automodule:: exa.cms.isotope
-    :members:
+.. automodule:: exa.compute.__init__

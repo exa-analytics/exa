@@ -2,6 +2,6 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ########################
-Computation
+Core
 ########################
-.. automodule:: exa.prc.__init__
+.. automodule:: exa.core.__init__

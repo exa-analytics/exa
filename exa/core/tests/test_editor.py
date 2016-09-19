@@ -14,7 +14,7 @@ from io import StringIO
 from uuid import uuid4
 from exa._config import config
 from exa.tester import UnitTester
-from exa.cms.editors.editor import Editor, concat
+from exa.core.editor import Editor, concat
 if not hasattr(bz2, "open"):
     bz2.open = bz2.BZ2File
 

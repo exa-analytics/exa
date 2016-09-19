@@ -14,7 +14,6 @@ framework, exa and its related packages should be run inside of a Jupyter
 notebook. When using the workflow and other processing features, exa and its
 related packages can be run inside of a notebook or in the console directly.
 
-
 .. automodule:: exa._config
     :members:
 

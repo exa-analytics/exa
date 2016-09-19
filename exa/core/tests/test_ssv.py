@@ -10,7 +10,7 @@ rather it only tests methods provided by :class:`~exa.cms.editors.csv.CSV`.
 import numpy as np
 import pandas as pd
 from exa.tester import UnitTester
-from exa.cms.editors.ssv import CSV
+from exa.core.ssv import CSV
 
 
 class TestCSV(UnitTester):

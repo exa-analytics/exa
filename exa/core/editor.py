@@ -314,19 +314,6 @@ class Editor(object):
                 to_remove.append(i)
         self.delete_lines(to_remove)
 
-#    def _data(self, copy=False):
-#        """
-#        Get all data associated with the container as key value pairs.
-#        """
-#        data = {}
-#        for key, obj in self.__dict__.items():
-#            if isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFrame)):
-#                if copy:
-#                    data[key] = obj.copy()
-#                else:
-#                    data[key] = obj
-#        return data
-#
     def delete_lines(self, lines):
         """
         Delete all lines with given line numbers.
@@ -336,56 +323,6 @@ class Editor(object):
         """
         for k, i in enumerate(lines):
             del self[i-k]    # Accounts for the fact that len(self) decrease upon deletion
-
-
-#    def pandas_dataframe(self, start, stop, ncol, **kwargs):
-#        """
-#        Returns the result of tab-separated pandas.read_csv on
-#        a subset of the file.
-#
-#        Args:
-#            start (int): line number where structured data starts
-#            stop (int): line number where structured data stops
-#            ncol (int or list): the number of columns in the structured
-#                data or a list of that length with column names
-#
-#        Returns:
-#            pd.DataFrame: structured data
-#        """
-#        try:
-#            ncol = int(ncol)
-#            return pd.read_csv(StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=range(ncol), **kwargs)
-#        except TypeError:
-#            try:
-#                ncol = list(ncol)
-#                return pd.read_csv(StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=ncol, **kwargs)
-#            except TypeError:
-#                print('Cannot pandas_dataframe if ncol is {}, must be int or list'.format(type(ncol)))
-#
-#
-
-#    @classmethod
-#    def from_file(cls, path, **kwargs):
-#        """Create an editor instance from a file on disk."""
-#        lines = lines_from_file(path)
-#        if 'meta' not in kwargs:
-#            kwargs['meta'] = {'from': 'file'}
-#        kwargs['meta']['filepath'] = path
-#        return cls(lines, **kwargs)
-#
-#    @classmethod
-#    def from_stream(cls, f, **kwargs):
-#        """Create an editor instance from a file stream."""
-#        lines = lines_from_stream(f)
-#        if 'meta' not in kwargs:
-#            kwargs['meta'] = {'from': 'stream'}
-#        kwargs['meta']['filepath'] = f.name if hasattr(f, 'name') else None
-#        return cls(lines, **kwargs)
-#
-#    @classmethod
-#    def from_string(cls, string, **kwargs):
-#        """Create an editor instance from a string template."""
-#        return cls(lines_from_string(string), **kwargs)
 
     def __eq__(self, other):
         if isinstance(other, Editor) and self._lines == other._lines:

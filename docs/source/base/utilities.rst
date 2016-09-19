@@ -2,7 +2,7 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ###################################################
-Utilities
+Miscellaneous
 ###################################################
 The exa framework provides convenience methods for interacting with commonly
 used tools in the field of science and technology including plotting programs
