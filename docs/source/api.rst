@@ -3,7 +3,7 @@
 
 
 ########################
-Full API
+API
 ########################
 This section provides a complete description of the framework API. A description
 of important framework concepts can also be found within this documentation.

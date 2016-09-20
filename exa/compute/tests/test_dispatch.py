@@ -5,7 +5,7 @@
 Tests for :mod:`~exa.prc.dispatch`
 ##########################################
 """
-from exa.compute.dispatch import dispatch
+#from exa.compute.dispatch import dispatch
 from exa.tester import UnitTester
 
 

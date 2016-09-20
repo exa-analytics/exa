@@ -174,7 +174,6 @@ def reconfigure(rootname=".exa"):
     Read in the configuration (or generate a new configuration) and set the
     dynamic configuration for the current session.
     """
-    global config, engine, loggers
     # Get exa"s root directory (e.g. /home/[username]/.exa, C:\\Users\[username]\\.exa)
     home = os.getenv("USERPROFILE") if platform.system().lower() == "windows" else os.getenv("HOME")
     root = os.path.join(home, rootname)
@@ -182,6 +181,7 @@ def reconfigure(rootname=".exa"):
     # Check for existing config or build one anew
     config_file = os.path.join(root, "config")
     init_flag = False
+    global config, engine, loggers
     if os.path.exists(config_file) and rootname == ".exa":
         stats = os.stat(config_file)
         if stats.st_size > 180:      # Check that the file size > 180 bytes

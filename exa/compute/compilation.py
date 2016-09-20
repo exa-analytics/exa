@@ -10,10 +10,10 @@ functions for use as part of a :class:`~exa.prc.workflow.Workflow`.
 See Also:
     :mod:`~exa.prc.dispatch`
 """
-try:                      # If numba is not present then this module does
-    import numba as nb    # not perform compilation.
-except ImportError:
-    nb = None
+#try:                      # If numba is not present then this module does
+#    import numba as nb    # not perform compilation.
+#except ImportError:
+#    nb = None
 
 
 def compile_func():

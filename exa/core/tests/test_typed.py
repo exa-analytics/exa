@@ -7,6 +7,7 @@ Tests for :mod:`~exa.core.typed`
 """
 import six
 from exa.tester import UnitTester
+from exa.errors import ExaException
 from exa.core.typed import TypedMeta
 
 
@@ -44,6 +45,9 @@ class TestTypedMeta(UnitTester):
     """
     def test_init(self):
         """Test type enforcement on creation."""
+        try:
+            DummyClass()
+        except ExaException as e:
+            self.fail(str(e))
         with self.assertRaises(TypeError):
-            klass = DummyClass(False, False)
-            del klass
+            DummyClass(False, False)
