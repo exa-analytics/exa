@@ -66,6 +66,7 @@ import pandas as pd
 from textwrap import wrap
 from itertools import product
 from sqlalchemy import create_engine
+from logging.handlers import RotatingFileHandler
 from exa._version import __version__
 
 
@@ -134,7 +135,7 @@ def create_logger(name):
 
     kwargs = {'maxBytes': int(config['logging']['nbytes']),
               'backupCount': int(config['logging']['nlogs'])}
-    handler = logging.handlers.RotatingFileHandler(config['logging'][name], **kwargs)
+    handler = RotatingFileHandler(config['logging'][name], **kwargs)
     handler.setFormatter(LogFormat())
     handler.setLevel(logging.WARNING)
     n = "sqlalchemy.engine.base.Engine" if name == "dblog" else name
