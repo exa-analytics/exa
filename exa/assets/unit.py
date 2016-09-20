@@ -43,12 +43,14 @@ class Dimension(object):
 
 class Length(six.with_metaclass(Meta, Base, Dimension)):
     """
-    >>> Length['angstrom', 'au']
-    1.88971616463
-    >>> Length['A', 'au']
-    1.88971616463
-    >>> Length['A', 'a0']
-    1.88971616463
+    Length conversions.
+
+        >>> Length['angstrom', 'au']
+        1.88971616463
+        >>> Length['A', 'au']
+        1.88971616463
+        >>> Length['A', 'a0']
+        1.88971616463
     """
     aliases = {
         'a.u.': 'au',
@@ -72,6 +74,7 @@ class Mass(six.with_metaclass(Meta, Base, Dimension)):
     """
     aliases = {
         'amu': 'u',
+        'au': 'u'
     }
 
 
