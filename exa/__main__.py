@@ -3,8 +3,8 @@
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Applications
-########################
+Executables
+#############
 """
 import platform
 import argparse
@@ -13,9 +13,7 @@ from exa._config import config, reconfigure
 
 
 def notebook():
-    """
-    Start the Jupyter notebook.
-    """
+    """Start the Jupyter notebook."""
     if platform.system().lower() == "windows":
         subprocess.Popen(["jupyter", "notebook"], shell=True, cwd=config["paths"]["notebooks"])
     else:
@@ -24,16 +22,17 @@ def notebook():
 
 def workflow(wkflw):
     """
+    Execute a workflow on given computational resources.
+
     Args:
-        wkflw: Path to workflow script or instance of workflow class.
+        wkflw: Workflow object
+        resrc: Computational resources
     """
     raise NotImplementedError("Workflows are currently unsupported.")
 
 
 def main():
-    """
-    Defines the possible arguments for the application.
-    """
+    """Sets up entry points and help text for executable."""
     parser = argparse.ArgumentParser(description="Launcher for exa")
     parser.add_argument(
         "-up",

@@ -1,6 +1,7 @@
 .. Copyright (c) 2015-2016, Exa Analytics Development Team
 .. Distributed under the terms of the Apache License 2.0
 
+
 ###################################################
 Testing
 ###################################################
@@ -19,6 +20,7 @@ mechanism for running tests in an interactive session. Base tests are below.
 
 .. automodule:: exa.tests.test_errors
     :members:
+
 
 .. _unittest: https://docs.python.org/3.5/library/unittest.html
 .. _doctest: https://docs.python.org/3.5/library/doctest.html

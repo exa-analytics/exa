@@ -123,4 +123,4 @@ class TypedMeta(type):
         for k, v in vars(metacls).items():
             if isinstance(v, (type, tuple, list)):
                 clsdict[k] = metacls.create_property(k, v)
-        return super().__new__(metacls, name, bases, clsdict)
+        return super(TypedMeta, metacls).__new__(metacls, name, bases, clsdict)

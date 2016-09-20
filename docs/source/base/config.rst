@@ -1,6 +1,7 @@
 .. Copyright (c) 2015-2016, Exa Analytics Development Team
 .. Distributed under the terms of the Apache License 2.0
 
+
 ###################################################
 Configuration, Logging, and Database Connectivity
 ###################################################
@@ -19,5 +20,6 @@ related packages can be run inside of a notebook or in the console directly.
 
 .. automodule:: exa._version
     :members:
+
 
 .. _Jupyter notebooks: http://jupyter.org/
