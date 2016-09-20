@@ -49,6 +49,7 @@ Strong typing helps exa containers ensure the correct data object types are
 attached. This, in turn, ensures things such as visualization and content
 management behave as expected.
 """
+from exa.core.errors import AutomaticConversionError
 
 
 class TypedMeta(type):
@@ -71,6 +72,10 @@ class TypedMeta(type):
             correct type; a type error is raised if this fails.
         """
         pname = '_' + name
+        if not isinstance(ptype, (tuple, list)):
+            ptype = (ptype, )
+        else:
+            ptype = tuple(ptype)
 
         def getter(self):
             """
@@ -80,8 +85,9 @@ class TypedMeta(type):
             convenience method with the signature, self.[_getter_prefix]_name()
             and call it prior to returning the property value.
             """
-            if not hasattr(self, pname) and hasattr(self, '{}{}'.format(self._getter_prefix, pname)):
-                getattr(self, '{}{}'.format(self._getter_prefix, pname))()
+            cmd = "{}{}".format(self._getter_prefix, pname)
+            if getattr(self, pname) is None and hasattr(self, cmd):
+                getattr(self, cmd)()
             if not hasattr(self, pname):
                 raise AttributeError('Please compute or set {} first.'.format(name))
             return getattr(self, pname)
@@ -92,11 +98,14 @@ class TypedMeta(type):
             Prior to setting a property value, this function checks that the
             object's type is correct.
             """
-            if not isinstance(obj, ptype):
-                try:
-                    obj = ptype(obj)
-                except Exception:
-                    raise TypeError('Must be able to convert object {0} to {1} (or must be of type {1})'.format(name, ptype))
+            if obj is not None and not isinstance(obj, ptype):
+                if len(ptype) == 1:
+                    try:
+                        obj = ptype[0](obj)
+                    except TypeError:
+                        raise AutomaticConversionError(obj, ptype)
+                else:
+                    raise TypeError('Object "{}" must be of type(s) {} not {}.'.format(name, ptype, type(obj)))
             setattr(self, pname, obj)
 
         def deleter(self):
@@ -112,6 +121,6 @@ class TypedMeta(type):
         the modified (i.e. property containing) class definition.
         """
         for k, v in vars(metacls).items():
-            if isinstance(v, type) and k[0] != '_':
+            if isinstance(v, (type, tuple, list)):
                 clsdict[k] = metacls.create_property(k, v)
         return super().__new__(metacls, name, bases, clsdict)

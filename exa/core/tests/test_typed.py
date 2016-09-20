@@ -13,20 +13,23 @@ from exa.core.typed import TypedMeta
 #class DummyTypedMeta(six.with_metaclass(TypedMeta, type)):
 class DummyTypedMeta(TypedMeta):
     """Dummy metaclass."""
-    foo = bool
-    bar = (int, float)
+    foo = int
+    bar = (str, float)
+    baz = tuple
 
 
 #class DummyClass(six.with_metaclass(DummyTypedMeta)):
-class DummyClass(metaclass=DummyTypedMeta):
+class DummyClass(six.with_metaclass(DummyTypedMeta, object)):
     """Dummy typed class."""
     _getter_prefix = "compute"
-
     def compute_foo(self):
         self._foo = True
 
     def compute_bar(self):
         self._bar = 42
+
+    def compute_baz(self):
+        self._baz = (42, True)
 
     def __init__(self, foo=None, bar=None):
         self.foo = foo
