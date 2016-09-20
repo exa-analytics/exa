@@ -66,7 +66,6 @@ import pandas as pd
 from textwrap import wrap
 from itertools import product
 from sqlalchemy import create_engine
-from logging.handlers import RotatingFileHandler
 from exa._version import __version__
 
 
@@ -220,12 +219,14 @@ def reconfigure(rootname=".exa"):
     try:
         import numba
         config['dynamic']['numba'] = "true"
+        del numba
     except ImportError:
         pass
     try:
         from numba import cuda
         if len(cuda.devices.gpus) > 0:
             config['dynamic']['cuda'] = "true"
+        del cuda, numba
     except (AttributeError, ImportError):
         pass
     try:

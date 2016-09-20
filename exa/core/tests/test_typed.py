@@ -46,3 +46,4 @@ class TestTypedMeta(UnitTester):
         """Test type enforcement on creation."""
         with self.assertRaises(TypeError):
             klass = DummyClass(False, False)
+            del klass

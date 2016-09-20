@@ -13,7 +13,6 @@ Compilation is performed by `numba`_ if available (see :mod:`~exa.prc.compile`).
 .. _numba: http://numba.pydata.org/
 .. _multiply dispatched: https://en.wikipedia.org/wiki/Multiple_dispatch
 """
-import numpy as np
 import pandas as pd
 from sys import getsizeof
 from itertools import product
@@ -97,10 +96,9 @@ class Dispatcher(object):
         for typ in types:
             if not isinstance(typ, type):
                 raise TypeError("Not a type: {}".format(typ))
-        cmp = False
         reg = (0, 0, 0, ) + tuple(types)
-        if jit or vectorize or guvectorize:
-            reg, func = compile_func(func)
+        #if jit or vectorize or guvectorize:
+        #    reg, func = compile_func(func)
         self.functions[reg] = func
 
     @property

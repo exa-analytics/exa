@@ -222,7 +222,7 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
         """
         Inplace conversion from categories.
         """
-        for column, dtype in self._categories.items():
+        for column in self._categories.keys():
             if column in self.columns:
                 self[column] = self[column].astype('category')
 
@@ -364,9 +364,9 @@ class Field(DataFrame):
     def slice_cardinal(self, key):
         """
         """
-        cls = self.__class__
-        grpby = self.cardinal_groupby()
-
+        raise NotImplementedError()
+        #cls = self.__class__
+        #grpby = self.cardinal_groupby()
 
     def _custom_traits(self):
         """
