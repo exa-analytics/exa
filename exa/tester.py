@@ -7,7 +7,6 @@ Tester
 Custom tester class for running interactive (i.e. within the Jupyter notebook
 environment) tests.
 """
-import os
 import sys
 from datetime import datetime
 from doctest import DocTestFinder, DocTestRunner

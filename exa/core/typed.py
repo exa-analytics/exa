@@ -49,6 +49,7 @@ Strong typing helps exa containers ensure the correct data object types are
 attached. This, in turn, ensures things such as visualization and content
 management behave as expected.
 """
+import warnings
 from exa.core.errors import AutomaticConversionError
 
 
@@ -76,6 +77,7 @@ class TypedMeta(type):
             ptype = (ptype, )
         else:
             ptype = tuple(ptype)
+        print(ptype)
 
         def getter(self):
             """
@@ -86,9 +88,9 @@ class TypedMeta(type):
             and call it prior to returning the property value.
             """
             cmd = "{}{}".format(self._getter_prefix, pname)
-            if getattr(self, pname) is None and hasattr(self, cmd):
+            if (not hasattr(self, pname) or getattr(self, pname) is None) and hasattr(self, cmd):
                 getattr(self, cmd)()
-            if not hasattr(self, pname):
+            elif not hasattr(self, pname):
                 raise AttributeError('Please compute or set {} first.'.format(name))
             return getattr(self, pname)
 
@@ -102,6 +104,8 @@ class TypedMeta(type):
                 if len(ptype) == 1:
                     try:
                         obj = ptype[0](obj)
+                        if isinstance(ptype[0], (tuple, list)):
+                            warnings.warn("Please check automatic type conversion!")
                     except TypeError:
                         raise AutomaticConversionError(obj, ptype)
                 else:

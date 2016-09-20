@@ -32,9 +32,10 @@ class DummyClass(six.with_metaclass(DummyTypedMeta, object)):
     def compute_baz(self):
         self._baz = (42, True)
 
-    def __init__(self, foo=None, bar=None):
+    def __init__(self, foo=None, bar=None, baz=None):
         self.foo = foo
         self.bar = bar
+        self.baz = baz
 
 
 class TestTypedMeta(UnitTester):
@@ -51,3 +52,21 @@ class TestTypedMeta(UnitTester):
             self.fail(str(e))
         with self.assertRaises(TypeError):
             DummyClass(False, False)
+        with self.assertRaises(TypeError):
+            DummyClass(10, 10, "baz")
+
+    def test_compute_calls(self):
+        """
+        Test default getters (using the _getter_prefix), for example,
+        :func:`~exa.core.tests.test_typed.DummyClass.compute_foo`.
+        """
+        klass = DummyClass()
+        self.assertEqual(klass.foo, True)
+        self.assertEqual(klass.bar, 42)
+        self.assertEqual(klass.baz, (42, True))
+
+    def test_autoconv(self):
+        """
+        Test automatic conversion performed by :func:`~exa.core.typed.TypedMeta.create_property`.
+        """
+        klass = DummyClass(foo=0, bar=42.0, baz="stuff")
