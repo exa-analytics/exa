@@ -5,10 +5,10 @@
 Dispatched Function Compilation
 ##################################
 This module provides a mechanism for automatically compiling dispatched
-functions for use as part of a :class:`~exa.prc.workflow.Workflow`.
+functions for use as part of a :class:`~exa.compute.workflow.Workflow`.
 
 See Also:
-    :mod:`~exa.prc.dispatch`
+    :mod:`~exa.compute.dispatch`
 """
 #try:                      # If numba is not present then this module does
 #    import numba as nb    # not perform compilation.

@@ -17,6 +17,7 @@ class DummyTypedMeta(TypedMeta):
     foo = int
     bar = (str, float)
     baz = tuple
+    faz = str
 
 
 #class DummyClass(six.with_metaclass(DummyTypedMeta)):
@@ -32,10 +33,11 @@ class DummyClass(six.with_metaclass(DummyTypedMeta, object)):
     def compute_baz(self):
         self._baz = (42, True)
 
-    def __init__(self, foo=None, bar=None, baz=None):
+    def __init__(self, foo=None, bar=None, baz=None, faz=None):
         self.foo = foo
         self.bar = bar
         self.baz = baz
+        self.faz = faz
 
 
 class TestTypedMeta(UnitTester):
@@ -70,3 +72,4 @@ class TestTypedMeta(UnitTester):
         Test automatic conversion performed by :func:`~exa.core.typed.TypedMeta.create_property`.
         """
         klass = DummyClass(foo=0, bar=42.0, baz="stuff")
+        #self.assertEqual()
