@@ -77,7 +77,6 @@ class TypedMeta(type):
             ptype = (ptype, )
         else:
             ptype = tuple(ptype)
-        print(ptype)
 
         def getter(self):
             """
