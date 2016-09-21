@@ -227,7 +227,7 @@ def reconfigure(rootname=".exa"):
         from numba import cuda
         if len(cuda.devices.gpus) > 0:
             config['dynamic']['cuda'] = "true"
-        del cuda, numba
+        del cuda
     except (AttributeError, ImportError):
         pass
     try:

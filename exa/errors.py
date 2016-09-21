@@ -13,10 +13,8 @@ logger = loggers['sys']
 
 
 class ExaException(Exception):
-    """
-    Generic exa exception/error.
-    """
-    def __init__(self, msg="default exception", level='warn'):
+    """Generic exa exception/error."""
+    def __init__(self, msg="default exception", level='info'):
         super(ExaException, self).__init__(msg)
         if level == 'info':
             logger.info(msg)

@@ -110,23 +110,23 @@ class Dispatcher(object):
         return doc
 
     def __call__(self, *args, **kwargs):
-        sig = (0, 0, 0, )
         types = tuple([type(arg) for arg in args])
-        memlim = kwargs.pop("_memlim", 2048)
-        nodes = kwargs.pop("_nodes", list())
-        proc = 1 if config['dynamic']['cuda'] == 'true' else 0
-        size = sum(getsizeof(arg) for arg in args)
-        mem = 1 if size/1024**2 > memlim else 0
-        pll = 0
-        if len(nodes) > 0:
-            pll = 2
-        elif any(key[1] > 0 for key in self.functions.keys()):
-            pll = 1
-        sig = (proc, mem, pll, ) + types
+        sig = (0, 0, 0, ) + types
+        #memlim = kwargs.pop("_memlim", 2048)
+        #nodes = kwargs.pop("_nodes", list())
+        #proc = 1 if config['dynamic']['cuda'] == 'true' else 0
+        #size = sum(getsizeof(arg) for arg in args)
+        #mem = 1 if size/1024**2 > memlim else 0
+        #pll = 0
+        #if len(nodes) > 0:
+    #        pll = 2
+    #    elif any(key[1] > 0 for key in self.functions.keys()):
+    #        pll = 1
+    #    sig = (proc, mem, pll, ) + types
         try:
             func = self.functions[sig]
         except KeyError:
-            raise KeyError("Missing signature for {}".format(sig))
+            raise TypeError("No type signature for type(s) {}".format(sig))
         return func(*args, **kwargs)
 
     def __init__(self, name):
@@ -154,11 +154,12 @@ def dispatch(*types, **flags):
     usage examples see :class:`~exa.workflow.dispatch.Dispatcher`.
     """
     def dispatched_func(func):
-        name = func.__name__
-        if name in _dispatched:
-            dispatcher = _dispatched[name]
-        else:
-            dispatcher = Dispatcher(name)
+        """This function acts on the implicit function argument."""
+        name = func.__name__                 # It checks to see if we have made
+        if name in _dispatched:              # an entry for a function with the
+            dispatcher = _dispatched[name]   # same name, creates one if not,
+        else:                                # and registers the current function
+            dispatcher = Dispatcher(name)    # definition to the provided types.
         dispatcher.register(types, func, **flags)
         return dispatcher
     return dispatched_func
