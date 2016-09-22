@@ -24,6 +24,11 @@ Compilation is performed by `numba`_ if available (see :mod:`~exa.prc.compile`).
     def fn(arg):
         return str(20*arg) + "!"
 
+Warning:
+    Most syntax checkers, linters, or other code analyses methods will raise
+    style or syntax errors on the code examples above. As always, use unit tests
+    to ensure that code is behaving as expected.
+
 This example generates a function dispatcher that makes a call to the appropriate
 function signature depending on the type of the argument given. For cases where
 the same signature supports multiple argument types the following syntax is
@@ -39,10 +44,8 @@ acceptable.
     def fn(arg):
         return str(float(arg)*42) + "!"
 
-Warning:
-    Most syntax checkers, linters, or other code analyses methods will raise
-    errors on the code examples above. As always, use unit tests to ensure that
-    the dispatched functions behave as expected.
+In these examples, signatures references will be created for both types of
+arguments passed to the dispatch decorator.
 
 .. _numba: http://numba.pydata.org/
 .. _multiply dispatched: https://en.wikipedia.org/wiki/Multiple_dispatch
@@ -62,8 +65,32 @@ _dispatched = dict()    # Global to keep track of all dispatched functions
 
 class Dispatcher(object):
     """
-    Class that wraps functions with specific argument types into a single,
-    multiply dispatched interface.
+    This class pretends to be a function (callable) but in fact stores functions
+    that perform the same action but in different ways for differently typed
+    arguments. This concept is called dispatching (single/multiple - for a
+    single argument, or multiple arguments). Internally, the dispatcher organizes
+    functions by not only their types, but there propensity for parallelism,
+    gpu/mic acceleration, and out of core processing. The dispatcher categorizes
+    functions as follows:
+
+    +----------------+------+----------+--------+-----+
+    | category/index |  0   |   1      |  2     | 3   |
+    +================+======+==========+========+=====+
+    | processing     | cpu  | gpu      | mic    |     |
+    +----------------+------+----------+--------+-----+
+    | memory         | ram  | disk     |        |     |
+    +----------------+------+----------+--------+-----+
+    | parallelism    | none | GIL free | #1     | #2  |
+    +----------------+------+----------+--------+-----+
+    +-------------------------------------------------+
+    | #1: single node, multithread/multiprocess       |
+    +-------------------------------------------------+
+    | #2: multi node, multithread/multiprocess        |
+    +-------------------------------------------------+
+
+    The function signature is composed of both the hardware requirements and
+    argument types: (processing, memory, parallelism, *types). Note that indexes
+    can be combined, for example ("cpu|gpu", "cpu+mic").
     """
     @property
     def signatures(self):
@@ -161,20 +188,23 @@ class Dispatcher(object):
         return func(*args, **kwargs)
 
     def __init__(self, name):
+        """
+        STUFF AND THINGS 2
+        """
         self.name = name
         self.__name__ = name
         self.functions = dict()
         if name not in _dispatched:
             _dispatched[name] = self
 
-    def __repr__(self):
-        return self.functions.__repr__()
+#    def __repr__(self):
+#        return self.functions.__repr__()
 
-    def __str__(self):
-        return self.__repr__()
+#    def __str__(self):
+#        return self.__repr__()
 
-    def _repr_html_(self):
-        return self.to_frame()._repr_html_()
+#    def _repr_html_(self):
+#        return self.to_frame()._repr_html_()
 
 
 def dispatch(*types, **flags):
@@ -197,9 +227,7 @@ def dispatch(*types, **flags):
 
 
 def get_nargs(func):
-    """
-    Get the count of function args.
-    """
+    """Get the count of function args."""
     spec = signature(func)
     if hasattr(spec, "parameters"):
         return len(spec.parameters.keys())

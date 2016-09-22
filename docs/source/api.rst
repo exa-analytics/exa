@@ -41,3 +41,4 @@ of important framework concepts can also be found within this documentation.
     :caption: Computation
 
     compute/main.rst
+    compute/dispatch.rst

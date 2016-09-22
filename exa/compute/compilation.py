@@ -2,19 +2,13 @@
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Dispatched Function Compilation
+Function Compilation
 ##################################
-This module provides a mechanism for automatically compiling dispatched
-functions for use as part of a :class:`~exa.compute.workflow.Workflow`.
 
 See Also:
-    :mod:`~exa.compute.dispatch`
+    Often times, compiling individual functions can be sped up via the
+    :mod:`~exa.compute.dispatch` module.
 """
-#try:                      # If numba is not present then this module does
-#    import numba as nb    # not perform compilation.
-#except ImportError:
-#    nb = None
-
 
 def compile_func():
     """
