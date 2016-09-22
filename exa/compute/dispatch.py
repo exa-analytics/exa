@@ -66,7 +66,7 @@ class Dispatcher(object):
     multiply dispatched interface.
     """
     @property
-    def dispatched(self):
+    def signatures(self):
         """Check avaiable function signatures."""
         proc = []
         mem = []
@@ -88,9 +88,7 @@ class Dispatcher(object):
         df.fillna(False, inplace=True)
         return df
 
-    def register(self, func, types, layout=None, jit=False, vectorize=False,
-                 guvectorize=False, nopython=False, nogil=False, cache=False,
-                 rtype=None, target='cpu', outcore=False, distrib=False):
+    def register(self, func, *types, **flags):
         """
         Register a new function signature.
 
@@ -99,8 +97,8 @@ class Dispatcher(object):
         specified.
 
         Args:
-            types (tuple): Type(s) for each argument
             func (function): Function to be registered
+            types (tuple): Type(s) for each argument
             layout (str): Dimensionality reduction/expansion layout
             jit (bool): Just-in-time function compilation
             vectorize (bool): Just-in-time function vectorization and compilation
@@ -112,21 +110,19 @@ class Dispatcher(object):
             outcore (bool): If the function designed for out-of-core execution
             distrib (bool): True if function desiged for distributed execution
         """
-        types = tuple(types)
         nargs = get_nargs(func)
         ntyps = len(types)
         if nargs != ntyps:
             raise ValueError("Function has {} args but signature has {} entries!".format(nargs, ntyps))
-        elif any(isinstance(typ, tuple) for typ in types):
+        elif any(isinstance(typ, (tuple, list)) for typ in types):
             prod = []
             for typ in types:
-                if not isinstance(typ, tuple):
+                if not isinstance(typ, (tuple, list)):
                     prod.append([typ])
                 else:
                     prod.append(typ)
             for typs in product(*prod):
-                self.register(typs, func, jit=jit, vectorize=vectorize,
-                              nopython=nopython, nogil=nogil, cache=cache)
+                self.register(func, *typs, **flags)
             return
         for typ in types:
             if not isinstance(typ, type):
@@ -195,7 +191,7 @@ def dispatch(*types, **flags):
             dispatcher = _dispatched[name]   # same name, creates one if not,
         else:                                # and registers the current function
             dispatcher = Dispatcher(name)    # definition to the provided types.
-        dispatcher.register(func, types, **flags)
+        dispatcher.register(func, *types, **flags)
         return dispatcher
     return dispatched_func
 
