@@ -10,6 +10,40 @@ dispatcher is not only to enable a `multiply dispatched`_ paradigm but also to
 compile functions compatible with :class:`~exa.prc.workflow.Workflow` class.
 Compilation is performed by `numba`_ if available (see :mod:`~exa.prc.compile`).
 
+.. code-block:: Python
+
+    @dispatch(str)
+    def fn(arg):
+        return arg + "!"
+
+    @dispatch(int)
+    def fn(arg):
+        return str(2*arg) + "!"
+
+    @dispatch(float)
+    def fn(arg):
+        return str(20*arg) + "!"
+
+This example generates a function dispatcher that makes a call to the appropriate
+function signature depending on the type of the argument given. For cases where
+the same signature supports multiple argument types the following syntax is
+acceptable.
+
+.. code-block:: Python
+
+    @dispatch((str, int))
+    def fn(arg):
+        return str(arg) + "!"
+
+    @dispatch((bool, float))
+    def fn(arg):
+        return str(float(arg)*42) + "!"
+
+Warning:
+    Most syntax checkers, linters, or other code analyses methods will raise
+    errors on the code examples above. As always, use unit tests to ensure that
+    the dispatched functions behave as expected.
+
 .. _numba: http://numba.pydata.org/
 .. _multiply dispatched: https://en.wikipedia.org/wiki/Multiple_dispatch
 """
@@ -54,7 +88,7 @@ class Dispatcher(object):
         df.fillna(False, inplace=True)
         return df
 
-    def register(self, types, func, layout=None, jit=False, vectorize=False,
+    def register(self, func, types, layout=None, jit=False, vectorize=False,
                  guvectorize=False, nopython=False, nogil=False, cache=False,
                  rtype=None, target='cpu', outcore=False, distrib=False):
         """
@@ -78,14 +112,15 @@ class Dispatcher(object):
             outcore (bool): If the function designed for out-of-core execution
             distrib (bool): True if function desiged for distributed execution
         """
+        types = tuple(types)
         nargs = get_nargs(func)
         ntyps = len(types)
         if nargs != ntyps:
             raise ValueError("Function has {} args but signature has {} entries!".format(nargs, ntyps))
-        elif any(isinstance(typ, (tuple, list)) for typ in types):
+        elif any(isinstance(typ, tuple) for typ in types):
             prod = []
             for typ in types:
-                if not isinstance(typ, (tuple, list)):
+                if not isinstance(typ, tuple):
                     prod.append([typ])
                 else:
                     prod.append(typ)
@@ -96,7 +131,7 @@ class Dispatcher(object):
         for typ in types:
             if not isinstance(typ, type):
                 raise TypeError("Not a type: {}".format(typ))
-        reg = (0, 0, 0, ) + tuple(types)
+        reg = (0, 0, 0, ) + types
         #if jit or vectorize or guvectorize:
         #    reg, func = compile_func(func)
         self.functions[reg] = func
@@ -160,7 +195,7 @@ def dispatch(*types, **flags):
             dispatcher = _dispatched[name]   # same name, creates one if not,
         else:                                # and registers the current function
             dispatcher = Dispatcher(name)    # definition to the provided types.
-        dispatcher.register(types, func, **flags)
+        dispatcher.register(func, types, **flags)
         return dispatcher
     return dispatched_func
 

@@ -4,6 +4,8 @@
 """
 Tests for :mod:`~exa.compute.dispatch`
 ##########################################
+Test the (multiple) dispatch like functionality provided by
+:mod:`~exa.compute.dispatch`.
 """
 import numpy as np
 from exa.compute.dispatch import dispatch
@@ -12,11 +14,13 @@ from exa.tester import UnitTester
 
 class TestDispatcher(UnitTester):
     """
+    In order to test the dispatching functionality, we generate a dummy multiply
+    dispatched function "fn".
     """
     def setUp(self):
         """
+        Generate the dummy function "fn".
         """
-        # Create dispatched functions...
         try:
             @dispatch(str)
             def fn(arg):
@@ -47,6 +51,7 @@ class TestDispatcher(UnitTester):
 
     def test_single_dispatch(self):
         """
+        Test the singly dispatched methods.
         """
         self.assertTrue(self.fn("Foo").endswith("!"))
         self.assertTrue(self.fn(True).endswith("!"))
