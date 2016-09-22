@@ -4,11 +4,12 @@
 """
 Dispatched Functions
 ########################
-This module provides the :class:`~exa.workflow.dispatcher.Dispatcher` object
-and the :func:`~exa.workflow.dispatcher.dispatch` decorator. The purpose of the
+This module provides the :class:`~exa.compute.dispatch.Dispatcher` object
+and the :func:`~exa.compute.dispatch.dispatch` decorator. The purpose of the
 dispatcher is not only to enable a `multiply dispatched`_ paradigm but also to
-compile functions compatible with :class:`~exa.prc.workflow.Workflow` class.
-Compilation is performed by `numba`_ if available (see :mod:`~exa.prc.compile`).
+compile functions compatible with :class:`~exa.compute.workflow.Workflow` class.
+Compilation is performed by `numba`_ if available (see
+:mod:`~exa.compute.compilation`).
 
 .. code-block:: Python
 
@@ -67,7 +68,7 @@ class Dispatcher(object):
     """
     This class pretends to be a function (callable) but in fact stores functions
     that perform the same action but in different ways for differently typed
-    arguments. This concept is called dispatching (single/multiple - for a
+    arguments. This concept is called dispatching (single/multiple \- for a
     single argument, or multiple arguments). Internally, the dispatcher organizes
     functions by not only their types, but there propensity for parallelism,
     gpu/mic acceleration, and out of core processing. The dispatcher categorizes
@@ -82,39 +83,20 @@ class Dispatcher(object):
     +----------------+------+----------+--------+-----+
     | parallelism    | none | GIL free | #1     | #2  |
     +----------------+------+----------+--------+-----+
-    +-------------------------------------------------+
     | #1: single node, multithread/multiprocess       |
     +-------------------------------------------------+
     | #2: multi node, multithread/multiprocess        |
     +-------------------------------------------------+
 
     The function signature is composed of both the hardware requirements and
-    argument types: (processing, memory, parallelism, *types). Note that indexes
-    can be combined, for example ("cpu|gpu", "cpu+mic").
-    """
-    @property
-    def signatures(self):
-        """Check avaiable function signatures."""
-        proc = []
-        mem = []
-        parallel = []
-        types = []
-        exists = []
-        for sig in self.functions.keys():
-            p, m, l = sig[:3]
-            typ = tuple(sig[3:])
-            proc.append(p)
-            mem.append(m)
-            parallel.append(l)
-            types.append("(" + ", ".join([t.__name__ for t in typ]) + ")")
-            exists.append(True)
-        df = pd.DataFrame.from_dict({'types': types, 'proc': proc, 'mem': mem,
-                                     'parallel': parallel, 'exists': exists})
-        df = df.pivot_table(values='exists', index=['proc', 'mem', 'parallel'],
-                            columns='types')
-        df.fillna(False, inplace=True)
-        return df
+    argument types: (processing, memory, parallelism, \*types). Note that indexes
+    can be combined, for example ("cpu\|gpu", "cpu\+mic").
 
+    Note:
+        Parallelism types 2 and 3 always require an additional (typically
+        internal) argument called **resources** to specify what computing
+        infrastructure to use.
+    """
     def register(self, func, *types, **flags):
         """
         Register a new function signature.
@@ -160,27 +142,36 @@ class Dispatcher(object):
         self.functions[reg] = func
 
     @property
-    def __doc__(self):
-        doc = "Dispatched method {}".format(self.name)
-        for func in self.functions.values():
-            doc += func.__doc__
-            doc += "="*80 + r"\n\n"
-        return doc
+    def signatures(self):
+        """
+        Check avaiable function signatures.
+
+        Returns:
+            df (:class:`~pandas.DataFrame`): Data table of available signatures
+        """
+        proc = []
+        mem = []
+        parallel = []
+        types = []
+        exists = []
+        for sig in self.functions.keys():
+            p, m, l = sig[:3]
+            typ = tuple(sig[3:])
+            proc.append(p)
+            mem.append(m)
+            parallel.append(l)
+            types.append("(" + ", ".join([t.__name__ for t in typ]) + ")")
+            exists.append(True)
+        df = pd.DataFrame.from_dict({'types': types, 'proc': proc, 'mem': mem,
+                                     'parallel': parallel, 'exists': exists})
+        df = df.pivot_table(values='exists', index=['proc', 'mem', 'parallel'],
+                            columns='types')
+        df.fillna(False, inplace=True)
+        return df
 
     def __call__(self, *args, **kwargs):
         types = tuple([type(arg) for arg in args])
         sig = (0, 0, 0, ) + types
-        #memlim = kwargs.pop("_memlim", 2048)
-        #nodes = kwargs.pop("_nodes", list())
-        #proc = 1 if config['dynamic']['cuda'] == 'true' else 0
-        #size = sum(getsizeof(arg) for arg in args)
-        #mem = 1 if size/1024**2 > memlim else 0
-        #pll = 0
-        #if len(nodes) > 0:
-    #        pll = 2
-    #    elif any(key[1] > 0 for key in self.functions.keys()):
-    #        pll = 1
-    #    sig = (proc, mem, pll, ) + types
         try:
             func = self.functions[sig]
         except KeyError:
@@ -188,40 +179,48 @@ class Dispatcher(object):
         return func(*args, **kwargs)
 
     def __init__(self, name):
-        """
-        STUFF AND THINGS 2
-        """
         self.name = name
         self.__name__ = name
         self.functions = dict()
         if name not in _dispatched:
             _dispatched[name] = self
 
-#    def __repr__(self):
-#        return self.functions.__repr__()
+    def __repr__(self):
+        return self.functions.__repr__()
 
-#    def __str__(self):
-#        return self.__repr__()
+    def __str__(self):
+        return self.__repr__()
 
-#    def _repr_html_(self):
-#        return self.to_frame()._repr_html_()
+    def _repr_html_(self):
+        return self.to_frame()._repr_html_()
 
 
-def dispatch(*types, **flags):
+def dispatch(itypes=None, otypes=None, **flags):
     """
-    Decorator used to create/register a strongly typed and possibly parallelized
-    and/or compiled function for standalone use or as part of a
-    :class:`~exa.workflow.Workflow`. For a description of the arguments and
-    usage examples see :class:`~exa.workflow.dispatch.Dispatcher`.
+    Decorator to transform a set of functions into a
+    :class:`~exa.compute.dispatch.Dispatcher` callable (behaves just like a
+    function).
+
+    .. code-block:: Python
+
+        @dispatch(int, float)
+        def f(x, y):
+            return x + y
+
+        @dispatch(int, str)
+        def f(x, y):
+            return str(x) + y + "!"
+
+    See Also:
+        More examples can be found in the tests: :class:`~exa.compute.tests.test_dispatch`.
     """
     def dispatched_func(func):
-        """This function acts on the implicit function argument."""
         name = func.__name__                 # It checks to see if we have made
         if name in _dispatched:              # an entry for a function with the
             dispatcher = _dispatched[name]   # same name, creates one if not,
         else:                                # and registers the current function
             dispatcher = Dispatcher(name)    # definition to the provided types.
-        dispatcher.register(func, *types, **flags)
+        dispatcher.register(func, itypes, **flags)
         return dispatcher
     return dispatched_func
 

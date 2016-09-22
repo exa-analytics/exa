@@ -3,9 +3,10 @@
 
 
 ########################
-Computational Workflows
+Typed Class Attributes
 ########################
-.. automodule:: exa.compute.__init__
+Description
 
-.. automodule:: exa.compute.connect
+
+.. automodule:: exa.core.typed
     :members:

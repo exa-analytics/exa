@@ -10,9 +10,9 @@ This sub-package contains functionality for performing computation.
 - :class:`~exa.compute.conectivity.SSH`: Inter node communication for workflows
 """
 # Import modules
-from exa.compute import dispatch
+from exa.compute import compilation, dispatch, connect, resource, workflow
 
 # Import sub-packages
-from exa.compute import tests
+from exa.compute import algorithms, tests
 
 # Import user/dev API

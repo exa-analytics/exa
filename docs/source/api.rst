@@ -24,6 +24,7 @@ of important framework concepts can also be found within this documentation.
     :caption: Containers and Editors
 
     core/main.rst
+    core/typed.rst
 
 
 .. toctree::
@@ -42,3 +43,5 @@ of important framework concepts can also be found within this documentation.
 
     compute/main.rst
     compute/dispatch.rst
+    compute/workflow.rst
+    compute/algorithms/main.rst

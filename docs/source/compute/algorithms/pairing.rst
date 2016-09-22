@@ -3,9 +3,7 @@
 
 
 ########################
-Computational Workflows
+Pairing Functions
 ########################
-.. automodule:: exa.compute.__init__
-
-.. automodule:: exa.compute.connect
+.. automodule:: exa.compute.algorithms.pairing
     :members:
