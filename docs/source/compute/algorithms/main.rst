@@ -11,4 +11,4 @@ Computational Algorithms
     :maxdepth: 1
     :caption: Algorithms
 
-    
+    pairing.rst

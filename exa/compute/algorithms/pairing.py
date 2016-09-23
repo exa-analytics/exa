@@ -61,17 +61,9 @@ def szudzik(x, y):
     """
     `Szudzik`_ pairing function.
 
-    .. _Szudzik: http://szudzik.com/ElegantPairing.pdf
-
     See Also:
         http://stackoverflow.com/questions/919612/mapping-two-integers-to-one-in-a-unique-and-deterministic-way
+
+    .. _Szudzik: http://szudzik.com/ElegantPairing.pdf
     """
-    xx = 2*x
-    if x < 0:
-        xx = -2*x - 1
-    yy = 2*y
-    if y < 0:
-        yy = -2*y - 1
-    if xx > yy:
-        return y**2 + x
-    return x**2 + x + y
+    raise NotImplementedError()
