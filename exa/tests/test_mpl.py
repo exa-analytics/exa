@@ -11,7 +11,7 @@ from exa.tester import UnitTester
 
 
 class TestMPL(UnitTester):
-    """
-    """
+    """Test internal matplotlib configuration."""
     def test_color_palette(self):
+        """Test :func:`~exa.mpl.color_palette`."""
         self.assertTrue(np.isclose(0.622722, color_palette()[0][2]))

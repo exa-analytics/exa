@@ -116,14 +116,14 @@ class TypedMeta(type):
 
         return property(getter, setter, deleter)
 
-    def __new__(metacls, name, bases, clsdict):
+    def __new__(mcs, name, bases, clsdict):
         """
         Modification of the class definition occurs here; we iterate over all
         statically typed attributes and attach their property (see
         :func:`~exa.typed.TypedMeta.create_property`) definition, returning
         the modified (i.e. property containing) class definition.
         """
-        for k, v in vars(metacls).items():
+        for k, v in vars(mcs).items():
             if isinstance(v, (type, tuple, list)):
-                clsdict[k] = metacls.create_property(k, v)
-        return super(TypedMeta, metacls).__new__(metacls, name, bases, clsdict)
+                clsdict[k] = mcs.create_property(k, v)
+        return super(TypedMeta, mcs).__new__(mcs, name, bases, clsdict)

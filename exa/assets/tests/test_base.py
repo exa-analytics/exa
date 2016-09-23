@@ -10,8 +10,7 @@ from exa.assets.base import generate_hexuid
 
 
 class TestBaseModel(UnitTester):
-    """
-    """
+    """Test the base model for database tables."""
     def test_generate_hexuid(self):
         """Test :func:`~exa.cms.base.generate_hexuid`."""
         hexuid = generate_hexuid()

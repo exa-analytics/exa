@@ -66,7 +66,7 @@ def szudzik(x, y):
     See Also:
         http://stackoverflow.com/questions/919612/mapping-two-integers-to-one-in-a-unique-and-deterministic-way
     """
-        xx = 2*x
+    xx = 2*x
     if x < 0:
         xx = -2*x - 1
     yy = 2*y

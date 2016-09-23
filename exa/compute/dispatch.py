@@ -52,7 +52,6 @@ arguments passed to the dispatch decorator.
 .. _multiply dispatched: https://en.wikipedia.org/wiki/Multiple_dispatch
 """
 import pandas as pd
-from sys import getsizeof
 from itertools import product
 try:
     from inspect import signature
@@ -149,25 +148,7 @@ class Dispatcher(object):
         Returns:
             df (:class:`~pandas.DataFrame`): Data table of available signatures
         """
-        proc = []
-        mem = []
-        parallel = []
-        types = []
-        exists = []
-        for sig in self.functions.keys():
-            p, m, l = sig[:3]
-            typ = tuple(sig[3:])
-            proc.append(p)
-            mem.append(m)
-            parallel.append(l)
-            types.append("(" + ", ".join([t.__name__ for t in typ]) + ")")
-            exists.append(True)
-        df = pd.DataFrame.from_dict({'types': types, 'proc': proc, 'mem': mem,
-                                     'parallel': parallel, 'exists': exists})
-        df = df.pivot_table(values='exists', index=['proc', 'mem', 'parallel'],
-                            columns='types')
-        df.fillna(False, inplace=True)
-        return df
+        return False
 
     def __call__(self, *args, **kwargs):
         types = tuple([type(arg) for arg in args])
@@ -195,7 +176,7 @@ class Dispatcher(object):
         return self.to_frame()._repr_html_()
 
 
-def dispatch(itypes=None, otypes=None, **flags):
+def dispatch(*itypes, **flags):
     """
     Decorator to transform a set of functions into a
     :class:`~exa.compute.dispatch.Dispatcher` callable (behaves just like a
@@ -220,7 +201,7 @@ def dispatch(itypes=None, otypes=None, **flags):
             dispatcher = _dispatched[name]   # same name, creates one if not,
         else:                                # and registers the current function
             dispatcher = Dispatcher(name)    # definition to the provided types.
-        dispatcher.register(func, itypes, **flags)
+        dispatcher.register(func, *itypes, **flags)
         return dispatcher
     return dispatched_func
 

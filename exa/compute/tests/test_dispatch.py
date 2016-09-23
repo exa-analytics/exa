@@ -65,8 +65,3 @@ class TestDispatcher(UnitTester):
         self.assertTrue(self.fn("Bar", True).endswith("!"))
         self.assertTrue(self.fn(42, 42).endswith("!"))
         self.assertTrue(self.fn("42", True).endswith("!"))
-
-    def test_nb_compiler(self):
-        """
-        """
-        pass
