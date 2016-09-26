@@ -43,26 +43,13 @@ def compile_function(func, itypes, compiler='default', otypes=None):
         def func(arg0, ...):
             ...
 
-    The operators are "+" (AND), "|" (OR), "*", (propagate AND).
-
+    The operators are "+" (AND), "\|" (OR), "*", (propagate AND).
     | cpu: Compute only on CPU resources
     | gpu: Compute only on GPU resource
     | cpu+gpu: Computation on both CPU and GPU resources simultaneously
     | cpu|gpu: Compile signatures for cpu only and gpu only computation
     | (cpu|gpu)*mic: Compile signatures "cpu+mic|gpu+mic", but not "cpu+gpu+mic"
     | cpu*gpu*mic: Compile signatures for cpu only, gpu only, cpu+gpu, cpu+mic, gpu+mic, and cpu+gpu+mic computation
-
-    The operator "+" acts to require all types of resources to be present, e.g.
-    "cpu+gpu" requires a node with gpu compute capability, "cpu|gpu" functions
-    can operate on a node that does or does not have a GPU, and "gpu" functions
-    only operate on nodes that have gpu compute capability.
-
-     Similarly, writing
-    "cpu,gpu" will compile two function signatures one for operation on cpus
-    only and one for operation on gpus only. For full cross compilation,
-    "cpu:gpu" will create function signatures that will work on either only
-    cpus, only gpus, or any combination therein. This can be extended to three
-    resource objects as follows: "cpu+gpu:mic"
 
     Args:
         itypes (tuple): Input argument types
