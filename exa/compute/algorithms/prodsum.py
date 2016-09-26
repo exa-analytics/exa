@@ -10,7 +10,6 @@ from itertools import product
 from exa.workflow.dispatch import dispatch
 
 
-@dispatch(list, list)
 def product_pair_sum(x, y):
     """
     Product pair list comprehension.

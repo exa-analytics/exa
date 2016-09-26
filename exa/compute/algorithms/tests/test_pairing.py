@@ -6,7 +6,8 @@ Tests for :mod:`~exa.compute.algorithms.pairing`
 ########################################################
 """
 from exa.tester import UnitTester
-from exa.compute.algorithms.pairing import cantor, invert_cantor
+from exa.compute.algorithms.pairing import (cantor, invert_cantor, szudzik
+                                            invert_szudzik, unordered)
 
 
 class TestPairing(UnitTester):
@@ -20,3 +21,15 @@ class TestPairing(UnitTester):
         self.assertEqual(cantor(1, 52), 1483)
         self.assertEqual(invert_cantor(1432), (52, 1))
         self.assertEqual(invert_cantor(1483), (1, 52))
+
+    def test_szudzik(self):
+        """
+        Test :func:`~exa.compute.algorithms.pairing.szudzik` and
+        :func:`~exa.compute.algorithms.pairing.invert_szudzik`.
+        """
+        self.assertEqual(szudzik(1, 1), 3)
+        self.assertEqual(invert_szudzik(3), (1, 1))
+
+    def test_unordered(self):
+        """Test :func:`~exa.compute.algorithms.pairing.unordered`."""
+        self.assertEqual(unordered(1, 3), 3)

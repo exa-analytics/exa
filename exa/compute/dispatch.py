@@ -5,48 +5,37 @@
 Dispatched Functions
 ########################
 This module provides the :class:`~exa.compute.dispatch.Dispatcher` object
-and the :func:`~exa.compute.dispatch.dispatch` decorator. The purpose of the
-dispatcher is not only to enable a `multiply dispatched`_ paradigm but also to
-compile functions compatible with :class:`~exa.compute.workflow.Workflow` class.
-Compilation is performed by `numba`_ if available (see
-:mod:`~exa.compute.compilation`).
+and the :func:`~exa.compute.dispatch.dispatch` decorator. The primary purpose of
+the dispatcher is to allow for the `multiply dispatched`_ programming paradigm.
+Because "dispatching" requires information about argument types, it is
+convenient to also perform dynamic compilation upon dispatch. Compilation can
+allow for GIL free execution enabling parallelization. Of course, it also
+usually makes the function faster. See :mod:`~exa.compute.compilation` for
+more information.
 
-.. code-block:: Python
+Dispatched functions are stored in a :class:`~exa.compute.dispatch.Dispatcher`
+class object. They are indexed by a combination of their input (and output)
+argument types and executation specifications (a consequence of possible
+compilation options).
 
-    @dispatch(str)
-    def fn(arg):
-        return arg + "!"
-
-    @dispatch(int)
-    def fn(arg):
-        return str(2*arg) + "!"
-
-    @dispatch(float)
-    def fn(arg):
-        return str(20*arg) + "!"
++----------------+------+----------+--------+--------+
+| category/index |  0   |   1      |  2     | 3      |
++================+======+==========+========+========+
+| processing     | cpu  | gpu      | mic    |        |
++----------------+------+----------+--------+--------+
+| memory         | ram  | disk     |        |        |
++----------------+------+----------+--------+--------+
+| parallelism    | none | gilfree  | first  | second |
++----------------+------+----------+--------+--------+
+| first: single node, multithread/multiprocess       |
++----------------------------------------------------+
+| second: multi node, multithread/multiprocess       |
++----------------------------------------------------+
 
 Warning:
     Most syntax checkers, linters, or other code analyses methods will raise
     style or syntax errors on the code examples above. As always, use unit tests
     to ensure that code is behaving as expected.
-
-This example generates a function dispatcher that makes a call to the appropriate
-function signature depending on the type of the argument given. For cases where
-the same signature supports multiple argument types the following syntax is
-acceptable.
-
-.. code-block:: Python
-
-    @dispatch((str, int))
-    def fn(arg):
-        return str(arg) + "!"
-
-    @dispatch((bool, float))
-    def fn(arg):
-        return str(float(arg)*42) + "!"
-
-In these examples, signatures references will be created for both types of
-arguments passed to the dispatch decorator.
 
 .. _numba: http://numba.pydata.org/
 .. _multiply dispatched: https://en.wikipedia.org/wiki/Multiple_dispatch
@@ -57,7 +46,7 @@ try:
     from inspect import signature
 except ImportError:
     from inspect import getargspec as signature
-from exa._config import config
+from exa.compute.compilation import compile_function
 
 
 _dispatched = dict()    # Global to keep track of all dispatched functions
@@ -65,38 +54,41 @@ _dispatched = dict()    # Global to keep track of all dispatched functions
 
 class Dispatcher(object):
     """
-    This class pretends to be a function (callable) but in fact stores functions
-    that perform the same action but in different ways for differently typed
-    arguments. This concept is called dispatching (single/multiple \- for a
-    single argument, or multiple arguments). Internally, the dispatcher organizes
-    functions by not only their types, but there propensity for parallelism,
-    gpu/mic acceleration, and out of core processing. The dispatcher categorizes
-    functions as follows:
+    A class for storing type dispatched functions.
 
-    +----------------+------+----------+--------+-----+
-    | category/index |  0   |   1      |  2     | 3   |
-    +================+======+==========+========+=====+
-    | processing     | cpu  | gpu      | mic    |     |
-    +----------------+------+----------+--------+-----+
-    | memory         | ram  | disk     |        |     |
-    +----------------+------+----------+--------+-----+
-    | parallelism    | none | GIL free | #1     | #2  |
-    +----------------+------+----------+--------+-----+
-    | #1: single node, multithread/multiprocess       |
-    +-------------------------------------------------+
-    | #2: multi node, multithread/multiprocess        |
-    +-------------------------------------------------+
+    .. code-block:: Python
 
-    The function signature is composed of both the hardware requirements and
-    argument types: (processing, memory, parallelism, \*types). Note that indexes
-    can be combined, for example ("cpu\|gpu", "cpu\+mic").
+        @dispatch(str)
+        def fn(arg):
+            return arg + "!"
 
-    Note:
-        Parallelism types 2 and 3 always require an additional (typically
-        internal) argument called **resources** to specify what computing
-        infrastructure to use.
+        @dispatch(int)
+        def fn(arg):
+            return str(2*arg) + "!"
+
+        @dispatch(float)
+        def fn(arg):
+            return str(20*arg) + "!"
+
+    This example generates a function dispatcher that makes a call to the appropriate
+    function signature depending on the type of the argument given. For cases where
+    the same signature supports multiple argument types the following syntax is
+    acceptable.
+
+    .. code-block:: Python
+
+        @dispatch((str, int))
+        def fn(arg):
+            return str(arg) + "!"
+
+        @dispatch((bool, float))
+        def fn(arg):
+            return str(float(arg)*42) + "!"
+
+    In these examples, signature references will be created for both types of
+    arguments passed to the dispatch decorator.
     """
-    def register(self, func, *types, **flags):
+    def register(self, func, *itypes, **flags):
         """
         Register a new function signature.
 
@@ -106,7 +98,8 @@ class Dispatcher(object):
 
         Args:
             func (function): Function to be registered
-            types (tuple): Type(s) for each argument
+            itypes (tuple): Type(s) for each argument
+            otypes (tuple): Output type(s)
             layout (str): Dimensionality reduction/expansion layout
             jit (bool): Just-in-time function compilation
             vectorize (bool): Just-in-time function vectorization and compilation
@@ -119,12 +112,12 @@ class Dispatcher(object):
             distrib (bool): True if function desiged for distributed execution
         """
         nargs = get_nargs(func)
-        ntyps = len(types)
+        ntyps = len(itypes)
         if nargs != ntyps:
             raise ValueError("Function has {} args but signature has {} entries!".format(nargs, ntyps))
-        elif any(isinstance(typ, (tuple, list)) for typ in types):
+        elif any(isinstance(typ, (tuple, list)) for typ in itypes):
             prod = []
-            for typ in types:
+            for typ in itypes:
                 if not isinstance(typ, (tuple, list)):
                     prod.append([typ])
                 else:
@@ -132,10 +125,15 @@ class Dispatcher(object):
             for typs in product(*prod):
                 self.register(func, *typs, **flags)
             return
-        for typ in types:
+        for typ in itypes:
             if not isinstance(typ, type):
                 raise TypeError("Not a type: {}".format(typ))
-        reg = (0, 0, 0, ) + types
+        reg = (0, 0, 0, ) + itypes
+        jit = flags.pop('jit', False)
+        vectorize = flags.pop('vectorize', False)
+        guvectorize = flags.pop('guvectorize', False)
+        if jit or vectorize or guvectorize:
+            reg, func = compile
         #if jit or vectorize or guvectorize:
         #    reg, func = compile_func(func)
         self.functions[reg] = func
@@ -151,8 +149,8 @@ class Dispatcher(object):
         return False
 
     def __call__(self, *args, **kwargs):
-        types = tuple([type(arg) for arg in args])
-        sig = (0, 0, 0, ) + types
+        itypes = tuple([type(arg) for arg in args])
+        sig = (0, 0, 0, ) + itypes
         try:
             func = self.functions[sig]
         except KeyError:

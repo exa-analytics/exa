@@ -28,6 +28,8 @@ def cantor(k1, k2):
 
     .. _Cantor: https://en.wikipedia.org/wiki/Pairing_function#Cantor_pairing_function
     """
+    k1 = np.int64(k1)
+    k2 = np.int64(k2)
     return (k1 + k2)*(k1 + k2 + 1)//2 + k2
 
 
@@ -38,18 +40,18 @@ def invert_cantor(z):
 
     .. math::
 
-        w = \\left\\lfloor{\\frac{\\sqrt{8z + 1} - 1}{2}}\\right\\rfloor \\\\
-        t = \\frac{w^2 + w}{2} \\\\
-        y = z - t \\\\
-        x = w - y \\\\
+        w &= \\left\\lfloor{\\frac{\\sqrt{8z + 1} - 1}{2}}\\right\\rfloor \\\\
+        t &= \\frac{w^2 + w}{2} \\\\
+        y &= z - t \\\\
+        x &= w - y \\\\
 
     Args:
         z: Cantor function result
 
     Returns:
-        k1: First number in Cantor pair
-        k2: Second number in Cantor pair
+        (k1, k2): Cantor pairs
     """
+    z = np.int64(z)
     w = np.floor((np.sqrt(8*z + 1) - 1)//2).astype(np.int64)
     t = (w**2 + w)//2
     y = z - t
@@ -66,4 +68,33 @@ def szudzik(x, y):
 
     .. _Szudzik: http://szudzik.com/ElegantPairing.pdf
     """
-    raise NotImplementedError()
+    if x < y:
+        return np.int64(y**2 + x)
+    return np.int64(x**2 + x + y)
+
+
+def invert_szudzik(z):
+    """
+    From a Szudzik number, extract the input values of x and y.
+
+    See Also:
+        :func:`~exa.compute.algorithms.pairing.szudzik`
+    """
+    z = np.int64(z)
+    w = np.floor(np.sqrt(z)).astype(np.int64)
+    t = z - w**2
+    if t < w:
+        return t, w
+    return w, t - w
+
+
+def unordered(x, y):
+    """
+    Pairing function for to elements where order doesn't matter.
+
+    .. math::
+
+        \\left(x, y\\right) = xy + trunc\\left[\\left(\\left|x - y\\right|
+        - 1\\right)^2/4\\right] = \\left(y, x\\right)
+    """
+    return x*y + np.trunc((np.abs(x - y) - 1)**2/4).astype(np.int64)
