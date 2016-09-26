@@ -12,7 +12,7 @@ See Also:
     :mod:`~exa.compute.dispatch` module.
 """
 from exa._config import config
-compilers = dict()
+compilers = {'none': None}
 if config['dynamic']['numba']:
     pass
     #from exa.compute.compilers.nb import compiler as nb_compiler
@@ -60,8 +60,11 @@ def compile_function(func, itypes, compiler='default', otypes=None):
         parallelism (str): Choice of "none", "gilfree", "first", "second"
     """
     otypes = ("*", ) if otypes is None else otypes
-    if compilers['default'] is None:
+    try:
+        compiler = compilers[compiler]
+    except KeyError:
+        raise KeyError("No such compiler {} available.".format(compiler))
+    if compiler is None:
         return ("cpu", "ram", "none", ) + itypes, func
-    elif compiler in compilers:
+    else:
         return compilers[compiler](func, itypes, flags)
-    raise KeyError("No such compiler {} available.".format(compiler))

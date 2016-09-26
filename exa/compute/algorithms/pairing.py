@@ -63,6 +63,13 @@ def szudzik(x, y):
     """
     `Szudzik`_ pairing function.
 
+    .. math::
+
+        f\\left(x, y\\right) = \\begin{cases}
+        x + y^2\ &if x < y \\\\
+        x^2 + x + y\ &otherwise \\\\
+        \\end{cases}
+
     See Also:
         http://stackoverflow.com/questions/919612/mapping-two-integers-to-one-in-a-unique-and-deterministic-way
 

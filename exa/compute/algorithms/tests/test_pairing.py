@@ -6,7 +6,7 @@ Tests for :mod:`~exa.compute.algorithms.pairing`
 ########################################################
 """
 from exa.tester import UnitTester
-from exa.compute.algorithms.pairing import (cantor, invert_cantor, szudzik
+from exa.compute.algorithms.pairing import (cantor, invert_cantor, szudzik,
                                             invert_szudzik, unordered)
 
 
