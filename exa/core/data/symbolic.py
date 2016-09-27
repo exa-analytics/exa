@@ -18,19 +18,20 @@ class SymbolicFunction(sy.Function):
     """
     Base class for symbolic functions.
     """
-    def lambdify(self, recompile=False):
-        """
-        Compile the function for discrete evaluation.
-        """
-        if self._discrete_func is None or recompile == True:
-            npfunc = sy.lambdify(sorted(self.free_symbols), self, 'numpy')
-            if self._compile_type == "jit":
-                self._discrete_func = jit(nopython=True)(npfunc)
-            elif self._compile_type == "vectorize":
-                self._discrete_func = vectorize([], nopython=True)(npfunc)
-            else:
-                raise NotImplementedError()
-        return self._discrete_func
+# This should use new compilation machinery
+#    def lambdify(self, recompile=False):
+#        """
+#        Compile the function for discrete evaluation.
+#        """
+#        if self._discrete_func is None or recompile == True:
+#            npfunc = sy.lambdify(sorted(self.free_symbols), self, 'numpy')
+#            if self._compile_type == "jit":
+#                self._discrete_func = jit(nopython=True)(npfunc)
+#            elif self._compile_type == "vectorize":
+#                self._discrete_func = vectorize([], nopython=True)(npfunc)
+#            else:
+#                raise NotImplementedError()
+#        return self._discrete_func
 
     def __call__(self, *args, recompile=False, **kwargs):
         func = self.lambdify(recompile)
