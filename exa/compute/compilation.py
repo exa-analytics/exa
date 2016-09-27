@@ -7,6 +7,23 @@ Function Compilation
 Translation between the arguments used for :func:`~exa.compute.dispatch.dispatch`
 -ing functions as well as compiling them for faster execution and parallelization.
 
++----------------+------+----------+--------+--------+
+| category/index |  0   |   1      |  2     | 3      |
++================+======+==========+========+========+
+| processing     | cpu  | gpu      | mic    |        |
++----------------+------+----------+--------+--------+
+| memory         | ram  | disk     |        |        |
++----------------+------+----------+--------+--------+
+| parallelism    | none | gilfree  | first  | second |
++----------------+------+----------+--------+--------+
+| first: single node, multithread/multiprocess       |
++----------------------------------------------------+
+| second: multi node, multithread/multiprocess       |
++----------------------------------------------------+
+
+Functions that get compiled with "first" or "second" parallelism will
+automatically obtain machinery to handle a resource kwarg.
+
 See Also:
     Often times, compiling individual functions can be sped up via the
     :mod:`~exa.compute.dispatch` module.
@@ -15,9 +32,9 @@ from exa._config import config
 compilers = {'none': None}
 if config['dynamic']['numba']:
     pass
-    #from exa.compute.compilers.nb import compiler as nb_compiler
-    #compilers['numba'] = nb_compiler
-compilers['default'] = nb_compiler if 'numba' in compilers else None
+    from exa.compute.compilers.nb import compiler as nb_compiler
+    compilers['numba'] = nb_compiler
+compilers['default'] = compilers['numba'] if 'numba' in compilers else None
 
 
 def available_compilers():
@@ -43,7 +60,8 @@ def compile_function(func, itypes, compiler='default', otypes=None):
         def func(arg0, ...):
             ...
 
-    The operators are "+" (AND), "\|" (OR), "*", (propagate AND).
+    The operators are "+" (AND), "\|" (OR), "*", (propagate).
+
     | cpu: Compute only on CPU resources
     | gpu: Compute only on GPU resource
     | cpu+gpu: Computation on both CPU and GPU resources simultaneously
@@ -59,12 +77,11 @@ def compile_function(func, itypes, compiler='default', otypes=None):
         memory (str): Choice of "ram", "disk" (e.g. "ram|disk")
         parallelism (str): Choice of "none", "gilfree", "first", "second"
     """
-    otypes = ("*", ) if otypes is None else otypes
     try:
         compiler = compilers[compiler]
     except KeyError:
         raise KeyError("No such compiler {} available.".format(compiler))
     if compiler is None:
-        return ("cpu", "ram", "none", ) + itypes, func
+        return (0, 0, 0, ) + itypes, func
     else:
         return compilers[compiler](func, itypes, flags)

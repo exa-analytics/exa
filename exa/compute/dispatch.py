@@ -13,25 +13,6 @@ allow for GIL free execution enabling parallelization. Of course, it also
 usually makes the function faster. See :mod:`~exa.compute.compilation` for
 more information.
 
-Dispatched functions are stored in a :class:`~exa.compute.dispatch.Dispatcher`
-class object. They are indexed by a combination of their input (and output)
-argument types and executation specifications (a consequence of possible
-compilation options).
-
-+----------------+------+----------+--------+--------+
-| category/index |  0   |   1      |  2     | 3      |
-+================+======+==========+========+========+
-| processing     | cpu  | gpu      | mic    |        |
-+----------------+------+----------+--------+--------+
-| memory         | ram  | disk     |        |        |
-+----------------+------+----------+--------+--------+
-| parallelism    | none | gilfree  | first  | second |
-+----------------+------+----------+--------+--------+
-| first: single node, multithread/multiprocess       |
-+----------------------------------------------------+
-| second: multi node, multithread/multiprocess       |
-+----------------------------------------------------+
-
 Warning:
     Most syntax checkers, linters, or other code analyses methods will raise
     style or syntax errors on the code examples above. As always, use unit tests
