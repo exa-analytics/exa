@@ -27,7 +27,6 @@ try:
     from inspect import signature
 except ImportError:
     from inspect import getargspec as signature
-from exa.compute.compilation import compile_function
 
 
 _dispatched = dict()    # Global to keep track of all dispatched functions
@@ -77,20 +76,6 @@ class Dispatcher(object):
         method can request the function be compiled according to option arguments
         specified.
 
-        Args:
-            func (function): Function to be registered
-            itypes (tuple): Type(s) for each argument
-            otypes (tuple): Output type(s)
-            layout (str): Dimensionality reduction/expansion layout
-            jit (bool): Just-in-time function compilation
-            vectorize (bool): Just-in-time function vectorization and compilation
-            nopython (bool): Compile with native types (true) or Python types (false)
-            nogil (bool): Release the GIL when compiling with native types
-            cache (bool): Compile to disk based cache
-            rtype (type): Vectorized return type
-            target (str): Vectorized compile architecture target
-            outcore (bool): If the function designed for out-of-core execution
-            distrib (bool): True if function desiged for distributed execution
         """
         nargs = get_nargs(func)
         ntyps = len(itypes)
@@ -99,22 +84,25 @@ class Dispatcher(object):
         elif any(isinstance(typ, (tuple, list)) for typ in itypes):
             prod = []
             for typ in itypes:
-                if not isinstance(typ, (tuple, list)):
-                    prod.append([typ])
-                else:
+                if isinstance(typ, (tuple, list)):
                     prod.append(typ)
-            for typs in product(*prod):
+                else:
+                    prod.append((typ, ))
+            for typs in product(*prod):    # Recursive call to self.register
+                print("recur: " + str(typs))
                 self.register(func, *typs, **flags)
-            return
+            return                         # Make sure to exit recursive calls
+        # Begin registration process here, checking expanded arguments
         for typ in itypes:
             if not isinstance(typ, type):
                 raise TypeError("Not a type: {}".format(typ))
+        print(itypes)
         reg = (0, 0, 0, ) + itypes
-        jit = flags.pop('jit', False)
-        vectorize = flags.pop('vectorize', False)
-        guvectorize = flags.pop('guvectorize', False)
-        if jit or vectorize or guvectorize:
-            reg, func = compile
+        #jit = flags.pop('jit', False)
+        #vectorize = flags.pop('vectorize', False)
+        #guvectorize = flags.pop('guvectorize', False)
+        #if jit or vectorize or guvectorize:
+    #        reg, func = compile
         #if jit or vectorize or guvectorize:
         #    reg, func = compile_func(func)
         self.functions[reg] = func
@@ -127,6 +115,7 @@ class Dispatcher(object):
         Returns:
             df (:class:`~pandas.DataFrame`): Data table of available signatures
         """
+        
         return False
 
     def __call__(self, *args, **kwargs):
@@ -155,7 +144,7 @@ class Dispatcher(object):
         return self.to_frame()._repr_html_()
 
 
-def dispatch(*itypes, **flags):
+def dispatch(*itypes):
     """
     Decorator to transform a set of functions into a
     :class:`~exa.compute.dispatch.Dispatcher` callable (behaves just like a
@@ -171,16 +160,18 @@ def dispatch(*itypes, **flags):
         def f(x, y):
             return str(x) + y + "!"
 
-    See Also:
-        More examples can be found in the tests: :class:`~exa.compute.tests.test_dispatch`.
+    Args:
+        otype: Output types
+        processing:
     """
     def dispatched_func(func):
-        name = func.__name__                 # It checks to see if we have made
+        name = func.__name__                 # Checks to see if we have made
         if name in _dispatched:              # an entry for a function with the
             dispatcher = _dispatched[name]   # same name, creates one if not,
         else:                                # and registers the current function
             dispatcher = Dispatcher(name)    # definition to the provided types.
-        dispatcher.register(func, *itypes, **flags)
+        print(itypes)
+        dispatcher.register(func, *itypes)
         return dispatcher
     return dispatched_func
 

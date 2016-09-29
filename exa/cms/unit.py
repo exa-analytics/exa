@@ -8,7 +8,7 @@ This module provides relational classes for unit conversion tables.
 """
 import six
 from sqlalchemy import and_, String, Float, Column
-from exa.assets.base import BaseMeta, Base, scoped_session
+from exa.cms.base import BaseMeta, Base, scoped_session
 
 
 class Meta(BaseMeta):

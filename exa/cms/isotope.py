@@ -12,7 +12,7 @@ used dataframe manipulations.
 import six
 import pandas as pd
 from sqlalchemy import String, Float, Integer, Column
-from exa.assets.base import BaseMeta, Base, session_factory
+from exa.cms.base import BaseMeta, Base, session_factory
 #from exa.math.misc.summation import sum_product_pair_f8, sum_product_pair
 
 

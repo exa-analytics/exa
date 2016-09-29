@@ -11,7 +11,7 @@ relationship with container files.
 """
 from sqlalchemy import String, Integer, ForeignKey, Table, Column
 from sqlalchemy.orm import relationship
-from exa.relational.base import Name, Time, Size, Base
+from exa.cms.base import Name, Time, Size, Base
 
 
 jobdatafile = Table(    # Many to many relationship; Job - DataFile

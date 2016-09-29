@@ -11,7 +11,7 @@ there is a many to many relationship between raw data files and container files.
 """
 from sqlalchemy import String, Column, Integer, Table, ForeignKey
 from sqlalchemy.orm import relationship
-from exa.relational.base import Base, Name, HexUID, Time
+from exa.cms.base import Base Name, HexUID, Time
 
 
 containerfiledatafile = Table(    # Many to many relationship; ContainerFile - DataFile

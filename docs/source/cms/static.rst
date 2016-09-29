@@ -8,11 +8,11 @@ Static Data
 These modules contain an API for accessing commonly referenced scientific data
 stored persistently in the database.
 
-.. automodule:: exa.assets.constant
+.. automodule:: exa.cms.constant
     :members:
 
-.. automodule:: exa.assets.unit
+.. automodule:: exa.cms.unit
     :members:
 
-.. automodule:: exa.assets.isotope
+.. automodule:: exa.cms.isotope
     :members:

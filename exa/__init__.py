@@ -11,7 +11,7 @@ with extensibility in mind.
 from exa import _version, _config, tester, errors, mpl, tex
 
 # Import sub-packages
-from exa import assets, compute, core, tests
+from exa import cms, compute, core, tests
 
 # Import user/dev API
 from exa._version import __version__

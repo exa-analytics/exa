@@ -2,11 +2,11 @@
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Tests for :mod:`~exa.assets.base`
+Tests for :mod:`~exa.cms.base`
 #############################################
 """
 from exa.tester import UnitTester
-from exa.assets.base import generate_hexuid
+from exa.cms.base import generate_hexuid
 
 
 class TestBaseModel(UnitTester):

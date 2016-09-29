@@ -4,8 +4,12 @@
 """
 Function Compilation
 ##################################
-Translation between the arguments used for :func:`~exa.compute.dispatch.dispatch`
--ing functions as well as compiling them for faster execution and parallelization.
+This module provides a generic wrapper for different compilation machinery
+available in the Python ecosystem. It provides a systematic API for developers
+writing compiled functions which is compiler backend independent. In this way
+the same algorithm can be tested with a number of different compiler backends
+without needed a rewrite.
+
 
 +----------------+------+----------+--------+--------+
 | category/index |  0   |   1      |  2     | 3      |
@@ -15,7 +19,7 @@ Translation between the arguments used for :func:`~exa.compute.dispatch.dispatch
 | memory         | ram  | disk     |        |        |
 +----------------+------+----------+--------+--------+
 | parallelism    | none | gilfree  | first  | second |
-+----------------+------+----------+--------+--------+
++================+======+==========+========+========+
 | first: single node, multithread/multiprocess       |
 +----------------------------------------------------+
 | second: multi node, multithread/multiprocess       |
@@ -31,9 +35,8 @@ See Also:
 from exa._config import config
 compilers = {'none': None}
 if config['dynamic']['numba']:
-    pass
     from exa.compute.compilers.nb import compiler as nb_compiler
-    compilers['numba'] = nb_compiler
+    #compilers['numba'] = nb_compiler
 compilers['default'] = compilers['numba'] if 'numba' in compilers else None
 
 
@@ -44,7 +47,39 @@ def available_compilers():
 
 def compile_function(func, itypes, compiler='default', otypes=None):
     """
-    Compile a function using a specified compiler.
+    Compile a function using a specified backend compiler.
+
+    .. code-block:: Python
+
+        from numbers import Real
+
+        def fn(a, b, c):
+            d = a*b
+            return "ans: {}, {}".format(str(d), c)
+
+        itypes = (Real, Real, str)
+        sig, fnc = compile_function(fn, itypes)
+
+    Args:
+        itypes (tuple): Tuple of argument types
+        compiler (str): See :func:`~exa.compute.compilers.wrapper.available_compilers`
+        otypes (tuple): Tuple of output type(s) or None
+        Args:
+            func (function): Function to be registered
+            itypes (tuple): Type(s) for each argument
+            otypes (tuple): Output type(s)
+            layout (str): Dimensionality reduction/expansion layout
+            jit (bool): Just-in-time function compilation
+            vectorize (bool): Just-in-time function vectorization and compilation
+            nopython (bool): Compile with native types (true) or Python types (false)
+            nogil (bool): Release the GIL when compiling with native types
+            cache (bool): Compile to disk based cache
+            rtype (type): Vectorized return type
+            target (str): Vectorized compile architecture target
+            outcore (bool): If the function designed for out-of-core execution
+            distrib (bool): True if function desiged for distributed execution
+
+
 
     Compilation accepts a number of human readable arguments. To compile a
     function that requires both CPU and GPU resources, acts in memory only,

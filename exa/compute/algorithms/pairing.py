@@ -10,6 +10,7 @@ import numpy as np
 from exa.compute.dispatch import dispatch
 
 
+@dispatch((int, np.int64), (int, np.int64))
 def cantor(k1, k2):
     """
     `Cantor`_ pairing function takes two numbers and creates a unique number.
@@ -20,17 +21,15 @@ def cantor(k1, k2):
         \\left(k_1 + k_2 + 1\\right) + k_2
 
     Args:
-        k1: First number
-        k2: Second number
+        k1 (int): First number
+        k2 (int): Second number
 
     Returns:
-        k12: Unique number based on k1, k2
+        k12 (int): Unique number based on k1, k2
 
     .. _Cantor: https://en.wikipedia.org/wiki/Pairing_function#Cantor_pairing_function
     """
-    k1 = np.int64(k1)
-    k2 = np.int64(k2)
-    return (k1 + k2)*(k1 + k2 + 1)//2 + k2
+    return int((k1 + k2)*(k1 + k2 + 1)//2 + k2)
 
 
 def invert_cantor(z):

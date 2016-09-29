@@ -13,7 +13,7 @@ See Also:
 """
 from sqlalchemy import Integer, Column, ForeignKey, Table
 from sqlalchemy.orm import relationship
-from exa.relational.base import Base, Name, Time, Size
+from exa.cms.base import Base, Name, Time, Size
 
 
 projectjob = Table(   # Many to many relationship; Project - Job

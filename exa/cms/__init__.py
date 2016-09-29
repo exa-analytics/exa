@@ -6,13 +6,13 @@ This sub-package handles all digital asset management features of the exa
 framework.
 """
 # Import modules
-from exa.assets import base, constant, isotope, unit
+from exa.cms import base, constant, isotope, unit
 
 # Import sub-packages
-from exa.assets import tests
+from exa.cms import tests
 
 # Import user/dev API
-from exa.assets.constant import Constant
-from exa.assets.unit import (Length, Mass, Time, Current, Amount, Luminosity,
+from exa.cms.constant import Constant
+from exa.cms.unit import (Length, Mass, Time, Current, Amount, Luminosity,
                              Dose, Acceleration, Charge, Dipole, Energy, Force,
                              Frequency, MolarMass)

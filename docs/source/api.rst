@@ -25,16 +25,16 @@ of important framework concepts can also be found within this documentation.
 
     core/main.rst
     core/typed.rst
+    core/editor.rst
 
 
 .. toctree::
     :maxdepth: 1
-    :caption: Asset Management
+    :caption: Content Management
 
-    assets/main.rst
-    assets/static.rst
-    assets/cmm.rst
-    assets/editor.rst
+    cms/main.rst
+    cms/static.rst
+    cms/cmm.rst
 
 
 .. toctree::

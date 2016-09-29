@@ -7,12 +7,14 @@ This sub-package contains functionality for performing computation.
 - :class:`~exa.compute.resource.Resources`: A representation of external computing resources
 - :class:`~exa.compute.workflow.Workflow`: Programmatic computation
 - :class:`~exa.compute.dispatch.Dispatcher`: Multiple dispatch, compilation, and parallelization
-- :class:`~exa.compute.conectivity.SSH`: Inter node communication for workflows
+- :class:`~exa.compute.conect.SSH`: Inter node communication for workflows
 """
 # Import modules
-from exa.compute import compilation, dispatch, connect, resource, workflow
+from exa.compute import dispatch, connect, resource, workflow
 
 # Import sub-packages
 from exa.compute import algorithms, tests
 
 # Import user/dev API
+from exa.compute.dispatch import dispatch
+from exa.compute.compilers.wrapper import compile_function, available_compilers
