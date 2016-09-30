@@ -89,14 +89,12 @@ class Dispatcher(object):
                 else:
                     prod.append((typ, ))
             for typs in product(*prod):    # Recursive call to self.register
-                print("recur: " + str(typs))
                 self.register(func, *typs, **flags)
             return                         # Make sure to exit recursive calls
         # Begin registration process here, checking expanded arguments
         for typ in itypes:
             if not isinstance(typ, type):
                 raise TypeError("Not a type: {}".format(typ))
-        print(itypes)
         reg = (0, 0, 0, ) + itypes
         #jit = flags.pop('jit', False)
         #vectorize = flags.pop('vectorize', False)
@@ -115,7 +113,7 @@ class Dispatcher(object):
         Returns:
             df (:class:`~pandas.DataFrame`): Data table of available signatures
         """
-        
+
         return False
 
     def __call__(self, *args, **kwargs):
@@ -170,7 +168,6 @@ def dispatch(*itypes):
             dispatcher = _dispatched[name]   # same name, creates one if not,
         else:                                # and registers the current function
             dispatcher = Dispatcher(name)    # definition to the provided types.
-        print(itypes)
         dispatcher.register(func, *itypes)
         return dispatcher
     return dispatched_func

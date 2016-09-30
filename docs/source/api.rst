@@ -44,4 +44,5 @@ of important framework concepts can also be found within this documentation.
     compute/main.rst
     compute/dispatch.rst
     compute/workflow.rst
+    compute/compilers/main.rst
     compute/algorithms/main.rst

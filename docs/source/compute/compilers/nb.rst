@@ -3,7 +3,7 @@
 
 
 #######################################################
-Multiple Dispatch
+Compilation Using Numba
 #######################################################
-.. automodule:: exa.compute.dispatch
+.. automodule:: exa.compute.compilers.nb
     :members:

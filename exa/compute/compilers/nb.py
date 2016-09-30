@@ -5,6 +5,8 @@
 Compilation Using `Numba`_
 #############################
 This module provides conversion between exa syntax and `numba`_ syntax.
+
+.. _numba: http://numba.pydata.org/
 """
 import numba as nb
 

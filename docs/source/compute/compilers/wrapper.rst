@@ -3,7 +3,7 @@
 
 
 #######################################################
-Multiple Dispatch
+Compilation wrapper
 #######################################################
-.. automodule:: exa.compute.dispatch
+.. automodule:: exa.compute.compilers.wrapper
     :members:

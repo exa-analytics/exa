@@ -3,7 +3,14 @@
 
 
 #######################################################
-Multiple Dispatch
+Automatic Compilation for Workflows
 #######################################################
-.. automodule:: exa.compute.dispatch
+.. automodule:: exa.compute.compilers.__init__
     :members:
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Compilers
+
+    wrapper.rst
+    nb.rst

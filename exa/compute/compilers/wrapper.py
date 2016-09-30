@@ -19,7 +19,7 @@ without needed a rewrite.
 | memory         | ram  | disk     |        |        |
 +----------------+------+----------+--------+--------+
 | parallelism    | none | gilfree  | first  | second |
-+================+======+==========+========+========+
++----------------+------+----------+--------+--------+
 | first: single node, multithread/multiprocess       |
 +----------------------------------------------------+
 | second: multi node, multithread/multiprocess       |
