@@ -7,31 +7,32 @@ Pairing Functions
 Pairing functions are used to map (bijectively: one-to-one) elements of tow sets.
 """
 import numpy as np
-from exa.compute.dispatch import dispatch
+from exa.compute.dispatch import dispatch, ints, floats
 
 
-@dispatch((int, np.int64), (int, np.int64))
-def cantor(k1, k2):
+@dispatch(ints, ints)
+def cantor(x, y):
     """
     `Cantor`_ pairing function takes two numbers and creates a unique number.
 
     .. math::
 
-        f\\left(k_1, k_2\\right) = \\frac{1}{2}\\left(k_1 + k_2\\right)
-        \\left(k_1 + k_2 + 1\\right) + k_2
+        f\\left(x, y\\right) = \\frac{1}{2}\\left(x + y\\right)
+        \\left(x + y + 1\\right) + y
 
     Args:
-        k1 (int): First number
-        k2 (int): Second number
+        x (int): First number
+        y (int): Second number
 
     Returns:
-        k12 (int): Unique number based on k1, k2
+        x2 (int): Unique number based on x, y
 
     .. _Cantor: https://en.wikipedia.org/wiki/Pairing_function#Cantor_pairing_function
     """
-    return int((k1 + k2)*(k1 + k2 + 1)//2 + k2)
+    return int((x + y)*(x + y + 1)//2 + y)
 
 
+@dispatch(ints)
 def invert_cantor(z):
     """
     Extract the input numbers for a given :func:`~exa.compute.algorithms.pairing.cantor`
@@ -50,14 +51,14 @@ def invert_cantor(z):
     Returns:
         (k1, k2): Cantor pairs
     """
-    z = np.int64(z)
-    w = np.floor((np.sqrt(8*z + 1) - 1)//2).astype(np.int64)
+    w = np.floor((np.sqrt(8*z + 1) - 1)//2)
     t = (w**2 + w)//2
     y = z - t
     x = w - y
-    return x, y
+    return int(x), int(y)
 
 
+@dispatch(ints, ints)
 def szudzik(x, y):
     """
     `Szudzik`_ pairing function.
@@ -75,32 +76,49 @@ def szudzik(x, y):
     .. _Szudzik: http://szudzik.com/ElegantPairing.pdf
     """
     if x < y:
-        return np.int64(y**2 + x)
-    return np.int64(x**2 + x + y)
+        return int(y**2 + x)
+    return int(x**2 + x + y)
 
 
+@dispatch(ints)
 def invert_szudzik(z):
     """
     From a Szudzik number, extract the input values of x and y.
 
+    Args:
+        z (int): Szudzik number
+
+    Returns:
+        xy (tuple): Input x, y pair (as ints)
+
     See Also:
         :func:`~exa.compute.algorithms.pairing.szudzik`
     """
-    z = np.int64(z)
-    w = np.floor(np.sqrt(z)).astype(np.int64)
+    w = np.floor(np.sqrt(z))
     t = z - w**2
     if t < w:
-        return t, w
-    return w, t - w
+        return int(t), int(w)
+    return int(w), int(t - w)
 
 
+@dispatch(ints, ints)
 def unordered(x, y):
     """
-    Pairing function for to elements where order doesn't matter.
-
-    .. math::
-
-        \\left(x, y\\right) = xy + trunc\\left[\\left(\\left|x - y\\right|
-        - 1\\right)^2/4\\right] = \\left(y, x\\right)
+    The :func:`~exa.compute.algorithms.pairing.szudzik` pairing function
+    ordered such that the first argument is greater than the second argument.
     """
-    return x*y + np.trunc((np.abs(x - y) - 1)**2/4).astype(np.int64)
+    if x > y:
+        return szudzik(x, y)
+    return szudzik(y, x)
+
+
+@dispatch(ints)
+def invert_unordered(z):
+    """
+    Invert :func:`~exa.compute.algorithms.pairing.unordered` to return input
+    arguments (ordered in descending order).
+    """
+    x, y = invert_szudzik(z)
+    if x > y:
+        return x, y
+    return y, x

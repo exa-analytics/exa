@@ -21,15 +21,19 @@ Warning:
 .. _numba: http://numba.pydata.org/
 .. _multiply dispatched: https://en.wikipedia.org/wiki/Multiple_dispatch
 """
+import numpy as np
 import pandas as pd
 from itertools import product
 try:
     from inspect import signature
 except ImportError:
     from inspect import getargspec as signature
+from exa.compute.compilers.wrapper import compile_function
 
 
 _dispatched = dict()    # Global to keep track of all dispatched functions
+ints = (int, np.int8, np.int16, np.int32, np.int64)
+floats = (float, np.float16, np.float32, np.float64, np.float128)
 
 
 class Dispatcher(object):
@@ -95,15 +99,8 @@ class Dispatcher(object):
         for typ in itypes:
             if not isinstance(typ, type):
                 raise TypeError("Not a type: {}".format(typ))
-        reg = (0, 0, 0, ) + itypes
-        #jit = flags.pop('jit', False)
-        #vectorize = flags.pop('vectorize', False)
-        #guvectorize = flags.pop('guvectorize', False)
-        #if jit or vectorize or guvectorize:
-    #        reg, func = compile
-        #if jit or vectorize or guvectorize:
-        #    reg, func = compile_func(func)
-        self.functions[reg] = func
+        sig, func = compile_function(func, itypes)
+        self.functions[sig] = func
 
     @property
     def signatures(self):
@@ -118,11 +115,11 @@ class Dispatcher(object):
 
     def __call__(self, *args, **kwargs):
         itypes = tuple([type(arg) for arg in args])
-        sig = (0, 0, 0, ) + itypes
+        sig = ("cpu", "ram", "serial", ) + itypes
         try:
             func = self.functions[sig]
-        except KeyError:
-            raise TypeError("No type signature for type(s) {}".format(sig))
+        except KeyError as e:
+            raise e
         return func(*args, **kwargs)
 
     def __init__(self, name):
@@ -142,7 +139,8 @@ class Dispatcher(object):
         return self.to_frame()._repr_html_()
 
 
-def dispatch(*itypes):
+def dispatch(*itypes, otypes=None, processing="cpu", memory="ram",
+             parallelism="serial"):
     """
     Decorator to transform a set of functions into a
     :class:`~exa.compute.dispatch.Dispatcher` callable (behaves just like a
@@ -159,8 +157,11 @@ def dispatch(*itypes):
             return str(x) + y + "!"
 
     Args:
-        otype: Output types
-        processing:
+        itypes: Input argument type(s)
+        otypes: Output argument type(s)
+        processing (str): Type of processing unit
+        memory (str): Type of memory usage
+        parallelism (str): Type of parallelization support
     """
     def dispatched_func(func):
         name = func.__name__                 # Checks to see if we have made

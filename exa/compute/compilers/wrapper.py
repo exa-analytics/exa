@@ -8,36 +8,42 @@ This module provides a generic wrapper for different compilation machinery
 available in the Python ecosystem. It provides a systematic API for developers
 writing compiled functions which is compiler backend independent. In this way
 the same algorithm can be tested with a number of different compiler backends
-without needed a rewrite.
+without needing to be rewritten. The human readable categories for describing
+compiled functions are as follows.
 
++------------------------+----------------------+----------------------------+
+| processing             | memory               | parallelism                |
++========================+======================+============================+
+| cpu, gpu               | ram, disk            | serial, gilfree, resources |
++------------------------+----------------------+----------------------------+
 
-+----------------+------+----------+--------+--------+
-| category/index |  0   |   1      |  2     | 3      |
-+================+======+==========+========+========+
-| processing     | cpu  | gpu      | mic    |        |
-+----------------+------+----------+--------+--------+
-| memory         | ram  | disk     |        |        |
-+----------------+------+----------+--------+--------+
-| parallelism    | none | gilfree  | first  | second |
-+----------------+------+----------+--------+--------+
-| first: single node, multithread/multiprocess       |
-+----------------------------------------------------+
-| second: multi node, multithread/multiprocess       |
-+----------------------------------------------------+
+Combined with the input argument (and possibly output) type(s), a unique
+signature can be created for each algorithm implementation. If alternative
+function algorithms are not required for different types for parallization
+schemes (for example), a new function is not compiled rather the previously
+compiled function is referenced.
 
-Functions that get compiled with "first" or "second" parallelism will
-automatically obtain machinery to handle a resource kwarg.
+Processing described the object expected for perfoming computation. Memory
+describes whether the function acts only in memory, or only (primarily) out of
+core. Parallelism describes the type of parallelization (if available) the
+function is capable of: serial - no parallelization, gilfree - no intrinsic
+parallelization, but ready for embarassingly parallel applications i.e. the
+function can be executed in parallel "by hand", and resources - local or
+distributed parallelization using the exa resources scheme.
 
 See Also:
-    Often times, compiling individual functions can be sped up via the
-    :mod:`~exa.compute.dispatch` module.
+    For a description of automatic function compilation, see
+    :mod:`~exa.compute.dispatch`. Additional information regarding computational
+    resources and workflows can be found in :mod:`~exa.compute.resource` and
+    :mod:`~exa.compute.workflow`.
 """
+from functools import wraps
 from exa._config import config
+from exa.compute.resource import default_resources
 compilers = {'none': None}
 if config['dynamic']['numba']:
     from exa.compute.compilers.nb import compiler as nb_compiler
-    #compilers['numba'] = nb_compiler
-compilers['default'] = compilers['numba'] if 'numba' in compilers else None
+    compilers['numba'] = nb_compiler
 
 
 def available_compilers():
@@ -45,7 +51,51 @@ def available_compilers():
     return compilers.keys()
 
 
-def compile_function(func, itypes, compiler='default', otypes=None):
+def check_memerr():
+    """
+    Decorator to check the function for a possible memory error based on the
+    function's memory complexity and size of input arguments.
+    """
+    pass
+
+
+def check_diskerr():
+    """
+    Decorator to check for possible disk usage error given the function's disk
+    usage complexity and arguments.
+    """
+    pass
+
+
+def resources_required():
+    """
+    Decorator used to inject a resource argument for intrinsically parallel
+    functions.
+    """
+    def parallel_func(func):
+        @wraps(func)
+        def func_wrapper(*args, **kwargs):
+            resources = kwargs.pop("resources", default_resources())
+            return func(*args, **kwargs)
+        return func
+    return parallel_func
+
+
+def static_otype(*otypes):
+    """
+    Decorator
+    """
+    def conv_func(func):
+        @wraps(func)
+        def func_wrapper(*args, **kwargs):
+            if len(otypes) == 1:
+                return otypes[0](func(*args, **kwargs))
+            return tuple([otypes[i](obj) for i, obj in enumerate(func(*args, **kwargs))])
+        return func_wrapper
+    return conv_func
+
+
+def compile_function(func, itypes, compiler='none', otypes=None):
     """
     Compile a function using a specified backend compiler.
 
@@ -117,6 +167,6 @@ def compile_function(func, itypes, compiler='default', otypes=None):
     except KeyError:
         raise KeyError("No such compiler {} available.".format(compiler))
     if compiler is None:
-        return (0, 0, 0, ) + itypes, func
+        return ("cpu", "ram", "serial", ) + itypes, func
     else:
         return compilers[compiler](func, itypes, flags)

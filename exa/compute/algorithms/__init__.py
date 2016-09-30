@@ -5,4 +5,10 @@
 This sub-package provides library of numerical algorithms (both discrete and
 symbolic).
 """
+# Import modules
 from exa.compute.algorithms import pairing
+
+# Import sub-packages
+from exa.compute.algorithms import tests
+
+# Import user/dev API

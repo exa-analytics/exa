@@ -9,13 +9,12 @@ from exa.tester import UnitTester
 from exa.compute.compilers.wrapper import compile_function, available_compilers
 
 
-class TestCompilation(UnitTester):
-    """
-    Tests for :mod:`~exa.compute.compilation`
-    """
+class TestWrapper(UnitTester):
+    """Tests for :mod:`~exa.compute.compilers.wrapper`."""
     def test_available_compilers(self):
         """Test :func:`~exa.compute.compilation.available_compilers`."""
         self.assertIsInstance(list(available_compilers()), list)
+        self.assertTrue("none" in available_compilers())
 
     def test_no_compilation(self):
         """
@@ -23,7 +22,7 @@ class TestCompilation(UnitTester):
         """
         func = lambda x: not x
         sig, func1 = compile_function(func, (bool, ), compiler='none')
-        self.assertEqual(sig, (0, 0, 0, bool))
+        self.assertEqual(sig, ("cpu", "ram", "serial", bool))
         self.assertTrue(func1 is func)
 
     def test_mia_compiler(self):
