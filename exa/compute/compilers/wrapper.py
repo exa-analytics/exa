@@ -11,31 +11,51 @@ the same algorithm can be tested with a number of different compiler backends
 without needing to be rewritten. The human readable categories for describing
 compiled functions are as follows.
 
-+------------------------+----------------------+----------------------------+
-| processing             | memory               | parallelism                |
-+========================+======================+============================+
-| cpu, gpu               | ram, disk            | serial, gilfree, resources |
-+------------------------+----------------------+----------------------------+
+To compile for multiple targets simultaneously use "|", e.g. "cpu|gpu". If the
+function requires multiple target resources use "+", e.g. "cpu+gpu".
 
-Combined with the input argument (and possibly output) type(s), a unique
-signature can be created for each algorithm implementation. If alternative
-function algorithms are not required for different types for parallization
-schemes (for example), a new function is not compiled rather the previously
-compiled function is referenced.
++--------+--------------+------------------------------------------------------+
+| name   | description  | values                                               |
++========+==============+======================================================+
+| ftype  | strategy     | unroll, vec, gvec                                    |
++--------+--------------+------------------------------------------------------+
+| target | processor(s) | cpu (default), gpu                                   |
++--------+--------------+------------------------------------------------------+
+| core   | memory use   | ram (default), disk                                  |
++--------+--------------+------------------------------------------------------+
+| mp     | parallelism  | serial (default), nogil, parallel, distrib           |
++--------+--------------+------------------------------------------------------+
 
-Processing described the object expected for perfoming computation. Memory
-describes whether the function acts only in memory, or only (primarily) out of
-core. Parallelism describes the type of parallelization (if available) the
-function is capable of: serial - no parallelization, gilfree - no intrinsic
-parallelization, but ready for embarassingly parallel applications i.e. the
-function can be executed in parallel "by hand", and resources - local or
-distributed parallelization using the exa resources scheme.
+The **ftype** argument describes the compilation strategy to be used. When using
+**unroll**, compilation expands loops and reduces all operations to primitive
+operations. Likewise, **vec** transforms a `ufunc`_ into a vectorized operation,
+an operation that can be quickly applied to all elements of an array. The option
+**gvec** generalizes **vec** to act on multidimensional arguments.
+
+The **target** argument describes the type of processing unit (or units) to be
+used. Examples are **cpu** and **gpu**.
+
+The **core** argument describes whether the algorithm supports out of core
+processing (**disk**) or not (**ram**).
+
+The **mp** argument describes the parallelization strategy for the function.
+Serial functions (**serial**) are not parallelized and are `GIL`_ locked.
+Functions compiled with the **nogil** flag are not intrinsically parallelized
+but support parallel execution because they release the `GIL`_. Intrinsically
+parallel functions come in two flavors, **parallel** and **distrib**. The
+former type refers to functions that are parallelized for shared memory,
+symmetric multiprocessing architectures (single node). The latter type refers
+to those functions parallelized for distributed computing systems (it is common
+to develop a "parallel" function that then can be wrapped by a "distributed"
+function).
 
 See Also:
     For a description of automatic function compilation, see
     :mod:`~exa.compute.dispatch`. Additional information regarding computational
     resources and workflows can be found in :mod:`~exa.compute.resource` and
     :mod:`~exa.compute.workflow`.
+
+.. _GIL: https://wiki.python.org/moin/GlobalInterpreterLock
 """
 from functools import wraps
 from exa._config import config
@@ -67,35 +87,35 @@ def check_diskerr():
     pass
 
 
-def resources_required():
+def returns(*otypes):
     """
-    Decorator used to inject a resource argument for intrinsically parallel
-    functions.
-    """
-    def parallel_func(func):
-        @wraps(func)
-        def func_wrapper(*args, **kwargs):
-            resources = kwargs.pop("resources", default_resources())
-            return func(*args, **kwargs)
-        return func
-    return parallel_func
+    Decorator for automatically enforcing output types of functions. If no
+    output types are specified will simply return the evaluated result.
 
+    Args:
+        otypes (tuple): Output type(s)
 
-def static_otype(*otypes):
-    """
-    Decorator
+    Returns:
+        func (function): Wrapped function
+
+    Raises:
+        TypeError: On failed conversion
     """
     def conv_func(func):
         @wraps(func)
         def func_wrapper(*args, **kwargs):
-            if len(otypes) == 1:
+            if len(otypes) == 0:
+                return func(*args, **kwargs)
+            elif len(otypes) == 1:
                 return otypes[0](func(*args, **kwargs))
             return tuple([otypes[i](obj) for i, obj in enumerate(func(*args, **kwargs))])
         return func_wrapper
     return conv_func
 
 
-def compile_function(func, itypes, compiler='none', otypes=None):
+#def compile_function(func, itypes, compiler='none', ftype="unroll", target="cpu",
+#                     core="ram", mp="serial", otypes=None):
+def compile_function(func, *itypes, **flags):
     """
     Compile a function using a specified backend compiler.
 
@@ -113,54 +133,14 @@ def compile_function(func, itypes, compiler='none', otypes=None):
     Args:
         itypes (tuple): Tuple of argument types
         compiler (str): See :func:`~exa.compute.compilers.wrapper.available_compilers`
+        ftype (str): Compilation method "unroll", "vec", "gvec"
+        target (str): Computing target "cpu", "gpu"
+        core (str): One, or combination of "ram", "disk"
+        mp (str): One, or combination of "serial", "gilfree", "resources"
         otypes (tuple): Tuple of output type(s) or None
-        Args:
-            func (function): Function to be registered
-            itypes (tuple): Type(s) for each argument
-            otypes (tuple): Output type(s)
-            layout (str): Dimensionality reduction/expansion layout
-            jit (bool): Just-in-time function compilation
-            vectorize (bool): Just-in-time function vectorization and compilation
-            nopython (bool): Compile with native types (true) or Python types (false)
-            nogil (bool): Release the GIL when compiling with native types
-            cache (bool): Compile to disk based cache
-            rtype (type): Vectorized return type
-            target (str): Vectorized compile architecture target
-            outcore (bool): If the function designed for out-of-core execution
-            distrib (bool): True if function desiged for distributed execution
 
-
-
-    Compilation accepts a number of human readable arguments. To compile a
-    function that requires both CPU and GPU resources, acts in memory only,
-    and supports single node and multinode parallelization, the following
-    arguments would work:
-
-    .. code-block:: Python
-
-        compile_function(func, itypes, processing="cpu+gpu", memory="ram",
-                         processing="first,second")
-        # Alternatively...
-        @dispatch(*itypes, processing="cpu+gpu", memory="ram", processing="first,second")
-        def func(arg0, ...):
-            ...
-
-    The operators are "+" (AND), "\|" (OR), "*", (propagate).
-
-    | cpu: Compute only on CPU resources
-    | gpu: Compute only on GPU resource
-    | cpu+gpu: Computation on both CPU and GPU resources simultaneously
-    | cpu|gpu: Compile signatures for cpu only and gpu only computation
-    | (cpu|gpu)*mic: Compile signatures "cpu+mic|gpu+mic", but not "cpu+gpu+mic"
-    | cpu*gpu*mic: Compile signatures for cpu only, gpu only, cpu+gpu, cpu+mic, gpu+mic, and cpu+gpu+mic computation
-
-    Args:
-        itypes (tuple): Input argument types
-        otypes (tuple): Output type(s)
-        contraction (str): Layout or dimensionality reduction/expansion
-        processing (str): Choice of "cpu", "gpu", "mic" (e.g. "cpu+gpu")
-        memory (str): Choice of "ram", "disk" (e.g. "ram|disk")
-        parallelism (str): Choice of "none", "gilfree", "first", "second"
+    Returns:
+        sig, func: Tuple of function signature (tuple) and compiled function (function)
     """
     try:
         compiler = compilers[compiler]

@@ -40,6 +40,7 @@ def convert_bytes(value):
     """
     n = np.rint(len(str(value))/4).astype(int)
     return value/(1024**n), sizes[n]
+    
 
 class Container:
     """

@@ -33,7 +33,7 @@ from exa.compute.compilers.wrapper import compile_function
 
 _dispatched = dict()    # Global to keep track of all dispatched functions
 ints = (int, np.int8, np.int16, np.int32, np.int64)
-floats = (float, np.float16, np.float32, np.float64, np.float128)
+floats = (float, np.float16, np.float32, np.float64)
 
 
 class Dispatcher(object):
@@ -76,10 +76,12 @@ class Dispatcher(object):
         """
         Register a new function signature.
 
-        In addition to accepting the required types (function signature), this
-        method can request the function be compiled according to option arguments
-        specified.
+        .. code-block:: Python
 
+            myfunc = Dispatcher("myfunc")
+            def fn(a, b):
+                return a*b + (b - a)**b
+            myfunc.register(fn, float, float, processing="" parallelism="resources")
         """
         nargs = get_nargs(func)
         ntyps = len(itypes)
@@ -139,8 +141,7 @@ class Dispatcher(object):
         return self.to_frame()._repr_html_()
 
 
-def dispatch(*itypes, otypes=None, processing="cpu", memory="ram",
-             parallelism="serial"):
+def dispatch(*itypes, **kwargs):
     """
     Decorator to transform a set of functions into a
     :class:`~exa.compute.dispatch.Dispatcher` callable (behaves just like a
@@ -157,11 +158,12 @@ def dispatch(*itypes, otypes=None, processing="cpu", memory="ram",
             return str(x) + y + "!"
 
     Args:
-        itypes: Input argument type(s)
-        otypes: Output argument type(s)
-        processing (str): Type of processing unit
-        memory (str): Type of memory usage
-        parallelism (str): Type of parallelization support
+        itypes (tuple): Tuple of argument types
+        compiler (str): See :func:`~exa.compute.compilers.wrapper.available_compilers`
+        processing (str): One, or combination of "cpu", "gpu"
+        memory (str): One, or combination of "ram", "disk"
+        parallelism (str): One, or combination of "serial", "gilfree", "resources"
+        otypes (tuple): Tuple of output type(s) or None
     """
     def dispatched_func(func):
         name = func.__name__                 # Checks to see if we have made
@@ -169,7 +171,7 @@ def dispatch(*itypes, otypes=None, processing="cpu", memory="ram",
             dispatcher = _dispatched[name]   # same name, creates one if not,
         else:                                # and registers the current function
             dispatcher = Dispatcher(name)    # definition to the provided types.
-        dispatcher.register(func, *itypes)
+        dispatcher.register(func, *itypes, **kwargs)
         return dispatcher
     return dispatched_func
 

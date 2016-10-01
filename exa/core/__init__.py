@@ -14,3 +14,5 @@ from exa.core import typed, editor, ssv
 from exa.core import tests
 
 # Import user/dev API
+from exa.core.editor import Editor
+from exa.core.ssv import CSV

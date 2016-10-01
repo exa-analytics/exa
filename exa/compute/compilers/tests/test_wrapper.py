@@ -6,7 +6,8 @@ Tests for :mod:`~exa.compute.compilers.wrapper`
 ########################################################
 """
 from exa.tester import UnitTester
-from exa.compute.compilers.wrapper import compile_function, available_compilers
+from exa.compute.compilers.wrapper import (compile_function, available_compilers,
+                                           resources, returns)
 
 
 class TestWrapper(UnitTester):
@@ -32,3 +33,25 @@ class TestWrapper(UnitTester):
         """
         with self.assertRaises(KeyError):
             compile_function(lambda x: not x, (bool, ), compiler='__mia__')
+
+    def test_returns(self):
+        """Test :func:`~exa.compute.compilers.wrapper.returns`."""
+        try:
+            @returns(bool)
+            def fn1(arg):
+                return arg
+
+            @returns(str, int)
+            def fn2(arg):
+                return arg, arg
+        except Exception as e:
+            self.fail(str(e))
+        self.assertIsInstance(fn1(0), bool)
+        self.assertIsInstance(fn1(1), bool)
+        self.assertEqual(fn1(0), False)
+        self.assertEqual(fn1(1), True)
+        values = fn2(0)
+        self.assertIsInstance(values[0], str)
+        self.assertIsInstance(values[1], int)
+        self.assertEqual(fn2(0), ("0", 0))
+        self.assertEqual(fn2(1), ("1", 1))

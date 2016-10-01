@@ -4,11 +4,10 @@
 """
 Symbolic Data Objects
 ###################################
-Often it is convenient to work with an analytical form of a function prior to
-discretizing and computing an approximate solution. This can be particularly
-useful where the analytical form of a :class:`~exa.numerical.Field` is known,
-but visualization requires evaluation of the field on a discrete grid. This
-module provides functionality to support such situations.
+This module provides a mechanism for working with symbolic data using `sympy`_.
+It extens
+
+.. _sympy: http://www.sympy.org/en/index.html
 """
 import sympy as sy
 from numba import vectorize, jit

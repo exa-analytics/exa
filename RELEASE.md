@@ -9,10 +9,3 @@ Update _version.py (add 'dev' and increment minor)
 git add and git commit
 git push
 git push --tags
-
-- To release a new version of exa on NPM:
-
-# nuke the  `dist` and `node_modules`
-git clean -fdx
-npm install
-npm publish
