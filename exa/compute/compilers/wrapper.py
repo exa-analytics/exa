@@ -131,6 +131,7 @@ def compile_function(func, *itypes, **flags):
     Returns:
         sig, func: Tuple of function signature (tuple) and compiled function (function)
     """
+    compiler = flags.pop("compiler", "none")
     try:
         compiler = compilers[compiler]
     except KeyError:
@@ -138,4 +139,4 @@ def compile_function(func, *itypes, **flags):
     if compiler is None:
         return ("cpu", "ram", "serial", ) + itypes, func
     else:
-        return compilers[compiler](func, itypes, flags)
+        return compiler(func, *itypes, **flags)

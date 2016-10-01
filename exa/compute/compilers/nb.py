@@ -12,20 +12,14 @@ import numba as nb
 
 
 def jit(func, sig=None, nopython=False, nogil=False, cache=False):
-    """
-    """
     raise NotImplementedError()
 
 
 def vectorize(func, signatures=None, identity=None, nopython=True, target='cpu'):
-    """
-    """
     raise NotImplementedError()
 
 
 def guvectorize(func, signatures, layout, identity=None, nopython=True, target='cpu'):
-    """
-    """
     raise NotImplementedError()
 
 
