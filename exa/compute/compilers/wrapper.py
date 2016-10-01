@@ -119,17 +119,6 @@ def compile_function(func, *itypes, **flags):
     """
     Compile a function using a specified backend compiler.
 
-    .. code-block:: Python
-
-        from numbers import Real
-
-        def fn(a, b, c):
-            d = a*b
-            return "ans: {}, {}".format(str(d), c)
-
-        itypes = (Real, Real, str)
-        sig, fnc = compile_function(fn, itypes)
-
     Args:
         itypes (tuple): Tuple of argument types
         compiler (str): See :func:`~exa.compute.compilers.wrapper.available_compilers`

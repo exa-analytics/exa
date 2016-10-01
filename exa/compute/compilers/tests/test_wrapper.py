@@ -7,7 +7,7 @@ Tests for :mod:`~exa.compute.compilers.wrapper`
 """
 from exa.tester import UnitTester
 from exa.compute.compilers.wrapper import (compile_function, available_compilers,
-                                           resources, returns)
+                                           returns)
 
 
 class TestWrapper(UnitTester):
