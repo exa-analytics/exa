@@ -17,13 +17,11 @@ function requires multiple target resources use "+", e.g. "cpu+gpu".
 +--------+--------------+------------------------------------------------------+
 | name   | description  | values                                               |
 +========+==============+======================================================+
-| ftype  | strategy     | unroll, vec, gvec                                    |
+| target | processor(s) | cpu, gpu                                             |
 +--------+--------------+------------------------------------------------------+
-| target | processor(s) | cpu (default), gpu                                   |
+| core   | memory use   | ram, disk                                            |
 +--------+--------------+------------------------------------------------------+
-| core   | memory use   | ram (default), disk                                  |
-+--------+--------------+------------------------------------------------------+
-| mp     | parallelism  | serial (default), nogil, parallel, distrib           |
+| mp     | compilation  | serial, unroll, vec, gvec, parallel, distrib         |
 +--------+--------------+------------------------------------------------------+
 
 The **ftype** argument describes the compilation strategy to be used. When using
@@ -38,9 +36,10 @@ used. Examples are **cpu** and **gpu**.
 The **core** argument describes whether the algorithm supports out of core
 processing (**disk**) or not (**ram**).
 
-The **mp** argument describes the parallelization strategy for the function.
-Serial functions (**serial**) are not parallelized and are `GIL`_ locked.
-Functions compiled with the **nogil** flag are not intrinsically parallelized
+The **mp** argument describes the compilation and (possible) parallelization
+strategy for the function. Serial functions (**serial**) are not parallelized
+and are `GIL`_ locked. `GIL`_ free functions (that can additionally be used in
+embarassingly parallel execution) Functions compiled with the **nogil** flag are not intrinsically parallelized
 but support parallel execution because they release the `GIL`_. Intrinsically
 parallel functions come in two flavors, **parallel** and **distrib**. The
 former type refers to functions that are parallelized for shared memory,
@@ -56,6 +55,7 @@ See Also:
     :mod:`~exa.compute.workflow`.
 
 .. _GIL: https://wiki.python.org/moin/GlobalInterpreterLock
+.. _ufunc: https://docs.scipy.org/doc/numpy/reference/ufuncs.html
 """
 from functools import wraps
 from exa._config import config
@@ -113,8 +113,6 @@ def returns(*otypes):
     return conv_func
 
 
-#def compile_function(func, itypes, compiler='none', ftype="unroll", target="cpu",
-#                     core="ram", mp="serial", otypes=None):
 def compile_function(func, *itypes, **flags):
     """
     Compile a function using a specified backend compiler.
@@ -122,7 +120,6 @@ def compile_function(func, *itypes, **flags):
     Args:
         itypes (tuple): Tuple of argument types
         compiler (str): See :func:`~exa.compute.compilers.wrapper.available_compilers`
-        ftype (str): Compilation method "unroll", "vec", "gvec"
         target (str): Computing target "cpu", "gpu"
         core (str): One, or combination of "ram", "disk"
         mp (str): One, or combination of "serial", "gilfree", "resources"
