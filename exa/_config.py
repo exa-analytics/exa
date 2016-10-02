@@ -231,6 +231,12 @@ def reconfigure(rootname=".exa"):
     except (AttributeError, ImportError):
         pass
     try:
+        import cython
+        config['dynamic']['cython'] = "true"
+        del cython
+    except ImportError:
+        pass
+    try:
         cfg = get_ipython().config
         if "IPKernelApp" in cfg:
             config['dynamic']['notebook'] = "true"

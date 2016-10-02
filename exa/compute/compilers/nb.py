@@ -4,9 +4,9 @@
 """
 Compilation Using `Numba`_
 #############################
-This module provides conversion between exa syntax and `numba`_ syntax.
+This module provides conversion between exa syntax and `Numba`_ syntax.
 
-.. _numba: http://numba.pydata.org/
+.. _Numba: http://numba.pydata.org/
 """
 import numba as nb
 
@@ -25,4 +25,7 @@ def guvectorize(func, signatures, layout, identity=None, nopython=True, target='
 
 def compiler(func, *itypes, **flags):
     """Convert generic arguments to numba specific arguments."""
-    raise NotImplementedError()
+    target = flags.pop("target", "cpu")
+    core = flags.pop("core", "ram")
+    mp = flags.pop("mp", "serial")
+    return (target, core, mp), func

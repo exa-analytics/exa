@@ -7,10 +7,11 @@ Pairing Functions
 Pairing functions are used to map (bijectively: one-to-one) elements of tow sets.
 """
 import numpy as np
-from exa.compute.dispatch import dispatch, ints, floats
+from exa.compute.dispatch import dispatch, ints
+from exa.compute.compilers.wrapper import default_compiler
 
 
-@dispatch(ints, ints)
+@dispatch(ints, ints, compiler=default_compiler)
 def cantor(x, y):
     """
     `Cantor`_ pairing function takes two numbers and creates a unique number.
