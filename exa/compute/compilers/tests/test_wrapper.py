@@ -22,7 +22,7 @@ class TestWrapper(UnitTester):
         Test no compilation in :func:`~exa.compute.compilation.compile_function`.
         """
         func = lambda x: not x
-        sig, func1 = compile_function(func, (bool, ), compiler='none')
+        sig, func1 = compile_function(func, bool, compiler='none')
         self.assertEqual(sig, ("cpu", "ram", "serial", bool))
         self.assertTrue(func1 is func)
 

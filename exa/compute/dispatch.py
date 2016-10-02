@@ -75,13 +75,6 @@ class Dispatcher(object):
     def register(self, func, *itypes, **flags):
         """
         Register a new function signature.
-
-        .. code-block:: Python
-
-            myfunc = Dispatcher("myfunc")
-            def fn(a, b):
-                return a*b + (b - a)**b
-            myfunc.register(fn, float, float, processing="" parallelism="resources")
         """
         nargs = get_nargs(func)
         ntyps = len(itypes)
@@ -93,7 +86,7 @@ class Dispatcher(object):
                 if isinstance(typ, (tuple, list)):
                     prod.append(typ)
                 else:
-                    prod.append((typ, ))
+                    prod.append(tuple([typ, ]))
             for typs in product(*prod):    # Recursive call to self.register
                 self.register(func, *typs, **flags)
             return                         # Make sure to exit recursive calls
@@ -101,7 +94,7 @@ class Dispatcher(object):
         for typ in itypes:
             if not isinstance(typ, type):
                 raise TypeError("Not a type: {}".format(typ))
-        sig, func = compile_function(func, itypes)
+        sig, func = compile_function(func, *itypes, **flags)
         self.functions[sig] = func
 
     @property
@@ -112,7 +105,6 @@ class Dispatcher(object):
         Returns:
             df (:class:`~pandas.DataFrame`): Data table of available signatures
         """
-
         return False
 
     def __call__(self, *args, **kwargs):

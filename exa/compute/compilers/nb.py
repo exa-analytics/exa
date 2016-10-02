@@ -25,4 +25,4 @@ def guvectorize(func, signatures, layout, identity=None, nopython=True, target='
 
 def compiler(func, *itypes, **flags):
     """Convert generic arguments to numba specific arguments."""
-    pass
+    raise NotImplementedError()

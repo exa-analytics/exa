@@ -9,6 +9,45 @@ It extens
 
 .. _sympy: http://www.sympy.org/en/index.html
 """
+import six
+from exa.core.typed import TypedMeta
+
+class SymbolicMeta(TypedMeta):
+    """
+    """
+    pass
+    
+
+class SymbolicFunction(six.with_metaclass(TypedMeta, sy.Function)):
+    """Base class for exa's symbolic function system."""
+    def recompile(self):
+        self._compiled =
+
+
+    def compiled(self):
+        """Compile the discrete function representation."""
+        if not hasattr("sel")
+        func = self.lambdify()
+        self._compiled = self.lambdify
+
+    def __call__(self, *args, **kwargs):
+        return self.compiled(*args, **kwargs)
+        f = self.compile_function
+        func = self.lambdify(recompile)
+        return func(*args, **kwargs)
+
+    @classmethod
+    def new_expression(cls, expression, *itypes, **kwargs):
+        """
+        Create a new expression instance.
+
+        Args:
+            expression: Any valid sympy expression
+        """
+
+        expression.__class__._itypes = itypes
+        expression.__class__.__call__ = cls.__call__
+        return expression
 import sympy as sy
 from numba import vectorize, jit
 

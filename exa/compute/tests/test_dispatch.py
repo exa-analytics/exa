@@ -18,9 +18,7 @@ class TestDispatcher(UnitTester):
     dispatched function "fn".
     """
     def setUp(self):
-        """
-        Generate the dummy function "fn".
-        """
+        """Generate the dummy function "fn"."""
         try:
             @dispatch(str)
             def fn(arg):
@@ -50,14 +48,12 @@ class TestDispatcher(UnitTester):
         self.fn = fn
 
     def test_single_dispatch(self):
-        """
-        Test the singly dispatched methods.
-        """
+        """Test the singly dispatched methods."""
         self.assertTrue(self.fn("Foo").endswith("!"))
         self.assertTrue(self.fn(True).endswith("!"))
         self.assertTrue(self.fn(42).endswith("!"))
         self.assertTrue(self.fn(np.int64(42)).endswith("!"))
-        with self.assertRaises(TypeError):
+        with self.assertRaises(KeyError):
             self.fn(np.int32(42))
 
     def test_multiple_dispatch(self):
