@@ -60,10 +60,10 @@ See Also:
 from functools import wraps
 from exa._config import config
 compilers = {'none': None}
-if config['dynamic']['numba']:
+if config['dynamic']['numba'] == "true":
     from exa.compute.compilers.nb import compiler as nb_compiler
     compilers['numba'] = nb_compiler
-if config['dynamic']['cython']:
+if config['dynamic']['cython'] == "true":
     from exa.compute.compilers.cy import compiler as cy_compiler
     compilers['cython'] = cy_compiler
 if 'numba' in compilers:

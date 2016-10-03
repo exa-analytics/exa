@@ -8,7 +8,7 @@ See Also:
     :mod:`~exa.compute.dispatch`
 """
 # Import modules
-from exa.compute.compilers import wrapper, nb
+from exa.compute.compilers import wrapper
 
 # Import sub-packages
 from exa.compute.compilers import tests
