@@ -132,16 +132,21 @@ def compile_function(func, *itypes, **flags):
         core (str): One, or combination of "ram", "disk"
         mp (str): One, or combination of "serial", "gilfree", "resources"
         otypes (tuple): Tuple of output type(s) or None
+        nosig (bool): Don't return signature (default false)
 
     Returns:
         sig, func: Tuple of function signature (tuple) and compiled function (function)
     """
     compiler = flags.pop("compiler", "none")
+    nosig = flags.pop("nosig", False)
     try:
         compiler = compilers[compiler]
     except KeyError:
         raise KeyError("No such compiler {} available.".format(compiler))
     if compiler is None:
-        return ("cpu", "ram", "serial", ) + itypes, func
+        sig = ("cpu", "ram", "serial", ) + itypes
     else:
-        return compiler(func, *itypes, **flags)
+        sig, func = compiler(func, *itypes, **flags)
+    if nosig:
+        return func
+    return sig, func
