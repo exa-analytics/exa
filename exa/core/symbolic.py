@@ -35,9 +35,6 @@ class Base(six.with_metaclass(Meta, sy.Function)):
 
     def __call__(self, *args, **kwargs):
         return self.compiled(*args, **kwargs)
-        f = self.compile_function
-        func = self.lambdify(recompile)
-        return func(*args, **kwargs)
 
 
 class Function(Base):

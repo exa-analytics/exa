@@ -215,6 +215,7 @@ def reconfigure(rootname=".exa"):
     config['dynamic']['static'] = os.path.join(config['dynamic']['pkg'], "..", "static")
     config['dynamic']['examples'] = os.path.join(config['dynamic']['pkg'], "..", "examples")
     config['dynamic']['numba'] = "false"
+    config['dynamic']['cython'] = "false"
     config['dynamic']['cuda'] = "false"
     config['dynamic']['notebook'] = "false"
     try:

@@ -22,7 +22,6 @@ Warning:
 .. _multiply dispatched: https://en.wikipedia.org/wiki/Multiple_dispatch
 """
 import numpy as np
-import pandas as pd
 from itertools import product
 try:
     from inspect import signature

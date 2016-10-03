@@ -11,7 +11,7 @@ from exa.compute.dispatch import dispatch, ints
 from exa.compute.compilers.wrapper import default_compiler
 
 
-@dispatch(ints, ints, compiler=default_compiler)
+@dispatch(ints, ints)
 def cantor(x, y):
     """
     `Cantor`_ pairing function takes two numbers and creates a unique number.

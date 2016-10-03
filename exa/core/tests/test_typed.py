@@ -71,5 +71,11 @@ class TestTypedMeta(UnitTester):
         """
         Test automatic conversion performed by :func:`~exa.core.typed.TypedMeta.create_property`.
         """
-        klass = DummyClass(foo=0, bar=42.0, baz="stuff")
-        #self.assertEqual()
+        try:
+            klass = DummyClass(foo=0, bar=42.0, baz="stuff")
+        except Exception as e:
+            self.fail(str(e))
+        self.assertIsInstance(klass.foo, DummyTypedMeta.foo)
+        self.assertIsInstance(klass.bar, DummyTypedMeta.bar)
+        self.assertIsInstance(klass.baz, DummyTypedMeta.baz)
+        self.assertTrue(klass.faz is None)

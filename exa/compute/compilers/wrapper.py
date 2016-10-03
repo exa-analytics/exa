@@ -59,7 +59,6 @@ See Also:
 """
 from functools import wraps
 from exa._config import config
-from exa.compute.resource import default_resources
 compilers = {'none': None}
 if config['dynamic']['numba']:
     from exa.compute.compilers.nb import compiler as nb_compiler
