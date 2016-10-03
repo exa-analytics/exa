@@ -10,12 +10,19 @@ from exa.errors import ExaException
 
 
 class TestExceptions(UnitTester):
-    """
-    Test that base exceptions can be raised.
-    """
+    """Test that base exceptions can be raised."""
     def test_generic(self):
-        """
-        Test for :class:`~exa.errors.ExaException`.
-        """
+        """Test for :class:`~exa.errors.ExaException`."""
         with self.assertRaises(ExaException):
             raise ExaException()
+
+    def test_levels(self):
+        """Test exception logging levels."""
+        with self.assertRaises(ExaException):
+            raise ExaException(level="warn")
+        with self.assertRaises(ExaException):
+            raise ExaException(level="error")
+        with self.assertRaises(ExaException):
+            raise ExaException(level="critical")
+        with self.assertRaises(ExaException):
+            raise ExaException(level="custom")
