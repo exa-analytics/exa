@@ -238,7 +238,7 @@ class Editor:
                     self.cursor = i + 1
                     return tup
 
-    def regex(self, *patterns, keys_only=False, flags=0):
+    def regex(self, *patterns, start=0, stop=None, keys_only=False, flags=0):
         """
         Search the editor for lines matching the regular expression.
         re.MULTILINE is not currently supported.
@@ -252,7 +252,8 @@ class Editor:
             results (dict): Dictionary of pattern keys, line values (or groups - default)
         """
         results = {pattern: [] for pattern in patterns}
-        for i, line in enumerate(self):
+        stop = stop if stop is not None else -1
+        for i, line in enumerate(self[start:stop]):
             for pattern in patterns:
                 grps = re.search(pattern, line, flags=flags)
                 if grps and keys_only:
