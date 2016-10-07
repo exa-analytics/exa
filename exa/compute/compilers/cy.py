@@ -8,7 +8,10 @@ This module provides conversion between exa syntax and `Cython`_ syntax.
 
 .. _cython: http://cython.org/
 """
-import cython as cy
+try:
+    import cython as cy
+except ImportError:
+    pass
 
 
 def compiler(func, *itypes, **flags):

@@ -5,9 +5,12 @@
 Tests for :mod:`~exa.compute.compilers.cy`
 ########################################################
 """
+from exa._config import config
 from exa.tester import UnitTester
 
 
 class TestCythonCompiler(UnitTester):
-    def failer(self):
-        self.fail("test fail")
+    def setUp(self):
+        """Skip all tests if the "cython" package is not installed."""
+        if config['dynamic']['cython'] == 'false':
+            self.skipTest("Package 'cython' not available.")

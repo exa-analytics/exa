@@ -8,7 +8,10 @@ This module provides conversion between exa syntax and `Numba`_ syntax.
 
 .. _Numba: http://numba.pydata.org/
 """
-import numba as nb
+try:
+    import numba as nb
+except ImportError:
+    pass
 
 
 def jit(func, sig=None, nopython=False, nogil=False, cache=False):
