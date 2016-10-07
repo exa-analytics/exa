@@ -3,7 +3,7 @@
 
 
 ###################################################
-Configuration, Logging, and Database Connectivity
+Configuration and Basics
 ###################################################
 Exa requires the creation of a persistent directory, **~/.exa** (e.g.
 C:\\Users\\[username]\\.exa, /home/[username]/.exa) that houses the
@@ -19,6 +19,9 @@ related packages can be run inside of a notebook or in the console directly.
     :members:
 
 .. automodule:: exa._version
+    :members:
+
+.. automodule:: exa.errors
     :members:
 
 

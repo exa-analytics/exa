@@ -42,7 +42,7 @@ class Resource(object):
 
 
 class Resources(object):
-    """A collection of :class:`~exa.compute.resource.Resource` objects."""
+    """A collection of :class:`~exa.compute.resources.Resource` objects."""
     @property
     def total_memory(self):
         """Get the total memory (bytes) available across all resources."""
@@ -56,9 +56,7 @@ class Resources(object):
 
 
 def get_ngpus():
-    """
-    Get the number of gpus present
-    """
+    """Get the number of gpus present."""
     try:
         from numba import cuda
         return len(cuda.devices.gpus)
@@ -75,7 +73,7 @@ def inspect_resource(name, location="localhost"):
         location (str): Location of the resource (e.g. hostname or IP address)
 
     Returns:
-        resource (:class:`~exa.compute.resource.Resource`): Inspected resource
+        resource (:class:`~exa.compute.resources.Resource`): Inspected resource
     """
     def inspector():
         """Helper function to obtain the parameters of the resource."""
@@ -92,3 +90,11 @@ def inspect_resource(name, location="localhost"):
 def default_resources(name="default"):
     """Default resources are comprised of the local machine only."""
     return Resources(inspect_resource("default"))
+
+
+def autoparallel():
+    """
+    Decorator that automatically parallelizes GIL free functions within the
+    "resources" framework provided by :mod:`~exa.compute.resources`
+    """
+    raise NotImplementedError()

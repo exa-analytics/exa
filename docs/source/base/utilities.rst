@@ -3,13 +3,16 @@
 
 
 ###################################################
-Miscellaneous
+Utilities and Adapters
 ###################################################
-The exa framework provides convenience methods for interacting with commonly
-used tools in the field of science and technology including plotting programs
-and word processing/typesetting systems.
 
 .. automodule:: exa.mpl
+    :members:
+
+.. automodule:: exa.bq
+    :members:
+
+.. automodule:: exa.js
     :members:
 
 .. automodule:: exa.tex

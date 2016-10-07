@@ -12,5 +12,4 @@ Automatic Compilation for Workflows
     :maxdepth: 1
     :caption: Compilers
 
-    wrapper.rst
     nb.rst

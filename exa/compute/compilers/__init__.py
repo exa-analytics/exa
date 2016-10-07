@@ -2,16 +2,19 @@
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-exa.compute.compilers description
+This sub-package provides function compilers using various tools available in
+the Python ecosystem. For an introduction see :mod:`~exa.compute.__init__`.
 
-See Also:
-    :mod:`~exa.compute.dispatch`
+- `Numba`_: :mod:`~exa.compute.compilers.nb`
+- `Cython`_: :mod:`~exa.compute.compilers.cy`
+
+.. _Numba: http://numba.pydata.org/
+.. _Cython: http://cython.org/
 """
 # Import modules
-from exa.compute.compilers import wrapper
+from exa.compute.compilers import nb, cy
 
 # Import sub-packages
 from exa.compute.compilers import tests
 
 # Import user/dev API
-from exa.compute.compilers.wrapper import available_compilers, compile_function

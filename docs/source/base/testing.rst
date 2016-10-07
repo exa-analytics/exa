@@ -12,9 +12,6 @@ mechanism for running tests in an interactive session. Base tests are below.
 .. automodule:: exa.tester
     :members:
 
-.. automodule:: exa.tests.test_config
-    :members:
-
 .. automodule:: exa.tests.test_tester
     :members:
 

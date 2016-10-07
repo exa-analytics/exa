@@ -3,7 +3,13 @@
 
 
 #######################################################
-Multiple Dispatch
+Compilation, Dispatchers, and Workflows
 #######################################################
+.. automodule:: exa.compute.compiler
+    :members:
+
 .. automodule:: exa.compute.dispatch
+    :members:
+
+.. automodule:: exa.compute.workflow
     :members:

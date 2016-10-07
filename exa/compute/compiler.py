@@ -95,10 +95,11 @@ def check_diskerr():
     pass
 
 
-def returns(*otypes):
+def returns(*otypes, passthrough=True):
     """
-    Decorator for automatically enforcing output types of functions. If no
-    output types are specified will simply return the evaluated result.
+    Decorator that attempts to convert function outputs to specified types.
+
+    By default, if conversion fails, the unconverted result is passed through.
 
     Args:
         otypes (tuple): Output type(s)
@@ -127,12 +128,12 @@ def compile_function(func, *itypes, **flags):
 
     Args:
         itypes (tuple): Tuple of argument types
+        otypes (tuple): Tuple of output type(s) or None
         compiler (str): See :func:`~exa.compute.compilers.wrapper.available_compilers`
+        nosig (bool): Don't return signature (default false)
         target (str): Computing target "cpu", "gpu"
         core (str): One, or combination of "ram", "disk"
         mp (str): One, or combination of "serial", "gilfree", "resources"
-        otypes (tuple): Tuple of output type(s) or None
-        nosig (bool): Don't return signature (default false)
 
     Returns:
         sig, func: Tuple of function signature (tuple) and compiled function (function)

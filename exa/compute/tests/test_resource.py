@@ -2,24 +2,24 @@
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Tests for :mod:`~exa.compute.resource`
+Tests for :mod:`~exa.compute.resources`
 ########################################################
 """
 import psutil
 import numpy as np
 from exa.tester import UnitTester
-from exa.compute.resource import (default_resources, get_ngpus, Resource,
-                                  Resources, inspect_resource)
+from exa.compute.resources import (default_resources, get_ngpus, Resource,
+                                   Resources, inspect_resource, autoparallel)
 
 
 class TestResource(UnitTester):
-    """Tests for :mod:`~exa.compute.resource`."""
+    """Tests for :mod:`~exa.compute.resources`."""
     def test_get_ngpus(self):
-        """Test :func:`~exa.compute.resource.get_ngpus`."""
+        """Test :func:`~exa.compute.resources.get_ngpus`."""
         self.assertIsInstance(get_ngpus(), int)
 
     def test_inspect_resource(self):
-        """Test :func:`~exa.compute.resource.inspect_resource`."""
+        """Test :func:`~exa.compute.resources.inspect_resource`."""
         name = "name"
         resource = inspect_resource(name)
         self.assertIsInstance(resource, Resource)
@@ -29,8 +29,13 @@ class TestResource(UnitTester):
         self.assertEqual(resource.gpus, get_ngpus())
 
     def test_default_resources(self):
-        """Test :func:`~exa.compute.resource.default_resources`."""
+        """Test :func:`~exa.compute.resources.default_resources`."""
         resources = default_resources()
         self.assertIsInstance(resources, Resources)
         self.assertEqual(len(resources), 1)
         self.assertIsInstance(resources.resources[0], Resource)
+
+    def test_autoparallel(self):
+        """Test :func:`~exa.compute.resources.autoparallel`."""
+        with self.assertRaises(NotImplementedError):
+            autoparallel()

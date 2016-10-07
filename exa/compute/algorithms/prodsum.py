@@ -15,10 +15,6 @@ def product_sum(x, y):
     """
     Product pair list comprehension.
 
-        >>> x = ['a', 1]
-        >>> y = [2, 'b']
-        [('a', 2), ('a', 'b'), (1, 2), (1, 'b')]
-
     Args:
         x (list): List of Python objects
         y (list): List of Python objects

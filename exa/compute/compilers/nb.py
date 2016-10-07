@@ -12,6 +12,25 @@ try:
     import numba as nb
 except ImportError:
     pass
+from exa._config import config
+
+
+def signature(itypes=None, otypes=None):
+    """
+    Convert (Python) types to a string signature compatible with Numba types.
+
+    Input types must map 1 to 1 to input arguments. If itypes is a given as a
+    string, it will be passed through directly to Numba without processing.
+    Similarly, if output types are ommitted, they will be inferred by Numba.
+
+    Args:
+        itypes: Input argument types (one type per argument)
+        otypes: Return type
+    """
+    bit64 = False
+    if config['dynamic']['64bit'] == 'true':
+        bit64 = True
+
 
 
 def jit(func, sig=None, nopython=False, nogil=False, cache=False):
@@ -31,4 +50,6 @@ def compiler(func, *itypes, **flags):
     target = flags.pop("target", "cpu")
     core = flags.pop("core", "ram")
     mp = flags.pop("mp", "serial")
+    if mp == "serial":
+        func = jit(func)
     return (target, core, mp), func

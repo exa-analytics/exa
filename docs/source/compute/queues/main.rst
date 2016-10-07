@@ -3,11 +3,12 @@
 
 
 #######################################################
-Computational Resources and Workflows
+Queue Manager Support
 #######################################################
+.. automodule:: exa.compute.queue.__init__
 
-.. automodule:: exa.compute.resource
-    :members:
+.. toctree::
+    :maxdepth: 1
+    :caption: Compilers
 
-.. automodule:: exa.compute.workflow
-    :members:
+    slurm.rst

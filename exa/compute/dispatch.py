@@ -27,7 +27,7 @@ try:
     from inspect import signature
 except ImportError:
     from inspect import getargspec as signature
-from exa.compute.compilers.wrapper import compile_function
+from exa.compute.compiler import compile_function
 
 
 _dispatched = dict()    # Global to keep track of all dispatched functions
@@ -132,11 +132,15 @@ class Dispatcher(object):
         return self.to_frame()._repr_html_()
 
 
-def dispatch(*itypes, **kwargs):
+def dispatch(*itypes, **flags):
     """
-    Decorator to transform a set of functions into a
-    :class:`~exa.compute.dispatch.Dispatcher` callable (behaves just like a
-    function).
+    A high level decorator that creates a :class:`~exa.compute.dispatch.Dispatcher`
+    callable (which behaves just like a function).
+
+    This decorator wraps a number of other decorators into one simple API. For
+    details see :func:`~exa.compute.compilers.wrapper.returns`,
+    :func:`~exa.compute.compilers.wrapper.compile_function`, and
+    :func:`~exa.compute.resources.autoparallel`.
 
     .. code-block:: Python
 

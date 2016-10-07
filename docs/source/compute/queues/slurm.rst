@@ -3,7 +3,7 @@
 
 
 #######################################################
-Compilation wrapper
+SLURM Support
 #######################################################
-.. automodule:: exa.compute.compilers.wrapper
+.. automodule:: exa.compute.queue.slurm
     :members:

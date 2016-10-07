@@ -214,6 +214,7 @@ def reconfigure(rootname=".exa"):
     config['dynamic']['pkg'] = os.path.dirname(os.path.realpath(__file__))
     config['dynamic']['static'] = os.path.join(config['dynamic']['pkg'], "..", "static")
     config['dynamic']['examples'] = os.path.join(config['dynamic']['pkg'], "..", "examples")
+    config['dynamic']['64bit'] = "true" if sys.maxsize > 2**32 else "false"
     config['dynamic']['numba'] = "false"
     config['dynamic']['cython'] = "false"
     config['dynamic']['cuda'] = "false"

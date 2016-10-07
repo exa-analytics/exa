@@ -3,9 +3,12 @@
 
 
 ########################
-Computational Workflows
+Compute Framework
 ########################
 .. automodule:: exa.compute.__init__
 
-.. automodule:: exa.compute.connect
+.. automodule:: exa.compute.connects
+    :members:
+
+.. automodule:: exa.compute.resources
     :members:
