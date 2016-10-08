@@ -92,7 +92,7 @@ def default_resources(name="default"):
     return Resources(inspect_resource("default"))
 
 
-def autoparallel():
+def parallelize():
     """
     Decorator that automatically parallelizes GIL free functions within the
     "resources" framework provided by :mod:`~exa.compute.resources`

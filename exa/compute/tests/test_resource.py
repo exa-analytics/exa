@@ -9,7 +9,7 @@ import psutil
 import numpy as np
 from exa.tester import UnitTester
 from exa.compute.resources import (default_resources, get_ngpus, Resource,
-                                   Resources, inspect_resource, autoparallel)
+                                   Resources, inspect_resource, parallelize)
 
 
 class TestResource(UnitTester):
@@ -35,7 +35,7 @@ class TestResource(UnitTester):
         self.assertEqual(len(resources), 1)
         self.assertIsInstance(resources.resources[0], Resource)
 
-    def test_autoparallel(self):
-        """Test :func:`~exa.compute.resources.autoparallel`."""
+    def test_parallelize(self):
+        """Test :func:`~exa.compute.resources.parallelize`."""
         with self.assertRaises(NotImplementedError):
-            autoparallel()
+            parallelize()
