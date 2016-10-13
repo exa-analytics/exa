@@ -11,6 +11,7 @@ select the optimal function signature for a given set of inputs.
 """
 import psutil
 import numpy as np
+from socket import gethostname
 
 
 class Resource(object):
@@ -27,10 +28,10 @@ class Resource(object):
         scratch (str): Location on disk for scratch storage
         permanent (str): Location on disk for permanent storage
     """
-    def __init__(self, name, location="localhost", cpus=4, memory=4000, gpus=0,
+    def __init__(self, name=None, location="localhost", cpus=4, memory=4000, gpus=0,
                  scratch=None, permanent=None, scratch_space=np.inf,
                  permanent_space=np.inf):
-        self.name = name
+        self.name = gethostname() if name is None else str(name)
         self.location = location
         self.cpus = cpus
         self.memory = memory
@@ -39,6 +40,15 @@ class Resource(object):
         self.scratch_space = scratch_space
         self.permanent = permanent
         self.permanent_space = permanent_space
+
+    def __repr__(self):
+        clsname = self.__class__.__name__
+        name = self.name
+        cpus = str(self.cpus)
+        gpus = str(self.gpus)
+        mem = str(np.round(self.memory/1024**3))    # RAM in GB
+        rep = "{}('{}', {} CPU, {} GPU, {} RAM)"
+        return rep.format(clsname, name, cpus, gpus, mem)
 
 
 class Resources(object):
@@ -64,7 +74,7 @@ def get_ngpus():
         return 0
 
 
-def inspect_resource(name, location="localhost"):
+def inspect_resource(name=None, location="localhost"):
     """
     Get the parameters of a local or remote compute resource.
 
@@ -87,7 +97,7 @@ def inspect_resource(name, location="localhost"):
     raise NotImplementedError("Need to implement connect.py first")
 
 
-def default_resources(name="default"):
+def default_resources(name=None):
     """Default resources are comprised of the local machine only."""
     return Resources(inspect_resource("default"))
 
