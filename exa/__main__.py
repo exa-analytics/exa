@@ -3,23 +3,16 @@
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Executables
+Executable
 #############
 """
-import sys
-import os
-import platform
-HOME = os.getenv('USERPROFILE') if platform.system().lower() == 'windows' else os.getenv('HOME')
-#HOME = 'J:/Alex'
-sys.path.insert(0, os.sep.join((HOME, 'workspace', 'exa', 'exa')))
-import exa
-from ipyparallel.apps.ipengineapp import launch_new_instance
+from exa.compute.resources import inspect_resource
 
 
 def main():
-    resource = exa.compute.resources.inspect_resource()
+    resource = inspect_resource()
     print(resource)
-    launch_new_instance()
+    return
 
 
 if __name__ == "__main__":

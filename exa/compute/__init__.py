@@ -19,7 +19,7 @@ communication (see :mod:`~exa.compute.connects`) and resource management (see
 .. _multiple dispatch: https://en.wikipedia.org/wiki/Multiple_dispatch
 """
 # Import modules
-from exa.compute import resources
+from exa.compute import connects, resources
 
 # Import sub-packages
 from exa.compute import tests
