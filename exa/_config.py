@@ -266,10 +266,6 @@ def initialize():
     """
     Copy tutorial.ipynb to the notebooks directory and update static db data.
     """
-    tut = "tutorial.ipynb"
-    tutorial_source = os.path.join(config['dynamic']['examples'], tut)
-    tutorial_dest = os.path.join(config['paths']['notebooks'], tut)
-    shutil.copy(tutorial_source, tutorial_dest)
     # Load isotope static data (replacing existing data)
     isotopes = os.path.join(config['dynamic']['static'], "isotopes.json")
     df = pd.read_json(isotopes, orient='values')
@@ -301,6 +297,12 @@ def initialize():
     df.columns = ['symbol', 'value']
     df['pkid'] = df.index
     df.to_sql(name='constant', con=engine, index=False, if_exists='replace')
+    # Copy the tutorial
+    tut = "tutorial.ipynb"
+    tutorial_source = os.path.join(config['dynamic']['examples'], tut)
+    tutorial_dest = os.path.join(config['paths']['notebooks'], tut)
+    shutil.copy(tutorial_source, tutorial_dest)
+    config['dynamic']['_tut_file'] = 'true'   # See exa.cms.files
 
 
 # Create the config, db engine, and loggers

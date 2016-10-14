@@ -6,7 +6,7 @@ This sub-package handles all digital asset management features of the exa
 framework.
 """
 # Import modules
-from exa.cms import base, constant, isotope, unit
+from exa.cms import base, constant, isotope, unit, files, job, project
 
 # Import sub-packages
 from exa.cms import tests

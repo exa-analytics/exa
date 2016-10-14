@@ -16,8 +16,8 @@ from sqlalchemy.orm import relationship
 from exa.cms.base import Base, Name, Time, Size
 
 
-projectjob = Table(   # Many to many relationship; Project - Job
-    'projectjob',
+project_job = Table(   # Many to many relationship; Project - Job
+    'project_job',
     Base.metadata,
     Column(
         'project_pkid',
@@ -32,8 +32,8 @@ projectjob = Table(   # Many to many relationship; Project - Job
 )
 
 
-projectdatafile = Table(    # Many to many relationship; Project - DataFile
-    'projectdatafile',
+project_file = Table(    # Many to many relationship; Project - DataFile
+    'project_file',
     Base.metadata,
     Column(
         'project_pkid',
@@ -41,34 +41,16 @@ projectdatafile = Table(    # Many to many relationship; Project - DataFile
         ForeignKey('project.pkid', onupdate='CASCADE', ondelete='CASCADE')
     ),
     Column(
-        'datafile_pkid',
+        'file_pkid',
         Integer,
-        ForeignKey('datafile.pkid', onupdate='CASCADE', ondelete='CASCADE')
-    )
-)
-
-
-projectcontainerfile = Table(    # Many to many relationship; Project - ContainerFile
-    'projectcontainerfile',
-    Base.metadata,
-    Column(
-        'project_pkid',
-        Integer,
-        ForeignKey('project.pkid', onupdate='CASCADE', ondelete='CASCADE')
-    ),
-    Column(
-        'containerfile_pkid',
-        Integer,
-        ForeignKey('containerfile.pkid', onupdate='CASCADE', ondelete='CASCADE')
+        ForeignKey('file.pkid', onupdate='CASCADE', ondelete='CASCADE')
     )
 )
 
 
 class Project(Name, Time, Size, Base):
     """Continuous or finite study of a certain subject with a specific goal."""
-    jobs = relationship('Job', secondary=projectjob, backref='projects',
+    jobs = relationship('Job', secondary=project_job, backref='projects',
                         cascade='all, delete')
-    containerfiles = relationship('ContainerFile', secondary=projectcontainerfile,
-                                  backref='projects', cascade='all, delete')
-    datafiles = relationship('DataFile', secondary=projectdatafile,
-                             backref='projects', cascade='all, delete')
+    files = relationship('File', secondary=project_file,
+                         backref='projects', cascade='all, delete')

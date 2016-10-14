@@ -7,10 +7,9 @@ Exa is available through [anaconda](https://www.continuum.io/downloads)
 ```
 conda install -c exaanalytics exa
 ```
-or [pypi](https://pypi.python.org/pypi)
+and [pypi](https://pypi.python.org/pypi).
 ```
 pip install exa
-jupyter nbextension enable --py --sys-prefix exa
 ```
 
 # Getting Started
@@ -26,7 +25,6 @@ make html    # `.\make.bat html` on windows
 [![travis](https://travis-ci.org/exa-analytics/exa.svg?branch=master)](https://travis-ci.org/exa-analytics/exa)  
 [![Coverage](https://coveralls.io/repos/github/avmarchenko/exa/badge.svg?branch=master)](https://coveralls.io/github/avmarchenko/exa?branch=master)  
 [![Codacy](https://api.codacy.com/project/badge/Grade/221e700665c74c85b8255e5b399490d4)](https://www.codacy.com/app/alexvmarch/exa?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=avmarchenko/exa&amp;utm_campaign=Badge_Grade)  
-Note that development requires [npm](https://nodejs.org/en/).
 
 # Miscellaneous
 [![DOI](https://zenodo.org/badge/23807/exa-analytics/exa.svg)](https://zenodo.org/badge/latestdoi/23807/exa-analytics/exa)  

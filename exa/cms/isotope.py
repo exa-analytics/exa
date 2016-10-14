@@ -96,6 +96,15 @@ class Isotope(six.with_metaclass(Meta, Base)):
         return '{0}{1}'.format(self.A, self.symbol)
 
 
+def map_symbols_to_z():
+    """
+    Map element symbols to their corresponding proton (Z) number.
+
+    Args:
+        symbols (Series):
+    """
+    pass
+
 def symbol_to_z():
     """
     Create a "mapper" (:class:`~pandas.Series`) from element symbol to proton
