@@ -272,9 +272,8 @@ def initialize():
     df.columns = ('A', 'Z', 'af', 'eaf', 'color', 'radius', 'gfactor', 'mass',
                   'emass', 'name', 'eneg', 'quadmom', 'spin', 'symbol', 'szuid',
                   'strid')
-    df.index.names = ['pkid']
-    df.reset_index(inplace=True)
-    df.to_sql(name='isotope', con=engine, index=False, if_exists='replace')
+    df.to_sql(name='isotope', con=engine, index=True, index_label="pkid",
+              if_exists='replace')
     # Compute and load unit conversions
     path = os.path.join(config['dynamic']['static'], "units.json")
     df = pd.read_json(path)
@@ -302,7 +301,7 @@ def initialize():
     tutorial_source = os.path.join(config['dynamic']['examples'], tut)
     tutorial_dest = os.path.join(config['paths']['notebooks'], tut)
     shutil.copy(tutorial_source, tutorial_dest)
-    config['dynamic']['_tut_file'] = 'true'   # See exa.cms.files
+    config['dynamic']['init_cms'] = 'true'    # Initialize CMS features
 
 
 # Create the config, db engine, and loggers

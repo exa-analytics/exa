@@ -6,24 +6,32 @@ File Table
 ###################
 The file table keeps a record of all files (on disk) managed by the exa framework.
 """
+import os
 from sqlalchemy import String, Column, Integer, Table, ForeignKey
-from sqlalchemy.orm import relationship
-from exa._config import config
-from exa.cms.base import Base, Name, HexUID, Time
+from exa.cms.base import Base, Name, Sha256UID, Time
 
 
-class File(Name, HexUID, Time, Base):
+class File(Name, Time, Sha256UID, Base):
     """
     Representation of a non exa container file on disk. Provides content
     management for "raw" data files.
     """
-    extension = Column(String, nullable=False)    # File extension
+    ext = Column(String, nullable=False)    # File extension
     size = Column(Integer)
     container = Column(String)    # container type (i.e. class name)
 
-    def get_size(self):
-        pass
+    @classmethod
+    def from_path(cls, path, **kwargs):
+        """
+        Create a file entry using a file path on disk.
 
-
-if '_tut_file' in config['dynamic']:
-    tutorial = File(name="tutorial.ipynb")
+        Args:
+            path (str): Full file path
+        """
+        if not os.path.exists(path):
+            raise FileNotFoundError(path)
+        prefix, ext = os.path.splitext(path)
+        name = os.path.basename(path)
+        size = os.path.getsize(path)
+        uid = cls.sha256_from_file(path)
+        return cls(name=name, size=size, ext=ext, uid=uid, **kwargs)

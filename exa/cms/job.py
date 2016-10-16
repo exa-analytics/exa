@@ -27,5 +27,5 @@ class Job(Name, Time, Size, Base):
     Specific task in a :class:`~exa.relational.Program` or
     :class:`~exa.relational.Project`.
     """
-    files = relationship('DataFile', secondary=job_file, backref='jobs',
-                             cascade='all, delete')
+    files = relationship('File', secondary=job_file, backref='jobs',
+                         cascade='all, delete')

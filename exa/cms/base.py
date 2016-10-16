@@ -6,9 +6,9 @@ Base Table Model
 ##################################################
 This module provides the base classes and metaclasses for database tables.
 """
+import hashlib
 import pandas as pd
 from sys import getsizeof
-from uuid import UUID, uuid4
 from numbers import Integral
 from datetime import datetime
 from contextlib import contextmanager
@@ -16,11 +16,6 @@ from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
 from exa._config import engine
-
-
-def generate_hexuid():
-    """Create a unique, random, hex string id."""
-    return uuid4().hex
 
 
 @contextmanager
@@ -78,20 +73,6 @@ class BaseMeta(DeclarativeMeta):
         with scoped_session() as session:
             session.bulk_insert_mappings(cls, mappings)
 
-    def to_frame(cls):
-        """
-        Dump the table to a :class:`~pandas.DataFrame` object.
-
-        Warning:
-            If performing this action on a very large table, may raise a
-            memory error. It is almost always more effective to query the
-            table for the specific records of interest.
-        """
-        statement = session_factory().query(cls).statement
-        df = pd.read_sql(statement, engine)
-        if 'pkid' in df:
-            df = df.set_index('pkid').sort_index()
-        return df
 
     def __getitem__(cls, key):
         """
@@ -105,19 +86,15 @@ class BaseMeta(DeclarativeMeta):
             exa.relational.Isotope['12C']     # Gets isotope with strid == '12C'
             exa.relational.Length['m', 'km']  # Gets conversion factor meters to kilometers
         """
-        obj = None
         if hasattr(cls, '_getitem'):         # First try using custom getter
-            obj = cls._getitem(key)
-        if obj is None:                      # Fall back to default getters
-            if isinstance(key, Integral):
-                return cls.get_by_pkid(key)
-            elif isinstance(key, UUID):
-                return cls.get_by_uid(key)
-            elif isinstance(key, str):
-                return cls.get_by_name(key)
-            else:
-                raise KeyError('Unknown key ({0}).'.format(key))
-        return obj
+            return cls._getitem(key)
+        elif isinstance(key, Integral):
+            return cls.get_by_pkid(key)
+        elif isinstance(key, str) and len(key) == 64:
+            return cls.get_by_sha256(key)
+        elif isinstance(key, str):
+            return cls.get_by_name(key)
+        raise KeyError('Unknown key ({0}).'.format(key))
 
 
 @as_declarative(metaclass=BaseMeta)
@@ -159,13 +136,18 @@ class Name(object):
     description = Column(String)
 
 
-class HexUID(object):
-    """Hex-based unique id (uid) field."""
-    hexuid = Column(String(32), default=generate_hexuid)
+class Sha256UID(object):
+    """SHA-256 unique ID field."""
+    uid = Column(String(64), nullable=False)
 
-    @property
-    def uid(self):
-        return UUID(self.hexuid)
+    @staticmethod
+    def sha256_from_file(path, blocksize=65536):
+        """Compute sha-256 hash of a file."""
+        sha = hashlib.sha256()
+        with open(path, "rb") as f:
+            for chunk in iter(lambda: f.read(blocksize), b""):
+                sha.update(chunk)
+        return sha.hexdigest()
 
 
 class Time(object):
