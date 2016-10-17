@@ -2,16 +2,15 @@
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Tests for :mod:`~exa.compute.compilers.wrapper`
+Tests for :mod:`~exa.compute.compilers.compiler`
 ########################################################
 """
 from exa.tester import UnitTester
-from exa.compute.compilers.wrapper import (compile_function, available_compilers,
-                                           returns)
+from exa.compute.compiler import compile_function, available_compilers, returns
 
 
 class TestWrapper(UnitTester):
-    """Tests for :mod:`~exa.compute.compilers.wrapper`."""
+    """Tests for :mod:`~exa.compute.compiler`."""
     def test_available_compilers(self):
         """Test :func:`~exa.compute.compilation.available_compilers`."""
         self.assertIsInstance(list(available_compilers()), list)
@@ -35,7 +34,7 @@ class TestWrapper(UnitTester):
             compile_function(lambda x: not x, (bool, ), compiler='__mia__')
 
     def test_returns(self):
-        """Test :func:`~exa.compute.compilers.wrapper.returns`."""
+        """Test :func:`~exa.compute.compilers.compiler.returns`."""
         try:
             @returns(bool)
             def fn1(arg):

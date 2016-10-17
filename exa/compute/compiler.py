@@ -61,7 +61,7 @@ from functools import wraps
 from exa._config import config
 compilers = {'none': None}
 if config['dynamic']['numba'] == "true":
-    from exa.compute.compilers.nb import compiler as nb_compiler
+    from exa.compute.compilers.nbcompiler import compiler as nb_compiler
     compilers['numba'] = nb_compiler
 if 'numba' in compilers:
     default_compiler = 'numba'
