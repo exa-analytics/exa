@@ -19,10 +19,12 @@ from exa.cms.base import (reconfigure_session_factory, session_factory,
 class TestBase(UnitTester):
     """Test the base model for database tables."""
     def setUp(self):
+        """Test generation of a table entry (for later use) and string repr."""
         try:
             self.fp = File.from_path(__file__)
         except Exception as e:
             self.fail(str(e))
+        self.assertIsInstance(repr(self.fp), str)
 
     def test_session_factory_config(self):
         """
@@ -62,9 +64,12 @@ class TestBase(UnitTester):
         """
         try:
             with scoped_session() as session:
-                self.assertEqual(File.get_by_pkid(1).name, "tutorial")
+                tut = File.get_by_pkid(1)
+                self.assertEqual(tut.name, "tutorial")
                 self.assertTrue(len(File.get_by_name("tutorial")) > 0)
                 self.assertTrue(File.get_by_uid(File[1].uid).name, "tutorial")
+                self.assertTrue(len(File['tutorial']) > 0)
+                self.assertIsInstance(File[tut.uid], File)
         except Exception as e:
             self.fail(str(e))
 
