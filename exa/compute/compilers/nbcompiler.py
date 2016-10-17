@@ -32,7 +32,6 @@ def signature(itypes=None, otypes=None):
         bit64 = True
 
 
-
 def jit(func, sig=None, nopython=False, nogil=False, cache=False):
     raise NotImplementedError()
 

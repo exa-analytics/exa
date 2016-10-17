@@ -63,13 +63,8 @@ compilers = {'none': None}
 if config['dynamic']['numba'] == "true":
     from exa.compute.compilers.nb import compiler as nb_compiler
     compilers['numba'] = nb_compiler
-if config['dynamic']['cython'] == "true":
-    from exa.compute.compilers.cy import compiler as cy_compiler
-    compilers['cython'] = cy_compiler
 if 'numba' in compilers:
     default_compiler = 'numba'
-elif 'cython' in compilers:
-    default_compiler = 'cython'
 else:
     default_compiler = 'none'
 

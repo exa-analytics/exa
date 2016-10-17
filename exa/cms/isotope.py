@@ -11,6 +11,7 @@ used dataframe manipulations.
 """
 import six
 import pandas as pd
+from numbers import Integral
 from sqlalchemy import String, Float, Integer, Column
 from exa.cms.base import BaseMeta, Base, session_factory
 #from exa.math.misc.summation import sum_product_pair_f8, sum_product_pair
@@ -50,6 +51,9 @@ class Meta(BaseMeta):
             elif len(key) <= 3:
                 return cls.get_by_symbol(key)
             return cls.get_by_name(key)
+        elif isinstance(key, Integral):
+            return cls.get_by_pkid(key)
+        raise KeyError("Isotope not found for key {}".format(str(key)))
 
 
 class Isotope(six.with_metaclass(Meta, Base)):

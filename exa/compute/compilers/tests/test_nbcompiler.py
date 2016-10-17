@@ -7,7 +7,6 @@ Tests for :mod:`~exa.compute.compilers.nbcompiler`
 """
 from exa._config import config
 from exa.tester import UnitTester
-from exa.compute.dispatch import dispatch
 
 
 class TestNumbaCompiler(UnitTester):
