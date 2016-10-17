@@ -5,4 +5,3 @@
 Tests for :mod:`~exa.compute.connects`
 ########################################################
 """
-from exa.tester import UnitTester

@@ -12,7 +12,7 @@ the Python ecosystem. For an introduction see :mod:`~exa.compute.__init__`.
 .. _Cython: http://cython.org/
 """
 # Import modules
-from exa.compute.compilers import nb, cy
+from exa.compute.compilers import nbcompiler
 
 # Import sub-packages
 from exa.compute.compilers import tests

@@ -95,7 +95,7 @@ def check_diskerr():
     pass
 
 
-def returns(*otypes, passthrough=True):
+def returns(*otypes):
     """
     Decorator that attempts to convert function outputs to specified types.
 

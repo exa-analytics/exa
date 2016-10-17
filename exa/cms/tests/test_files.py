@@ -10,7 +10,6 @@ from exa._config import config
 from exa.tester import UnitTester
 from exa.cms.base import session_factory
 from exa.cms.files import File
-from exa.cms.mgmt import db
 
 
 class TestFiles(UnitTester):

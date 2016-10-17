@@ -8,7 +8,6 @@ Pairing functions are used to map (bijectively: one-to-one) elements of tow sets
 """
 import numpy as np
 from exa.compute.dispatch import dispatch, ints
-from exa.compute.compilers.wrapper import default_compiler
 
 
 @dispatch(ints, ints)

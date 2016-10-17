@@ -6,3 +6,7 @@ Tests for :mod:`~exa.cms.mgmt`
 #############################################
 """
 from exa.tester import UnitTester
+
+
+class TestMgmt(UnitTester):
+    pass
