@@ -166,7 +166,7 @@ def dispatch(*itypes, **flags):
             dispatcher = _dispatched[name]   # same name, creates one if not,
         else:                                # and registers the current function
             dispatcher = Dispatcher(name)    # definition to the provided types.
-        dispatcher.register(func, *itypes, **kwargs)
+        dispatcher.register(func, *itypes, **flags)
         return dispatcher
     return dispatched_func
 
