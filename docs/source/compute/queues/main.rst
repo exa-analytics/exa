@@ -9,6 +9,6 @@ Queue Manager Support
 
 .. toctree::
     :maxdepth: 1
-    :caption: Compilers
+    :caption: Queue Systems
 
     slurm.rst
