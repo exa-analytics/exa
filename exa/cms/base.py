@@ -53,10 +53,7 @@ class BaseMeta(DeclarativeMeta):
 
     def get_by_uid(cls, uid):
         """Select an object by hexuid (as string)"""
-        hexuid = uid
-        if isinstance(uid, UUID):
-            hexuid = uid.hex
-        return session_factory().query(cls).filter(cls.hexuid == hexuid).one()
+        return session_factory().query(cls).filter(cls.uid == uid).one()
 
     def bulk_insert(cls, mappings):
         """

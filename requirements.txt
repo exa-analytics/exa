@@ -13,7 +13,8 @@ psutil
 notebook
 ipywidgets
 pythreejs
-bqplot
+blaze
+bokeh
 sphinx
 nose
 six

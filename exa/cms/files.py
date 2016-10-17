@@ -31,7 +31,8 @@ class File(Name, Time, Sha256UID, Base):
         if not os.path.exists(path):
             raise FileNotFoundError(path)
         prefix, ext = os.path.splitext(path)
-        name = os.path.basename(path)
+        ext = ext[1:]    # Remove the leading "."
+        name = os.path.basename(prefix)
         size = os.path.getsize(path)
         uid = cls.sha256_from_file(path)
         return cls(name=name, size=size, ext=ext, uid=uid, **kwargs)

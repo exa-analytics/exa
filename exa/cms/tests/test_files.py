@@ -8,13 +8,13 @@ Tests for :mod:`~exa.cms.files`
 import os
 from exa._config import config
 from exa.tester import UnitTester
+from exa.cms.base import session_factory
 from exa.cms.files import File
+from exa.cms.mgmt import db
 
 
 class TestFiles(UnitTester):
-    """
-    Tests for :mod:`~exa.cms.files`
-    """
+    """Tests for :mod:`~exa.cms.files`."""
     def test_file_creation(self):
         """Test that file objects can be created."""
         try:
@@ -30,9 +30,20 @@ class TestFiles(UnitTester):
         except Exception as e:
             self.fail(str(e))
         if not os.path.exists(fp):
-            self.fail(str(FileNotFoundError("Missing tutorial.ipynb at {}".format(fp)))
+            self.fail(str(FileNotFoundError("Missing tutorial.ipynb at {}".format(fp))))
         try:
             fp0 = File[0]
         except Exception as e:
             self.fail(str(e))
-        
+
+    def test_file_entry_present(self):
+        """Test to ensure that the tutorial is the first entry in the db."""
+        try:
+            fp0 = File[1]
+        except Exception as e:
+            self.fail(str(e))
+        try:
+            fp1 = session_factory().query(File).filter(File.uid == fp0.uid).one()
+        except Exception as e:
+            self.fail(str(e))
+        self.assertEqual(fp0.uid, fp1.uid)
