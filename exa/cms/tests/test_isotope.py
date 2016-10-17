@@ -41,7 +41,7 @@ class TestIsotope(UnitTester):
             self.fail(str(e))
         self.assertIsInstance(isotope, Isotope)
         with self.assertRaises(KeyError):
-            Isotope[-1]
+            obj = Isotope[-1]
 
     def test_compute_element(self):
         """

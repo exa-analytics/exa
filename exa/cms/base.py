@@ -8,7 +8,6 @@ This module provides the base classes and metaclasses for database tables.
 """
 import hashlib
 import pandas as pd
-from sys import getsizeof
 from numbers import Integral
 from datetime import datetime
 from contextlib import contextmanager

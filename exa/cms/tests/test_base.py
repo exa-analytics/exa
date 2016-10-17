@@ -64,15 +64,14 @@ class TestBase(UnitTester):
         :func:`~exa.cms.base.BaseMeta.get_by_uid`.
         """
         try:
-            with scoped_session() as session:
-                tut = File.get_by_pkid(1)
-                self.assertEqual(tut.name, "tutorial")
-                self.assertTrue(len(File.get_by_name("tutorial")) > 0)
-                self.assertTrue(File.get_by_uid(File[1].uid).name, "tutorial")
-                self.assertTrue(len(File['tutorial']) > 0)
-                self.assertIsInstance(File[tut.uid], File)
+            tut = File.get_by_pkid(1)
         except Exception as e:
             self.fail(str(e))
+        self.assertEqual(tut.name, "tutorial")
+        self.assertTrue(len(File.get_by_name("tutorial")) > 0)
+        self.assertTrue(File.get_by_uid(File[1].uid).name, "tutorial")
+        self.assertTrue(len(File['tutorial']) > 0)
+        self.assertIsInstance(File[tut.uid], File)
 
     def test_to_series(self):
         """
@@ -118,4 +117,4 @@ class TestBase(UnitTester):
         except Exception as e:
             self.fail(str(e))
         with self.assertRaises(KeyError):
-            File[pkid]
+            obj = File[pkid]
