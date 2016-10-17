@@ -80,3 +80,8 @@ class TestUnits(UnitTester):
     def test_molarmass(self):
         """Test :class:`~exa.cms.unit.MolarMass`."""
         self.assertTrue(np.isclose(MolarMass['g_mol', 'kg_mol'], 0.001))
+
+    def test_keyerror(self):
+        """Test to ensure that proper error is raised on failed retrieval."""
+        with self.assertRaises(KeyError):
+            MolarMass["g_mol"]

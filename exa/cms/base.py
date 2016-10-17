@@ -55,22 +55,6 @@ class BaseMeta(DeclarativeMeta):
         """Select an object by hexuid (as string)"""
         return session_factory().query(cls).filter(cls.uid == uid).one()
 
-    def bulk_insert(cls, mappings):
-        """
-        Perform a `bulk insert`_ into a specific table.
-
-        .. code-block:: Python
-
-            mappings = [{'column1': 'foo', 'column2': 42, 'column3': 'bar'},
-                        {'column1': 'fop', 'column2': 43, 'column3': 'baz'}]
-            Table.bulk_insert(mappings)
-
-        .. _bulk insert: http://docs.sqlalchemy.org/en/latest/orm/session_api.html
-        """
-        with scoped_session() as session:
-            session.bulk_insert_mappings(cls, mappings)
-
-
     def __getitem__(cls, key):
         """
         Custom getter allows for the following convenient syntax:
@@ -88,7 +72,7 @@ class BaseMeta(DeclarativeMeta):
         elif isinstance(key, Integral):
             return cls.get_by_pkid(key)
         elif isinstance(key, str) and len(key) == 64:
-            return cls.get_by_sha256(key)
+            return cls.get_by_uid(key)
         elif isinstance(key, str):
             return cls.get_by_name(key)
         raise KeyError('Unknown key ({0}).'.format(key))
@@ -114,14 +98,6 @@ class Base(object):
         s = pd.Series(self.__dict__)
         del s['_sa_instance_state']
         return s
-
-    def _save_record(self):
-        """
-        Save the current object's relational information.
-        """
-        session = session_factory(expire_on_commit=False)
-        session.add(self)
-        session.commit()
 
     def __repr__(self):
         return '{0}(pkid: {1})'.format(self.__class__.__name__, self.pkid)
@@ -149,14 +125,10 @@ class Sha256UID(object):
 
 class Time(object):
     """Timestamp fields."""
-    created = Column(DateTime, default=datetime.now)
-    modified = Column(DateTime, default=datetime.now)
-    accessed = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    modified = Column(DateTime)
 
-    def _update_accessed(self):
-        self.accessed = datetime.now()
-
-    def _update_modified(self):
+    def update_modified(self):
+        """Update the modified timestamp to now."""
         self.modified = datetime.now()
 
 
@@ -164,9 +136,6 @@ class Size(object):
     """Approximate size (on disk) and file count fields."""
     size = Column(Integer)
     nfiles = Column(Integer)
-
-    def _update(self):
-        self.size = getsizeof(self)
 
 
 session_factory = None

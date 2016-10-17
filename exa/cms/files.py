@@ -7,6 +7,7 @@ File Table
 The file table keeps a record of all files (on disk) managed by the exa framework.
 """
 import os
+from datetime import datetime
 from sqlalchemy import String, Column, Integer, Table, ForeignKey
 from exa.cms.base import Base, Name, Sha256UID, Time
 
@@ -35,4 +36,5 @@ class File(Name, Time, Sha256UID, Base):
         name = os.path.basename(prefix)
         size = os.path.getsize(path)
         uid = cls.sha256_from_file(path)
-        return cls(name=name, size=size, ext=ext, uid=uid, **kwargs)
+        modified = datetime.fromtimestamp(os.path.getmtime(path))
+        return cls(name=name, size=size, ext=ext, uid=uid, modified=modified, **kwargs)

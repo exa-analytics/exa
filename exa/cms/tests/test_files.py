@@ -31,9 +31,10 @@ class TestFiles(UnitTester):
         if not os.path.exists(fp):
             self.fail(str(FileNotFoundError("Missing tutorial.ipynb at {}".format(fp))))
         try:
-            fp0 = File[0]
+            fp0 = File[1]
         except Exception as e:
             self.fail(str(e))
+        self.assertEqual(fp0.name, "tutorial")
 
     def test_file_entry_present(self):
         """Test to ensure that the tutorial is the first entry in the db."""

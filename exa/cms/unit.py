@@ -24,7 +24,7 @@ class Meta(BaseMeta):
             with scoped_session() as session:
                 return session.query(cls).filter(and_(cls.from_unit==f, cls.to_unit==t)).one().factor
         else:
-            raise TypeError('Usage requires syntax Dimension["from_unit", "to_unit"]')
+            raise KeyError('Usage requires syntax Dimension["from_unit", "to_unit"]')
 
 
 class Dimension(object):
