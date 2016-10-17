@@ -4,9 +4,10 @@
 """
 Job Table
 #############
-A job is a single experiment, typically resulting in a number of "raw" data
-files (inputs and outputs). A job can often be organized in a single container
-object.
+A :class:`~exa.cms.job.Job` is a single experiment, typically resulting in a
+number of "raw" data files (inputs and outputs). A job can often be organized
+in a single container object. A collection of :class:`~exa.cms.job.Job` objects
+typically make up a :class:`~exa.cms.project.Project`.
 """
 from sqlalchemy import String, Integer, ForeignKey, Table, Column
 from sqlalchemy.orm import relationship
@@ -24,8 +25,6 @@ job_file = Table(    # Many to many relationship; Job - File
 
 
 class Job(Name, Time, Size, Sha256UID, Base):
-    """
-    A single computational experiment that generates one or more output files.
-    """
+    """A single computational experiment that generates one or more files."""
     files = relationship('File', secondary=job_file, backref='jobs',
                          cascade='all, delete')

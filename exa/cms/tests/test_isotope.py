@@ -50,9 +50,13 @@ class TestIsotope(UnitTester):
         """
         try:
             h = Isotope.element("H")
+            o = Isotope.element("O")
+            u = Isotope.element("uranium")
         except Exception as e:
             self.fail(str(e))
         self.assertTrue(np.isclose(h.mass, 1.0079105192))
+        self.assertEqual(o.name, "oxygen")
+        self.assertEqual(u.name, "uranium")
 
 
 class TestElement(UnitTester):

@@ -94,7 +94,8 @@ class BaseMeta(DeclarativeMeta):
             return cls._getitem(key)
         elif isinstance(key, Integral):
             return cls.get_by_pkid(key)
-        elif isinstance(key, str) and len(key) == 64:
+        elif isinstance(key, str) and len(key) in [64, 66]:
+            key = key.replace("(", "").replace(")", "")
             return cls.get_by_uid(key)
         elif isinstance(key, str):
             return cls.get_by_name(key)
