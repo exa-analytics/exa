@@ -8,6 +8,7 @@ Tests to ensure correct initialization of the base table (metaclass) for all
 relational tables. Many of the tests act on the :class:`~exa.cms.files.File`
 table because it has a convenient column set.
 """
+import pandas as pd
 from datetime import datetime
 from exa._config import engine
 from exa.tester import UnitTester
@@ -84,9 +85,37 @@ class TestBase(UnitTester):
             self.fail(str(e))
         self.assertEqual(se['uid'], self.fp.uid)
 
+    def test_to_frame(self):
+        """Test :func:`~exa.cms.base.BaseMeta.to_frame`."""
+        try:
+            df = File.to_frame()
+        except Exception as e:
+            self.fail(str(e))
+        self.assertIsInstance(df, pd.DataFrame)
+
     def test_time(self):
         """Test methods of :class:`~exa.cms.base.Time`."""
         now = datetime.now()
         self.assertTrue(self.fp.modified < now)
         self.fp.update_modified()
         self.assertTrue((now - self.fp.modified).total_seconds() < 1)
+
+    def test_insert_delete(self):
+        """
+        Test insert and delete operations on the :class:`~exa.cms.files.File`
+        table.
+        """
+        try:
+            with scoped_session() as session:
+                session.add(self.fp)
+                session.commit()
+                pkid = self.fp.pkid
+        except Exception as e:
+            self.fail(str(e))
+        self.assertIsInstance(File[pkid], File)
+        try:
+            File.delete(pkid)
+        except Exception as e:
+            self.fail(str(e))
+        with self.assertRaises(KeyError):
+            File[pkid]

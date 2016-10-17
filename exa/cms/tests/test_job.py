@@ -6,7 +6,6 @@ Tests for :mod:`~exa.cms.job`
 #############################################
 """
 import os
-from exa._config import config
 from exa.tester import UnitTester
 from exa.cms.job import Job, job_file
 

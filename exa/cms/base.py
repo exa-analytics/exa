@@ -43,9 +43,33 @@ class BaseMeta(DeclarativeMeta):
     This is the base metaclass for all relational tables. It provides convient
     lookup methods, bulk insert methods, and conversions to other formats.
     """
+    def to_frame(cls):
+        """
+        Convenience method for converting table to :class:`~pandas.DataFrame`.
+
+        Warning:
+            This method should not generally be used see :mod:`~exa.cms.mgmt`
+            for ways of extracting/inspecting database data.
+        """
+        with scoped_session() as session:
+            statement = session.query(cls).statement
+            df = pd.read_sql(statement, engine)
+            if 'pkid' in df:
+                df.set_index('pkid', inplace=True)
+                df = df.sort_index()
+            return df
+
+    def delete(cls, pkid):
+        # Can only delete by pkid
+        with scoped_session() as session:
+            session.query(cls).filter(cls.pkid == pkid).delete()
+
     def get_by_pkid(cls, pkid):
         """Select an object by pkid."""
-        return session_factory().query(cls).get(pkid)
+        obj = session_factory().query(cls).get(pkid)
+        if obj is None:
+            raise KeyError("Entry with pkid {} not found in {}".format(str(pkid), cls.__name__))
+        return obj
 
     def get_by_name(cls, name):
         """Select objects by name."""
@@ -87,10 +111,6 @@ class Base(object):
     """
     pkid = Column(Integer, primary_key=True)
 
-    @declared_attr
-    def __tablename__(cls):
-        return cls.__name__.lower()
-
     def to_series(self):
         """
         Create a series object from the given record entry.
@@ -98,6 +118,10 @@ class Base(object):
         s = pd.Series(self.__dict__)
         del s['_sa_instance_state']
         return s
+
+    @declared_attr
+    def __tablename__(cls):
+        return cls.__name__.lower()
 
     def __repr__(self):
         return '{0}(pkid: {1})'.format(self.__class__.__name__, self.pkid)
