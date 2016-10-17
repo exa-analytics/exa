@@ -5,5 +5,5 @@
 #######################################################
 Compilation Using Numba
 #######################################################
-.. automodule:: exa.compute.compilers.nb
+.. automodule:: exa.compute.compilers.nbcompiler
     :members:

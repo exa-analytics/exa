@@ -12,4 +12,4 @@ Automatic Compilation for Workflows
     :maxdepth: 1
     :caption: Compilers
 
-    nb.rst
+    nbcompiler.rst

@@ -13,7 +13,7 @@ visualization framework built on top of the `PyData`_ stack.
 
 .. toctree::
     :maxdepth: 1
-    :caption: User Docs
+    :caption: User Guide
 
     install.rst
     started.rst
@@ -23,7 +23,7 @@ visualization framework built on top of the `PyData`_ stack.
 
 .. toctree::
     :maxdepth: 2
-    :caption: Technical Docs
+    :caption: Technical Info
 
     concepts.rst
     api.rst
