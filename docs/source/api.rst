@@ -43,6 +43,5 @@ of important framework concepts can also be found within this documentation.
 
     compute/main.rst
     compute/dispatch.rst
-    compute/queue/main.rst
     compute/compilers/main.rst
     compute/algorithms/main.rst
