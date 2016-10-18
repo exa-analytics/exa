@@ -8,6 +8,7 @@ This module provides the base classes and metaclasses for database tables.
 """
 import hashlib
 import pandas as pd
+from six import string_types
 from numbers import Integral
 from datetime import datetime
 from contextlib import contextmanager
@@ -94,12 +95,11 @@ class BaseMeta(DeclarativeMeta):
             return cls._getitem(key)
         elif isinstance(key, Integral):
             return cls.get_by_pkid(key)
-        elif isinstance(key, str) and len(key) in [64, 66]:
-            key = key.replace("(", "").replace(")", "")
+        elif isinstance(key, string_types) and len(key) == 64:
             return cls.get_by_uid(key)
-        elif isinstance(key, str):
+        elif isinstance(key, string_types):
             return cls.get_by_name(key)
-        raise KeyError('Unknown key ({0}).'.format(key))
+        raise KeyError('Unknown key "{0}".'.format(key))
 
 
 @as_declarative(metaclass=BaseMeta)

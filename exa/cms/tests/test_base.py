@@ -9,6 +9,7 @@ relational tables. Many of the tests act on the :class:`~exa.cms.files.File`
 table because it has a convenient column set.
 """
 import pandas as pd
+from six import string_types
 from datetime import datetime
 from exa._config import engine
 from exa.tester import UnitTester
@@ -25,7 +26,7 @@ class TestBase(UnitTester):
             self.fp = File.from_path(__file__)
         except Exception as e:
             self.fail(str(e))
-        self.assertIsInstance(repr(self.fp), str)
+        self.assertIsInstance(repr(self.fp), string_types)
 
     def test_session_factory_config(self):
         """
