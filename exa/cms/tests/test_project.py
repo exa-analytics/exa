@@ -29,6 +29,10 @@ class TestProject(UnitTester):
         self.session.add(self.project)
         self.session.commit()
 
+    def test_committed(self):
+        """Test that the pkids exist."""
+        pass
+
     def tearDown(self):
         """Clean up the table by rolling back the changes."""
         self.session.close()
