@@ -8,9 +8,11 @@ Tests for the isotope table.
 """
 import numpy as np
 import pandas as pd
+from six import string_types
 from exa.tester import UnitTester
 from exa.cms.isotope import (Isotope, Element, elements, symbol_to_znum,
-                             znum_to_symbol)
+                             znum_to_symbol, symbol_to_radius, symbol_to_mass,
+                             symbol_to_color)
 
 
 class TestIsotope(UnitTester):
@@ -48,13 +50,19 @@ class TestIsotope(UnitTester):
         """
         try:
             h = Isotope.element("H")
+            hh = Isotope.element("hydrogen")
             o = Isotope.element("O")
             u = Isotope.element("uranium")
         except Exception as e:
             self.fail(str(e))
         self.assertTrue(np.isclose(h.mass, 1.0079105192))
+        self.assertEqual(hh.name, "hydrogen")
         self.assertEqual(o.name, "oxygen")
         self.assertEqual(u.name, "uranium")
+
+    def test_repr(self):
+        """Test :class:`~exa.cms.isotope.Isotope` repr."""
+        self.assertIsInstance(repr(Isotope['1H']), string_types)
 
 
 class TestElement(UnitTester):
@@ -73,6 +81,20 @@ class TestElement(UnitTester):
         self.assertIsInstance(element, Element)
         self.assertTrue(np.isclose(element.mass, 1.0079105192))
 
+    def test_from_symbol_name(self):
+        """
+        Test :func:`~exa.cms.isotope.Element.from_symbol` and
+        :func:`~exa.cms.isotope.Element.from_name`.
+        """
+        try:
+            h0 = Element.from_symbol("h")
+            h1 = Element.from_name("hydrogen")
+            h2 = Element.from_name("HYDROGEN")
+        except Exception as e:
+            self.fail(str(e))
+        self.assertTrue(np.isclose(h0.mass, h1.mass))
+        self.assertTrue(np.isclose(h0.mass, h2.mass))
+
     def test_all_elements(self):
         """
         Test generation of all elements (:func:`~exa.cms.isotopes.elements`).
@@ -84,6 +106,10 @@ class TestElement(UnitTester):
         self.assertIsInstance(elementz, pd.Series)
         self.assertIsInstance(elementz['hydrogen'], Element)
         self.assertTrue(np.isclose(elementz['hydrogen'].mass, 1.0079105192))
+
+    def test_repr(self):
+        """Test :class:`~exa.cms.isotope.Element` repr."""
+        self.assertIsInstance(repr(Element.from_symbol('H')), string_types)
 
 
 class TestMappers(UnitTester):
@@ -103,11 +129,31 @@ class TestMappers(UnitTester):
             self.fail(str(e))
         self.assertIsInstance(mapper0, pd.Series)
         self.assertIsInstance(mapper1, pd.Series)
-        self.assertEqual(len(mapper0), len(mapper1) + 2)    # account for D & T
+        self.assertEqual(len(mapper0), len(mapper1))
 
     def test_symbol_to_radii(self):
-        """
-        Tests for :func:`~exa.cms.isotope.symbol_to_radius` and
-        :func:`~exa.cms.isotope.radius_to_symbol`.
-        """
-        pass
+        """Test :func:`~exa.cms.isotope.symbol_to_radius`."""
+        try:
+            mapper = symbol_to_radius()
+        except Exception as e:
+            self.fail(str(e))
+        self.assertIsInstance(mapper, pd.Series)
+        self.assertTrue(np.isclose(mapper['H'], 0.60471232))
+
+    def test_symbol_to_mass(self):
+        """Test :func:`~exa.cms.isotope.symbol_to_mass`."""
+        try:
+            mapper = symbol_to_mass()
+        except Exception as e:
+            self.fail(str(e))
+        self.assertIsInstance(mapper, pd.Series)
+        self.assertTrue(np.isclose(mapper['H'], 1.0079105192))
+
+    def test_symbol_to_color(self):
+        """Test :func:`~exa.cms.isotope.symbol_to_color`."""
+        try:
+            mapper = symbol_to_color()
+        except Exception as e:
+            self.fail(str(e))
+        self.assertIsInstance(mapper, pd.Series)
+        self.assertTrue(mapper['H'], 10197915)

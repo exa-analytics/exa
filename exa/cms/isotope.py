@@ -49,12 +49,11 @@ class Meta(BaseMeta):
 
     def _getitem(cls, key):
         """Custom getter that support strid (e.g. "1H") and symbols."""
-        if isinstance(key, str):
+        if isinstance(key, six.string_types):
             if key[0].isdigit():
                 return cls.get_by_strid(key)
             elif len(key) <= 3:
                 return cls.get_by_symbol(key)
-            return cls.get_by_name(key)
 
 
 class Isotope(six.with_metaclass(Meta, Base)):
@@ -143,18 +142,20 @@ class Element(object):
         mass = (isotopes["af"]*isotopes["mass"]).sum()
         emass = mass*(isotopes["af"]*isotopes["emass"]/isotopes["mass"]).sum()
         idx = isotopes["af"].idxmax()
-        items = ["A", "Z", "name", "symbol", "radius"]
-        anum, znum, name, symbol, radius = isotopes.ix[idx, items]
+        items = ["A", "Z", "name", "symbol", "radius", "color"]
+        anum, znum, name, symbol, radius, color = isotopes.ix[idx, items]
         return cls(name=name, symbol=symbol, A=anum, Z=znum, mass=mass,
-                   emass=emass, radius=radius)
+                   emass=emass, radius=radius, color=color)
 
-    def __init__(self, name, mass, emass, radius, A, Z, symbol):
+    def __init__(self, name, mass, emass, radius, A, Z, symbol, color):
         self.name = name
         self.symbol = symbol
         self.A = A
         self.Z = Z
         self.mass = mass
         self.emass = emass
+        self.radius = radius
+        self.color = color
 
     def __repr__(self):
         return "Element({0})".format(self.symbol)
@@ -181,8 +182,10 @@ def symbol_to_znum():
         mapper = symbol_to_z()
         z_series = symbol_series.map(mapper)
     """
-    df = Isotope.to_frame().drop_duplicates("symbol").sort_values("symbol")
-    return df.set_index("symbol")["Z"]
+    se = elements()
+    mapper = se.apply(lambda ele: ele.Z)
+    mapper.index = se.apply(lambda ele: ele.symbol)
+    return mapper
 
 
 def znum_to_symbol():
@@ -192,39 +195,31 @@ def znum_to_symbol():
     See Also:
         Opposite mapper of :func:`~exa.cms.isotope.symbol_to_z`.
     """
-    df = Isotope.to_frame().drop_duplicates("Z").sort_values("Z")
-    return df.set_index("Z")["symbol"]
+    se = elements()
+    mapper = se.apply(lambda ele: ele.symbol)
+    mapper.index = se.apply(lambda ele: ele.Z)
+    return mapper
 
 
 def symbol_to_radius():
     """Mapper from symbol pairs to sum of covalent radii."""
-    df = Isotope.to_frame().drop_duplicates("symbol")
-    symbol = df["symbol"].values
-    radius = df["radius"].values
-    symbols = [symbol0 + symbol1 for symbol0, symbol1 in product(symbol, symbol)]
-    s = pd.Series([radius0 + radius1 for radius0, radius1 in product(radius, radius)])
-    s.index = symbols
-    return s
+    se = elements()
+    mapper = se.apply(lambda ele: ele.radius)
+    mapper.index = se.apply(lambda ele: ele.symbol)
+    return mapper
 
 
-def symbol_to_element_mass():
-    """Mapper from symbol to element mass."""
-    df = Isotope.to_frame()
-    df["fmass"] = df["mass"].mul(df["af"])
-    s = df.groupby("name").sum()
-    mapper = df.drop_duplicates("name").set_index("name")["symbol"]
-    s.index = s.index.map(lambda x: mapper[x])
-    s = s["fmass"]
-    return s
-
-
-def symbol_to_radius():
-    """Mapper from isotope symbol to covalent radius."""
-    df = Isotope.to_frame().drop_duplicates("symbol")
-    return df.set_index("symbol")["radius"]
+def symbol_to_mass():
+    """Mapper from symbol to (element) mass."""
+    se = elements()
+    mapper = se.apply(lambda ele: ele.mass)
+    mapper.index = se.apply(lambda ele: ele.symbol)
+    return mapper
 
 
 def symbol_to_color():
     """Mapper from isotope symbol to color."""
-    df = Isotope.to_frame().drop_duplicates("symbol")
-    return df.set_index("symbol")["color"]
+    se = elements()
+    mapper = se.apply(lambda ele: ele.color)
+    mapper.index = se.apply(lambda ele: ele.symbol)
+    return mapper
