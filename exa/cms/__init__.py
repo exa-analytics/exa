@@ -12,7 +12,7 @@ from exa.cms import base, constant, isotope, unit, files, job, mgmt
 from exa.cms import tests
 
 # Import user/dev API
-from exa.cms.base import scoped_session
+from exa.cms.base import scoped_session, session_factory
 from exa.cms.files import File
 from exa.cms.constant import Constant
 from exa.cms.isotope import Isotope

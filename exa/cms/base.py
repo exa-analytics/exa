@@ -59,11 +59,6 @@ class BaseMeta(DeclarativeMeta):
                 df = df.sort_index()
             return df
 
-    def delete(cls, pkid):
-        # Can only delete by pkid
-        with scoped_session() as session:
-            session.query(cls).filter(cls.pkid == pkid).delete()
-
     def get_by_pkid(cls, pkid):
         """Select an object by pkid."""
         obj = session_factory().query(cls).get(pkid)
@@ -91,15 +86,20 @@ class BaseMeta(DeclarativeMeta):
             exa.relational.Isotope['12C']     # Gets isotope with strid == '12C'
             exa.relational.Length['m', 'km']  # Gets conversion factor meters to kilometers
         """
+        entries = None
+        mia = [None, [], ()]
         if hasattr(cls, '_getitem'):         # First try using custom getter
-            return cls._getitem(key)
-        elif isinstance(key, Integral):
-            return cls.get_by_pkid(key)
-        elif isinstance(key, string_types) and len(key) == 64:
-            return cls.get_by_uid(key)
-        elif isinstance(key, string_types):
-            return cls.get_by_name(key)
-        raise KeyError('Unknown key "{0}".'.format(key))
+            entries = cls._getitem(key)
+        if entries in mia:
+            if isinstance(key, Integral):
+                entries = cls.get_by_pkid(key)
+            elif isinstance(key, string_types) and len(key) == 64:
+                entries = cls.get_by_uid(key)
+            elif isinstance(key, string_types):
+                entries = cls.get_by_name(key)
+        if entries in mia:
+            raise KeyError('Unknown key "{0}".'.format(key))
+        return entries
 
 
 @as_declarative(metaclass=BaseMeta)
@@ -135,7 +135,7 @@ class Name(object):
 
 class Sha256UID(object):
     """SHA-256 unique ID field."""
-    uid = Column(String(64), nullable=False)
+    uid = Column(String(64), nullable=False, unique=True)
 
     @staticmethod
     def sha256_from_file(path, blocksize=65536):

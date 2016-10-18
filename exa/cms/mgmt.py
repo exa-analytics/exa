@@ -8,9 +8,31 @@ Database table creation and database inspection is provided by this module.
 """
 import os
 import blaze as bz
+import pandas as pd
 from exa._config import config, engine
 from exa.cms.base import Base, scoped_session
 from exa.cms.files import File
+
+
+def tables():
+    """Display all tables."""
+    return db.fields
+
+def tail(table, n=10, to_frame=False):
+    """
+    Extract the end of a table.
+
+    Args:
+        n (int): Number of entries to extract
+        to_frame (bool): Return a dataframe (default false)
+
+    Returns:
+        sliced: Blaze data object or pandas dataframe
+    """
+    sliced = db[table].sort().tail(n)
+    if to_frame:
+        return bz.odo(sliced, pd.DataFrame)
+    return sliced
 
 
 def init_cms():

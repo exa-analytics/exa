@@ -40,8 +40,6 @@ class TestIsotope(UnitTester):
         except Exception as e:
             self.fail(str(e))
         self.assertIsInstance(isotope, Isotope)
-        with self.assertRaises(KeyError):
-            obj = Isotope[-1]
 
     def test_compute_element(self):
         """

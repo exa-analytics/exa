@@ -14,14 +14,13 @@ from sqlalchemy.orm import relationship
 from exa.cms.base import Name, Time, Size, Base, Sha256UID
 
 
-job_file = Table(    # Many to many relationship; Job - File
-    'job_file',
-    Base.metadata,
-    Column('job_pkid', Integer, ForeignKey('job.pkid', onupdate='CASCADE',
-                                           ondelete='CASCADE')),
-    Column('file_pkid', Integer, ForeignKey('file.pkid', onupdate='CASCADE',
-                                            ondelete='CASCADE'))
-)
+job_file = Table('jobfile', Base.metadata,
+                 Column('job_pkid', Integer, ForeignKey('job.pkid',
+                                                        onupdate='CASCADE',
+                                                        ondelete='CASCADE')),
+                 Column('file_pkid', Integer, ForeignKey('file.pkid',
+                                                         onupdate='CASCADE',
+                                                         ondelete='CASCADE')))
 
 
 class Job(Name, Time, Size, Sha256UID, Base):

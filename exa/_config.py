@@ -181,7 +181,6 @@ def reconfigure(rootname=".exa"):
     # Check for existing config or build one anew
     config_file = os.path.join(root, "config")
     init_flag = False
-    global config, engine, loggers
     if os.path.exists(config_file) and rootname == ".exa":
         stats = os.stat(config_file)
         if stats.st_size > 180:      # Check that the file size > 180 bytes
@@ -245,6 +244,7 @@ def reconfigure(rootname=".exa"):
     except NameError:
         pass
     # Database engine
+    global engine
     try:
         engine.dispose()
     except AttributeError:

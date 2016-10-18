@@ -11,11 +11,11 @@ table because it has a convenient column set.
 import pandas as pd
 from six import string_types
 from datetime import datetime
-from exa._config import engine
 from exa.tester import UnitTester
 from exa.cms.files import File
+from exa.cms.mgmt import tail
 from exa.cms.base import (reconfigure_session_factory, session_factory,
-                          scoped_session)
+                          scoped_session, engine)
 
 
 class TestBase(UnitTester):
@@ -24,6 +24,9 @@ class TestBase(UnitTester):
         """Test generation of a table entry (for later use) and string repr."""
         try:
             self.fp = File.from_path(__file__)
+            self.conn = engine.connect()
+            self.trans = self.conn.begin()
+            self.session = session_factory(bind=self.conn)
         except Exception as e:
             self.fail(str(e))
         self.assertIsInstance(repr(self.fp), string_types)
@@ -73,6 +76,8 @@ class TestBase(UnitTester):
         self.assertTrue(File.get_by_uid(File[1].uid).name, "tutorial")
         self.assertTrue(len(File['tutorial']) > 0)
         self.assertIsInstance(File[tut.uid], File)
+        with self.assertRaises(KeyError):
+            File[-1]
 
     def test_to_series(self):
         """
@@ -100,22 +105,21 @@ class TestBase(UnitTester):
         self.fp.update_modified()
         self.assertTrue((now - self.fp.modified).total_seconds() < 1)
 
-    def test_insert_delete(self):
-        """
-        Test insert and delete operations on the :class:`~exa.cms.files.File`
-        table.
-        """
+    def test_commit(self):
+        """Test database commit."""
         try:
-            with scoped_session() as session:
-                session.add(self.fp)
-                session.commit()
-                pkid = self.fp.pkid
+            self.session.add(self.fp)
+            self.session.commit()
         except Exception as e:
             self.fail(str(e))
-        self.assertIsInstance(File[pkid], File)
+        self.assertEqual(self.session.query(File).get(self.fp.pkid).uid, self.fp.uid)
+
+    def tearDown(self):
+        """Remove test entry from database."""
         try:
-            File.delete(pkid)
+            self.session.close()
         except Exception as e:
             self.fail(str(e))
-        with self.assertRaises(KeyError):
-            obj = File[pkid]
+        finally:
+            self.trans.rollback()
+            self.conn.close()
