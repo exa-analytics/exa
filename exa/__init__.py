@@ -17,5 +17,5 @@ from exa import cms, compute, core, tests
 from exa._version import __version__
 from exa._config import print_config
 from exa.mpl import color_palette
-from exa.cms import scoped_session, db, File
+from exa.cms import scoped_session, session_factory, db, File, Job, Project
 from exa.core import Editor, CSV

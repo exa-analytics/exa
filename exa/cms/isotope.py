@@ -68,7 +68,7 @@ class Isotope(six.with_metaclass(Meta, Base)):
         >>> h.mass
         1.0078250321
         >>> Isotope["H"]
-        [Isotope(1H), Isotope(4H), Isotope(5H), Isotope(6H), Isotope(7H)]
+        [Isotope(1H), Isotope(2H), Isotope(3H), Isotope(4H), Isotope(5H), Isotope(6H), Isotope(7H)]
         >>> Isotope["13C"].szuid
         175
         >>> c = Isotope[57]

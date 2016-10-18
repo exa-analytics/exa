@@ -15,17 +15,15 @@ from exa.cms.mgmt import tail
 class TestJob(UnitTester):
     """Tests for :mod:`~exa.cms.job`."""
     def setUp(self):
-        try:
-            self.job = Job(name="test", uid="test_uid"*8)
-            self.file = File(name="test", uid="test_uid"*8, ext="nul")
-            self.conn = engine.connect()
-            self.trans = self.conn.begin()
-            self.session = session_factory(bind=self.conn)
-            self.job.files.append(self.file)
-            self.session.add(self.job)
-            self.session.commit()
-        except Exception as e:
-            self.fail(str(e))
+        """Set up the test job and test (related) file."""
+        self.job = Job(name="test", uid="test_uid"*8)
+        self.file = File(name="test", uid="test_uid"*8, ext="nul")
+        self.conn = engine.connect()
+        self.trans = self.conn.begin()
+        self.session = session_factory(bind=self.conn)
+        self.job.files.append(self.file)
+        self.session.add(self.job)
+        self.session.commit()
 
     def test_committed(self):
         """Test that pkids exist."""
@@ -40,21 +38,14 @@ class TestJob(UnitTester):
 
     def test_relationship(self):
         """Test that relationships were correctly created."""
-        try:
-            f = self.session.query(File).get(self.file.pkid)
-            j = self.session.query(Job).get(self.job.pkid)
-        except Exception as e:
-            self.fail(str(e))
+        f = self.session.query(File).get(self.file.pkid)
+        j = self.session.query(Job).get(self.job.pkid)
         self.assertIsInstance(f, File)
         self.assertEqual(len(f.jobs), 1)
         self.assertEqual(len(j.files), 1)
 
     def tearDown(self):
         """Clean up inserted entries."""
-        try:
-            self.session.close()
-        except Exception as e:
-            self.fail(str(e))
-        finally:
-            self.trans.rollback()
-            self.conn.close()
+        self.session.close()
+        self.trans.rollback()
+        self.conn.close()

@@ -22,13 +22,10 @@ class TestBase(UnitTester):
     """Test the base model for database tables."""
     def setUp(self):
         """Test generation of a table entry (for later use) and string repr."""
-        try:
-            self.fp = File.from_path(__file__)
-            self.conn = engine.connect()
-            self.trans = self.conn.begin()
-            self.session = session_factory(bind=self.conn)
-        except Exception as e:
-            self.fail(str(e))
+        self.fp = File.from_path(__file__)
+        self.conn = engine.connect()
+        self.trans = self.conn.begin()
+        self.session = session_factory(bind=self.conn)
         self.assertIsInstance(repr(self.fp), string_types)
 
     def test_session_factory_config(self):
@@ -37,25 +34,16 @@ class TestBase(UnitTester):
         that the :attr:`~exa.cms.base.session_factory` attribute is correctly
         bound to the engine.
         """
-        try:
-            reconfigure_session_factory()
-        except Exception as e:
-            self.fail(str(e))
-        try:
-            session = session_factory()
-            session.close()
-        except Exception as e:
-            self.fail(str(e))
+        reconfigure_session_factory()
+        session = session_factory()
+        session.close()
         self.assertTrue(engine is session_factory.kw['bind'])
 
     def test_scoped_session(self):
         """Test the :func:`~exa.cms.base.scoped_session` context manager."""
-        try:
-            with scoped_session() as session:
-                n = session.query(File).count()
-            self.assertTrue(n > 0)
-        except Exception as e:
-            self.fail(str(e))
+        with scoped_session() as session:
+            n = session.query(File).count()
+        self.assertTrue(n > 0)
         with self.assertRaises(AttributeError):
             with scoped_session() as session:
                 session.query(File).filter(File.missingobj == "mia").one()
@@ -67,10 +55,7 @@ class TestBase(UnitTester):
         :func:`~exa.cms.base.BaseMeta.get_by_name`, and
         :func:`~exa.cms.base.BaseMeta.get_by_uid`.
         """
-        try:
-            tut = File.get_by_pkid(1)
-        except Exception as e:
-            self.fail(str(e))
+        tut = File.get_by_pkid(1)
         self.assertEqual(tut.name, "tutorial")
         self.assertTrue(len(File.get_by_name("tutorial")) > 0)
         self.assertTrue(File.get_by_uid(File[1].uid).name, "tutorial")
@@ -84,18 +69,12 @@ class TestBase(UnitTester):
         Test :func:`~exa.cms.base.Base.to_series` and
         :func:`~exa.cms.base.Sha256UID.sha256_from_file`.
         """
-        try:
-            se = self.fp.to_series()
-        except Exception as e:
-            self.fail(str(e))
+        se = self.fp.to_series()
         self.assertEqual(se['uid'], self.fp.uid)
 
     def test_to_frame(self):
         """Test :func:`~exa.cms.base.BaseMeta.to_frame`."""
-        try:
-            df = File.to_frame()
-        except Exception as e:
-            self.fail(str(e))
+        df = File.to_frame()
         self.assertIsInstance(df, pd.DataFrame)
 
     def test_time(self):
@@ -107,19 +86,12 @@ class TestBase(UnitTester):
 
     def test_commit(self):
         """Test database commit."""
-        try:
-            self.session.add(self.fp)
-            self.session.commit()
-        except Exception as e:
-            self.fail(str(e))
+        self.session.add(self.fp)
+        self.session.commit()
         self.assertEqual(self.session.query(File).get(self.fp.pkid).uid, self.fp.uid)
 
     def tearDown(self):
         """Remove test entry from database."""
-        try:
-            self.session.close()
-        except Exception as e:
-            self.fail(str(e))
-        finally:
-            self.trans.rollback()
-            self.conn.close()
+        self.session.close()
+        self.trans.rollback()
+        self.conn.close()

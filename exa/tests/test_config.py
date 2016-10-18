@@ -93,16 +93,10 @@ class TestConfig(UnitTester):
         """
         _config.loggers['sys'].warning("THIS IS A TEST")
         out = StringIO()
-        try:
-            _config.loggers['sys'].head(out=out)
-        except Exception as e:
-            self.fail(str(e))
+        _config.loggers['sys'].head(out=out)
         _config.loggers['sys'].tail(out=out)
         self.assertIn("THIS IS A TEST", out.getvalue().strip())
 
     def test_save(self):
         """Test :func:`~exa._config.save`."""
-        try:
-            _config.save(True)
-        except Exception as e:
-            self.fail(str(e))
+        _config.save(True)

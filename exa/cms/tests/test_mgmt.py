@@ -9,4 +9,5 @@ from exa.tester import UnitTester
 
 
 class TestMgmt(UnitTester):
+    """Tests for :mod:`~exa.cms.mgmt`."""
     pass
