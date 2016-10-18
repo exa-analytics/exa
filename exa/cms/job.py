@@ -11,7 +11,7 @@ typically make up a :class:`~exa.cms.project.Project`.
 """
 from sqlalchemy import String, Integer, ForeignKey, Table, Column
 from sqlalchemy.orm import relationship
-from exa.cms.base import Name, Time, Size, Base, Sha256UID
+from exa.cms.base import Name, Time, Size, Base
 
 
 job_file = Table('jobfile', Base.metadata,
@@ -23,7 +23,7 @@ job_file = Table('jobfile', Base.metadata,
                                                          ondelete='CASCADE')))
 
 
-class Job(Name, Time, Size, Sha256UID, Base):
+class Job(Name, Time, Size, Base):
     """A single computational experiment that generates one or more files."""
     files = relationship('File', secondary=job_file, backref='jobs',
                          cascade='all, delete')

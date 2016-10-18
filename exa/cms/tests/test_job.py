@@ -9,14 +9,13 @@ from exa.tester import UnitTester
 from exa.cms.base import session_factory, engine
 from exa.cms.job import Job, job_file
 from exa.cms.files import File
-from exa.cms.mgmt import tail
 
 
 class TestJob(UnitTester):
     """Tests for :mod:`~exa.cms.job`."""
     def setUp(self):
         """Set up the test job and test (related) file."""
-        self.job = Job(name="test", uid="test_uid"*8)
+        self.job = Job(name="test")
         self.file = File(name="test", uid="test_uid"*8, ext="nul")
         self.conn = engine.connect()
         self.trans = self.conn.begin()

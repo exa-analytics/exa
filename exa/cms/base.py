@@ -15,7 +15,7 @@ from contextlib import contextmanager
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
-from exa._config import engine
+from exa._config import engine, config
 
 
 @contextmanager
@@ -160,6 +160,22 @@ class Size(object):
     """Approximate size (on disk) and file count fields."""
     size = Column(Integer)
     nfiles = Column(Integer)
+
+    def compute_size(self):
+        """Compute and update the size of entry (based on files on disk)."""
+        total = 0
+        for f in self.files:
+            total += os.path.getsize(f.path)
+        self.size = total
+
+    def compute_nfiles(self):
+        """Compute and update the number of assocated files (on disk)."""
+        self.nfiles = len(self.files)
+
+    def update_sizes(self):
+        """Perform update of size and nfiles attributes."""
+        self.compute_size()
+        self.compute_nfiles()
 
 
 session_factory = None
