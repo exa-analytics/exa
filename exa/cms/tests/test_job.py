@@ -17,6 +17,7 @@ class TestJob(UnitTester):
     def setUp(self):
         try:
             self.job = Job(name="test", uid="test_uid"*8)
+            self.file = File(name="test", uid="test_uid"*8, ext="")
         except Exception as e:
             self.fail(str(e))
 
@@ -24,9 +25,9 @@ class TestJob(UnitTester):
         """Test adding files."""
         self.assertIsInstance(self.job.files, list)
         with self.assertRaises(AttributeError):
-            self.job.files.append(None)
+            self.job.files.append("")
         try:
-            self.job.files.append(File(name="test", uid="test_uid"*8))
+            self.job.files.append(self.file)
         except Exception as e:
             self.fail(str(e))
 
@@ -34,6 +35,7 @@ class TestJob(UnitTester):
         """Test saving related objects."""
         try:
             with scoped_session(expire_on_commit=False) as session:
+                session.add(self.file)
                 session.add(self.job)
         except Exception as e:
             self.fail(str(e))
@@ -43,8 +45,11 @@ class TestJob(UnitTester):
         except Exception as e:
             self.fail(str(e))
         self.assertIsInstance(f, File)
+
+    def tearDown(self):
+        """Clean up inserted entries."""
         try:
-            File.delete(f.pkid)
-            Job.delete(j.pkid)
+            File.delete(self.job.pkid)
+            Job.delete(self.file.pkid)
         except Exception as e:
             self.fail(str(e))
