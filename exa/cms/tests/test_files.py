@@ -8,19 +8,23 @@ Tests for :mod:`~exa.cms.files`
 import os
 from exa._config import config
 from exa.tester import UnitTester
-from exa.cms.base import session_factory
+from exa.cms.base import session_factory, engine
 from exa.cms.files import File
 
 
 class TestFiles(UnitTester):
     """Tests for :mod:`~exa.cms.files`."""
-    def test_file_creation(self):
-        """Test that file objects can be created."""
+    def setUp(self):
+        """Create a test file entry."""
         try:
-            f = File()
+            self.file = File(name="test", uid="test_uid"*8, ext="nul")
+            self.conn = engine.connect()
+            self.trans = self.conn.begin()
+            self.session = session_factory(bind=self.conn)
+            self.session.add(self.file)
+            self.session.commit()
         except Exception as e:
             self.fail(str(e))
-        self.assertIsInstance(f, File)
 
     def test_tutorial_exists(self):
         """Test to make sure the default tutorial exists."""
@@ -39,11 +43,17 @@ class TestFiles(UnitTester):
     def test_file_entry_present(self):
         """Test to ensure that the tutorial is the first entry in the db."""
         try:
-            fp0 = File[1]
+            f = self.session.query(File).get(self.file.pkid)
         except Exception as e:
             self.fail(str(e))
+        self.assertEqual(f.uid, self.file.uid)
+
+    def tearDown(self):
+        """Clean up."""
         try:
-            fp1 = session_factory().query(File).filter(File.uid == fp0.uid).one()
+            self.session.close()
         except Exception as e:
             self.fail(str(e))
-        self.assertEqual(fp0.uid, fp1.uid)
+        finally:
+            self.trans.rollback()
+            self.conn.close()
