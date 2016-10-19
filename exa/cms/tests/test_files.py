@@ -24,15 +24,15 @@ class TestFiles(UnitTester):
         self.session.commit()
 
     def test_raises_fnf(self):
-        """Test that creation raises FileNotFoundError."""
-        with self.assertRaises(FileNotFoundError):
+        """Test that creation raises OSError."""
+        with self.assertRaises(OSError):
             File.from_path("random_name_that_does_not_exist")
 
     def test_tutorial_exists(self):
         """Test to make sure the default tutorial exists."""
         fp = os.path.join(config['paths']['notebooks'], 'tutorial.ipynb')
         if not os.path.exists(fp):
-            self.fail(str(FileNotFoundError("Missing tutorial.ipynb at {}".format(fp))))
+            self.fail(str(OSError("Missing tutorial.ipynb at {}".format(fp))))
         fp0 = File[1]
         self.assertEqual(fp0.name, "tutorial")
 

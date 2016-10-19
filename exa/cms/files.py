@@ -33,7 +33,7 @@ class File(Name, Time, Sha256UID, Base):
             path (str): Full file path
         """
         if not os.path.exists(path):
-            raise FileNotFoundError(path)
+            raise OSError("File not found: {}".format(path))
         prefix, ext = os.path.splitext(path)
         ext = ext[1:]    # Remove the leading "."
         name = os.path.basename(prefix)
