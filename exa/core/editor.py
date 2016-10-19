@@ -4,7 +4,7 @@
 """
 Editor
 ####################################
-The :class:`~exa.management.editor.Editor` class is a way for programmatic text-
+The :class:`~exa.core.editor.Editor` class is a way for programmatic text-
 editor-like manipulation of files on disk. It does not strive to be a full
 featured text editor. A large number of Pythonic operations can be performed on
 editors:
@@ -48,7 +48,7 @@ class Editor(object):
         description (str): Data/file/misc description
         meta (dict): Additional metadata as key, value pairs
         nrpint (int): Number of lines to display when printing
-        cursor (int): Line number position of the cusor (see :func:`~exa.editor.Editor.find_next_any` and :func:`~exa.editor.Editor.find_next_string`)
+        cursor (int): Line number position of the cusor
     """
     _getter_prefix = 'parse'     # See :class:`~exa.typed.Typed`
     _fmt = '{0}: {1}\n'.format   # Format for printing lines (see __repr__)

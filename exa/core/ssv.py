@@ -5,7 +5,7 @@
 Generic CSV Support
 ######################
 Provides an editor with convenience methods tailored specifically for comma
-separated value (CSV) files.
+separated value (CSV) files and tab separated value (TSV) files.
 """
 import csv
 import pandas as pd

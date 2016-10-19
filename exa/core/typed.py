@@ -4,9 +4,9 @@
 """
 Strongly Typed Classes
 ####################################
-This module provides the metaclass object :class:`~exa.typed.TypedMeta`. This
-metaclass creates statically typed class attributes using the built-in property
-mechanism. A usage example is given below:
+This module provides the metaclass object :class:`~exa.core.typed.TypedMeta`.
+This metaclass creates statically typed class attributes using the built-in
+property mechanism. A usage example is given below:
 
 .. code-block:: Python
 
@@ -21,10 +21,11 @@ mechanism. A usage example is given below:
             self.attr1 = attr1
             self.attr2 = attr2
 
-Under the covers, the :class:`~exa.typed.TypedMeta` (inherited) metaclass
+Under the covers, the :class:`~exa.core.typed.TypedMeta` (inherited) metaclass
 creates a class object that looks like the following example. Additionally the
-:class:`~exa.typed.TypedMeta` also provides a mechanism for automatic function
-calls when a missing (but computable or parsable) attribute is requested.
+:class:`~exa.core.typed.TypedMeta` also provides a mechanism for automatic
+function calls when a missing (but computable or parsable) attribute is
+requested.
 
 .. code-block:: Python
 
@@ -45,9 +46,9 @@ calls when a missing (but computable or parsable) attribute is requested.
 
         ...
 
-Strong typing helps exa containers ensure the correct data object types are
-attached. This, in turn, ensures things such as visualization and content
-management behave as expected.
+Strongly typed class attribtues helps exa containers and editors ensure correct
+data object types are attached/created. This, in turn, ensures things such as
+visualization and content management behave as expected.
 """
 import warnings
 from exa.core.errors import AutomaticConversionError
@@ -57,8 +58,8 @@ class TypedMeta(type):
     """
     A class for creating classes with enforced types. By convention this class
     also provies a mechanism for calling a computation (see
-    :class:`~exa.analytics.container.Container`) or parsing (see
-    :class:`~exa.management.editor.Editor`) function if the attribute requested
+    :class:`~exa.core.container.Container`) or parsing (see
+    :class:`~exa.core.editor.Editor`) function if the attribute requested
     does not exist.
     """
     @staticmethod
@@ -112,7 +113,7 @@ class TypedMeta(type):
             setattr(self, pname, obj)
 
         def deleter(self):
-            del self[pname]    # Deletes the property's value.
+            del self[pname]
 
         return property(getter, setter, deleter)
 

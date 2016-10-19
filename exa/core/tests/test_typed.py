@@ -4,23 +4,24 @@
 """
 Tests for :mod:`~exa.core.typed`
 #############################################
+Test strongly typed class attributes. A usage example is provided by the
+combination of :class:`~exa.core.tests.test_typed.DummyTypedMeta` and
+:class:`~exa.core.tests.test_typed.DummyClass`.
 """
 import six
 from exa.tester import UnitTester
-from exa.errors import ExaException
 from exa.core.typed import TypedMeta
 
 
-#class DummyTypedMeta(six.with_metaclass(TypedMeta, type)):
 class DummyTypedMeta(TypedMeta):
     """Dummy metaclass."""
     foo = int
     bar = (str, float)
     baz = tuple
     faz = str
+    jaz = object
 
 
-#class DummyClass(six.with_metaclass(DummyTypedMeta)):
 class DummyClass(six.with_metaclass(DummyTypedMeta, object)):
     """Dummy typed class."""
     _getter_prefix = "compute"
@@ -48,10 +49,7 @@ class TestTypedMeta(UnitTester):
     """
     def test_init(self):
         """Test type enforcement on creation."""
-        try:
-            DummyClass()
-        except ExaException as e:
-            self.fail(str(e))
+        DummyClass()
         with self.assertRaises(TypeError):
             DummyClass(False, False)
         with self.assertRaises(TypeError):
@@ -66,16 +64,18 @@ class TestTypedMeta(UnitTester):
         self.assertEqual(klass.foo, True)
         self.assertEqual(klass.bar, 42)
         self.assertEqual(klass.baz, (42, True))
+        with self.assertRaises(AttributeError):
+            klass.jaz
 
     def test_autoconv(self):
         """
-        Test automatic conversion performed by :func:`~exa.core.typed.TypedMeta.create_property`.
+        Test automatic conversion performed by
+        :func:`~exa.core.typed.TypedMeta.create_property`.
         """
-        try:
-            klass = DummyClass(foo=0, bar=42.0, baz="stuff")
-        except Exception as e:
-            self.fail(str(e))
+        klass = DummyClass(foo=0, bar=42.0, baz="stuff")
         self.assertIsInstance(klass.foo, DummyTypedMeta.foo)
         self.assertIsInstance(klass.bar, DummyTypedMeta.bar)
         self.assertIsInstance(klass.baz, DummyTypedMeta.baz)
         self.assertTrue(klass.faz is None)
+        with self.assertRaises(TypeError):
+            klass.bar = DummyClass()
