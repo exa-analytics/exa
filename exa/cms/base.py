@@ -6,6 +6,7 @@ Base Table Model
 ##################################################
 This module provides the base classes and metaclasses for database tables.
 """
+import os
 import hashlib
 import pandas as pd
 from six import string_types

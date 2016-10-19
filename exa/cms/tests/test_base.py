@@ -13,6 +13,7 @@ from six import string_types
 from datetime import datetime
 from exa.tester import UnitTester
 from exa.cms.files import File
+from exa.cms.job import Job
 from exa.cms.base import (reconfigure_session_factory, session_factory,
                           scoped_session, engine)
 
@@ -20,12 +21,20 @@ from exa.cms.base import (reconfigure_session_factory, session_factory,
 class TestBase(UnitTester):
     """Test the base model for database tables."""
     def setUp(self):
-        """Test generation of a table entry (for later use) and string repr."""
-        self.fp = File.from_path(__file__)
+        """
+        Test generation of a table entry (for later use), string repr, and
+        size computation (:class:`~exa.cms.base.Size`).
+        """
         self.conn = engine.connect()
         self.trans = self.conn.begin()
         self.session = session_factory(bind=self.conn)
-        self.assertIsInstance(repr(self.fp), string_types)
+        self.file = self.session.query(File).get(1)
+        self.job = Job(name="test")
+        self.job.files.append(self.file)
+        self.job.update_sizes()
+        self.session.add(self.job)
+        self.session.commit()
+        self.assertIsInstance(repr(self.file), string_types)
 
     def test_session_factory_config(self):
         """
@@ -54,22 +63,23 @@ class TestBase(UnitTester):
         :func:`~exa.cms.base.BaseMeta.get_by_name`, and
         :func:`~exa.cms.base.BaseMeta.get_by_uid`.
         """
-        tut = File.get_by_pkid(1)
-        self.assertEqual(tut.name, "tutorial")
+        self.assertEqual(self.file.name, "tutorial")
         self.assertTrue(len(File.get_by_name("tutorial")) > 0)
         self.assertTrue(File.get_by_uid(File[1].uid).name, "tutorial")
         self.assertTrue(len(File['tutorial']) > 0)
-        self.assertIsInstance(File[tut.uid], File)
+        self.assertIsInstance(File[self.file.uid], File)
         with self.assertRaises(KeyError):
             File[-1]
+        with self.assertRaises(KeyError):
+            File['random_name_that_does_not_exist']
 
     def test_to_series(self):
         """
         Test :func:`~exa.cms.base.Base.to_series` and
         :func:`~exa.cms.base.Sha256UID.sha256_from_file`.
         """
-        se = self.fp.to_series()
-        self.assertEqual(se['uid'], self.fp.uid)
+        se = self.file.to_series()
+        self.assertEqual(se['uid'], self.file.uid)
 
     def test_to_frame(self):
         """Test :func:`~exa.cms.base.BaseMeta.to_frame`."""
@@ -79,15 +89,15 @@ class TestBase(UnitTester):
     def test_time(self):
         """Test methods of :class:`~exa.cms.base.Time`."""
         now = datetime.now()
-        self.assertTrue(self.fp.modified < now)
-        self.fp.update_modified()
-        self.assertTrue((now - self.fp.modified).total_seconds() < 1)
+        self.assertTrue(self.file.modified < now)
+        self.file.update_modified()
+        self.assertTrue((now - self.file.modified).total_seconds() < 1)
 
     def test_commit(self):
         """Test database commit."""
-        self.session.add(self.fp)
+        self.session.add(self.file)
         self.session.commit()
-        self.assertEqual(self.session.query(File).get(self.fp.pkid).uid, self.fp.uid)
+        self.assertEqual(self.session.query(File).get(self.file.pkid).uid, self.file.uid)
 
     def tearDown(self):
         """Remove test entry from database."""

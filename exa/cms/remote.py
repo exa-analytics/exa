@@ -10,7 +10,7 @@ from sqlalchemy import String, Integer, ForeignKey, Table, Column
 from exa.cms.base import Base
 
 
-class RemoteComputer(Base):
+class RemoteResource(Base):
     """
     A remote (super) computer accessible over SSH.
 

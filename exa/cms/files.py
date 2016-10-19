@@ -42,11 +42,8 @@ class File(Name, Time, Sha256UID, Base):
         modified = datetime.fromtimestamp(os.path.getmtime(path))
         obj = cls(name=name, size=size, ext=ext, uid=uid, modified=modified,
                   **kwargs)
-        try:
-            mkdir(os.path.dirname(obj.path))
-            shutil.copyfile(path, obj.path)
-        except:
-            raise FileCreationError(path, os.path.dirname(obj.path))
+        mkdir(os.path.dirname(obj.path))
+        shutil.copyfile(path, obj.path)
         return obj
 
     @property
