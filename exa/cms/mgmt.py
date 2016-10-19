@@ -18,6 +18,7 @@ def tables():
     """Display all tables."""
     return db.fields
 
+
 def tail(table, n=10, to_frame=False):
     """
     Extract the end of a table.
@@ -35,24 +36,23 @@ def tail(table, n=10, to_frame=False):
     return sliced
 
 
-def init_cms():
+def init_db():
     """Initialize CMS tables."""
-    fp = os.path.join(config['paths']['notebooks'], 'tutorial.ipynb')
-    if not os.path.exists(fp):
-        raise FileNotFoundError("Missing tutorial.ipynb at {}".format(fp))
     Base.metadata.create_all(engine)
+    global db
+    db = bz.Data(engine)
+
+
+def init_tutorial():
+    """Create the tutorial notebook."""
+    fp = os.path.join(config['paths']['notebooks'], 'tutorial.ipynb')
     with scoped_session() as session:
         tutorial = File.from_path(fp)
         session.add(tutorial)
 
 
-def init_db_interface():
-    """(Re)initialize the database interface."""
-    global db
-    db = bz.Data(engine)
-
-
 if 'init_cms' in config['dynamic']:
-    init_cms()
+    init_db()
+    init_tutorial()
 db = None
-init_db_interface()
+init_db()

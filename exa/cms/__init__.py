@@ -7,7 +7,7 @@ framework.
 """
 # Import modules
 from exa.cms import (base, constant, isotope, unit, files, job, project, remote,
-                     mgmt, errors)
+                     mgmt)
 
 # Import sub-packages
 from exa.cms import tests

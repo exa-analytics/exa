@@ -11,7 +11,6 @@ import shutil
 from datetime import datetime
 from sqlalchemy import String, Column, Integer, Table, ForeignKey
 from exa.cms.base import Base, Name, Sha256UID, Time
-from exa.cms.errors import FileCreationError
 from exa._config import config, mkdir
 
 

@@ -3,4 +3,4 @@
 # Distributed under the terms of the Apache License 2.0
 from exa.cms.tests import (test_base, test_unit, test_constant, test_isotope,
                            test_files, test_job, test_mgmt, test_remote,
-                           test_project, test_errors)
+                           test_project)

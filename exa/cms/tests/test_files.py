@@ -16,7 +16,7 @@ class TestFiles(UnitTester):
     """Tests for :mod:`~exa.cms.files`."""
     def setUp(self):
         """Create a test file entry."""
-        self.file = File(name="test", uid="test_uid"*8, ext="nul")
+        self.file = File.from_path(__file__)
         self.conn = engine.connect()
         self.trans = self.conn.begin()
         self.session = session_factory(bind=self.conn)
@@ -43,6 +43,7 @@ class TestFiles(UnitTester):
 
     def tearDown(self):
         """Clean up."""
+        os.remove(self.file.path)
         self.session.close()
         self.trans.rollback()
         self.conn.close()
