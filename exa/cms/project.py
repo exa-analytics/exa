@@ -54,3 +54,11 @@ class Project(Name, Time, Size, Base):
                         cascade='all, delete')
     files = relationship('File', secondary=project_file,
                          backref='projects', cascade='all, delete')
+
+    @property
+    def all_files(self):
+        """Get all files associated with this project (i.e. job files)."""
+        files = self.files
+        for job in self.jobs:
+            files += job.files
+        return files

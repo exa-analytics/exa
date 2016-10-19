@@ -7,7 +7,7 @@ Tests for :mod:`~exa.cms.job`
 """
 from exa.tester import UnitTester
 from exa.cms.base import session_factory, engine
-from exa.cms.job import Job, job_file
+from exa.cms.job import Job
 from exa.cms.files import File
 
 
@@ -36,7 +36,12 @@ class TestJob(UnitTester):
             self.job.files.append("")
 
     def test_relationship(self):
-        """Test that relationships were correctly created."""
+        """
+        Test that relationships were created correctly.
+
+        Note:
+            This is where :class:`~exa.cms.job.job_file` is tested.
+        """
         f = self.session.query(File).get(self.file.pkid)
         j = self.session.query(Job).get(self.job.pkid)
         self.assertIsInstance(f, File)

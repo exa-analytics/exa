@@ -13,7 +13,6 @@ from six import string_types
 from datetime import datetime
 from exa.tester import UnitTester
 from exa.cms.files import File
-from exa.cms.mgmt import tail
 from exa.cms.base import (reconfigure_session_factory, session_factory,
                           scoped_session, engine)
 

@@ -31,7 +31,33 @@ class TestProject(UnitTester):
 
     def test_committed(self):
         """Test that the pkids exist."""
-        pass
+        self.assertIsInstance(self.job.pkid, int)
+        self.assertIsInstance(self.file0.pkid, int)
+        self.assertIsInstance(self.file1.pkid, int)
+        self.assertIsInstance(self.project.pkid, int)
+
+    def test_relationship(self):
+        """
+        Tests that relationships were created correctly.
+
+        Note:
+            This is where :class:`~exa.cms.project.project_job` and
+            :class:`~exa.cms.project.project_file` are tested.
+        """
+        f0 = self.session.query(File).get(self.file0.pkid)
+        f1 = self.session.query(File).get(self.file1.pkid)
+        j = self.session.query(Job).get(self.job.pkid)
+        p = self.session.query(Project).get(self.project.pkid)
+        self.assertEqual(len(f0.jobs), 1)
+        self.assertEqual(len(f0.projects), 0)
+        self.assertEqual(len(f0.all_projects), 1)
+        self.assertEqual(len(f1.jobs), 0)
+        self.assertEqual(len(f1.projects), 1)
+        self.assertEqual(len(j.files), 1)
+        self.assertEqual(len(j.projects), 1)
+        self.assertEqual(len(p.files), 1)
+        self.assertEqual(len(p.all_files), 2)
+        self.assertEqual(len(p.jobs), 1)
 
     def tearDown(self):
         """Clean up the table by rolling back the changes."""

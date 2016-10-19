@@ -54,5 +54,14 @@ class File(Name, Time, Sha256UID, Base):
         """Get the file path of the current file."""
         return os.path.join(data_dir, self.ext, self.uid)
 
+    @property
+    def all_projects(self):
+        """Check if this file has a second relation to a project."""
+        projects = []
+        for job in self.jobs:
+            projects += job.projects
+        return projects
+
+
 data_dir = config['paths']['data']
 del config

@@ -15,7 +15,7 @@ from contextlib import contextmanager
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
-from exa._config import engine, config
+from exa._config import engine
 
 
 @contextmanager
