@@ -35,6 +35,14 @@ class TestConfig(UnitTester):
         except OSError:
             pass
         _config.reconfigure(".exa_test")
+        _config.config['logging']['level'] = "1"
+        _config.reconfigure(".exa_test")
+        _config.config['logging']['level'] = "2"
+        _config.reconfigure(".exa_test")
+        _config.config['logging']['level'] = "3"
+        _config.save(nodel=True)
+        _config.reconfigure(".exa_test")
+        self.assertEqual(_config.config['logging']['level'], "0")
 
     def tearDown(self):
         """
