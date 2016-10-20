@@ -28,3 +28,8 @@ class RemoteResource(Base):
     scratch = Column(String)
     project = Column(String)
     user = Column(String)
+
+    def connect(self):
+        """
+        """
+        raise NotImplementedError()

@@ -10,4 +10,6 @@ from exa.tester import UnitTester
 
 class TestRemote(UnitTester):
     """Tests for :mod:`~exa.cms.remote`."""
-    pass
+    def test_connect(self):
+        """Test :func:`~exa.cms.remote.RemoteResource.connect`."""
+        pass
