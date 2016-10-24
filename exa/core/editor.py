@@ -189,9 +189,7 @@ class Editor(object):
                         return (i, str(self[i]))
 
     def copy(self):
-        """
-        Create a copy of the current editor.
-        """
+        """Create a copy of the current editor."""
         cls = self.__class__
         lines = self._lines[:]
         as_interned = copy(self.as_interned)
@@ -238,15 +236,11 @@ class Editor(object):
                 f.write(six.b(str(self)))
 
     def head(self, n=10):
-        """
-        Display the top of the file.
-        """
+        """Display the top of the file."""
         return "\n".join(self._lines[:n])
 
     def tail(self, n=10):
-        """
-        Display the bottom of the file.
-        """
+        """Display the bottom of the file."""
         return "\n".join(self._lines[-n:])
 
     def append(self, lines):

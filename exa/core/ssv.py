@@ -19,9 +19,7 @@ class CSV(Editor):
     etc. separated) files on disk.
     """
     def to_frame(self):
-        """
-        Create a :class:`~exa.numerical.DataFrame` from this file.
-        """
+        """Create a :class:`~exa.numerical.DataFrame` from this file."""
         if self.header:
             return pd.read_csv(StringIO(str(self)), sep=self.delimiter, names=self[0])
         return pd.read_csv(StringIO(str(self)), sep=self.delimiter)
