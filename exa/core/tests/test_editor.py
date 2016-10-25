@@ -200,7 +200,7 @@ class TestEditor(UnitTester):
     def test_read_missing_file(self):
         """Test reading a missing file."""
         path = os.path.abspath(__file__) + ".garbage"
-        with self.assertRaises(OSError):
+        with self.assertRaises((OSError, IOError)):
             Editor(path)
 
     def test_repr(self):
