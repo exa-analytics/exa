@@ -197,6 +197,12 @@ class TestEditor(UnitTester):
         self.assertTrue(os.path.exists(path))
         os.remove(path)
 
+    def test_read_missing_file(self):
+        """Test reading a missing file."""
+        path = os.path.abspath(__file__) + ".garbage"
+        with self.assertRaises(OSError):
+            Editor(path)
+
     def test_repr(self):
         """Test :func:`~exa.core.editor.Editor.__repr__`."""
         self.assertIsInstance(self.from_file.__repr__(), six.string_types)

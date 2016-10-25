@@ -354,10 +354,10 @@ class Editor(object):
     def __setitem__(self, line, value):
         self._lines[line] = value
 
-    def __init__(self, data, as_interned=False, nprint=30, name=None,
-                 description=None, meta=None, encoding='utf-8'):
+    def __init__(self, data, as_interned=False, nprint=30, description=None,
+                 name=None, meta=None, encoding='utf-8', ignore_warning=False):
         filepath = None
-        if isinstance(data, six.string_types) and os.path.exists(data):
+        if check_path(data, ignore_warning):
             self._lines = read_file(data, as_interned, encoding)
             filepath = data
         elif isinstance(data, six.string_types):
@@ -397,6 +397,26 @@ class Editor(object):
                 ln = str(i).rjust(n, ' ')
                 r += self._fmt(ln, line)
         return r
+
+
+def check_path(path, ignore_warning=False):
+    """
+    Check if path is or looks like a file path (path can be any string data).
+
+    Args:
+        path (str): Potential file path
+        ignore_warning (bool): Force returning true
+
+    Returns:
+        result (bool): True if file path or warning ignored, false otherwise
+    """
+    try:
+        if (ignore_warning or os.path.exists(path) or
+            (len(path.split("\n")) == 1 and (r"\\" in path or r"/" in path))):
+            return True
+    except TypeError:
+        pass
+    return False
 
 
 def read_file(path, as_interned=False, encoding='utf-8'):
