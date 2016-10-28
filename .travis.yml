@@ -12,11 +12,20 @@ before_install:
   - export PATH=/home/travis/miniconda3/bin:$PATH
   - conda update --yes conda
 install:
+<<<<<<< HEAD
   - conda install --yes python=$TRAVIS_PYTHON_VERSION
   - conda install --yes -c conda-forge `cat requirements.txt`
   - pip install sphinxcontrib-autoanysrc sphinx_rtd_theme coverage
   - pip install python-coveralls travis-sphinx codacy-coverage recommonmark
   - python setup.py install
+=======
+    - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy pandas
+    - conda install --yes sqlalchemy matplotlib networkx sympy seaborn sphinx nose numba
+    - conda install -c conda-forge --yes jupyter notebook ipywidgets ipyparallel
+    - pip install sphinxcontrib-autoanysrc coverage python-coveralls
+    - python setup.py install
+    - exa -uu
+>>>>>>> 41718efad59b303d331ad181dd18a3dd00cf76aa
 script:
   - nosetests --with-coverage
   - coverage xml
