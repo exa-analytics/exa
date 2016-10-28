@@ -173,10 +173,14 @@ class TestEditor(UnitTester):
         self.assertEqual(len(self.from_gzip), len(self.from_file) - 2)
 
     def test_copy(self):
-        """Test :func:`~exa.core.editor.Editor.copy`."""
+        """
+        Test :func:`~exa.core.editor.Editor.copy` and ensure that slicing the
+        editor returns a instance of an Editor.
+        """
         cp = self.from_file.copy()
         self.assertEqual(self.from_file, cp)
         self.assertFalse(cp is self.from_file)
+        self.assertIsInstance(self.from_file[0:2], Editor)
 
     def test_format(self):
         """
