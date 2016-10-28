@@ -12,6 +12,7 @@ before_install:
   - export PATH=/home/travis/miniconda3/bin:$PATH
   - conda update --yes conda
 install:
+<<<<<<< HEAD
   - conda install --yes python=$TRAVIS_PYTHON_VERSION
   - conda install --yes -c conda-forge `cat requirements.txt`
   - pip install sphinxcontrib-autoanysrc sphinx_rtd_theme coverage

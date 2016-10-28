@@ -17,4 +17,5 @@ blaze
 bokeh
 sphinx
 nose
+numba
 six
