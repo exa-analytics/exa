@@ -343,7 +343,10 @@ class Editor(object):
     def __getitem__(self, key):
         if isinstance(key, six.string_types):
             return getattr(self, key)
-        return self.__class__(self._lines[key])
+        kwargs = {'nprint': self.nprint, 'description': self.description,
+                  'name': self.name, 'meta': self.meta, 'encoding': self.encoding,
+                  'as_interned': self.as_interned}
+        return self.__class__(self._lines[key], **kwargs)
 
     def __setitem__(self, line, value):
         self._lines[line] = value

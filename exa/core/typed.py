@@ -89,9 +89,10 @@ class TypedMeta(type):
             """
             cmd = "{}{}".format(self._getter_prefix, pname)
             if (not hasattr(self, pname) or getattr(self, pname) is None) and hasattr(self, cmd):
-                getattr(self, cmd)()
+                setattr(self, pname, getattr(self, cmd)())
             elif not hasattr(self, pname):
-                raise AttributeError('Please compute or set {} first.'.format(name))
+                return None
+                #raise AttributeError('Please compute or set {} first.'.format(name))
             return getattr(self, pname)
 
         def setter(self, obj):

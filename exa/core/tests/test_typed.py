@@ -26,13 +26,13 @@ class DummyClass(six.with_metaclass(DummyTypedMeta, object)):
     """Dummy typed class."""
     _getter_prefix = "compute"
     def compute_foo(self):
-        self._foo = True
+        return True
 
     def compute_bar(self):
-        self._bar = 42
+        return 42
 
     def compute_baz(self):
-        self._baz = (42, True)
+        return (42, True)
 
     def __init__(self, foo=None, bar=None, baz=None, faz=None):
         self.foo = foo
@@ -64,8 +64,7 @@ class TestTypedMeta(UnitTester):
         self.assertEqual(klass.foo, True)
         self.assertEqual(klass.bar, 42)
         self.assertEqual(klass.baz, (42, True))
-        with self.assertRaises(AttributeError):
-            klass.jaz
+        self.assertTrue(klass.jaz is None)
 
     def test_autoconv(self):
         """
