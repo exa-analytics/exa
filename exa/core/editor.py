@@ -406,7 +406,7 @@ def check_path(path, ignore_warning=False):
     """
     try:
         if (ignore_warning or os.path.exists(path) or
-            (len(path.split("\n")) == 1 and (r"\\" in path or r"/" in path))):
+            (len(path.split("\n")) == 1 and ("\\" in path or "/" in path))):
             return True
     except TypeError:
         pass
