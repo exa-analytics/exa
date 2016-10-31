@@ -8,7 +8,7 @@ This sub-package contains the core functionality of exa:
 - :class:`~exa.core.container.Container`
 """
 # Import base modules
-from exa.core import typed, editor, ssv
+from exa.core import typed, editor, ssv, discrete
 
 # Import sub-packages
 from exa.core import tests
