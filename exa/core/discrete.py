@@ -20,14 +20,18 @@ class Base(object):
     def _prefix(self):
         return self.__class__.__name__.lower()
 
-    @property
-    def _constructor(self):
-        return self.__class__
-
 
 class Series(pd.Series, Base):
     """
+    A series is an indexed array. The index can be n-dimensional but most often
+    is 1-dimensional.
     """
+    def copy(self, *args, **kwargs):
+        pass
+    @property
+    def _constructor(self):
+        return Series
+
     def __finalize__(self, *args, **kwargs):
         return self.__class__(self, *args, **kwargs)
 
