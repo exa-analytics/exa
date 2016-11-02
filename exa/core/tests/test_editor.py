@@ -12,6 +12,7 @@ import bz2
 import gzip
 import six
 import shutil
+from types import GeneratorType
 import numpy as np
 from io import StringIO
 from uuid import uuid4
@@ -223,3 +224,14 @@ class TestEditor(UnitTester):
         self.assertIsInstance(self.from_file.__repr__(), six.string_types)
         self.from_gzip.nprint = 2
         self.assertIsInstance(self.from_gzip.__repr__(), six.string_types)
+
+    def test_iterlines(self):
+        """Test :func:`~exa.core.editor.Editor.iterlines`."""
+        obj0 = self.from_file.iterlines()
+        obj1 = self.from_file.iterlines(0, 3, 1)
+        obj2 = list(obj1)
+        self.assertIsInstance(obj0, GeneratorType)
+        self.assertIsInstance(obj1, GeneratorType)
+        self.assertIsInstance(obj2, list)
+        self.assertEqual(len(obj2), 3)
+        self.assertIsInstance(obj2[0], six.string_types)

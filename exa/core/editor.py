@@ -317,6 +317,13 @@ class Editor(object):
         for k, i in enumerate(sorted(lines)):
             del self[i-k]
 
+    def iterlines(self, start=0, stop=None, step=None):
+        """
+        Line generator.
+        """
+        for line in self._lines[slice(start, stop, step)]:
+            yield line
+
     def __eq__(self, other):
         if isinstance(other, Editor) and self._lines == other._lines:
             return True
