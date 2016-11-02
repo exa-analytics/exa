@@ -16,10 +16,30 @@ class CustomSeries(Series):
     pass
 
 
-
-class TestSeries(Series):
+class TestSeries(UnitTester):
     """Tests for :class:`~exa.core.discrete.Series`."""
     def setUp(self):
-        self.series0 = Series(np.random.rand(10))
-        self.series1 = Series(np.random.rand(10))
-        self.series2 = CustomSeries(np.random(10))
+        self.series0 = Series(np.random.rand(10), metadata={"name": "s0"})
+        self.series1 = Series(np.random.rand(10), metadata={"name": "s1"})
+        self.series2 = CustomSeries(np.random.rand(10), metadata={"name": "s2"})
+
+    def test_copy(self):
+        """
+        Test that copying (:func:`~exa.core.discrete.Series.copy`) returns the
+        correct type.
+        """
+        obj0 = self.series0.copy()
+        obj1 = self.series2.copy()
+        #self.assertFalse(obj0 is self.series0)
+        #self.assertFalse(obj1 is self.series2)
+        #self.assertIsInstance(obj0, Series)
+        #self.assertIsInstance(obj1, CustomSeries)
+
+    def test_combine_const(self):
+        """Test metadata propagation through adding constants."""
+        obj0 = self.series0 + 1
+        obj1 = self.series1 + 1.0
+        obj2 = self.series1*2.0
+        #self.assertEqual(obj0.metadata['name'], 's0')
+        #self.assertEqual(obj1.metadata['name'], 's1')
+        #self.assertEqual(obj2.metadata['name'], 's2')

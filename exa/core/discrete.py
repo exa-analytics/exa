@@ -12,10 +12,27 @@ description of relationships. There are three types of relationships, one-to-one
 import six
 import pandas as pd
 from exa.core.typed import TypedMeta
+from exa.cms.unit import (Length, Mass, Time, Current, Amount, Luminosity,
+                          Dose, Acceleration, Charge, Dipole, Energy, Force,
+                          Frequency, MolarMass, Dimension, unit_list)
 
 
 class Base(object):
     """Base class for discrete data objects."""
+    def convert_units(self, to_unit):
+        """Convert units."""
+        from_unit = self.units
+        unit = self._dim
+        if unit is not None:
+            self.values *= unit[from_unit, to_unit]
+            self.units = to_unit
+
+    @property
+    def _dim(self):
+        for unit in unit_list:
+            if self.units in unit.units():
+                return unit
+
     @property
     def _prefix(self):
         return self.__class__.__name__.lower()
@@ -26,17 +43,42 @@ class Series(pd.Series, Base):
     A series is an indexed array. The index can be n-dimensional but most often
     is 1-dimensional.
     """
+    _metadata = ['metadata', 'units']
+
     def copy(self, *args, **kwargs):
-        pass
+        """Copy maintaining class type."""
+        cls = self.__class__
+        return cls(super(Series, self).copy(*args, **kwargs))
+
     @property
     def _constructor(self):
         return Series
 
-    def __finalize__(self, *args, **kwargs):
-        return self.__class__(self, *args, **kwargs)
+    def _combine_const(self, other, *args, **kwargs):
+        return super(Series, self)._combine_const(other, *args, **kwargs).__finalize__(self)
+
+#    def __finalize__(self, other, method=None, **kwargs):
+#        if isinstance(other, pd.core.generic.NDFrame):
+#            for name in self._metadata:
+#                if name == 'units':
+#                    self.convert_units(other.units)
+#                else:
+#                    object.__setattr__(self, name, getattr(other, name, None))
+#        elif isinstance(other, Dimension):
+#            raise NotImplementedError()
+#        return self
 
     def __init__(self, *args, **kwargs):
+        metadata = kwargs.pop("metadata", None)
+        units = kwargs.pop("units", None)
         super(Series, self).__init__(*args, **kwargs)
+        self.metadata = metadata
+        self.units = units
+        if self.name is None and self.index.name is None:
+            try:
+                self.name = self.metadata['name']
+            except AttributeError:
+                pass
         if self.index.name is None:
             self.index.name = self.name
 

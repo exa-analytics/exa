@@ -7,9 +7,12 @@ Tests for :mod:`~exa.core.editor`
 Test the functionality of the :class:`~exa.core.editor.Editor` class and
 related functions.
 """
+import os
+import bz2
+import gzip
 import six
 import shutil
-import os, gzip, bz2
+import numpy as np
 from io import StringIO
 from uuid import uuid4
 from exa._config import config
@@ -137,6 +140,12 @@ class TestEditor(UnitTester):
             self.from_file.append(10)
         with self.assertRaises(TypeError):
             self.from_file.prepend(10)
+
+    def test_delete(self):
+        """Test :func:`~exa.core.editor.Editor.__delitem__` specifically."""
+        lines = np.random.randint(0, len(self.from_gzip), size=(len(self.from_gzip), ))
+        self.from_gzip.delete_lines(lines)
+        self.assertEqual(len(self.from_gzip), 0)
 
     def test_replace(self):
         """Test :func:`~exa.core.editor.Editor.replace`."""

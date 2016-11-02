@@ -40,6 +40,10 @@ class Dimension(object):
     to_unit = Column(String(8), nullable=False)
     factor = Column(Float, nullable=False)
 
+    @classmethod
+    def units(cls):
+        return sorted(cls.to_frame()['to_unit'].unique())
+
 
 class Length(six.with_metaclass(Meta, Base, Dimension)):
     """
@@ -188,3 +192,7 @@ class MolarMass(six.with_metaclass(Meta, Base, Dimension)):
     0.001
     """
     pass
+
+
+unit_list = [Length, Mass, Time, Current, Amount, Luminosity, Dose, Acceleration,
+             Charge, Dipole, Energy, Force, Frequency, MolarMass]

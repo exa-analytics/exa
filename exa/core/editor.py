@@ -314,8 +314,8 @@ class Editor(object):
         Args:
             lines (list): List of integers corresponding to line numbers to delete
         """
-        for k, i in enumerate(lines):
-            del self[i-k]    # Accounts for the fact that len(self) decrease upon deletion
+        for k, i in enumerate(sorted(lines)):
+            del self[i-k]
 
     def __eq__(self, other):
         if isinstance(other, Editor) and self._lines == other._lines:
