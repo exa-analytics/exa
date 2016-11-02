@@ -143,9 +143,11 @@ class TestEditor(UnitTester):
 
     def test_delete(self):
         """Test :func:`~exa.core.editor.Editor.__delitem__` specifically."""
-        lines = np.random.randint(0, len(self.from_gzip), size=(len(self.from_gzip), ))
+        lines = np.unique(np.random.randint(0, len(self.from_gzip), size=(len(self.from_gzip), )))
+        n0 = len(lines)
+        n1 = len(self.from_gzip) - n0
         self.from_gzip.delete_lines(lines)
-        self.assertEqual(len(self.from_gzip), 0)
+        self.assertEqual(len(self.from_gzip), n1)
 
     def test_replace(self):
         """Test :func:`~exa.core.editor.Editor.replace`."""
