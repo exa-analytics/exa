@@ -43,7 +43,7 @@ class Series(pd.Series, Base):
     A series is an indexed array. The index can be n-dimensional but most often
     is 1-dimensional.
     """
-    _metadata = ['metadata', 'units']
+    _metadata = ['units']
 
     def copy(self, *args, **kwargs):
         """Copy maintaining class type."""
@@ -69,10 +69,8 @@ class Series(pd.Series, Base):
 #        return self
 
     def __init__(self, *args, **kwargs):
-        metadata = kwargs.pop("metadata", None)
         units = kwargs.pop("units", None)
         super(Series, self).__init__(*args, **kwargs)
-        self.metadata = metadata
         self.units = units
         if self.name is None and self.index.name is None:
             try:
