@@ -26,7 +26,7 @@ class DiscreteMeta(type):
         """
         """
         def wrapper(self, other, *args, **kwargs):
-            other = self._auto_convert_units(other)
+            #other = self._auto_convert_units(other)
             # Note that in the call to __finalize__ below, self is the argument
             # "other" to __finalize__.
             return getattr(super(Series, self), dunder_op)(other, *args, **kwargs).__finalize__(self)
