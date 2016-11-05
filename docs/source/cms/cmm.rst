@@ -5,3 +5,14 @@
 ###########################
 Content Management Model
 ###########################
+The following classes create a flexible database schema for tracking experiments
+performed in-silico.
+
+.. automodule:: exa.cms.project
+    :members:
+
+.. automodule:: exa.cms.job
+    :members:
+
+.. automodule:: exa.cms.files
+    :members:

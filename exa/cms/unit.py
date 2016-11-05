@@ -4,11 +4,29 @@
 """
 Unit Conversions
 #########################
-This module provides relational classes for unit conversion tables.
+This module provides relational classes for unit conversion tables. To inspect
+available conversions:
+
+.. code-block: Python
+
+    exa.cms.unit.Length.to_frame()    # display full conversion table
+    exa.cms.unit.Length.units()       # list available units
+
+To create a new conversion:
+
+.. code-block: Python
+
+    exa.cms.unit.Dimension.create("kJ", "J", 1000)   # Note create J -> kJ too
+
+For high performance use the cached conversion factors directly:
+
+.. code-block: Python
+
+    exa.cms.unit.units[("kJ", "J")]
 """
 import six
 from sqlalchemy import and_, String, Float, Column
-from exa.cms.base import BaseMeta, Base, scoped_session
+from exa.cms.base import BaseMeta, Base, scoped_session, session_factory
 
 
 class Meta(BaseMeta):
@@ -43,6 +61,16 @@ class Dimension(object):
     @classmethod
     def units(cls):
         return sorted(cls.to_frame()['to_unit'].unique())
+
+    @classmethod
+    def create(cls, from_unit, to_unit, factor, session=None):
+        if session is None:
+            session = session_factory()
+        obj0 = cls(from_unit=from_unit, to_unit=to_unit, factor=factor)
+        obj1 = cls(from_unit=to_unit, to_unit=from_unit, factor=1/factor)
+        session.add(obj0)
+        session.add(obj1)
+        session.commit()
 
 
 class Length(six.with_metaclass(Meta, Base, Dimension)):

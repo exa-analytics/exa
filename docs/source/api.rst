@@ -33,8 +33,9 @@ of important framework concepts can also be found within this documentation.
     :caption: Content Management
 
     cms/main.rst
-    cms/static.rst
     cms/cmm.rst
+    cms/misc.rst
+    cms/static.rst
 
 
 .. toctree::
