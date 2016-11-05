@@ -22,5 +22,5 @@ from exa.cms.constant import Constant
 from exa.cms.isotope import Isotope
 from exa.cms.unit import (Length, Mass, Time, Current, Amount, Luminosity,
                           Dose, Acceleration, Charge, Dipole, Energy, Force,
-                          Frequency, MolarMass)
+                          Frequency, MolarMass, units)
 from exa.cms.mgmt import db

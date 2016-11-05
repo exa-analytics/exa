@@ -11,12 +11,11 @@ property mechanism. A usage example is given below:
 .. code-block:: Python
 
     class Meta(TypedMeta):
-        _getter_prefix = "compute"
         attr1 = (int, float)
         attr2 = DataFrame
 
     class Klass(metaclass=Meta):
-        #_getter_prefix = "compute"  # Alternatively can define the prefix here
+        _getter_prefix = "compute"
         def __init__(self, attr1, attr2):
             self.attr1 = attr1
             self.attr2 = attr2
@@ -92,7 +91,6 @@ class TypedMeta(type):
                 setattr(self, pname, getattr(self, cmd)())
             elif not hasattr(self, pname):
                 return None
-                #raise AttributeError('Please compute or set {} first.'.format(name))
             return getattr(self, pname)
 
         def setter(self, obj):

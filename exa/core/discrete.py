@@ -4,18 +4,62 @@
 """
 Discrete Data Objects
 ###################################
-Custom discrete data objects (such as series, dataframes, etc.) provide easy
-description of relationships. There are three types of relationships, one-to-one
-(matching index names), one-to-many (index name in columns), and many-to-many
-(matching columns).
+Exa's data objects (such as series and dataframes) provide all of the power of
+`pandas`_ but also a system for describing relationships between data in a
+manner easily identifiable by the :class:`~exa.core.container.Container`.
+
+.. _pandas: http://pandas.pydata.org/
 """
 import six
 import pandas as pd
-from exa.core.typed import TypedMeta
-from exa.cms.unit import units
+from pandas.core.ops import _op_descriptions
+from exa.cms import unit
 
 
-class Series(pd.Series):
+class DiscreteMeta(type):
+    """
+    This class modifies basic operation methods of pandas objects to support
+    automatic unit conversion and metadata propagation.
+    """
+    @staticmethod
+    def modify_op(dunder_op):
+        """
+        """
+        def wrapper(self, other, *args, **kwargs):
+            other = self._auto_convert_units(other)
+            # Note that in the call to __finalize__ below, self is the argument
+            # "other" to __finalize__.
+            return getattr(super(Series, self), dunder_op)(other, *args, **kwargs).__finalize__(self)
+        return wrapper
+
+    def _auto_convert_units(self, other):
+        """Automatically convert units prior to performing a basic operation."""
+        if isinstance(other, Series):
+            factor = unit.units[(other.units, self.units)]
+            return other.values * factor
+        return other
+
+    def __finalize__(self, other, method=None, **kwargs):
+        """Propagate (for example) metadata."""
+        for name in self._metadata:
+            object.__setattr__(self, name, getattr(other, name, None))
+        return self
+
+    def __new__(mcs, name, bases, clsdict):
+        """
+        """
+        for op, info in _op_descriptions.items():
+            op_name = "__{}__".format(op)
+            clsdict[op_name] = mcs.modify_op(op_name)
+            if info['reverse'] is not None:
+                op_name = "__{}__".format(info['reverse'])
+                clsdict[op_name] = mcs.modify_op(op_name)
+        clsdict['_auto_convert_units'] = mcs._auto_convert_units
+        clsdict['__finalize__'] = mcs.__finalize__
+        return super(DiscreteMeta, mcs).__new__(mcs, name, bases, clsdict)
+
+
+class Series(six.with_metaclass(DiscreteMeta, pd.Series)):
     """
     A series is a single valued n dimensional array.
 
@@ -42,33 +86,21 @@ class Series(pd.Series):
             to_unit (str): Unit to convert to
         """
         if self.units is not None:
-            self *= units[(self.units, to_unit)]
+            self *= unit.units[(self.units, to_unit)]
+            self.units = to_unit
 
     @property
     def _constructor(self):
         return Series
-
-    def _auto_convert_units(self, other):
-        if isinstance(other, Series):
-            factor = units[(other.units, self.units)]
-            return other.values * factor
-        return other
-
-    def __add__(self, other, *args, **kwargs):
-        if isinstance(other, Series):
-            other = self._auto_convert_units(other)
-        return super(Series, self).__add__(other, *args, **kwargs).__finalize__(self)
-
-    def __finalize__(self, other, method=None, **kwargs):
-        for name in self._metadata:
-            object.__setattr__(self, name, getattr(other, name, None))
-        return self
 
     def __init__(self, *args, **kwargs):
         units = kwargs.pop("units", None)
         super(Series, self).__init__(*args, **kwargs)
         self.units = units
 
+
+class DataFrame(six.with_metaclass(DiscreteMeta, pd.DataFrame)):
+    pass
 
 #class DataFrame(pd.DataFrame):
 #    """
