@@ -16,16 +16,33 @@ from exa.cms.unit import units
 
 
 class Series(pd.Series):
-    """A series is a single valued n dimensional array."""
+    """
+    A series is a single valued n dimensional array.
+
+    Single valued means that a series only carries a single type or column of
+    data (of a specific kind). Each element of the array is labeled by an index.
+    The index can be a single dimension (e.g. an array of integers) or
+    multidimensional. The dimensions of a series are determined by its index.
+    """
     _metadata = ['name', 'units']
 
     def convert_units(self, to_unit):
-        """Convert units."""
-        from_unit = self.units
-        unit = self._dim
-        if unit is not None:
-            self.values *= unit[from_unit, to_unit]
-            self.units = to_unit
+        """
+        Convert units (inplace) of the current series.
+
+        .. code-block: Python
+
+            energies = Series([1, 2, 3], units="kJ")
+            print(energies.units)      # kJ
+            energies.convert_units("J")
+            print(energies)            # 1000, 2000, 3000
+            print(energies.units)      # J
+
+        Args:
+            to_unit (str): Unit to convert to
+        """
+        if self.units is not None:
+            self *= units[(self.units, to_unit)]
 
     @property
     def _constructor(self):

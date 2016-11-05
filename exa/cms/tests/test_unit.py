@@ -7,11 +7,11 @@ Tests for :mod:`~exa.cms.unit`
 """
 import numpy as np
 from exa.tester import UnitTester
-from exa.cms.base import session_factory, engine
+from exa.cms import unit
+from exa.cms.base import scoped_session
 from exa.cms.unit import (Length, Mass, Time, Current, Amount, Luminosity,
                           Dose, Acceleration, Charge, Dipole, Energy, Force,
-                          Frequency, MolarMass, units, reconfigure_units,
-                          Dimension)
+                          Frequency, MolarMass)
 
 
 class TestUnits(UnitTester):
@@ -19,18 +19,6 @@ class TestUnits(UnitTester):
     Test different types of unit conversions available in classes such as
     :class:`~exa.cms.unit.Length` and similar.
     """
-    def setUp(self):
-        """Custom db session to allow rolling back."""
-        self.conn = engine.connect()
-        self.trans = self.conn.begin()
-        self.session = session_factory(bind=self.conn)
-
-    def tearDown(self):
-        """Clean up the table by rolling back the changes."""
-        self.session.close()
-        self.trans.rollback()
-        self.conn.close()
-
     def test_length(self):
         """Test :class:`~exa.cms.unit.Length`."""
         self.assertTrue(np.isclose(Length['angstroms', 'au'], 1.88971616463))
@@ -102,12 +90,14 @@ class TestUnits(UnitTester):
 
     def test_units(self):
         """Test :attr:`~exa.cms.unit.units`."""
-        self.assertTrue(np.isclose(units[('m', 'km')], 0.001))
-        self.assertTrue(np.isclose(units[('kJ', 'J')], 1000.0))
+        self.assertTrue(np.isclose(unit.units[('m', 'km')], 0.001))
+        self.assertTrue(np.isclose(unit.units[('kJ', 'J')], 1000.0))
 
     def test_unit_creation(self):
         """Test :func:`~exa.cms.unit.Dimension.create`."""
-        Dimension.create("xyz", "zyx", 1, self.session)
-        reconfigure_units()
-        self.assertEqual(units[("xyz", "zyx")], 1)
-        self.assertEqual(units[("xyx", "xyz")], 1)
+        Length.create("xyz", "zyx", 1)
+        self.assertEqual(unit.units[('xyz', 'zyx')], 1)
+        self.assertEqual(unit.units[('zyx', 'xyz')], 1)
+        with scoped_session() as session:
+            session.query(Length).filter(Length.from_unit=="xyz").delete()
+            session.query(Length).filter(Length.from_unit=="zyx").delete()

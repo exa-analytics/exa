@@ -26,7 +26,7 @@ For high performance use the cached conversion factors directly:
 """
 import six
 from sqlalchemy import and_, String, Float, Column
-from exa.cms.base import BaseMeta, Base, scoped_session, session_factory
+from exa.cms.base import BaseMeta, Base, scoped_session
 
 
 class Meta(BaseMeta):
@@ -63,14 +63,13 @@ class Dimension(object):
         return sorted(cls.to_frame()['to_unit'].unique())
 
     @classmethod
-    def create(cls, from_unit, to_unit, factor, session=None):
-        if session is None:
-            session = session_factory()
-        obj0 = cls(from_unit=from_unit, to_unit=to_unit, factor=factor)
-        obj1 = cls(from_unit=to_unit, to_unit=from_unit, factor=1/factor)
-        session.add(obj0)
-        session.add(obj1)
-        session.commit()
+    def create(cls, from_unit, to_unit, factor):
+        with scoped_session() as session:
+            obj0 = cls(from_unit=from_unit, to_unit=to_unit, factor=factor)
+            obj1 = cls(from_unit=to_unit, to_unit=from_unit, factor=1/factor)
+            session.add(obj0)
+            session.add(obj1)
+        reconfigure_units()
 
 
 class Length(six.with_metaclass(Meta, Base, Dimension)):
