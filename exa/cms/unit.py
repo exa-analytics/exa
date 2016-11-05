@@ -194,5 +194,16 @@ class MolarMass(six.with_metaclass(Meta, Base, Dimension)):
     pass
 
 
-unit_list = [Length, Mass, Time, Current, Amount, Luminosity, Dose, Acceleration,
-             Charge, Dipole, Energy, Force, Frequency, MolarMass]
+def reconfigure_units():
+    """Update unit (:attr:`~exa.cms.unit.units`) conversion factors."""
+    global units
+    units = {}
+    for unit in [Length, Mass, Time, Current, Amount, Luminosity, Dose,
+                 Acceleration, Charge, Dipole, Energy, Force, Frequency,
+                 MolarMass]:
+        units.update(unit.to_frame().set_index(['from_unit',
+                                                'to_unit'])['factor'].to_dict())
+
+
+units = None
+reconfigure_units()
