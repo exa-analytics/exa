@@ -38,47 +38,39 @@ class Base(object):
         return self.__class__.__name__.lower()
 
 
-class Series(pd.Series, Base):
-    """
-    A series is an indexed array. The index can be n-dimensional but most often
-    is 1-dimensional.
-    """
-    _metadata = ['units']
-
-    def copy(self, *args, **kwargs):
-        """Copy maintaining class type."""
-        cls = self.__class__
-        return cls(super(Series, self).copy(*args, **kwargs))
+class Series(pd.Series):
+    """A series is."""
+    _metadata = ['name', 'units']
 
     @property
     def _constructor(self):
         return Series
 
-    def _combine_const(self, other, *args, **kwargs):
-        return super(Series, self)._combine_const(other, *args, **kwargs).__finalize__(self)
+    def _auto_convert_units(self, other):
+        def converter(value, factor):
+            return value * factor
 
-#    def __finalize__(self, other, method=None, **kwargs):
-#        if isinstance(other, pd.core.generic.NDFrame):
-#            for name in self._metadata:
-#                if name == 'units':
-#                    self.convert_units(other.units)
-#                else:
-#                    object.__setattr__(self, name, getattr(other, name, None))
-#        elif isinstance(other, Dimension):
-#            raise NotImplementedError()
-#        return self
+        if isinstance(other, Series):
+            #unit_class = unit_hash_table[other.units]
+            #factor = unit_class[other.units, self.units]
+            factor = nrg2[(other.units, self.units)]
+            return converter(other.values, factor)
+        return other
+
+    def __add__(self, other, *args, **kwargs):
+        if isinstance(other, Series1):
+            other = self._convert_units(other)
+        return super(Series, self).__add__(other, *args, **kwargs).__finalize__(self)
+
+    def __finalize__(self, other, method=None, **kwargs):
+        for name in self._metadata:
+            object.__setattr__(self, name, getattr(other, name, None))
+        return self
 
     def __init__(self, *args, **kwargs):
         units = kwargs.pop("units", None)
         super(Series, self).__init__(*args, **kwargs)
         self.units = units
-        if self.name is None and self.index.name is None:
-            try:
-                self.name = self.metadata['name']
-            except AttributeError:
-                pass
-        if self.index.name is None:
-            self.index.name = self.name
 
 
 #class DataFrame(pd.DataFrame):
