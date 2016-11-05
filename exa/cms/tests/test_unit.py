@@ -9,7 +9,7 @@ import numpy as np
 from exa.tester import UnitTester
 from exa.cms.unit import (Length, Mass, Time, Current, Amount, Luminosity,
                           Dose, Acceleration, Charge, Dipole, Energy, Force,
-                          Frequency, MolarMass)
+                          Frequency, MolarMass, units, reconfigure_units)
 
 
 class TestUnits(UnitTester):
@@ -85,3 +85,9 @@ class TestUnits(UnitTester):
         """Test to ensure that proper error is raised on failed retrieval."""
         with self.assertRaises(KeyError):
             MolarMass["g_mol"]
+
+    def test_units(self):
+        """Test :attr:`~exa.cms.unit.units`."""
+        reconfigure_units()
+        self.assertTrue(np.isclose(units[('m', 'km')], 0.001))
+        self.assertTrue(np.isclose(units[('kJ', 'J')], 1000.0))

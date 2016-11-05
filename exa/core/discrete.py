@@ -12,13 +12,13 @@ description of relationships. There are three types of relationships, one-to-one
 import six
 import pandas as pd
 from exa.core.typed import TypedMeta
-from exa.cms.unit import (Length, Mass, Time, Current, Amount, Luminosity,
-                          Dose, Acceleration, Charge, Dipole, Energy, Force,
-                          Frequency, MolarMass, Dimension, unit_list)
+from exa.cms.unit import units
 
 
-class Base(object):
-    """Base class for discrete data objects."""
+class Series(pd.Series):
+    """A series is a single valued n dimensional array."""
+    _metadata = ['name', 'units']
+
     def convert_units(self, to_unit):
         """Convert units."""
         from_unit = self.units
@@ -28,38 +28,18 @@ class Base(object):
             self.units = to_unit
 
     @property
-    def _dim(self):
-        for unit in unit_list:
-            if self.units in unit.units():
-                return unit
-
-    @property
-    def _prefix(self):
-        return self.__class__.__name__.lower()
-
-
-class Series(pd.Series):
-    """A series is."""
-    _metadata = ['name', 'units']
-
-    @property
     def _constructor(self):
         return Series
 
     def _auto_convert_units(self, other):
-        def converter(value, factor):
-            return value * factor
-
         if isinstance(other, Series):
-            #unit_class = unit_hash_table[other.units]
-            #factor = unit_class[other.units, self.units]
-            factor = nrg2[(other.units, self.units)]
-            return converter(other.values, factor)
+            factor = units[(other.units, self.units)]
+            return other.values * factor
         return other
 
     def __add__(self, other, *args, **kwargs):
-        if isinstance(other, Series1):
-            other = self._convert_units(other)
+        if isinstance(other, Series):
+            other = self._auto_convert_units(other)
         return super(Series, self).__add__(other, *args, **kwargs).__finalize__(self)
 
     def __finalize__(self, other, method=None, **kwargs):

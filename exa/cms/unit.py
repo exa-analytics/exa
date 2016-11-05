@@ -198,12 +198,12 @@ def reconfigure_units():
     """Update unit (:attr:`~exa.cms.unit.units`) conversion factors."""
     global units
     units = {}
-    for unit in [Length, Mass, Time, Current, Amount, Luminosity, Dose,
-                 Acceleration, Charge, Dipole, Energy, Force, Frequency,
-                 MolarMass]:
-        units.update(unit.to_frame().set_index(['from_unit',
-                                                'to_unit'])['factor'].to_dict())
+    for unit in unit_tables:
+        series = unit.to_frame().set_index(['from_unit', 'to_unit'])['factor']
+        units.update(series.to_dict())
 
 
+unit_tables = [Length, Mass, Time, Current, Amount, Luminosity, Dose, Acceleration,
+               Charge, Dipole, Energy, Force, Frequency, MolarMass]
 units = None
 reconfigure_units()
