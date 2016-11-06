@@ -3,13 +3,10 @@
 
 
 ###################################################
-Utilities and Adapters
+Static Typing and Errors
 ###################################################
-.. automodule:: exa.mpl
+.. automodule:: exa.typed
     :members:
 
-.. automodule:: exa.js
-    :members:
-
-.. automodule:: exa.tex
+.. automodule:: exa.errors
     :members:

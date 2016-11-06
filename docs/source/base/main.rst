@@ -9,7 +9,3 @@ Introduction and Applications
 
 .. automodule:: exa.__main__
     :members:
-
-
-.. _PyData: http://pydata.org/
-.. _Jupyter notebook: http://jupyter.org

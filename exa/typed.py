@@ -4,25 +4,25 @@
 """
 Strongly Typed Classes
 ####################################
-This module provides the metaclass object :class:`~exa.core.typed.TypedMeta`.
+This module provides the metaclass object :class:`~exa.typed.Typed`.
 This metaclass creates statically typed class attributes using the built-in
 property mechanism. A usage example is given below:
 
 .. code-block:: Python
 
-    class Meta(TypedMeta):
+    class Meta(Typed):
         attr1 = (int, float)
         attr2 = DataFrame
 
-    class Klass(metaclass=Meta):
+    class Klass(metaclass=Meta):   # py2compat: six.with_metaclass(Meta, ...)
         _getter_prefix = "compute"
         def __init__(self, attr1, attr2):
             self.attr1 = attr1
             self.attr2 = attr2
 
-Under the covers, the :class:`~exa.core.typed.TypedMeta` (inherited) metaclass
+Under the covers, the :class:`~exa.typed.Typed` (inherited) metaclass
 creates a class object that looks like the following example. Additionally the
-:class:`~exa.core.typed.TypedMeta` also provides a mechanism for automatic
+:class:`~exa.typed.Typed` also provides a mechanism for automatic
 function calls when a missing (but computable or parsable) attribute is
 requested.
 
@@ -50,10 +50,10 @@ data object types are attached/created. This, in turn, ensures things such as
 visualization and content management behave as expected.
 """
 import warnings
-from exa.core.errors import AutomaticConversionError
+from exa.errors import AutomaticConversionError
 
 
-class TypedMeta(type):
+class Typed(type):
     """
     A class for creating classes with enforced types. By convention this class
     also provies a mechanism for calling a computation (see
@@ -120,10 +120,10 @@ class TypedMeta(type):
         """
         Modification of the class definition occurs here; we iterate over all
         statically typed attributes and attach their property (see
-        :func:`~exa.typed.TypedMeta.create_property`) definition, returning
+        :func:`~exa.typed.Typed.create_property`) definition, returning
         the modified (i.e. property containing) class definition.
         """
         for k, v in vars(mcs).items():
             if isinstance(v, (type, tuple, list)):
                 clsdict[k] = mcs.create_property(k, v)
-        return super(TypedMeta, mcs).__new__(mcs, name, bases, clsdict)
+        return super(Typed, mcs).__new__(mcs, name, bases, clsdict)

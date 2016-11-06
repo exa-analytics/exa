@@ -7,7 +7,6 @@ Tests for :mod:`~exa.cms.unit`
 """
 import numpy as np
 from exa.tester import UnitTester
-from exa.cms import unit
 from exa.cms.base import scoped_session
 from exa.cms.unit import (Length, Mass, Time, Current, Amount, Luminosity,
                           Dose, Acceleration, Charge, Dipole, Energy, Force,
@@ -87,17 +86,3 @@ class TestUnits(UnitTester):
         """Test to ensure that proper error is raised on failed retrieval."""
         with self.assertRaises(KeyError):
             MolarMass["g_mol"]
-
-    def test_units(self):
-        """Test :attr:`~exa.cms.unit.units`."""
-        self.assertTrue(np.isclose(unit.units[('m', 'km')], 0.001))
-        self.assertTrue(np.isclose(unit.units[('kJ', 'J')], 1000.0))
-
-    def test_unit_creation(self):
-        """Test :func:`~exa.cms.unit.Dimension.create`."""
-        Length.create("xyz", "zyx", 1)
-        self.assertEqual(unit.units[('xyz', 'zyx')], 1)
-        self.assertEqual(unit.units[('zyx', 'xyz')], 1)
-        with scoped_session() as session:
-            session.query(Length).filter(Length.from_unit=="xyz").delete()
-            session.query(Length).filter(Length.from_unit=="zyx").delete()

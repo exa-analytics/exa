@@ -5,10 +5,14 @@
 #################################
 `Exa Analytics Framework`_
 #################################
-*The exa framework for data management, processing, and visualization.*
+*A framework for data management, processing, and visualization.*
 
 This package provides a data management, processing, analytics, and
-visualization framework built on top of the `PyData`_ stack.
+visualization framework built atop of the `PyData`_ stack. Although it is the
+main dependency of packages tailored to specific data industries, it can also
+be used in a standalone fashion for data management, exploration, and
+visualization, and is especially useful where relationships between discrete
+(and/or analytical) data sets are present.
 
 
 .. toctree::

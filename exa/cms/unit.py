@@ -2,25 +2,25 @@
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Unit Conversions
-#########################
+Tabulated Conversion Factors
+##############################
 This module provides relational classes for unit conversion tables. To inspect
 available conversions:
 
-.. code-block: Python
+.. code-block:: Python
 
     exa.cms.unit.Length.to_frame()    # display full conversion table
     exa.cms.unit.Length.units()       # list available units
 
 To create a new conversion:
 
-.. code-block: Python
+.. code-block:: Python
 
     exa.cms.unit.Dimension.create("kJ", "J", 1000)   # Note create J -> kJ too
 
 For high performance use the cached conversion factors directly:
 
-.. code-block: Python
+.. code-block:: Python
 
     exa.cms.unit.units[("kJ", "J")]
 """
@@ -219,18 +219,3 @@ class MolarMass(six.with_metaclass(Meta, Base, Dimension)):
     0.001
     """
     pass
-
-
-def reconfigure_units():
-    """Update unit (:attr:`~exa.cms.unit.units`) conversion factors."""
-    global units
-    units = {}
-    for unit in unit_tables:
-        series = unit.to_frame().set_index(['from_unit', 'to_unit'])['factor']
-        units.update(series.to_dict())
-
-
-unit_tables = [Length, Mass, Time, Current, Amount, Luminosity, Dose, Acceleration,
-               Charge, Dipole, Energy, Force, Frequency, MolarMass]
-units = None
-reconfigure_units()

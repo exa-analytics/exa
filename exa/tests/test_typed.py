@@ -2,18 +2,18 @@
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Tests for :mod:`~exa.core.typed`
+Tests for :mod:`~exa.typed`
 #############################################
 Test strongly typed class attributes. A usage example is provided by the
-combination of :class:`~exa.core.tests.test_typed.DummyTypedMeta` and
-:class:`~exa.core.tests.test_typed.DummyClass`.
+combination of :class:`~exa.tests.test_typed.DummyTyped` and
+:class:`~exa.tests.test_typed.DummyClass`.
 """
 import six
 from exa.tester import UnitTester
-from exa.core.typed import TypedMeta
+from exa.typed import Typed
 
 
-class DummyTypedMeta(TypedMeta):
+class DummyTyped(Typed):
     """Dummy metaclass."""
     foo = int
     bar = (str, float)
@@ -22,7 +22,7 @@ class DummyTypedMeta(TypedMeta):
     jaz = object
 
 
-class DummyClass(six.with_metaclass(DummyTypedMeta, object)):
+class DummyClass(six.with_metaclass(DummyTyped, object)):
     """Dummy typed class."""
     _getter_prefix = "compute"
     def compute_foo(self):
@@ -41,11 +41,11 @@ class DummyClass(six.with_metaclass(DummyTypedMeta, object)):
         self.faz = faz
 
 
-class TestTypedMeta(UnitTester):
+class TestTyped(UnitTester):
     """
-    Test :class:`~exa.core.typed` using dummy classes. Type definitions are
-    given in :class:`~exa.core.tests.test_typed.DummyTypedMeta` and the class
-    definition is given by :class:`~exa.core.tests.test_typed.DummyClass`.
+    Test :class:`~exa.typed` using dummy classes. Type definitions are
+    given in :class:`~exa.tests.test_typed.DummyTyped` and the class
+    definition is given by :class:`~exa.tests.test_typed.DummyClass`.
     """
     def test_init(self):
         """Test type enforcement on creation."""
@@ -58,7 +58,7 @@ class TestTypedMeta(UnitTester):
     def test_compute_calls(self):
         """
         Test default getters (using the _getter_prefix), for example,
-        :func:`~exa.core.tests.test_typed.DummyClass.compute_foo`.
+        :func:`~exa.tests.test_typed.DummyClass.compute_foo`.
         """
         klass = DummyClass()
         self.assertEqual(klass.foo, True)
@@ -69,12 +69,12 @@ class TestTypedMeta(UnitTester):
     def test_autoconv(self):
         """
         Test automatic conversion performed by
-        :func:`~exa.core.typed.TypedMeta.create_property`.
+        :func:`~exa.typed.Typed.create_property`.
         """
         klass = DummyClass(foo=0, bar=42.0, baz="stuff")
-        self.assertIsInstance(klass.foo, DummyTypedMeta.foo)
-        self.assertIsInstance(klass.bar, DummyTypedMeta.bar)
-        self.assertIsInstance(klass.baz, DummyTypedMeta.baz)
+        self.assertIsInstance(klass.foo, DummyTyped.foo)
+        self.assertIsInstance(klass.bar, DummyTyped.bar)
+        self.assertIsInstance(klass.baz, DummyTyped.baz)
         self.assertTrue(klass.faz is None)
         with self.assertRaises(TypeError):
             klass.bar = DummyClass()

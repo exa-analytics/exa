@@ -15,6 +15,7 @@ of important framework concepts can also be found within this documentation.
 
     base/main.rst
     base/config.rst
+    base/typed.rst
     base/testing.rst
     base/utilities.rst
 
@@ -24,7 +25,6 @@ of important framework concepts can also be found within this documentation.
     :caption: Containers and Editors
 
     core/main.rst
-    core/typed.rst
     core/editor.rst
 
 

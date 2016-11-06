@@ -26,3 +26,17 @@ class ExaException(Exception):
             logger.critical(msg)
         else:
             logger.debug(msg)
+
+
+class AutomaticConversionError(ExaException):
+    """
+    Raised when a type conversion is attempted but fails.
+
+    See Also:
+        :mod:`~exa.typed`.
+    """
+    fmt = 'Automatic type conversion to type {} failed for "{}" with type {}.'
+
+    def __init__(self, obj, ptype):
+        msg = self.fmt.format(obj.__class__.__name__, type(obj), ptype)
+        super(AutomaticConversionError, self).__init__(msg, 'error')

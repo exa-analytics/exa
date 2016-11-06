@@ -63,6 +63,7 @@ import configparser
 import shutil
 import logging
 import pandas as pd
+from glob import glob
 from textwrap import wrap
 from itertools import product
 from sqlalchemy import create_engine
@@ -212,7 +213,7 @@ def reconfigure(rootname=".exa"):
     config['dynamic']['config_file'] = config_file
     config['dynamic']['pkg'] = os.path.dirname(os.path.realpath(__file__))
     config['dynamic']['static'] = os.path.join(config['dynamic']['pkg'], "..", "static")
-    config['dynamic']['examples'] = os.path.join(config['dynamic']['pkg'], "..", "examples")
+    config['dynamic']['notebooks'] = os.path.join(config['dynamic']['pkg'], "..", "notebooks")
     config['dynamic']['64bit'] = "true" if sys.maxsize > 2**32 else "false"
     config['dynamic']['numba'] = "false"
     config['dynamic']['cython'] = "false"
@@ -296,12 +297,15 @@ def initialize():
     df.columns = ['symbol', 'value']
     df['pkid'] = df.index
     df.to_sql(name='constant', con=engine, index=False, if_exists='replace')
-    # Copy the tutorial
-    tut = "tutorial.ipynb"
-    tutorial_source = os.path.join(config['dynamic']['examples'], tut)
-    tutorial_dest = os.path.join(config['paths']['notebooks'], tut)
-    shutil.copy(tutorial_source, tutorial_dest)
-    config['dynamic']['init_cms'] = 'true'    # Initialize CMS features
+    # Copy the tutorials
+    source_dir = config['dynamic']['notebooks']
+    dest_dir = config['paths']['notebooks']
+    print(source_dir, dest_dir)
+    for source in glob(os.path.join(source_dir, "*.ipynb")):
+        dest = os.path.join(dest_dir, os.path.basename(source))
+        shutil.copy(source, dest)
+    # Initialize CMS database
+    config['dynamic']['init_cms'] = 'true'
 
 
 # Create the config, db engine, and loggers

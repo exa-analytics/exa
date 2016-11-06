@@ -6,13 +6,41 @@
 Executable
 #############
 """
-from exa.compute.resources import inspect_resource
+import argparse
+import platform
+import subprocess
+#
+#import os, sys
+#HOME = 'J:/Alex'
+#sys.path.insert(0, os.sep.join((HOME, 'workspace', 'exa', 'exa')))
+#
+from exa._config import config
 
 
 def main():
-    resource = inspect_resource()
-    print(resource)
-    return
+    parser = argparse.ArgumentParser(description="The exa framework launcher.")
+    parser.add_argument(
+        "-nb",
+        "--notebook",
+        action="store_true",
+        help="Starts a Jupyter notebook server in the exa notebook directory.",
+        required=False,
+        default=False
+    )
+    args = parser.parse_args()
+    if args.notebook == True:
+        notebook()
+
+
+def notebook():
+    """Start the Jupyter notebook."""
+    if platform.system().lower() == "windows":
+        proc = subprocess.Popen(["jupyter", "notebook"], shell=True,
+                                cwd=config["paths"]["notebooks"], stdin=subprocess.PIPE)
+    else:
+        proc = subprocess.Popen(["jupyter notebook"], shell=True,
+                                cwd=config["paths"]["notebooks"], stdin=subprocess.PIPE)
+    proc.wait()
 
 
 if __name__ == "__main__":
@@ -24,12 +52,6 @@ if __name__ == "__main__":
 #import argparse
 #import subprocess
 #from exa._config import config, reconfigure
-#def notebook():
-#    """Start the Jupyter notebook."""
-#    if platform.system().lower() == "windows":
-#        subprocess.Popen(["jupyter", "notebook"], shell=True, cwd=config["paths"]["notebooks"])
-#    else:
-#        subprocess.Popen(["jupyter notebook"], shell=True, cwd=config["paths"]["notebooks"])
 #
 #
 #def workflow(wkflw):

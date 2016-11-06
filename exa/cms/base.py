@@ -16,7 +16,7 @@ from contextlib import contextmanager
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import as_declarative, declared_attr, DeclarativeMeta
-from exa._config import engine
+from exa import _config
 
 
 @contextmanager
@@ -36,7 +36,7 @@ def scoped_session(*args, **kwargs):
 def reconfigure_session_factory():
     """Internal function for binding the session_factory attribute to the engine."""
     global session_factory
-    session_factory = sessionmaker(bind=engine)
+    session_factory = sessionmaker(bind=_config.engine)
 
 
 class BaseMeta(DeclarativeMeta):
@@ -54,7 +54,7 @@ class BaseMeta(DeclarativeMeta):
         """
         with scoped_session() as session:
             statement = session.query(cls).statement
-            df = pd.read_sql(statement, engine)
+            df = pd.read_sql(statement, _config.engine)
             if 'pkid' in df:
                 df.set_index('pkid', inplace=True)
                 df = df.sort_index()

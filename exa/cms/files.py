@@ -10,8 +10,8 @@ import os
 import shutil
 from datetime import datetime
 from sqlalchemy import String, Column, Integer, Table, ForeignKey
+from exa import _config
 from exa.cms.base import Base, Name, Sha256UID, Time
-from exa._config import config, mkdir
 
 
 class File(Name, Time, Sha256UID, Base):
@@ -41,14 +41,14 @@ class File(Name, Time, Sha256UID, Base):
         modified = datetime.fromtimestamp(os.path.getmtime(path))
         obj = cls(name=name, size=size, ext=ext, uid=uid, modified=modified,
                   **kwargs)
-        mkdir(os.path.dirname(obj.path))
+        _config.mkdir(os.path.dirname(obj.path))
         shutil.copyfile(path, obj.path)
         return obj
 
     @property
     def path(self):
         """Get the file path of the current file."""
-        return os.path.join(data_dir, self.ext, self.uid)
+        return os.path.join(_config.config['paths']['data'], self.ext, self.uid)
 
     @property
     def all_projects(self):
@@ -57,7 +57,3 @@ class File(Name, Time, Sha256UID, Base):
         for job in self.jobs:
             projects += job.projects
         return projects
-
-
-data_dir = config['paths']['data']
-del config

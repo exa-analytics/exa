@@ -11,11 +11,11 @@ table because it has a convenient column set.
 import pandas as pd
 from six import string_types
 from datetime import datetime
+from exa import _config
 from exa.tester import UnitTester
 from exa.cms.files import File
 from exa.cms.job import Job
-from exa.cms.base import (reconfigure_session_factory, session_factory,
-                          scoped_session, engine)
+from exa.cms.base import reconfigure_session_factory, session_factory, scoped_session
 
 
 class TestBase(UnitTester):
@@ -25,7 +25,7 @@ class TestBase(UnitTester):
         Test generation of a table entry (for later use), string repr, and
         size computation (:class:`~exa.cms.base.Size`).
         """
-        self.conn = engine.connect()
+        self.conn = _config.engine.connect()
         self.trans = self.conn.begin()
         self.session = session_factory(bind=self.conn)
         self.file = self.session.query(File).get(1)
@@ -45,7 +45,7 @@ class TestBase(UnitTester):
         reconfigure_session_factory()
         session = session_factory()
         session.close()
-        self.assertTrue(engine is session_factory.kw['bind'])
+        self.assertTrue(_config.engine is session_factory.kw['bind'])
 
     def test_scoped_session(self):
         """Test the :func:`~exa.cms.base.scoped_session` context manager."""
@@ -63,10 +63,10 @@ class TestBase(UnitTester):
         :func:`~exa.cms.base.BaseMeta.get_by_name`, and
         :func:`~exa.cms.base.BaseMeta.get_by_uid`.
         """
-        self.assertEqual(self.file.name, "tutorial")
-        self.assertTrue(len(File.get_by_name("tutorial")) > 0)
-        self.assertTrue(File.get_by_uid(File[1].uid).name, "tutorial")
-        self.assertTrue(len(File['tutorial']) > 0)
+        self.assertEqual(self.file.name, "exa_tutorial")
+        self.assertTrue(len(File.get_by_name("exa_tutorial")) > 0)
+        self.assertTrue(File.get_by_uid(File[1].uid).name, "exa_tutorial")
+        self.assertTrue(len(File['exa_tutorial']) > 0)
         self.assertIsInstance(File[self.file.uid], File)
         with self.assertRaises(KeyError):
             File[-1]

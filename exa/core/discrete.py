@@ -13,7 +13,6 @@ manner easily identifiable by the :class:`~exa.core.container.Container`.
 import six
 import pandas as pd
 from pandas.core.ops import _op_descriptions
-from exa.cms import unit
 
 
 class DiscreteMeta(type):
@@ -35,7 +34,8 @@ class DiscreteMeta(type):
     def _auto_convert_units(self, other):
         """Automatically convert units prior to performing a basic operation."""
         if isinstance(other, Series):
-            factor = unit.units[(other.units, self.units)]
+            #factor = unit.units[(other.units, self.units)]
+            factor = 1
             return other.values * factor
         return other
 
@@ -86,7 +86,7 @@ class Series(six.with_metaclass(DiscreteMeta, pd.Series)):
             to_unit (str): Unit to convert to
         """
         if self.units is not None:
-            self *= unit.units[(self.units, to_unit)]
+            #self *= unit.units[(self.units, to_unit)]
             self.units = to_unit
 
     @property
@@ -100,7 +100,10 @@ class Series(six.with_metaclass(DiscreteMeta, pd.Series)):
 
 
 class DataFrame(six.with_metaclass(DiscreteMeta, pd.DataFrame)):
+    """
+    """
     pass
+
 
 #class DataFrame(pd.DataFrame):
 #    """

@@ -4,11 +4,14 @@
 """
 This sub-package contains the core functionality of exa:
 
-- :class:`~exa.core.editor.Editor`
-- :class:`~exa.core.container.Container`
+- :class:`~exa.core.analytical`: Analytical data objects
+- :class:`~exa.core.units`: Quantity support (data object with associated units)
+- :class:`~exa.core.discrete`: Discrete data objects
+- :class:`~exa.core.editor.Editor`: Programmatic file manipulation
+- :class:`~exa.core.container.Container`: Data object analysis and visualization toolkit
 """
 # Import base modules
-from exa.core import typed, editor, ssv, discrete
+from exa.core import editor, ssv, discrete
 
 # Import sub-packages
 from exa.core import tests

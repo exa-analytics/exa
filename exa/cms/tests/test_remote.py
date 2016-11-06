@@ -5,6 +5,7 @@
 Tests for :mod:`~exa.cms.remote`
 #############################################
 """
+from exa import _config
 from exa.tester import UnitTester
 
 

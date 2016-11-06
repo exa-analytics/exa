@@ -5,8 +5,9 @@
 Tests for :mod:`~exa.cms.job`
 #############################################
 """
+from exa import _config
 from exa.tester import UnitTester
-from exa.cms.base import session_factory, engine
+from exa.cms.base import session_factory
 from exa.cms.job import Job
 from exa.cms.files import File
 
@@ -17,7 +18,7 @@ class TestJob(UnitTester):
         """Set up the test job and test (related) file."""
         self.job = Job(name="test")
         self.file = File(name="test", uid="test_uid"*8, ext="nul")
-        self.conn = engine.connect()
+        self.conn = _config.engine.connect()
         self.trans = self.conn.begin()
         self.session = session_factory(bind=self.conn)
         self.job.files.append(self.file)

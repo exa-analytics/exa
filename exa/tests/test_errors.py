@@ -6,7 +6,7 @@ Tests for :mod:`~exa.errors`
 ##################################
 """
 from exa.tester import UnitTester
-from exa.errors import ExaException
+from exa.errors import ExaException, AutomaticConversionError
 
 
 class TestExceptions(UnitTester):
@@ -15,6 +15,8 @@ class TestExceptions(UnitTester):
         """Test for :class:`~exa.errors.ExaException`."""
         with self.assertRaises(ExaException):
             raise ExaException()
+        with self.assertRaises(AutomaticConversionError):
+            raise AutomaticConversionError(object, type)
 
     def test_levels(self):
         """Test exception logging levels."""
