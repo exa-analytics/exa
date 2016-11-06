@@ -2,8 +2,8 @@
 .. Distributed under the terms of the Apache License 2.0
 
 
-########################
 .. install:
+########################
 Installation
 ########################
 Exa currently supports Python 2.7, 3.4, and 3.5. Installation via `anaconda`

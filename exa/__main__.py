@@ -8,12 +8,12 @@ Executable
 """
 import argparse
 import platform
-import subprocess
 #
 #import os, sys
 #HOME = 'J:/Alex'
 #sys.path.insert(0, os.sep.join((HOME, 'workspace', 'exa', 'exa')))
 #
+from subprocess import Popen, PIPE
 from exa._config import config
 
 
@@ -35,11 +35,11 @@ def main():
 def notebook():
     """Start the Jupyter notebook."""
     if platform.system().lower() == "windows":
-        proc = subprocess.Popen(["jupyter", "notebook"], shell=True,
-                                cwd=config["paths"]["notebooks"], stdin=subprocess.PIPE)
+        proc = Popen(["jupyter", "notebook"], shell=True,
+                     cwd=config["paths"]["notebooks"], stdin=PIPE)
     else:
-        proc = subprocess.Popen(["jupyter notebook"], shell=True,
-                                cwd=config["paths"]["notebooks"], stdin=subprocess.PIPE)
+        proc = Popen(["jupyter notebook"], shell=True,
+                     cwd=config["paths"]["notebooks"], stdin=PIPE)
     proc.wait()
 
 
