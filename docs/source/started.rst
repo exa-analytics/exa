@@ -5,7 +5,7 @@
 ########################
 Getting Started
 ########################
-Once installed (see :ref:`install`) Python can be executed from a command
+Once installed (see Exa) Python can be executed from a command
 prompt.
 
 .. code-block:: bash
@@ -23,7 +23,7 @@ Python can also be run in a web browser (which allows for visualization).
 
 
 If familiar with Python and the Jupyter notebook skip the next section and see
-:ref:`exa-tutorial`.
+below.
 
 
 Introductory Tutorials
@@ -41,7 +41,6 @@ To see a list of tutorial notebooks use the command:
 - **viz_tutorial**: Visualization within the `Jupyter notebook`_
 
 
-.. exa-tutorial:
 Exa
 #########################
 Tutorial
