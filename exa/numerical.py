@@ -377,7 +377,7 @@ class Field(DataFrame):
         traits = {}
         if self._cardinal is not None:
             grpby = self.cardinal_groupby()
-            string = str(list(grpby.groups.values())).replace(' ', '')
+            string = str([list(grp.index) for i, grp in grpby]).replace(' ', '')
             traits['field_indices'] = Unicode(string).tag(sync=True)
         else:
             string = pd.Series(self.index.values).to_json(orient='values')

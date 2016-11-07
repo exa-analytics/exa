@@ -215,7 +215,7 @@ class Editor:
             return results[strings[0]]
         return results
 
-    def find_next(self, string):
+    def find_next(self, string, start=None, keys_only=False):
         """
         From the editor's current cursor position find the next instance of the
         given string.
@@ -231,11 +231,13 @@ class Editor:
             This function cycles the entire editor (i.e. cursor to length of
             editor to zero and back to cursor position).
         """
-        for start, stop in [(self.cursor, len(self)), (0, self.cursor)]:
+        staht = start if start is not None else self.cursor
+        for start, stop in [(staht, len(self)), (0, staht)]:
             for i in range(start, stop):
                 if string in self[i]:
                     tup = (i, self[i])
                     self.cursor = i + 1
+                    if keys_only: return i
                     return tup
 
     def regex(self, *patterns, start=0, stop=None, keys_only=False, flags=0):
@@ -295,6 +297,11 @@ class Editor:
         Returns:
             pd.DataFrame: structured data
         """
+        try:
+            int(start)
+            int(stop)
+        except:
+            print('start and stop must be ints')
         try:
             ncol = int(ncol)
             return pd.read_csv(StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=range(ncol), **kwargs)

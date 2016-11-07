@@ -637,6 +637,6 @@ class TypedMeta(type):
         the new class definition.
         """
         for k, v in vars(metacls).items():
-            if isinstance(v, type) and k[0] != '_':
+            if isinstance(v, type) and not k.startswith('_'):
                 clsdict[k] = metacls.create_property(k, v)
         return super().__new__(metacls, name, bases, clsdict)

@@ -13,4 +13,3 @@ ipywidgets
 ipyparallel
 sphinx
 nose
-sphinxcontrib-autoanysrc
