@@ -4,4 +4,19 @@
 """
 Tests for :mod:`~exa.core.analytical`
 #############################################
+Tests base behavior of custom analytical data objects.
 """
+#from exa.tester import UnitTester
+#from exa.core.analytical import Dimension
+#
+#
+#class TestDimension(UnitTester):
+#    """
+#    """
+#    def setUp(self):
+#        self.length = Dimension(length=1, name="length", symbol="L")
+#        self.time = Dimension(time=1, name="time", symbol="L")
+#
+#    def test_add(self):
+#
+#
