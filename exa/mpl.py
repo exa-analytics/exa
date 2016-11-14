@@ -9,7 +9,7 @@ import seaborn as sns
 # Subclassing matplotlib Figure and Axes
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes, subplot_class_factory
-from matplotlib.backends.backend_agg import FigureCanvasAgg
+#from matplotlib.backends.backend_agg import FigureCanvasAgg
 
 legend = {'legend.frameon': True, 'legend.facecolor': 'white',
           'legend.fancybox': True, 'patch.facecolor': 'white',
@@ -47,7 +47,9 @@ class ExaFigure(Figure):
 
     def __init__(self, *args, **kwargs):
         super(ExaFigure, self).__init__(*args, **kwargs)
-        self.set_canvas(FigureCanvasAgg(self))
+        print('Must fig.set_canvas(matplotlib.backends.'
+              'backend_agg.FigureCanvasAgg(self))')
+#        self.set_canvas(FigureCanvasAgg(self))
 
 class ExAxes(Axes):
     """
