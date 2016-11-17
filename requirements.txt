@@ -11,7 +11,7 @@ scikit-image
 sympy
 psutil
 notebook
-ipywidgets
+ipywidgets>=5.15
 pythreejs
 blaze
 bokeh

@@ -1,4 +1,2 @@
 recursive-include data *.json
-#recursive-include exa *
-#include requirements.txt
-
+recursive-include exa/static *.*
