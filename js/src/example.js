@@ -33,6 +33,6 @@ var HelloView = widgets.DOMWidgetView.extend({
 
 
 module.exports = {
-    HelloModel,
-    HelloView
+    HelloModel: HelloModel,
+    HelloView: HelloView
 };

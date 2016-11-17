@@ -8,7 +8,8 @@ The version can be checked using the following command:
 
 .. code-block:: Python
 
+    exa.version_info
     exa.__verion__
 """
-version_info = (0, 4, 0, 'dev')
+version_info = (0, 4, 0, 'dev0')
 __version__ = '.'.join(map(str, version_info))

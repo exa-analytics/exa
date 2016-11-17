@@ -37,7 +37,7 @@ module.exports = [
         },
         devtool: "source-map",
         module: {
-            loaders
+            loaders: loaders
         },
         externals: ["jupyter-js-widgets"]
     },

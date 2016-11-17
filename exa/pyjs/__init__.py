@@ -11,4 +11,4 @@ from exa.pyjs import example
 from exa.pyjs import tests
 
 # Import user/dev API
-from exa.pyjs.example import HelloWorld
+from exa.pyjs.example import HelloWorld, ExampleWidget

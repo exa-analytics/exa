@@ -27,8 +27,17 @@ from exa import _version, _config, tester, errors, typed, mpl, tex
 from exa import cms, compute, core, tests, pyjs
 
 # Import user/dev API
-from exa._version import __version__
+from exa._version import __version__, version_info
 from exa._config import print_config
 from exa.mpl import color_palette
 from exa.cms import scoped_session, session_factory, db, File, Job, Project
 from exa.core import Editor, CSV
+
+
+def _jupyter_nbextension_paths():
+    return [{
+        'section': 'notebook',
+        'src': 'static',
+        'dest': 'jupyter-exa',
+        'require': 'jupyter-exa/extension'
+    }]
