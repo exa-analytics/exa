@@ -102,7 +102,7 @@ class NPM(Command):
     def run(self):
         has_npm = self.has_npm()
         if not has_npm:
-            log.error("`npm` unavailable.  If you"re running this command using sudo, make sure `npm` is available to sudo")
+            log.error("`npm` unavailable.  If you're running this command using sudo, make sure `npm` is available to sudo")
 
         env = os.environ.copy()
         env["PATH"] = npm_path
@@ -154,8 +154,8 @@ setup_args = {
     "author": "Thomas J. Duignan and Alex Marchenko",
     "author_email": "exa.data.analytics@gmail.com",
     "maintainer_email": "exa.data.analytics@gmail.com",
-    "url"="https://exa-analytics.github.io",
-    "download_url": "https://github.com/exa-analytics/exa/tarball/v{}".format(__version__),
+    "url": "https://exa-analytics.github.io",
+    "download_url": "https://github.com/exa-analytics/exa/tarball/v{}".format(version_ns["__version__"]),
     "keywords": [
         "big data",
         "visualization",

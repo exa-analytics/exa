@@ -26,7 +26,9 @@ osx-64/
 doc/build/
 target/
 .settings/
-node_modules/
+js/node_modules/
+exa/static/
+
 
 # Compiled
 *.py[cod]

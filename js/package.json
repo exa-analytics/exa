@@ -11,7 +11,7 @@
   "keywords": [
     "big data",
     "visualization",
-    "analytics",
+    "analytics"
   ],
   "scripts": {
     "prepublish": "webpack",
