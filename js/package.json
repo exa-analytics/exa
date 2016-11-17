@@ -1,0 +1,29 @@
+{
+  "name": "jupyter-exa",
+  "version": "0.0.1",
+  "description": "The exa framework for data processing analytics,a and visualization.",
+  "author": "Thomas J. duignan and Alex Marchenko",
+  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/exa/exa.git"
+  },
+  "keywords": [
+    "jupyter",
+    "widgets",
+    "ipython",
+    "ipywidgets"
+  ],
+  "scripts": {
+    "prepublish": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "json-loader": "^0.5.4",
+    "webpack": "^1.12.14"
+  },
+  "dependencies": {
+    "jupyter-js-widgets": "^1.1.1",
+    "underscore": "^1.8.3"
+  }
+}

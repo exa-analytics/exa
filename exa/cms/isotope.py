@@ -159,13 +159,13 @@ class Element(object):
         return "Element({0})".format(self.symbol)
 
 
-def elements():
+def elements(index='name'):
     """
     Create a :class:`~pandas.Series` of :class:`~exa.cms.isotope.Element`
     objects.
     """
     isotopes = Isotope.to_frame()
-    isotopes = isotopes[isotopes['af'].notnull()].groupby('name')
+    isotopes = isotopes[isotopes['af'].notnull()].groupby(index)
     return isotopes.apply(Element.from_isotopes)
 
 
