@@ -14,6 +14,7 @@ before_install:
 install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION
   - conda install --yes -c conda-forge `cat requirements.txt`
+  - conda install -c cpcloud npm
   - pip install sphinxcontrib-autoanysrc sphinx_rtd_theme coverage
   - pip install python-coveralls travis-sphinx codacy-coverage recommonmark
   - python setup.py install
