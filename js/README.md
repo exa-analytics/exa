@@ -1,4 +1,4 @@
-The exa framework for data processing analytics,a and visualization.
+The exa framework for data, processing, analytics, and visualization.
 
 Package Install
 ---------------
