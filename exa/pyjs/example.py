@@ -28,3 +28,12 @@ class ExampleWidget(DOMWidget):
     _model_module = Unicode("jupyter-exa").tag(sync=True)
 
     value = Unicode("Example text!").tag(sync=True)
+
+
+class Renderer(DOMWidget):
+    """
+    """
+    _view_name = Unicode("RendererView").tag(sync=True)
+    _model_name = Unicode("RendererModel").tag(sync=True)
+    _view_module = Unicode("jupyter-exa").tag(sync=True)
+    _model_module = Unicode("jupyter-exa").tag(sync=True)
