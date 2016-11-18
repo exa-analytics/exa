@@ -16,6 +16,7 @@ import platform
 here = os.path.dirname(os.path.abspath(__file__))
 node_root = os.path.join(here, "js")
 is_repo = os.path.exists(os.path.join(here, ".git"))
+pltfrm = True if platform.system().lower() == 'windows' else False
 
 npm_path = os.pathsep.join([
     os.path.join(node_root, "node_modules", ".bin"),
@@ -89,7 +90,10 @@ class NPM(Command):
 
     def has_npm(self):
         try:
-            check_call(["npm", "--version"], shell=True)
+            if pltfrm:
+                check_call(["npm", "--version"], shell=True)
+            else:
+                check_call(["npm", "--version"])
             return True
         except:
             return False
@@ -109,8 +113,12 @@ class NPM(Command):
 
         if self.should_run_npm_install():
             log.info("Installing build dependencies with npm.  This may take a while...")
-            check_call(["npm", "install"], cwd=node_root, stdout=sys.stdout,
-                       stderr=sys.stderr, shell=True)
+            if pltfrm:
+                check_call(["npm", "install"], cwd=node_root, stdout=sys.stdout,
+                           stderr=sys.stderr, shell=True)
+            else:
+                check_call(["npm", "install"], cwd=node_root, stdout=sys.stdout,
+                           stderr=sys.stderr)
             os.utime(self.node_modules, None)
 
         for t in self.targets:
