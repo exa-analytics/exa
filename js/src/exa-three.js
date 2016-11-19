@@ -14,6 +14,7 @@ require("./threejs/renderers/CanvasRenderer.js");
 var Detector = require("./threejs/Detector.js");
 
 
+// Core three.js objects
 var RendererModel = base.createWidgetModel("Renderer", {"value": "renderer model"});
 
 class RendererView extends widgets.DOMWidgetView {
@@ -28,12 +29,15 @@ class RendererView extends widgets.DOMWidgetView {
 }
 
 function build_api() {
+    console.log("building api");
     var models = {RendererModel: RendererModel};
     var views = {RendererView: RendererView};
     var len = THREE.length;
+    console.log(len);
     for (var i = 0; i < len; i++) {
         console.log(THREE[i]);
     }
+
     return _.extend({}, models, views);
 }
 
