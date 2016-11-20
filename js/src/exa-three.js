@@ -32,10 +32,8 @@ function build_api() {
     console.log("building api");
     var models = {RendererModel: RendererModel};
     var views = {RendererView: RendererView};
-    var len = THREE.length;
-    console.log(len);
-    for (var i = 0; i < len; i++) {
-        console.log(THREE[i]);
+    for (var attribute in THREE) {
+        console.log(attribute);
     }
 
     return _.extend({}, models, views);
