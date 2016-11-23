@@ -3,8 +3,8 @@
 # Distributed under the terms of the Apache License 2.0
 """
 """
-from ipywidgets import register, DOMWidget
-from traitlets import Unicode
+from ipywidgets import register, DOMWidget, Widget
+from traitlets import Unicode, List
 
 
 @register("hello.Hello")
@@ -30,6 +30,20 @@ class ExampleWidget(DOMWidget):
     value = Unicode("Example text!").tag(sync=True)
 
 
+@register("three.API")
+class ThreeAPI(Widget):
+    """
+    """
+    _view_name = Unicode("ThreeAPIView").tag(sync=True)
+    _model_name = Unicode("ThreeAPIModel").tag(sync=True)
+    _view_module = Unicode("jupyter-exa").tag(sync=True)
+    _model_module = Unicode("jupyter-exa").tag(sync=True)
+
+    api = List(["Geometry", "BufferGeometry"]).tag(sync=True)
+
+
+
+@register("three.Renderer")
 class Renderer(DOMWidget):
     """
     """

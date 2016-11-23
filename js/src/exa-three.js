@@ -7,14 +7,17 @@ Description
 */
 var widgets = require("jupyter-js-widgets");
 var _ = require("underscore");
-var base = require("./foo/base.js");
 var THREE = require("three");
 window.THREE = THREE;    // Allows importing three/*
 require("./threejs/renderers/CanvasRenderer.js");
 var Detector = require("./threejs/Detector.js");
 
+var $ = require("jquery");
 
-// Core three.js objects
+var base = require("./foo/base.js");
+
+
+// The DOM object is what is actually displayed in the (Jupyter) notebook
 var RendererModel = base.createWidgetModel("Renderer", {"value": "renderer model"});
 
 class RendererView extends widgets.DOMWidgetView {
@@ -28,13 +31,42 @@ class RendererView extends widgets.DOMWidgetView {
     }
 }
 
+
+// All other objects are just Widgets
+class ThreeView extends widgets.WidgetView {
+}
+
+class ThreeModel extends widgets.WidgetModel {
+}
+
+
+//
+
+
+function generate_view(name) {
+    console.log("generate_view");
+//    console.log(THREE[name]);
+//    console.log(THREE[name].prototype);
+ //   var obj = THREE[name];
+ //   console.log(obj);
+    var obj1 = THREE.BoxBufferGeometry(1, 1, 1);
+    console.log(obj1);
+
+    return {};
+}
+
+
 function build_api() {
     console.log("building api");
     var models = {RendererModel: RendererModel};
     var views = {RendererView: RendererView};
-    for (var attribute in THREE) {
-        console.log(attribute);
-    }
+    console.log(THREE);
+    //for (var attribute in THREE) {
+    //    if (THREE.hasOwnProperty(attribute)) {
+    //        console.log(attribute);
+    //    }
+    //}
+    var attributes = generate_view("BoxGeometry");
 
     return _.extend({}, models, views);
 }
