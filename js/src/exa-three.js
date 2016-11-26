@@ -49,8 +49,6 @@ function generate_view(name) {
 //    console.log(THREE[name].prototype);
  //   var obj = THREE[name];
  //   console.log(obj);
-    var obj1 = THREE.BoxBufferGeometry(1, 1, 1);
-    console.log(obj1);
 
     return {};
 }
@@ -66,7 +64,9 @@ function build_api() {
     //        console.log(attribute);
     //    }
     //}
-    var attributes = generate_view("BoxGeometry");
+    var obj = THREE.BoxGeometry();
+    console.log(obj);
+    //var attributes = generate_view("BoxGeometry");
 
     return _.extend({}, models, views);
 }
