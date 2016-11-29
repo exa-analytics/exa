@@ -212,7 +212,7 @@ def reconfigure(rootname=".exa"):
     config['dynamic']['home'] = home
     config['dynamic']['config_file'] = config_file
     config['dynamic']['pkg'] = os.path.dirname(os.path.realpath(__file__))
-    config['dynamic']['static'] = os.path.join(config['dynamic']['pkg'], "..", "static")
+    config['dynamic']['data'] = os.path.join(config['dynamic']['pkg'], "..", "data")
     config['dynamic']['notebooks'] = os.path.join(config['dynamic']['pkg'], "..", "notebooks")
     config['dynamic']['64bit'] = "true" if sys.maxsize > 2**32 else "false"
     config['dynamic']['numba'] = "false"
@@ -268,7 +268,7 @@ def initialize():
     Copy tutorial.ipynb to the notebooks directory and update static db data.
     """
     # Load isotope static data (replacing existing data)
-    isotopes = os.path.join(config['dynamic']['static'], "isotopes.json")
+    isotopes = os.path.join(config['dynamic']['data'], "isotopes.json")
     df = pd.read_json(isotopes, orient='values')
     df.columns = ('A', 'Z', 'af', 'eaf', 'color', 'radius', 'gfactor', 'mass',
                   'emass', 'name', 'eneg', 'quadmom', 'spin', 'symbol', 'szuid',
@@ -276,7 +276,7 @@ def initialize():
     df.to_sql(name='isotope', con=engine, index=True, index_label="pkid",
               if_exists='replace')
     # Compute and load unit conversions
-    path = os.path.join(config['dynamic']['static'], "units.json")
+    path = os.path.join(config['dynamic']['data'], "units.json")
     df = pd.read_json(path)
     for column in df.columns:
         series = df[column].dropna()
@@ -291,7 +291,7 @@ def initialize():
         df_to_save['pkid'] = df_to_save.index
         df_to_save.to_sql(name=column, con=engine, index=False, if_exists='replace')
     # Load physical constants
-    path = os.path.join(config['dynamic']['static'], "constants.json")
+    path = os.path.join(config['dynamic']['data'], "constants.json")
     df = pd.read_json(path)
     df.reset_index(inplace=True)
     df.columns = ['symbol', 'value']

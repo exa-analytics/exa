@@ -3,18 +3,12 @@
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Executable
+Scripts
 #############
 """
 import argparse
 import platform
-#
-#import os, sys
-#HOME = 'J:/Alex'
-#sys.path.insert(0, os.sep.join((HOME, 'workspace', 'exa', 'exa')))
-#
-from notebook.notebookapp import main as notebook
-from exa._config import config
+from exa.app import main as app
 
 
 def main():
@@ -29,7 +23,7 @@ def main():
     )
     args = parser.parse_args()
     print(args)
-    notebook()
+    app()
 
 
 if __name__ == "__main__":

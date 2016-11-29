@@ -140,7 +140,8 @@ setup_args = {
     "version": version_ns["__version__"],
     "description": "The exa framework for data processing, analytics, and visualization.",
     "long_description": long_description,
-    "package_data": {"data": ["*.json"]},
+    "package_data": {"data": ["*.json"],
+                     "exa": ["templates/*.html"]},
     "include_package_data": True,
     "entry_points": {"console_scripts": ["exa=exa.__main__:main"]},
     "data_files": [
