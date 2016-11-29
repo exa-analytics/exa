@@ -13,7 +13,7 @@ import platform
 #HOME = 'J:/Alex'
 #sys.path.insert(0, os.sep.join((HOME, 'workspace', 'exa', 'exa')))
 #
-from subprocess import Popen, PIPE
+from notebook.notebookapp import main as notebook
 from exa._config import config
 
 
@@ -28,19 +28,8 @@ def main():
         default=False
     )
     args = parser.parse_args()
-    if args.notebook == True:
-        notebook()
-
-
-def notebook():
-    """Start the Jupyter notebook."""
-    if platform.system().lower() == "windows":
-        proc = Popen(["jupyter", "notebook"], shell=True,
-                     cwd=config["paths"]["notebooks"], stdin=PIPE)
-    else:
-        proc = Popen(["jupyter notebook"], shell=True,
-                     cwd=config["paths"]["notebooks"], stdin=PIPE)
-    proc.wait()
+    print(args)
+    notebook()
 
 
 if __name__ == "__main__":
