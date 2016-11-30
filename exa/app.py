@@ -15,7 +15,7 @@ class Application(NotebookApp):
     Docstring
     """
 
-    default_url = Unicode("/app", config=True, help="")
+    default_url = Unicode("/templates/app", config=True, help="")
 
 
 main = launch_new_instance = Application.launch_instance
