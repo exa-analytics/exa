@@ -19,7 +19,7 @@ module.exports = [
         entry: "./src/extension.js",
         output: {
             filename: "extension.js",
-            path: "../exa/static",
+            path: "../build/widgets",
             libraryTarget: "amd"
         }
     },
@@ -32,7 +32,7 @@ module.exports = [
         entry: "./src/index.js",
         output: {
             filename: "index.js",
-            path: "../exa/static",
+            path: "../build/widgets",
             libraryTarget: "amd"
         },
         devtool: "source-map",

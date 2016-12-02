@@ -59,13 +59,14 @@ function build_api() {
     var models = {RendererModel: RendererModel};
     var views = {RendererView: RendererView};
     console.log(THREE);
-    //for (var attribute in THREE) {
-    //    if (THREE.hasOwnProperty(attribute)) {
-    //        console.log(attribute);
-    //    }
-    //}
-    var obj = THREE.BoxGeometry();
-    console.log(obj);
+    for (var attribute in THREE) {
+        if (THREE.hasOwnProperty(attribute)) {
+            console.log(attribute);
+        }
+    }
+    console.log("EDIT");
+//    var obj = THREE.BoxGeometry();
+//    console.log(obj);
     //var attributes = generate_view("BoxGeometry");
 
     return _.extend({}, models, views);

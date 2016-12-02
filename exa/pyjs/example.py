@@ -16,6 +16,9 @@ class HelloWorld(DOMWidget):
     _model_module = Unicode("jupyter-exa").tag(sync=True)
 
     value = Unicode("Hello World!").tag(sync=True)
+    def __init__(self, *args, **kwargs):
+        super(HelloWorld, self).__init__(*args, **kwargs)
+        print("HERERER")
 
 
 @register("example.Example")

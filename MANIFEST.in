@@ -1,2 +1,2 @@
 recursive-include data *.json
-recursive-include exa/static *.*
+recursive-include build/widgets *.*

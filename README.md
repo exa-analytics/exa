@@ -42,7 +42,9 @@ For a development ready installation:
     $ jupyter nbextension install --py --symlink --sys-prefix exa
     $ jupyter nbextension enable --py --sys-prefix exa
 
-Note that this requires npm.
+Note that this requires npm. On Windows, symlinks will not work but as a work-
+around, extensions can be recompiled and reinstalled upon edits without the
+need to reinstall the package.
 
 
 # Reference

@@ -37,7 +37,7 @@ from exa.core import Editor, CSV
 def _jupyter_nbextension_paths():
     return [{
         'section': 'notebook',
-        'src': 'static',
+        'src': '../build/widgets',
         'dest': 'jupyter-exa',
         'require': 'jupyter-exa/extension'
     }]

@@ -78,8 +78,8 @@ class NPM(Command):
     node_modules = os.path.join(node_root, "node_modules")
 
     targets = [
-        os.path.join(here, "exa", "static", "extension.js"),
-        os.path.join(here, "exa", "static", "index.js")
+        os.path.join(here, "build", "widgets", "extension.js"),
+        os.path.join(here, "build", "widgets", "index.js")
     ]
 
     def initialize_options(self):
@@ -140,15 +140,14 @@ setup_args = {
     "version": version_ns["__version__"],
     "description": "The exa framework for data processing, analytics, and visualization.",
     "long_description": long_description,
-    "package_data": {"data": ["*.json"],
-                     "exa": ["templates/*.html"]},
+    "package_data": {"data": ["*.json"], "html": ["*.html"], "static": ["*.css"]},
     "include_package_data": True,
     "entry_points": {"console_scripts": ["exa=exa.__main__:main"]},
     "data_files": [
         ("share/jupyter/nbextensions/jupyter-exa", [
-            "exa/static/extension.js",
-            "exa/static/index.js",
-            "exa/static/index.js.map",
+            "build/widgets/extension.js",
+            "build/widgets/index.js",
+            "build/wdigets/index.js.map",
         ]),
     ],
     "install_requires": dependencies,
