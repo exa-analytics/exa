@@ -147,7 +147,7 @@ setup_args = {
         ("share/jupyter/nbextensions/jupyter-exa", [
             "build/widgets/extension.js",
             "build/widgets/index.js",
-            "build/wdigets/index.js.map",
+            "build/widgets/index.js.map",
         ]),
     ],
     "install_requires": dependencies,
