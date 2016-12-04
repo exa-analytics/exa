@@ -7,13 +7,12 @@ Description
 */
 var widgets = require("jupyter-js-widgets");
 var _ = require("underscore");
+var pythreejs = require("jupyter-threejs");
 var THREE = require("three");
 window.THREE = THREE;    // Allows importing three/*
 require("./threejs/renderers/CanvasRenderer.js");
 var Detector = require("./threejs/Detector.js");
-
 var $ = require("jquery");
-
 var base = require("./foo/base.js");
 
 
@@ -65,6 +64,7 @@ function build_api() {
         }
     }
     console.log("EDIT");
+    console.log(pythreejs);
 //    var obj = THREE.BoxGeometry();
 //    console.log(obj);
     //var attributes = generate_view("BoxGeometry");
