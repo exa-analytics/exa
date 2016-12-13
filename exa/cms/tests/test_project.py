@@ -51,13 +51,14 @@ class TestProject(UnitTester):
         p = self.session.query(Project).get(self.project.pkid)
         self.assertEqual(len(f0.jobs), 1)
         self.assertEqual(len(f0.projects), 0)
-        self.assertEqual(len(f0.all_projects), 1)
+        self.assertEqual(len(f0.list_projects), 1)
         self.assertEqual(len(f1.jobs), 0)
         self.assertEqual(len(f1.projects), 1)
         self.assertEqual(len(j.files), 1)
+        self.assertEqual(len(j.list_files), 1)
         self.assertEqual(len(j.projects), 1)
         self.assertEqual(len(p.files), 1)
-        self.assertEqual(len(p.all_files), 2)
+        self.assertEqual(len(p.list_files), 2)
         self.assertEqual(len(p.jobs), 1)
 
     def tearDown(self):

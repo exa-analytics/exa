@@ -4,14 +4,17 @@
 """
 Tests for :mod:`~exa.mpl`
 #############################################
+Tests for matplotlib customizations.
 """
 import numpy as np
-from exa.mpl import color_palette
+from exa.mpl import qualitative, sequential, diverging
 from exa.tester import UnitTester
 
 
 class TestMPL(UnitTester):
     """Test internal matplotlib configuration."""
-    def test_color_palette(self):
-        """Test :func:`~exa.mpl.color_palette`."""
-        self.assertTrue(np.isclose(0.622722, color_palette()[0][2]))
+    def test_color_palettes(self):
+        """Test default color palettes."""
+        self.assertTrue(len(qualitative()), 5)
+        self.assertTrue(len(sequential()), 5)
+        self.assertTrue(len(diverging()), 5)

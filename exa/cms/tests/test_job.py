@@ -33,6 +33,7 @@ class TestJob(UnitTester):
     def test_files(self):
         """Test adding non-file objects."""
         self.assertIsInstance(self.job.files, list)
+        self.assertTrue(self.job.files is self.job.list_files)
         with self.assertRaises(AttributeError):
             self.job.files.append("")
 

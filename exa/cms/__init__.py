@@ -4,6 +4,10 @@
 """
 This sub-package handles all digital asset management features of the exa
 framework.
+
+- :class:`~exa.cms.project.Project`: An ongoing program or finite study with multiple jobs and files
+- :class:`~exa.cms.job.Job`: A single task, possibly within the context of project
+- :class:`~exa.`
 """
 # Import modules
 from exa.cms import (base, constant, isotope, unit, files, job, project, remote,
@@ -23,4 +27,4 @@ from exa.cms.isotope import Isotope
 from exa.cms.unit import (Length, Mass, Time, Current, Amount, Luminosity,
                           Dose, Acceleration, Charge, Dipole, Energy, Force,
                           Frequency, MolarMass)
-from exa.cms.mgmt import db
+from exa.cms.mgmt import db, tables

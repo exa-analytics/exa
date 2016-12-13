@@ -17,9 +17,12 @@ communication (see :mod:`~exa.compute.connects`) and resource management (see
 
 .. _GIL: https://wiki.python.org/moin/GlobalInterpreterLock
 .. _multiple dispatch: https://en.wikipedia.org/wiki/Multiple_dispatch
+
+See Also:
+    For information about distributed computing see :mod:`~exa.app.distributed`.
 """
 # Import modules
-from exa.compute import connects, resources
+from exa.compute import connects, resources, dispatch
 
 # Import sub-packages
 from exa.compute import tests

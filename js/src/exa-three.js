@@ -7,12 +7,10 @@ Description
 */
 var widgets = require("jupyter-js-widgets");
 var _ = require("underscore");
+var $ = require("jquery");
 var pythreejs = require("jupyter-threejs");
 var THREE = require("three");
 window.THREE = THREE;    // Allows importing three/*
-require("./threejs/renderers/CanvasRenderer.js");
-var Detector = require("./threejs/Detector.js");
-var $ = require("jquery");
 var base = require("./foo/base.js");
 
 

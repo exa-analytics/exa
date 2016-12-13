@@ -17,17 +17,23 @@ and informative visualizations.
 import seaborn as sns
 
 
-def color_palette(name='plasma', n=8):
-    """
-    Generate a qualitative color palette with the given number of colors.
-    """
-    return sns.color_palette(name, n)
+def qualitative(n=5):
+    """Perceptually uniform qualitative color palette."""
+    return sns.color_palette("cubehelix", n)
+
+
+def sequential(name="viridis", n=5, desat=None):
+    """Perceptually uniform sequential color palette."""
+    return sns.color_palette(name, n, desat)
+
+
+def diverging(name="BrBG", n=5, desat=None):
+    """Colorblind sensitive diverging color palette."""
+    return sns.color_palette("BrBG", n, desat)
 
 
 def reconfigure():
-    """
-    Set the Matplotlib configuration.
-    """
+    """Set the Matplotlib configuration."""
     legend = {'legend.frameon': True, 'legend.facecolor': 'white',
               'legend.fancybox': True, 'patch.facecolor': 'white',
               'patch.edgecolor': 'black'}
@@ -38,7 +44,7 @@ def reconfigure():
     rc.update(axis)
     rc.update(mathtext)
     rc.update(save)
-    sns.set(context='poster', style='white', palette='plasma',
+    sns.set(context='poster', style='white', palette=qualitative(),
             font_scale=1.6, font='serif', rc=rc)
 
 

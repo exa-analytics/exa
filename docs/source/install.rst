@@ -5,36 +5,41 @@
 ########################
 Installation
 ########################
-Exa currently supports Python 2.7, 3.4, and 3.5. Installation via `anaconda`
-(or `miniconda`_) is recommended.
+For information on installing Python see https://www.python.org/ or
+https://wiki.python.org/moin/BeginnersGuide/Download. Exa supports
+**Python 2.7+**. Installation via the `anaconda` (or `miniconda`_) Python
+distribution is recommended.
 
 .. code-block:: bash
 
-    conda install -c exa-analytics exa
+    conda install -c exaanalytics exa
 
-In using another Python distribution, installation can be accomplished with
-`pip`_.
+Alternatively using `pip`_:
 
 .. code-block:: bash
 
     pip install exa
+    jupyter nbextension enable --py --sys-prefix exa
 
-Finally, exa can be install "by hand". After downloading the exa `source`_,
-enter the root directory and install in the standard way.
+Alternatively "by hand"; download the exa `source`_:
 
 .. code-block:: bash
 
-    cd exa/
+    cd exa-source/    # contains setup.py
     python setup.py install
+    jupyter nbextension enable --py --sys-prefix exa
 
-Note that the source directory must be downloaded from the web.
+Finally, for a development installation (npm required):
 
+.. code-block:: bash
 
-Setting up Python
-#####################
-For more information on how to install Python see https://www.python.org/ or
-https://wiki.python.org/moin/BeginnersGuide/Download. Alternatively, see
-also https://www.continuum.io/.
+    git clone https://github.com/exa-analytics/exa.git
+    cd exa
+    pip install -e .
+    jupyter nbextension install --py --symlink --sys-prefix exa
+    jupyter nbextension enable --py --sys-prefix exa
+
+Note that the development installation does not support Windows.
 
 
 .. _anaconda: https://www.continuum.io/downloads

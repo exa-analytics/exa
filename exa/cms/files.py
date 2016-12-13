@@ -4,7 +4,9 @@
 """
 File Table
 ###################
-The file table keeps a record of all files (on disk) managed by the exa framework.
+This table keeps track of files stored on disk; file paths are stored in the
+database. File entries can be associated with :class:`~exa.cms.job.Job` and/or
+:class:`~exa.cms.project.Project` objects.
 """
 import os
 import shutil
@@ -15,13 +17,10 @@ from exa.cms.base import Base, Name, Sha256UID, Time
 
 
 class File(Name, Time, Sha256UID, Base):
-    """
-    Representation of a non exa container file on disk. Provides content
-    management for "raw" data files.
-    """
+    """Representation of a file on disk."""
     ext = Column(String, nullable=False)    # File extension (no ".")
     size = Column(Integer)
-    container = Column(String)    # container type (i.e. class name)
+    container = Column(String)    # container type (class name)
 
     @classmethod
     def from_path(cls, path, **kwargs):
@@ -51,9 +50,13 @@ class File(Name, Time, Sha256UID, Base):
         return os.path.join(_config.config['paths']['data'], self.ext, self.uid)
 
     @property
-    def all_projects(self):
+    def list_projects(self):
         """Check if this file has a second relation to a project."""
         projects = []
         for job in self.jobs:
             projects += job.projects
         return projects
+
+    @property
+    def list_jobs(self):
+        return self.jobs

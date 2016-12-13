@@ -5,12 +5,13 @@
 Computational Resources
 ########################
 This module provides classes that describe how exa organizes computational
-resources. Exa itself does not manage these resources, rather it keeps track of
-them in order to quickly enable the :class:`~exa.compute.dispatch.Dispatcher` to
+resources. Exa itself does not manage these resources, rather it tracks them
+in order to quickly enable the :class:`~exa.compute.dispatch.Dispatcher` to
 select the optimal function signature for a given set of inputs.
 """
 import psutil
 import numpy as np
+import paramiko as pk
 from socket import gethostname
 
 
@@ -28,6 +29,10 @@ class Resource(object):
         scratch (str): Location on disk for scratch storage
         permanent (str): Location on disk for permanent storage
     """
+    def connect(self):
+        """Create an open secure shell connection."""
+        pass
+
     def __init__(self, name=None, location="localhost", cpus=4, memory=4000, gpus=0,
                  scratch=None, permanent=None, scratch_space=np.inf,
                  permanent_space=np.inf):
@@ -40,6 +45,7 @@ class Resource(object):
         self.scratch_space = scratch_space
         self.permanent = permanent
         self.permanent_space = permanent_space
+        self._client = None
 
     def __repr__(self):
         clsname = self.__class__.__name__

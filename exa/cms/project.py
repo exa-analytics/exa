@@ -4,12 +4,10 @@
 """
 Project Table
 #################
-A project represents a continuous or finite study of a subject matter. It is
-the highest level of categorical organization for the content management
-system.
-
-See Also:
-    :mod:`~exa.relational.job` and :mod:`~exa.relational.file`
+A project represents a continuous program or finite study of a subject. It is
+the highest level of categorical organization for content management. A project
+may have any number of associated :class:`~exa.cms.job.Job` and
+:class:`~exa.cms.files.File` objects.
 """
 from sqlalchemy import Integer, Column, ForeignKey, Table
 from sqlalchemy.orm import relationship
@@ -49,14 +47,14 @@ project_file = Table(    # Many to many relationship; Project - DataFile
 
 
 class Project(Name, Time, Size, Base):
-    """Continuous or finite study of a certain subject with a specific goal."""
+    """An ongoing program or finite study."""
     jobs = relationship('Job', secondary=project_job, backref='projects',
                         cascade='all, delete')
     files = relationship('File', secondary=project_file,
                          backref='projects', cascade='all, delete')
 
     @property
-    def all_files(self):
+    def list_files(self):
         """Get all files associated with this project (i.e. job files)."""
         files = self.files
         for job in self.jobs:
