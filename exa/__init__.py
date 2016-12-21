@@ -10,7 +10,7 @@ and visualization. It is built atop the Python data stack (for more info see
 - :mod:`~exa._config`: Configuration and logging
 - :mod:`~exa.tester`: Unit and doc tests
 - :mod:`~exa.errors`: Loggable errors and exceptions
-- :mod:`~exa.mpl`: Interactive visualizations (2d)
+- :mod:`~exa.mpl`: Wrappers for matplotlib
 - :mod:`~exa.tex`: LaTeX support
 - :mod:`~exa.typed`: Strongly typed classes
 

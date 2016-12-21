@@ -11,7 +11,10 @@ from notebook.notebookapp import NotebookApp
 from exa._config import config
 
 
+# TODO: Add custom styling to this notebook
+# TODO: Add custom indexing of notebooks related to projects/
 class ExaNotebook(NotebookApp):
+    """Launch Exa notebook in the exa directory."""
     @classmethod
     def launch_instance(self, **kwargs):
         argv = [config['paths']['notebooks']]

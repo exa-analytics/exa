@@ -68,7 +68,7 @@ class Series(six.with_metaclass(DiscreteMeta, pd.Series)):
     The index can be a single dimension (e.g. an array of integers) or
     multidimensional. The dimensions of a series are determined by its index.
     """
-    _metadata = ['name', 'units']
+    _metadata = ['name', 'units', 'aliases']
 
     def convert_units(self, to_unit):
         """
@@ -95,6 +95,7 @@ class Series(six.with_metaclass(DiscreteMeta, pd.Series)):
 
     def __init__(self, *args, **kwargs):
         units = kwargs.pop("units", None)
+        aliases = kwargs.pop("aliases", )
         super(Series, self).__init__(*args, **kwargs)
         self.units = units
 
