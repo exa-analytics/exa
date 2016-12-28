@@ -8,9 +8,11 @@ Exa's data objects (e.g. :class:`~exa.core.series.Series`, etc.) make use of
 custom indexing and math operations provided by the metaclasses in this module.
 """
 from sympy.physics.units import Unit
+from sympy.core.mul import Mul
 from collections import MutableMapping
 from pandas.core.ops import _op_descriptions
 from exa.typed import Typed
+from exa.core.errors import UnitsError
 
 
 class Alias(MutableMapping):
@@ -43,22 +45,35 @@ class Alias(MutableMapping):
 class Meta(Typed):
     """Metaclass for Exa's data objects supporting unit conversions."""
     aliases = Alias
-    units = Unit
+    units = (Unit, Mul, )
 
     @staticmethod
     def modify_op(op):
         def op_wrapper(self, other, *args, **kwargs):
+            try:
+                u0 = self.units
+                u1 = other.units
+                print("h0")
+                try:
+                    print("h1")
+                    if u0.args[1] == u1:
+                        print("h2")
+                        other *= self.units/other.units
+                except IndexError:
+                    try:
+                        print("h3")
+                        if u0 == u1.args[1]:
+                            print("h4")
+                            other *= self.units/other.units
+                    except IndexError:
+                        print("h5")
+                        if u0 != u1:
+                            print("h6")
+                            raise UnitsError(u0, u1)
+            except AttributeError:
+                print("h5")
             return getattr(super(self.__class__, self), op)(other, *args, **kwargs).__finalize__(self)
         return op_wrapper
-
-    #def modify_op(mcs, dunder_op):
-    #    """Modifies mathematical operations to support unit conversions."""
-    #    def wrapper(self, other, *args, **kwargs):
-    #        if isinstance(other, Meta) and self.units != other.units:
-    #            pass
-    #            #other = other.copy()*self.units/other.units
-    #        return getattr(mcs, dunder_op)(other, *args, **kwargs).__finalize__(self)
-    #    return wrapper
 
     def __finalize__(self, other, method=None, **kwargs):
         for name in self._metadata:

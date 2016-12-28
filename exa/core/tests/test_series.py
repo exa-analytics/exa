@@ -15,15 +15,16 @@ from exa.core.series import Series
 class TestSeries(UnitTester):
     """Tests :class:`~exa.core.series.Series`."""
     def setUp(self):
-        self.series0 = pd.Series([0, 1, 2])
-        self.series1 = Series([0, 1, 2])
-        self.series2 = Series([3, 4, 5], units=units.m)
-        self.series2 = Series([6, 7, 8], units=units.eV)
-        self.series3 = Series([9, 0, 1], units=units.km, aliases={"first": 0,
-                                                                  "second": 1,
-                                                                  "third": 2})
+        self.s0 = pd.Series([0, 1, 2])
+        self.s1 = Series([1, 2, 0.2])
+        self.s2 = Series([3, 4, 5], units=units.m)
+        self.s3 = Series([6, 7, 8], units=units.eV)
+        self.s4 = Series([9, 0, 1], units=units.km, aliases={"first": 0,
+                                                                  "second": 1})
 
     def test_interop(self):
-        """
-        """
-        pass
+        """Test interoperability with standard pandas objects."""
+        self.assertIsInstance(self.s0+self.s1, Series)
+        self.assertIsInstance(self.s1+self.s0, Series)
+        self.assertEqual((self.s0 + self.s2).units, self.s2.units)
+        self.assertEqual((self.s2 + self.s0).units, self.s2.units)
