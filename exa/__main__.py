@@ -9,7 +9,7 @@ This module provides all front-facing command line actions. By default running
 exa starts exa's Jupyter notebook interface.
 """
 import argparse
-from exa.app import ExaApp, ExaNotebook
+from exa.app import ExaNotebook
 
 
 def main():

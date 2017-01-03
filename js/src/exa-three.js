@@ -21,7 +21,7 @@ class RendererView extends widgets.DOMWidgetView {
     render() {
         this.value_changed();
         this.model.on("change:value", this.value_changed, this);
-    }
+    
 
     value_changed() {
         this.el.textContent = this.model.get("value");

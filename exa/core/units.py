@@ -11,3 +11,13 @@ used to define a single value or attached to data objects (such as a
 
 .. _unitsystem: http://docs.sympy.org/dev/modules/physics/unitsystems/units.html
 """
+from sympy.physics import units as _units
+
+
+class Unit(_units.Unit):
+    """Units for data objects."""
+    def __add__(self, other):
+        u0 = self.as_coeff_Mul()
+        u1 = self.as_coeff_Mul()
+        if u0[1] == u1[1]:
+            pass

@@ -26,11 +26,11 @@ class TestDispatcher(UnitTester):
 
             @dispatch(bool)
             def fn(arg):
-                return str(arg) + "!"
+                return str(arg) + "?"
 
             @dispatch(int)
             def fn(arg):
-                return str(arg) + "!"
+                return str(arg) + "*"
 
             @dispatch((int, np.int64))
             def fn(arg):
@@ -50,8 +50,8 @@ class TestDispatcher(UnitTester):
     def test_single_dispatch(self):
         """Test the singly dispatched methods."""
         self.assertTrue(self.fn("Foo").endswith("!"))
-        self.assertTrue(self.fn(True).endswith("!"))
-        self.assertTrue(self.fn(42).endswith("!"))
+        self.assertTrue(self.fn(True).endswith("?"))
+        self.assertTrue(self.fn(42).endswith("*"))
         self.assertTrue(self.fn(np.int64(42)).endswith("!"))
         with self.assertRaises(KeyError):
             self.fn(np.int32(42))

@@ -43,35 +43,17 @@ class Alias(MutableMapping):
 
 
 class Meta(Typed):
-    """Metaclass for Exa's data objects supporting unit conversions."""
+    """Metaclass for Exa's data objects."""
     aliases = Alias
     units = (Unit, Mul, )
 
     @staticmethod
     def modify_op(op):
         def op_wrapper(self, other, *args, **kwargs):
-            try:
-                u0 = self.units
-                u1 = other.units
-                print("h0")
-                try:
-                    print("h1")
-                    if u0.args[1] == u1:
-                        print("h2")
-                        other *= self.units/other.units
-                except IndexError:
-                    try:
-                        print("h3")
-                        if u0 == u1.args[1]:
-                            print("h4")
-                            other *= self.units/other.units
-                    except IndexError:
-                        print("h5")
-                        if u0 != u1:
-                            print("h6")
-                            raise UnitsError(u0, u1)
-            except AttributeError:
-                print("h5")
+            print(op)
+            print(other.units)
+            print(self.units)
+            self.units = getattr(self.units, op)(other.units)
             return getattr(super(self.__class__, self), op)(other, *args, **kwargs).__finalize__(self)
         return op_wrapper
 

@@ -7,7 +7,6 @@ framework.
 
 - :class:`~exa.cms.project.Project`: An ongoing program or finite study with multiple jobs and files
 - :class:`~exa.cms.job.Job`: A single task, possibly within the context of project
-- :class:`~exa.`
 """
 # Import modules
 from exa.cms import (base, constant, isotope, unit, files, job, project, remote,

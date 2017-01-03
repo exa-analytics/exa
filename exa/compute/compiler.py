@@ -39,7 +39,8 @@ processing (**disk**) or not (**ram**).
 The **mp** argument describes the compilation and (possible) parallelization
 strategy for the function. Serial functions (**serial**) are not parallelized
 and are `GIL`_ locked. `GIL`_ free functions (that can additionally be used in
-embarassingly parallel execution) Functions compiled with the **nogil** flag are not intrinsically parallelized
+embarassingly parallel execution) Functions compiled with the **nogil** flag are
+not intrinsically parallelized
 but support parallel execution because they release the `GIL`_. Intrinsically
 parallel functions come in two flavors, **parallel** and **distrib**. The
 former type refers to functions that are parallelized for shared memory,
