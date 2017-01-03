@@ -12,7 +12,7 @@ import seaborn as sns
 #from matplotlib.backends.backend_agg import FigureCanvasAgg
 
 import numpy as np
-#from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d import Axes3D
 
 #legend = {'legend.frameon': True, 'legend.facecolor': 'white',
 #          'legend.fancybox': True, 'patch.facecolor': 'white',
@@ -77,27 +77,60 @@ def _gen_figure(nxplot=1, nyplot=1, joinx=False, joiny=False,
     """
     figargs = {} if figargs is None else figargs
     if projection == '3d':
-        print('3d axis')
         fig = sns.mpl.pyplot.figure(**figargs)
         axs = fig.add_subplot(111, projection=projection)
     else:
-        print('2d axis')
         fig, axs = sns.mpl.pyplot.subplots(nyplot, nxplot, **figargs)
         if joinx:
             fig.subplots_adjust(wspace=0)
         if joiny:
             fig.subplots_adjust(hspace=0)
-    if not isinstance(axs, np.ndarray): axs = np.array([axs])
-    print(type(axs), len(axs))
+    # In case axs is returned not as an iterable
+    axs = fig.get_axes()
     methods = {(x, nxlabel): (axs[0].set_xlim, axs[0].set_xticks),
                (y, nylabel): (axs[0].set_ylim, axs[0].set_yticks)}
-    print(methods)
+    #print(methods)
     if projection == '3d':
         methods.update({(z, nzlabel): (axs[0].set_zlim, axs[0].set_zticks)})
     for (cart, nlabel), (lim, ticks) in methods.items():
-        print(cart, nlabel, lim, ticks)
+        #print(cart, nlabel, lim, ticks)
         if cart is not None:
             lim((cart.min(), cart.max()))
             if nlabel is not None:
                 ticks(np.linspace(cart.min(), cart.max(), nlabel))
     return fig
+
+
+def _plot_surface(x, y, z, nxlabel, nylabel, nzlabel, method, figargs, axargs):
+    fig = _gen_figure(x=x, y=y, z=z, nxlabel=nxlabel, nylabel=nylabel, method=method,
+                      nzlabel=nzlabel, figargs=figargs, axargs=axargs, projection='3d')
+    axs = fig.get_axes()
+    convenience = {'wireframe': ax.wireframe,
+                    'contourf': ax.contourf,
+                     'contour': ax.contour,
+                     'trisurf': ax.trisurf,
+                     'scatter': ax.scatter,
+                        'line': ax.plot}
+    if method not in convenience.keys():
+        raise Exception('method must be in {}'.format(convenience.keys()))
+    sx, sy = np.meshgrid(x, y)
+    if method in ['trisurf', 'scatter', 'line']:
+        if method == 'line':
+            axargs = {key: val for key, val in axargs.items() if key != 'cmap'}
+        convenience[method](sx.flatten(), sy.flatten(), z.flatten(), **axargs)
+    else:
+        convenience[method](sx, sy, z, **axargs)
+    return fig
+
+def _plot_contour(x, y, z, nxlabel, nylabel, method, colorbar, figargs, axargs):
+    fig = _gen_figure(x=x, y=y, nxlabel=nxl, nylabel=nyl, figargs=figargs)
+    axs = fig.get_axes()
+    convenience = {'contour': axs[0].contour,
+                  'contourf': axs[0].contourf,
+                'pcolormesh': axs[0].pcolormesh,
+                    'pcolor': ax.pcolor}
+    if method not in convenience.keys():
+        raise Exception('method must be in {}'.format(convenience.keys()))
+    t = convenience[method](x, y, z, **axargs)
+    cbar = fig.colorbar(t) if colorbar else None
+    return fig, cbar
