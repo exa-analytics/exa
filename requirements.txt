@@ -4,6 +4,7 @@ matplotlib
 seaborn
 networkx
 sqlalchemy
+paramiko
 h5py
 pandas
 scikit-learn
