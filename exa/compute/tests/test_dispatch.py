@@ -28,13 +28,9 @@ class TestDispatcher(UnitTester):
             def fn(arg):
                 return str(arg) + "?"
 
-            @dispatch(int)
-            def fn(arg):
-                return str(arg) + "*"
-
             @dispatch((int, np.int64))
             def fn(arg):
-                return str(arg) + "!"
+                return str(arg) + "*"
 
             @dispatch(str, bool)
             def fn(arg0, arg1):
@@ -52,7 +48,7 @@ class TestDispatcher(UnitTester):
         self.assertTrue(self.fn("Foo").endswith("!"))
         self.assertTrue(self.fn(True).endswith("?"))
         self.assertTrue(self.fn(42).endswith("*"))
-        self.assertTrue(self.fn(np.int64(42)).endswith("!"))
+        self.assertTrue(self.fn(np.int64(42)).endswith("*"))
         with self.assertRaises(KeyError):
             self.fn(np.int32(42))
 
@@ -60,4 +56,3 @@ class TestDispatcher(UnitTester):
         """Test multiply dispatched arguments."""
         self.assertTrue(self.fn("Bar", True).endswith("!"))
         self.assertTrue(self.fn(42, 42).endswith("!"))
-        self.assertTrue(self.fn("42", True).endswith("!"))

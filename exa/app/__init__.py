@@ -6,10 +6,10 @@ Exa provides a custom notebook application that executes in the exa notebook
 directory.
 """
 # Import base modules
-from exa.app import notebook
+from exa.app import nbk
 
 # Import sub-packages
 from exa.app import tests
 
 # Import user/dev API
-from exa.app.notebook import ExaNotebook
+from exa.app.nbk import ExaNotebook
