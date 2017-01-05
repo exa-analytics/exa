@@ -18,7 +18,7 @@ and visualization. It is built atop the Python data stack (for more info see
 .. _Jupyter notebook: http://jupyter.org/
 """
 # Import base modules
-from exa import _version, _config, tester, errors, typed, mpl, tex
+from exa import _version, _config, tester, errors, typed, mpl, tex, units
 
 # Import sub-packages
 from exa import cms, compute, core, tests, pyjs, app
@@ -28,7 +28,7 @@ from exa._version import __version__, version_info
 from exa._config import print_config
 from exa.mpl import sequential, diverging, qualitative
 from exa.cms import File, Job, Project, db
-from exa.core import Editor, CSV
+from exa.core import Editor, CSV, DataSeries
 
 
 def _jupyter_nbextension_paths():

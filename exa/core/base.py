@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Base Classes for Core Functionality
+Base Class for Data Objects
 ####################################
-Exa's data objects (e.g. :class:`~exa.core.series.Series`, etc.) make use of
-custom indexing and math operations provided by the metaclasses in this module.
+Exa's data objects (e.g. :class:`~exa.core.dataseries.DataSeries`) have special
+attributes that allow for aliasing column/row names and perform automatic unit
+conversion.
 """
-from sympy.physics.units import Unit
+import numpy as np
 from sympy.core.mul import Mul
+from sympy.physics.units import Unit
 from collections import MutableMapping
 from pandas.core.ops import _op_descriptions
 from exa.typed import Typed
-from exa.core.errors import UnitsError
+from exa.core.errors import UnitsError, MissingUnits
 
 
 class Alias(MutableMapping):
@@ -43,19 +45,66 @@ class Alias(MutableMapping):
 
 
 class Meta(Typed):
-    """Metaclass for Exa's data objects."""
+    """
+    Metaclass for data objects.
+
+    Below is an example showing the required properties of the class object:
+
+    .. code-block:: Python
+
+        class DataObject(six.with_metaclass(Meta, pandas.SparseDataFrame)):
+            @property
+            def _constructor(self):
+                return DataObject                # Used by __finalize__
+
+            @property
+            def _base(self):
+                return pandas.SparseDataFrame    # Used by as_pandas
+
+    See Also:
+        More examples can be found in the source code:
+        :class:`~exa.core.dataseries.DataSeries`,
+        :class:`~exa.core.dataframe.DataFrame`
+    """
     aliases = Alias
     units = (Unit, Mul, )
 
+    def as_pandas(self):
+        """Return the corresponding pandas object."""
+        return self._base(self)
+
+    def asunit(self, unit):
+        """
+        Convert to new unit.
+
+        .. code-block:: Python
+
+            series = exa.DataSeries([0, 1, 2], units=exa.units.km)
+            new = series.asunit(exa.units.m)
+            new.values    # prints [0.0, 1000.0, 2000.0]
+            new.units     # prints exa.units.m
+
+        Args:
+            unit (Unit): Any one of exa.units.*
+
+        Returns:
+            obj: Object of the same type with converted values and units attribute
+        """
+        try:
+            f0, u0 = self.units.as_coeff_Mul()
+        except AttributeError:
+            raise MissingUnits()
+        f1, u1 = unit.as_coeff_Mul()
+        new = self*np.float64(f0/f1)
+        new.units = unit
+        return new
+
     @staticmethod
     def modify_op(op):
-        def op_wrapper(self, other, *args, **kwargs):
-            print(op)
-            print(other.units)
-            print(self.units)
-            self.units = getattr(self.units, op)(other.units)
+        def wrapper(self, other, *args, **kwargs):
+            """Ensure we return an Exa data object type."""
             return getattr(super(self.__class__, self), op)(other, *args, **kwargs).__finalize__(self)
-        return op_wrapper
+        return wrapper
 
     def __finalize__(self, other, method=None, **kwargs):
         for name in self._metadata:
@@ -63,11 +112,15 @@ class Meta(Typed):
         return self
 
     def __new__(mcs, name, bases, clsdict):
+        # Modify math operations
         for op_name, info in _op_descriptions.items():
             op = "__{}__".format(op_name)
             clsdict[op] = mcs.modify_op(op)
             if info['reverse'] is not None:
                 op = "__{}__".format(info['reverse'])
                 clsdict[op] = mcs.modify_op(op)
+        # Attach methods
         clsdict['__finalize__'] = mcs.__finalize__
+        clsdict['as_pandas'] = mcs.as_pandas
+        clsdict['asunit'] = mcs.asunit
         return super(Meta, mcs).__new__(mcs, name, bases, clsdict)

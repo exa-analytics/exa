@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Exa Series
+Exa DataSeries
 ###################################
-The :class:`~exa.core.series.Series` object supports index aliases and units.
+The :class:`~exa.core.dataseries.DataSeries` object supports index aliases and
+units.
 
 See Also:
     http://pandas.pydata.org/
@@ -15,7 +16,7 @@ from exa.core.base import Meta, Alias
 from exa.core.indexing import indexers
 
 
-class Series(six.with_metaclass(Meta, pd.Series)):
+class DataSeries(six.with_metaclass(Meta, pd.Series)):
     """
     A series is a single valued n dimensional array.
 
@@ -29,16 +30,20 @@ class Series(six.with_metaclass(Meta, pd.Series)):
 
     @property
     def _constructor(self):
-        return Series
+        return DataSeries
+
+    @property
+    def _base(self):
+        return pd.Series
 
     def __init__(self, *args, **kwargs):
         units = kwargs.pop("units", None)
         aliases = kwargs.pop("aliases", None)
-        super(Series, self).__init__(*args, **kwargs)
+        super(DataSeries, self).__init__(*args, **kwargs)
         self.units = units
         self.aliases = aliases
 
 
 for name, indexer in indexers():          # Calls pandas machinery
-    setattr(Series, name, None)           # Need to unreference existing indexer
-    Series._create_indexer(name, indexer) # Prior to instantiation new indexer
+    setattr(DataSeries, name, None)           # Need to unreference existing indexer
+    DataSeries._create_indexer(name, indexer) # Prior to instantiation new indexer

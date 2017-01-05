@@ -21,7 +21,7 @@ Alternatively using `pip`_:
     pip install exa
     jupyter nbextension enable --py --sys-prefix exa
 
-Alternatively "by hand"; download the exa `source`_:
+Alternatively download the exa `source`_:
 
 .. code-block:: bash
 
