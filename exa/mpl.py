@@ -101,3 +101,43 @@ def _gen_figure(nxplot=1, nyplot=1, joinx=False, joiny=False,
             if nlabel is not None:
                 ticks(np.linspace(cart.min(), cart.max(), nlabel))
     return fig
+
+
+def _plot_contour(x, y, z, nxlabel, nylabel, method, colorbar,
+                  figargs, axargs):
+    fig = _gen_figure(x=x, y=y, z=z, nxlabel=nxlabel,
+                      nylabel=nylabel, figargs=figargs)
+    ax = fig.get_axes()[0]
+    convenience = {'contour': ax.contour,
+                  'contourf': ax.contourf,
+                'pcolormesh': ax.pcolormesh,
+                    'pcolor': ax.pcolor}
+    if method not in convenience.keys():
+        raise Exception('Method must be in {}.'.format(convenience.keys()))
+    t = convenience[method](x, y, z, **axargs)
+    cbar = fig.colorbar(t) if colorbar else None
+    return fig, cbar
+
+
+def _plot_surface(x, y, z, nxlabel, nylabel, nzlabel, method,
+                  figargs, axargs):
+    fig = _gen_figure(x=x, y=y, z=z, nxlabel=nxlabel,
+                      nylabel=nylabel, nzlabel=nzlabel,
+                      figargs=figargs, projection='3d')
+    ax = fig.get_axes()[0]
+    convenience = {'wireframe': ax.wireframe,
+                     'contour': ax.contour,
+                    'contourf': ax.contourf,
+                     'trisurf': ax.trisurf,
+                     'scatter': ax.scatter,
+                        'line': ax.plot}
+    if method not in convenience.keys():
+        raise Exception('Method must be in {}.'.format(convenience.keys()))
+    sx, sy = np.meshgrid(x, y)
+    if method in ['trisurf', 'scatter', 'line']:
+        if method == 'line':
+            axargs = {key: val for key, val in axargs.items() if key != 'cmap'}
+        convenience[method](sx.flatten(), sy.flatten(), z.flatten(), **axargs)
+    else:
+        convenience[method](sx, sy, z, **axargs)
+    return fig
