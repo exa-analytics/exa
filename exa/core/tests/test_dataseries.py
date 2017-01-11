@@ -10,6 +10,7 @@ import pandas as pd
 from exa import units
 from exa.tester import UnitTester
 from exa.core.dataseries import DataSeries
+from exa.core.errors import MissingUnits
 
 
 class TestDataSeries(UnitTester):
@@ -20,18 +21,19 @@ class TestDataSeries(UnitTester):
         self.s2 = DataSeries([0, 1, 2], units=units.m)
         self.s3 = DataSeries([0, 1, 2], units=units.km)
         self.s4 = DataSeries([0, 1, 2], units=units.eV)
-        #self.s4 = Series([9, 0, 1], units=units.km, aliases={"first": 0,
-        #                                                          "second": 1})
+        self.s5 = DataSeries([9, 0, 1], units=units.km,
+                             aliases={"first": 0, "second": 1})
 
     def test_interop(self):
         """Test interoperability with standard pandas objects."""
-        s = self.s0 + self.s1
+        s = self.s0 + self.s1    # __add__
         self.assertIsInstance(s, DataSeries)
-        s = self.s1 + self.s0
+        s = self.s1 + self.s0    # __radd__
         self.assertIsInstance(s, DataSeries)
         s = self.s2.as_pandas()
         self.assertIsInstance(s, pd.Series)
         self.assertFalse(hasattr(s, "units"))
+        self.assertFalse(s is self.s2)
 
     def test_no_units(self):
         """See also :mod:`~exa.core.base`."""
@@ -41,6 +43,8 @@ class TestDataSeries(UnitTester):
         s = self.s1 + self.s0
         self.assertEqual(s.units, self.s1.units)
         self.assertTrue(s.units is None)
+        with self.assertRaises(MissingUnits):
+            self.s1.asunit(units.m)
 
     def test_unit_conversion(self):
         """Test unit conversion: :func:`~exa.core.base.Meta.asunit`."""
@@ -51,8 +55,3 @@ class TestDataSeries(UnitTester):
         """See also :mod:`~exa.core.base`."""
         s = self.s0 + self.s2
         self.assertTrue(s.units is self.s2.units)
-
-
-#    def test_same_units(self):
-#        """See also :mod:`~exa.core.base`."""
-#        pass

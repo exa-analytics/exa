@@ -90,10 +90,13 @@ class Meta(Typed):
         Returns:
             obj: Object of the same type with converted values and units attribute
         """
-        try:
-            f0, u0 = self.units.as_coeff_Mul()
-        except AttributeError:
+        if not hasattr(self.units, "as_coeff_Mul"):
             raise MissingUnits()
+        return self._asunit(unit)
+
+    def _asunit(self, unit):
+        """Convert units without error checking."""
+        f0, u0 = self.units.as_coeff_Mul()
         f1, u1 = unit.as_coeff_Mul()
         new = self*np.float64(f0/f1)
         new.units = unit
@@ -101,6 +104,7 @@ class Meta(Typed):
 
     @staticmethod
     def modify_op(op):
+        """Modifies mathematical operations to return correctly typed objects."""
         def wrapper(self, other, *args, **kwargs):
             """Ensure we return an Exa data object type."""
             return getattr(super(self.__class__, self), op)(other, *args, **kwargs).__finalize__(self)
@@ -123,4 +127,5 @@ class Meta(Typed):
         clsdict['__finalize__'] = mcs.__finalize__
         clsdict['as_pandas'] = mcs.as_pandas
         clsdict['asunit'] = mcs.asunit
+        clsdict['_asunit'] = mcs._asunit
         return super(Meta, mcs).__new__(mcs, name, bases, clsdict)

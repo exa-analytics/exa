@@ -10,3 +10,16 @@ units.
 See Also:
     http://pandas.pydata.org/
 """
+import six
+import pandas as pd
+from exa.core.base import Meta, Alias
+from exa.core.indexing import indexers
+
+
+class DataFrame(six.with_metaclass(Meta, pd.DataFrame)):
+    pass
+
+
+for name, indexer in indexers():          # Calls pandas machinery
+    setattr(DataFrame, name, None)           # Need to unreference existing indexer
+    DataFrame._create_indexer(name, indexer) # Prior to instantiation new indexer

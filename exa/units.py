@@ -10,6 +10,7 @@ Custom units built atop of `sympy`_'s dimension and unit system infrastructure.
 .. _sympy: http://www.sympy.org/en/index.html
 """
 import sympy
+import sympy.physics
 units = []
 for name, value in vars(sympy.physics.units).items():
     if isinstance(value, (sympy.physics.units.Unit, sympy.Mul)):

@@ -30,6 +30,5 @@ class RemoteResource(Base):
     user = Column(String)
 
     def connect(self):
-        """
-        """
+        """Establish an SSH connection."""
         raise NotImplementedError()
