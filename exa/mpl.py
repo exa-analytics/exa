@@ -102,18 +102,20 @@ def _gen_figure(nxplot=1, nyplot=1, joinx=False, joiny=False,
     return fig
 
 
-def _plot_surface(x, y, z, nxlabel, nylabel, nzlabel, method, figargs, axargs):
-    fig = _gen_figure(x=x, y=y, z=z, nxlabel=nxlabel, nylabel=nylabel, method=method,
-                      nzlabel=nzlabel, figargs=figargs, axargs=axargs, projection='3d')
-    axs = fig.get_axes()
+def _plot_surface(x, y, z, nxlabel, nylabel, nzlabel, method,
+                  figargs, axargs):
+    fig = _gen_figure(x=x, y=y, z=z, nxlabel=nxlabel,
+                      nylabel=nylabel, nzlabel=nzlabel,
+                      figargs=figargs, projection='3d')
+    ax = fig.get_axes()[0]
     convenience = {'wireframe': ax.plot_wireframe,
-                    'contourf': ax.contourf,
                      'contour': ax.contour,
+                    'contourf': ax.contourf,
                      'trisurf': ax.plot_trisurf,
                      'scatter': ax.scatter,
                         'line': ax.plot}
     if method not in convenience.keys():
-        raise Exception('method must be in {}'.format(convenience.keys()))
+        raise Exception('Method must be in {}.'.format(convenience.keys()))
     sx, sy = np.meshgrid(x, y)
     if method in ['trisurf', 'scatter', 'line']:
         if method == 'line':
@@ -122,6 +124,7 @@ def _plot_surface(x, y, z, nxlabel, nylabel, nzlabel, method, figargs, axargs):
     else:
         convenience[method](sx, sy, z, **axargs)
     return fig
+
 
 def _plot_contour(x, y, z, nxlabel, nylabel, method, colorbar, figargs, axargs):
     fig = _gen_figure(x=x, y=y, nxlabel=nxl, nylabel=nyl, figargs=figargs)
