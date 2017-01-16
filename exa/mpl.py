@@ -69,9 +69,10 @@ sns.set(context='poster', style='white', palette='colorblind', font_scale=1.3,
 #        super(ExAxes, self).__init__(*args, **kwargs)
 
 
-def _gen_figure(nxplot=1, nyplot=1, joinx=False, joiny=False,
+def _gen_figure(nxplot=1, nyplot=1, sharex=False, sharey=False,
                 x=None, y=None, z=None, nxlabel=None, nylabel=None,
-                nzlabel=None, figargs=None, projection=None):
+                nzlabel=None, figargs=None, projection=None,
+                fontsize=20):
     """
     Returns a figure object with as much customization as provided.
     """
@@ -81,24 +82,26 @@ def _gen_figure(nxplot=1, nyplot=1, joinx=False, joiny=False,
         axs = fig.add_subplot(111, projection=projection)
     else:
         fig, axs = sns.mpl.pyplot.subplots(nyplot, nxplot, **figargs)
-        if joinx:
+        if sharex:
             fig.subplots_adjust(wspace=0)
-        if joiny:
+        if sharey:
             fig.subplots_adjust(hspace=0)
     # In case axs is returned not as an iterable
     axs = fig.get_axes()
     data = {'x': x, 'y': y}
-    methods = {'x': (axs[0].set_xlim, axs[0].set_xticks, nxlabel),
-               'y': (axs[0].set_ylim, axs[0].set_yticks, nylabel)}
-    if projection == '3d':
-        data['z'] = z
-        methods['z'] = (axs[0].set_zlim, axs[0].set_zticks, nzlabel)
-    for cart, arr in data.items():
-        lim, ticks, nlabel = methods[cart]
-        if arr is not None:
-            lim((arr.min(), arr.max()))
-            if nlabel is not None:
-                ticks(np.linspace(arr.min(), arr.max(), nlabel))
+    for ax in axs:
+        methods = {'x': (ax.set_xlim, ax.set_xticks, nxlabel),
+                   'y': (ax.set_ylim, ax.set_yticks, nylabel)}
+        if projection == '3d':
+            data['z'] = z
+            methods['z'] = (ax.set_zlim, ax.set_zticks, nzlabel)
+        for cart, arr in data.items():
+            lim, ticks, nlabel = methods[cart]
+            if arr is not None:
+                lim((arr.min(), arr.max()))
+                if nlabel is not None:
+                    ticks(np.linspace(arr.min(), arr.max(), nlabel))
+            ax.tick_params(axis=cart, labelsize=fontsize)
     return fig
 
 
