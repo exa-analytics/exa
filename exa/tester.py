@@ -44,6 +44,10 @@ def run_doctests(log=False, mock=False):
 
     Args:
         log (bool): Write test results to system log (default false)
+        mock (bool): Dry run tests
+
+    Returns:
+        results (list): List of doctest results
     """
     def tester(modules, runner):
         """Runs tests for each module."""
@@ -69,7 +73,10 @@ def run_doctests(log=False, mock=False):
         return results
     runner = DocTestRunner(verbose=verbose)
     modules = get_internal_modules()
-    return tester(modules, runner)
+    results = tester(modules, runner)
+    failures = sum(result.failed for result in results if result is not None)
+    print("Doc Test Failures: ", failures)
+    return results
 
 
 def run_unittests(log=False, mock=False):
@@ -78,11 +85,36 @@ def run_unittests(log=False, mock=False):
 
     Args:
         log (bool): Send results to system log (default False)
+        mock (bool): Dry run tests
+
+    Returns:
+        results (list): List of unittest results
     """
     tests = UnitTester.__subclasses__()
     if mock:
         return tests
-    return [test.run_interactively(log=log) for test in tests]
+    results = [test.run_interactively(log=log) for test in tests]
+    failures = sum(len(result.failures) for result in results)
+    print("Unit Test Failures: ", failures)
+    return results
+
+
+def run_all_tests(log=False, mock=False):
+    """
+    Performa both unit and documentation tests.
+
+    Args:
+        log (bool): Send results to system log (default False)
+        mock (bool): Dry run tests
+
+    Returns:
+        results (tuple): Tuple of unit test and doc test results
+    """
+    results = (run_unittests(log, mock), run_doctests(log, mock))
+    failures = sum(len(result.failures) for result in results[0])
+    failures += sum(result.failed for result in results[1] if result is not None)
+    print("Total Failures: ", failures)
+    return results
 
 
 class UnitTester(TestCase):

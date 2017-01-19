@@ -23,15 +23,11 @@ Text lines are stored in memory; file handles are only open during reading and
 writing. For large repetitive files, memoization can reduce the memory footprint
 (see the **as_interned** kwarg).
 """
-import os
-import re
-import sys
-import bz2
-import six
-import gzip
+import os, re, sys, bz2, gzip, six
 from copy import copy, deepcopy
-from collections import Counter
+from collections import Counter, OrderedDict
 from io import StringIO, TextIOWrapper
+from exa.typed import Typed
 
 
 class Editor(object):
@@ -403,6 +399,97 @@ class Editor(object):
                 ln = str(i).rjust(n, ' ')
                 r += self._fmt(ln, line)
         return r
+
+
+class SectionsMeta(Typed):
+    """Sections metaclass."""
+    parsers = dict
+    sections = OrderedDict
+
+
+class Sections(six.with_metaclass(SectionsMeta, Editor)):
+    """
+    An editor tailored for files that are composed of multiple, distinct sections,
+    each of which may be parsed individually. This editor can be thought of as
+    a "pre-parser" for complex files. Individual sections are then parsed by
+    :class:`~exa.core.editor.Section` objects. Only parsing functions required
+    to determine the sections of the file (see :func:`~exa.core.editor.Sections.parse`)
+    are required for this class and its subclasses.
+
+    See Also:
+        :class:`~exa.core.editor.Section`
+    """
+    @property
+    def delimiters(self):
+        """Section delimiters and other markers used in parsing sections."""
+        return {name: getattr(self, name) for name in dir(self) if name.startswith("_key_")}
+
+    def get_section_bounds(self, section):
+        """
+        Get the start and end point of a given section.
+
+        Args:
+            section (str or int): Section name or integer index
+
+        Returns:
+            tup (tuple): Tuple of form (start, end, name, number)
+        """
+        end = float('inf')    # So that abs(...) < abs(...) works (see below)
+        if isinstance(section, int):
+            name = list(self.sections.keys())[section]
+            number = section
+        else:
+            name = section
+            number = list(self.sections.keys()).index(section)
+        start = self.sections[name]
+        for key, lineno in ed.sections.items():
+            if lineno > start and abs(lineno - start) < abs(end - start):
+                end = lineno
+        return (start, end, name, number)
+
+    def get_section(self, section):
+        """
+        Get the Section editor associated with the named or integer section.
+
+        Args:
+            section (str or int): Section name or integer index
+
+        Returns:
+            section (Section): Section editor object specific to the given section
+        """
+        start, end, name, number = self.get_section_bounds(section)
+        return self._parsers[name](str(self[start:end]))
+
+    def describe(self):
+        raise NotImplementedError()
+
+    def parse(self):
+        raise NotImplementedError()
+
+    @classmethod
+    def add_section_parser(cls, section_parser):
+        """Add a section parser to the editor class."""
+        cls._parsers.update({section_parser.name: section_parser})
+
+
+class Section(Editor):
+    """
+    This editor can be considered a parser that converts a specific file or
+    section of a file that has a known structure into an data object compatible
+    with the exa framework. This class and those classes that subclass it are
+    where all parsing and data object creation functions belong.
+
+    See Also:
+        :class:`exa.core.editor.Sections`
+    """
+    def describe(self):
+        """
+        """
+        raise NotImplementedError()
+
+    def parse(self):
+        """Parse all data objects."""
+        raise NotImplementedError()
 
 
 def check_path(path, ignore_warning=False):

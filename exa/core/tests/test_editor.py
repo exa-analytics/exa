@@ -19,6 +19,7 @@ from uuid import uuid4
 from exa._config import config
 from exa.tester import UnitTester
 from exa.core.editor import Editor, concat
+# py3 compat
 if not hasattr(bz2, "open"):
     bz2.open = bz2.BZ2File
 
@@ -235,3 +236,9 @@ class TestEditor(UnitTester):
         self.assertIsInstance(obj2, list)
         self.assertEqual(len(obj2), 3)
         self.assertIsInstance(obj2[0], six.string_types)
+
+    def test_create_editor_from_editor(self):
+        """Test creation of an editor from another editor."""
+        obj = Editor(self.from_file)
+        self.assertIsInstance(obj, Editor)
+        self.assertEqual(len(obj), len(self.from_file))

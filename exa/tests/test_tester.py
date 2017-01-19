@@ -6,7 +6,7 @@ Test for :mod:`~exa.tester`
 ##################################
 """
 from exa.tester import UnitTester, datetime_header, get_internal_modules
-from exa.tester import run_doctests, run_unittests
+from exa.tester import run_doctests, run_unittests, run_all_tests
 
 
 class TestTester(UnitTester):
@@ -35,3 +35,8 @@ class TestTester(UnitTester):
         self.assertIsInstance(results, list)
         results = run_doctests(mock=True)
         self.assertIsInstance(results, list)
+
+    def test_run_all(self):
+        """Also tests mocking functionality."""
+        tup = run_all_tests(mock=True)
+        self.assertIsInstance(tup, tuple)

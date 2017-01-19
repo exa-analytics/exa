@@ -98,7 +98,7 @@ class Meta(Typed):
         """Convert units without error checking."""
         f0, u0 = self.units.as_coeff_Mul()
         f1, u1 = unit.as_coeff_Mul()
-        new = self*np.float64(f0/f1)
+        new = (self*np.float64(f0/f1)).__finalize__(self)
         new.units = unit
         return new
 

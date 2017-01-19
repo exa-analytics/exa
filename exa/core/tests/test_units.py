@@ -6,4 +6,3 @@ Tests for :mod:`~exa.core.units`
 #############################################
 """
 from exa.tester import UnitTester
-from exa.core.units
