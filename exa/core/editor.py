@@ -370,6 +370,8 @@ class Editor(object):
             self._lines = read_stream(data, as_interned)
         elif isinstance(data, list) and all(isinstance(dat, six.string_types) for dat in data):
             self._lines = data
+        elif isinstance(data, Editor):
+            self._lines = data._lines
         else:
             raise TypeError('Unknown type for arg data: {}'.format(type(data)))
         self.name = name

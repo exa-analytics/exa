@@ -51,7 +51,11 @@ class TestDataSeries(UnitTester):
         s = self.s3.asunit(units.m)
         self.assertTrue(np.allclose(s, [0, 1000, 2000]))
 
-    def test_single_units(self):
-        """See also :mod:`~exa.core.base`."""
+    def test_operations(self):
+        """Test that normal operations work even if units don't match."""
         s = self.s0 + self.s2
-        self.assertTrue(s.units is self.s2.units)
+        self.assertEqual(s.units, self.s2.units)
+        s = self.s2 + self.s0
+        self.assertEqual(s.units, self.s2.units)
+        s = self.s2.asunit(units.km) + self.s3
+        self.assertEqual(s.units, units.km)

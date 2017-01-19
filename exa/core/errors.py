@@ -12,7 +12,7 @@ class UnitsError(ExaException):
     """
     Raised when attempting to add or subtract two objects with different units.
     """
-    fmt = "Can't add/subtract objects with units {} and {}".format
+    fmt = "Can't operate on objects with units {} and {}".format
 
     def __init__(self, unit0, unit1):
         msg = self.fmt(unit0, unit1)
