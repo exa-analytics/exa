@@ -7,20 +7,16 @@ Tests for :mod:`~exa.core.editor`
 Test the functionality of the :class:`~exa.core.editor.Editor` class and
 related functions.
 """
-import os
-import bz2
-import gzip
-import six
-import shutil
+import os, bz2, gzip, six, shutil
 from types import GeneratorType
+from collections import OrderedDict
 import numpy as np
 from io import StringIO
 from uuid import uuid4
 from exa._config import config
 from exa.tester import UnitTester
-from exa.core.editor import Editor, concat
-# py3 compat
-if not hasattr(bz2, "open"):
+from exa.core.editor import Editor, concat, Sections
+if not hasattr(bz2, "open"):    # Python 3.x compatibility
     bz2.open = bz2.BZ2File
 
 
@@ -31,6 +27,15 @@ It contains templates: {template}
 and constants: {{constant}}
 
 That was a blank line"""
+
+
+sections_string = u"""Sections have some text
+followed by a delimiter
+==================================
+That eventually repeats
+=================================
+and more text.
+"""
 
 
 class TestEditor(UnitTester):
@@ -242,3 +247,23 @@ class TestEditor(UnitTester):
         obj = Editor(self.from_file)
         self.assertIsInstance(obj, Editor)
         self.assertEqual(len(obj), len(self.from_file))
+
+
+class DummySections(Sections):
+    """Mock example of :class:`~exa.core.editor.Sections`."""
+    _key_marker = "===="
+
+    def parse(self):
+        """This function must be implemneted for a specific (sections) file."""
+        self.sections = list(enumerate(self.find(self._key_marker, which='keys')[self._key_marker]))
+
+
+class TestSections(UnitTester):
+    """Tests for :class:`~exa.core.editor.Sections`."""
+    def setUp(self):
+        self.ed = DummySections(sections_string)
+
+    def test_sections(self):
+        """Test that sections are automatically parsed."""
+        s = self.ed.sections
+        self.assertIsInstance(s, OrderedDict)

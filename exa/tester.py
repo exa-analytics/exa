@@ -74,7 +74,7 @@ def run_doctests(log=False, mock=False):
     runner = DocTestRunner(verbose=verbose)
     modules = get_internal_modules()
     results = tester(modules, runner)
-    failures = sum(result.failed for result in results if result is not None)
+    failures = sum(result.failed for result in results if hasattr(result, "failed"))
     print("Doc Test Failures: ", failures)
     return results
 
@@ -94,7 +94,7 @@ def run_unittests(log=False, mock=False):
     if mock:
         return tests
     results = [test.run_interactively(log=log) for test in tests]
-    failures = sum(len(result.failures) for result in results)
+    failures = sum(len(result.failures) for result in results if hasattr(result, "failures"))
     print("Unit Test Failures: ", failures)
     return results
 
@@ -111,8 +111,8 @@ def run_all_tests(log=False, mock=False):
         results (tuple): Tuple of unit test and doc test results
     """
     results = (run_unittests(log, mock), run_doctests(log, mock))
-    failures = sum(len(result.failures) for result in results[0])
-    failures += sum(result.failed for result in results[1] if result is not None)
+    failures = sum(len(result.failures) for result in results[0] if hasattr(result, "failures"))
+    failures += sum(result.failed for result in results[1] if hasattr(result, "failed"))
     print("Total Failures: ", failures)
     return results
 
