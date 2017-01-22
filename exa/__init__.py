@@ -27,7 +27,7 @@ atop the exa package.
 from exa import _version, _config, tester, errors, typed, mpl, tex, units
 
 # Import sub-packages
-from exa import cms, compute, core, tests, pyjs, app
+from exa import cms, compute, core, tests, app
 
 # Import user/dev API
 from exa._version import __version__, version_info
