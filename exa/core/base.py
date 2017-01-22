@@ -13,11 +13,11 @@ from sympy.core.mul import Mul
 from sympy.physics.units import Unit
 from collections import MutableMapping
 from pandas.core.ops import _op_descriptions
-from exa.typed import Typed
+from exa.typed import Meta
 from exa.core.errors import UnitsError, MissingUnits
 
 
-class Alias(MutableMapping):
+class Aliases(MutableMapping):
     """Dict like object that returns non-existant keys on getitem calls."""
     def __getitem__(self, key):
         if key in self.store:
@@ -44,7 +44,7 @@ class Alias(MutableMapping):
         return "{}({})".format(self.__class__.__name__, str(list(self.items())))
 
 
-class Meta(Typed):
+class Base(Meta):
     """
     Metaclass for data objects.
 
@@ -52,7 +52,7 @@ class Meta(Typed):
 
     .. code-block:: Python
 
-        class DataObject(six.with_metaclass(Meta, pandas.SparseDataFrame)):
+        class DataObject(six.with_metaclass(Base, pandas.SparseDataFrame)):
             @property
             def _constructor(self):
                 return DataObject                # Used by __finalize__
@@ -66,7 +66,7 @@ class Meta(Typed):
         :class:`~exa.core.dataseries.DataSeries`,
         :class:`~exa.core.dataframe.DataFrame`
     """
-    aliases = Alias
+    aliases = Aliases
     units = (Unit, Mul, )
 
     def as_pandas(self):
@@ -128,4 +128,4 @@ class Meta(Typed):
         clsdict['as_pandas'] = mcs.as_pandas
         clsdict['asunit'] = mcs.asunit
         clsdict['_asunit'] = mcs._asunit
-        return super(Meta, mcs).__new__(mcs, name, bases, clsdict)
+        return super(Base, mcs).__new__(mcs, name, bases, clsdict)

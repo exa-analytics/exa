@@ -5,17 +5,17 @@
 Tests for :mod:`~exa.core.base`
 #############################################
 Test Exa's data object metaclass (:class:`~exa.core.base.Meta`) and the indexer
-aliasing class (:class:`~exa.core.base.Alias`).
+aliasing class (:class:`~exa.core.base.Aliases`).
 """
 import six
 from exa.tester import UnitTester
-from exa.core.base import Alias, Meta
+from exa.core.base import Aliases, Meta
 
 
-class TestAlias(UnitTester):
-    """Tests for :class:`~exa.core.base.Alias`."""
+class TestAliases(UnitTester):
+    """Tests for :class:`~exa.core.base.Aliases`."""
     def setUp(self):
-        self.alias = Alias(dict([("key0", "alias0"), ("key1", "alias1")]))
+        self.alias = Aliases(dict([("key0", "alias0"), ("key1", "alias1")]))
 
     def test_getter(self):
         """Test dictionary getter."""
@@ -45,10 +45,15 @@ class TestMeta(UnitTester):
     """Tests for :class:`~exa.core.base.Meta`."""
     def setUp(self):
         """Dummy class to test the metaclass."""
-        class Klass(six.with_metaclass(Meta)):
-            _getter_prefix = "default"
+        class MetaKlass(Meta):
+            _getters = ("default", )
+            aliases = Aliases
+
+        class Klass(six.with_metaclass(MetaKlass)):
+            def default_aliases(self):
+                self.aliases = Aliases({"an": "alias"})
         self.klass = Klass()
 
     def test_hasattr(self):
         """Test that the aliases attribute is created."""
-        self.assertIsNone(self.klass.aliases)
+        self.assertIsInstance(self.klass.aliases, Aliases)

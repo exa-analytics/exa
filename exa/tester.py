@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Tester
@@ -73,10 +73,7 @@ def run_doctests(log=False, mock=False):
         return results
     runner = DocTestRunner(verbose=verbose)
     modules = get_internal_modules()
-    results = tester(modules, runner)
-    failures = sum(result.failed for result in results if hasattr(result, "failed"))
-    print("Doc Test Failures: ", failures)
-    return results
+    return tester(modules, runner)
 
 
 def run_unittests(log=False, mock=False):
@@ -93,10 +90,7 @@ def run_unittests(log=False, mock=False):
     tests = UnitTester.__subclasses__()
     if mock:
         return tests
-    results = [test.run_interactively(log=log) for test in tests]
-    failures = sum(len(result.failures) for result in results if hasattr(result, "failures"))
-    print("Unit Test Failures: ", failures)
-    return results
+    return [test.run_interactively(log=log) for test in tests]
 
 
 def run_all_tests(log=False, mock=False):
@@ -110,11 +104,7 @@ def run_all_tests(log=False, mock=False):
     Returns:
         results (tuple): Tuple of unit test and doc test results
     """
-    results = (run_unittests(log, mock), run_doctests(log, mock))
-    failures = sum(len(result.failures) for result in results[0] if hasattr(result, "failures"))
-    failures += sum(result.failed for result in results[1] if hasattr(result, "failed"))
-    print("Total Failures: ", failures)
-    return results
+    return (run_unittests(log, mock), run_doctests(log, mock))
 
 
 class UnitTester(TestCase):

@@ -15,5 +15,4 @@ from exa.core.dataframe import DataFrame
 class TestDataFrame(UnitTester):
     """Tests :class:`~exa.core.dataframe.DataFrame`."""
     def setUp(self):
-        
         pass

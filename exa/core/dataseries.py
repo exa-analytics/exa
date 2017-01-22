@@ -12,11 +12,11 @@ See Also:
 """
 import six
 import pandas as pd
-from exa.core.base import Meta, Alias
+from exa.core.base import Base
 from exa.core.indexing import indexers
 
 
-class DataSeries(six.with_metaclass(Meta, pd.Series)):
+class DataSeries(six.with_metaclass(Base, pd.Series)):
     """
     A series is a single valued n dimensional array.
 
@@ -25,7 +25,7 @@ class DataSeries(six.with_metaclass(Meta, pd.Series)):
     The index can be a single dimension (e.g. an array of integers) or
     multidimensional. The dimensions of a series are determined by its index.
     """
-    _getter_prefix = "compute"
+    _getters = ("compute", )
     _metadata = ['name', 'units', 'aliases']
 
     @property

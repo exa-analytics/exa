@@ -1,129 +1,119 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Strongly Typed Classes
+Strongly Typed Metaclass
 ####################################
-This module provides the metaclass object :class:`~exa.typed.Typed`.
-This metaclass creates statically typed class attributes using the built-in
-property mechanism. A usage example is given below:
+Certain class objects within the Exa framework require static typing. Additionally,
+these classes often involve abstract methods that are dependent on the specific
+subclassing to be done. This module provides a type enforcing abstract base
+class (metaclass). Static typing is accomplished via property objects.
 
 .. code-block:: Python
 
-    class Meta(Typed):
+    import six
+
+    class KlassMeta(Meta):
+        _getters = ("compute", )
         attr1 = (int, float)
         attr2 = DataFrame
 
-    class Klass(metaclass=Meta):   # py2compat: six.with_metaclass(Meta, ...)
-        _getter_prefix = "compute"
+    class Klass(six.with_metaclass(KlassMeta, object)):
+        def compute_attr1(self):
+            self.attr1 = 1.0
+
         def __init__(self, attr1, attr2):
             self.attr1 = attr1
             self.attr2 = attr2
 
-Under the covers, the :class:`~exa.typed.Typed` (inherited) metaclass
-creates a class object that looks like the following example. Additionally the
-:class:`~exa.typed.Typed` also provides a mechanism for automatic
-function calls when a missing (but computable or parsable) attribute is
-requested.
-
-.. code-block:: Python
-
-    class Klass:
-        @property
-        def attr1(self):
-            if not hasattr(self, attr1) and hasattr(self, 'compute_attr1'):
-                self['compute_attr1']()
-            if not hasattr(self, _attr1):
-                raise AttributeError("Please compute or set attr1 first.")
-            return getattr(self, "attr1")
-
-        @attr1.setter
-        def attr1(self, obj):
-            if not isinstance(obj, (int, float)):
-                raise TypeError('attr1 must be int')
-            self._attr1 = obj
-
-        ...
-
-Strongly typed class attribtues helps exa containers and editors ensure correct
-data object types are attached/created. This, in turn, ensures things such as
-visualization and content management behave as expected.
+At runtime, the class object, "Klass", creates property attributes "attr1" and
+"attr2" (stored as "_attr1" and "_attr2"). The property setter performs all of
+the type checking. The property getter can attempt to parse or compute the
+attribute (via the "_getters" attribute). In the example above, "_getters" is
+a tuple with only the "compute" prefix listed. If "attr1" were not set, any
+attempt to get this attribute would first make a call to the "compute_attr1"
+function.
 """
+import six
 import warnings
+from abc import ABCMeta
 from exa.errors import AutomaticConversionError
 
 
-class Typed(type):
+def create_typed_attr(name, ptypes):
     """
-    A class for creating classes with enforced types. By convention this class
-    also provies a mechanism for calling a computation (see
-    :class:`~exa.core.container.Container`) or parsing (see
-    :class:`~exa.core.editor.Editor`) function if the attribute requested
-    does not exist.
+    Create a property that enforces types. Akin to:
+
+    .. code-block:
+
+    Args:
+        name (str): Name of strongly typed attribute
+        ptypes (tuple): Immutable of valid types
+
+    Returns:
+        prop (property): Strongly typed property object
+
+    See Also:
+        :mod:`~exa.typed` documentation
     """
-    @staticmethod
-    def create_property(name, ptype):
-        """
-        Creates a custom property with a getter that performs computing
-        functionality (if available) and raise a type error if setting
-        with the wrong type.
+    pname = '_' + name
+    if not isinstance(ptypes, (tuple, list)):
+        ptypes = (ptypes, )
+    else:
+        ptypes = tuple(ptypes)
 
-        Note:
-            By default, the setter attempts to convert the object to the
-            correct type; a type error is raised if this fails.
-        """
-        pname = '_' + name
-        if not isinstance(ptype, (tuple, list)):
-            ptype = (ptype, )
-        else:
-            ptype = tuple(ptype)
-
-        def getter(self):
-            """
-            This will be where the data is store (e.g. self._name)
-            This is the default property "getter" for container data objects.
-            If the property value is None, this function will check for a
-            convenience method with the signature, self.[_getter_prefix]_name()
-            and call it prior to returning the property value.
-            """
-            cmd = "{}{}".format(self._getter_prefix, pname)
-            if (not hasattr(self, pname) or getattr(self, pname) is None) and hasattr(self, cmd):
-                setattr(self, pname, getattr(self, cmd)())
-            elif not hasattr(self, pname):
-                return None
+    def getter(self):
+        """Attempt to compute/parse/etc the attribute and return it."""
+        fmt = "{}{}".format
+        try:
+            return getattr(self, pname)
+        except AttributeError:
+            for prefix in self._getters:
+                cmd = fmt(prefix, pname)
+                if hasattr(self, cmd):
+                    getattr(self, cmd)()    # Call the compute/parse/etc function
+                    if hasattr(self, pname):  # In case of multiple functions
+                        break
+        if hasattr(self, pname):
             return getattr(self, pname)
 
-        def setter(self, obj):
-            """
-            This is the default property "setter" for container data objects.
-            Prior to setting a property value, this function checks that the
-            object's type is correct.
-            """
-            if obj is not None and not isinstance(obj, ptype):
-                if len(ptype) == 1:
-                    try:
-                        obj = ptype[0](obj)
-                        if isinstance(ptype[0], (tuple, list)):
-                            warnings.warn("Please check automatic type conversion!")
-                    except TypeError:
-                        raise AutomaticConversionError(obj, ptype)
-                else:
-                    raise TypeError('Object "{}" must be of type(s) {} not {}.'.format(name, ptype, type(obj)))
+    def setter(self, obj):
+        """Check the type, attempt to convert if necessary, and set it."""
+        if not isinstance(obj, ptypes):
+            for ptype in ptypes:
+                try:
+                    obj = ptype(obj)
+                    break
+                except Exception:
+                    pass
+        if isinstance(obj, ptypes) or obj is None:
             setattr(self, pname, obj)
+        else:
+            raise AutomaticConversionError(obj, ptypes)
 
-        def deleter(self):
-            del self[pname]
+    def deleter(self):
+        """Property deleter."""
+        del self.__dict__[pname]
 
-        return property(getter, setter, deleter)
+    return property(getter, setter, deleter)
 
+
+class Meta(ABCMeta):
+    """
+    An abstract base class that supports strongly typed class attributes via
+    property objects.
+
+    See Also:
+        :func:`~exa.typed.create_typed_attr`
+    """
     def __new__(mcs, name, bases, clsdict):
         """
-        Modification of the class definition occurs here; we iterate over all
-        statically typed attributes and attach their property (see
-        :func:`~exa.typed.Typed.create_property`) definition, returning
-        the modified (i.e. property containing) class definition.
+        At runtime the class definition is modified; all public variables are
+        converted into typed attributes.
         """
         for k, v in vars(mcs).items():
-            if isinstance(v, (type, tuple, list)):
-                clsdict[k] = mcs.create_property(k, v)
-        return super(Typed, mcs).__new__(mcs, name, bases, clsdict)
+            if k.startswith("_") and not k.startswith("__"):
+                clsdict[k] = v    # _priv attributes are added directly
+            elif isinstance(v, (type, tuple, list)):
+                clsdict[k] = create_typed_attr(k, v)  # strongly typed
+        return super(Meta, mcs).__new__(mcs, name, bases, clsdict)

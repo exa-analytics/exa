@@ -249,7 +249,7 @@ class TestEditor(UnitTester):
         self.assertEqual(len(obj), len(self.from_file))
 
 
-class DummySections(Sections):
+class MockSections(Sections):
     """Mock example of :class:`~exa.core.editor.Sections`."""
     _key_marker = "===="
 
@@ -261,7 +261,7 @@ class DummySections(Sections):
 class TestSections(UnitTester):
     """Tests for :class:`~exa.core.editor.Sections`."""
     def setUp(self):
-        self.ed = DummySections(sections_string)
+        self.ed = MockSections(sections_string)
 
     def test_sections(self):
         """Test that sections are automatically parsed."""

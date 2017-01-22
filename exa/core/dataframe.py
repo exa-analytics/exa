@@ -12,11 +12,11 @@ See Also:
 """
 import six
 import pandas as pd
-from exa.core.base import Meta, Alias
+from exa.core.base import Base
 from exa.core.indexing import indexers
 
 
-class DataFrame(six.with_metaclass(Meta, pd.DataFrame)):
+class DataFrame(six.with_metaclass(Base, pd.DataFrame)):
     pass
 
 

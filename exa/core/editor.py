@@ -24,10 +24,11 @@ writing. For large repetitive files, memoization can reduce the memory footprint
 (see the **as_interned** kwarg).
 """
 import os, re, sys, bz2, gzip, six
+from abc import abstractmethod
 from copy import copy, deepcopy
 from collections import Counter, OrderedDict
 from io import StringIO, TextIOWrapper
-from exa.typed import Typed
+from exa.typed import Meta
 
 
 class Editor(object):
@@ -46,7 +47,7 @@ class Editor(object):
         nrpint (int): Number of lines to display when printing
         cursor (int): Line number position of the cusor
     """
-    _getter_prefix = 'parse'     # See :class:`~exa.typed.Typed`
+    _getter_prefix = 'parse'     # See :class:`~exa.typed.Meta`
     _fmt = '{0}: {1}\n'.format   # Format for printing lines (see __repr__)
 
     @property
@@ -401,8 +402,9 @@ class Editor(object):
         return r
 
 
-class SectionsMeta(Typed):
+class SectionsMeta(Meta):
     """Sections metaclass."""
+    _getters = ["parse"]
     parsers = dict
     sections = OrderedDict
 
@@ -463,13 +465,26 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
     def describe(self):
         raise NotImplementedError()
 
+    @abstractmethod
     def parse(self):
-        raise NotImplementedError()
+        pass    # Must be defined in the subclass
+
+    def parse_sections(self):
+        """For automatic section parsing."""
+        self.parse()    # For convenience edit the parse method only.
 
     @classmethod
-    def add_section_parser(cls, section_parser):
-        """Add a section parser to the editor class."""
-        cls._parsers.update({section_parser.name: section_parser})
+    def add_section_parsers(cls, *args):
+        """
+        Add section parsers to the editor class.
+
+        .. code-block:
+
+            Sections.add_section_parsers(Section1, Section2, ...)
+        """
+        if not hasattr(cls, "_parsers"):
+            cls._parsers = {}
+        cls._parsers.update({s.name: s for s in args})
 
 
 class Section(Editor):
@@ -483,8 +498,6 @@ class Section(Editor):
         :class:`exa.core.editor.Sections`
     """
     def describe(self):
-        """
-        """
         raise NotImplementedError()
 
     def parse(self):

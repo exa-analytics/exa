@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-This sub-package provides function compilers using various tools available in
-the Python ecosystem. For an introduction see :mod:`~exa.compute.__init__`.
+This sub-package provides:
 
-- `Numba`_: :mod:`~exa.compute.compilers.nb`
-- `Cython`_: :mod:`~exa.compute.compilers.cy`
+- :mod:`~exa.compute.compilers.nbcompiler`: Automatic compilation via `numba`_
 
-.. _Numba: http://numba.pydata.org/
-.. _Cython: http://cython.org/
+.. _numba: http://numba.pydata.org/
 """
 # Import modules
 from exa.compute.compilers import nbcompiler

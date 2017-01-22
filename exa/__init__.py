@@ -2,17 +2,22 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-This package creates a framework for data management, computation, analytics,
-and visualization. It is built atop the Python data stack (for more info see
-`PyData`_) utilizing the `Jupyter notebook`_ interface.
+Exa is a framework for data management, computation, analytics, and visualization.
+It leverages the Python data stack (`PyData`_) uses a web application frontend
+for multi-platform support. Typically, data specific applications are built
+atop the exa package.
 
+- :mod:`~exa.cms.__init__`: Exa's content management system
+- :mod:`~exa.compute.__init__`: Exa's compilation and computation support
+- :mod:`~exa.core.__init__`: Exa's core objects, Editor, DataObject, and Container
 - :mod:`~exa.__main__`: Application launchers
-- :mod:`~exa._config`: Configuration and logging
-- :mod:`~exa.tester`: Unit and doc tests
-- :mod:`~exa.errors`: Loggable errors and exceptions
-- :mod:`~exa.mpl`: Wrappers for matplotlib
+- :mod:`~exa._config`: Configuration
+- :mod:`~exa._version`: Version information
+- :mod:`~exa.tester`: Support for unit and doc tests
+- :mod:`~exa.errors`: Base error handling
+- :mod:`~exa.mpl`: Wrappers for static plotting
 - :mod:`~exa.tex`: LaTeX support
-- :mod:`~exa.typed`: Strongly typed classes
+- :mod:`~exa.typed`: Strongly typed abstract base class
 
 .. _PyData: http://pydata.org/
 .. _Jupyter notebook: http://jupyter.org/
