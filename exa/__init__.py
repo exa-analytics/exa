@@ -2,14 +2,15 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Exa is a framework for data management, computation, analytics, and visualization.
-It leverages the Python data stack (`PyData`_) uses a web application frontend
-for multi-platform support. Typically, data specific applications are built
+Exa is a framework for data management, computation, analytics, and
+visualization. It leverages the Python data stack (`PyData`_) and uses the
+`Jupyter Notebook`_ as a frontend. Data specific applications can be built
 atop the exa package.
 
-- :mod:`~exa.cms.__init__`: Exa's content management system
-- :mod:`~exa.compute.__init__`: Exa's compilation and computation support
-- :mod:`~exa.core.__init__`: Exa's core objects, Editor, DataObject, and Container
+- :mod:`~exa.app.__init__`: Jupyter notebook frontend
+- :mod:`~exa.cms.__init__`: Content management system
+- :mod:`~exa.compute.__init__`: Dispatching and support for computation
+- :mod:`~exa.core.__init__`: Core classes - Editor and Container
 - :mod:`~exa.__main__`: Application launchers
 - :mod:`~exa._config`: Configuration
 - :mod:`~exa._version`: Version information

@@ -107,7 +107,10 @@ class Base(Meta):
         """Modifies mathematical operations to return correctly typed objects."""
         def wrapper(self, other, *args, **kwargs):
             """Ensure we return an Exa data object type."""
-            return getattr(super(self.__class__, self), op)(other, *args, **kwargs).__finalize__(self)
+            obj = getattr(super(self.__class__, self), op)(other, *args, **kwargs)
+            if hasattr(obj, "__finalize__"):
+                obj.__finalize__(self)
+            return obj
         return wrapper
 
     def __finalize__(self, other, method=None, **kwargs):

@@ -5,10 +5,10 @@
 
 """
 # Import base modules
-from exa.pyjs import example
+#from exa.pyjs import example
 
 # Import sub-packages
-from exa.pyjs import tests
+#from exa.pyjs import tests
 
 # Import user/dev API
-from exa.pyjs.example import HelloWorld, ExampleWidget
+#from exa.pyjs.example import HelloWorld, ExampleWidget
