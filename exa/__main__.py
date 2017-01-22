@@ -9,13 +9,14 @@ This module provides all front-facing command line actions. By default running
 exa starts exa's Jupyter notebook interface.
 """
 import argparse
-from exa.app import ExaNotebook
+#from exa.app import ExaNotebook
 
 
 def main():
-    parser = argparse.ArgumentParser(description="The exa framework launcher.")
+    pass
+#    parser = argparse.ArgumentParser(description="The exa framework launcher.")
     #args = parser.parse_args()
-    ExaNotebook.launch_instance()
+#    ExaNotebook.launch_instance()
 
 
 if __name__ == "__main__":
