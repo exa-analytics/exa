@@ -30,78 +30,87 @@ mpl_rc.update(mpl_save)
 sns.set(context='poster', style='white', palette='colorblind', font_scale=1.3,
         font='serif', rc=mpl_rc)
 
-#def _stale_figure_callback(cls, val):
-#    if cls.figure:
-#        cls.figure.stale = val
-#
-#class ExaFigure(Figure):
-#    """A custom figure class that allows using custom Axes subclasses."""
-#
-#    def add_subplot(self, axis, *args, **kwargs):
-#        """Override add_subplot to accept custom Axes objects."""
-#        key = self._make_key(*args, **kwargs)
-#        a = subplot_class_factory(axis)(self, *args, **kwargs)
-#        self._axstack.add(key, a)
-#        self.sca(a)
-#        self.stale = True
-#        a._remove_method = self._Figure__remove_ax
-#        a.stale_callback = _stale_figure_callback
-#        return a
-#
-#    def __init__(self, *args, **kwargs):
-#        super(ExaFigure, self).__init__(*args, **kwargs)
-#        print('Must fig.set_canvas(matplotlib.backends.'
-#              'backend_agg.FigureCanvasAgg(self))')
-#        self.set_canvas(FigureCanvasAgg(self))
-
-#class ExAxes(Axes):
-#    """
-#    A custom matplotlib Axes object for convenience methods related to
-#    various dataframes.
-#
-#    .. code-block:: Python
-#
-#        fig = ExaFigure()
-#        ax = fig.add_subplot(ExAxes, 111)
-#        ax.plot(x, y)
-#    """
-#    def __init__(self, *args, **kwargs):
-#        super(ExAxes, self).__init__(*args, **kwargs)
+def _gen_projected(nxplot, nyplot, projection, figargs):
+    total = nxplot * nyplot
+    fig = sns.mpl.pyplot.figure(**figargs)
+    stargs = (nxplot, nyplot)
+    kwargs = {'projection': projection}
+    axs = [fig.add_subplot(*stargs, i, **kwargs) for i in range(1, total + 1)]
+    return fig, axs
 
 
-def _gen_figure(nxplot=1, nyplot=1, sharex=False, sharey=False,
-                x=None, y=None, z=None, nxlabel=None, nylabel=None,
-                nzlabel=None, figargs=None, projection=None,
-                fontsize=20):
+def _gen_shared(nxplot, nyplot, sharex, sharey, figargs):
+    fig, axs = sns.mpl.pyplot.subplots(nxplot, nyplot, sharex=sharex,
+                                       sharey=sharey, **figargs)
+    axs = fig.get_axes()
+    return fig, axs
+
+
+def _gen_figure(nxplot=1, nyplot=1, figargs=None, projection=None,
+                sharex='none', joinx=False, sharey='none', joiny=False,
+                x=None, nxlabel=None, xlabels=None, nxdecimal=None, xmin=None, xmax=None,
+                y=None, nylabel=None, ylabels=None, nydecimal=None, ymin=None, ymax=None,
+                z=None, nzlabel=None, zlabels=None, nzdecimal=None, zmin=None, zmax=None,
+                r=None, nrlabel=None, rlabels=None, nrdecimal=None, rmin=None, rmax=None,
+                t=None, ntlabel=None, tlabels=None, fontsize=20):
     """
     Returns a figure object with as much customization as provided.
     """
     figargs = {} if figargs is None else figargs
-    if projection == '3d':
-        fig = sns.mpl.pyplot.figure(**figargs)
-        axs = fig.add_subplot(111, projection=projection)
+    if projection is not None:
+        fig, axs = _gen_projected(nxplot, nyplot, projection, figargs)
     else:
-        fig, axs = sns.mpl.pyplot.subplots(nyplot, nxplot, **figargs)
-        if sharex:
-            fig.subplots_adjust(wspace=0)
-        if sharey:
-            fig.subplots_adjust(hspace=0)
-    # In case axs is returned not as an iterable
-    axs = fig.get_axes()
-    data = {'x': x, 'y': y}
+        fig, axs = _gen_shared(nxplot, nyplot, sharex, sharey, figargs)
+    adj = {}
+    if joinx: adj.update({'hspace': 0})
+    if joiny: adj.update({'wspace': 0})
+    fig.subplots_adjust(**adj)
+    data = {}
+    if projection is None:
+        data = {'x': x, 'y': y}
+    elif projection == '3d':
+        data = {'x': x, 'y': y, 'z': z}
+    elif projection == 'polar':
+        data = {'r': r, 't': t}
+    methods = {}
     for ax in axs:
-        methods = {'x': (ax.set_xlim, ax.set_xticks, nxlabel),
-                   'y': (ax.set_ylim, ax.set_yticks, nylabel)}
-        if projection == '3d':
-            data['z'] = z
-            methods['z'] = (ax.set_zlim, ax.set_zticks, nzlabel)
-        for cart, arr in data.items():
-            lim, ticks, nlabel = methods[cart]
-            if arr is not None:
-                lim((arr.min(), arr.max()))
+        if 'x' in data:
+            methods['x'] = (ax.set_xlim, ax.set_xticks, ax.set_xticklabels,
+                            nxlabel, xlabels, nxdecimal, xmin, xmax)
+        if 'y' in data:
+            methods['y'] = (ax.set_ylim, ax.set_yticks, ax.set_yticklabels,
+                            nylabel, ylabels, nydecimal, ymin, ymax)
+        if 'z' in data:
+            methods['z'] = (ax.set_zlim, ax.set_zticks, ax.set_zticklabels,
+                            nzlabel, zlabels, nzdecimal, zmin, zmax)
+        if 'r' in data:
+            methods['r'] = (ax.set_rlim, ax.set_rticks, ax.set_rgrids,
+                            nrlabel, rlabels, nrdecimal, rmin, rmax)
+        if 't' in data:
+            methods['t'] = (ax.set_thetagrids, ntlabel, tlabels)
+        for dim, arr in data.items():
+            if dim == 't':
+                grids, nlabel, labls = methods[dim]
+                if ntlabel is not None:
+                    theta = np.arange(0, 2 * np.pi, 2 * np.pi / ntlabel)
+                    if labls is not None:
+                        grids(np.degrees(theta), labls, fontsize=fontsize)
+                    else:
+                        grids(np.degrees(theta), fontsize=fontsize)
+            else:
+                lim, ticks, labels, nlabel, labls, decs, mins, maxs = methods[dim]
+                if arr is not None:
+                    amin = mins if mins is not None else arr.min()
+                    amax = maxs if maxs is not None else arr.max()
+                    lim((amin, amax))
                 if nlabel is not None:
-                    ticks(np.linspace(arr.min(), arr.max(), nlabel))
-            ax.tick_params(axis=cart, labelsize=fontsize)
+                    ticks(np.linspace(amin, amax, nlabel))
+                    if decs is not None:
+                        sub = "{{:.{}f}}".format(decs).format
+                        labels([sub(i) for i in np.linspace(amin, amax, nlabel)])
+                if labls is not None:
+                    labels(labls)
+                ax.tick_params(axis=dim, labelsize=fontsize)
     return fig
 
 
@@ -129,8 +138,9 @@ def _plot_surface(x, y, z, nxlabel, nylabel, nzlabel, method,
     return fig
 
 
-def _plot_contour(x, y, z, nxlabel, nylabel, method, colorbar, figargs, axargs):
-    fig = _gen_figure(x=x, y=y, nxlabel=nxl, nylabel=nyl, figargs=figargs)
+def _plot_contour(x, y, z, vmin, vmax, ncbarlabel, ncbardecimal, nxlabel, nylabel,
+                  method, colorbar, figargs, axargs):
+    fig = _gen_figure(x=x, y=y, nxlabel=nxlabel, nylabel=nylabel, figargs=figargs)
     axs = fig.get_axes()
     convenience = {'contour': axs[0].contour,
                   'contourf': axs[0].contourf,
@@ -140,4 +150,10 @@ def _plot_contour(x, y, z, nxlabel, nylabel, method, colorbar, figargs, axargs):
         raise Exception('method must be in {}'.format(convenience.keys()))
     t = convenience[method](x, y, z, **axargs)
     cbar = fig.colorbar(t) if colorbar else None
+    if ncbarlabel is not None:
+        newticks = np.linspace(vmin, vmax, ncbarlabel)
+        cbar.set_ticks(newticks)
+        if ncbardecimal is not None:
+            fmt = '{{:.{}f}}'.format(ncbardecimal).format
+            cbar.set_ticklabels([fmt(i) for i in newticks])
     return fig, cbar
