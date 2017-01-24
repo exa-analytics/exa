@@ -103,11 +103,12 @@ def _gen_figure(nxplot=1, nyplot=1, figargs=None, projection=None,
                     amin = mins if mins is not None else arr.min()
                     amax = maxs if maxs is not None else arr.max()
                     lim((amin, amax))
-                if nlabel is not None:
-                    ticks(np.linspace(amin, amax, nlabel))
-                    if decs is not None:
-                        sub = "{{:.{}f}}".format(decs).format
-                        labels([sub(i) for i in np.linspace(amin, amax, nlabel)])
+                elif mins is not None and maxs is not None:
+                    if nlabel is not None:
+                        ticks(np.linspace(amin, amax, nlabel))
+                        if decs is not None:
+                            sub = "{{:.{}f}}".format(decs).format
+                            labels([sub(i) for i in np.linspace(amin, amax, nlabel)])
                 if labls is not None:
                     labels(labls)
                 ax.tick_params(axis=dim, labelsize=fontsize)
