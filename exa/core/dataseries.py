@@ -2,7 +2,7 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Exa DataSeries
+DataSeries
 ###################################
 The :class:`~exa.core.dataseries.DataSeries` object supports index aliases and
 units.
@@ -10,13 +10,12 @@ units.
 See Also:
     http://pandas.pydata.org/
 """
-import six
 import pandas as pd
-from exa.core.base import Base
-from exa.core.indexing import indexers
+from exa.core.base import DataObject
+#from exa.core.indexing import indexers
 
 
-class DataSeries(six.with_metaclass(Base, pd.Series)):
+class DataSeries(DataObject, pd.Series):    # Note the ordering
     """
     A series is a single valued n dimensional array.
 
@@ -26,24 +25,24 @@ class DataSeries(six.with_metaclass(Base, pd.Series)):
     multidimensional. The dimensions of a series are determined by its index.
     """
     _getters = ("compute", )
-    _metadata = ['name', 'units', 'aliases']
+    _metadata = ['name', 'units']
 
     @property
     def _constructor(self):
         return DataSeries
 
-    @property
-    def _base(self):
-        return pd.Series
+    def _asunit(self, unit):
+        """Convert units without error checking."""
+        f0, u0 = self.units.as_coeff_Mul()
+        f1, u1 = unit.as_coeff_Mul()
+        new = (self*np.float64(f0/f1)).__finalize__(self)
+        new.units = unit
+        return new
 
     def __init__(self, *args, **kwargs):
         units = kwargs.pop("units", None)
-        aliases = kwargs.pop("aliases", None)
         super(DataSeries, self).__init__(*args, **kwargs)
         self.units = units
-        self.aliases = aliases
 
 
-for name, indexer in indexers():          # Calls pandas machinery
-    setattr(DataSeries, name, None)           # Need to unreference existing indexer
-    DataSeries._create_indexer(name, indexer) # Prior to instantiation new indexer
+DataSeries._init()

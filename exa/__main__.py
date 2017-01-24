@@ -3,20 +3,19 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Launchers
-#############
-This module provides all front-facing command line actions. By default running
-exa starts exa's Jupyter notebook interface.
+App Launcher
+##############
+Launches a `Jupyter notebook`_ in Exa's root directory.
 """
 import argparse
-#from exa.app import ExaNotebook
+from exa.app import Notebook
 
 
 def main():
-    pass
-#    parser = argparse.ArgumentParser(description="The exa framework launcher.")
-    #args = parser.parse_args()
-#    ExaNotebook.launch_instance()
+    """Main application launcher."""
+    parser = argparse.ArgumentParser(description="Exa notebook app launcher.")
+    args = parser.parse_args()
+    Notebook.launch_instance()
 
 
 if __name__ == "__main__":

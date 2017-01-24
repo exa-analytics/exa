@@ -12,14 +12,14 @@ See Also:
 """
 import six
 import pandas as pd
-from exa.core.base import Base
-from exa.core.indexing import indexers
+#from exa.core.base import Base
+#from exa.core.indexing import indexers
 
 
-class DataFrame(six.with_metaclass(Base, pd.DataFrame)):
-    pass
+#class DataFrame(six.with_metaclass(Base, pd.DataFrame)):
+#    pass
 
 
-for name, indexer in indexers():          # Calls pandas machinery
-    setattr(DataFrame, name, None)           # Need to unreference existing indexer
-    DataFrame._create_indexer(name, indexer) # Prior to instantiation new indexer
+#for name, indexer in indexers():          # Calls pandas machinery
+#    setattr(DataFrame, name, None)           # Need to unreference existing indexer
+#    DataFrame._create_indexer(name, indexer) # Prior to instantiation new indexer

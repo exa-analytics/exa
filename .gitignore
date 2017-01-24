@@ -45,7 +45,7 @@ nosetests.xml
 coverage.xml
 *.mo
 *.pot
-*.log
+*.log*
 *.project
 *.pydevproject
 *.swp
