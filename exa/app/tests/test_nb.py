@@ -5,7 +5,7 @@
 Tests for :mod:`~exa.app.nb`
 ##################################
 """
-from notebook.notebookapp import NotebookApp
+from traitlets.traitlets import MetaHasTraits
 from exa.tester import UnitTester
 from exa.app.nb import Notebook
 
@@ -14,4 +14,4 @@ class TestNotebook(UnitTester):
     """Check the :class:`~exa.app.nb.Notebook` object."""
     def test_instance(self):
         """Type check."""
-        self.assertIsInstance(Notebook, NotebookApp)
+        self.assertIsInstance(Notebook, MetaHasTraits)

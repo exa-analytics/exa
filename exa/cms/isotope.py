@@ -74,8 +74,6 @@ class Isotope(six.with_metaclass(Meta, Base)):
         13
         >>> c.Z
         6
-        >>> c.strid
-        '13C'
     """
     A = Column(Integer, nullable=False)
     Z = Column(Integer, nullable=False)
