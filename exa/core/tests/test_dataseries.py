@@ -34,14 +34,20 @@ class TestDataSeries(UnitTester):
             self.s1.asunit(units.m)
 
 
-# We add test functions dynamically, we could have dynamically created test cases
+# Add test functions dynamically. Could instead dynamically create test cases
 def create_op_finalize_test(op):
     """This function creates the test below for every operation."""
     def test_op_finalize(self):
         """Test that finalize converts objects correctly on operations."""
-        self.assertIsInstance(getattr(self.s1, op)(1), DataSeries)  # constant
-        self.assertIsInstance(getattr(self.s1, op)(self.s0), DataSeries)  # pandas
-        self.assertIsInstance(getattr(self.s1, op)(self.s2), DataSeries)  # DataSeris
+        # Constants
+        test = getattr(self.s1, op)(1)
+        self.assertIsInstance(test, DataSeries)
+        # Pandas objects
+        test = getattr(self.s1, op)(self.s0)
+        self.assertIsInstance(test, DataSeries)
+        # DataObject(s)
+        test = getattr(self.s1, op)(self.s2)
+        self.assertIsInstance(test, DataSeries)
     return test_op_finalize
 
 
