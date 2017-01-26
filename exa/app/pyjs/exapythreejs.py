@@ -16,10 +16,15 @@ framework.
 .. _three.js: https://threejs.org/
 """
 import pythreejs as py3js
+from ipywidgets import register
+from traitlets import Unicode
 
 
 class Renderer(py3js.Renderer):
     """
     Custom Renderer (an instance of a widget) for the Exa framework.
     """
-    pass
+    _view_name = Unicode("RendererView").tag(sync=True)
+    _model_name = Unicode("RendererModel").tag(sync=True)
+    _view_module = Unicode("jupyter-exa").tag(sync=True)
+    _model_module = Unicode("jupyter-exa").tag(sync=True)

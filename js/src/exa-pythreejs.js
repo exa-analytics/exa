@@ -1,9 +1,12 @@
-// Copyright (c) 2015-2016, Exa Analytics Development Team
+// Copyright (c) 2015-2017, Exa Analytics Development Team
 // Distributed under the terms of the Apache License 2.0
 /*""""
-Exa-Three.js Adapter
+Exa-pythreejs Adapter
 =====================
-Description
+Pythreejs is a Python/JavaScript package that provide a low level interface to
+the three.js library. The three.js library can be used to render interactive
+applications within the broser using WebGL (among other technologies). This
+extension builds a top the pythrejs framework.
 */
 var widgets = require("jupyter-js-widgets");
 var _ = require("underscore");
@@ -11,7 +14,23 @@ var $ = require("jquery");
 var pythreejs = require("jupyter-threejs");
 var THREE = require("three");
 window.THREE = THREE;    // Allows importing three/*
-var base = require("./foo/base.js");
+
+class RendererView extends pythreejs.RendererView {
+
+}
+
+
+class RendererModel extends pythreejs.RendererModel {
+
+}
+
+
+module.exports = {
+    RendererView: RendererView,
+    RendererModel: RendererModel,
+};
+
+/*var base = require("./foo/base.js");
 
 
 // The DOM object is what is actually displayed in the (Jupyter) notebook
@@ -21,7 +40,7 @@ class RendererView extends widgets.DOMWidgetView {
     render() {
         this.value_changed();
         this.model.on("change:value", this.value_changed, this);
-    
+
 
     value_changed() {
         this.el.textContent = this.model.get("value");

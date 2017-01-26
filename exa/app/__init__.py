@@ -21,7 +21,7 @@ See Also:
 from exa.app import nb
 
 # Import sub-packages
-from exa.app import tests
+from exa.app import tests, pyjs
 
 # Import user/dev API
 from exa.app.nb import Notebook
