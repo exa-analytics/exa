@@ -88,6 +88,11 @@ var pythreejs = require("jupyter-threejs");
 
 
 var ExaRendererModel = pythreejs.RendererModel.extend({
+    constructor: function() {
+        console.log("custom model");
+        pythreejs.RendererModel.prototype.constructor.apply(this, arguments);
+    },
+
     defaults: _.extend({}, pythreejs.RendererModel.prototype.defaults, {
         _view_name: "RendererView",
         _model_name: "ExaRendererModel",
