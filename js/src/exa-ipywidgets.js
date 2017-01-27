@@ -23,14 +23,14 @@ var HelloWorldView = widgets.DOMWidgetView.extend({
 
 
 var HelloWorldModel = widgets.DOMWidgetModel.extend({
-    defaults: _.extend({}, widgets.DOMWidgetModel.prototype.defaults, {
-        _view_name: "HelloWorldView",
-        _model_name: "HelloWorldModel",
-        _view_module: "jupyter-exa",
-        _model_module: "jupyter-exa",
+//    defaults: _.extend({}, widgets.DOMWidgetModel.prototype.defaults, {
+//        _view_name: "TypoHelloWorldView",
+//        _model_name: "TypoHelloWorldModel",
+//        _view_module: "jupyter-exa",
+//        _model_module: "jupyter-exa",
 
-        value: "Hello World"
-    })
+//        value: "Hello World"
+//    })
 });
 
 
