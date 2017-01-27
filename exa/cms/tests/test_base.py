@@ -44,8 +44,8 @@ class TestBase(UnitTester):
         """
         reconfigure_session_factory()
         session = session_factory()
-        session.close()
         self.assertTrue(_config.engine is session_factory.kw['bind'])
+        session.close()
 
     def test_scoped_session(self):
         """Test the :func:`~exa.cms.base.scoped_session` context manager."""

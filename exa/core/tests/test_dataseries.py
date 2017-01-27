@@ -35,8 +35,8 @@ class TestDataSeries(UnitTester):
 
 
 # Add test functions dynamically. Could instead dynamically create test cases
-def create_op_finalize_test(op):
-    """This function creates the test below for every operation."""
+def create_optest(op):
+    """Create a test for a specific operation."""
     def test_op_finalize(self):
         """Test that finalize converts objects correctly on operations."""
         # Constants
@@ -55,10 +55,10 @@ for name, info in _op_descriptions.items():
     if name == None:
         continue
     op = "__{}__".format(name)
-    setattr(TestDataSeries, "test_op_finalize" + op, create_op_finalize_test(op))
+    setattr(TestDataSeries, "test_op_finalize" + op, create_optest(op))
     if info['reverse'] is not None:
         op = "__{}__".format(info['reverse'])
-        setattr(TestDataSeries, "test_op_finalize" + op, create_op_finalize_test(op))
+        setattr(TestDataSeries, "test_op_finalize" + op, create_optest(op))
 
 #    def test_interop(self):
 #        """Test interoperability with standard pandas objects."""

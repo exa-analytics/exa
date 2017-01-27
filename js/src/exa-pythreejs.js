@@ -12,81 +12,60 @@ var widgets = require("jupyter-js-widgets");
 var _ = require("underscore");
 var $ = require("jquery");
 var pythreejs = require("jupyter-threejs");
-var THREE = require("three");
-window.THREE = THREE;    // Allows importing three/*
-
-class RendererView extends pythreejs.RendererView {
-
-}
 
 
-class RendererModel extends pythreejs.RendererModel {
+var RendererView = pythreejs.RendererView.extend({
+    render: function() {
+        console.log("inside custom render func");
+//        console.log(this);
+//        this.camera = new window.THREE.PerspectiveCamera(
+//            this.model.get('fov'),
+//            this.model.get('aspect'),
+//            this.model.get('near'),
+//            this.model.get('far')
+//        );
+        console.log(this);
+        console.log(typeof this.camera === 'object');
+        console.log(Object.prototype.toString.call(this.scene));
+        console.log(Object.prototype.toString.call(this.camera));
+        console.log(Object.prototype.toString.call(this.camera.obj));
+        console.log(Object.prototype.toString.call(this.camera.prototype));
+        pythreejs.RendererView.prototype.render.call(this);
+    }
+});
+//
+//
+var RendererModel = pythreejs.RendererModel.extend({
+    defaults: _.extend({}, pythreejs.RendererModel.prototype.defaults, {
+        _view_name: "RendererView",
+        _model_name: "RendererModel",
+        _view_module: "jupyter-exa",
+        _model_module: "jupyter-exa"
+    })
+});
+//
+//
+console.log(pythreejs.RendererModel);
+console.log(RendererModel);
+console.log(pythreejs.RendererModel.prototype);
+console.log(RendererModel.prototype);
 
-}
+//var SceneView = pythreejs.SceneView; //.extend({});
+//
+//var SceneModel = pythreejs.SceneModel.extend({
+//    defaults: _.extend({}, pythreejs.SceneModel.prototype.defaults, {
+//        _view_name: "SceneView",
+//        _model_name: "SceneModel",
+//        _view_module: "jupyter-exa",
+//        _model_module: "jupyter-exa"
+//    })
+//});
 
 
 module.exports = {
     RendererView: RendererView,
-    RendererModel: RendererModel,
+    RendererModel: RendererModel
+//    SceneView: SceneView,
+//    SceneModel: SceneModel
 };
 
-/*var base = require("./foo/base.js");
-
-
-// The DOM object is what is actually displayed in the (Jupyter) notebook
-var RendererModel = base.createWidgetModel("Renderer", {"value": "renderer model"});
-
-class RendererView extends widgets.DOMWidgetView {
-    render() {
-        this.value_changed();
-        this.model.on("change:value", this.value_changed, this);
-
-
-    value_changed() {
-        this.el.textContent = this.model.get("value");
-    }
-}
-
-
-// All other objects are just Widgets
-class ThreeView extends widgets.WidgetView {
-}
-
-class ThreeModel extends widgets.WidgetModel {
-}
-
-
-//
-
-
-function generate_view(name) {
-    console.log("generate_view");
-//    console.log(THREE[name]);
-//    console.log(THREE[name].prototype);
- //   var obj = THREE[name];
- //   console.log(obj);
-
-    return {};
-}
-
-
-function build_api() {
-    console.log("building api");
-    var models = {RendererModel: RendererModel};
-    var views = {RendererView: RendererView};
-    console.log(THREE);
-    for (var attribute in THREE) {
-        if (THREE.hasOwnProperty(attribute)) {
-            console.log(attribute);
-        }
-    }
-    console.log("EDIT");
-    console.log(pythreejs);
-//    var obj = THREE.BoxGeometry();
-//    console.log(obj);
-    //var attributes = generate_view("BoxGeometry");
-
-    return _.extend({}, models, views);
-}
-
-module.exports = build_api();
