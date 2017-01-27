@@ -10,13 +10,13 @@ extension builds a top the pythrejs framework.
 */
 var widgets = require("jupyter-js-widgets");
 var _ = require("underscore");
-var $ = require("jquery");
+//var $ = require("jquery");
 var pythreejs = require("jupyter-threejs");
 
 
 var RendererView = pythreejs.RendererView.extend({
-    render: function() {
-        console.log("inside custom render func");
+//    render: function() {
+//        console.log("inside custom render func");
 //        console.log(this);
 //        this.camera = new window.THREE.PerspectiveCamera(
 //            this.model.get('fov'),
@@ -24,17 +24,22 @@ var RendererView = pythreejs.RendererView.extend({
 //            this.model.get('near'),
 //            this.model.get('far')
 //        );
-        console.log(this);
-        console.log(typeof this.camera === 'object');
-        console.log(Object.prototype.toString.call(this.scene));
-        console.log(Object.prototype.toString.call(this.camera));
-        console.log(Object.prototype.toString.call(this.camera.obj));
-        console.log(Object.prototype.toString.call(this.camera.prototype));
-        pythreejs.RendererView.prototype.render.call(this);
-    }
+//        console.log(this);
+//        console.log(typeof this);
+//        console.log(Object.prototype.toString.call(this));
+//        pythreejs.RendererView.prototype.render.call(this);
+//        console.log(this);
+//        console.log(typeof this);
+//        console.log(Object.prototype.toString.call(this));
+//        console.log(typeof this.camera === 'object');
+//        console.log(Object.prototype.toString.call(this.scene));
+//        console.log(Object.prototype.toString.call(this.camera));
+//        console.log(Object.prototype.toString.call(this.camera.obj));
+//        console.log(Object.prototype.toString.call(this.camera.prototype));
+//    }
 });
-//
-//
+
+
 var RendererModel = pythreejs.RendererModel.extend({
     defaults: _.extend({}, pythreejs.RendererModel.prototype.defaults, {
         _view_name: "RendererView",
@@ -43,8 +48,13 @@ var RendererModel = pythreejs.RendererModel.extend({
         _model_module: "jupyter-exa"
     })
 });
-//
-//
+
+
+console.log(pythreejs.RendererView);
+console.log(RendererView);
+console.log(pythreejs.RendererView.prototype);
+console.log(RendererView.prototype);
+
 console.log(pythreejs.RendererModel);
 console.log(RendererModel);
 console.log(pythreejs.RendererModel.prototype);

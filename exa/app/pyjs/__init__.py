@@ -7,7 +7,7 @@ base content inside of of a `Jupyter notebook`_) to custom widgets that allow
 users to visualize and interact with data.
 """
 # Import base modules
-from exa.app.pyjs import exapythreejs
+from exa.app.pyjs import exapythreejs, exaipywidgets
 
 # Import sub-packages
 from exa.app.pyjs import tests
