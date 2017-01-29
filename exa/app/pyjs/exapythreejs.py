@@ -22,9 +22,9 @@ from traitlets import Unicode
 
 class Renderer(py3js.Renderer):
     """Custom Renderer (an instance of a widget) for the Exa framework."""
-#    _view_name = Unicode("ExaRendererView").tag(sync=True)
+    _view_name = Unicode("ExaRendererView").tag(sync=True)
     _model_name = Unicode("ExaRendererModel").tag(sync=True)
-#    _view_module = Unicode("jupyter-exa").tag(sync=True)
+    _view_module = Unicode("jupyter-exa").tag(sync=True)
     _model_module = Unicode("jupyter-exa").tag(sync=True)
 
 

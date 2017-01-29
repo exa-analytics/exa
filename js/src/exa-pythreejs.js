@@ -86,6 +86,15 @@ var pythreejs = require("jupyter-threejs");
 //    })
 //});
 
+var ExaRendererView = pythreejs.RendererView.extend({
+    render: function() {
+        console.log("custom view");
+        pythreejs.RendererView.prototype.render.apply(this, arguments);
+        this.el.className = "jupyter-widget jupyter-exa";
+        console.log(this);
+    }
+});
+
 
 var ExaRendererModel = pythreejs.RendererModel.extend({
     constructor: function() {
@@ -94,15 +103,16 @@ var ExaRendererModel = pythreejs.RendererModel.extend({
     },
 
     defaults: _.extend({}, pythreejs.RendererModel.prototype.defaults, {
-        _view_name: "RendererView",
+        _view_name: "ExaRendererView",
         _model_name: "ExaRendererModel",
-        _view_module: "jupyter-three",
+        _view_module: "jupyter-exa",
         _model_module: "jupyter-exa"
     })
 });
 
 
 module.exports = {
+    ExaRendererView: ExaRendererView,
     ExaRendererModel: ExaRendererModel
 //    ExaRendererView: ExaRendererView
 //    ExaRendererModel: ExaRendererModel

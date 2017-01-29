@@ -6,5 +6,11 @@
 
 // Export widget models and views, and the npm package version number.
 var _ = require("underscore");
-module.exports = _.extend({}, require("./exa-pythreejs.js"), require("./exa-ipywidgets.js"));
+module.exports = _.extend(
+    {}, 
+    require("./exa-pythreejs.js"), 
+    require("./exa-ipywidgets.js"),
+    require("./exa-threejs.js"),
+    require("./exa-threeapp.js")
+);
 module.exports["version"] = require("../package.json").version;
