@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "The exa framework for data processing, analytics, and visualization.",
   "author": "Thomas J. Duignan and Alex Marchenko",
+  "license": "Apache-2.0",
   "main": "src/index.js",
   "repository": {
     "type": "git",

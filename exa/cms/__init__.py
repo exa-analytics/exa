@@ -9,8 +9,8 @@ framework.
 - :class:`~exa.cms.job.Job`: A single task, possibly within the context of project
 """
 # Import modules
-from exa.cms import (base, constant, isotope, unit, files, job, project, remote,
-                     mgmt)
+from exa.cms import (base, constant, isotope, unit, files, job, project, remote)
+#                     mgmt)
 
 # Import sub-packages
 from exa.cms import tests
@@ -26,4 +26,4 @@ from exa.cms.isotope import Isotope
 from exa.cms.unit import (Length, Mass, Time, Current, Amount, Luminosity,
                           Dose, Acceleration, Charge, Dipole, Energy, Force,
                           Frequency, MolarMass)
-from exa.cms.mgmt import db, tables
+#from exa.cms.mgmt import db, tables

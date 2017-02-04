@@ -33,8 +33,10 @@ from exa import cms, compute, core, tests, app
 from exa._version import __version__, version_info
 from exa._config import print_config
 from exa.mpl import sequential, diverging, qualitative
-from exa.cms import File, Job, Project, db
+from exa.cms import File, Job, Project#, db
 from exa.core import Editor, CSV#, DataSeries
+
+from exa.app.pyjs.threejs import Renderer
 
 
 def _jupyter_nbextension_paths():
