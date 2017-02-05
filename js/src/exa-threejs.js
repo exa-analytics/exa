@@ -5,37 +5,20 @@ Exa-three.js Adapter
 =====================
 */
 "use strict";
-var widgets = require("jupyter-js-widgets");
 var THREE = require("three");
-//var $ = require("jquery");
+var abc = require("./exa-abcwidgets.js");
 
 
-class RendererView extends widgets.DOMWidgetView {
-    render() {
+class RendererView extends abc.ABCView {
+    init() {
+        /*"""
+        init
+        ------------
+        Initialize the application
+        */
         var button = document.createElement("button");
-        button.value = "button";
-        button.text = "other";
         button.classList.add("button");
-        console.log(button);
-        var css = document.createElement("style");
-        css.innerHTML = ".button {\
-            background-color: #4CAF50; /* Green */\
-            border: none;\
-            color: black;\
-            padding: 15px 32px;\
-            text-align: center;\
-            text-decoration: none;\
-            display: inline-block;\
-            font-size: 20px;\
-            height: 100px;\
-            width: 300px;\
-            position: absolute;\
-            left: 0px;\
-            top: 0px;\
-            opacity: 0.5;\
-        }";
-        console.log(css);
-//        button.style = css;
+        console.log(this.css);
         this.camera = new THREE.PerspectiveCamera(75, 600/450, 1, 1000);
         this.camera.position.z = 500;
         this.scene = new THREE.Scene();
@@ -52,25 +35,21 @@ class RendererView extends widgets.DOMWidgetView {
             alpha: true
         });
         this.renderer.setSize(600, 400);
-        var self = this;
-        var el = $("<div/>").width(700).height(400).resizable({
-            aspectRatio: false,
-            resize: function(event, ui) {
-                self.el.width = ui.size.width;
-                self.el.height = ui.size.height;
-                self.renderer.setSize(self.el.width, self.el.height);
-                self.camera.aspect = self.el.width/self.el.height;
-                self.camera.updateProjectionMatrix();
-            },
-        });
-        el.append(this.renderer.domElement);
-        el.append(button);
-        el.append(css);
-        console.log(el);
-        this.setElement(el);
+        this.el.append(this.renderer.domElement);
+        this.el.append(button);
+//        el.append(css);
+        console.log(this);
+    }
+
+    launch() {
+        /*"""
+        launch
+        --------------
+        Start the web application
+        */
         this.renderer.render(this.scene, this.camera);
         this.animation();
-    };
+    }
     
     animation() {
         window.requestAnimationFrame(this.animation.bind(this));
@@ -79,13 +58,13 @@ class RendererView extends widgets.DOMWidgetView {
         this.mesh.position.y += 0.0005;
         this.mesh.position.z += 0.05;
         this.renderer.render(this.scene, this.camera);
-    };
+    }
 }
 
 
-class RendererModel extends widgets.DOMWidgetModel {
+class RendererModel extends abc.ABCModel {
     get defaults() {
-        return _.extend({}, widgets.DOMWidgetModel.prototype.defaults, {
+        return _.extend({}, abc.ABCModel.prototype.defaults, {
             _view_name: "RendererView",
             _view_module: "jupyter-exa",
             _model_name: "RendererModel",

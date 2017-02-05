@@ -7,15 +7,10 @@ sqlalchemy
 paramiko
 h5py
 pandas
-scikit-learn
-scikit-image
 sympy
 psutil
 notebook
 ipywidgets
-pythreejs
-blaze
-bokeh
 sphinx
 nose
 numba

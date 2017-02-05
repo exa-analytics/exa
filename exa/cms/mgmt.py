@@ -4,43 +4,19 @@
 """
 Database Management
 ##################################################
-Database table creation and database inspection is provided by this module.
+Initialize the database and add the tutorial notebooks to the exa directory.
+
+TODO blaze compat example
 """
 import os
-import blaze as bz
-import pandas as pd
 from exa import _config
 from exa.cms.base import Base, scoped_session
 from exa.cms.files import File
 
 
-def tables():
-    """Display all tables."""
-    return db.fields
-
-
-def tail(table, n=10, to_frame=False):
-    """
-    Extract the end of a table.
-
-    Args:
-        n (int): Number of entries to extract
-        to_frame (bool): Return a dataframe (default false)
-
-    Returns:
-        sliced: Blaze data object or pandas dataframe
-    """
-    sliced = db[table].sort().tail(n)
-    if to_frame:
-        return bz.odo(sliced, pd.DataFrame)
-    return sliced
-
-
 def init_db():
     """Initialize CMS tables."""
     Base.metadata.create_all(_config.engine)
-    global db
-    db = bz.Data(_config.engine)
 
 
 def init_tutorial():
@@ -54,5 +30,3 @@ def init_tutorial():
 if 'init_cms' in _config.config['dynamic']:
     init_db()
     init_tutorial()
-db = None
-init_db()

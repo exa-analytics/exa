@@ -1,9 +1,11 @@
 // Copyright (c) 2015-2017, Exa Analytics Development Team
 // Distributed under the terms of the Apache License 2.0
 /*""""
- * Subclassing example
+Subclassing example
+===================
 */
 "use strict";
+var THREE = require("three");
 var exathreejs = require("./exa-threejs.js");
 
 

@@ -36,7 +36,7 @@ from exa.mpl import sequential, diverging, qualitative
 from exa.cms import File, Job, Project#, db
 from exa.core import Editor, CSV#, DataSeries
 
-from exa.app.pyjs.threejs import Renderer
+from exa.app.threejs import Renderer, SubRenderer
 
 
 def _jupyter_nbextension_paths():

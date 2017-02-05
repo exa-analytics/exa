@@ -2,7 +2,7 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Wrapper for `three.js`_
+Abstract Base Widgets
 ##########################
 For 3D visualization in the webbrowser, `three.js`_ is a library that provides
 infrastructure to render objects using WebGL (among others). This module provides
@@ -15,19 +15,12 @@ from ipywidgets import DOMWidget
 from traitlets import Unicode
 
 
-class Renderer(DOMWidget):
+class ABCWidget(DOMWidget):
     """
+    Abstract base widget
     """
-    _view_name = Unicode("RendererView").tag(sync=True)
-    _model_name = Unicode("RendererModel").tag(sync=True)
+    _view_name = Unicode("ABCView").tag(sync=True)
     _view_module = Unicode("jupyter-exa").tag(sync=True)
+    _model_name = Unicode("ABCModel").tag(sync=True)
     _model_module = Unicode("jupyter-exa").tag(sync=True)
 
-
-class SubRenderer(Renderer):
-    """
-    """
-    _view_name = Unicode("SubRendererView").tag(sync=True)
-    _model_name = Unicode("SubRendererModel").tag(sync=True)
-    _view_module = Unicode("jupyter-exa").tag(sync=True)
-    _model_module = Unicode("jupyter-exa").tag(sync=True)
