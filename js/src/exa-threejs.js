@@ -18,15 +18,17 @@ class RendererView extends abc.ABCView {
         */
         var button = document.createElement("button");
         button.classList.add("button");
-        console.log(this.css);
+        button.style.position = "absolute";
+        button.style.top = "0px";
+        button.style.left = "0px";
+        console.log(button)
         this.camera = new THREE.PerspectiveCamera(75, 600/450, 1, 1000);
         this.camera.position.z = 500;
         this.scene = new THREE.Scene();
         this.geom = new THREE.IcosahedronGeometry(200, 1);
         this.mat = new THREE.MeshBasicMaterial({
             color: "red",
-            wireframe: true,
-            wireframelinewidth: 8
+            wireframe: true
         });
         this.mesh = new THREE.Mesh(this.geom, this.mat);
         this.scene.add(this.mesh);
@@ -37,7 +39,6 @@ class RendererView extends abc.ABCView {
         this.renderer.setSize(600, 400);
         this.el.append(this.renderer.domElement);
         this.el.append(button);
-//        el.append(css);
         console.log(this);
     }
 

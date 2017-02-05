@@ -14,23 +14,55 @@ var widgets = require("jupyter-js-widgets");
 
 
 // Default styles
-var buttons = ".button {\
-    background-color: grey;\
-    border: 1px;\
-    color: black;\
-    text-align: center;\
-    font-size: 16px;\
-    opacity: 0.5;\
-}";
+var button = {
+    "background-color": "grey",
+    "border": "1px",
+    "color": "black",
+    "text-align": "center",
+    "font-size": "16px",
+    "opacity": "0.5",
+    "width": "100px",
+    "height": "50px"
+};
+
+//var buttons = ".button {\
+//    background-color: grey;\
+//    border: 1px;\
+//    color: black;\
+//    text-align: center;\
+//    font-size: 16px;\
+//    opacity: 0.5;\
+//}";
 
 
-var styles = [buttons];
-var default_css = function() {
-    var css = document.createElement("style");
-    console.log(css);
-    css.innerHTML = styles.join("\n");
-    console.log(css);
-    return css
+var default_style_dict = {
+    button: button
+};
+
+function compile_css(style_dict) {
+    /*"""
+    compile_css
+    ==============
+    */
+    if (style_dict === undefined) {
+        style_dict = default_style_dict;
+    };
+    var css = "";
+    for (var cls in style_dict) {
+        if (style_dict.hasOwnProperty(cls)) {
+            css += "." + String(cls) + " {\n";
+            var style = style_dict[cls];
+            for (var sty in style) {
+                if (style.hasOwnProperty(sty)) {
+                    css += sty + ": " + String(style[sty]) + ";\n";
+                }
+            }
+            css += "}";
+        }
+    }
+    var style = document.createElement("style");
+    style.innerHTML = css;
+    return style;
 }
 
 
@@ -62,9 +94,12 @@ class ABCView extends widgets.DOMWidgetView {
                 self.resize(w, h);
             }
         });
-        this.css = default_css();
+        this.style_dict = default_style_dict;
+        console.log(this.style_dict);
         this.init();
-        this.el.append(this.css);
+        this.style = compile_css(this.style_dict);
+        console.log(this.style)
+        this.el.append(this.style);
         this.setElement(this.el);
         this.launch();
     }
@@ -125,8 +160,9 @@ class ABCModel extends widgets.DOMWidgetModel {
 module.exports = {
     "ABCView": ABCView,
     "ABCModel": ABCModel,
-    "default_css": default_css,
-    "buttons": buttons,
-    "styles": styles
+    "default_style_dict": default_style_dict,
+    "compile_css": compile_css,
+    "button": button,
+    "default_style_dict": default_style_dict
 };
 
