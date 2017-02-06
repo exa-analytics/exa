@@ -110,7 +110,7 @@ class Editor(object):
         .. _Regular expressions: https://en.wikipedia.org/wiki/Regular_expression
         """
         which = kwargs.pop('which', None)
-        flags = kwargs.pop('flags', re.MULTILINE|re.DOTALL)
+        flags = kwargs.pop('flags', re.MULTILINE)
         results = {}
         self_str = str(self)
         for pattern in patterns:
