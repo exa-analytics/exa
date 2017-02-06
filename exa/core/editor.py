@@ -110,7 +110,7 @@ class Editor(object):
         .. _Regular expressions: https://en.wikipedia.org/wiki/Regular_expression
         """
         which = kwargs.pop('which', None)
-        flags = kwargs.pop('flags', re.MULTILINE|re.DOTALL)
+        flags = kwargs.pop('flags', re.MULTILINE)
         results = {}
         self_str = str(self)
         for pattern in patterns:
@@ -524,7 +524,7 @@ def check_path(path, ignore_warning=False):
         result (bool): True if file path or warning ignored, false otherwise
     """
     try:
-        if (not ignore_warning or os.path.exists(path) or
+        if (ignore_warning or os.path.exists(path) or
             (len(path.split("\n")) == 1 and ("\\" in path or "/" in path))):
             return True
     except TypeError:
