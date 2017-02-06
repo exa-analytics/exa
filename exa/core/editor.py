@@ -411,20 +411,32 @@ class SectionsMeta(Meta):
 
 class Sections(six.with_metaclass(SectionsMeta, Editor)):
     """
-    An editor tailored for files that are composed of multiple, distinct sections,
-    each of which may be parsed individually. This editor can be thought of as
-    a "pre-parser" for complex files. Individual sections are then parsed by
-    :class:`~exa.core.editor.Section` objects. Only parsing functions required
-    to determine the sections of the file (see :func:`~exa.core.editor.Sections.parse`)
-    are required for this class and its subclasses.
+    A special editor like object tailored to parsing of files that consist of
+    multiple, distinct, regions. Each region corresponds to a
+    :class:`~exa.core.editor.Section` object that contains the appropriate
+    parsing functionality specific to (only) that region. Complex files' regions
+    may themselves be :class:`~exa.core.editor.Sections` objects.
+
+    Note:
+        Use the 'describe' property to see what data objects are available.
 
     See Also:
         :class:`~exa.core.editor.Section`
     """
+    name = None
+
     @property
     def delimiters(self):
-        """Section delimiters and other markers used in parsing sections."""
-        return {name: getattr(self, name) for name in vars(self) if name.startswith("_key_")}
+        """Describe the patterns used to disambiguate regions of the file."""
+        return [(name, getattr(self, name)) for name in vars(self) if name.startswith("_key_")]
+
+    @property
+    def describe(self):
+        """
+        Describe what section parsers and/or (sub)sections are handled by this
+        object.
+        """
+        return self.parsers
 
     def get_section_bounds(self, section):
         """
@@ -482,25 +494,21 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
 
             Sections.add_section_parsers(Section1, Section2, ...)
         """
-        if not hasattr(cls, "_parsers"):
-            cls._parsers = {}
-        cls._parsers.update({s.name: s for s in args})
+        cls.parsers.update({s.name: s for s in args})
 
 
 class Section(Editor):
     """
-    This editor can be considered a parser that converts a specific file or
-    section of a file that has a known structure into an data object compatible
-    with the exa framework. This class and those classes that subclass it are
-    where all parsing and data object creation functions belong.
+    An editor like object that corresponds to a specific and distinct region of
+    a file and contains parsing functionality tailored to this region. The
+    :class:`~exa.core.editor.Section` object can be used standalone or in concert
+    with the :class:`~exa.core.editor.Sections` object for parsing of complex
+    files with multiple regions.
 
     See Also:
         :class:`exa.core.editor.Sections`
     """
-    @abstractproperty
-    def name(self):
-        """File dependent identifier of the section; section title."""
-        pass
+    name = None # Must be defined in subclass
 
     @abstractmethod
     def parse(self):
@@ -524,7 +532,7 @@ def check_path(path, ignore_warning=False):
         result (bool): True if file path or warning ignored, false otherwise
     """
     try:
-        if (not ignore_warning or os.path.exists(path) or
+        if (ignore_warning or os.path.exists(path) or
             (len(path.split("\n")) == 1 and ("\\" in path or "/" in path))):
             return True
     except TypeError:
