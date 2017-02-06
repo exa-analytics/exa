@@ -24,7 +24,7 @@ writing. For large repetitive files, memoization can reduce the memory footprint
 (see the **as_interned** kwarg).
 """
 import os, re, sys, bz2, gzip, six
-from abc import abstractmethod, abstractproperty
+from abc import abstractmethod
 from copy import copy, deepcopy
 from collections import Counter
 from io import StringIO, TextIOWrapper
@@ -98,7 +98,7 @@ class Editor(object):
         Args:
             \*patterns: Regular expressions to search each line for
             which (str): If none, return values as (lineno, match), if "keys" return lineno only, if "values" return lines only
-            flags: Python re flags (e.g. re.MULTILINE)
+            flags: Python re flags (default re.MULTILINE)
 
         Returns:
             results (dict): Dictionary with pattern keys and list of (lineno, match) values
@@ -405,7 +405,6 @@ class Editor(object):
 class SectionsMeta(Meta):
     """Sections metaclass."""
     _getters = ["parse"]
-    parsers = dict
     sections = list
 
 
@@ -424,6 +423,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         :class:`~exa.core.editor.Section`
     """
     name = None
+    parsers = None
 
     @property
     def delimiters(self):
@@ -432,10 +432,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
 
     @property
     def describe(self):
-        """
-        Describe what section parsers and/or (sub)sections are handled by this
-        object.
-        """
+        """Describe section parsers and/or (sub)sections are handled by this object."""
         return self.parsers
 
     def get_section_bounds(self, section):
@@ -474,9 +471,6 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         start, end, name, number = self.get_section_bounds(section)
         return self._parsers[name](str(self[start:end]))
 
-    def describe(self):
-        raise NotImplementedError()
-
     @abstractmethod
     def parse(self):
         pass    # Must be defined in the subclass
@@ -494,6 +488,8 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
 
             Sections.add_section_parsers(Section1, Section2, ...)
         """
+        if cls.parsers is None:
+            cls.parsers = {}
         cls.parsers.update({s.name: s for s in args})
 
 
@@ -508,16 +504,18 @@ class Section(Editor):
     See Also:
         :class:`exa.core.editor.Sections`
     """
-    name = None # Must be defined in subclass
+    name = None # Defined in subclass
+    _data = None # Defined in subclass
+
+    @property
+    def describe(self):
+        return self._data
 
     @abstractmethod
     def parse(self):
         """
         """
         pass
-
-    def describe(self):
-        raise NotImplementedError()
 
 
 def check_path(path, ignore_warning=False):
