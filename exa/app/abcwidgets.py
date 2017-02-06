@@ -16,9 +16,7 @@ from traitlets import Unicode
 
 
 class ABCWidget(DOMWidget):
-    """
-    Abstract base widget
-    """
+    """Abstract base widget."""
     _view_name = Unicode("ABCView").tag(sync=True)
     _view_module = Unicode("jupyter-exa").tag(sync=True)
     _model_name = Unicode("ABCModel").tag(sync=True)

@@ -74,6 +74,10 @@ class TestEditor(UnitTester):
         os.remove(self.path + ".bz2")
         os.remove(self.path + ".iso-8859-1")
 
+    def test_check_path(self):
+        """Test :func:`~exa.core.editor.check_path`)."""
+        with self.assertRaises(TypeError)
+
     def test_editor_input_methods(self):
         """
         Test to make sure all the support input (**read_\***) were read in

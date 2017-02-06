@@ -11,6 +11,10 @@ a default stylesheet.
 */
 "use strict";
 var widgets = require("jupyter-js-widgets");
+var tests = require("./tests/test-exa-abcwidgets.js");
+console.log(tests);
+
+//var stuff = new tests.TestABCWidgets();
 
 
 // Default styles
@@ -25,24 +29,17 @@ var button = {
     "height": "50px"
 };
 
-//var buttons = ".button {\
-//    background-color: grey;\
-//    border: 1px;\
-//    color: black;\
-//    text-align: center;\
-//    font-size: 16px;\
-//    opacity: 0.5;\
-//}";
-
 
 var default_style_dict = {
     button: button
 };
 
+
 function compile_css(style_dict) {
     /*"""
     compile_css
     ==============
+    Compiles an Object (dict like) into HTML for a style tag (css).
     */
     if (style_dict === undefined) {
         style_dict = default_style_dict;
@@ -160,9 +157,8 @@ class ABCModel extends widgets.DOMWidgetModel {
 module.exports = {
     "ABCView": ABCView,
     "ABCModel": ABCModel,
-    "default_style_dict": default_style_dict,
     "compile_css": compile_css,
+    "default_style_dict": default_style_dict,
     "button": button,
-    "default_style_dict": default_style_dict
 };
 

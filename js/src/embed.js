@@ -8,6 +8,7 @@
 var _ = require("underscore");
 module.exports = _.extend(
     {}, 
+    require("./exa-tester.js"),
     require("./exa-abcwidgets.js"), 
     require("./exa-threejs.js"),
     require("./exa-threeapp.js")

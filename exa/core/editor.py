@@ -24,7 +24,7 @@ writing. For large repetitive files, memoization can reduce the memory footprint
 (see the **as_interned** kwarg).
 """
 import os, re, sys, bz2, gzip, six
-from abc import abstractmethod
+from abc import abstractmethod, abstractproperty
 from copy import copy, deepcopy
 from collections import Counter, OrderedDict
 from io import StringIO, TextIOWrapper
@@ -406,7 +406,7 @@ class SectionsMeta(Meta):
     """Sections metaclass."""
     _getters = ["parse"]
     parsers = dict
-    sections = OrderedDict
+    sections = list
 
 
 class Sections(six.with_metaclass(SectionsMeta, Editor)):
@@ -424,7 +424,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
     @property
     def delimiters(self):
         """Section delimiters and other markers used in parsing sections."""
-        return {name: getattr(self, name) for name in dir(self) if name.startswith("_key_")}
+        return {name: getattr(self, name) for name in vars(self) if name.startswith("_key_")}
 
     def get_section_bounds(self, section):
         """
@@ -497,11 +497,18 @@ class Section(Editor):
     See Also:
         :class:`exa.core.editor.Sections`
     """
-    def describe(self):
-        raise NotImplementedError()
+    @abstractproperty
+    def name(self):
+        """File dependent identifier of the section; section title."""
+        pass
 
+    @abstractmethod
     def parse(self):
-        """Parse all data objects."""
+        """
+        """
+        pass
+
+    def describe(self):
         raise NotImplementedError()
 
 
@@ -517,7 +524,7 @@ def check_path(path, ignore_warning=False):
         result (bool): True if file path or warning ignored, false otherwise
     """
     try:
-        if (ignore_warning or os.path.exists(path) or
+        if (not ignore_warning or os.path.exists(path) or
             (len(path.split("\n")) == 1 and ("\\" in path or "/" in path))):
             return True
     except TypeError:
