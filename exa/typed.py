@@ -34,8 +34,6 @@ a tuple with only the "compute" prefix listed. If "attr1" were not set, any
 attempt to get this attribute would first make a call to the "compute_attr1"
 function.
 """
-import six
-import warnings
 from abc import ABCMeta
 from exa.errors import AutomaticConversionError
 

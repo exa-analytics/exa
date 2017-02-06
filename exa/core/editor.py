@@ -26,7 +26,7 @@ writing. For large repetitive files, memoization can reduce the memory footprint
 import os, re, sys, bz2, gzip, six
 from abc import abstractmethod, abstractproperty
 from copy import copy, deepcopy
-from collections import Counter, OrderedDict
+from collections import Counter
 from io import StringIO, TextIOWrapper
 from exa.typed import Meta
 
@@ -444,7 +444,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
             name = section
             number = list(self.sections.keys()).index(section)
         start = self.sections[name]
-        for key, lineno in ed.sections.items():
+        for key, lineno in self.sections:
             if lineno > start and abs(lineno - start) < abs(end - start):
                 end = lineno
         return (start, end, name, number)
