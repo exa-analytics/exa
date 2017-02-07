@@ -300,7 +300,6 @@ def initialize():
     # Copy the tutorials
     source_dir = config['dynamic']['notebooks']
     dest_dir = config['paths']['notebooks']
-    print(source_dir, dest_dir)
     for source in glob(os.path.join(source_dir, "*.ipynb")):
         dest = os.path.join(dest_dir, os.path.basename(source))
         shutil.copy(source, dest)

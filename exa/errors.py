@@ -17,12 +17,14 @@ class ExaException(Exception):
     Exa exceptions allow for a default message. The message can be static or
     dynamic accepting both position and keyword arugments.
     """
-    default = = None
+    default = "None"
 
     def __init__(self, *args, **kwargs):
         level = kwargs.pop('level', 'info')
         msg = kwargs.pop('msg', self.default)
+        print(msg)
         if callable(msg):
+            print(*args, **kwargs)
             msg = msg(*args, **kwargs)
         super(ExaException, self).__init__(msg)
         if level == 'info':
@@ -44,4 +46,8 @@ class AutomaticConversionError(ExaException):
     See Also:
         :mod:`~exa.typed`.
     """
-    default = 'Automatic type conversion to type {} failed for "{}" with type {}.'.format
+    @staticmethod
+    def default(obj, typ):
+        msg = 'Automatic conversion to type {} failed for "{}" with type {}.'
+        ttyp = type(obj)
+        return msg.format(obj, typ, ttyp)
