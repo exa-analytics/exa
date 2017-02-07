@@ -17,6 +17,7 @@ from traitlets import Unicode
 
 class Renderer(ABCWidget):
     """
+    Test0
     """
     _view_name = Unicode("RendererView").tag(sync=True)
     _model_name = Unicode("RendererModel").tag(sync=True)
@@ -26,6 +27,7 @@ class Renderer(ABCWidget):
 
 class SubRenderer(Renderer):
     """
+    Test1
     """
     _view_name = Unicode("SubRendererView").tag(sync=True)
     _model_name = Unicode("SubRendererModel").tag(sync=True)

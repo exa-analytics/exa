@@ -27,7 +27,7 @@ try:
     from inspect import signature
 except ImportError:
     from inspect import getargspec as signature
-from exa.compute.compiler import compile_function
+#from exa.compute.compiler import compile_function
 
 
 _dispatched = dict()    # Global to keep track of all dispatched functions

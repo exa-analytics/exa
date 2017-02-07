@@ -12,7 +12,7 @@ from abc import abstractproperty, abstractmethod
 from sympy.core.mul import Mul
 from sympy.physics.units import Unit
 from exa.typed import Meta
-from exa.core.errors import UnitsError, MissingUnits
+from exa.core.errors import MissingUnits
 from exa.core.indexing import indexers
 
 

@@ -131,13 +131,12 @@ class NPM(Command):
         # update package data in case this created new files
         update_package_data(self.distribution)
 
-version_ns = {}
 with open(os.path.join(here, "exa", "_version.py")) as f:
-    exec(f.read(), {}, version_ns)
+    version = '.'.join(v.split('=')[1].strip()[1:-1].replace(" ", "").split(','))
 
 setup_args = {
     "name": "exa",
-    "version": version_ns["__version__"],
+    "version": version,
     "description": "The exa framework for data processing, analytics, and visualization.",
     "long_description": long_description,
     "package_data": {"data": ["*.json"], "html": ["*.html"], "static": ["*.css"]},
@@ -164,7 +163,7 @@ setup_args = {
     "author_email": "exa.data.analytics@gmail.com",
     "maintainer_email": "exa.data.analytics@gmail.com",
     "url": "https://exa-analytics.github.io",
-    "download_url": "https://github.com/exa-analytics/exa/tarball/v{}".format(version_ns["__version__"]),
+    "download_url": "https://github.com/exa-analytics/exa/tarball/v{}".format(version),
     "keywords": [
         "big data",
         "visualization",

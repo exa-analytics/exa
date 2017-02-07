@@ -13,8 +13,17 @@ logger = loggers['sys']
 
 
 class ExaException(Exception):
-    """Generic exa exception/error."""
-    def __init__(self, msg="default exception", level='info'):
+    """
+    Exa exceptions allow for a default message. The message can be static or
+    dynamic accepting both position and keyword arugments.
+    """
+    default = = None
+
+    def __init__(self, *args, **kwargs):
+        level = kwargs.pop('level', 'info')
+        msg = kwargs.pop('msg', self.default)
+        if callable(msg):
+            msg = msg(*args, **kwargs)
         super(ExaException, self).__init__(msg)
         if level == 'info':
             logger.info(msg)
@@ -35,8 +44,4 @@ class AutomaticConversionError(ExaException):
     See Also:
         :mod:`~exa.typed`.
     """
-    fmt = 'Automatic type conversion to type {} failed for "{}" with type {}.'
-
-    def __init__(self, obj, ptype):
-        msg = self.fmt.format(obj.__class__.__name__, type(obj), ptype)
-        super(AutomaticConversionError, self).__init__(msg, 'error')
+    default = 'Automatic type conversion to type {} failed for "{}" with type {}.'.format
