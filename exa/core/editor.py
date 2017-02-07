@@ -29,7 +29,7 @@ from abc import abstractmethod
 from copy import copy, deepcopy
 from collections import Counter
 from io import StringIO, TextIOWrapper
-from exa.typed import Meta, simple_function_factory, get_properties
+from exa.typed import Meta, simple_function_factory
 
 
 class Editor(object):

@@ -35,7 +35,7 @@ attempt to get this attribute would first make a call to the "compute_attr1"
 function.
 """
 from abc import ABCMeta
-from exa.errors import AutomaticConversionError
+from exa.errors import TypeConversionError
 
 
 def create_typed_attr(name, ptypes):
@@ -87,7 +87,7 @@ def create_typed_attr(name, ptypes):
         if isinstance(obj, ptypes) or obj is None:
             setattr(self, pname, obj)
         else:
-            raise AutomaticConversionError(obj, ptypes)
+            raise TypeConversionError(obj, ptypes)
 
     def deleter(self):
         """Property deleter."""
@@ -118,13 +118,23 @@ def simple_function_factory(fname, prefix, attr):
     return func
 
 
-def get_properties(clsobj):
-    """Get a list of property attribute names and types."""
-    props = []
-    for name, attr in vars(clsobj.__class__).items():
+def yield_property_types(obj):
+    """
+    Iterate over property names and type definitions.
+
+    Args:
+        obj: Class instance or definition
+
+    Returns:
+        iterator: List of (name, type) tuples
+    """
+    if not isinstance(obj, Meta):
+        obj = obj.__class__
+    mcs = obj.__class__
+    for name, attr in vars(obj).items():
         if isinstance(attr, property):
-            props.append((name, getattr(clsobj.__class__.__class__, name).__name__))
-    return props
+            # Get the attribute's type definition
+            yield (name, getattr(mcs, name))
 
 
 class Meta(ABCMeta):
@@ -143,10 +153,9 @@ class Meta(ABCMeta):
         converted into typed attributes.
         """
         # Strongly typed attributes
-        for name, definition in vars(mcs).items():
-            if not name.startswith("_") and isinstance(definition, (type, tuple, list)):
-                clsdict[name] = create_typed_attr(name, definition)
+        for name, definition in yield_property_types(mcs):
+            clsdict[name] = create_typed_attr(name, definition)
         # Methods
-        clsdict["_properties"] = get_properties
-        clsdict["_getters"] = mcs._getters
+        clsdict['_getters'] = mcs._getters
+        clsdict['_yield_properties'] = yield_property_types
         return super(Meta, mcs).__new__(mcs, name, bases, clsdict)
