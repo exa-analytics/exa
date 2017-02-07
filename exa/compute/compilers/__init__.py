@@ -9,9 +9,9 @@ This sub-package provides:
 .. _numba: http://numba.pydata.org/
 """
 # Import modules
-from exa.compute.compilers import nbcompiler
+#from exa.compute.compilers import nbcompiler
 
 # Import sub-packages
-from exa.compute.compilers import tests
+#from exa.compute.compilers import tests
 
 # Import user/dev API

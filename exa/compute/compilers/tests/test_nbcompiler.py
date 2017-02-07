@@ -5,13 +5,13 @@
 Tests for :mod:`~exa.compute.compilers.nbcompiler`
 ########################################################
 """
-from exa._config import config
-from exa.tester import UnitTester
-
-
-class TestNumbaCompiler(UnitTester):
-    """Tests for :mod:`~exa.compute.compilers.nbcompiler`."""
-    def setUp(self):
-        """Skip all tests if the "numba" package is not installed."""
-        if config['dynamic']['numba'] == 'false':
-            self.skipTest("Package 'numba' not available.")
+#from exa._config import config
+#from exa.tester import UnitTester
+#
+#
+#class TestNumbaCompiler(UnitTester):
+#    """Tests for :mod:`~exa.compute.compilers.nbcompiler`."""
+#    def setUp(self):
+#        """Skip all tests if the "numba" package is not installed."""
+#        if config['dynamic']['numba'] == 'false':
+#            self.skipTest("Package 'numba' not available.")

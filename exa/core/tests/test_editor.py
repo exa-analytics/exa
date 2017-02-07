@@ -9,7 +9,6 @@ related functions.
 """
 import os, bz2, gzip, six, shutil
 from types import GeneratorType
-from collections import OrderedDict
 import numpy as np
 from io import StringIO
 from uuid import uuid4
@@ -271,4 +270,4 @@ class TestSections(UnitTester):
     def test_sections(self):
         """Test that sections are automatically parsed."""
         s = self.ed.sections
-        self.assertIsInstance(s, OrderedDict)
+        self.assertIsInstance(s, list)

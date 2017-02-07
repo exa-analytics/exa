@@ -58,92 +58,92 @@ See Also:
 .. _GIL: https://wiki.python.org/moin/GlobalInterpreterLock
 .. _ufunc: https://docs.scipy.org/doc/numpy/reference/ufuncs.html
 """
-from functools import wraps
-from exa._config import config
-compilers = {'none': None}
-if config['dynamic']['numba'] == "true":
-    from exa.compute.compilers.nbcompiler import compiler as nb_compiler
-    compilers['numba'] = nb_compiler
-if 'numba' in compilers:
-    default_compiler = 'numba'
-else:
-    default_compiler = 'none'
-
-
-def available_compilers():
-    """Display available compilers."""
-    return compilers.keys()
-
-
-def check_memerr():
-    """
-    Decorator to check the function for a possible memory error based on the
-    function's memory complexity and size of input arguments.
-    """
-    pass
-
-
-def check_diskerr():
-    """
-    Decorator to check for possible disk usage error given the function's disk
-    usage complexity and arguments.
-    """
-    pass
-
-
-def returns(*otypes):
-    """
-    Decorator that attempts to convert function outputs to specified types.
-
-    By default, if conversion fails, the unconverted result is passed through.
-
-    Args:
-        otypes (tuple): Output type(s)
-
-    Returns:
-        func (function): Wrapped function
-
-    Raises:
-        TypeError: On failed conversion
-    """
-    def conv_func(func):
-        @wraps(func)
-        def func_wrapper(*args, **kwargs):
-            if len(otypes) == 0:
-                return func(*args, **kwargs)
-            elif len(otypes) == 1:
-                return otypes[0](func(*args, **kwargs))
-            return tuple([otypes[i](obj) for i, obj in enumerate(func(*args, **kwargs))])
-        return func_wrapper
-    return conv_func
-
-
-def compile_function(func, *itypes, **flags):
-    """
-    Compile a function using a specified backend compiler.
-
-    Args:
-        itypes (tuple): Tuple of argument types
-        otypes (tuple): Tuple of output type(s) or None
-        compiler (str): See :func:`~exa.compute.compilers.wrapper.available_compilers`
-        nosig (bool): Don't return signature (default false)
-        target (str): Computing target "cpu", "gpu"
-        core (str): One, or combination of "ram", "disk"
-        mp (str): One, or combination of "serial", "gilfree", "resources"
-
-    Returns:
-        sig, func: Tuple of function signature (tuple) and compiled function (function)
-    """
-    compiler = flags.pop("compiler", "none")
-    nosig = flags.pop("nosig", False)
-    try:
-        compiler = compilers[compiler]
-    except KeyError:
-        raise KeyError("No such compiler {} available.".format(compiler))
-    if compiler is None:
-        sig = ("cpu", "ram", "serial", ) + itypes
-    else:
-        sig, func = compiler(func, *itypes, **flags)
-    if nosig:
-        return func
-    return sig, func
+#from functools import wraps
+#from exa._config import config
+#compilers = {'none': None}
+#if config['dynamic']['numba'] == "true":
+#    from exa.compute.compilers.nbcompiler import compiler as nb_compiler
+#    compilers['numba'] = nb_compiler
+#if 'numba' in compilers:
+#    default_compiler = 'numba'
+#else:
+#    default_compiler = 'none'
+#
+#
+#def available_compilers():
+#    """Display available compilers."""
+#    return compilers.keys()
+#
+#
+#def check_memerr():
+#    """
+#    Decorator to check the function for a possible memory error based on the
+#    function's memory complexity and size of input arguments.
+#    """
+#    pass
+#
+#
+#def check_diskerr():
+#    """
+#    Decorator to check for possible disk usage error given the function's disk
+#    usage complexity and arguments.
+#    """
+#    pass
+#
+#
+#def returns(*otypes):
+#    """
+#    Decorator that attempts to convert function outputs to specified types.
+#
+#    By default, if conversion fails, the unconverted result is passed through.
+#
+#    Args:
+#        otypes (tuple): Output type(s)
+#
+#    Returns:
+#        func (function): Wrapped function
+#
+#    Raises:
+#        TypeError: On failed conversion
+#    """
+#    def conv_func(func):
+#        @wraps(func)
+#        def func_wrapper(*args, **kwargs):
+#            if len(otypes) == 0:
+#                return func(*args, **kwargs)
+#            elif len(otypes) == 1:
+#                return otypes[0](func(*args, **kwargs))
+#            return tuple([otypes[i](obj) for i, obj in enumerate(func(*args, **kwargs))])
+#        return func_wrapper
+#    return conv_func
+#
+#
+#def compile_function(func, *itypes, **flags):
+#    """
+#    Compile a function using a specified backend compiler.
+#
+#    Args:
+#        itypes (tuple): Tuple of argument types
+#        otypes (tuple): Tuple of output type(s) or None
+#        compiler (str): See :func:`~exa.compute.compilers.wrapper.available_compilers`
+#        nosig (bool): Don't return signature (default false)
+#        target (str): Computing target "cpu", "gpu"
+#        core (str): One, or combination of "ram", "disk"
+#        mp (str): One, or combination of "serial", "gilfree", "resources"
+#
+#    Returns:
+#        sig, func: Tuple of function signature (tuple) and compiled function (function)
+#    """
+#    compiler = flags.pop("compiler", "none")
+#    nosig = flags.pop("nosig", False)
+#    try:
+#        compiler = compilers[compiler]
+#    except KeyError:
+#        raise KeyError("No such compiler {} available.".format(compiler))
+#    if compiler is None:
+#        sig = ("cpu", "ram", "serial", ) + itypes
+#    else:
+#        sig, func = compiler(func, *itypes, **flags)
+#    if nosig:
+#        return func
+#    return sig, func
