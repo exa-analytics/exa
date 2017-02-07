@@ -93,8 +93,8 @@ class Dispatcher(object):
         for typ in itypes:
             if not isinstance(typ, type):
                 raise TypeError("Not a type: {}".format(typ))
-        sig, func = compile_function(func, *itypes, **flags)
-        self.functions[sig] = func
+        #sig, func = compile_function(func, *itypes, **flags)
+        #self.functions[sig] = func
 
     @property
     def signatures(self):

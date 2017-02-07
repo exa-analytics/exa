@@ -22,9 +22,7 @@ class ExaException(Exception):
     def __init__(self, *args, **kwargs):
         level = kwargs.pop('level', 'info')
         msg = kwargs.pop('msg', self.default)
-        print(msg)
         if callable(msg):
-            print(*args, **kwargs)
             msg = msg(*args, **kwargs)
         super(ExaException, self).__init__(msg)
         if level == 'info':
