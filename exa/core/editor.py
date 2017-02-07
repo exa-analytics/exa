@@ -24,11 +24,12 @@ writing. For large repetitive files, memoization can reduce the memory footprint
 (see the **as_interned** kwarg).
 """
 import os, re, sys, bz2, gzip, six
+import pandas as pd
 from abc import abstractmethod
 from copy import copy, deepcopy
 from collections import Counter
 from io import StringIO, TextIOWrapper
-from exa.typed import Meta
+from exa.typed import Meta, simple_function_factory
 
 
 class Editor(object):
@@ -315,11 +316,13 @@ class Editor(object):
             del self[i-k]
 
     def iterlines(self, start=0, stop=None, step=None):
-        """
-        Line generator.
-        """
+        """Line generator."""
         for line in self._lines[slice(start, stop, step)]:
             yield line
+
+    def to_stringio(self):
+        """Send to StringIO object."""
+        return StringIO(str(self))
 
     def __eq__(self, other):
         if isinstance(other, Editor) and self._lines == other._lines:
@@ -493,6 +496,21 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         cls.parsers.update({s.name: s for s in args})
 
 
+class SectionMeta(Meta):
+    """Metaclass for :class:`~exa.core.editor.Section` objects."""
+    _getters = ("parse", )
+    _attr_descr = None
+
+    def __new__(mcs, name, bases, clsdict):
+        for name, typ in vars(mcs).items():
+            if not name.startswith("_"):
+                f = simple_function_factory("parse", "parse", name)
+                clsdict[f.__name__] = f
+        clsdict['_attr_descr'] = mcs._attr_descr
+        clsdict['_getters'] = mcs._getters
+        return super(SectionMeta, mcs).__new__(mcs, name, bases, clsdict)
+
+
 class Section(Editor):
     """
     An editor like object that corresponds to a specific and distinct region of
@@ -501,15 +519,23 @@ class Section(Editor):
     with the :class:`~exa.core.editor.Sections` object for parsing of complex
     files with multiple regions.
 
+    .. code-block: Python
+
     See Also:
         :class:`exa.core.editor.Sections`
     """
     name = None # Defined in subclass
-    _data = None # Defined in subclass
 
     @property
     def describe(self):
-        return self._data
+        """Description of data attributes associated with this parser."""
+        description = {}
+        for name, typ in self._properties():
+            description[name] = (self._attr_descr[name], typ)
+        descr = pd.DataFrame.from_dict(description, orient='index')
+        descr.columns = ["description", "type"]
+        descr.index.name = "attribute"
+        return descr
 
     @abstractmethod
     def parse(self):

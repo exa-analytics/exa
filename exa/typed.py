@@ -96,6 +96,28 @@ def create_typed_attr(name, ptypes):
     return property(getter, setter, deleter)
 
 
+def simple_function_factory(fname, prefix, attr):
+    """
+    Create a simple function of the following form:
+
+    .. code-block: Python
+
+        def prefix_attr(self):
+            self.fname()
+
+        # Running
+        simple_function_factory('parse_all', 'parse', 'section')
+        # Returns
+        def parse_section(self):
+            self.parse_all()
+
+    """
+    def func(self, *args, **kwargs):
+        getattr(self, fname)(*args, **kwargs)
+    func.__name__ = "_".join((prefix, attr))
+    return func
+
+
 class Meta(ABCMeta):
     """
     An abstract base class that supports strongly typed class attributes via
@@ -104,6 +126,14 @@ class Meta(ABCMeta):
     See Also:
         :func:`~exa.typed.create_typed_attr`
     """
+    def _properties(self):
+        """Get a list of property attribute names and types."""
+        props = []
+        for name, attr in vars(self.__class__).items():
+            if isinstance(attr, property):
+                props.append((name, getattr(self.__class__.__class__, name).__name__))
+        return props
+
     def __new__(mcs, name, bases, clsdict):
         """
         At runtime the class definition is modified; all public variables are
