@@ -35,6 +35,11 @@ except ImportError:
         long_description = f.read()
 with open("requirements.txt") as f:
     dependencies = f.read().splitlines()
+with open(os.path.join(here, "exa", "_version.py")) as f:
+    v = f.readlines()[-2]
+    v = v.split('=')[1].strip()[1:-1]
+    version = '.'.join(v.replace(" ", "").split(","))
+
 
 def js_prerelease(command, strict=False):
     """decorator for building minified js/css prior to another command"""
@@ -61,6 +66,7 @@ def js_prerelease(command, strict=False):
             command.run(self)
             update_package_data(self.distribution)
     return DecoratedCommand
+
 
 def update_package_data(distribution):
     """update package_data to catch changes during setup"""
@@ -131,8 +137,6 @@ class NPM(Command):
         # update package data in case this created new files
         update_package_data(self.distribution)
 
-with open(os.path.join(here, "exa", "_version.py")) as f:
-    version = '.'.join(v.split('=')[1].strip()[1:-1].replace(" ", "").split(','))
 
 setup_args = {
     "name": "exa",
