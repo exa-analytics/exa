@@ -118,6 +118,15 @@ def simple_function_factory(fname, prefix, attr):
     return func
 
 
+def get_properties(clsobj):
+    """Get a list of property attribute names and types."""
+    props = []
+    for name, attr in vars(clsobj.__class__).items():
+        if isinstance(attr, property):
+            props.append((name, getattr(clsobj.__class__.__class__, name).__name__))
+    return props
+
+
 class Meta(ABCMeta):
     """
     An abstract base class that supports strongly typed class attributes via
@@ -126,22 +135,18 @@ class Meta(ABCMeta):
     See Also:
         :func:`~exa.typed.create_typed_attr`
     """
-    def _properties(self):
-        """Get a list of property attribute names and types."""
-        props = []
-        for name, attr in vars(self.__class__).items():
-            if isinstance(attr, property):
-                props.append((name, getattr(self.__class__.__class__, name).__name__))
-        return props
+    _getters = ()
 
     def __new__(mcs, name, bases, clsdict):
         """
         At runtime the class definition is modified; all public variables are
         converted into typed attributes.
         """
-        for k, v in vars(mcs).items():
-            if k.startswith("_") and not k.startswith("__"):
-                clsdict[k] = v    # _priv attributes are added directly
-            elif isinstance(v, (type, tuple, list)):
-                clsdict[k] = create_typed_attr(k, v)  # strongly typed
+        # Strongly typed attributes
+        for name, definition in vars(mcs).items():
+            if not name.startswith("_") and isinstance(definition, (type, tuple, list)):
+                clsdict[name] = create_typed_attr(name, definition)
+        # Methods
+        clsdict["_properties"] = get_properties
+        clsdict["_getters"] = mcs._getters
         return super(Meta, mcs).__new__(mcs, name, bases, clsdict)

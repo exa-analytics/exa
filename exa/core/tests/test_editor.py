@@ -259,7 +259,8 @@ class MockSections(Sections):
 
     def parse(self):
         """This function must be implemneted for a specific (sections) file."""
-        self.sections = list(enumerate(self.find(self._key_marker, which='keys')[self._key_marker]))
+        self.sections = list(enumerate(self.find(self._key_marker,
+                                                 which='keys')[self._key_marker]))
 
 
 class TestSections(UnitTester):

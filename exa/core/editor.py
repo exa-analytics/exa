@@ -29,7 +29,7 @@ from abc import abstractmethod
 from copy import copy, deepcopy
 from collections import Counter
 from io import StringIO, TextIOWrapper
-from exa.typed import Meta, simple_function_factory
+from exa.typed import Meta, simple_function_factory, get_properties
 
 
 class Editor(object):
@@ -406,9 +406,20 @@ class Editor(object):
 
 
 class SectionsMeta(Meta):
-    """Sections metaclass."""
-    _getters = ["parse"]
+    """
+    Metaclass that automatically generates functions.
+    """
+    _getters = ("parse", )
+    _attr_descriptions = {"sections": "List of sections"}
     sections = list
+
+    def __new__(mcs, name, bases, clsdict):
+        for name, definition in vars(mcs).items():
+            if not name.startswith("_") and isinstance(definition, (type, tuple, list)):
+                f = simple_function_factory("parse", "parse", name)
+                clsdict[f.__name__] = f
+        clsdict["_attr_descriptions"] = mcs._attr_descriptions
+        return super(SectionsMeta, mcs).__new__(mcs, name, bases, clsdict)
 
 
 class Sections(six.with_metaclass(SectionsMeta, Editor)):
@@ -426,14 +437,12 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         :class:`~exa.core.editor.Section`
     """
     name = None
-    parsers = None
+    parsers = {}
 
-    @property
     def delimiters(self):
         """Describe the patterns used to disambiguate regions of the file."""
         return [(name, getattr(self, name)) for name in vars(self) if name.startswith("_key_")]
 
-    @property
     def describe(self):
         """Describe section parsers and/or (sub)sections are handled by this object."""
         return self.parsers
@@ -476,11 +485,8 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
 
     @abstractmethod
     def parse(self):
-        pass    # Must be defined in the subclass
-
-    def parse_sections(self):
-        """For automatic section parsing."""
-        self.parse()    # For convenience edit the parse method only.
+        """Section identification algorithm belongs here."""
+        pass
 
     @classmethod
     def add_section_parsers(cls, *args):
@@ -491,27 +497,17 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
 
             Sections.add_section_parsers(Section1, Section2, ...)
         """
-        if cls.parsers is None:
-            cls.parsers = {}
         cls.parsers.update({s.name: s for s in args})
 
 
-class SectionMeta(Meta):
+
+class SectionMeta(SectionsMeta):
     """Metaclass for :class:`~exa.core.editor.Section` objects."""
     _getters = ("parse", )
-    _attr_descr = None
-
-    def __new__(mcs, name, bases, clsdict):
-        for name, typ in vars(mcs).items():
-            if not name.startswith("_"):
-                f = simple_function_factory("parse", "parse", name)
-                clsdict[f.__name__] = f
-        clsdict['_attr_descr'] = mcs._attr_descr
-        clsdict['_getters'] = mcs._getters
-        return super(SectionMeta, mcs).__new__(mcs, name, bases, clsdict)
+    _attr_descriptions = None
 
 
-class Section(Editor):
+class Section(six.with_metaclass(SectionMeta, Editor)):
     """
     An editor like object that corresponds to a specific and distinct region of
     a file and contains parsing functionality tailored to this region. The
@@ -524,14 +520,14 @@ class Section(Editor):
     See Also:
         :class:`exa.core.editor.Sections`
     """
-    name = None # Defined in subclass
+    name = None
 
-    @property
     def describe(self):
         """Description of data attributes associated with this parser."""
         description = {}
-        for name, typ in self._properties():
-            description[name] = (self._attr_descr[name], typ)
+        for name, attr in vars(self.__class__).items():
+            if isinstance(attr, property):
+                description[name] = (self._attr_descriptions[name], getattr(self.__class__.__class__, name).__name__)
         descr = pd.DataFrame.from_dict(description, orient='index')
         descr.columns = ["description", "type"]
         descr.index.name = "attribute"
@@ -539,8 +535,7 @@ class Section(Editor):
 
     @abstractmethod
     def parse(self):
-        """
-        """
+        """The parsing algorithm, specific to this section, belongs here."""
         pass
 
 
