@@ -135,14 +135,20 @@ def create_typed_attr(name, ptypes):
 
     def getter(self):
         fmt = "{}{}".format
-        value = getattr(self, pname)
+        value = None
+        if hasattr(self, pname):
+            value = getattr(self, pname)
         if value is None:
             for prefix in self._getters:
                 cmd = fmt(prefix, pname)
                 if hasattr(self, cmd):
                     # Call the function and set as needed
                     value = getattr(self, cmd)()
-                    setattr(self, name, value)
+                    if value is not None:
+                        # Call the setter if necessary
+                        setattr(self, pname, value)
+                    else:
+                        return getattr(self, pname)
                     break
         return value
 

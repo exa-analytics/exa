@@ -73,8 +73,8 @@ class Editor(object):
         """
         csnt = r"{{[\w\d]*}}"
         tmpl = r"{[\w\d]*}"
-        constants = [match[2:-2] for match in self.regex(csnt, which='values')[csnt]]
-        templates = [match[1:-1] for match in self.regex(tmpl, which='values')[tmpl]]
+        constants = [match[2:-2] for match in self.regex(csnt, which='text')[csnt]]
+        templates = [match[1:-1] for match in self.regex(tmpl, which='text')[tmpl]]
         return sorted(set(templates).difference(constants))
 
     @property
@@ -92,7 +92,7 @@ class Editor(object):
         .. _String formatting: https://docs.python.org/3.6/library/string.html
         """
         csnt = r"{{[\w\d]*}}"
-        constants = [match[2:-2] for match in self.regex(csnt, which='values')[csnt]]
+        constants = [match[2:-2] for match in self.regex(csnt, which='text')[csnt]]
         return sorted(constants)
 
     def regex(self, *patterns, **kwargs):
@@ -183,9 +183,9 @@ class Editor(object):
             for i in range(start, stop, inc):
                 if pattern in str(self[i]):
                     self.cursor = i
-                    if which == "keys":
+                    if which == "lineno":
                         return i
-                    elif which == "values":
+                    elif which == "text":
                         return str(self[i])
                     else:
                         return (i, str(self[i]))
@@ -195,11 +195,10 @@ class Editor(object):
         cls = self.__class__
         lines = self._lines[:]
         as_interned = copy(self.as_interned)
-        name = copy(self.name)
         nprint = copy(self.nprint)
         metadata = deepcopy(self.metadata)
-        enc = copy(self.encoding)
-        return cls(lines, as_interned, nprint, name, metadata, enc)
+        encoding = copy(self.encoding)
+        return cls(lines, as_interned, nprint, metadata, encoding)
 
     def format(self, *args, **kwargs):
         """
@@ -370,16 +369,15 @@ class Editor(object):
     def __getitem__(self, key):
         if isinstance(key, six.string_types):
             return getattr(self, key)
-        kwargs = {'nprint': self.nprint, 'description': self.description,
-                  'name': self.name, 'meta': self.meta, 'encoding': self.encoding,
-                  'as_interned': self.as_interned}
+        kwargs = {'nprint': self.nprint, 'metadata': self.metadata,
+                  'encoding': self.encoding, 'as_interned': self.as_interned}
         return self.__class__(self._lines[key], **kwargs)
 
     def __setitem__(self, line, value):
         self._lines[line] = value
 
     def __init__(self, data, as_interned=False, nprint=30, description=None,
-                 name=None, meta=None, encoding='utf-8', ignore_warning=False):
+                 metadata=None, encoding='utf-8', ignore_warning=False):
         filepath = None
         if check_path(data, ignore_warning):
             self._lines = read_file(data, as_interned, encoding)
@@ -394,17 +392,15 @@ class Editor(object):
             self._lines = data._lines
         else:
             raise TypeError('Unknown type for arg data: {}'.format(type(data)))
-        self.name = name
-        self.description = description
-        self.meta = meta
+        if metadata is None:
+            metadata = {"description": description}
+        self.metadata = metadata
         self.nprint = 30
         self.as_interned = as_interned
         self.encoding = encoding
         self.cursor = 0
-        if self.meta is None and filepath is not None:
-            self.meta = {'filepath': filepath}
-        elif filepath is not None and 'filepath' not in self.meta:
-            self.meta['filepath'] = filepath
+        if filepath is not None:
+            self.metadata['filepath'] = filepath
 
     def __repr__(self):
         r = ''

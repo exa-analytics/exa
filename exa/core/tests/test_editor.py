@@ -97,7 +97,7 @@ class TestEditor(UnitTester):
         cnst = u"{[\w\d]*}"
         self.assertEqual(len(self.from_file.regex(cnst)[cnst]), 2)
         cnst = u"{[\w\d]*}"
-        self.assertEqual(len(self.from_file.regex(cnst, which='keys')[cnst]), 2)
+        self.assertEqual(len(self.from_file.regex(cnst, which='lineno')[cnst]), 2)
 
     def test_head_tail(self):
         """
@@ -158,7 +158,7 @@ class TestEditor(UnitTester):
         """Test :func:`~exa.core.editor.Editor.replace`."""
         rp0 = "This string is used as the test for the editor class."
         rp1 = "replacement"
-        self.from_file.replace(rp0, rp1)
+        self.from_file.replace(rp0, rp1, inplace=True)
         self.assertEqual(str(self.from_file[0]), rp1)
         self.from_file.replace(rp1, rp0)
 
@@ -166,16 +166,16 @@ class TestEditor(UnitTester):
         """Test :func:`~exa.core.editor.Editor.find`."""
         rp = "That was a blank line"
         self.assertEqual(len(self.from_file.find(rp)[rp]), 2)
-        self.assertEqual(len(self.from_file.find(rp, which="keys")[rp]), 2)
-        self.assertEqual(len(self.from_file.find(rp, which="values")[rp]), 2)
+        self.assertEqual(len(self.from_file.find(rp, which="lineno")[rp]), 2)
+        self.assertEqual(len(self.from_file.find(rp, which="text")[rp]), 2)
 
     def test_find_next(self):
         """Test :func:`~exa.core.editor.Editor.find_next`."""
         rp = "That was a blank line"
-        self.assertEqual(self.from_file.find_next(rp, "keys", True), 6)  # Cursor 0 -> 6
-        self.assertEqual(self.from_file.find_next(rp, "keys"), 2)        # 6 -> 2
-        self.assertEqual(self.from_file.find_next(rp, "keys"), 6)        # 2 -> 6
-        self.assertEqual(self.from_file.find_next(rp, "values"), rp)     # 2 -> 6
+        self.assertEqual(self.from_file.find_next(rp, "lineno", True), 6)  # Cursor 0 -> 6
+        self.assertEqual(self.from_file.find_next(rp, "lineno"), 2)        # 6 -> 2
+        self.assertEqual(self.from_file.find_next(rp, "lineno"), 6)        # 2 -> 6
+        self.assertEqual(self.from_file.find_next(rp, "text"), rp)     # 2 -> 6
         self.assertEqual(self.from_file.find_next(rp), (6, rp))
 
     def test_concat(self):
@@ -254,7 +254,7 @@ class MockSections(Sections):
     def parse(self):
         """This function must be implemneted for a specific (sections) file."""
         self.sections = list(enumerate(self.find(self._key_marker,
-                                                 which='keys')[self._key_marker]))
+                                                 which='lineno')[self._key_marker]))
 
 
 class TestSections(UnitTester):
