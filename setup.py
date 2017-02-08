@@ -50,7 +50,6 @@ def js_prerelease(command, strict=False):
                 # sdist, nothing to do
                 command.run(self)
                 return
-
             try:
                 self.distribution.run_command("jsdeps")
             except Exception as e:
@@ -78,11 +77,8 @@ def update_package_data(distribution):
 
 class NPM(Command):
     description = "install package.json dependencies using npm"
-
     user_options = []
-
     node_modules = os.path.join(node_root, "node_modules")
-
     targets = [
         os.path.join(here, "build", "widgets", "extension.js"),
         os.path.join(here, "build", "widgets", "index.js")
@@ -105,8 +101,8 @@ class NPM(Command):
             return False
 
     def should_run_npm_install(self):
-        package_json = os.path.join(node_root, "package.json")
-        node_modules_exists = os.path.exists(self.node_modules)
+#        package_json = os.path.join(node_root, "package.json")
+#        node_modules_exists = os.path.exists(self.node_modules)
         return self.has_npm()
 
     def run(self):
@@ -143,7 +139,7 @@ setup_args = {
     "version": version,
     "description": "The exa framework for data processing, analytics, and visualization.",
     "long_description": long_description,
-    "package_data": {"data": ["*.json"], "html": ["*.html"], "static": ["*.css"]},
+    "package_data": {"data": ["*.json"]},
     "include_package_data": True,
     "entry_points": {"console_scripts": ["exa=exa.__main__:main"]},
     "data_files": [
@@ -168,30 +164,16 @@ setup_args = {
     "maintainer_email": "exa.data.analytics@gmail.com",
     "url": "https://exa-analytics.github.io",
     "download_url": "https://github.com/exa-analytics/exa/tarball/v{}".format(version),
-    "keywords": [
-        "big data",
-        "visualization",
-        "analytics",
-    ],
+    "keywords": ["visualization", "analytics", "framework"],
     "classifiers": [
         "Development Status :: 3 - Alpha",
         "Environment :: Web Environment",
-        "Framework :: IPython",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
-        "Intended Audience :: Financial and Insurance Industry",
-        "Intended Audience :: Healthcare Industry",
-        "Intended Audience :: Information Technology",
-        "Intended Audience :: Legal Industry",
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
-        "Natural Language :: English",
-        "Topic :: Scientific/Engineering",
-        "Topic :: Multimedia :: Graphics",
+        "Natural Language :: English"
     ]
 }
 
