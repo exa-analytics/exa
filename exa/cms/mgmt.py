@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Database Management
+Management Functionality
 ##################################################
-Initialize the database and add the tutorial notebooks to the exa directory.
-
-TODO blaze compat example
+The content management system requires initialization functions and features
+which are provided by this module.
 """
 import os
 from exa import _config

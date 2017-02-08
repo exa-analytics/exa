@@ -4,14 +4,11 @@
 """
 DataSeries
 ###################################
-The :class:`~exa.core.dataseries.DataSeries` object supports index aliases and
-units.
-
 See Also:
     http://pandas.pydata.org/
 """
 import pandas as pd
-from exa.core.base import DataObject
+from exa.core.dataobj import DataObject
 #from exa.core.indexing import indexers
 
 

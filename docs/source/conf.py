@@ -75,7 +75,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "exa"
-copyrite = "Copyright (c) 2015-2016, Exa Analytics Development Team"
+copyrite = "Copyright (c) 2015-2017, Exa Analytics Development Team"
 author = "Thomas J. Duignan and Alex Marchenko"
 
 # The version info for the project you"re documenting, acts as replacement for
@@ -166,7 +166,7 @@ html_logo = "_static/logo.png"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+html_static_path = ["_static", "../../notebooks"]
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -255,7 +255,7 @@ latex_documents = [(master_doc, "exa.tex", "Exa Documentation",
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-latex_logo = "source/_static/logo.png"
+latex_logo = "_static/logo.png"
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
@@ -296,7 +296,7 @@ texinfo_documents = [
   (master_doc, "exa", "Exa Documentation",
    author, "Thomas J. Duignan and Alex Marchenko",
    "The exa framework for data management, processing, and visualization",
-   "Copyright (c) 2015-2016, Exa Analytics Development Team")
+   "Copyright (c) 2015-2017, Exa Analytics Development Team")
 ]
 
 # Documents to append as an appendix to all manuals.

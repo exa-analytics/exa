@@ -1,10 +1,8 @@
-The exa framework for data, processing, analytics, and visualization.
+[![exa logo](docs/source/_static/logo.png)](https://exa-analytics.github.io)  
 
-Package Install
----------------
 
-**Prerequisites**
-- [node](http://nodejs.org/)
+# Installation
+Note that [npm](http://nodejs.org/) is required.
 
 ```bash
 npm install --save jupyter-exa

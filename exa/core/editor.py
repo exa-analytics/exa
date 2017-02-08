@@ -304,7 +304,7 @@ class Editor(object):
 
         """
         lines = []
-        for i, line in enumerate(self):
+        for line in self:
             while pattern in line:
                 line = line.replace(pattern, replacement)
             lines.append(line)
@@ -423,15 +423,21 @@ class Editor(object):
 
 class SectionsMeta(Meta):
     """
-    Metaclass that automatically generates functions.
+    Metaclass that automatically generates parsing function wrappers.
+
+    The default paradigm for :class:`~exa.core.editor.Sections` and
+    :class:`~exa.core.editor.Section` objectss is that a the ``parse``
+    method is responsible for parsing all data objects; individual
+    ``parse_dataobj`` like functions simply call the main ``parse``
+    method.
     """
     _getters = ("parse", )
     _attr_descriptions = {"sections": "List of sections"}
     sections = list
 
     def __new__(mcs, name, bases, clsdict):
-        for attr_name, definition in yield_typed(mcs):
-            f = simple_function_factory("parse", "parse", attr_name)
+        for attr in yield_typed(mcs):
+            f = simple_function_factory("parse", "parse", attr[0])
             clsdict[f.__name__] = f
         clsdict["_attr_descriptions"] = mcs._attr_descriptions
         return super(SectionsMeta, mcs).__new__(mcs, name, bases, clsdict)
@@ -445,22 +451,32 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
     parsing functionality specific to (only) that region. Complex files' regions
     may themselves be :class:`~exa.core.editor.Sections` objects.
 
-    Note:
-        Use the 'describe' property to see what data objects are available.
-
     See Also:
         :class:`~exa.core.editor.Section`
     """
-    name = None
-    parsers = {}
+    name = None    # Subclass should set this!
+    _parsers = {}
+
+    @property
+    def parsers(self):
+        return self._parsers
 
     def delimiters(self):
-        """Describe the patterns used to disambiguate regions of the file."""
+        """Describes the patterns used to disambiguate regions of the file."""
         return [(name, getattr(self, name)) for name in vars(self) if name.startswith("_key_")]
 
     def describe(self):
         """Describe section parsers and/or (sub)sections are handled by this object."""
-        return self.parsers
+        print("Note that parameters should be prefixed with '_key_' when accessed.")
+        data = {}
+        for key, item in self.parsers.items():
+            params = [n.replace("_key_", "") for n in vars(item) if n.startswith("_key_")]
+            data[key] = (", ".join(params), item)
+        df = pd.DataFrame.from_dict(data, orient='index')
+        df.index.name = "Identifier"
+        df.columns = ["Parameters", "Class"]
+        df.columns.name = "Sections Object"
+        return df
 
     def get_section_bounds(self, section):
         """
@@ -512,8 +528,9 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
 
             Sections.add_section_parsers(Section1, Section2, ...)
         """
-        cls.parsers.update({s.name: s for s in args})
-
+        if cls.parsers is None:
+            cls.parsers = {}
+        cls._parsers.update({s.name: s for s in args})
 
 
 class SectionMeta(SectionsMeta):
@@ -530,8 +547,6 @@ class Section(six.with_metaclass(SectionMeta, Editor)):
     with the :class:`~exa.core.editor.Sections` object for parsing of complex
     files with multiple regions.
 
-    .. code-block: Python
-
     See Also:
         :class:`exa.core.editor.Sections`
     """
@@ -539,15 +554,14 @@ class Section(six.with_metaclass(SectionMeta, Editor)):
 
     def describe(self):
         """Description of data attributes associated with this parser."""
-        description = {}
-        for name, attr in self._yield_typed():
-#        for name, attr in vars(self.__class__).items():
-#            if isinstance(attr, property):
-            description[name] = (self._attr_descriptions[name], attr)
-        descr = pd.DataFrame.from_dict(description, orient='index')
-        descr.columns = ["description", "type"]
-        descr.index.name = "attribute"
-        return descr
+        dfiption = {}
+        for name, types in self._yield_typed():
+            dfiption[name] = (self._attr_descriptions[name], types)
+        df = pd.DataFrame.from_dict(dfiption, orient='index')
+        df.columns = ["Data Description", "Data Type"]
+        df.index.name = "Attribute"
+        df.columns.name = "Section Object"
+        return df
 
     @abstractmethod
     def parse(self):

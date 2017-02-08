@@ -7,12 +7,10 @@
 #################################
 *A framework for data management, processing, and visualization.*
 
-This package provides a data management, processing, analytics, and
-visualization framework built atop of the `PyData`_ stack. Although it is the
-main dependency of packages tailored to specific data industries, it can also
-be used in a standalone fashion for data management, exploration, and
-visualization, and is especially useful where relationships between discrete
-(and/or analytical) data sets are present.
+This package is built atop the `PyData`_ stack, with specific attention to 
+`pandas`_ and the `Jupyter notebook`_. The former handles organization of 
+numerical and other data in memory while the latter provides an interactive
+user interface.
 
 
 .. toctree::
@@ -35,3 +33,5 @@ visualization, and is especially useful where relationships between discrete
 
 .. _Exa Analytics Framework: https://exa-analytics.github.io
 .. _PyData: http://pydata.org/
+.. _pandas: http://pandas.pydata.org/
+.. _Jupyter notebook: https://jupyter.org/

@@ -1,6 +1,6 @@
 {
   "name": "jupyter-exa",
-  "version": "0.0.1",
+  "version": "0.4.0",
   "description": "The exa framework for data processing, analytics, and visualization.",
   "author": "Thomas J. Duignan and Alex Marchenko",
   "license": "Apache-2.0",

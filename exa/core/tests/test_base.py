@@ -2,14 +2,12 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Tests for :mod:`~exa.core.base`
+Tests for :mod:`~exa.core.dataobj`
 #############################################
-Test Exa's data object metaclass (:class:`~exa.core.base.Meta`) and the indexer
-aliasing class (:class:`~exa.core.base.Aliases`).
 """
 import six
 from exa.tester import UnitTester
-from exa.core.base import DataObject
+from exa.core.dataobj import DataObject
 
 
 class TestDataObject(UnitTester):

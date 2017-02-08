@@ -5,3 +5,5 @@
 ########################
 Getting Started
 ########################
+Exa provides objects that are useful at all stages of a data pipeline. They
+are outlined below starting from files on disk. 

@@ -134,23 +134,24 @@ def create_typed_attr(name, ptypes):
         ptypes = tuple(ptypes)
 
     def getter(self):
-        fmt = "{}{}".format
         value = None
-        if hasattr(self, pname):
-            value = getattr(self, pname)
-        if value is None:
+        # If not set or set to none, try to compute the value on-the-fly
+        if not hasattr(self, pname) or getattr(self, pname) is None:
             for prefix in self._getters:
-                cmd = fmt(prefix, pname)
+                cmd = "{}{}".format(prefix, pname)
+                # Get the name of the compute function
                 if hasattr(self, cmd):
-                    # Call the function and set as needed
                     value = getattr(self, cmd)()
+                    # If the compute function returns a value
                     if value is not None:
-                        # Call the setter if necessary
+                        # Set it
                         setattr(self, pname, value)
-                    else:
-                        return getattr(self, pname)
+                        return value
                     break
-        return value
+            # If the attribute wasn't set or is still none, return none
+            if not hasattr(self, pname) or getattr(self, pname) is None:
+                return None
+        return getattr(self, pname)
 
     def setter(self, obj):
         # Attempt to convert types
@@ -204,8 +205,8 @@ def yield_typed(obj):
     Returns:
         iterator: List of (name, types) tuples
     """
-    #if not isinstance(obj, Meta):
-    #    obj = obj.__class__
+    if not isinstance(obj, type):
+        obj = obj.__class__
     mcs = obj.__class__
     for name, attr in vars(obj).items():
         if not name.startswith("_"):

@@ -28,6 +28,7 @@ target/
 .settings/
 js/node_modules/
 exa/static/
+node_modules/
 
 
 # Compiled
