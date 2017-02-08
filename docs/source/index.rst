@@ -1,4 +1,4 @@
-.. Copyright (c) 2015-2016, Exa Analytics Development Team
+.. Copyright (c) 2015-2017, Exa Analytics Development Team
 .. Distributed under the terms of the Apache License 2.0
 
 
@@ -30,7 +30,7 @@ visualization, and is especially useful where relationships between discrete
     :caption: Technical Info
 
     concepts.rst
-    api.rst
+..    api.rst
 
 
 .. _Exa Analytics Framework: https://exa-analytics.github.io
