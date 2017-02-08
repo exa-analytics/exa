@@ -5,24 +5,31 @@
 ########################
 API
 ########################
-This section provides a complete description of the framework API. A description
-of important framework concepts can also be found within this documentation.
+The application program interface (API) is the syntax by which a user or developer
+interacts with the code. A full listing of source code documentation is given in
+the following pages. Additional ways of getting this information interactively are
+as follows.
+
+.. code-block:: python
+
+    help(exa.Editor)
+    exa.Editor?      # In Jupyter notebook
+
+Users may want to consult the :ref:`examples-label` page for most common usage.
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Basic Objects
+
+    exa/01_init.rst
+    exa/02_err.rst
+    exa/03_mcs.rst
+    exa/04_util.rst
 
 
 .. toctree::
     :maxdepth: 1
-    :caption: Base Functionality
-
-..    base/main.rst
-..    base/config.rst
-..    base/typed.rst
-..    base/testing.rst
-..    base/utilities.rst
-
-
-.. toctree::
-    :maxdepth: 1
-    :caption: Core Objects
+    :caption: Data Objects
 
 ..    core/main.rst
 ..    core/editor.rst
@@ -40,7 +47,7 @@ of important framework concepts can also be found within this documentation.
 
 .. toctree::
     :maxdepth: 1
-    :caption: Computation
+    :caption: Data Computation
 
 ..    compute/main.rst
 ..    compute/dispatch.rst

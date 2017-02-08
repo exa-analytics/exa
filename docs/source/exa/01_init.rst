@@ -7,3 +7,9 @@ Configuration and Logging
 #########################
 .. automodule:: exa.__init__
     :members:
+
+.. automodule:: exa._config
+    :members:
+
+.. automodule:: exa._version
+    :members:
