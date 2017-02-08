@@ -38,6 +38,8 @@ user interface.
     app.rst
     js.rst
 
+.. include:: _static/out.md
+
 .. _Exa Analytics Framework: https://exa-analytics.github.io
 .. _PyData: http://pydata.org/
 .. _pandas: http://pandas.pydata.org/
