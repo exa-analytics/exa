@@ -7,18 +7,18 @@ visualization. It leverages the Python data stack (`PyData`_) and uses the
 `Jupyter Notebook`_ as a frontend. Data specific applications can be built
 atop the exa package.
 
-- :mod:`~exa.app.__init__`: Jupyter notebook frontend
-- :mod:`~exa.cms.__init__`: Content management system
-- :mod:`~exa.compute.__init__`: Dispatching and support for computation
-- :mod:`~exa.core.__init__`: Core classes - Editor and Container
-- :mod:`~exa.__main__`: Application launchers
-- :mod:`~exa._config`: Configuration
-- :mod:`~exa._version`: Version information
-- :mod:`~exa.errors`: Base error handling
-- :mod:`~exa.mpl`: Wrappers for static plotting
-- :mod:`~exa.tester`: Support for unit and doc tests
-- :mod:`~exa.tex`: LaTeX support
-- :mod:`~exa.typed`: Strongly typed abstract base class
+- :mod:`exa.app.__init__`: Jupyter notebook frontend
+- :mod:`exa.cms.__init__`: Content management system
+- :mod:`exa.compute.__init__`: Data computation
+- :mod:`exa.core.__init__`: Data objects
+- :mod:`exa.__main__`: Application launchers
+- :mod:`exa._config`: Application configuration
+- :mod:`exa._version`: Version information
+- :mod:`exa.errors`: Error handling
+- :mod:`exa.mpl`: Matplotlib wrappers
+- :mod:`exa.tester`: Support for unit and doc tests
+- :mod:`exa.tex`: Text manipulation utilities
+- :mod:`exa.typed`: Strongly typed abstract base class
 
 .. _PyData: http://pydata.org/
 .. _Jupyter notebook: http://jupyter.org/
@@ -46,8 +46,8 @@ def _jupyter_nbextension_paths():
     .. _cookiecutter: https://github.com/jupyter/widget-cookiecutter
     """
     return [{
-        'section': 'notebook',
-        'src': '../build/widgets',
-        'dest': 'jupyter-exa',
-        'require': 'jupyter-exa/extension'
+        'section': "notebook",
+        'src': "../build/widgets",
+        'dest': "jupyter-exa",
+        'require': "jupyter-exa/extension"
     }]

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Apache License 2.0
 /*""""
 Abstract Base Classes for Exa Widgets
-========================================
+#######################################
 Every ipywidgets DOMWidget is composed of two JavaScript parts, a model, which 
 describes the data that the widget interacts with from the Python backend, and
 a view, which defines the visual representation of the model's data. This
@@ -11,10 +11,6 @@ a default stylesheet.
 */
 "use strict";
 var widgets = require("jupyter-js-widgets");
-var tests = require("./tests/test-exa-abcwidgets.js");
-console.log(tests);
-
-//var stuff = new tests.TestABCWidgets();
 
 
 // Default styles
@@ -37,9 +33,10 @@ var default_style_dict = {
 
 function compile_css(style_dict) {
     /*"""
-    compile_css
-    ==============
-    Compiles an Object (dict like) into HTML for a style tag (css).
+    .. function:: compile_css(style_dict)
+        
+        :param: style_dict: Dict like object containing style tag and value
+        :returns: Style element (CSS)
     */
     if (style_dict === undefined) {
         style_dict = default_style_dict;
@@ -67,7 +64,7 @@ function compile_css(style_dict) {
 class ABCView extends widgets.DOMWidgetView {
     /*"""
     ABCView
-    ========================
+    ```````````````````````
     An abstract base class for a DOMWidgetView object (the object that actually
     gets rendererd in the browser by the ipywidgets infrastructure).
     */

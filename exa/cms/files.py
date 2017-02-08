@@ -55,8 +55,8 @@ class File(Name, Time, Sha256UID, Base):
         projects = []
         for job in self.jobs:
             projects += job.projects
-        return projects
+        return list(sorted(set(projects)))
 
     @property
     def list_jobs(self):
-        return self.jobs
+        return list(sorted(set(self.jobs)))

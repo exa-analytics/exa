@@ -63,10 +63,7 @@ class TestBase(UnitTester):
         :func:`~exa.cms.base.BaseMeta.get_by_name`, and
         :func:`~exa.cms.base.BaseMeta.get_by_uid`.
         """
-        self.assertEqual(self.file.name, "exa_tutorial")
-        self.assertTrue(len(File.get_by_name("exa_tutorial")) > 0)
-        self.assertTrue(File.get_by_uid(File[1].uid).name, "exa_tutorial")
-        self.assertTrue(len(File['exa_tutorial']) > 0)
+        self.assertEqual("ipynb", self.file.ext)
         self.assertIsInstance(File[self.file.uid], File)
         with self.assertRaises(KeyError):
             File[-1]

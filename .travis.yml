@@ -18,6 +18,8 @@ install:
   - conda install --yes -c cpcloud npm
   - conda install --yes coverage
   - pip install sphinxcontrib-autoanysrc travis-sphinx codacy-coverage recommonmark
+  - npm install jsdoc
+  - npm install jsdoc-sphinx
   - python setup.py install
 script:
   - nosetests --with-coverage

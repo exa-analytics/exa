@@ -6,6 +6,8 @@
 App Launcher
 ##############
 Launches a `Jupyter notebook`_ in Exa's root directory.
+
+.. _Jupyter notebook: https://jupyter.org
 """
 import argparse
 from exa.app import Notebook
@@ -18,5 +20,5 @@ def main():
     Notebook.launch_instance()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

@@ -8,7 +8,6 @@ Test Exa's abstract base class, which supports strongly typed attributes.
 Note that an example of usage of this metaclass is provided by this test.
 """
 import six
-#from abc import abstractmethod
 from exa.tester import UnitTester
 from exa.typed import Meta
 

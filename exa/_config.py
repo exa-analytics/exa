@@ -77,9 +77,9 @@ class LogFormat(logging.Formatter):
     """
     spacing = '                                     '
     log_basic = '%(asctime)19s - %(levelname)8s'
-    debug_format = """%(asctime)19s - %(levelname)8s - %(pathname)s:%(lineno)d
-                                     %(message)s"""
-    info_format = """%(asctime)19s - %(levelname)8s - %(message)s"""
+    debug_format = '''%(asctime)19s - %(levelname)8s - %(pathname)s:%(lineno)d
+                                     %(message)s'''
+    info_format = '%(asctime)19s - %(levelname)8s - %(message)s'
     log_formats = {logging.DEBUG: debug_format, logging.INFO: info_format,
                    logging.WARNING: info_format, logging.ERROR: debug_format,
                    logging.CRITICAL: debug_format}
@@ -124,13 +124,13 @@ def create_logger(name):
     """
     def head(n=10, out=sys.stdout):
         # Custom head function that we attach to the logging.Logger class
-        with open(config["logging"][name], 'r') as f:
+        with open(config['logging'][name], 'r') as f:
             lines = u"".join(f.readlines()[:n])
         out.write(lines)
 
     def tail(n=10, out=sys.stdout):
         # Custom tail function that we attach to the logging.Logger class
-        with open(config["logging"][name], 'r') as f:
+        with open(config['logging'][name], 'r') as f:
             lines = u"".join(f.readlines()[-n:])
         out.write(lines)
 
@@ -256,7 +256,7 @@ def reconfigure(rootname=".exa"):
     root = logging.getLogger()
     map(root.removeHandler, root.handlers[:])
     map(root.removeFilter, root.filters[:])
-    for name in config["logging"].keys():
+    for name in config['logging'].keys():
         if name.endswith("log"):
             loggers[name.replace("log", "")] = create_logger(name)
     if init_flag:

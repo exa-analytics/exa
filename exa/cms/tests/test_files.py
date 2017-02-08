@@ -4,8 +4,10 @@
 """
 Tests for :mod:`~exa.cms.files`
 #############################################
+Test that files can be added to the appropriate table and that methods of the
+:class:`~exa.cms.files.File` object work correctly.
 """
-import os
+import six, os
 from exa import _config
 from exa.tester import UnitTester
 from exa.cms.base import session_factory
@@ -28,18 +30,19 @@ class TestFiles(UnitTester):
         with self.assertRaises(OSError):
             File.from_path("random_name_that_does_not_exist")
 
-    def test_tutorial_exists(self):
-        """Test to make sure the default tutorial exists."""
-        fp = os.path.join(_config.config['paths']['notebooks'], 'exa_tutorial.ipynb')
-        if not os.path.exists(fp):
-            self.fail(str(OSError("Missing exa_tutorial.ipynb at {}".format(fp))))
-        fp0 = File[1]
-        self.assertEqual(fp0.name, "exa_tutorial")
-
     def test_file_entry_present(self):
         """Test to ensure that the tutorial is the first entry in the db."""
         f = self.session.query(File).get(self.file.pkid)
         self.assertEqual(f.uid, self.file.uid)
+
+    def test_properties(self):
+        """Test that properties return the correct types."""
+        obj = self.file.path
+        self.assertIsInstance(obj, six.string_types)
+        obj = self.file.list_projects
+        self.assertIsInstance(obj, list)
+        obj = self.file.list_jobs
+        self.assertIsInstance(obj, list)
 
     def tearDown(self):
         """Clean up."""
