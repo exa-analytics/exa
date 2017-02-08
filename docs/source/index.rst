@@ -28,7 +28,7 @@ user interface.
     :caption: Technical Info
 
     concepts.rst
-..    api.rst
+    api.rst
 
 
 .. _Exa Analytics Framework: https://exa-analytics.github.io

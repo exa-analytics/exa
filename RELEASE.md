@@ -9,7 +9,7 @@ git add -A
 git commit -m "message"
 git push
 ```
-Make a pull request (PR). Once accepted it will be tagged.
+Make a pull request (PR). Once accepted the organization will be tag a new release.
 ```bash
 git tag -a X.X.X -m "message"
 git push --tags
@@ -17,7 +17,7 @@ git push --tags
 
 
 # Release on PyPI Testing
-Publish to `TestPyPI`_
+Publish to `TestPyPI`_ (~/.pypirc required).
 ```bash
 python setup.py register -r pypitest    # run once
 python setup.py sdist upload -r pypitest
@@ -26,7 +26,7 @@ python setup.py bdist_wheel upload -r pypitest
 
 
 # Release on PyPI
-Publish to `PyPI`_.
+Publish to `PyPI`_ (~/.pypirc required).
 ```bash
 python setup.py register -r pypi     # run once
 python setup.py sdist upload -r pypi

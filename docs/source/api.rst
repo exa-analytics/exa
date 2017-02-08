@@ -13,37 +13,37 @@ of important framework concepts can also be found within this documentation.
     :maxdepth: 1
     :caption: Base Functionality
 
-    base/main.rst
-    base/config.rst
-    base/typed.rst
-    base/testing.rst
-    base/utilities.rst
+..    base/main.rst
+..    base/config.rst
+..    base/typed.rst
+..    base/testing.rst
+..    base/utilities.rst
 
 
 .. toctree::
     :maxdepth: 1
-    :caption: Containers and Editors
+    :caption: Core Objects
 
-    core/main.rst
-    core/editor.rst
+..    core/main.rst
+..    core/editor.rst
 
 
 .. toctree::
     :maxdepth: 1
     :caption: Content Management
 
-    cms/main.rst
-    cms/cmm.rst
-    cms/misc.rst
-    cms/static.rst
+..    cms/main.rst
+..    cms/cmm.rst
+..    cms/misc.rst
+..    cms/static.rst
 
 
 .. toctree::
     :maxdepth: 1
     :caption: Computation
 
-    compute/main.rst
-    compute/dispatch.rst
-    compute/compilers/main.rst
-    compute/algorithms/main.rst
-    compute/queues/main.rst
+..    compute/main.rst
+..    compute/dispatch.rst
+..    compute/compilers/main.rst
+..    compute/algorithms/main.rst
+..    compute/queues/main.rst
