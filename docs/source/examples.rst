@@ -5,3 +5,7 @@
 ########################
 Examples
 ########################
+
+.. toctree::
+    
+    notebooks/python.ipynb
