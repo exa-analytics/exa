@@ -7,7 +7,7 @@ Management Functionality
 The content management system requires initialization functions and features
 which are provided by this module.
 """
-import os
+from glob import glob
 from exa import _config
 from exa.cms.base import Base, scoped_session
 from exa.cms.files import File
@@ -20,10 +20,10 @@ def init_db():
 
 def init_tutorial():
     """Create the tutorial notebook."""
-    fp = os.path.join(_config.config['paths']['notebooks'], 'exa_tutorial.ipynb')
-    with scoped_session() as session:
-        tutorial = File.from_path(fp)
-        session.add(tutorial)
+    for fp in glob(_config.config['paths']['notebooks'] + "/*.ipynb"):
+        with scoped_session() as session:
+            tutorial = File.from_path(fp)
+            session.add(tutorial)
 
 
 if 'init_cms' in _config.config['dynamic']:

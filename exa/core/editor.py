@@ -440,6 +440,7 @@ class SectionsMeta(Meta):
             f = simple_function_factory("parse", "parse", attr[0])
             clsdict[f.__name__] = f
         clsdict["_attr_descriptions"] = mcs._attr_descriptions
+        clsdict["_parsers"] = {}
         return super(SectionsMeta, mcs).__new__(mcs, name, bases, clsdict)
 
 
@@ -454,12 +455,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
     See Also:
         :class:`~exa.core.editor.Section`
     """
-    name = None    # Subclass should set this!
-    _parsers = {}
-
-    @property
-    def parsers(self):
-        return self._parsers
+    name = None       # Subclass should set this!
 
     def delimiters(self):
         """Describes the patterns used to disambiguate regions of the file."""
@@ -469,7 +465,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         """Describe section parsers and/or (sub)sections are handled by this object."""
         print("Note that parameters should be prefixed with '_key_' when accessed.")
         data = {}
-        for key, item in self.parsers.items():
+        for key, item in self._parsers.items():
             params = [n.replace("_key_", "") for n in vars(item) if n.startswith("_key_")]
             data[key] = (", ".join(params), item)
         df = pd.DataFrame.from_dict(data, orient='index')
@@ -522,24 +518,16 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
     @classmethod
     def add_section_parsers(cls, *args):
         """
-        Add section parsers to the editor class.
+        Add section parsers classes.
 
         .. code-block:
 
             Sections.add_section_parsers(Section1, Section2, ...)
         """
-        if cls.parsers is None:
-            cls.parsers = {}
         cls._parsers.update({s.name: s for s in args})
 
 
-class SectionMeta(SectionsMeta):
-    """Metaclass for :class:`~exa.core.editor.Section` objects."""
-    _getters = ("parse", )
-    _attr_descriptions = None
-
-
-class Section(six.with_metaclass(SectionMeta, Editor)):
+class Section(six.with_metaclass(SectionsMeta, Editor)):
     """
     An editor like object that corresponds to a specific and distinct region of
     a file and contains parsing functionality tailored to this region. The
