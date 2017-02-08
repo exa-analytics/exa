@@ -6,7 +6,7 @@ if "%SPHINXBUILD%" == "" (
 	set SPHINXBUILD=sphinx-build
 )
 set BUILDDIR=build
-set ALLSPHINXOPTS=-d %BUILDDIR%/doctrees %SPHINXOPTS% source
+set ALLSPHINXOPTS=-j 4 -d %BUILDDIR%/doctrees %SPHINXOPTS% source
 set I18NSPHINXOPTS=%SPHINXOPTS% source
 if NOT "%PAPER%" == "" (
 	set ALLSPHINXOPTS=-D latex_paper_size=%PAPER% %ALLSPHINXOPTS%
@@ -55,7 +55,7 @@ goto sphinx_ok
 
 :sphinx_python
 
-set SPHINXBUILD=python -m sphinx.__init__
+set SPHINXBUILD=python -m sphinx.__init__ 
 %SPHINXBUILD% 2> nul
 if errorlevel 9009 (
 	echo.

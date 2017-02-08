@@ -17,6 +17,7 @@ nose
 numba
 six
 blosc
+pandoc
 nbsphinx
 recommonmark
 sphinxcontrib-autoanysrc

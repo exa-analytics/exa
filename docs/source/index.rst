@@ -29,6 +29,7 @@ user interface.
 
     concepts.rst
     api.rst
+    _static/exa_tutorial.ipynb
 
 
 .. _Exa Analytics Framework: https://exa-analytics.github.io

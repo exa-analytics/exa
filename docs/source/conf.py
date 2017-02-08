@@ -44,8 +44,9 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
-    "sphinxcontrib.autoanysrc",
-    "nbsphinx"
+    "sphinxcontrib.autoanysrc",                          # JavaScript autodocs
+    'IPython.sphinxext.ipython_console_highlighting',    # see https://github.com/spatialaudio/nbsphinx/issues/24
+    "nbsphinx"                                           # ipynb autodocs
 ]
 
 # sphinx.ext.napoleon settings
@@ -105,7 +106,7 @@ language = None
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ["_build", "build", "**.ipynb_checkpoints"]
+exclude_patterns = ["_build", "**.ipynb_checkpoints"]
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
