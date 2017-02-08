@@ -17,6 +17,6 @@ nose
 numba
 six
 blosc
+nbsphinx
 recommonmark
 sphinxcontrib-autoanysrc
-nbsphinx

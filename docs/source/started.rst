@@ -6,4 +6,5 @@
 Getting Started
 ########################
 Exa provides objects that are useful at all stages of a data pipeline. They
-are outlined below starting from files on disk. 
+are outlined below in typical chronological use order. Workable examples can
+be very helpful and can viewed by running `exa` on the command line.
