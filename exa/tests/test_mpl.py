@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Tests for :mod:`~exa.mpl`
 #############################################
-Tests for matplotlib customizations.
+Tests for matplotlib wrappers.
 """
-import numpy as np
 from exa.mpl import qualitative, sequential, diverging
 from exa.tester import UnitTester
 

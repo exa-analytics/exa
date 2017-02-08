@@ -4,8 +4,10 @@
 """
 Tester
 #########################
-Custom tester class for running interactive (i.e. within the Jupyter notebook
-environment) tests.
+Custom tester class for running interactive (i.e. within a `Jupyter notebook`_)
+unit and doc tests.
+
+.. _Jupyter notebook: http://jupyter.org/
 """
 import sys
 from datetime import datetime

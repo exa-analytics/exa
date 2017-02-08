@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Tests for :mod:`~exa.core.editor`
 #############################################
-Test the functionality of the :class:`~exa.core.editor.Editor` class and
-related functions.
+Tests for base editor and editor-like classes.
 """
 import os, bz2, gzip, six, shutil
 from types import GeneratorType
@@ -72,10 +71,6 @@ class TestEditor(UnitTester):
         os.remove(self.path + ".gz")
         os.remove(self.path + ".bz2")
         os.remove(self.path + ".iso-8859-1")
-
-#    def test_check_path(self):
-#        """Test :func:`~exa.core.editor.check_path`)."""
-#        with self.assertRaises(TypeError)
 
     def test_editor_input_methods(self):
         """

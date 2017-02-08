@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Editor
 ####################################
 The :class:`~exa.core.editor.Editor` class is a way for programmatic text-
-editor-like manipulation of files on disk. It does not strive to be a full
-featured text editor. A large number of Pythonic operations can be performed on
-editors:
+editor-like manipulation of files on disk. The goal of an editor is to facilitate
+easy conversion or extraction of data from a text file. It does not strive to be
+a full featured text editor. A large number of Pythonic operations can be performed
+on editors:
 
 .. code-block:: Python
 
     editor = Editor(file.txt)       # Create an editor from a file
-    editor = Editor(file.txt.gz)    # Automatically decompress
+    editor = Editor(file.txt.gz)    # Automatically decompresses files
     editor = Editor(file.txt.bz2)
     for line in editor:             # Iterate over lines in the file
         pass
@@ -22,6 +23,10 @@ editors:
 Text lines are stored in memory; file handles are only open during reading and
 writing. For large repetitive files, memoization can reduce the memory footprint
 (see the **as_interned** kwarg).
+
+See Also:
+    Common examples of data objects are  :class:`~exa.core.dataseries.DataSeries`
+    and :class:`~exa.core.dataframe.DataFrame` among others.
 """
 import os, re, sys, bz2, gzip, six
 import pandas as pd
@@ -29,32 +34,31 @@ from abc import abstractmethod
 from copy import copy, deepcopy
 from collections import Counter
 from io import StringIO, TextIOWrapper
-from exa.typed import Meta, simple_function_factory
+from exa.typed import Meta, simple_function_factory, yield_typed
 
 
 class Editor(object):
     """
-    An in memory copy of a file on disk that can be programmatically manipulated.
+    A representation of a file on disk that can be modified programmatically.
 
-    Editor line numbers use a 0 base index. To increase the number of lines
-    displayed by the repr, increase the value of the **nprint** attribute.
-    For large text with repeating strings be sure to use the **as_interned**
-    argument.
+    Editor line numbers start at 0. To increase the number of lines
+    displayed, increase the value of the ``nprint`` attribute. For large text
+    with repeating strings be sure to use the ``as_interned`` argument.
+    To change the print format, modify the ``_fmt`` attribute
 
     Args:
         name (str): Data/file/misc name
         description (str): Data/file/misc description
         meta (dict): Additional metadata as key, value pairs
         nrpint (int): Number of lines to display when printing
-        cursor (int): Line number position of the cusor
+        cursor (int): Line number position of the cursor
     """
-    _getter_prefix = 'parse'     # See :class:`~exa.typed.Meta`
     _fmt = '{0}: {1}\n'.format   # Format for printing lines (see __repr__)
 
     @property
     def templates(self):
         """
-        Display a list of templatable variables present in the file.
+        Display a list of templates.
 
         .. code-block:: text
 
@@ -76,8 +80,7 @@ class Editor(object):
     @property
     def constants(self):
         """
-        Display a list of constants within the file. Constants are literal
-        templates constructed using double curly braces.
+        Display test of literal curly braces.
 
         .. code-block:: text
 
@@ -97,18 +100,15 @@ class Editor(object):
         Match a line or lines by the specified regular expression(s).
 
         Args:
-            \*patterns: Regular expressions to search each line for
-            which (str): If none, return values as (lineno, match), if "keys" return lineno only, if "values" return lines only
-            flags: Python re flags (default re.MULTILINE)
+            \*patterns: Regular expressions
+            which: If none, returns (lineno, text), else "lineno" or "text"
+            flags: Python regex flags (default re.MULTILINE)
 
         Returns:
-            results (dict): Dictionary with pattern keys and list of (lineno, match) values
+            results (dict): Dictionary with pattern keys and list of values
 
         See Also:
-            `Regular expressions`_ are a complex but powerful way to search
-            and match text text.
-
-        .. _Regular expressions: https://en.wikipedia.org/wiki/Regular_expression
+            https://en.wikipedia.org/wiki/Regular_expression
         """
         which = kwargs.pop('which', None)
         flags = kwargs.pop('flags', re.MULTILINE)
@@ -116,36 +116,40 @@ class Editor(object):
         self_str = str(self)
         for pattern in patterns:
             match = pattern
+            pattern_results = []
             if not type(pattern).__name__ == "SRE_Pattern":
                 match = re.compile(pattern, flags)
-            if which == "keys":
-                pattern_results = [self_str.count("\n", 0, m.start()) + 1 for m in match.finditer(self_str)]
-            elif which == "values":
-                pattern_results = [m.group() for m in match.finditer(self_str)]
+            if which == "lineno":
+                for m in match.finditer(self_str):
+                    pattern_results.append(self_str.count("\n", 0, m.start()) + 1)
+            elif which == "text":
+                for m in match.finditer(self_str):
+                    pattern_results.append(m.group())
             else:
-                pattern_results = [(self_str.count("\n", 0, m.start()) + 1, m.group()) for m in match.finditer(self_str)]
+                for m in match.finditer(self_str):
+                    pattern_results.append((self_str.count("\n", 0, m.start()) + 1, m.group()))
             results[match.pattern] = pattern_results
         return results
 
     def find(self, *patterns, **kwargs):
         """
-        Search each line for a specified pattern(s).
+        Search for patterns line by line.
 
         Args:
             \*strings (str): Any number of strings to search for
-            which (str): If none, return values as (lineno, match), if "keys" return lineno only, if "values" return lines only
+            which: If None, returns (lineno, text), else "lineno" or "text"
 
         Returns:
             results (dict): Dictionary with pattern keys and list of (lineno, line) values
         """
         which = kwargs.pop('which', None)
-        results = {pattern: [] for pattern in patterns}
-        for i, line in enumerate(self):
-            for pattern in patterns:
+        results = {pattern: [] for pattern in patterns}   # Iterate twice over
+        for i, line in enumerate(self):                   # patterns because we
+            for pattern in patterns:                      # search line by line
                 if pattern in line:
-                    if which == "keys":
+                    if which == "lineno":
                         results[pattern].append(i)
-                    elif which == "values":
+                    elif which == "text":
                         results[pattern].append(line)
                     else:
                         results[pattern].append((i, line))
@@ -156,8 +160,8 @@ class Editor(object):
         From the current cursor position, find the next occurrence of the pattern.
 
         Args:
-            pattern (str): String to search for from the current cursor position
-            which (str): If none, return values as (lineno, match), if "keys" return lineno only, if "values" return lines only
+            pattern (str): String to search for from the cursor
+            which: If None, returns (lineno, text), else "lineno" or "text"
             reverse (bool): Find next in reverse
 
         Returns:
@@ -165,7 +169,7 @@ class Editor(object):
 
         Note:
             Searching will cycle the file and continue if an occurrence is not
-            found.
+            found (forward or reverse direction determined by ``reverse``).
         """
         n = len(self)
         n1 = n - 1
@@ -191,12 +195,11 @@ class Editor(object):
         cls = self.__class__
         lines = self._lines[:]
         as_interned = copy(self.as_interned)
-        nprint = copy(self.nprint)
         name = copy(self.name)
-        description = copy(self.description)
-        meta = deepcopy(self.meta)
+        nprint = copy(self.nprint)
+        metadata = deepcopy(self.metadata)
         enc = copy(self.encoding)
-        return cls(lines, as_interned, nprint, name, description, meta, enc)
+        return cls(lines, as_interned, nprint, name, metadata, enc)
 
     def format(self, *args, **kwargs):
         """
@@ -223,9 +226,9 @@ class Editor(object):
         Write the editor contents to a file.
 
         Args:
-            path (str): Full file path (default None, prints to stdout)
-            *args: Positional arguments to format the editor with
-            **kwargs: Keyword arguments to format the editor with
+            path (str): Full file path (default none, prints to stdout)
+            *args: Positional arguments for formatting
+            **kwargs: Keyword arguments for formatting
         """
         with open(path, "wb") as f:
             if len(args) > 0 or len(kwargs) > 0:
@@ -243,10 +246,13 @@ class Editor(object):
 
     def append(self, lines):
         """
-        Append lines to the editor (inplace).
+        Append lines to the editor.
 
         Args:
             lines (list, str): List of lines or str text to append to the editor
+
+        Note:
+            Occurs in-place, like ``list.append``.
         """
         if isinstance(lines, list):
             self._lines += lines
@@ -257,10 +263,13 @@ class Editor(object):
 
     def prepend(self, lines):
         """
-        Prepend lines to the editor (inplace).
+        Prepend lines to the editor.
 
         Args:
             lines (list, str): List of lines or str text to append to the editor
+
+        Note:
+            Occurs in-place, like ``list.insert(0, ...)``.
         """
         if isinstance(lines, list):
             self._lines = lines + self._lines
@@ -269,32 +278,43 @@ class Editor(object):
         else:
             raise TypeError("Unsupported type {} for lines.".format(type(lines)))
 
-    def insert(self, no, lines):
+    def insert(self, lineno, lines):
         """
-        Insert lines into the editor (inplace).
+        Insert lines into the editor after ``lineno``.
 
         Args:
-            no (int): Line number after which to insert lines
+            lineno (int): Line number after which to insert lines
             lines (list, str): List of lines or str text to append to the editor
+
+        Note:
+            Occurs in-place, like ``list.insert(...)``.
         """
         if isinstance(lines, six.string_types):
             lines = lines.splitlines()
         elif not isinstance(lines, list):
             raise TypeError("Unsupported type {} for lines.".format(type(lines)))
-        self._lines = self._lines[:no] + lines + self._lines[no:]
+        self._lines = self._lines[:lineno] + lines + self._lines[lineno:]
 
-    def replace(self, pattern, replacement):
+    def replace(self, pattern, replacement, inplace=False):
         """
         Replace all instances of a pattern with a replacement.
 
         Args:
             pattern (str): Pattern to replace
             replacement (str): Text to insert
+
         """
+        lines = []
         for i, line in enumerate(self):
             while pattern in line:
                 line = line.replace(pattern, replacement)
-            self[i] = line
+            lines.append(line)
+        if inplace:
+            self._lines = lines
+        else:
+            new = self.copy()
+            new._lines = lines
+            return new
 
     def remove_blank_lines(self):
         """Remove all blank lines (blank lines are those with zero characters)."""
@@ -414,10 +434,9 @@ class SectionsMeta(Meta):
     sections = list
 
     def __new__(mcs, name, bases, clsdict):
-        for name, definition in vars(mcs).items():
-            if not name.startswith("_") and isinstance(definition, (type, tuple, list)):
-                f = simple_function_factory("parse", "parse", name)
-                clsdict[f.__name__] = f
+        for attr_name, definition in yield_typed(mcs):
+            f = simple_function_factory("parse", "parse", attr_name)
+            clsdict[f.__name__] = f
         clsdict["_attr_descriptions"] = mcs._attr_descriptions
         return super(SectionsMeta, mcs).__new__(mcs, name, bases, clsdict)
 
@@ -525,9 +544,10 @@ class Section(six.with_metaclass(SectionMeta, Editor)):
     def describe(self):
         """Description of data attributes associated with this parser."""
         description = {}
-        for name, attr in vars(self.__class__).items():
-            if isinstance(attr, property):
-                description[name] = (self._attr_descriptions[name], getattr(self.__class__.__class__, name).__name__)
+        for name, attr in self._yield_typed():
+#        for name, attr in vars(self.__class__).items():
+#            if isinstance(attr, property):
+            description[name] = (self._attr_descriptions[name], attr)
         descr = pd.DataFrame.from_dict(description, orient='index')
         descr.columns = ["description", "type"]
         descr.index.name = "attribute"

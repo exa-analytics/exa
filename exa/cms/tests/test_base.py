@@ -44,7 +44,7 @@ class TestBase(UnitTester):
         """
         reconfigure_session_factory()
         session = session_factory()
-        self.assertTrue(_config.engine is session_factory.kw['bind'])
+        self.assertTrue(hasattr(_config, "engine") and _config.engine is not None)
         session.close()
 
     def test_scoped_session(self):

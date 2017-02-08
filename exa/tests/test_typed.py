@@ -1,124 +1,72 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Tests for :mod:`~exa.typed`
 #############################################
-Test strongly typed class attributes. A usage example is provided by the
-combination of :class:`~exa.tests.test_typed.DummyTyped` and
-:class:`~exa.tests.test_typed.DummyClass`.
+Test Exa's abstract base class, which supports strongly typed attributes.
+Note that an example of usage of this metaclass is provided by this test.
 """
 import six
-from abc import abstractmethod
+#from abc import abstractmethod
 from exa.tester import UnitTester
 from exa.typed import Meta
 
 
-class MockMeta(Meta):
-    """An exmaple usage of :class:`~exa.typed.Typed`."""
-    _getters = ("parse", "compute")
+class MinimalMeta(Meta):
+    """Minimal working example."""
     foo = int
-    bar = (str, float)
-    baz = tuple
-    faz = (str, object)
 
 
-class MockBaseClass(six.with_metaclass(MockMeta)):
-    """An example of an abstract base class using :class:`~exa.typed.Meta`."""
-    @abstractmethod
-    def parse_all(self):
-        """Example of an abstract method that requires implementation."""
-        pass
-
-    def compute_foo(self):
-        self.foo = 42
-
-    def compute_bar(self):
-        self.bar = 42.0
-
-    def parse_baz(self):
-        self.baz = ("42", 42)
-
-    def parse_faz(self):
-        self.faz = "42"
-
-    def __init__(self, foo=None, bar=None, baz=None, faz=None):
+class MinimalClass(six.with_metaclass(MinimalMeta, object)):
+    """Minimal working example."""
+    def __init__(self, foo=None):
         self.foo = foo
-        self.bar = bar
-        self.baz = baz
-        self.faz = faz
 
 
-class MockSubClass1(MockBaseClass):
-    """This class correctly implements the "parse_all" method."""
-    def compute_foo(self):
-        self.foo = 0
+class GetterMeta(MinimalMeta):
+    """Example with getters."""
+    _getters = ("compute", )
 
-    def compute_bar(self):
-        self.bar = "0.0"
 
-    def parse_all(self):
+class GetterClass(six.with_metaclass(GetterMeta, MinimalClass)):
+    """Example with custom getter function(s)."""
+    def compute_foo(self, ret=True):
         """
-        Example implementation of a subclass that correctly implements the
-        required :func:`~exa.tests.test_typed.MockBaseClass.parse_all`.
+        Functions of this type may return or set the value of foo.
         """
-        return True
-
-
-class MockSubClass2(MockBaseClass):
-    """
-    This class does not implement the "parse_all" method. Instantiating this
-    class throws a TypeError.
-    """
-    pass
+        if ret:
+            return 10
+        self.foo = 20
 
 
 class TestTyped(UnitTester):
     """
-    Tests for :mod:`~exa.typed` via :class:`~exa.tests.test_typed.MockMeta`,
-    :class:`~exa.tests.test_typed.MockBaseClass`, and
-    :class:`~exa.tests.test_typed.MockSubClass`.
+    Tests the functionality provided in :mod:`~exa.typed` using the example
+    classes (and metaclasses) provided above.
     """
-    def setUp(self):
-        """Create instances of the mock classes."""
-        self.klass = MockSubClass1()
-
-    def test_instance(self):
-        """Ensure that TypeError is raised."""
+    def test_mwe(self):
+        """Test minimal working example."""
+        mwe = MinimalClass()
+        self.assertTrue(hasattr(mwe, "_foo"))
+        self.assertTrue(mwe.foo is None)
+        mwe = MinimalClass(2.1)
+        self.assertEqual(mwe.foo, 2)
+        self.assertIsInstance(mwe.foo, int)
         with self.assertRaises(TypeError):
-            MockBaseClass()
-        with self.assertRaises(TypeError):
-            MockSubClass2()
+            MinimalClass(type)
 
-#    def test_init(self):
-##        """Test type enforcement on creation."""
-##        DummyClass()
-##        with self.assertRaises(TypeError):
-##            DummyClass(False, False)
-##        with self.assertRaises(TypeError):
-##            DummyClass(10, 10, "baz")
-##
-##    def test_compute_calls(self):
-##        """
-##        Test default getters (using the _getter_prefix), for example,
-##        :func:`~exa.tests.test_typed.DummyClass.compute_foo`.
-##        """
-##        klass = DummyClass()
-##        self.assertEqual(klass.foo, True)
-##        self.assertEqual(klass.bar, 42)
-##        self.assertEqual(klass.baz, (42, True))
-##        self.assertTrue(klass.jaz is None)
-##
-##    def test_autoconv(self):
-##        """
-##        Test automatic conversion performed by
-##        :func:`~exa.typed.Typed.create_property`.
-##        """
-##        klass = DummyClass(foo=0, bar=42.0, baz="stuff")
-##        self.assertIsInstance(klass.foo, DummyTyped.foo)
-##        self.assertIsInstance(klass.bar, DummyTyped.bar)
-##        self.assertIsInstance(klass.baz, DummyTyped.baz)
-##        self.assertTrue(klass.faz is None)
-##        with self.assertRaises(TypeError):
-##            klass.bar = DummyClass()
-##
+    def test_gwe(self):
+        """Test the getter example."""
+        gwe = GetterClass()
+        self.assertTrue(gwe._foo is None)
+        gwe.foo = 30
+        self.assertEqual(gwe.foo, 30)
+        gwe = GetterClass(40)
+        self.assertEqual(gwe.foo, 40)
+        value = gwe.compute_foo()
+        self.assertEqual(value, 10)
+        gwe = GetterClass()
+        self.assertEqual(gwe.foo, 10)
+        gwe.compute_foo(False)
+        self.assertEqual(gwe.foo, 20)

@@ -14,9 +14,9 @@ atop the exa package.
 - :mod:`~exa.__main__`: Application launchers
 - :mod:`~exa._config`: Configuration
 - :mod:`~exa._version`: Version information
-- :mod:`~exa.tester`: Support for unit and doc tests
 - :mod:`~exa.errors`: Base error handling
 - :mod:`~exa.mpl`: Wrappers for static plotting
+- :mod:`~exa.tester`: Support for unit and doc tests
 - :mod:`~exa.tex`: LaTeX support
 - :mod:`~exa.typed`: Strongly typed abstract base class
 

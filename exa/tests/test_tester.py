@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Test for :mod:`~exa.tester`
 ##################################
+Tests for Exa's custom test runners.
 """
 from exa.tester import UnitTester, datetime_header, get_internal_modules
 from exa.tester import run_doctests, run_unittests, run_all_tests
@@ -29,7 +30,8 @@ class TestTester(UnitTester):
 
     def test_runners(self):
         """
-        Test for :func:`~exa.tester.run_unittests` and :func:`~exa.tester.run_doctests`.
+        Test for :func:`~exa.tester.run_unittests` and
+        :func:`~exa.tester.run_doctests`.
         """
         results = run_unittests(mock=True)
         self.assertIsInstance(results, list)

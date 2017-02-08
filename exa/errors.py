@@ -71,12 +71,15 @@ class ExaException(Exception):
             logger.debug(msg)
 
 
-class TypeConversionError(ExaException):
+class TypeConversionError(ExaException, TypeError):
     """
     Raised when casting an object as a given type fails.
 
     See Also:
         For context and use see :mod:`~exa.typed`.
+
+    Note:
+        This exception is also a TypeError.
     """
     @staticmethod
     def default(obj, totype):
