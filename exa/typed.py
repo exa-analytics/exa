@@ -155,7 +155,7 @@ def create_typed_attr(name, ptypes):
 
     def setter(self, obj):
         # Attempt to convert types
-        if not isinstance(obj, ptypes):
+        if not isinstance(obj, ptypes) and obj is not None:
             for ptype in ptypes:
                 try:
                     obj = ptype(obj)

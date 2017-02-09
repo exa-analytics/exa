@@ -2,15 +2,11 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Exa is a framework for data management, computation, analytics, and
-visualization. It leverages the Python data stack (`PyData`_) and uses the
-`Jupyter Notebook`_ as a frontend. Data specific applications can be built
-atop the exa package.
+The package is organized into sub-packages and modules. They are outlined
+below. Low level functionality is found in the root (this) directory in
+module files. Higher level functionalities are organized into sub-
+packages.
 
-- :mod:`exa.app.__init__`: Jupyter notebook frontend
-- :mod:`exa.cms.__init__`: Content management system
-- :mod:`exa.compute.__init__`: Data computation
-- :mod:`exa.core.__init__`: Data objects
 - :mod:`exa.__main__`: Application launchers
 - :mod:`exa._config`: Application configuration
 - :mod:`exa._version`: Version information
@@ -20,8 +16,10 @@ atop the exa package.
 - :mod:`exa.tex`: Text manipulation utilities
 - :mod:`exa.typed`: Strongly typed abstract base class
 
-.. _PyData: http://pydata.org/
-.. _Jupyter notebook: http://jupyter.org/
+- :mod:`exa.app.__init__`: Jupyter notebook frontend
+- :mod:`exa.cms.__init__`: Content management system
+- :mod:`exa.compute.__init__`: Data computation
+- :mod:`exa.core.__init__`: Data objects
 """
 # Import base modules
 from exa import _version, _config, tester, errors, typed, mpl, tex, units

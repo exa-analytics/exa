@@ -23,6 +23,8 @@ class TestExceptions(UnitTester):
         """Test exception logging levels."""
         with self.assertRaises(ExaException):
             raise ExaException(level="warn")
+            raise ExaException(level="error")
+            raise ExaException(level="critical")
 
     def test_complex_formatter(self):
         """Test that formatting works."""

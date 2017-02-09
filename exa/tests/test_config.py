@@ -15,7 +15,7 @@ if sys.version[0] == 2:
 else:
     from io import StringIO
 from sqlalchemy.exc import OperationalError
-from exa import _config
+from exa import _config, _jupyter_nbextension_paths
 from exa.tester import UnitTester
 
 
@@ -109,3 +109,9 @@ class TestConfig(UnitTester):
     def test_save(self):
         """Test :func:`~exa._config.save`."""
         _config.save(True)
+
+    def test_init_function(self):
+        """Test build related function."""
+        obj = _jupyter_nbextension_paths()
+        self.assertIsInstance(obj, list)
+

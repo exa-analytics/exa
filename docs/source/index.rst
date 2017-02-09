@@ -38,6 +38,7 @@ user interface.
     app.rst
     js.rst
 
+* :ref:`genindex`
 
 .. _Exa Analytics Framework: https://exa-analytics.github.io
 .. _PyData: http://pydata.org/

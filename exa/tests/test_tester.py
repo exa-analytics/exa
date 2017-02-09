@@ -6,8 +6,10 @@ Test for :mod:`~exa.tester`
 ##################################
 Tests for Exa's custom test runners.
 """
+from unittest.result import TestResult
 from exa.tester import UnitTester, datetime_header, get_internal_modules
 from exa.tester import run_doctests, run_unittests, run_all_tests
+from exa.tests.test_errors import TestExceptions
 
 
 class TestTester(UnitTester):
@@ -42,3 +44,10 @@ class TestTester(UnitTester):
         """Also tests mocking functionality."""
         tup = run_all_tests(mock=True)
         self.assertIsInstance(tup, tuple)
+
+    def test_doc_test_logging(self):
+        """Doc tests are quick so run them with logging."""
+        results = run_doctests(log=True)
+        self.assertIsInstance(results, list)
+        result = TestExceptions.run_interactively(log=True)
+        self.assertIsInstance(result, TestResult)

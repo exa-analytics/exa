@@ -66,7 +66,7 @@ def run_doctests(log=False, mock=False):
                 elif test.examples == []:    # Skip empty tests
                     pass
                 elif log != False:
-                    f = log.handlers[0].stream
+                    f = logger.handlers[0].stream
                     f.write('\n'.join(('-' * 80, test.name, '-' * 80, '\n')))
                     results.append(runner.run(test, out=f))
                 else:

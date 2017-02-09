@@ -5,19 +5,16 @@
 Introduction
 ########################
 The application program interface (API) is the syntax by which a user or developer
-interacts with the code. A full listing of source code documentation is given in
-the following pages. Additional ways of getting this information interactively are
-as follows.
+interacts with the code. The API is presented in order of dependencies and/or
+requirements. Low level functionality (objects that make up the foundation of the
+framework) are presented first. High level functionality is presented later. Users
+should start with the :ref:`examples-label` page or get additional information 
+interactively.
 
 .. code-block:: python
 
     help(exa.Editor)
     exa.Editor?      # In Jupyter notebook
-
-Users may want to consult the :ref:`examples-label` page for most common usage.
-The API is organized in (pseudo) dependency order: objects that are used by 
-higher level functionality in the package are presented first. More complex
-functionality (i.e. API used by users) is presented later.
 
 .. automodule:: exa.__init__
     :members:

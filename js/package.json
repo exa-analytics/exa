@@ -29,6 +29,6 @@
     "three": "^0.82.0",
     "qunitjs": "^2.1.1",
     "jsdoc": "^3.4.3",
-    "jsdoc-rst-template": "^0.0.17"
+    "jsdoc-sphinx": "^0.0.6"
   }
 }
