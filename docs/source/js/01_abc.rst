@@ -5,10 +5,4 @@
 Models, Views, and Tests
 ############################
 
-.. autoanysrc:: abcwidgets
-    :src: ../../js/src/exa-abcwidgets.js
-    :analyzer: js
-
-.. autoanysrc:: tester
-    :src: ../../js/src/exa-tester.js
-    :analyzer: js
+.. include:: jsdoc_rst/exa-abcwidgets.rst

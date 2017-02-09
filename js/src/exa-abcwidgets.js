@@ -1,19 +1,28 @@
 // Copyright (c) 2015-2017, Exa Analytics Development Team
 // Distributed under the terms of the Apache License 2.0
-/*""""
-Abstract Base Classes for Exa Widgets
-#######################################
-Every ipywidgets DOMWidget is composed of two JavaScript parts, a model, which 
-describes the data that the widget interacts with from the Python backend, and
-a view, which defines the visual representation of the model's data. This
-module provides a default DOMWidgetView that sets up a resizable element with
-a default stylesheet.
-*/
+/**
+ * Abstract Base Classes for Exa Widgets
+ * #######################################
+ * Every ipywidgets DOMWidget is composed of two JavaScript parts, a model, which
+ * describes the data that the widget interacts with from the Python backend, and
+ * a view, which defines the visual representation of the model's data. This
+ * module provides a default DOMWidgetView that sets up a resizable element with
+ * a default stylesheet.
+ *
+ * @module exa-abcwidgets
+ */
 "use strict";
 var widgets = require("jupyter-js-widgets");
 
 
-// Default styles
+/**
+ * Default button class style.
+ *
+ * @var
+ * @type {Object}
+ * @default
+ * @memberOf exa-abcwidgets
+ */
 var button = {
     "background-color": "grey",
     "border": "1px",

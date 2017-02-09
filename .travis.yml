@@ -14,12 +14,10 @@ before_install:
   - conda update --yes conda
 install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION
-  - conda install --yes -c conda-forge `head -n 21 requirements.txt`
+  - conda install --yes -c conda-forge `cat requirements.txt`
   - conda install --yes -c cpcloud npm
   - conda install --yes coverage
-  - pip install sphinxcontrib-autoanysrc travis-sphinx codacy-coverage recommonmark
-  - npm install jsdoc
-  - npm install jsdoc-sphinx
+  - pip install sphinxcontrib-autoanysrc travis-sphinx codacy-coverage
   - python setup.py install
 script:
   - nosetests --with-coverage
