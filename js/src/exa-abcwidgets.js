@@ -16,12 +16,10 @@ var widgets = require("jupyter-js-widgets");
 
 
 /**
- * Default button class style.
+ * Default style for HTML buttons.
  *
  * @var
  * @type {Object}
- * @default
- * @memberOf exa-abcwidgets
  */
 var button = {
     "background-color": "grey",
@@ -35,18 +33,25 @@ var button = {
 };
 
 
+/**
+ * Default styles for all HTML elements.
+ *
+ * @var
+ * @type {Object}
+ */
 var default_style_dict = {
     button: button
 };
 
 
+/**
+ * Compiles a dict-like object of style parameters into a style element.
+ *
+ * @function compile_css
+ * @param {Object} style_dict - Dict-like object containing style tag and value pairs
+ * @returns {style} Style element (CSS)
+ */
 function compile_css(style_dict) {
-    /*"""
-    .. function:: compile_css(style_dict)
-        
-        :param: style_dict: Dict like object containing style tag and value
-        :returns: Style element (CSS)
-    */
     if (style_dict === undefined) {
         style_dict = default_style_dict;
     };
@@ -69,21 +74,20 @@ function compile_css(style_dict) {
 }
 
 
-// Abstract base view
+/**
+ * Abstract base class for views.
+ *
+ * An abstract base class for a DOMWidgetView object (the object that actually
+ * gets rendererd in the browser by the ipywidgets infrastructure).
+ */
 class ABCView extends widgets.DOMWidgetView {
-    /*"""
-    ABCView
-    ```````````````````````
-    An abstract base class for a DOMWidgetView object (the object that actually
-    gets rendererd in the browser by the ipywidgets infrastructure).
-    */
+    /**
+     * Render the view.
+     *
+     * Custom view rendering method that creates a standard widget style.
+     * To modify the rendering behavior, see the init and launch methods.
+     */
     render() {
-        /*"""
-        render
-        -----------
-        Custom view rendering method that creates a standard widget style.
-        To modify the rendering behavior, see the init and launch methods.
-        */
         var self = this;
         this.el = $("<div/>").width(this.model.get('width')).height(this.model.get('height')).resizable({
             aspectRatio: false,
@@ -107,30 +111,31 @@ class ABCView extends widgets.DOMWidgetView {
         this.launch();
     }
 
+    /**
+     * Perform setup actions prior to setting the view element.
+     *
+     * Abstract method to be modified by the subclass. Called at the start
+     * of view rendering. Most view specific code belongs here. Interactive
+     * or app-like widgets can use the launch method, once modifications
+     * to the view element (here) are complete, to perform additional tasks.
+     *
+     * Note:
+     *     This method can modify the css and el attributes as needed.
+     */
     init() {
-        /*"""
-        init
-        ---------------
-        Abstract method to be modified by the subclass. Called at the start
-        of view rendering. Most view specific code belongs here. Interactive
-        or app-like widgets can use the launch method, once modifications
-        to the view element (here) are complete, to perform additional tasks.
-        
-        Note:
-            This method can modify the css and el attributes as needed.
-        */
     }
 
+    /**
+     * Launches any interactive applications running in the view after setting
+     * the view element. 
+     *
+     * Abstract method to be modified by the subclass. Called after the init
+     * method. Used to start interactive or app like widgets. 
+     *
+     * Note:
+     *     No modifications to the view element should be performed here.
+     */
     launch() {
-        /*"""
-        launch
-        ---------
-        Abstract method to be modified by the subclass. Called after the
-        init method. Used to start interactive or app like widgets. 
-        
-        Note:
-            No modifications to the view element should be performed here.
-        */
     }
 
     resize(width, height) {

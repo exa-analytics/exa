@@ -22,15 +22,18 @@ requirements:
         - pandas
         - h5py
         - sympy
-        - psutil
         - notebook
         - ipywidgets
-        - sphinx
-        - sphinx_rtd_theme
         - nose
         - numba
-        - six
         - blosc
+        - six
+        - psutil
+        - sphinx
+        - sphinx_rtd_theme
+        - pandoc
+        - nbsphinx
+        - coverage
 
     run:
         - numpy
@@ -43,15 +46,13 @@ requirements:
         - pandas
         - h5py
         - sympy
-        - psutil
         - notebook
         - ipywidgets
-        - sphinx
-        - sphinx_rtd_theme
         - nose
         - numba
-        - six
         - blosc
+        - six
+        - psutil
 
 about:
     home: https://exa-analytics.github.io

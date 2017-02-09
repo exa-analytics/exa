@@ -16,8 +16,7 @@ install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION
   - conda install --yes -c conda-forge `cat requirements.txt`
   - conda install --yes -c cpcloud npm
-  - conda install --yes coverage
-  - pip install sphinxcontrib-autoanysrc travis-sphinx codacy-coverage
+  - pip install travis-sphinx codacy-coverage python-coveralls codecov
   - python setup.py install
 script:
   - nosetests --with-coverage
