@@ -1,15 +1,16 @@
 // Copyright (c) 2015-2017, Exa Analytics Development Team
 // Distributed under the terms of the Apache License 2.0
 /**
- * Abstract Base Classes for Exa Widgets
- * #######################################
- * Every ipywidgets DOMWidget is composed of two JavaScript parts, a model, which
- * describes the data that the widget interacts with from the Python backend, and
- * a view, which defines the visual representation of the model's data. This
- * module provides a default DOMWidgetView that sets up a resizable element with
- * a default stylesheet.
+ * @namespace abcwidgets
+ * @desc
+ * Every ipywidgets JavaScript widget (DOMWidget) is composed of a model, which
+ * describes the data that the widget interacts with from the Python backend, 
+ * and a view, which defines the visual representation of the model's data. This
+ * namespace provides a default DOMWidgetView that sets up a resizable element 
+ * with a default stylesheet.
  *
- * @module exa-abcwidgets
+ * Note:
+ *     The terms module and namespace are used interchangeably.
  */
 "use strict";
 var widgets = require("jupyter-js-widgets");
@@ -17,9 +18,7 @@ var widgets = require("jupyter-js-widgets");
 
 /**
  * Default style for HTML buttons.
- *
- * @var
- * @type {Object}
+ * @memberof abcwidgets
  */
 var button = {
     "background-color": "grey",
@@ -35,9 +34,6 @@ var button = {
 
 /**
  * Default styles for all HTML elements.
- *
- * @var
- * @type {Object}
  */
 var default_style_dict = {
     button: button
@@ -46,10 +42,6 @@ var default_style_dict = {
 
 /**
  * Compiles a dict-like object of style parameters into a style element.
- *
- * @function compile_css
- * @param {Object} style_dict - Dict-like object containing style tag and value pairs
- * @returns {style} Style element (CSS)
  */
 function compile_css(style_dict) {
     if (style_dict === undefined) {
@@ -79,6 +71,8 @@ function compile_css(style_dict) {
  *
  * An abstract base class for a DOMWidgetView object (the object that actually
  * gets rendererd in the browser by the ipywidgets infrastructure).
+ *
+ * @memberof abcwidgets
  */
 class ABCView extends widgets.DOMWidgetView {
     /**
@@ -157,7 +151,7 @@ class ABCView extends widgets.DOMWidgetView {
  * defines communication between the JavaScript frontend and Python
  * backend (using the ipywidgets infrastructure).
  *
- * @extends widgets.DOMWidgetModel
+ * @memberof abcwidgets
  */
 class ABCModel extends widgets.DOMWidgetModel {
     get defaults() {

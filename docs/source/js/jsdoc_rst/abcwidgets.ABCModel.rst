@@ -1,10 +1,10 @@
-.. _module-exa-abcwidgets.ABCModel:
+.. _abcwidgets.ABCModel:
 
 ===================
 Class: ``ABCModel``
 ===================
 
-Member Of :doc:`module-exa-abcwidgets`
+Member Of :doc:`abcwidgets`
 
 .. contents:: Local Navigation
    :local:
@@ -23,7 +23,7 @@ Description
 
 
 
-.. _module-exa-abcwidgets-ABCModel.defaults:
+.. _abcwidgets.ABCModel.defaults:
 
 Member: ``defaults``: 
 

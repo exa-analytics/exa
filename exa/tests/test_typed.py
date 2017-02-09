@@ -42,7 +42,7 @@ class GetterClass(six.with_metaclass(GetterMeta, MinimalClass)):
 class AdvancedMeta(GetterMeta):
     """Advanced modification of class objects using :mod:`~exa.typed`."""
     foo = int
-    bar = six.string_types
+    bar = str
 
     def __new__(mcs, name, bases, clsdict):
         for attr in yield_typed(mcs):

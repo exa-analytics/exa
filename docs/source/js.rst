@@ -25,4 +25,4 @@ Note:
 .. _ipywidgets: https://github.com/ipython/ipywidgets
 .. _backbone.js: http://backbonejs.org/
 .. _jsdoc: http://usejsdoc.org/
-.. _web: https://github.com/blitzagency/jsdoc-rst-template
+.. _web: https://github.com/HumanBrainProject/jsdoc-sphinx 

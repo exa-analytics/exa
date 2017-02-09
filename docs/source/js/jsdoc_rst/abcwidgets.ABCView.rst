@@ -1,10 +1,10 @@
-.. _module-exa-abcwidgets.ABCView:
+.. _abcwidgets.ABCView:
 
 ==================
 Class: ``ABCView``
 ==================
 
-Member Of :doc:`module-exa-abcwidgets`
+Member Of :doc:`abcwidgets`
 
 .. contents:: Local Navigation
    :local:
@@ -22,7 +22,7 @@ Description
 
 
 
-.. _module-exa-abcwidgets-ABCView.render:
+.. _abcwidgets.ABCView.render:
 
 
 Function: ``render``
@@ -37,7 +37,7 @@ To modify the rendering behavior, see the init and launch methods.
 
     
     
-.. _module-exa-abcwidgets-ABCView.init:
+.. _abcwidgets.ABCView.init:
 
 
 Function: ``init``
@@ -57,7 +57,7 @@ Note:
 
     
     
-.. _module-exa-abcwidgets-ABCView.launch:
+.. _abcwidgets.ABCView.launch:
 
 
 Function: ``launch``
@@ -76,7 +76,7 @@ Note:
 
     
     
-.. _module-exa-abcwidgets-ABCView.resize:
+.. _abcwidgets.ABCView.resize:
 
 
 Function: ``resize``
@@ -93,15 +93,15 @@ contexts, GUI elements).
     
     
 
-.. _module-exa-abcwidgets-ABCView.el:
+.. _abcwidgets.ABCView.el:
 
 Member: ``el``: 
 
-.. _module-exa-abcwidgets-ABCView.style_dict:
+.. _abcwidgets.ABCView.style_dict:
 
 Member: ``style_dict``: 
 
-.. _module-exa-abcwidgets-ABCView.style:
+.. _abcwidgets.ABCView.style:
 
 Member: ``style``: 
 

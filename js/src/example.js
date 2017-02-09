@@ -1,5 +1,0 @@
-/**
- * Module description
- *
- * @module stuff
- */
