@@ -2,7 +2,7 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ########################
-Data Objects
+Core Class Objects
 ########################
 .. automodule:: exa.core.__init__
     :members:
@@ -11,5 +11,5 @@ Data Objects
 .. toctree::
     :maxdepth: 1
     
-    core/01_init.rst
-    core/02_editor.rst
+    core/01_editors.rst
+    core/02_dataobj.rst

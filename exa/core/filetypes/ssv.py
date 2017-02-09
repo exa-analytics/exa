@@ -13,7 +13,7 @@ from io import StringIO
 from exa.core.editor import Editor
 
 
-class CSV(Editor):
+class SSV(Editor):
     """
     A convenience class for manipulating CSV (or CSV like, including tab, space,
     etc. separated) files on disk.
@@ -22,7 +22,7 @@ class CSV(Editor):
         """Create a :class:`~exa.numerical.DataFrame` from this file."""
         if self.header:
             return pd.read_csv(StringIO(str(self)), sep=self.delimiter, names=self[0])
-        return pd.read_csv(StringIO(str(self)), sep=self.delimiter)
+        return pd.read_csv(StringIO(str(self)), sep=self.delimiter, names=range(self.ncols))
 
     def __init__(self, *args, **kwargs):
         super(CSV, self).__init__(*args, **kwargs)
@@ -34,3 +34,4 @@ class CSV(Editor):
         self.quoting = dialect.quoting
         self.escapechar = dialect.escapechar
         self.quotechar = dialect.quotechar
+        self.ncols = len(self[2].split(self.delimiter))

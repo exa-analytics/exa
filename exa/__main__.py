@@ -5,18 +5,15 @@
 """
 App Launcher
 ##############
-Launches a `Jupyter notebook`_ in Exa's root directory.
+Launches a `Jupyter notebook`_ in Exa's root directory (~/.exa).
 
 .. _Jupyter notebook: https://jupyter.org
 """
-import argparse
 from exa.app import Notebook
 
 
 def main():
-    """Main application launcher."""
-    parser = argparse.ArgumentParser(description="Exa notebook app launcher.")
-    args = parser.parse_args()
+    """Notebook launcher."""
     Notebook.launch_instance()
 
 

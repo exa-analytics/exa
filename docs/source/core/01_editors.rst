@@ -3,7 +3,10 @@
 
 
 #########################
-Core Data Objects
+Editors
 #########################
-.. automodule:: exa.core.__init__
+.. automodule:: exa.core.editor
+    :members:
+
+.. automodule:: exa.core.tests.test_editor
     :members:

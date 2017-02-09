@@ -2,21 +2,18 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-This sub-package contains the core functionality of exa:
+This sub-package contains high level data manipulation API.
 
-- :class:`~exa.core.analytical`: Analytical data objects
-- :class:`~exa.core.units`: Quantity support (data object with associated units)
-- :class:`~exa.core.discrete`: Discrete data objects
-- :class:`~exa.core.editor.Editor`: Programmatic file manipulation
-- :class:`~exa.core.container.Container`: Data object analysis and visualization toolkit
+- :mod:`~exa.core.editor`: Programmatic file manipulation
+- :mod:`~exa.core.dataobj`: Abstract base data object
+- :mod:`~exa.core.dataseries`: Single valued n-dimensional array
+- :mod:`~exa.core.dataframe`: Multiply valued n-dimensional array
 """
 # Import base modules
-from exa.core import editor, ssv#, indexing, dataseries
+from exa.core import editor
 
 # Import sub-packages
 from exa.core import tests
 
 # Import user/dev API
 from exa.core.editor import Editor
-from exa.core.ssv import CSV
-#from exa.core.dataseries import DataSeries
