@@ -274,41 +274,96 @@ class TestEditor(UnitTester):
 
 class MockSections(Sections):
     """Mock example of :class:`~exa.core.editor.Sections`."""
+    name = "example_sections"
+    description = "Parses text sections delimited by ===="
     _key_marker = "===="
     _key_def_sec_name = 'default'
 
-    def parse(self):
-        """This function must be implemneted for a specific (sections) file."""
-        linenos = self.find(self._key_marker, which='lineno')[self._key_marker]
-        names = [self._key_def_sec_name]*len(linenos)
-        sections = list(zip(names, linenos))
-        self._finalize_sections(sections)
+    def _parse(self):
+        """This is depends on the file structure."""
+        delims = self.find(self._key_marker, which='lineno')[self._key_marker]
+        starts = [delim + 1 for delim in delims]
+        starts.insert(0, 0)
+        ends = delims
+        ends.append(len(self))
+        names = [self._key_def_sec_name]*len(starts)
+        self.sections = list(zip(names, starts, ends))
 
 
 class MockSectionMeta(SectionsMeta):
     """Metaclass that defines data objects for the section parser."""
-    lines = pd.DataFrame
-    _descriptions = {'lines': "Split lines"}
+    wordcount = int
+    wordlist = list
+    _descriptions = {'wordcount': "Count of number of words",
+                     'wordlist': "List of words"}
 
 
-class MockSection(Section):
+class MockSection(six.with_metaclass(MockSectionMeta, Section)):
     """Mock example of :class:`~exa.core.editor.Section."""
     name = "default"
+    description = "Parser for word regions."
 
-    def parse(self):
-        """Parse section."""
-        lines = []
-        for line in self:
-            lines.append(line.split())
-        self.lines = [item for splitline in lines for item in splitline]
+    def _parse(self):
+        """Parse a word section."""
+        self.wordlist = [word for line in self.lines for word in line.split()]
+        self.wordcount = len(self.wordlist)
+
+
+class MockBaseSections(Sections):
+    """Raises TypeError."""
+    pass
+
+
+class MockBaseSection(Section):
+    """Raises TypeError."""
+    pass
+
+
+MockSections.add_section_parsers(MockSection)
 
 
 class TestSections(UnitTester):
-    """Tests for :class:`~exa.core.editor.Sections`."""
-    def setUp(self):
-        MockSections.add_section_parsers(MockSection)
-        self.sec0 = MockSections(sections0)
-        self.sec1 = MockSections(sections1)
-        self.sec2 = MockSections(sections2)
-        self.sec3 = MockSections(sections3)
+    """
+    Tests for :class:`~exa.core.editor.Sections`. and
+    :class:`~exa.core.editor.Section.`
+    """
+    def test_base_sections(self):
+        """Tests raising TypeError."""
+        with self.assertRaises(TypeError):
+            MockBaseSections()
+        with self.assertRaises(TypeError):
+            MockBaseSection()
+
+    def test_describe_pre_parse(self):
+        """Test descriptors prior to parsing."""
+        sec0 = MockSections(sections0)
+        sec1 = MockSections(sections1)
+        sec2 = MockSections(sections2)
+        sec3 = MockSections(sections3)
+        secs = [sec0, sec1, sec2, sec3]
+        for sec in secs:
+            df = sec.describe_this()
+            self.assertIsInstance(df, pd.Series)
+            self.assertEqual(len(df), 4)
+            df = sec.describe_parsers()
+            self.assertIsInstance(df, pd.DataFrame)
+            self.assertEqual(len(df), 1)
+            with self.assertRaises(TypeError):
+                sec.__class__.describe_sections()
+
+    def test_parsing(self):
+        """Test live modification of class objects on parsing."""
+        sec0 = MockSections(sections0)
+        sec1 = MockSections(sections1)
+        sec2 = MockSections(sections2)
+        sec3 = MockSections(sections3)
+        secs = [sec0, sec1, sec2, sec3]
+        for sec in secs:
+            self.assertFalse(hasattr(sec, "section0"))
+            self.assertFalse(hasattr(sec, "parse_section0"))
+            sec.parse()
+            for i in range(sec._nsections):
+                name = "section" + str(i)
+                self.assertTrue(hasattr(sec, "parse_" + name))
+                self.assertTrue(hasattr(sec, name))
 

@@ -14,9 +14,7 @@ from exa.core.filetypes.ssv import SSV
 
 
 class TestSSV(UnitTester):
-    """
-    Test the :class:`~exa.core.ssv.SSV` class and related functionality.
-    """
+    """Test the :class:`~exa.core.ssv.SSV` class and related functionality."""
     def setUp(self):
         """Generate csv data to test."""
         self.csv = SSV(pd.DataFrame(np.random.rand(10, 3),

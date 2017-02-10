@@ -18,9 +18,10 @@ from sympy.core.mul import Mul
 from sympy.physics.units import Unit
 from exa.core.errors import MissingUnits
 from exa.core.indexing import indexers
+from exa.typed import Meta
 
 
-class DataObject(object):
+class DataObject(six.with_metaclass(Meta, object)):
     """An abstract base class for Exa's data objects."""
     @abstractproperty
     def _constructor(self):

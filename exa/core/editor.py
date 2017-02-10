@@ -441,12 +441,24 @@ class SectionsMeta(Meta):
     _descriptions = {"sections": "List of sections"}
     sections = list
 
+    # Self here refers to the future class definition, not an instance thereof
+    def describe_this(self):
+        """Description of this parser."""
+        data = {"Name": self.name, "Class": self, "Description": self.description}
+        params = [n.replace("_key_", "") for n in vars(self) if n.startswith("_key_")]
+        if len(params) == 0:
+            data["Parameters"] = None
+        else:
+            data["Parameters"] = params
+        return pd.Series(data)
+
     def __new__(mcs, name, bases, clsdict):
         for attr in yield_typed(mcs):
             f = simple_function_factory("parse", "parse", attr[0])
             clsdict[f.__name__] = f
         clsdict['_descriptions'] = mcs._descriptions
         clsdict['_parsers'] = {}
+        clsdict['describe_this'] = mcs.describe_this
         return super(SectionsMeta, mcs).__new__(mcs, name, bases, clsdict)
 
 
@@ -470,11 +482,11 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
 
         class SectionsExample(exa.core.editor.Sections):
             name = 'example_sections_parser'
-            description = 'Parses files separated by -* regex'
+            description = 'Parses files separated by ---'
             _key_sep = '---'                # Arbitrary section separator
-            _key_def _sec_name = 'default'   # Default section name
+            _key_def_sec_name = 'default'   # Default section name
 
-            def parse(self):
+            def _parse(self):
                 # The code below depends on the file in question
                 delims = self.find(self._key_sep, which='lineno')[self._key_sep]
                 starts = [delim + 1 for delim in delims]
@@ -484,60 +496,58 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
                 names = [self._key_def_sec_name]*len(starts)
                 self.sections = list(zip(names, starts, ends))
 
+        class ParserMeta(exa.core.editor.SectionsMeta):
+            wordcount = int
+            wordlist = list
+            _descriptions = {'wordcount': "Count of number of words",
+                             'wordlist': "List of words"}
 
-            class ParserMeta(exa.core.editor.SectionsMeta):
-                wordcount = int
-                wordlist = list
-                _descriptions = {'wordcount': "Count of number of words",
-                                      'wordlist': "List of words"}
+        class Parser(six.with_metaclass(ParserMeta, exa.core.editor.Section)):
+            description = 'Parser for individual region separated by -* regex'
+            name = 'default'
 
-            class Parser(six.with_metaclass(ParserMeta, exa.core.editor.Section)):
-                description = 'Parser for individual region separated by -* regex'
-                name = 'default'
+            def _parse(self):
+                # Arbitrary what data objects are created here
+                self.wordlist = [word for line in self.lines for word in line.split()]
+                self.wordcount = len(self.wordlist)
 
-                def parse(self):
-                    # Arbitrary what data objects are created here
-                    lines = self._lines
-                    wordlist = [word for line in lines for word in line.split()]
-                    self.wordlist = wordlist
-                    self.wordcount = len(wordcount)
 
-            # The following needs only be performed once,
-            # preferably at the module level, hidden from the user.
-            SectionsExample.add_section_parsers(Parser)
+        # The following needs only be performed once,
+        # preferably at the module level, hidden from the user.
+        SectionsExample.add_section_parsers(Parser)
 
-            # The following shows some useful commands and (commented) print output
-            # Prior to using a Sections or Section object one can inspect them
-            SectionsExample.describe_this()
-                # Class          <class '__main__.SectionsExample'>
-                # Description    Parses files separated by -* regex
-                # Name                      example_sections_parser
-                # Parameters                    [sep, def_sec_name]
-            SectionsExample.describe_parsers()
-                # +-------------+------------+------------------+---------------------+
-                # | Parser Name | Parameters | Class(es)        | Attributes          |
-                # +-------------+------------+------------------+---------------------+
-                # | default     | None       | <class 'Parser'> | wordcount, wordlist |
-                # +-------------+------------+------------------+---------------------+
+        # The following shows some useful commands and (commented) print output
+        # Prior to using a Sections or Section object one can inspect them
+        SectionsExample.describe_this()
+            # Class          <class '__main__.SectionsExample'>
+            # Description    Parses files separated by -* regex
+            # Name                      example_sections_parser
+            # Parameters                    [sep, def_sec_name]
+        SectionsExample.describe_parsers()
+            # +-------------+------------+------------------+---------------------+
+            # | Parser Name | Parameters | Class(es)        | Attributes          |
+            # +-------------+------------+------------------+---------------------+
+            # | default     | None       | <class 'Parser'> | wordcount, wordlist |
+            # +-------------+------------+------------------+---------------------+
 
-            # The object is create just like all editors
-            edit = SectionsExample(text)
-            edit
-                # 0: some
-                # 1: --------------
-                # 2: structured
-                # 3: --------------
-                # 4: text
-            edit.describe_sections()
-                # +------------+-------------+-------+-----+
-                # | Section ID | Parser Name | Start | End |
-                # +------------+-------------+-------+-----+
-                # | 0          | default     | 0     | 1   |
-                # +------------+-------------+-------+-----+
-                # | 1          | default     | 2     | 3   |
-                # +------------+-------------+-------+-----+
-                # | 2          | default     | 4     | 5   |
-                # +------------+-------------+-------+-----+
+        # The object is create just like all editors
+        edit = SectionsExample(text)
+        edit
+            # 0: some
+            # 1: --------------
+            # 2: structured
+            # 3: --------------
+            # 4: text
+        edit.describe_sections()
+            # +------------+-------------+-------+-----+
+            # | Section ID | Parser Name | Start | End |
+            # +------------+-------------+-------+-----+
+            # | 0          | default     | 0     | 1   |
+            # +------------+-------------+-------+-----+
+            # | 1          | default     | 2     | 3   |
+            # +------------+-------------+-------+-----+
+            # | 2          | default     | 4     | 5   |
+            # +------------+-------------+-------+-----+
 
     Warning:
         Parsers should be added to sections class objects using the
@@ -603,59 +613,14 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
             # object's class, we dynamically create a copy of this object's
             # class and attach our properties to that class object.
             cls = type(self)
-            if not hasattr(cls, '__perinstance'):
-                cls = type(cls.__name__, (cls, ), {'__perinstance': True})
-            setattr(cls, secname, create_typed_attr(secname, ptypes))
+            if not hasattr(cls, '__unique'):
+                uniquecls = type(cls.__name__, (cls, ), {})
+                uniquecls.__unique = True
+                uniquecls.add_section_parsers(*cls._parsers.values())
+                self.__class__ = uniquecls
+            setattr(self.__class__, secname, create_typed_attr(secname, ptypes))
             # And attach a lazy evaluation method using the above helper
             setattr(self, "parse_" + secname, section_parser_helper(i))
-
-    def delimiters(self):
-        """Describes the patterns used to disambiguate regions of the file."""
-        return [(name, getattr(self, name)) for name in vars(self) if name.startswith("_key_")]
-
-    @classmethod
-    def describe_this(cls):
-        """Describe this object."""
-        data = {"Name": cls.name, "Class": cls, "Description": cls.description}
-        params = [n.replace("_key_", "") for n in vars(cls) if n.startswith("_key_")]
-        if len(params) == 0:
-            data["Parameters"] = None
-        else:
-            data["Parameters"] = params
-        return pd.Series(data)
-
-    def describe_sections(self):
-        """
-        Display available section names and numbers.
-
-        Note:
-            This method only has meaning once sections have been parsed.
-        """
-        sections = self.sections
-        if len(sections) == 0:
-            raise NoSections()
-        else:
-            df = pd.DataFrame(sections, columns=["Parser Name", "Start", "End"])
-            df.index.name = "Section ID"
-            return df
-
-    @classmethod
-    def describe_parsers(cls):
-        """Display available section parsers."""
-        data = {}
-        for key, item in cls._parsers.items():
-            params = [n.replace("_key_", "") for n in vars(item) if n.startswith("_key_")]
-            params = None if params == [] else ", ".join(params)
-            attrs = [attr[0] for attr in yield_typed(item)]
-            attrs = None if attrs == [] else ", ".join(attrs)
-            data[key] = (params, item, attrs)
-        if len(data) == 0:
-            raise NoParsers()
-        else:
-            df = pd.DataFrame.from_dict(data, orient='index')
-            df.index.name = "Parser Name"
-            df.columns = ["Parameters", "Class(es)", "Attributes"]
-            return df
 
     def parse_all_sections(self):
         """
@@ -698,6 +663,43 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         # request, e.g. sections.parser.dataobj
         setattr(self, secname, self._parsers[section](self[start:end]))
 
+    def delimiters(self):
+        """Describes the patterns used to disambiguate regions of the file."""
+        return [(name, getattr(self, name)) for name in vars(self) if name.startswith("_key_")]
+
+    def describe_sections(self):
+        """
+        Display available section names and numbers.
+
+        Note:
+            This method only has meaning once sections have been parsed.
+        """
+        sections = self.sections
+        if len(sections) == 0:
+            raise NoSections()
+        else:
+            df = pd.DataFrame(sections, columns=["Parser Name", "Start", "End"])
+            df.index.name = "Section ID"
+            return df
+
+    @classmethod
+    def describe_parsers(cls):
+        """Display available section parsers."""
+        data = {}
+        for key, item in cls._parsers.items():
+            params = [n.replace("_key_", "") for n in vars(item) if n.startswith("_key_")]
+            params = None if params == [] else ", ".join(params)
+            attrs = [attr[0] for attr in yield_typed(item)]
+            attrs = None if attrs == [] else ", ".join(attrs)
+            data[key] = (params, item, attrs)
+        if len(data) == 0:
+            raise NoParsers()
+        else:
+            df = pd.DataFrame.from_dict(data, orient='index')
+            df.index.name = "Parser Name"
+            df.columns = ["Parameters", "Class(es)", "Attributes"]
+            return df
+
     @classmethod
     def add_section_parsers(cls, *args, **kwargs):
         """
@@ -727,22 +729,6 @@ class Section(six.with_metaclass(SectionsMeta, Editor)):
     name = None        # Set by subclass
     description = None # ditto
 
-    @classmethod
-    def describe_this(cls):
-        """Description of this parser."""
-        pass
-
-    @classmethod
-    def describe_attributes(cls):
-        """Description of data attributes associated with this parser."""
-        df = {}
-        for name, types in yield_typed(cls):
-            df[name] = (cls._descriptions[name], types)
-        df = pd.DataFrame.from_dict(df, orient='index')
-        df.columns = ["Description", "Type"]
-        df.index.name = "Attribute"
-        return df
-
     @abstractmethod
     def _parse(self):
         """
@@ -760,6 +746,17 @@ class Section(six.with_metaclass(SectionsMeta, Editor)):
     def parse(self):
         """Parse all data objects."""
         self._parse()
+
+    @classmethod
+    def describe_attributes(cls):
+        """Description of data attributes associated with this parser."""
+        df = {}
+        for name, types in yield_typed(cls):
+            df[name] = (cls._descriptions[name], types)
+        df = pd.DataFrame.from_dict(df, orient='index')
+        df.columns = ["Description", "Type"]
+        df.index.name = "Attribute"
+        return df
 
 
 def check_path(path, ignore_warning=False):

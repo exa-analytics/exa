@@ -13,7 +13,7 @@ This sub-package contains high level data manipulation API.
 from exa.core import editor
 
 # Import sub-packages
-from exa.core import tests
+from exa.core import tests, filetypes
 
 # Import user/dev API
 from exa.core.editor import Editor

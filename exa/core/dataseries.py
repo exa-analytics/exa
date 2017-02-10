@@ -11,6 +11,7 @@ See Also:
     http://pandas.pydata.org/
 """
 import pandas as pd
+from abc import abstractmethod
 from exa.core.dataobj import DataObject
 #from exa.core.indexing import indexers
 

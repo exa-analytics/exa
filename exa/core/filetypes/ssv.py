@@ -28,10 +28,11 @@ class SSV(Editor):
         super(SSV, self).__init__(*args, **kwargs)
         self.remove_blank_lines()
         sniffer = csv.Sniffer()
-        dialect = sniffer.sniff(self._lines[1])
-        self.header = sniffer.has_header(str(self))
+        sample = "\n".join(self._lines[:10])
+        dialect = sniffer.sniff(sample)
+        self.header = sniffer.has_header(sample)
         self.delimiter = dialect.delimiter
         self.quoting = dialect.quoting
         self.escapechar = dialect.escapechar
         self.quotechar = dialect.quotechar
-        self.ncols = len(self[2].split(self.delimiter))
+        self.ncols = len(sample.split("\n")[0].split(self.delimiter))
