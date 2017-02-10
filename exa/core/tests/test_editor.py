@@ -348,8 +348,8 @@ class TestSections(UnitTester):
             df = sec.describe_parsers()
             self.assertIsInstance(df, pd.DataFrame)
             self.assertEqual(len(df), 1)
-            with self.assertRaises(TypeError):
-                sec.__class__.describe_sections()
+        with self.assertRaises(TypeError):
+            MockSections.describe_sections()
 
     def test_parsing(self):
         """Test live modification of class objects on parsing."""
