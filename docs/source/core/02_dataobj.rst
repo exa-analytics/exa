@@ -2,8 +2,13 @@
 .. Distributed under the terms of the Apache License 2.0
 
 #########################
-Editors
+Generic Data Objects
 #########################
-.. automodule:: exa.core.editor
+.. automodule:: exa.core.dataobj
     :members:
 
+.. automodule:: exa.core.dataseries
+    :members:
+
+.. automodule:: exa.core.dataframe
+    :members:

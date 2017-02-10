@@ -4,6 +4,9 @@
 """
 DataSeries
 ###################################
+DataSeries objects can correspond to various mathematical
+constructs, vectors, matrices, and higher dimensional objects.
+
 See Also:
     http://pandas.pydata.org/
 """
@@ -27,6 +30,33 @@ class DataSeries(DataObject, pd.Series):    # Note the ordering
     @property
     def _constructor(self):
         return DataSeries
+
+    def asunit(self, unit):
+        """
+        Convert the physical units of the array.
+
+        .. code-block:: Python
+
+            series = exa.DataSeries([0, 1, 2], units=exa.units.km)
+            new = series.asunit(exa.units.m)
+            new.values    # prints [0.0, 1000.0, 2000.0]
+            new.units     # prints exa.units.m
+
+        Args:
+            unit (Unit): Any one of exa.units.*
+
+        Returns:
+            obj: Object of the same type with converted values and units attribute
+        """
+        if not hasattr(self.units, "as_coeff_Mul") and not isinstance(self.units, dict):
+            raise MissingUnits()
+        return self._asunit(unit)
+
+    @abstractmethod
+    def _asunit(self):
+        """Unit conversion function."""
+        pass
+
 
     def _asunit(self, unit):
         """Convert units without error checking."""

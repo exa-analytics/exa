@@ -10,7 +10,7 @@ easy conversion or extraction of data from a text file. It does not strive to be
 a full featured text editor. A large number of Pythonic operations can be performed
 on editors:
 
-.. code-block:: Python
+.. code-block:: python
 
     editor = Editor(file.txt)       # Create an editor from a file
     editor = Editor(file.txt.gz)    # Automatically decompresses files
@@ -29,12 +29,15 @@ See Also:
     and :class:`~exa.core.dataframe.DataFrame` among others.
 """
 import os, re, sys, bz2, gzip, six
+import warnings
 import pandas as pd
-from abc import abstractmethod
+from abc import abstractmethod, abstractproperty
 from copy import copy, deepcopy
 from collections import Counter
 from io import StringIO, TextIOWrapper
-from exa.typed import Meta, simple_function_factory, yield_typed
+from IPython.display import display
+from exa.typed import Meta, simple_function_factory, yield_typed, create_typed_attr
+from exa.core.errors import NoParsers, NoSections
 
 
 class Editor(object):
@@ -207,7 +210,7 @@ class Editor(object):
         Args:
             \*args: Args for formatting
             \*\*kwargs: Kwargs for formatting
-            inplace (bool): If True, overwrite editor's contents with formatted contents (default False)
+            inplace (bool): If True, overwrite editor's contents (default False)
 
         Returns:
             formatted: Returns the formatted editor (if inplace is False)
@@ -248,7 +251,7 @@ class Editor(object):
         Append lines to the editor.
 
         Args:
-            lines (list, str): List of lines or str text to append to the editor
+            lines (list, str): List of lines or text to append to the editor
 
         Note:
             Occurs in-place, like ``list.append``.
@@ -265,7 +268,7 @@ class Editor(object):
         Prepend lines to the editor.
 
         Args:
-            lines (list, str): List of lines or str text to append to the editor
+            lines (list, str): List of lines or text to append to the editor
 
         Note:
             Occurs in-place, like ``list.insert(0, ...)``.
@@ -283,7 +286,7 @@ class Editor(object):
 
         Args:
             lineno (int): Line number after which to insert lines
-            lines (list, str): List of lines or str text to append to the editor
+            lines (list, str): List of lines or text to append to the editor
 
         Note:
             Occurs in-place, like ``list.insert(...)``.
@@ -430,93 +433,273 @@ class SectionsMeta(Meta):
     method is responsible for parsing all data objects; individual
     ``parse_dataobj`` like functions simply call the main ``parse``
     method.
+
+    Attributes:
+        sections (list): A list of tuples of the form [(name, start, end), ...]
     """
     _getters = ("parse", )
-    _attr_descriptions = {"sections": "List of sections"}
+    _descriptions = {"sections": "List of sections"}
     sections = list
 
     def __new__(mcs, name, bases, clsdict):
         for attr in yield_typed(mcs):
             f = simple_function_factory("parse", "parse", attr[0])
             clsdict[f.__name__] = f
-        clsdict["_attr_descriptions"] = mcs._attr_descriptions
-        clsdict["_parsers"] = {}
+        clsdict['_descriptions'] = mcs._descriptions
+        clsdict['_parsers'] = {}
         return super(SectionsMeta, mcs).__new__(mcs, name, bases, clsdict)
 
 
 class Sections(six.with_metaclass(SectionsMeta, Editor)):
     """
     A special editor like object tailored to parsing of files that consist of
-    multiple, distinct, regions. Each region corresponds to a
-    :class:`~exa.core.editor.Section` object that contains the appropriate
-    parsing functionality specific to (only) that region. Complex files' regions
-    may themselves be :class:`~exa.core.editor.Sections` objects.
+    multiple, distinct, regions. Regions may, themselves, consist of sections
+    or may be directly parsed (see :class:`~exa.core.editor.Section`). The
+    following example shows simple use case.
+
+    .. code-block:: python
+
+        import six
+
+        text = '''some
+        --------------
+        structured
+        --------------
+        text
+        '''
+
+        class SectionsExample(exa.core.editor.Sections):
+            name = 'example_sections_parser'
+            description = 'Parses files separated by -* regex'
+            _key_sep = '---'                # Arbitrary section separator
+            _key_def _sec_name = 'default'   # Default section name
+
+            def parse(self):
+                # The code below depends on the file in question
+                delims = self.find(self._key_sep, which='lineno')[self._key_sep]
+                starts = [delim + 1 for delim in delims]
+                starts.insert(0, 0)
+                ends = delims
+                ends.append(len(self))
+                names = [self._key_def_sec_name]*len(starts)
+                self.sections = list(zip(names, starts, ends))
+
+
+            class ParserMeta(exa.core.editor.SectionsMeta):
+                wordcount = int
+                wordlist = list
+                _descriptions = {'wordcount': "Count of number of words",
+                                      'wordlist': "List of words"}
+
+            class Parser(six.with_metaclass(ParserMeta, exa.core.editor.Section)):
+                description = 'Parser for individual region separated by -* regex'
+                name = 'default'
+
+                def parse(self):
+                    # Arbitrary what data objects are created here
+                    lines = self._lines
+                    wordlist = [word for line in lines for word in line.split()]
+                    self.wordlist = wordlist
+                    self.wordcount = len(wordcount)
+
+            # The following needs only be performed once,
+            # preferably at the module level, hidden from the user.
+            SectionsExample.add_section_parsers(Parser)
+
+            # The following shows some useful commands and (commented) print output
+            # Prior to using a Sections or Section object one can inspect them
+            SectionsExample.describe_this()
+                # Class          <class '__main__.SectionsExample'>
+                # Description    Parses files separated by -* regex
+                # Name                      example_sections_parser
+                # Parameters                    [sep, def_sec_name]
+            SectionsExample.describe_parsers()
+                # +-------------+------------+------------------+---------------------+
+                # | Parser Name | Parameters | Class(es)        | Attributes          |
+                # +-------------+------------+------------------+---------------------+
+                # | default     | None       | <class 'Parser'> | wordcount, wordlist |
+                # +-------------+------------+------------------+---------------------+
+
+            # The object is create just like all editors
+            edit = SectionsExample(text)
+            edit
+                # 0: some
+                # 1: --------------
+                # 2: structured
+                # 3: --------------
+                # 4: text
+            edit.describe_sections()
+                # +------------+-------------+-------+-----+
+                # | Section ID | Parser Name | Start | End |
+                # +------------+-------------+-------+-----+
+                # | 0          | default     | 0     | 1   |
+                # +------------+-------------+-------+-----+
+                # | 1          | default     | 2     | 3   |
+                # +------------+-------------+-------+-----+
+                # | 2          | default     | 4     | 5   |
+                # +------------+-------------+-------+-----+
+
+    Warning:
+        Parsers should be added to sections class objects using the
+        :func:`~exa.code.editor.Sections.add_section_parsers` function.
+        Parser objects have a ``name`` attribute to identify what section they
+        parse: avoid using **START** or **END** as these are special sections
+
+    Tip:
+        Access a parsing parameter using the ``._key_[parameter]`` attribute.
+        Access a parsed section using the ``.sectionid`` attribute.
+        Access a parser using the ``_parsers[name]`` attribute.
+
+    Note:
+        Sections follows the [start, end) convention for line numbering.
 
     See Also:
-        :class:`~exa.core.editor.Section`
+        The :class:`~exa.core.editor.Section` objects are section parsers.
+        Example usage can be found in :mod:`~exa.core.tests.test_editor`.
     """
-    name = None       # Subclass should set this!
+    name = None        # Subclasses may set this if needed
+    description = None # ditto
+
+    @abstractmethod
+    def _parse(self):
+        """
+        Parsing the the sections attribute occurs here.
+
+        The algorithm is file specific but should conform to creating a ``sections``
+        attribute of the following form.
+
+        .. code-block:: python
+
+            [('section name', line_start, line_end), ...]
+        """
+        pass
+
+    def parse(self):
+        """
+        Parse the sections of this file and set the ``sections`` attribute.
+
+        See Also:
+            :func:`~exa.core.editor.Sections.describe_sections`
+        """
+        # This helper function is used below; it makes a call self's parse_section
+        # function with a given argument.
+        def section_parser_helper(i):
+            def section_parser():
+                self.parse_section(i)
+            return section_parser
+        # First perform the file specific parse method
+        self._parse()
+        # Now generate section attributes for the sections present
+        self._nsections = len(str(len(self.sections)))
+        for i, (section, start, end) in enumerate(self.sections):
+            if section not in self._parsers:
+                warnings.warn("No parser for section '{}'!".format(section))
+                continue
+            secname = "section" + str(i).zfill(self._nsections)
+            ptypes = self._parsers[section]
+            # Now we perform a bit of class gymnastics:
+            # Because we don't want to attach out typed property paradigm
+            # (see exa.typed.create_typed_attr) to all instances of this
+            # object's class, we dynamically create a copy of this object's
+            # class and attach our properties to that class object.
+            cls = type(self)
+            if not hasattr(cls, '__perinstance'):
+                cls = type(cls.__name__, (cls, ), {'__perinstance': True})
+            setattr(cls, secname, create_typed_attr(secname, ptypes))
+            # And attach a lazy evaluation method using the above helper
+            setattr(self, "parse_" + secname, section_parser_helper(i))
 
     def delimiters(self):
         """Describes the patterns used to disambiguate regions of the file."""
         return [(name, getattr(self, name)) for name in vars(self) if name.startswith("_key_")]
 
-    def describe(self):
-        """Describe section parsers and/or (sub)sections are handled by this object."""
-        print("Note that parameters should be prefixed with '_key_' when accessed.")
-        data = {}
-        for key, item in self._parsers.items():
-            params = [n.replace("_key_", "") for n in vars(item) if n.startswith("_key_")]
-            data[key] = (", ".join(params), item)
-        df = pd.DataFrame.from_dict(data, orient='index')
-        df.index.name = "Identifier"
-        df.columns = ["Parameters", "Class"]
-        df.columns.name = "Sections Object"
-        return df
-
-    def get_section_bounds(self, section):
-        """
-        Get the start and end point of a given section.
-
-        Args:
-            section (str or int): Section name or integer index
-
-        Returns:
-            tup (tuple): Tuple of form (start, end, name, number)
-        """
-        end = float('inf')    # So that abs(...) < abs(...) works (see below)
-        if isinstance(section, int):
-            name = list(self.sections.keys())[section]
-            number = section
+    @classmethod
+    def describe_this(cls):
+        """Describe this object."""
+        data = {"Name": cls.name, "Class": cls, "Description": cls.description}
+        params = [n.replace("_key_", "") for n in vars(cls) if n.startswith("_key_")]
+        if len(params) == 0:
+            data["Parameters"] = None
         else:
-            name = section
-            number = list(self.sections.keys()).index(section)
-        start = self.sections[name]
-        for key, lineno in self.sections:
-            if lineno > start and abs(lineno - start) < abs(end - start):
-                end = lineno
-        return (start, end, name, number)
+            data["Parameters"] = params
+        return pd.Series(data)
 
-    def get_section(self, section):
+    def describe_sections(self):
         """
-        Get the Section editor associated with the named or integer section.
+        Display available section names and numbers.
 
-        Args:
-            section (str or int): Section name or integer index
-
-        Returns:
-            section (Section): Section editor object specific to the given section
+        Note:
+            This method only has meaning once sections have been parsed.
         """
-        start, end, name, number = self.get_section_bounds(section)
-        return self._parsers[name](str(self[start:end]))
-
-    @abstractmethod
-    def parse(self):
-        """Section identification algorithm belongs here."""
-        pass
+        sections = self.sections
+        if len(sections) == 0:
+            raise NoSections()
+        else:
+            df = pd.DataFrame(sections, columns=["Parser Name", "Start", "End"])
+            df.index.name = "Section ID"
+            return df
 
     @classmethod
-    def add_section_parsers(cls, *args):
+    def describe_parsers(cls):
+        """Display available section parsers."""
+        data = {}
+        for key, item in cls._parsers.items():
+            params = [n.replace("_key_", "") for n in vars(item) if n.startswith("_key_")]
+            params = None if params == [] else ", ".join(params)
+            attrs = [attr[0] for attr in yield_typed(item)]
+            attrs = None if attrs == [] else ", ".join(attrs)
+            data[key] = (params, item, attrs)
+        if len(data) == 0:
+            raise NoParsers()
+        else:
+            df = pd.DataFrame.from_dict(data, orient='index')
+            df.index.name = "Parser Name"
+            df.columns = ["Parameters", "Class(es)", "Attributes"]
+            return df
+
+    def parse_all_sections(self):
+        """
+        Parse data (or sub-sections) of each section identified by this object.
+
+        For each section parsed, a corresponding attributed name ``sectionID``
+        is created; nothing is returned by this function and no arguments are
+        accepted.
+
+        See Also:
+            Two very useful functions, :func:`~exa.core.editor.Sections.describe_sections`
+            and :func:`~exa.editor.Sections.describe_parsers` show section names
+            and numbers, and section parsers, respectively.
+        """
+        for i in range(self._nsections):
+            self.parse_section(i)
+
+    def parse_section(self, number):
+        """
+        Parse specific section of this object.
+
+        Parse section data can be accessed via the ``sectionID`` attribute, where
+        ID is the number of the section as listed in the ``describe_sections``
+        table or in the order given by the ``sections`` attribute.
+
+        Args:
+            number (int): Section number (of the ``sections`` list)
+
+        See Also:
+            Two very useful functions, :func:`~exa.core.editor.Sections.describe_sections`
+            and :func:`~exa.editor.Sections.describe_parsers` show section names
+            and numbers, and section parsers, respectively.
+        """
+        section, start, end = self.sections[number]
+        if section not in self._parsers:
+            warnings.warn("No parser for section '{}'!".format(section))
+            return
+        secname = "section" + str(number).zfill(self._nsections)
+        # Note that we don't actually parse anything until a value is in fact
+        # request, e.g. sections.parser.dataobj
+        setattr(self, secname, self._parsers[section](self[start:end]))
+
+    @classmethod
+    def add_section_parsers(cls, *args, **kwargs):
         """
         Add section parsers classes.
 
@@ -524,7 +707,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
 
             Sections.add_section_parsers(Section1, Section2, ...)
         """
-        cls._parsers.update({s.name: s for s in args})
+        cls._parsers.update({str(s.name): s for s in args})
 
 
 class Section(six.with_metaclass(SectionsMeta, Editor)):
@@ -537,24 +720,46 @@ class Section(six.with_metaclass(SectionsMeta, Editor)):
 
     See Also:
         :class:`exa.core.editor.Sections`
-    """
-    name = None
 
-    def describe(self):
+    Warning:
+        Subclasses must set the class attribute 'name' as the parser name.
+    """
+    name = None        # Set by subclass
+    description = None # ditto
+
+    @classmethod
+    def describe_this(cls):
+        """Description of this parser."""
+        pass
+
+    @classmethod
+    def describe_attributes(cls):
         """Description of data attributes associated with this parser."""
-        dfiption = {}
-        for name, types in self._yield_typed():
-            dfiption[name] = (self._attr_descriptions[name], types)
-        df = pd.DataFrame.from_dict(dfiption, orient='index')
-        df.columns = ["Data Description", "Data Type"]
+        df = {}
+        for name, types in yield_typed(cls):
+            df[name] = (cls._descriptions[name], types)
+        df = pd.DataFrame.from_dict(df, orient='index')
+        df.columns = ["Description", "Type"]
         df.index.name = "Attribute"
-        df.columns.name = "Section Object"
         return df
 
     @abstractmethod
-    def parse(self):
-        """The parsing algorithm, specific to this section, belongs here."""
+    def _parse(self):
+        """
+        The parsing algorithm, specific to this section, belongs here.
+
+        This function should set all data object attributes as defined by in
+        the corresponding metaclass (e.g. :class:`~exa.core.editor.SectionsMeta`).
+
+        See Also:
+            An example implementation can be found in the docs of
+            :class:`~exa.core.editor.Sections`.
+        """
         pass
+
+    def parse(self):
+        """Parse all data objects."""
+        self._parse()
 
 
 def check_path(path, ignore_warning=False):

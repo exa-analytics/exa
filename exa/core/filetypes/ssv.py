@@ -25,7 +25,7 @@ class SSV(Editor):
         return pd.read_csv(StringIO(str(self)), sep=self.delimiter, names=range(self.ncols))
 
     def __init__(self, *args, **kwargs):
-        super(CSV, self).__init__(*args, **kwargs)
+        super(SSV, self).__init__(*args, **kwargs)
         self.remove_blank_lines()
         sniffer = csv.Sniffer()
         dialect = sniffer.sniff(self._lines[1])

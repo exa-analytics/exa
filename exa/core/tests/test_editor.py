@@ -9,11 +9,12 @@ Tests for base editor and editor-like classes.
 import os, bz2, gzip, six, shutil
 from types import GeneratorType
 import numpy as np
+import pandas as pd
 from io import StringIO
 from uuid import uuid4
 from exa._config import config
 from exa.tester import UnitTester
-from exa.core.editor import Editor, concat, Sections
+from exa.core.editor import Editor, concat, Sections, Section, SectionsMeta
 if not hasattr(bz2, "open"):    # Python 3.x compatibility
     bz2.open = bz2.BZ2File
 
@@ -27,12 +28,35 @@ and constants: {{constant}}
 That was a blank line"""
 
 
-sections_string = u"""Sections have some text
-followed by a delimiter
+sections0 = u"""Sections have some text followed by a delimiter
 ==================================
-That eventually repeats
-=================================
-and more text.
+that eventually repeats
+==================================
+"""
+
+
+sections1 = u"""Sections have some text followed by a delimiter
+==================================
+that eventually repeats
+==================================
+or may have final text.
+"""
+
+
+sections2 = u"""==============================
+Sections have some text preceded by a delimiter
+==================================
+that eventually repeats.
+==================================
+"""
+
+
+sections3 = u"""==============================
+Sections have some text preceded by a delimiter
+==================================
+that eventually repeats
+==================================
+or may have final text.
 """
 
 
@@ -148,7 +172,8 @@ class TestEditor(UnitTester):
 
     def test_delete(self):
         """Test :func:`~exa.core.editor.Editor.__delitem__` specifically."""
-        lines = np.unique(np.random.randint(0, len(self.from_gzip), size=(len(self.from_gzip), )))
+        lines = np.unique(np.random.randint(0, len(self.from_gzip),
+                                            size=(len(self.from_gzip), )))
         n0 = len(lines)
         n1 = len(self.from_gzip) - n0
         self.from_gzip.delete_lines(lines)
@@ -250,19 +275,40 @@ class TestEditor(UnitTester):
 class MockSections(Sections):
     """Mock example of :class:`~exa.core.editor.Sections`."""
     _key_marker = "===="
+    _key_def_sec_name = 'default'
 
     def parse(self):
         """This function must be implemneted for a specific (sections) file."""
-        self.sections = list(enumerate(self.find(self._key_marker,
-                                                 which='lineno')[self._key_marker]))
+        linenos = self.find(self._key_marker, which='lineno')[self._key_marker]
+        names = [self._key_def_sec_name]*len(linenos)
+        sections = list(zip(names, linenos))
+        self._finalize_sections(sections)
+
+
+class MockSectionMeta(SectionsMeta):
+    """Metaclass that defines data objects for the section parser."""
+    lines = pd.DataFrame
+    _descriptions = {'lines': "Split lines"}
+
+
+class MockSection(Section):
+    """Mock example of :class:`~exa.core.editor.Section."""
+    name = "default"
+
+    def parse(self):
+        """Parse section."""
+        lines = []
+        for line in self:
+            lines.append(line.split())
+        self.lines = [item for splitline in lines for item in splitline]
 
 
 class TestSections(UnitTester):
     """Tests for :class:`~exa.core.editor.Sections`."""
     def setUp(self):
-        self.ed = MockSections(sections_string)
+        MockSections.add_section_parsers(MockSection)
+        self.sec0 = MockSections(sections0)
+        self.sec1 = MockSections(sections1)
+        self.sec2 = MockSections(sections2)
+        self.sec3 = MockSections(sections3)
 
-    def test_sections(self):
-        """Test that sections are automatically parsed."""
-        s = self.ed.sections
-        self.assertIsInstance(s, list)
