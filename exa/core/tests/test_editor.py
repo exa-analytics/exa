@@ -299,7 +299,7 @@ class MockSectionMeta(SectionsMeta):
 
 
 class MockSection(six.with_metaclass(MockSectionMeta, Section)):
-    """Mock example of :class:`~exa.core.editor.Section."""
+    """Mock example of :class:`~exa.core.editor.Section`."""
     name = "default"
     description = "Parser for word regions."
 

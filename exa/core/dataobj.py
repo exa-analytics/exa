@@ -5,8 +5,8 @@
 Abstract Base Class for Data Objects
 ######################################
 Data objects come in two forms, single valued n-dimensional arrays (called
-:class:`~exa.core.dataseries.DataSeries`s) and multiply valued n-dimensional
-arrays (called :class:`~exa.core.dataframe.DataFrame`s). DataFrames can be
+:class:`~exa.core.dataseries.DataSeries`) and multiply valued n-dimensional
+arrays (called :class:`~exa.core.dataframe.DataFrame`). DataFrames can be
 thought of as collections of DataSeries objects that share a common
 dimensionality.
 """
@@ -17,7 +17,7 @@ from abc import abstractproperty, abstractmethod
 from sympy.core.mul import Mul
 from sympy.physics.units import Unit
 from exa.core.errors import MissingUnits
-from exa.core.indexing import indexers
+#from exa.core.indexing import indexers
 from exa.typed import Meta
 
 
@@ -58,6 +58,6 @@ class DataObject(six.with_metaclass(Meta, object)):
             if info['reverse'] is not None:
                 op = "__{}__".format(info['reverse'])
                 setattr(cls, op, cls._modify_op(op))
-        for name, indexer in indexers():       # Calls pandas machinery
-            setattr(cls, name, None)           # Need to unreference existing indexer
-            cls._create_indexer(name, indexer) # Prior to instantiation new indexer
+#        for name, indexer in indexers():       # Calls pandas machinery
+#            setattr(cls, name, None)           # Need to unreference existing indexer
+#            cls._create_indexer(name, indexer) # Prior to instantiation new indexer

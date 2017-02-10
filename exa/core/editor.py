@@ -553,7 +553,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         Parsers should be added to sections class objects using the
         :func:`~exa.code.editor.Sections.add_section_parsers` function.
         Parser objects have a ``name`` attribute to identify what section they
-        parse: avoid using **START** or **END** as these are special sections
+        parse.
 
     Tip:
         Access a parsing parameter using the ``._key_[parameter]`` attribute.
