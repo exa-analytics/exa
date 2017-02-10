@@ -271,6 +271,19 @@ class TestEditor(UnitTester):
         self.assertIsInstance(obj, Editor)
         self.assertEqual(len(obj), len(self.from_file))
 
+    def test_to_stream(self):
+        """
+        Tests for methods :func:`~exa.core.editor.Editor.to_stream`.
+
+        Note:
+            Function :func:`~exa.core.editor.Editor.to_File` is tested in
+            :func:`~exa.core.tests.test_editor.TestEditor.test_format`.
+            Function :func:`~exa.core.editor.Editor.to_data` is tested in
+            :mod:`~exa.core.filetypes.tests.test_ssv`.
+        """
+        stream = self.from_gzip.to_stream()
+        self.assertIsInstance(stream, StringIO)
+
 
 class MockSections(Sections):
     """Mock example of :class:`~exa.core.editor.Sections`."""
