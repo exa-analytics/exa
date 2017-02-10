@@ -8,8 +8,6 @@ Provides an editor with convenience methods tailored specifically for comma
 separated value (CSV) files and tab separated value (TSV) files.
 """
 import csv
-import pandas as pd
-from io import StringIO
 from exa.core.editor import Editor
 
 
@@ -18,21 +16,37 @@ class SSV(Editor):
     A convenience class for manipulating CSV (or CSV like, including tab, space,
     etc. separated) files on disk.
     """
-    def to_frame(self):
-        """Create a :class:`~exa.numerical.DataFrame` from this file."""
+    def to_dataobj(self, skipinitialspace=True, **kwargs):
+        """
+        Create a data object from the file.
+
+        Args:
+            kwargs: See below
+
+        Returns:
+            dataobj: A dataframe containing the data
+
+        Note:
+            A list of keyword arguments can be found at
+            http://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html
+        """
         if self.header:
-            return pd.read_csv(StringIO(str(self)), sep=self.delimiter, names=self[0])
-        return pd.read_csv(StringIO(str(self)), sep=self.delimiter, names=range(self.ncols))
+            names = self._lines[0].split(self.delimiter)
+            return pd.read_csv(self.to_stream(), sep=self.delimiter, names=names,
+                               skipinitialspace=skipinitialspace, **kwargs)
+        return super(SSV, self).to_dataobj(skipinitialspace=skipinitialspace, **kwargs)
 
     def __init__(self, *args, **kwargs):
         super(SSV, self).__init__(*args, **kwargs)
         self.remove_blank_lines()
         sniffer = csv.Sniffer()
-        sample = "\n".join(self._lines[:10])
+        sample = "\n".join(self._lines[1:10])
         dialect = sniffer.sniff(sample)
-        self.header = sniffer.has_header(sample)
+        self.header = None
         self.delimiter = dialect.delimiter
         self.quoting = dialect.quoting
         self.escapechar = dialect.escapechar
         self.quotechar = dialect.quotechar
         self.ncols = len(sample.split("\n")[0].split(self.delimiter))
+        if sniffer.has_header(sample):
+            self.header = self._lines[0].split(dialect.delimiter)

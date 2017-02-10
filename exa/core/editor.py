@@ -342,9 +342,23 @@ class Editor(object):
         for line in self._lines[slice(start, stop, step)]:
             yield line
 
-    def to_stringio(self):
-        """Send to StringIO object."""
+    def to_stream(self):
+        """Send editor text to a file stream (StringIO) object."""
         return StringIO(str(self))
+
+    def to_file(self, path, *args, **kwargs):
+        """Convenience name for :func:`~exa.core.editor.Editor.write`."""
+        self.write(path, *args, **kwargs)
+
+    def to_data(self, *args, **kwargs):
+        """
+        Create a single appropriate data object using pandas read_csv.
+
+        Note:
+            A list of keyword arguments can be found at
+            http://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html
+        """
+        return pd.read_csv(self.to_stream(), *args, **kwargs)
 
     def __eq__(self, other):
         if isinstance(other, Editor) and self._lines == other._lines:
