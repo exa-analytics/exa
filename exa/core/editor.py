@@ -344,7 +344,7 @@ class Editor(object):
 
     def to_stream(self):
         """Send editor text to a file stream (StringIO) object."""
-        return StringIO(six.b(str(self)))
+        return StringIO(six.u(str(self)))
 
     def to_file(self, path, *args, **kwargs):
         """Convenience name for :func:`~exa.core.editor.Editor.write`."""

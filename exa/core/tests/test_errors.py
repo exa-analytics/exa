@@ -5,19 +5,18 @@
 Tests for :mod:`~exa.core.errors`
 ##################################
 """
-#from sympy.physics import units
-#from exa.tester import UnitTester
-#from exa.core.errors import UnitsError
-#
-#
-#class TestCoreExceptions(UnitTester):
-#    """Tests for core exceptions and errors."""
-#    def setUp(self):
-#        pass
-#        self.s0 = Series([0, 1, 2], units=units.m)
-#        self.s1 = Series([3, 4, 5], units=units.eV)
-#
-#    def test_raisesed(self):
-#        """Test the error is raised."""
-#        with self.assertRaises(UnitsError):
-#            self.s0 + self.s1
+from exa.tester import UnitTester
+from exa.core.errors import UnitsError, MissingUnits, NoParsers, NoSections
+
+
+class TestCoreExceptions(UnitTester):
+    """Tests for core exceptions and errors."""
+    def test_raising(self):
+        with self.assertRaises(UnitsError):
+            raise UnitsError(None, None)
+        with self.assertRaises(MissingUnits):
+            raise MissingUnits()
+        with self.assertRaises(NoParsers):
+            raise NoParsers()
+        with self.assertRaises(NoSections):
+            raise NoSections()
