@@ -318,7 +318,7 @@ class MockSection(six.with_metaclass(MockSectionMeta, Section)):
 
     def _parse(self):
         """Parse a word section."""
-        self.wordlist = [word for line in self.lines for word in line.split()]
+        self.wordlist = [word for line in self._lines for word in line.split()]
         self.wordcount = len(self.wordlist)
 
 
@@ -379,4 +379,8 @@ class TestSections(UnitTester):
                 name = "section" + str(i)
                 self.assertTrue(hasattr(sec, "parse_" + name))
                 self.assertTrue(hasattr(sec, name))
+            sec.section1.parse()
+            self.assertTrue(hasattr(sec.section0, "wordlist"))
+            self.assertTrue(hasattr(sec.section0, "wordcount"))
+            self.assertTrue(sec.section1.wordcount > 0)
 
