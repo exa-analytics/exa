@@ -8,6 +8,7 @@ Provides an editor with convenience methods tailored specifically for comma
 separated value (CSV) files and tab separated value (TSV) files.
 """
 import csv
+import pandas as pd
 from exa.core.editor import Editor
 
 
@@ -40,13 +41,13 @@ class SSV(Editor):
         super(SSV, self).__init__(*args, **kwargs)
         self.remove_blank_lines()
         sniffer = csv.Sniffer()
-        sample = "\n".join(self._lines[1:10])
+        sample = "\n".join(self._lines[:20])
         dialect = sniffer.sniff(sample)
-        self.header = None
         self.delimiter = dialect.delimiter
         self.quoting = dialect.quoting
         self.escapechar = dialect.escapechar
         self.quotechar = dialect.quotechar
         self.ncols = len(sample.split("\n")[0].split(self.delimiter))
+        self.header = None
         if sniffer.has_header(sample):
             self.header = self._lines[0].split(dialect.delimiter)

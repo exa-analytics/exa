@@ -4,17 +4,32 @@
 """
 Container
 ########################
-The :class:`~exa.container.BaseContainer` class is the primary object for
-data processing, analysis, and visualization. In brief, containers are composed
-of data objects whose contents are used for 2D and 3D visualization. Containers
-also provide some content management and data relationship features.
+Data comes in many formats from simple local text or binary files (e.g. `HDF`_)
+to remote distributed databases or filesystems (e.g. `MySQL`_, `Hadoop`_).
+Analytics and computation are sometimes simple, performed locally in memory, or
+complex, performed on a remote, distributed, high performance computational
+cluster. The :class:`~exa.core.container.Container` object synthesizes common
+tasks associated with data workflows and provides a framework for interactive
+analytics and visualization.
 
-See Also:
-    For a description of data objects see :mod:`~exa.numerical`. For a
-    description of visualization of containers, see :mod:`~exa.widget`.
+Similar to a database schema, a :class:`~exa.core.container.Container` can have
+many different tables with arbitrary shape (i.e. dimensionality and attributes).
+Relationships between data objects within a :class:`~exa.core.container.Container`
+are elucidated automatically. The :class:`~exa.core.container.Container` object
+provides an API for all analytics and computation operations.
+
+.. _HDF: https://en.wikipedia.org/wiki/Hierarchical_Data_Format
+.. _MySQL: https://en.wikipedia.org/wiki/MySQL
+.. _Hadoop: https://en.wikipedia.org/wiki/Apache_Hadoop
 """
 
 class Container(object):
+    """
+    A storage point for an arbitrary collection of related data objects.
+
+    Facilitates computation, analytics, and visualization of simple or
+    complex data collections.
+    """
     pass
 #import os
 #import numpy as np

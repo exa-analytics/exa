@@ -5,6 +5,7 @@
 This sub-package contains high level data manipulation API.
 
 - :mod:`~exa.core.editor`: Programmatic file manipulation
+
 - :mod:`~exa.core.dataobj`: Abstract base data object
 - :mod:`~exa.core.dataseries`: Single valued n-dimensional array
 - :mod:`~exa.core.dataframe`: Multiply valued n-dimensional array
