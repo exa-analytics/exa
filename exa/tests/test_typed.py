@@ -42,7 +42,7 @@ class GetterClass(six.with_metaclass(GetterMeta, MinimalClass)):
 class AdvancedMeta(GetterMeta):
     """Advanced modification of class objects using :mod:`~exa.typed`."""
     foo = int
-    bar = str
+    bar = [str, float]
 
     def __new__(mcs, name, bases, clsdict):
         for attr in yield_typed(mcs):
@@ -103,3 +103,11 @@ class TestTyped(UnitTester):
         self.assertEqual(awe.foo, 50)
         self.assertEqual(awe.bar, "42")
         del awe.foo
+
+    def test_yield_typed(self):
+        """Test :func:`~exa.typed.yield_typed`."""
+        awe = AdvancedClass()
+        typed = list(yield_typed(awe))
+        self.assertEqual(len(typed), 2)
+        self.assertIsInstance(typed, list)
+        self.assertIsInstance(typed[0], tuple)

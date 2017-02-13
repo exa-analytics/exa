@@ -22,8 +22,6 @@ import six
 import numpy as np
 from pandas.core.ops import _op_descriptions
 from abc import abstractproperty, abstractmethod
-from sympy.core.mul import Mul
-from sympy.physics.units import Unit
 from exa.core.errors import MissingUnits
 from exa.typed import Meta
 
@@ -31,38 +29,44 @@ from exa.typed import Meta
 class PandasDataObjectMeta(Meta):
     """
     Metaclass for data objects.
+
+    Modifies all operations to ensure that metadata and types are propagated
+    correctly.
     """
-    pass
+    @classmethod
+    def _modify_op(cls, op):
+        """Modifies mathematical operations to return correctly typed objects."""
+        def wrapper(self, other, *args, **kwargs):
+            """Ensure we return an Exa data object type."""
+            return self.__finalize__(getattr(super(cls, self), op)(other, *args, **kwargs))
+        return wrapper
+
+    def __new__(mcs, name, bases, clsdict):
+        for opname, info in _op_descriptions.items():
+            if opname == None:
+                continue
+            op = "__{}__".format(opname)
+            clsdict[op] = mcs._modify_op(op)
+            if info['reverse'] is not None:
+                op = "__{}__".format(info['reverse'])
+                clsdict[op] = mcs._modify_op(op)
+        return super(PandasDataObjectMeta, mcs).__new__(mcs, name, bases, clsdict)
 
 
-class PandasDataObject(six.with_metaclass(PandasDataObjectMeta)):
+class PandasDataObject(six.with_metaclass(PandasDataObjectMeta, object)):
     """
     """
-    pass
+    @abstractproperty
+    def _constructor(self):
+        """Required for metadata propagation."""
+        pass
 
-#    @abstractproperty
-#    def _constructor(self):
-#        """Required for metadata propagation."""
-#        pass
-#
-#    @abstractmethod
-#    def as_pandas(self):
-#        """Convert to a pandas object equivalent."""
-#        pass
-#
-#    def __finalize__(self, other, method=None, **kwargs):
-#        """Pandas metadata propatation solution."""
-#        for name in self._metadata:
-#            object.__setattr__(self, name, getattr(other, name, None))
-#        return self
-#
-#    @classmethod
-#    def _modify_op(cls, op):
-#        """Modifies mathematical operations to return correctly typed objects."""
-#        def wrapper(self, other, *args, **kwargs):
-#            """Ensure we return an Exa data object type."""
-#            return self.__finalize__(getattr(super(cls, self), op)(other, *args, **kwargs))
-#        return wrapper
+    def __finalize__(self, other, method=None, **kwargs):
+        """Pandas metadata propatation solution."""
+        for name in self._metadata:
+            object.__setattr__(self, name, getattr(other, name, None))
+        return self
+
 #
 #    @classmethod
 #    def _init(cls):

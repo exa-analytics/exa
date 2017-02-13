@@ -4,7 +4,7 @@
 #########################
 Generic Data Objects
 #########################
-.. automodule:: exa.core.dataobj
+.. automodule:: exa.core.abcdata
     :members:
 
 .. automodule:: exa.core.dataseries
