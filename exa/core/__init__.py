@@ -14,7 +14,7 @@ This sub-package contains high level data manipulation API.
 from exa.core import editor, errors, abcdata, dataseries
 
 # Import sub-packages
-from exa.core import tests, filetypes
+from exa.core import tests
 
 # Import user/dev API
 from exa.core.editor import Editor
