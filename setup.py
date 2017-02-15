@@ -75,7 +75,7 @@ def update_package_data(distribution):
     build_py.finalize_options()
 
 
-def has_npm(self):
+def has_npm():
     try:
         if pltfrm:
             check_call(["npm", "--version"], shell=True)
