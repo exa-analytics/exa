@@ -45,7 +45,7 @@ class EditorMeta(ABCBaseMeta):
     _getters = ('_get', 'parse', )
 
 
-class Editor(six.with_metaclass(ABCBaseMeta, ABCBaseMeta)):
+class Editor(six.with_metaclass(EditorMeta, ABCBase)):
     """
     A representation of a file on disk that can be modified programmatically.
 
@@ -398,8 +398,9 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBaseMeta)):
     def __setitem__(self, line, value):
         self._lines[line] = value
 
-    def __init__(self, data, as_interned=False, nprint=30, description=None,
-                 metadata=None, encoding='utf-8', ignore_warning=False):
+    def __init__(self, data, as_interned=False, nprint=30, metadata=None,
+                 encoding='utf-8', ignore_warning=False, **kwargs):
+        super(Editor, self).__init__(**kwargs)
         filepath = None
         if check_path(data, ignore_warning):
             self._lines = read_file(data, as_interned, encoding)
@@ -414,11 +415,7 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBaseMeta)):
             self._lines = data._lines
         else:
             raise TypeError('Unknown type for arg data: {}'.format(type(data)))
-        self.metadata = metadata
-        if self.metadata is None:
-            self.metadata = {}
-        self.metadata["description"] = description
-        self.nprint = 30
+        self.nprint = nprint
         self.as_interned = as_interned
         self.encoding = encoding
         self.cursor = 0

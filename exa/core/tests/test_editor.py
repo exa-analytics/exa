@@ -71,7 +71,7 @@ class TestEditor(UnitTester):
         A :class:`~exa.core.editor.Editor` can be create in three ways,
         from a file, from a stream, and from a string.
         """
-        self.path = os.path.join(config['paths']['tmp'], uuid4().hex)
+        self.path = os.path.join(config['paths']['scratch'], uuid4().hex)
         with open(self.path, 'wb') as f:
             f.write(editor_string.encode())
         with open(self.path, "rb") as f_in:

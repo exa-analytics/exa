@@ -47,3 +47,7 @@ def _jupyter_nbextension_paths():
         'dest': "jupyter-exa",
         'require': "jupyter-exa/extension"
     }]
+
+
+# Misc imports
+import exa.tests.test_config

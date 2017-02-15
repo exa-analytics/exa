@@ -75,34 +75,21 @@ Attributes:
 """
 import pandas as pd
 import os, sys, atexit, platform, shutil, logging, configparser
+import textwrap
 from glob import glob
-from textwrap import wrap
 from itertools import product
 from sqlalchemy import create_engine
 from logging.handlers import RotatingFileHandler
 from exa._version import __version__
+join = os.path.join
 
 
-_j = os.path.join
-
-
-class LogFormat(logging.Formatter):
-    """Custom logging style."""
-    spacing = '                                     '
-    log_basic = '%(asctime)19s - %(levelname)8s'
-    debug_format = '''%(asctime)19s - %(levelname)8s - %(pathname)s:%(lineno)d
-                                     %(message)s'''
-    info_format = '%(asctime)19s - %(levelname)8s - %(message)s'
-    log_formats = {logging.DEBUG: debug_format, logging.INFO: info_format,
-                   logging.WARNING: info_format, logging.ERROR: debug_format,
-                   logging.CRITICAL: debug_format}
-
-    def format(self, record):
-        """Use above style when formatting log messages."""
-        fmt = logging.Formatter(self.log_formats[record.levelno])
-        j = '\n' + self.spacing
-        record.msg = j.join(wrap(record.msg, width=80))
-        return fmt.format(record)
+# Logging formats
+default = logging.Formatter("%(asctime)19s - %(levelname)8s - %(message)s")
+info = logging.Formatter("%(asctime)19s - %(levelname)8s - %(name)20s - %(message)s")
+debug = logging.Formatter("%(asctime)19s - %(levelname)8s - %(pathname)s:%(lineno)d - %(message)s")
+formats = {logging.DEBUG: debug, logging.INFO: info, logging.WARNING: default,
+           logging.ERROR: default, logging.CRITICAL: default}
 
 
 def mkdir(path):
@@ -139,20 +126,23 @@ def create_logger(name):
 
     kwargs = {'maxBytes': int(config['logging']['nbytes']),
               'backupCount': int(config['logging']['nlogs'])}
-    handler = RotatingFileHandler(config['logging'][name], **kwargs)
-    handler.setFormatter(LogFormat())
-    handler.setLevel(logging.WARNING)
     n = "sqlalchemy.engine.base.Engine" if name == "dblog" else name
     logger = logging.getLogger(n)
-    logger.setLevel(logging.WARNING)
+    handler = RotatingFileHandler(config['logging'][name], **kwargs)
     logger.head = head
     logger.tail = tail
-    if config['logging']['level'] == '1':
-        logger.setLevel(logging.INFO)
-        handler.setLevel(logging.INFO)
-    elif config['logging']['level'] == '2':
-        logger.setLevel(logging.DEBUG)
+    if config['logging']['level'] == '2':
+        handler.setFormatter(debug)
         handler.setLevel(logging.DEBUG)
+        logger.setLevel(logging.DEBUG)
+    elif config['logging']['level'] == '1':
+        handler.setFormatter(debug)
+        handler.setLevel(logging.INFO)
+        logger.setLevel(logging.INFO)
+    else:
+        handler.setFormatter(default)
+        handler.setLevel(logging.WARNING)
+        logger.setLevel(logging.WARNING)
     logger.addHandler(handler)
     return logger
 
@@ -166,7 +156,7 @@ def save(del_dynamic=True):
         Setting no_del to true may cause unstable behavior; it is used for
         testing only.
     """
-    config_file = _j(config['dynamic']['root'], "config.ini")
+    config_file = join(config['dynamic']['root'], "config.ini")
     if del_dynamic:
         del config['dynamic']    # Delete dynamically assigned config options
     with open(config_file, "w") as f:
@@ -186,10 +176,12 @@ def reconfigure(test=False):
     exaroot = os.getenv('EXAROOT')
     home = os.getenv("USERPROFILE") if platform.system().lower() == "windows" else os.getenv("HOME")
     if test == True:
-        exaroot = _j(home, ".exa_test")
+        exaroot = join(home, ".exa_test")
+        mkdir(exaroot)
+        init = True
     elif exaroot is None:
-        exaroot = _j(home, ".exa")
-    mkdir(exaroot)
+        exaroot = join(home, ".exa")
+        mkdir(exaroot)
     # Set the dynamic configuration
     ipynb = "false"
     try:
@@ -199,20 +191,20 @@ def reconfigure(test=False):
     except NameError:
         pass
     pkg = os.path.dirname(os.path.realpath(__file__))
-    docnb = _j(pkg, "..", "docs/source/notebooks")
-    data = _j(pkg, "..", "data")
+    docnb = join(pkg, "..", "docs/source/notebooks")
+    data = join(pkg, "..", "data")
     config['dynamic'] = {'root': exaroot, 'notebook': ipynb, 'pkg': pkg,
                          'docnb': docnb, 'data': data, 'home': home}
     # Set the default static config
-    config['paths'] = {'data': _j(exaroot, "data"),
-                       'scratch': _j(exaroot, "tmp"),
-                       'notebooks': _j(exaroot, "notebooks")}
-    config['logging'] = {'nlogs': "3", 'nbytes': "10485760", 'level': "1",
-                         'syslog': _j(exaroot, "sys.log"),
-                         'dblog': _j(exaroot, "db.log")}
-    config['db'] = {'uri': "sqlite:///" + _j(exaroot, "exa.sqlite")}
+    config['paths'] = {'data': join(exaroot, "data"),
+                       'scratch': join(exaroot, "tmp"),
+                       'notebooks': join(exaroot, "notebooks")}
+    config['logging'] = {'nlogs': "3", 'nbytes': "10485760", 'level': "0",
+                         'syslog': join(exaroot, "sys.log"),
+                         'dblog': join(exaroot, "db.log")}
+    config['db'] = {'uri': "sqlite:///" + join(exaroot, "exa.sqlite")}
     # Update the default static config
-    config_file = _j(exaroot, "config.ini")
+    config_file = join(exaroot, "config.ini")
     if os.path.exists(config_file):
         config.read(config_file)
     else:
@@ -243,7 +235,7 @@ def reconfigure(test=False):
 def initialize():
     """Copy tutorials and set up db schema."""
     # Load isotope static data (replacing existing data)
-    isotopes = _j(config['dynamic']['data'], "isotopes.json")
+    isotopes = join(config['dynamic']['data'], "isotopes.json")
     df = pd.read_json(isotopes, orient='values')
     df.columns = ('A', 'Z', 'af', 'eaf', 'color', 'radius', 'gfactor', 'mass',
                   'emass', 'name', 'eneg', 'quadmom', 'spin', 'symbol', 'szuid',
@@ -265,6 +257,8 @@ def initialize():
         shutil.copy(source, dest)
     # Set the cms initialization flag
     config['dynamic']['init_cms'] = "true"
+    # Save the config
+    save(False)
 
 
 # Create the config, db engine, and loggers

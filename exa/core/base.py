@@ -21,7 +21,7 @@ class ABCBaseMeta(Meta):
     uid = UUID
 
 
-class ABCBase(six.with_metaclass(Meta, object)):
+class ABCBase(six.with_metaclass(ABCBaseMeta, object)):
     """
     Abstract base class for composite data representations such as the core
     :class:`~exa.core.editor.Editor` and :class:`~exa.core.container.Container`
@@ -44,4 +44,4 @@ class ABCBase(six.with_metaclass(Meta, object)):
             metadata.update(kwargs)
         self.name = name
         self.uid = uid
-        self.metadat = metadata
+        self.metadata = metadata
