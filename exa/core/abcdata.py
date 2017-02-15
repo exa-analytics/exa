@@ -2,80 +2,51 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Abstract Base Class for Data Objects
-######################################
-This module provides abstract base classes for two `pandas`_ like data
-objects, dataseries and dataframe objects. In the context of Exa, dataseries
-objects are single valued n-dimensional arrays. Dataframes are multiply valued
-n-dimensional arrays. The are called :class:`~exa.core.dataseries.DataSeries`
-and :class:`~exa.core.dataframe.DataFrame`, respectively. The latter can be
-thought of as collections of former having the same dimensions. Classes
-provided by Exa are interoperable with pure `pandas`_ objects.
+Abstract Data Objects
+#########################
+At a minimum
 
-See Also:
-    See :class:`~exa.core.dataseries.DataSeries` and
-    :class:`~exa.core.dataframe.DataFrame` for additional features.
+Data consists of dimensions and features. Dimensions describe the extent of the
+space occupied by the data. Features describe the individual values at given
+points in the space of the data. Dimensions can be defined as discrete arrays
+or by parameterized functions. A common example is weather data. The dimensions
+of weather are longitude, latitude, and time. The features of weather are
+temperature and precipitation.
 
-.. _pandas: http://pandas.pydata.org
+The number of dimensions determine the dimensionality of the data (in the weather
+example there are three dimensions, two spatial and one temporal). There can be
+an arbitrary number of features. In computational work it can be useful to perform
+'record keeping' which is accomplished by maintaining a unique indentifier (index)
+with every point in the space of the data.
 """
-import six
-import numpy as np
-from pandas.core.ops import _op_descriptions
-from abc import abstractproperty, abstractmethod
-from exa.core.errors import MissingUnits
 from exa.typed import Meta
 
 
-class PandasDataObjectMeta(Meta):
-    """
-    Metaclass for data objects.
-
-    Modifies all operations to ensure that metadata and types are propagated
-    correctly.
-    """
-    @classmethod
-    def _modify_op(cls, op):
-        """Modifies mathematical operations to return correctly typed objects."""
-        def wrapper(self, other, *args, **kwargs):
-            """Ensure we return an Exa data object type."""
-            return self.__finalize__(getattr(super(cls, self), op)(other, *args, **kwargs))
-        return wrapper
-
-    def __new__(mcs, name, bases, clsdict):
-        for opname, info in _op_descriptions.items():
-            if opname == None:
-                continue
-            op = "__{}__".format(opname)
-            clsdict[op] = mcs._modify_op(op)
-            if info['reverse'] is not None:
-                op = "__{}__".format(info['reverse'])
-                clsdict[op] = mcs._modify_op(op)
-        return super(PandasDataObjectMeta, mcs).__new__(mcs, name, bases, clsdict)
+class ABCDataMeta(Meta):
+    """An abstract base metaclass for all data objects."""
+    dataid = UUID
 
 
-class PandasDataObject(six.with_metaclass(PandasDataObjectMeta, object)):
-    """
-    """
+class ABCDataBase(six.with_metaclass(ABCDataMeta)):
+    """An abstract base class for all data objects."""
     @abstractproperty
-    def _constructor(self):
-        """Required for metadata propagation."""
+    def features(self):
+        """List of feature names."""
         pass
 
-    def __finalize__(self, other, method=None, **kwargs):
-        """Pandas metadata propatation solution."""
-        for name in self._metadata:
-            object.__setattr__(self, name, getattr(other, name, None))
-        return self
+    @abstractproperty
+    def dimensions(self):
+        """List of dimension names."""
+        pass
 
-#
-#    @classmethod
-#    def _init(cls):
-#        """Modify class operations and update indexers."""
-#        for name, info in _op_descriptions.items():
-#            if name == None:
-#                continue
-#            op = "__{}__".format(name)
-#            setattr(cls, op, cls._modify_op(op))
-#            if info['reverse'] is not None:
-#                op = "__{}__".format(info['reverse'])
-#                setattr(cls, op, cls._modify_op(op))
+    @abstractproperty
+    def uid(self):
+        """
+        Unique identifier name (for data entries).
+
+        Note:
+            The :attr:`~exa.core.abcdata.ABCDataMeta.dataid` is the unique
+            identifier of the data object itself (for use by a
+            :class:`~exa.core.container.Container`).
+        """
+        pass

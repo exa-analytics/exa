@@ -22,15 +22,30 @@ provides an API for all analytics and computation operations.
 .. _MySQL: https://en.wikipedia.org/wiki/MySQL
 .. _Hadoop: https://en.wikipedia.org/wiki/Apache_Hadoop
 """
+import six
+from exa.typed import Meta
+
+
+class ContainerMeta(Meta):
+    """Metaclass for containers."""
+    name = str
+    description = str
+
 
 class Container(object):
     """
-    A storage point for an arbitrary collection of related data objects.
+    A storage point for an arbitrary collection of data objects.
 
-    Facilitates computation, analytics, and visualization of simple or
-    complex data collections.
+    This object facilitates computation, analytics, and visualization of simple
+    or complex, related or unrelated data objects.
     """
-    pass
+    def __init__(self, name=None, description=None, uid=None, *args, **kwargs):
+        self.name = name
+        self.
+
+
+
+
 #import os
 #import numpy as np
 #import pandas as pd

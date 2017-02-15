@@ -11,11 +11,10 @@ This sub-package contains high level data manipulation API.
 - :mod:`~exa.core.dataframe`: Multiply valued n-dimensional array
 """
 # Import base modules
-from exa.core import editor, errors, abcdata, dataseries
+from exa.core import errors, editor
 
 # Import sub-packages
 from exa.core import tests
 
 # Import user/dev API
 from exa.core.editor import Editor
-from exa.core.dataseries import DataSeries
