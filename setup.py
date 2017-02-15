@@ -75,6 +75,17 @@ def update_package_data(distribution):
     build_py.finalize_options()
 
 
+def has_npm(self):
+    try:
+        if pltfrm:
+            check_call(["npm", "--version"], shell=True)
+        else:
+            check_call(["npm", "--version"])
+        return True
+    except Exception:
+        return False
+
+
 class NPM(Command):
     description = "install package.json dependencies using npm"
     user_options = []
@@ -90,24 +101,14 @@ class NPM(Command):
     def finalize_options(self):
         pass
 
-    def has_npm(self):
-        try:
-            if pltfrm:
-                check_call(["npm", "--version"], shell=True)
-            else:
-                check_call(["npm", "--version"])
-            return True
-        except:
-            return False
-
     def should_run_npm_install(self):
 #        package_json = os.path.join(node_root, "package.json")
 #        node_modules_exists = os.path.exists(self.node_modules)
-        return self.has_npm()
+        return has_npm()
 
     def run(self):
-        has_npm = self.has_npm()
-        if not has_npm:
+        has_npm_ = has_npm()
+        if not has_npm_:
             log.error("`npm` unavailable.  If you're running this command using sudo, make sure `npm` is available to sudo")
 
         env = os.environ.copy()
@@ -126,7 +127,7 @@ class NPM(Command):
         for t in self.targets:
             if not os.path.exists(t):
                 msg = "Missing file: %s" % t
-                if not has_npm:
+                if not has_npm_:
                     msg += "\nnpm is required to build a development version of widgetsnbextension"
                 raise ValueError(msg)
 

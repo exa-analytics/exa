@@ -39,9 +39,11 @@ class Container(object):
     This object facilitates computation, analytics, and visualization of simple
     or complex, related or unrelated data objects.
     """
-    def __init__(self, name=None, description=None, uid=None, *args, **kwargs):
+    def __init__(self, name=None, metadata=None, uid=None, *args, **kwargs):
         self.name = name
-        self.
+        if metadata is None:
+            metadata = {'description': description}
+        self.metadata = metadata
 
 
 

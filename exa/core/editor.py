@@ -31,16 +31,21 @@ See Also:
 import os, re, sys, bz2, gzip, six
 import warnings
 import pandas as pd
-from abc import abstractmethod, abstractproperty
+from abc import abstractmethod
 from copy import copy, deepcopy
 from collections import Counter
 from io import StringIO, TextIOWrapper
-from IPython.display import display
-from exa.typed import Meta, simple_function_factory, yield_typed, create_typed_attr
+from exa.typed import simple_function_factory, yield_typed, create_typed_attr
 from exa.core.errors import NoParsers, NoSections
+from exa.core.base import ABCBase, ABCBaseMeta
 
 
-class Editor(object):
+class EditorMeta(ABCBaseMeta):
+    """Strongly typed attributes for editors."""
+    _getters = ('_get', 'parse', )
+
+
+class Editor(six.with_metaclass(ABCBaseMeta, ABCBaseMeta)):
     """
     A representation of a file on disk that can be modified programmatically.
 
@@ -409,9 +414,10 @@ class Editor(object):
             self._lines = data._lines
         else:
             raise TypeError('Unknown type for arg data: {}'.format(type(data)))
-        if metadata is None:
-            metadata = {"description": description}
         self.metadata = metadata
+        if self.metadata is None:
+            self.metadata = {}
+        self.metadata["description"] = description
         self.nprint = 30
         self.as_interned = as_interned
         self.encoding = encoding
@@ -438,20 +444,13 @@ class Editor(object):
         return r
 
 
-class SectionsMeta(Meta):
+class SectionsMeta(EditorMeta):
     """
     Metaclass that automatically generates parsing function wrappers.
-
-    The default paradigm for :class:`~exa.core.editor.Sections` and
-    :class:`~exa.core.editor.Section` objectss is that a the ``parse``
-    method is responsible for parsing all data objects; individual
-    ``parse_dataobj`` like functions simply call the main ``parse``
-    method.
 
     Attributes:
         sections (list): A list of tuples of the form [(name, start, end), ...]
     """
-    _getters = ("parse", )
     _descriptions = {"sections": "List of sections"}
     sections = list
 
@@ -603,7 +602,8 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         self._parse()
         # Now generate section attributes for the sections present
         self._nsections = len(str(len(self.sections)))
-        for i, (section, start, end) in enumerate(self.sections):
+        for i, sec in enumerate(self.sections):
+            section = sec[0]
             if section not in self._parsers:
                 warnings.warn("No parser for section '{}'!".format(section))
                 continue

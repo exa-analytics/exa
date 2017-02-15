@@ -4,7 +4,7 @@
 """
 Tests for :mod:`~exa._config`
 ##################################
-Test logging and configuration infrastructure and basic database functions.
+Test config, logging, and database engine manipulation.
 """
 import os
 import sys
@@ -16,50 +16,52 @@ else:
     from io import StringIO
 from sqlalchemy.exc import OperationalError
 from exa import _config, _jupyter_nbextension_paths
+from exa._config import _j
 from exa.tester import UnitTester
 
 
 class TestConfig(UnitTester):
     """
-    This test works by temporarily reconfiguring the config object to be located
-    in the "~/.exa_test" directory. When :func:`~exa._config.reconfigure` is
-    called with the non-default argument (the default is ".exa") it should force
-    a call to :func:`~exa._config.initialize`. Upon completion, this test reverts
-    to the default configuration.
+    All tests are performed in a temporary configuration space '.exa_test' so
+    as not to affect working configuration.
     """
     def setUp(self):
-        """
-        Generate the temporary test configuration.
-        """
+        """Generate the temporary test configuration."""
         try:
-            shutil.rmtree(os.path.join(_config.config['dynamic']['home'], ".exa_test"))
+            shutil.rmtree(_j(_config.config['dynamic']['home'], ".exa_test"))
         except OSError:
             pass
-        _config.reconfigure(".exa_test")
-        _config.config['logging']['level'] = "1"
-        _config.reconfigure(".exa_test")
-        _config.config['logging']['level'] = "2"
-        _config.reconfigure(".exa_test")
-        _config.config['logging']['level'] = "3"
-        _config.save(nodel=True)
-        _config.reconfigure(".exa_test")
-        self.assertEqual(_config.config['logging']['level'], "0")
 
     def tearDown(self):
-        """
-        Reset to the default configuration.
-        """
-        tbd = _config.config['dynamic']['root']
+        """Delete test configurations."""
+        path = _j(_config.config['dynamic']['home'], ".exa_test")
+        _config.engine.dispose()
         _config.reconfigure()
         try:
-            os.remove(os.path.join(tbd, "config"))
-            os.remove(os.path.join(tbd, "exa.sqlite"))
-            os.remove(os.path.join(tbd, "db.log"))
-            os.remove(os.path.join(tbd, "sys.log"))
-            os.remove(os.path.join(tbd, "notebooks",  "tutorial.log"))
-            shutil.rmtree(tbd)
+            shutil.rmtree(path)
         except OSError:
+            raise
             pass
+
+    def test_reconfigure(self):
+        """Test generation of config.ini."""
+        _config.reconfigure(".exa_test")
+        _config.config['logging']['level'] = "1"
+        self.assertEqual(_config.config['logging']['level'], "1")
+        _config.reconfigure(".exa_test")
+        _config.config['logging']['level'] = "2"
+        self.assertEqual(_config.config['logging']['level'], "2")
+        _config.save(del_dynamic=False)
+        config_file = _j(config['dynamic']['home'], ".exa_test", "config.ini")
+        dynamic = False
+        with open(config_file) as f:
+            for line in f:
+                if "[dynamic]" in line:
+                    dynamic = True
+                    break
+        self.assertTrue(dynamic)
+        _config.reconfigure(".exa_test")
+        self.assertEqual(_config.config['logging']['level'], "0")
 
     def test_mkdir(self):
         """Test that config created the new configuration directory."""
@@ -70,23 +72,10 @@ class TestConfig(UnitTester):
         By default, the configuration creates a sqlite database in the config
         directory which stores content management and static data.
         """
-        dbfile = _config.config['db']['uri'].replace("sqlite:///", "")
-        self.assertTrue(os.path.isfile(dbfile))
-        try:
-            df = pd.read_sql("select * from isotope", con=_config.engine)
-        except OperationalError:
-            self.fail("Failed to select isotope data at {}.".format(_config.engine))
-        self.assertTrue(len(df) > 3000)
-        try:
-            df = pd.read_sql("select * from time", con=_config.engine)
-        except OperationalError:
-            self.fail("Failed to select time data at {}.".format(_config.engine))
-        self.assertTrue(len(df) > 200)
-        try:
-            df = pd.read_sql("select * from constant", con=_config.engine)
-        except OperationalError:
-            self.fail("Failed to select constant data at {}.".format(_config.engine))
-        self.assertTrue(len(df) > 29)
+        df = pd.read_sql("select * from isotope", con=_config.engine)
+        self.assertIsInstance(df, pd.DataFrame)
+        df = pd.read_sql("select * from constant", con=_config.engine)
+        self.assertIsInstance(df, pd.DataFrame)
 
     def test_print(self):
         """Test :func:`~exa._config.print_config`."""

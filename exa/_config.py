@@ -2,16 +2,17 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Configuration
+Config
 ############################
-The configuration file (**~/.exa/config**) has the following structure:
+Exa uses a configuration file to store some (user editable) settings. The
+configuration file follows the `standard`_ format for Python.
 
 .. code-block:: text
 
     [paths]
     data: Path to the data directory (default ~/.exa/data)
     notebooks: Path to the notebooks directory (default ~/.exa/notebooks)
-    tmp: Path to temporary directory (default ~/.exa/tmp)
+    scratch: Path to scratch directory (default ~/.exa/tmp)
 
     [logging]
     nlogs: Number of log files to rotate (default 3)
@@ -23,46 +24,57 @@ The configuration file (**~/.exa/config**) has the following structure:
     [db]
     uri: String URI for database connection
 
-The configuration file is can be updated manually:
+The configuration can be updated during a session, but changes won't take effect
+until the following session unless the configuration is saved manually.
 
 .. code-block:: Python
 
     exa._config.config['log']['nlogs'] = '4'
-    #exa._config.save()
+    # To write the changes immediately
+    exa._config.save()
 
-Note that the value must be a string and will be saved on exit or if called
-manually (as commented out in the example). If multiple **exa** processes are running
-simultaneously (e.g. multiple Jupyter notebooks or Python interpreter consoles)
-the last one to exit will write the final configuration file. Automatic saving
-can be unregistered if necessary:
+Editing the configuration file 'by hand' can only be done when no Exa sessions
+are running (i.e. make sure no Python instances have imported exa). For most
+users the default configuration is sufficient.
 
-.. code-block:: Python
 
-    exa._config.atexit.unregister(exa._config.save)
+Tip:
+    If needed, automatic function calls can be unregistered to prevent auto-
+    updating of the configuration.
 
-Finally only edit the configuration file manually when no **exa** (Python) processes
-are running or make sure to unregister all automatic saving prior to editing.
+    .. code-block:: Python
+
+        exa._config.atexit.unregister(exa._config.save)
+
+Exa's root directory can be set by setting the environment variable 'EXAROOT'.
+If set, Exa will look for a configuration in this directory before looking
+in the default location (e.g. '~/.exa').
 
 Logging
 ###############
-By default **exa** provides two loggers, **db** and **sys**. Both are accessible via
-the loggers attribute. The system log is records all messages related to container,
-editor, and workflow actions. The database log keeps track of all content
-management actions.
+Exa uses two loggers, one for database logs (``db``) and one for core system logs
+(``sys``). Both loggers are accessible via the ``loggers`` attribute but should
+not be needed for typical usage.
+
+
+Database
+###############
+Lastly, the database engine is established by this module. The database engine
+provides a connection to an external or internal database system that manages
+the table schemas provided in ``cms`` subpackage. These schemas are primarily
+used for tracking user actions and organizing projects, etc. Exa leverages the
+rich `PyData`_ stack for connections to external data storage systems.
 
 Attributes:
     config (:class:`~configparser.ConfigParser`): Framework configuration
     loggers (dict): Dictionary of loggers
     engine (:class:`~sqlalchemy.engine.base.Engine`): Sqlalchemy database engine
+
+.. _standard: https://docs.python.org/3/library/configparser.html
+.. _PyData: http://pydata.org/
 """
-import os
-import sys
-import atexit
-import platform
-import configparser
-import shutil
-import logging
 import pandas as pd
+import os, sys, atexit, platform, shutil, logging, configparser
 from glob import glob
 from textwrap import wrap
 from itertools import product
@@ -71,10 +83,11 @@ from logging.handlers import RotatingFileHandler
 from exa._version import __version__
 
 
+_j = os.path.join
+
+
 class LogFormat(logging.Formatter):
-    """
-    Custom logging format for systematic, parsable, and human readable log files.
-    """
+    """Custom logging style."""
     spacing = '                                     '
     log_basic = '%(asctime)19s - %(levelname)8s'
     debug_format = '''%(asctime)19s - %(levelname)8s - %(pathname)s:%(lineno)d
@@ -85,10 +98,7 @@ class LogFormat(logging.Formatter):
                    logging.CRITICAL: debug_format}
 
     def format(self, record):
-        """
-        Overwrites the built-in format function (called when sending a message
-        to the logger) with the specific format defined by this class.
-        """
+        """Use above style when formatting log messages."""
         fmt = logging.Formatter(self.log_formats[record.levelno])
         j = '\n' + self.spacing
         record.msg = j.join(wrap(record.msg, width=80))
@@ -96,20 +106,15 @@ class LogFormat(logging.Formatter):
 
 
 def mkdir(path):
-    """
-    Create a directory on disk (supports Python 2 and 3). No exception is raised
-    if the directory already exists.
-    """
+    """Safely create a directory on disk."""
     try:    # This approach supports Python 2 and Python 3
         os.makedirs(path)
     except OSError:
         pass
 
 
-def print_config(out=sys.stdout):
-    """
-    Display the complete configuration (read-only).
-    """
+def info(out=sys.stdout):
+    """Display config and other information (read-only)."""
     out.write(u"(exa {})\n\n\n".format(__version__))
     for name, section in config.items():
         out.write(u"[{}]\n".format(name))
@@ -119,17 +124,15 @@ def print_config(out=sys.stdout):
 
 
 def create_logger(name):
-    """
-    Construct a custom logger with rotating file handlers and custom format.
-    """
+    """Create a modified logger with rotating file handlers."""
     def head(n=10, out=sys.stdout):
-        # Custom head function that we attach to the logging.Logger class
+        """Show the head of the log."""
         with open(config['logging'][name], 'r') as f:
             lines = u"".join(f.readlines()[:n])
         out.write(lines)
 
     def tail(n=10, out=sys.stdout):
-        # Custom tail function that we attach to the logging.Logger class
+        """Show the tail of the log."""
         with open(config['logging'][name], 'r') as f:
             lines = u"".join(f.readlines()[-n:])
         out.write(lines)
@@ -155,103 +158,70 @@ def create_logger(name):
 
 
 @atexit.register
-def save(nodel=False):
+def save(del_dynamic=True):
     """
     Save the configuration file to disk (occurs automatically on exit).
 
     Warning:
-        Setting nodel to true may cause unstable behavior; it is used for test
-        pursposes only.
+        Setting no_del to true may cause unstable behavior; it is used for
+        testing only.
     """
-    config_file = config['dynamic']['config_file']
-    if not nodel:
+    config_file = _j(config['dynamic']['root'], "config.ini")
+    if del_dynamic:
         del config['dynamic']    # Delete dynamically assigned config options
     with open(config_file, "w") as f:
         config.write(f)
 
 
-def reconfigure(rootname=".exa"):
+def reconfigure(test=False):
     """
     Read in the configuration (or generate a new configuration) and set the
     dynamic configuration for the current session.
     """
-    # Get exa"s root directory (e.g. /home/[username]/.exa, C:\\Users\[username]\\.exa)
+    # Editing the module level variables
+    global config
+    global engine
+    init = False
+    # Determine root directory
+    exaroot = os.getenv('EXAROOT')
     home = os.getenv("USERPROFILE") if platform.system().lower() == "windows" else os.getenv("HOME")
-    root = os.path.join(home, rootname)
-    mkdir(root)
-    # Check for existing config or build one anew
-    config_file = os.path.join(root, "config")
-    init_flag = False
-    if os.path.exists(config_file) and rootname == ".exa":
-        stats = os.stat(config_file)
-        if stats.st_size > 180:      # Check that the file size > 180 bytes
-            config.read(config_file)
-    else:
-        # paths
-        config['paths'] = {}
-        config['paths']['data'] = os.path.join(root, "data")
-        config['paths']['tmp'] = os.path.join(root, "tmp")
-        config['paths']['notebooks'] = os.path.join(root, "notebooks")
-        mkdir(config['paths']['data'])
-        mkdir(config['paths']['tmp'])
-        mkdir(config['paths']['notebooks'])
-        # logging
-        config['logging'] = {}
-        config['logging']['nlogs'] = "3"
-        config['logging']['nbytes'] = str(10*1024*1024)    # 10 MiB
-        config['logging']['syslog'] = os.path.join(root, "sys.log")
-        config['logging']['dblog'] = os.path.join(root, "db.log")
-        config['logging']['level'] = "0"
-        # db
-        config['db'] = {}
-        config['db']['uri'] = "sqlite:///" + os.path.join(root, "exa.sqlite")
-        init_flag = True
-    # Get the dynamic (system/installation/dev dependent) configuration
-    config['dynamic'] = {}
-    config['dynamic']['root'] = root
-    config['dynamic']['home'] = home
-    config['dynamic']['config_file'] = config_file
-    config['dynamic']['pkg'] = os.path.dirname(os.path.realpath(__file__))
-    config['dynamic']['data'] = os.path.join(config['dynamic']['pkg'], "..", "data")
-    config['dynamic']['notebooks'] = os.path.join(config['dynamic']['pkg'], "..", "docs/source/notebooks")
-    config['dynamic']['64bit'] = "true" if sys.maxsize > 2**32 else "false"
-    config['dynamic']['numba'] = "false"
-    config['dynamic']['cython'] = "false"
-    config['dynamic']['cuda'] = "false"
-    config['dynamic']['notebook'] = "false"
-    try:
-        import numba
-        config['dynamic']['numba'] = "true"
-        del numba
-    except ImportError:
-        pass
-    try:
-        from numba import cuda
-        if len(cuda.devices.gpus) > 0:
-            config['dynamic']['cuda'] = "true"
-        del cuda
-    except (AttributeError, ImportError):
-        pass
-    try:
-        import cython
-        config['dynamic']['cython'] = "true"
-        del cython
-    except ImportError:
-        pass
+    if test == True:
+        exaroot = _j(home, ".exa_test")
+    elif exaroot is None:
+        exaroot = _j(home, ".exa")
+    mkdir(exaroot)
+    # Set the dynamic configuration
+    ipynb = "false"
     try:
         cfg = get_ipython().config
         if "IPKernelApp" in cfg:
-            config['dynamic']['notebook'] = "true"
+            ipynb = "true"
     except NameError:
         pass
-    # Database engine
-    global engine
-    try:
-        engine.dispose()
-    except AttributeError:
-        pass
-    engine = create_engine(config['db']['uri'], echo=False)
-    # Loggers
+    pkg = os.path.dirname(os.path.realpath(__file__))
+    docnb = _j(pkg, "..", "docs/source/notebooks")
+    data = _j(pkg, "..", "data")
+    config['dynamic'] = {'root': exaroot, 'notebook': ipynb, 'pkg': pkg,
+                         'docnb': docnb, 'data': data, 'home': home}
+    # Set the default static config
+    config['paths'] = {'data': _j(exaroot, "data"),
+                       'scratch': _j(exaroot, "tmp"),
+                       'notebooks': _j(exaroot, "notebooks")}
+    config['logging'] = {'nlogs': "3", 'nbytes': "10485760", 'level': "1",
+                         'syslog': _j(exaroot, "sys.log"),
+                         'dblog': _j(exaroot, "db.log")}
+    config['db'] = {'uri': "sqlite:///" + _j(exaroot, "exa.sqlite")}
+    # Update the default static config
+    config_file = _j(exaroot, "config.ini")
+    if os.path.exists(config_file):
+        config.read(config_file)
+    else:
+        # First time importing Exa...
+        init = True
+        # Create default paths
+        for path in config['paths'].values():
+            mkdir(path)
+    # Create loggers
     logging.basicConfig()
     root = logging.getLogger()
     map(root.removeHandler, root.handlers[:])
@@ -259,37 +229,27 @@ def reconfigure(rootname=".exa"):
     for name in config['logging'].keys():
         if name.endswith("log"):
             loggers[name.replace("log", "")] = create_logger(name)
-    if init_flag:
-        initialize()    # Inject static data into the database
+    # Update the cms db engine
+    try:
+        engine.dispose()
+    except AttributeError:
+        pass
+    engine = create_engine(config['db']['uri'], echo=False)
+    # Initialize db schema and tutorial notebooks
+    if init:
+        initialize()
 
 
 def initialize():
-    """
-    Copy tutorial.ipynb to the notebooks directory and update static db data.
-    """
+    """Copy tutorials and set up db schema."""
     # Load isotope static data (replacing existing data)
-    isotopes = os.path.join(config['dynamic']['data'], "isotopes.json")
+    isotopes = _j(config['dynamic']['data'], "isotopes.json")
     df = pd.read_json(isotopes, orient='values')
     df.columns = ('A', 'Z', 'af', 'eaf', 'color', 'radius', 'gfactor', 'mass',
                   'emass', 'name', 'eneg', 'quadmom', 'spin', 'symbol', 'szuid',
                   'strid')
     df.to_sql(name='isotope', con=engine, index=True, index_label="pkid",
               if_exists='replace')
-    # Compute and load unit conversions
-    path = os.path.join(config['dynamic']['data'], "units.json")
-    df = pd.read_json(path)
-    for column in df.columns:
-        series = df[column].dropna()
-        values = series.values
-        labels = series.index
-        n = len(values)
-        factor = (values.reshape(1, n) / values.reshape(n, 1)).ravel()
-        from_unit, to_unit = zip(*product(labels, labels))
-        df_to_save = pd.DataFrame.from_dict({'from_unit': from_unit,
-                                             'to_unit': to_unit,
-                                             'factor': factor})
-        df_to_save['pkid'] = df_to_save.index
-        df_to_save.to_sql(name=column, con=engine, index=False, if_exists='replace')
     # Load physical constants
     path = os.path.join(config['dynamic']['data'], "constants.json")
     df = pd.read_json(path)
@@ -298,13 +258,13 @@ def initialize():
     df['pkid'] = df.index
     df.to_sql(name='constant', con=engine, index=False, if_exists='replace')
     # Copy the tutorials
-    source_dir = config['dynamic']['notebooks']
+    source_dir = config['dynamic']['docnb']
     dest_dir = config['paths']['notebooks']
     for source in glob(os.path.join(source_dir, "*.ipynb")):
         dest = os.path.join(dest_dir, os.path.basename(source))
         shutil.copy(source, dest)
-    # Initialize CMS database
-    config['dynamic']['init_cms'] = 'true'
+    # Set the cms initialization flag
+    config['dynamic']['init_cms'] = "true"
 
 
 # Create the config, db engine, and loggers
