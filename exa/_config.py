@@ -75,9 +75,7 @@ Attributes:
 """
 import pandas as pd
 import os, sys, atexit, platform, shutil, logging, configparser
-import textwrap
 from glob import glob
-from itertools import product
 from sqlalchemy import create_engine
 from logging.handlers import RotatingFileHandler
 from exa._version import __version__

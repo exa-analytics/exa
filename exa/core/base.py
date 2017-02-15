@@ -32,7 +32,8 @@ class ABCBase(six.with_metaclass(ABCBaseMeta, object)):
         """Must define a copy method."""
         pass
 
-    def _get_uid(self):
+    @staticmethod
+    def _get_uid():
         """Generate a new uid for this object."""
         return uuid4()
 

@@ -11,7 +11,7 @@ from types import GeneratorType
 import numpy as np
 import pandas as pd
 from io import StringIO
-from uuid import uuid4
+from uuid import uuid4, UUID
 from exa._config import config
 from exa.tester import UnitTester
 from exa.core.editor import Editor, concat, Sections, Section, SectionsMeta
@@ -95,6 +95,11 @@ class TestEditor(UnitTester):
         os.remove(self.path + ".gz")
         os.remove(self.path + ".bz2")
         os.remove(self.path + ".iso-8859-1")
+
+    def test_editor_has_uid(self):
+        """Test that a uid is generated automatically if needed."""
+        uid = self.from_file.uid
+        self.assertIsInstance(uid, UUID)
 
     def test_editor_input_methods(self):
         """

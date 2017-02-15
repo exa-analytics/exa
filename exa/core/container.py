@@ -23,22 +23,25 @@ provides an API for all analytics and computation operations.
 .. _Hadoop: https://en.wikipedia.org/wiki/Apache_Hadoop
 """
 import six
+from exa.core.base import ABCBaseMeta, ABCBase
 from exa.typed import Meta
 
 
-class ContainerMeta(Meta):
+class ContainerMeta(ABCBaseMeta):
     """Metaclass for containers."""
-    name = str
-    description = str
+    _getters = ("_get", "parse", "compute", )
 
 
-class Container(object):
+class Container(six.with_metaclass(ContainerMeta, ABCBase)):
     """
     A storage point for an arbitrary collection of data objects.
 
     This object facilitates computation, analytics, and visualization of simple
     or complex, related or unrelated data objects.
     """
+    def copy(self):
+        return self
+
     def __init__(self, name=None, metadata=None, uid=None, *args, **kwargs):
         self.name = name
         if metadata is None:

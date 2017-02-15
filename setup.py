@@ -101,11 +101,6 @@ class NPM(Command):
     def finalize_options(self):
         pass
 
-    def should_run_npm_install(self):
-#        package_json = os.path.join(node_root, "package.json")
-#        node_modules_exists = os.path.exists(self.node_modules)
-        return has_npm()
-
     def run(self):
         has_npm_ = has_npm()
         if not has_npm_:
@@ -114,7 +109,7 @@ class NPM(Command):
         env = os.environ.copy()
         env["PATH"] = npm_path
 
-        if self.should_run_npm_install():
+        if has_npm:
             log.info("Installing build dependencies with npm.  This may take a while...")
             if pltfrm:
                 check_call(["npm", "install"], cwd=node_root, stdout=sys.stdout,

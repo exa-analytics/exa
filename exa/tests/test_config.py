@@ -14,7 +14,6 @@ if sys.version[0] == 2:
     from io import BytesIO as StringIO
 else:
     from io import StringIO
-from sqlalchemy.exc import OperationalError
 from exa import _config, _jupyter_nbextension_paths
 from exa.tester import UnitTester
 join = _config.join
