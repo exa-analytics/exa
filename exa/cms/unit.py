@@ -2,28 +2,20 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Tabulated Conversion Factors
+Syntax Sugar for Units
 ##############################
-This module provides relational classes for unit conversion tables. To inspect
-available conversions:
+Units, dimensions, and prefixes are not statically stored in the database; they
+are pulled into Exa from `sympy`_
 
-.. code-block:: Python
-
-    exa.cms.unit.Length.to_frame()    # display full conversion table
-    exa.cms.unit.Length.units()       # list available units
-
-To create a new conversion:
-
-.. code-block:: Python
-
-    exa.cms.unit.Dimension.create("kJ", "J", 1000)   # Note create J -> kJ too
-
-For high performance use the cached conversion factors directly:
-
-.. code-block:: Python
-
-    exa.cms.unit.units[("kJ", "J")]
+.. _sympy:
 """
+class Unit(object):
+    """Singleton getter for systematic (i.e. pretty) API."""
+    @staticmethod
+    def __getitem__(name):
+        return getattr(exa.units, name)
+
+Unit = Unit()
 #import six
 #from sqlalchemy import and_, String, Float, Column
 #from exa.cms.base import BaseMeta, Base, scoped_session
