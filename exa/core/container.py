@@ -24,12 +24,11 @@ provides an API for all analytics and computation operations.
 """
 import six
 from exa.core.base import ABCBaseMeta, ABCBase
-from exa.typed import Meta
 
 
 class ContainerMeta(ABCBaseMeta):
     """Metaclass for containers."""
-    _getters = ("_get", "parse", "compute", )
+    _getters = ("_get", "parse", "compute")
 
 
 class Container(six.with_metaclass(ContainerMeta, ABCBase)):
@@ -38,15 +37,15 @@ class Container(six.with_metaclass(ContainerMeta, ABCBase)):
 
     This object facilitates computation, analytics, and visualization of simple
     or complex, related or unrelated data objects.
+
+    Warning:
+        Keyword arguments are not passed to the super constructor.
     """
     def copy(self):
         return self
 
-    def __init__(self, name=None, metadata=None, uid=None, *args, **kwargs):
-        self.name = name
-        if metadata is None:
-            metadata = {'description': description}
-        self.metadata = metadata
+    def __init__(self, name=None, uid=None, meta=None, *args, **kwargs):
+        super(Container, self).__init__(name, uid, meta)
 
 
 
@@ -91,7 +90,7 @@ class Container(six.with_metaclass(ContainerMeta, ABCBase)):
 #    def copy(self, name=None, description=None, meta=None):
 #        """
 #        Create a copy of the current object (may alter the container's name,
-#        description, and update the metadata if needed).
+#        description, and update the meta if needed).
 #        """
 #        cls = self.__class__
 #        kwargs = self._rel(copy=True)
@@ -239,7 +238,7 @@ class Container(six.with_metaclass(ContainerMeta, ABCBase)):
 #    def info(self):
 #        """
 #        Display information about the container's data objects (note that info
-#        on metadata and visualization objects is also provided).
+#        on meta and visualization objects is also provided).
 #
 #        Note:
 #            Sizes are reported in bytes.
@@ -254,7 +253,7 @@ class Container(six.with_metaclass(ContainerMeta, ABCBase)):
 #            for obj in self._widget._trait_values.values():
 #                s += getsizeof(obj)
 #        sizes.append(s)
-#        names.append('METADATA')
+#        names.append('meta')
 #        types.append('-')
 #        s = 0
 #        for obj in self._rel().values():
@@ -416,7 +415,7 @@ class Container(six.with_metaclass(ContainerMeta, ABCBase)):
 #            raise ValueError('File path must have a ".hdf5" or ".hdf" extension.')
 #        with pd.HDFStore(path, 'w') as store:
 #            store['kwargs'] = pd.Series()
-#            store.get_storer('kwargs').attrs.metadata = self._rel()
+#            store.get_storer('kwargs').attrs.meta = self._rel()
 #            fc = 0    # Field counter (see special handling of fields below)
 #            for name, data in self._data().items():
 #                if hasattr(data, '_revert_categories'):
@@ -477,7 +476,7 @@ class Container(six.with_metaclass(ContainerMeta, ABCBase)):
 #        with pd.HDFStore(path) as store:
 #            for key in store.keys():
 #                if 'kwargs' in key:
-#                    kwargs.update(store.get_storer(key).attrs.metadata)
+#                    kwargs.update(store.get_storer(key).attrs.meta)
 #                else:
 #                    name = str(key[1:])
 #                    kwargs[name] = store[key]

@@ -40,12 +40,7 @@ from exa.core.errors import NoParsers, NoSections
 from exa.core.base import ABCBase, ABCBaseMeta
 
 
-class EditorMeta(ABCBaseMeta):
-    """Strongly typed attributes for editors."""
-    _getters = ('_get', 'parse', )
-
-
-class Editor(six.with_metaclass(EditorMeta, ABCBase)):
+class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
     """
     A representation of a file on disk that can be modified programmatically.
 
@@ -57,10 +52,11 @@ class Editor(six.with_metaclass(EditorMeta, ABCBase)):
     Args:
         name (str): Data/file/misc name
         description (str): Data/file/misc description
-        meta (dict): Additional metadata as key, value pairs
+        meta (dict): Additional meta as key, value pairs
         nrpint (int): Number of lines to display when printing
         cursor (int): Line number position of the cursor
     """
+    _getters = ('_get', 'parse')
     _fmt = '{0}: {1}\n'.format   # Format for printing lines (see __repr__)
 
     @property
@@ -204,9 +200,9 @@ class Editor(six.with_metaclass(EditorMeta, ABCBase)):
         lines = self._lines[:]
         as_interned = copy(self.as_interned)
         nprint = copy(self.nprint)
-        metadata = deepcopy(self.metadata)
+        meta = deepcopy(self.meta)
         encoding = copy(self.encoding)
-        return cls(lines, as_interned, nprint, metadata, encoding)
+        return cls(lines, as_interned, nprint, meta, encoding)
 
     def format(self, *args, **kwargs):
         """
@@ -391,14 +387,14 @@ class Editor(six.with_metaclass(EditorMeta, ABCBase)):
     def __getitem__(self, key):
         if isinstance(key, six.string_types):
             return getattr(self, key)
-        kwargs = {'nprint': self.nprint, 'metadata': self.metadata,
+        kwargs = {'nprint': self.nprint, 'meta': self.meta,
                   'encoding': self.encoding, 'as_interned': self.as_interned}
         return self.__class__(self._lines[key], **kwargs)
 
     def __setitem__(self, line, value):
         self._lines[line] = value
 
-    def __init__(self, data, as_interned=False, nprint=30, metadata=None,
+    def __init__(self, data, as_interned=False, nprint=30, meta=None,
                  encoding='utf-8', ignore_warning=False, **kwargs):
         super(Editor, self).__init__(**kwargs)
         filepath = None
@@ -420,7 +416,10 @@ class Editor(six.with_metaclass(EditorMeta, ABCBase)):
         self.encoding = encoding
         self.cursor = 0
         if filepath is not None:
-            self.metadata['filepath'] = filepath
+            try:
+                self.meta['filepath'] = filepath
+            except TypeError:
+                self.meta = {'filepath': filepath}
 
     def __repr__(self):
         r = ''
@@ -441,7 +440,7 @@ class Editor(six.with_metaclass(EditorMeta, ABCBase)):
         return r
 
 
-class SectionsMeta(EditorMeta):
+class SectionsMeta(ABCBaseMeta):
     """
     Metaclass that automatically generates parsing function wrappers.
 

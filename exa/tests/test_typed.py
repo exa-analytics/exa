@@ -23,26 +23,21 @@ class MinimalClass(six.with_metaclass(MinimalMeta, object)):
         self.foo = foo
 
 
-class GetterMeta(MinimalMeta):
-    """Example with getters."""
+class GetterClass(six.with_metaclass(MinimalMeta, MinimalClass)):
+    """Example with custom getter function(s)."""
     _getters = ("compute", )
 
-
-class GetterClass(six.with_metaclass(GetterMeta, MinimalClass)):
-    """Example with custom getter function(s)."""
     def compute_foo(self, ret=True):
-        """
-        Functions of this type may return or set the value of foo.
-        """
-        if ret:
-            return 10
+        """Functions must set the value of foo, but can also return it."""
         self.foo = 20
+        if ret:
+            return self.foo
 
 
-class AdvancedMeta(GetterMeta):
+class AdvancedMeta(MinimalMeta):
     """Advanced modification of class objects using :mod:`~exa.typed`."""
     foo = int
-    bar = [str, float]
+    bar = (str, float)
 
     def __new__(mcs, name, bases, clsdict):
         for attr in yield_typed(mcs):
@@ -51,7 +46,7 @@ class AdvancedMeta(GetterMeta):
         return super(AdvancedMeta, mcs).__new__(mcs, name, bases, clsdict)
 
 
-class AdvancedClass(six.with_metaclass(AdvancedMeta, object)):
+class AdvancedClass(six.with_metaclass(AdvancedMeta, GetterClass)):
     """Example advanced use of metaclass features."""
     def compute_all(self):
         """Computes both 'bar' and 'foo' attributes."""
@@ -88,11 +83,9 @@ class TestTyped(UnitTester):
         gwe = GetterClass(40)
         self.assertEqual(gwe.foo, 40)
         value = gwe.compute_foo()
-        self.assertEqual(value, 10)
-        gwe = GetterClass()
-        self.assertEqual(gwe.foo, 10)
-        gwe.compute_foo(False)
-        self.assertEqual(gwe.foo, 20)
+        self.assertEqual(value, 20)
+        value = gwe.compute_foo(False)
+        self.assertTrue(value is None)
 
     def test_awe(self):
         """Test the advanced example."""

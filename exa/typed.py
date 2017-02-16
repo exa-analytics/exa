@@ -15,52 +15,52 @@ a flexible metaclass that addresses these needs leveraging the built-in
     import six    # Convenient Python 2.7 compatibility
 
     class KlassMeta(Meta):
-        attr1 = (int, float)
-        attr2 = DataFrame
+        foo = (int, float)
+        bar = DataFrame
 
     class Klass(six.with_metaclass(KlassMeta, object)):
-        def __init__(self, attr1, attr2):
-            self.attr1 = attr1
-            self.attr2 = attr2
+        def __init__(self, foo=None, bar=None):
+            self.foo = foo
+            self.bar = bar
 
 In the above example, at runtime, the class definition "Klass" will be modified
-such that 'attr1' is a property object whose setter checks to ensure that its
-value is either an int or a float. Similarly, 'attr2' will become a property
+such that 'foo' is a property object whose setter checks to ensure that its
+value is either an int or a float. Similarly, 'bar' will become a property
 whose setter checks to ensure that its value is a DataFrame. If a value is passed
-for (for example) 'attr2' that can be converted to a DataFrame, automatic type
-conversion will occur. More advanced uses are also possible:
+for (for example) 'bar' that can be converted to a DataFrame, automatic type
+conversion will occur. More advanced uses are also possible.
 
 .. code-block:: Python
 
     import six
 
     class KlassMeta(Meta):
-        _getters = ("parse", )
-        attr = DataFrame
+        foo = DataFrame
 
     class Klass(six.with_metaclass(KlassMeta, object)):
-        def parse_attr(self):
-            # Perform some operation to obtain the value of attr
-            self.attr = attr  # or 'return attr'
+        _getters = ("parse", )
 
-        def __init__(self, attr=None):
-            self.attr = attr
+        def parse_foo(self):
+            # Perform some operation to obtain the value of attr
+            self.foo = foo
+
+        def __init__(self, foo=None):
+            self.foo = foo
 
 By specifying the '_getters' attribute the statically typed property's getter
-can be informed about what method to access if the value of the property has
+can be informed about what method(s) to access if the value of the property has
 not been set. This paradigm is sometimes called 'lazy evaluation'; the value
 is only computed, parsed, etc. when it is requested (e.g. by calling
-Klass().attr). Even more advanced usage is possible:
+Klass().foo). Even more advanced usage is possible:
 
 .. code-block:: Python
 
     import six
 
     class KlassMeta(Meta):
-        _getters = ("parse", )
-        _private = "private attribute"
-        attr = DataFrame
-        bttr = DataFrame
+        foo = int
+        bar = int
+        _private = "'static' private attribute"
 
         def __new__(mcs, name, bases, clsdict):
             for name in ["attr", "bttr"]:
@@ -70,22 +70,28 @@ Klass().attr). Even more advanced usage is possible:
             return super(KlassMeta, mcs).__new__(mcs, name, bases, clsdict)
 
     class Klass(six.with_metaclass(KlassMeta, object)):
+        _getters = ("parse", )
+
         def parse_all(self):
             # Perform all parsing here or by calling other methods
             # Set all values here or in individually in other methods
+            self.foo = 0
+            self.bar = 1
 
-        def __init__(self, attr=None):
-            self.attr = attr
+        def __init__(self, foo=None, bar=None):
+            self.foo = foo
+            self.bar = bar
 
 In this example, the metaclass (``KlassMeta``) utilizes the convenience
 function, :func:`~exa.typed.simple_function_factory`, to generate methods
 for the class (``Klass``) dynamically. This is useful when you have a single
-method that typically does all of the work (e.g. ``Klass().parse_all``) but want
-to be able to have the convenience of the previous example when calling specific
-attributes (e.g. ``Klass().attr`` will call the dynamically generated method,
-``Klass().parse_attr``, created by the :func:`~exa.typed.simple_function_factory`).
-More complex function factories are possible. Finally, private attributes and
-methods can also be defined by hand (i.e. ``clsdict['_private'] = ...``).
+method that typically does all of the work (e.g. ``Klass().parse_all``) and
+prefer to have convenience methods generated dynamically (e.g. ``Klass().foo``
+will call the dynamically generated method, ``Klass().parse_foo``, created by
+the :func:`~exa.typed.simple_function_factory`). More complex function
+factories are possible. Finally, pseudo static (private or not) attributes and
+methods can also be defined by hand (i.e. ``clsdict['_private'] = baz`` where
+``baz`` is the method or attribute in question).
 
 .. _abc: https://docs.python.org/3/library/abc.html
 """
@@ -99,7 +105,8 @@ def create_typed_attr(name, ptypes):
 
     The minimal example shown below describes type enforcing. The properties
     created by this function have access to other functionality provided by
-    Exa's abstract base class, :class:`~exa.typed.Meta`.
+    Exa's abstract base class, :class:`~exa.typed.Meta` but do not depend
+    on it.
 
     .. code-block:: Python
 
@@ -110,7 +117,7 @@ def create_typed_attr(name, ptypes):
 
             @foo.setter
             def foo(self, value):
-                if isinstance(str):
+                if isinstance(value, ptypes):
                     self._foo = value
 
             @foo.deleter
@@ -119,7 +126,7 @@ def create_typed_attr(name, ptypes):
 
     Args:
         name (str): Name of strongly typed attribute
-        ptypes (tuple): Immutable of valid types
+        ptypes (tuple): Iterable of valid types
 
     Returns:
         prop (property): Strongly typed property object
@@ -136,17 +143,13 @@ def create_typed_attr(name, ptypes):
     def getter(self):
         value = None
         # If not set or set to none, try to compute the value on-the-fly
-        if not hasattr(self, pname) or getattr(self, pname) is None:
+        if ((not hasattr(self, pname) or getattr(self, pname) is None)
+            and hasattr(self, "_getters")):
             for prefix in self._getters:
                 cmd = "{}{}".format(prefix, pname)
                 # Get the name of the compute function
                 if hasattr(self, cmd):
-                    value = getattr(self, cmd)()
-                    # If the compute function returns a value
-                    if value is not None:
-                        # Set it
-                        setattr(self, pname, value)
-                        return value
+                    getattr(self, cmd)()    # Expect the function to set the value
                     break
             # If the attribute wasn't set or is still none, return none
             if not hasattr(self, pname) or getattr(self, pname) is None:
@@ -222,13 +225,10 @@ class Meta(ABCMeta):
     properties and a host of other functionality. For examples and usage
     information see the module documentation, :mod:`~exa.typed`.
     """
-    _getters = ()
-
     def __new__(mcs, name, bases, clsdict):
         # Strongly typed attributes
         for attr_name, types in yield_typed(mcs):
             clsdict[attr_name] = create_typed_attr(attr_name, types)
-        # Methods
-        clsdict['_getters'] = mcs._getters
+        # Other attributes and methods
         clsdict['_yield_typed'] = yield_typed
         return super(Meta, mcs).__new__(mcs, name, bases, clsdict)

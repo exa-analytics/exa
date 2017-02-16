@@ -98,8 +98,7 @@ class TestEditor(UnitTester):
 
     def test_editor_has_uid(self):
         """Test that a uid is generated automatically if needed."""
-        uid = self.from_file.uid
-        self.assertIsInstance(uid, UUID)
+        self.assertIsInstance(self.from_file.uid, UUID)
 
     def test_editor_input_methods(self):
         """

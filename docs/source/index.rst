@@ -25,6 +25,7 @@ user interface.
     :maxdepth: 2
     :caption: Contributors
 
+    contrib.rst
     concepts.rst
 
 .. toctree::

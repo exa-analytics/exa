@@ -18,7 +18,7 @@ class ABCBaseMeta(Meta):
     """Strongly typed static attributes."""
     _getters = ('_get', )
     name = str
-    metadata = dict
+    meta = dict
     uid = UUID
 
 
@@ -28,22 +28,24 @@ class ABCBase(six.with_metaclass(ABCBaseMeta, object)):
     :class:`~exa.core.editor.Editor` and :class:`~exa.core.container.Container`
     objects.
     """
+
     @abstractmethod
     def copy(self):
         """Must define a copy method."""
         pass
 
-    @staticmethod
-    def _get_uid():
+    def _get_uid(self):
         """Generate a new uid for this object."""
-        return uuid4()
+        self.uid = uuid4()
 
-    def __init__(self, name=None, uid=None, metadata=None, **kwargs):
+    def __init__(self, name=None, uid=None, meta=None, **kwargs):
         """Additional kwargs are grouped as a dictionary of metadata."""
-        if metadata is None:
-            metadata = kwargs
+        if meta is None and kwargs == {}:
+            pass
+        elif meta is None:
+            meta = kwargs
         else:
-            metadata.update(kwargs)
+            meta.update(kwargs)
         self.name = name
         self.uid = uid
-        self.metadata = metadata
+        self.meta = meta
