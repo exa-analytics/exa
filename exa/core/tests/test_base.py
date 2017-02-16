@@ -6,11 +6,13 @@ Tests for :mod:`~exa.core.base`
 #############################################
 """
 from exa.tester import UnitTester
-from exa.core.base import Base
+from exa.core.base import ABCBase
 
 
-class Concrete(Base):
-    """Concrete implementation of ABC :class:`~exa.core.base.Base`."""
+class Concrete(ABCBase):
+    """Concrete implementation using :class:`~exa.core.base.ABCBase`."""
+    pass
+
 
 class TestBase(UnitTester):
     """
@@ -18,6 +20,6 @@ class TestBase(UnitTester):
     functionality behavior.
     """
     def test_raises(self):
-        """Test ABC behavior of :class:`~exa.core.base.Base`."""
+        """Test ABC behavior of :class:`~exa.core.base.ABCBase`."""
         with self.assertRaises(TypeError):
-            Base()
+            ABCBase()

@@ -11,7 +11,6 @@ Children
 
 .. toctree::
    :maxdepth: 1
-   
    abcwidgets.ABCView
    abcwidgets.ABCModel
    

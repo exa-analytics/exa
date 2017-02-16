@@ -3,7 +3,7 @@
 
 
 #########################
-Generic Editors
+Default Editors
 #########################
 .. automodule:: exa.core.editor
     :members:

@@ -11,5 +11,5 @@ Core Class Objects
 .. toctree::
     :maxdepth: 1
     
-    core/01_editors.rst
-    core/02_dataobj.rst
+    core/03_data.rst
+    core/04_editors.rst

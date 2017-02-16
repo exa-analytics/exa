@@ -2,13 +2,10 @@
 .. Distributed under the terms of the Apache License 2.0
 
 #########################
-Generic Data Objects
+Default Data Objects
 #########################
-.. automodule:: exa.core.abcdata
+.. automodule:: exa.core.data
     :members:
 
-.. automodule:: exa.core.dataseries
-    :members:
-
-.. automodule:: exa.core.dataframe
+.. automodule:: exa.core.tests.test_data
     :members:

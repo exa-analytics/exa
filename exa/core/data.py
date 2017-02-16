@@ -2,7 +2,7 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Data Objects
+Default Data Objects
 #########################
 Data consists of dimensions and features. Dimensions describe the extent of the
 space occupied by the data. Features describe the individual values at given
@@ -14,8 +14,8 @@ temperature and precipitation.
 The number of dimensions determine the dimensionality of the data (in the weather
 example there are three dimensions, two spatial and one temporal). There can be
 an arbitrary number of features. In computational work it can be useful to perform
-'record keeping' which is accomplished by maintaining a unique index with every
-point in the space of the data.
+'record keeping' which is accomplished by maintaining a unique indentifier (index)
+with every point in the space of the data.
 
 Default data objects are built using `pandas`_ TODO
 

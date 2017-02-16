@@ -37,7 +37,6 @@ Editing the configuration file 'by hand' can only be done when no Exa sessions
 are running (i.e. make sure no Python instances have imported exa). For most
 users the default configuration is sufficient.
 
-
 Tip:
     If needed, automatic function calls can be unregistered to prevent auto-
     updating of the configuration.
@@ -49,6 +48,7 @@ Tip:
 Exa's root directory can be set by setting the environment variable 'EXAROOT'.
 If set, Exa will look for a configuration in this directory before looking
 in the default location (e.g. '~/.exa').
+
 
 Logging
 ###############
@@ -64,6 +64,7 @@ provides a connection to an external or internal database system that manages
 the table schemas provided in ``cms`` subpackage. These schemas are primarily
 used for tracking user actions and organizing projects, etc. Exa leverages the
 rich `PyData`_ stack for connections to external data storage systems.
+
 
 Attributes:
     config (:class:`~configparser.ConfigParser`): Framework configuration
@@ -106,6 +107,13 @@ def info(out=sys.stdout):
         for key, value in section.items():
             out.write(key + u" = " + value + u"\n")
         out.write(u"\n")
+
+
+def close_logger(logger):
+    """Gracefully close a logger."""
+    for handler in logger.handlers[:]:
+        handler.close()
+        logger.removeHandler(handler)
 
 
 def create_logger(name):
@@ -169,6 +177,7 @@ def reconfigure(test=False):
     # Editing the module level variables
     global config
     global engine
+    global loggers
     init = False
     # Determine root directory
     exaroot = os.getenv('EXAROOT')
@@ -212,10 +221,11 @@ def reconfigure(test=False):
         for path in config['paths'].values():
             mkdir(path)
     # Create loggers
+    for logger in loggers.values():
+        close_logger(logger)
     logging.basicConfig()
     root = logging.getLogger()
     map(root.removeHandler, root.handlers[:])
-    map(root.removeFilter, root.filters[:])
     for name in config['logging'].keys():
         if name.endswith("log"):
             loggers[name.replace("log", "")] = create_logger(name)

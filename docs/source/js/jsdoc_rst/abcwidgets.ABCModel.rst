@@ -15,7 +15,6 @@ Children
 .. toctree::
    :maxdepth: 1
    
-   
 Description
 ===========
 

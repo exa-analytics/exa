@@ -48,11 +48,13 @@ class TestConfig(UnitTester):
     def tearDown(self):
         """Delete test configurations."""
         path = join(_config.config['dynamic']['home'], ".exa_test")
+        print(path)
         _config.engine.dispose()
         _config.reconfigure()
         try:
             shutil.rmtree(path)
-        except IOError:
+        except IOError as e:
+            print(e)
             pass
 
     def test_mkdir(self):

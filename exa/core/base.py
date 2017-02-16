@@ -2,10 +2,11 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Base Class for Editors and Containers
+Core Abstract Base Classes
 #######################################
-Abstract base class for :class:`~exa.core.editor.Editor` and
-:class:`~exa.core.container.Container` objects.
+This module provides abstract base classes for analytical data objects
+(:mod:`~exa.core.analytical`), discrete data objects (:mod:`~exa.core.data`),
+editors (:mod:`~exa.core.editor`), and containers (:mod:`~exa.core.container`).
 """
 import six
 from uuid import UUID, uuid4

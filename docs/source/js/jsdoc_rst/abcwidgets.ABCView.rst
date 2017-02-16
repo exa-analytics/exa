@@ -15,7 +15,6 @@ Children
 .. toctree::
    :maxdepth: 1
    
-   
 Description
 ===========
 
@@ -36,7 +35,6 @@ To modify the rendering behavior, see the init and launch methods.
 .. js:function:: render()
 
     
-    
 .. _abcwidgets.ABCView.init:
 
 
@@ -56,7 +54,6 @@ Note:
 .. js:function:: init()
 
     
-    
 .. _abcwidgets.ABCView.launch:
 
 
@@ -75,7 +72,6 @@ Note:
 .. js:function:: launch()
 
     
-    
 .. _abcwidgets.ABCView.resize:
 
 
@@ -90,7 +86,6 @@ contexts, GUI elements).
 
 .. js:function:: resize()
 
-    
     
 
 .. _abcwidgets.ABCView.el:
