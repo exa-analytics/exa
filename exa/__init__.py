@@ -44,6 +44,5 @@ from exa import cms, compute, core, app, tests
 # Import user/dev API
 from exa._version import __version__, version_info
 from exa._config import info
-from exa.units import Unit
-from exa.cms import File, Job, Project, Constant, Isotope
+from exa.cms import File, Job, Project, Isotope
 from exa.core import Editor
