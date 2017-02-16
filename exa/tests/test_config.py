@@ -28,7 +28,7 @@ class TestConfig(UnitTester):
         """Generate the temporary test configuration."""
         try:
             shutil.rmtree(join(_config.config['dynamic']['home'], ".exa_test"))
-        except IOError:
+        except OSError:
             pass
         _config.reconfigure(True)
         _config.config['logging']['level'] = "1"
@@ -48,13 +48,11 @@ class TestConfig(UnitTester):
     def tearDown(self):
         """Delete test configurations."""
         path = join(_config.config['dynamic']['home'], ".exa_test")
-        print(path)
         _config.engine.dispose()
         _config.reconfigure()
         try:
             shutil.rmtree(path)
-        except IOError as e:
-            print(e)
+        except OSError:
             pass
 
     def test_mkdir(self):
