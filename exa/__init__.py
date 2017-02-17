@@ -35,14 +35,15 @@ def _jupyter_nbextension_paths():
         'require': "jupyter-exa/extension"
     }]
 
+
 # Import base modules
-from exa import _version, _config, tester, errors, typed, mpl, tex, units
+from exa import _version, _config, tester, errors, typed, mimic, mpl, tex, units
 
 # Import sub-packages
 from exa import cms, compute, core, app, tests
 
 # Import user/dev API
-from exa._version import __version__, version_info
+from exa._version import __version__
 from exa._config import info
 from exa.cms import File, Job, Project, Isotope
-from exa.core import Editor
+from exa.core import Editor, Sections, Section

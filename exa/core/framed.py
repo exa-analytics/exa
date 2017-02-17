@@ -7,17 +7,18 @@ Default Data Objects
 Data consists of dimensions and features. Dimensions describe the extent of the
 space occupied by the data. Features describe the individual values at given
 points in the space of the data. Dimensions can be defined as discrete arrays
-or by parameterized functions. A common example is weather data. The dimensions
-of weather are longitude, latitude, and time. The features of weather are
-temperature and precipitation.
+or by parameterized functions. A common example is weather data. Dimensions of
+weather data may be longitude, latitude, and time. Examples features of weather
+data may be temperature and precipitation.
 
 The number of dimensions determine the dimensionality of the data (in the weather
 example there are three dimensions, two spatial and one temporal). There can be
 an arbitrary number of features. In computational work it can be useful to perform
-'record keeping' which is accomplished by maintaining a unique indentifier (index)
+'record keeping' which is accomplished by maintaining a unique identifier (index)
 with every point in the space of the data.
 
-Default data objects are built using `pandas`_ TODO
+Default data objects are built on top `pandas`_. The :class:`~pandas.DataFrame`
+is extended to represent a multidimensional object. TODO
 
 .. _pandas: http://pandas.pydata.org/
 """

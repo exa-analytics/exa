@@ -251,12 +251,12 @@ def initialize():
     df.to_sql(name='isotope', con=engine, index=True, index_label="pkid",
               if_exists='replace')
     # Load physical constants
-    path = os.path.join(config['dynamic']['data'], "constants.json")
-    df = pd.read_json(path)
-    df.reset_index(inplace=True)
-    df.columns = ['symbol', 'value']
-    df['pkid'] = df.index
-    df.to_sql(name='constant', con=engine, index=False, if_exists='replace')
+#    path = os.path.join(config['dynamic']['data'], "constants.json")
+#    df = pd.read_json(path)
+#    df.reset_index(inplace=True)
+#    df.columns = ['symbol', 'value']
+#    df['pkid'] = df.index
+#    df.to_sql(name='constant', con=engine, index=False, if_exists='replace')
     # Copy the tutorials
     source_dir = config['dynamic']['docnb']
     dest_dir = config['paths']['notebooks']

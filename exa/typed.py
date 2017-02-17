@@ -141,7 +141,6 @@ def create_typed_attr(name, ptypes):
         ptypes = tuple(ptypes)
 
     def getter(self):
-        value = None
         # If not set or set to none, try to compute the value on-the-fly
         if ((not hasattr(self, pname) or getattr(self, pname) is None)
             and hasattr(self, "_getters")):

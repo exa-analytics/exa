@@ -359,7 +359,7 @@ class TestSections(UnitTester):
         sec3 = MockSections(sections3)
         secs = [sec0, sec1, sec2, sec3]
         for sec in secs:
-            df = sec.describe_this()
+            df = sec.describe()
             self.assertIsInstance(df, pd.Series)
             self.assertEqual(len(df), 4)
             df = sec.describe_parsers()

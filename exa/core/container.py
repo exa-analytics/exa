@@ -6,46 +6,46 @@ Container
 ########################
 Data comes in many formats from simple local text or binary files (e.g. `HDF`_)
 to remote distributed databases or filesystems (e.g. `MySQL`_, `Hadoop`_).
-Analytics and computation are sometimes simple, performed locally in memory, or
-complex, performed on a remote, distributed, high performance computational
-cluster. The :class:`~exa.core.container.Container` object synthesizes common
-tasks associated with data workflows and provides a framework for interactive
-analytics and visualization.
-
-Similar to a database schema, a :class:`~exa.core.container.Container` can have
-many different tables with arbitrary shape (i.e. dimensionality and attributes).
-Relationships between data objects within a :class:`~exa.core.container.Container`
-are elucidated automatically. The :class:`~exa.core.container.Container` object
-provides an API for all analytics and computation operations.
+Data may be qualitative, quantitative, analytical, discrete, etc. Data computation
+and analysis can be simple, performed locally in memory (RAM), or complex
+performed on a supercomputer or on a distributed computational cluster, even
+requiring out-of-core (RAM) algorithms. The purpose of the
+:class:`~exa.core.container.Container` object is to synthesize common tasks to
+both simple and complex data workflows, in a single convenient location (API).
 
 .. _HDF: https://en.wikipedia.org/wiki/Hierarchical_Data_Format
 .. _MySQL: https://en.wikipedia.org/wiki/MySQL
 .. _Hadoop: https://en.wikipedia.org/wiki/Apache_Hadoop
 """
-import six
-from exa.core.base import ABCBaseMeta, ABCBase
+from abc import abstractmethod
+from exa.core.base import ABCBase
 
 
-class ContainerMeta(ABCBaseMeta):
-    """Metaclass for containers."""
+class ABCContainer(ABCBase):
+    """
+    An abstract base class for container objects.
+
+    Given a collection of data of some (at least moderately) known structure,
+    this object can facilitate computation, analytics, and visualization. All
+    container objects share a basic API defined by this class.
+    """
     _getters = ("_get", "parse", "compute")
 
+    @abstractmethod
+    def concat(self, *args, **kwargs):
+        """Concatenate container objects."""
+        pass
 
-class Container(six.with_metaclass(ContainerMeta, ABCBase)):
-    """
-    A storage point for an arbitrary collection of data objects.
+    @abstractmethod
+    def describe(self):
+        """Describe this object."""
+        pass
 
-    This object facilitates computation, analytics, and visualization of simple
-    or complex, related or unrelated data objects.
+    @abstractmethod
+    def _html_repr_(self):
+        """Jupyter notebook representation."""
+        pass
 
-    Warning:
-        Keyword arguments are not passed to the super constructor.
-    """
-    def copy(self):
-        return self
-
-    def __init__(self, name=None, uid=None, meta=None, *args, **kwargs):
-        super(Container, self).__init__(name, uid, meta)
 
 
 

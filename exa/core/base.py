@@ -4,9 +4,7 @@
 """
 Core Abstract Base Classes
 #######################################
-This module provides abstract base classes for analytical data objects
-(:mod:`~exa.core.analytical`), discrete data objects (:mod:`~exa.core.data`),
-editors (:mod:`~exa.core.editor`), and containers (:mod:`~exa.core.container`).
+This module provides abstract base classes for all (built-in) data objects.
 """
 import six
 from uuid import UUID, uuid4
@@ -16,7 +14,6 @@ from exa.typed import Meta
 
 class ABCBaseMeta(Meta):
     """Strongly typed static attributes."""
-    _getters = ('_get', )
     name = str
     meta = dict
     uid = UUID
@@ -28,10 +25,11 @@ class ABCBase(six.with_metaclass(ABCBaseMeta, object)):
     :class:`~exa.core.editor.Editor` and :class:`~exa.core.container.Container`
     objects.
     """
+    _getters = ('_get', )
 
     @abstractmethod
     def copy(self):
-        """Must define a copy method."""
+        """At a bare minimum a data object must define a copy method."""
         pass
 
     def _get_uid(self):
@@ -39,7 +37,17 @@ class ABCBase(six.with_metaclass(ABCBaseMeta, object)):
         self.uid = uuid4()
 
     def __init__(self, name=None, uid=None, meta=None, **kwargs):
-        """Additional kwargs are grouped as a dictionary of metadata."""
+        """
+        Base constructor for all data objects, editors, and containers.
+
+        Args:
+            name (str): Container name (optional)
+            uid (UUID): Container uid (optional)
+            meta (dict): Dictionary of metadata (optional)
+
+        Note:
+            Keyword arguments are added to this object's metadata.
+        """
         if meta is None and kwargs == {}:
             pass
         elif meta is None:

@@ -450,12 +450,23 @@ class SectionsMeta(ABCBaseMeta):
     _descriptions = {"sections": "List of sections"}
     sections = list
 
+    def describe(cls):
+        """Description of this parser."""
+        data = {"Name": cls.name, "Class": cls, "Description": cls.description}
+        params = [n.replace("_key_", "") for n in vars(cls) if n.startswith("_key_")]
+        if len(params) == 0:
+            data["Parameters"] = None
+        else:
+            data["Parameters"] = params
+        return pd.Series(data)
+
     def __new__(mcs, name, bases, clsdict):
         for attr in yield_typed(mcs):
             f = simple_function_factory("parse", "parse", attr[0])
             clsdict[f.__name__] = f
         clsdict['_descriptions'] = mcs._descriptions
         clsdict['_parsers'] = {}
+        clsdict['describe'] = classmethod(mcs.describe)
         return super(SectionsMeta, mcs).__new__(mcs, name, bases, clsdict)
 
 
@@ -515,7 +526,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
 
         # The following shows some useful commands and (commented) print output
         # Prior to using a Sections or Section object one can inspect them
-        SectionsExample.describe_this()
+        SectionsExample.describe()
             # Class          <class '__main__.SectionsExample'>
             # Description    Parses files separated by -* regex
             # Name                      example_sections_parser
@@ -699,17 +710,6 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
             return df
 
     @classmethod
-    def describe_this(cls):
-        """Description of this parser."""
-        data = {"Name": cls.name, "Class": cls, "Description": cls.description}
-        params = [n.replace("_key_", "") for n in vars(cls) if n.startswith("_key_")]
-        if len(params) == 0:
-            data["Parameters"] = None
-        else:
-            data["Parameters"] = params
-        return pd.Series(data)
-
-    @classmethod
     def add_section_parsers(cls, *args, **kwargs):
         """
         Add section parsers classes.
@@ -766,17 +766,6 @@ class Section(six.with_metaclass(SectionsMeta, Editor)):
         df.columns = ["Description", "Type"]
         df.index.name = "Attribute"
         return df
-
-    @classmethod
-    def describe_this(cls):
-        """Description of this parser."""
-        data = {"Name": cls.name, "Class": cls, "Description": cls.description}
-        params = [n.replace("_key_", "") for n in vars(cls) if n.startswith("_key_")]
-        if len(params) == 0:
-            data["Parameters"] = None
-        else:
-            data["Parameters"] = params
-        return pd.Series(data)
 
 
 def check_path(path, ignore_warning=False):
