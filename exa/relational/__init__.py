@@ -13,17 +13,9 @@ from itertools import product
 from exa._config import config, del_update
 from exa.utility import mkp
 from exa.relational.base import engine, Base, scoped_session, session_factory
-try:
-    from exa.relational.unit import (Length, Mass, Time, Current, Amount, Luminosity,
-                                     Dose, Acceleration, Charge, Dipole, Energy, Force,
-                                     Frequency, MolarMass)
-    thing = Length['au', 'A']
-    print(thing)
-except:
-    from exa.relational.hack import Length, Energy
-    print(type(Energy))
-    Mass, Time, Current, Amount, Luminosity, Dose = None, None, None, None, None, None
-    Acceleration, Charge, Dipole, Force, Frequency, MolarMass = None, None, None, None, None, None
+from exa.relational.unit import (Length, Mass, Time, Current, Amount, Luminosity,
+                                 Dose, Acceleration, Charge, Dipole, Energy, Force,
+                                 Frequency, MolarMass)
 from exa.relational.isotope import Isotope
 from exa.relational.constant import Constant
 from exa.relational.project import Project
