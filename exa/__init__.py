@@ -46,4 +46,5 @@ from exa import cms, compute, core, app, tests
 from exa._version import __version__
 from exa._config import info
 from exa.cms import File, Job, Project, Isotope
+from exa.compute import dispatch
 from exa.core import Editor, Sections, Section

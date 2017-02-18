@@ -22,6 +22,8 @@ is extended to represent a multidimensional object. TODO
 
 .. _pandas: http://pandas.pydata.org/
 """
+class FrameData():
+    pass
 #import six
 #import pandas as pd
 #from uuid import UUID, uuid4
