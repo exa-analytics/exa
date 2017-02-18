@@ -11,8 +11,9 @@ and interface to `pythreejs`_ and extends its features specifc to the Exa framew
 .. _Jupyter notebook: https://jupyter-notebook.readthedocs.io/en/latest/
 .. _three.js: https://threejs.org/
 """
+from ipywidgets import Widget
 from exa.app.abcwidgets import ABCWidget
-from traitlets import Unicode
+from traitlets import Unicode, CFloat
 
 
 class Renderer(ABCWidget):
@@ -33,3 +34,23 @@ class SubRenderer(Renderer):
     _model_name = Unicode("SubRendererModel").tag(sync=True)
     _view_module = Unicode("jupyter-exa").tag(sync=True)
     _model_module = Unicode("jupyter-exa").tag(sync=True)
+
+
+class BaseWidget(Widget):
+    """
+    Base widget providing view/model module.
+    """
+    _view_module = Unicode("jupyter-exa").tag(sync=True)
+    _model_module = Unicode("jupyter-exa").tag(sync=True)
+    _view_name = Unicode("BaseWidgetView").tag(sync=True)
+    _model_name = Unicode("BaseWidgetModel").tag(sync=True)
+
+
+class SphereGeometry(Widget):
+    """
+    Sphere Geometry.
+    """
+    _view_name = Unicode('SphereGeometryName').tag(sync=True)
+    _model_name = Unicode('SphereGeometryModel').tag(sync=True)
+
+    radius = CFloat(1).tag(sync=True)

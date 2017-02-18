@@ -16,12 +16,16 @@ class RendererView extends abc.ABCView {
         ------------
         Initialize the application
         */
-        var button = document.createElement("button");
-        button.classList.add("button");
+        var button = document.createElement("fancybutton");
+        button.classList.add("fancybutton");
         button.style.position = "absolute";
         button.style.top = "0px";
         button.style.left = "0px";
-        console.log(button)
+        var button1 = document.createElement("fancybutton");
+        button1.classList.add("fancybutton");
+        button1.style.position = "absolute";
+        button1.style.top = "30px";
+        button1.style.left = "0px";
         this.camera = new THREE.PerspectiveCamera(75, 600/450, 1, 1000);
         this.camera.position.z = 500;
         this.scene = new THREE.Scene();
@@ -39,6 +43,7 @@ class RendererView extends abc.ABCView {
         this.renderer.setSize(600, 400);
         this.el.append(this.renderer.domElement);
         this.el.append(button);
+        this.el.append(button1);
         console.log(this);
     }
 
@@ -51,7 +56,7 @@ class RendererView extends abc.ABCView {
         this.renderer.render(this.scene, this.camera);
         this.animation();
     }
-    
+
     animation() {
         window.requestAnimationFrame(this.animation.bind(this));
         this.mesh.rotation.x = Date.now()*0.00005;
@@ -79,4 +84,3 @@ module.exports = {
     "RendererView": RendererView,
     "RendererModel": RendererModel
 };
-
