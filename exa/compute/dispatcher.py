@@ -2,24 +2,48 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Dispatched Functions
+Dispatch
 ########################
-This module provides the :class:`~exa.compute.dispatch.Dispatcher` object
-and the :func:`~exa.compute.dispatch.dispatch` decorator. The primary purpose of
-the dispatcher is to allow for the `multiply dispatched`_ programming paradigm.
-Because "dispatching" requires information about argument types, it is
-convenient to also perform dynamic compilation upon dispatch. Compilation can
-allow for GIL free execution enabling parallelization. Of course, it also
-usually makes the function faster. See :mod:`~exa.compute.compilation` for
-more information.
+`Multiple dispatching`_ is a programming paradigm that delegates function calls
+based on argument types. This is primarily a convenience for situations where
+the behavior of a function or method may differ depending on argument types but
+there is a desire to maintain a specific API. This is accomplished using the
+:class:`~exa.compute.dispatcher.Dispatcher` which acts as a storage class for
+dispatched functions with a given function name. Dispatched functions may be
+designated using the convience decorator, :func:`~exa.compute.dispatcher.dispatch`,
+as follows.
+
+.. code-block:: python
+
+    @dispatch(str)
+    def f(x):
+        return x.zfill(2)        # string operation
+
+    @dispatch(int)
+    def f(x):
+        return x.bit_length()    # int operation
+
+The implementation provided by this module allows for multiple function arguments,
+each with multiple types.
+
+.. code-block:: python
+
+    @dispatch(str, (int, float))
+    def f(x, y):
+        return x.zfill(2), y.real
+
+    @dispatch(int, str)
+    def f(x, y):
+        return x.bit_length(), y.zfill(3)
+
+TODO additional features of dispatcher
 
 Warning:
     Most syntax checkers, linters, or other code analyses methods will raise
     style or syntax errors on the code examples above. As always, use unit tests
     to ensure that code is behaving as expected.
 
-.. _numba: http://numba.pydata.org/
-.. _multiply dispatched: https://en.wikipedia.org/wiki/Multiple_dispatch
+.. _Multiple dispatching: https://en.wikipedia.org/wiki/Multiple_dispatch
 """
 import numpy as np
 from itertools import product
@@ -27,54 +51,20 @@ try:
     from inspect import signature
 except ImportError:
     from inspect import getargspec as signature
-#from exa.compute.compiler import compile_function
 
 
-_dispatched = dict()    # Global to keep track of all dispatched functions
-ints = (int, np.int8, np.int16, np.int32, np.int64)
-floats = (float, np.float16, np.float32, np.float64)
+_dispatched = {}    # Keeps track of all dispatched functions and methods
+_ints = (int, np.int, np.int8, np.int16, np.int32, np.int64)
+_floats = (float, np.float, np.float16, np.float32, np.float64)
 
 
 class Dispatcher(object):
     """
-    A class for storing type dispatched functions.
-
-    .. code-block:: Python
-
-        @dispatch(str)
-        def fn(arg):
-            return arg + "!"
-
-        @dispatch(int)
-        def fn(arg):
-            return str(2*arg) + "!"
-
-        @dispatch(float)
-        def fn(arg):
-            return str(20*arg) + "!"
-
-    This example generates a function dispatcher that makes a call to the appropriate
-    function signature depending on the type of the argument given. For cases where
-    the same signature supports multiple argument types the following syntax is
-    acceptable.
-
-    .. code-block:: Python
-
-        @dispatch((str, int))
-        def fn(arg):
-            return str(arg) + "!"
-
-        @dispatch((bool, float))
-        def fn(arg):
-            return str(float(arg)*42) + "!"
-
-    In these examples, signature references will be created for both types of
-    arguments passed to the dispatch decorator.
+    A class that represents a function with a given name and calls the correct
+    method based on the signature of a given function call.
     """
     def register(self, func, *itypes, **flags):
-        """
-        Register a new function signature.
-        """
+        """Register a new function with a given signature."""
         nargs = get_nargs(func)
         ntyps = len(itypes)
         if nargs != ntyps:
@@ -93,18 +83,6 @@ class Dispatcher(object):
         for typ in itypes:
             if not isinstance(typ, type):
                 raise TypeError("Not a type: {}".format(typ))
-        #sig, func = compile_function(func, *itypes, **flags)
-        #self.functions[sig] = func
-
-    @property
-    def signatures(self):
-        """
-        Check avaiable function signatures.
-
-        Returns:
-            df (:class:`~pandas.DataFrame`): Data table of available signatures
-        """
-        return False
 
     def __call__(self, *args, **kwargs):
         itypes = tuple([type(arg) for arg in args])
@@ -128,8 +106,8 @@ class Dispatcher(object):
     def __str__(self):
         return self.__repr__()
 
-    def _repr_html_(self):
-        return self.to_frame()._repr_html_()
+    def _html_repr_(self):
+        pass
 
 
 def dispatch(*itypes, **flags):
