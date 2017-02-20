@@ -66,8 +66,6 @@ TODO additional features of dispatcher
 .. _Multiple dispatching: https://en.wikipedia.org/wiki/Multiple_dispatch
 .. _type hints: https://docs.python.org/3/library/typing.html
 """
-from functools import wraps
-from itertools import product
 try:
     from inspect import signature
 except ImportError:
@@ -92,7 +90,7 @@ class Dispatcher(object):
             args: Function argument types
             kwargs: Function argument types and flags
         """
-        print("reg: ", f, args, kwargs)
+        print("register: ", f, args, kwargs)
         self.functions[self.i] = f
         self.i += 1
 
@@ -108,51 +106,125 @@ class Dispatcher(object):
         Checks if to see if a dispatcher with the given name has been created,
         if it has return it, otherwise create a new dispatcher object.
         """
+        print("newing: ", name)
         return _dispatched.get(name, super(Dispatcher, cls).__new__(cls))
 
     def __init__(self, name):
+        print("initing: ", name)
         self.name = name
         self.__name__ = name
         self.functions = {}
         _dispatched[name] = self
 
 
-def dispatch(*args, **kwargs):
-    """A decorator for dispatching functions."""
-    print("1: ", args, kwargs)
-    def wrapper(f, *args, **kwargs):
-        print("2: ", f, args, kwargs)
-        return f
-
-    if len(args) == 1 and len(kwargs) == 0 and callable(args[0]):
-        print(args[0])
-        return args[0]
-    else:
-        print(wrapper)
-        return wrapper
-
-#    def wrapper(*args, **kwargs):
-#        """
-#        A helper decorator to manage additional flags that may be passed along
-#        with the function to modify dispatching.
-#        """
-#        ooc = kwargs.pop('ooc', False)
-#        nogil = kwargs.pop('nogil', False)
-#        threaded = kwargs.pop('threaded', False)
-#        cuda = kwargs.pop('cuda', False)
-#        # Now get the correct arguments for registration
-#        if len(args) == 1 and len(kwargs) == 0 and callable(args[0]):
-#            print("2: ", args, kwargs)
-#            args = list(args)
-#            f = args.pop(0)
-#        else:
-#            f = wrapper
-#        print(f.__name__, f, args, kwargs, ooc, nogil, threaded, cuda)
-#        dspchr = Dispatcher(f.__name__)
-#        print("dispatcher: ", dspchr)
-#        dspchr.register(f, ooc=ooc, nogil=nogil, threaded=threaded, cuda=cuda, **kwargs)
+#def dispatch(core=False, thread=False, nogil=False, cuda=False,
+#             *args, **kwargs):
+#    """
+#    Dispatch a function or method.
+#
+#    Basic usage is as follows.
+#
+#    .. code-block:: python
+#
+#        @dispatch
+#        def f(a):
+#            pass
+#
+#        @dispatch
+#        def f(a: type) -> type:    # Python 3 only
+#            pass
+#
+#        @dispatch(type)
+#        def f(a):
+#            pass
+#
+#    Args:
+#        core (bool): Wrap as out of core function
+#        thread (bool): Compile multi-threaded function
+#        nogil (bool): Compile `GIL`_ free function
+#        cuda (bool): Compile function for GPU execution
+#
+#    Note:
+#        Compiling a threaded function automatically releases the `GIL`_.
+#
+#    .. _GIL: https://en.wikipedia.org/wiki/Global_interpreter_lock
+#    """
+#
+#
+#def processor(fn, core, nogil, threaded, cuda, *args, **kwargs):
+#print("5: Processor", fn, args, kwargs)
+#return fn
+#def helper(fn):
+#print("helping? ", fn, fn.__name__)
+#if hasattr(fn, "__annotations__"):
+#kwargs.update(fn.__annotations__)
+#return processor(fn, core, nogil, threaded, cuda, *args, **kwargs)
+## Extract the correct arugments
+## Remove flags
+#core = kwargs.pop('ooc', False)
+#nogil = kwargs.pop('nogil', False)
+#threaded = kwargs.pop('threaded', False)
+#cuda = kwargs.pop('cuda', False)
+## args and kwargs only have types and a function arguments now
+## If no type hints passed
+#print("1: ", args, kwargs, core, nogil, threaded, cuda)
+#if (len(args) == 1 and len(kwargs) == 0 and callable(args[0])
+#and not isinstance(args[0], type)):
+#f = args[0]
+#if not hasattr(f, "__annotations__") or len(f.__annotations__) == 0:
+#print("2: No type hints")
+#return processor(f, core, nogil, threaded, cuda)
+#else:
+#print("3: __annotations__ type hints")
+#kwargs = {name: typ for name, typ in f.__annotations__.items() if name != "return"}
+#return processor(f, core, nogil, threaded, cuda, **kwargs)
+#else:
+#print("4: args/kwargs type hints (and annotations?)")
+#return helper
+#
+#
+#
+#def dispatch(*args, **kwargs):
+#    """Dispatch a function or method."""
+#    print("1: ", args, kwargs)
+#    def processor(fn, *types, **flags):
+#
+#    def decorator(fn):
+#        print("2: ", fn)
+#        dspchr = Dispatcher(fn.__name__)    # Get or create Dispatcher
+#        dspchr.register(fn)
 #        return dspchr
-#    return wrapper
+#
+#    if (len(args) == 1 and len(kwargs) == 0 and callable(args[0])
+#        and not isinstance(args[0], type)):
+#        print("3: No args")
+#        return decorator(args[0])
+#    else:
+#        print("4: args")
+#        return decorator
+#
+##    def wrapper(*args, **kwargs):
+##        """
+##        A helper decorator to manage additional flags that may be passed along
+##        with the function to modify dispatching.
+##        """
+##        ooc = kwargs.pop('ooc', False)
+##        nogil = kwargs.pop('nogil', False)
+##        threaded = kwargs.pop('threaded', False)
+##        cuda = kwargs.pop('cuda', False)
+##        # Now get the correct arguments for registration
+##        if len(args) == 1 and len(kwargs) == 0 and callable(args[0]):
+##            print("2: ", args, kwargs)
+##            args = list(args)
+##            f = args.pop(0)
+##        else:
+##            f = wrapper
+##        print(f.__name__, f, args, kwargs, ooc, nogil, threaded, cuda)
+##        dspchr = Dispatcher(f.__name__)
+##        print("dispatcher: ", dspchr)
+##        dspchr.register(f, ooc=ooc, nogil=nogil, threaded=threaded, cuda=cuda, **kwargs)
+##        return dspchr
+##    return wrapper
 
 
 def arg_count(f):
