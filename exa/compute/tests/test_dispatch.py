@@ -2,57 +2,33 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Tests for :mod:`~exa.compute.dispatch`
+Tests for :mod:`~exa.compute.dispatcher`
 ##########################################
-Test the (multiple) dispatch like functionality provided by
-:mod:`~exa.compute.dispatch`.
 """
 import numpy as np
-from exa.compute.dispatcher import dispatch
+from exa.compute.dispatcher import dispatch, Dispatcher, arg_count
 from exa.tester import UnitTester
 
 
 class TestDispatcher(UnitTester):
-    """
-    In order to test the dispatching functionality, we generate a dummy multiply
-    dispatched function "fn".
-    """
-    def setUp(self):
-        """Generate the dummy function "fn"."""
-        try:
-            @dispatch(str)
-            def fn(arg):
-                return arg + "!"
-
-            @dispatch(bool)
-            def fn(arg):
-                return str(arg) + "?"
-
-            @dispatch((int, np.int64))
-            def fn(arg):
-                return str(arg) + "*"
-
-            @dispatch(str, bool)
-            def fn(arg0, arg1):
-                return arg0 + str(arg1) + "!"
-
-            @dispatch((str, int), (bool, int))
-            def fn(arg0, arg1):
-                return str(arg0) + str(arg1) + "!"
-        except Exception as e:
-            self.fail(str(e))
-        self.fn = fn
-
-#    def test_single_dispatch(self):
-#        """Test the singly dispatched methods."""
-#        self.assertTrue(self.fn("Foo").endswith("!"))
-#        self.assertTrue(self.fn(True).endswith("?"))
-#        self.assertTrue(self.fn(42).endswith("*"))
-#        self.assertTrue(self.fn(np.int64(42)).endswith("*"))
-#        with self.assertRaises(KeyError):
-#            self.fn(np.int32(42))
+    """Tests for multiple dispatching."""
+    pass
+#    def test_arg_count(self):
+#        """Test :func:`~exa.compute.dispatcher.arg_count`."""
+#        def f(a):
+#            pass
+#        self.assertEqual(arg_count(f), 1)
+#        def f(a, b):
+#            pass
+#        self.assertEqual(arg_count(f), 2)
+#        def f(a, b=None):
+#            pass
+#        self.assertEqual(arg_count(f), 2)
 #
-#    def test_multiple_dispatch(self):
-#        """Test multiply dispatched arguments."""
-#        self.assertTrue(self.fn("Bar", True).endswith("!"))
-#        self.assertTrue(self.fn(42, 42).endswith("!"))
+#
+#    def test_manual(self):
+#        """Test 'by hand' dispatcher creation."""
+#        f = Dispatcher("f")
+#        #f.register(lambda x: x.zfill(2), str)  # Same as @dispatch(str)...
+#        #print(f("1"))
+#        #self.assertEqual(f("1"), "01")
