@@ -1,4 +1,5 @@
 numpy
+numba
 scipy
 matplotlib
 sqlalchemy
@@ -12,4 +13,3 @@ ipywidgets
 ipyparallel
 sphinx
 nose
-sphinxcontrib-autoanysrc
