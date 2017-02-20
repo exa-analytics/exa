@@ -24,7 +24,7 @@ def datetime_header(title=''):
     return '\n'.join(('=' * 80, title + ': ' + str(datetime.now()), '=' * 80))
 
 
-def mkp(*args, mk=False):
+def mkp(*args, **kwargs):
     """
     Generate a directory path, and create it if requested.
 
@@ -40,11 +40,15 @@ def mkp(*args, mk=False):
     Returns:
         path (str): File or directory path
     """
+    mk = kwargs.pop('mk', False)
     path = os.sep.join(list(args))
     if mk:
         while sep2 in path:
             path = path.replace(sep2, os.sep)
-        os.makedirs(path, exist_ok=True)
+        try:
+            os.makedirs(path)
+        except FileExistsError:
+            pass
     return path
 
 
