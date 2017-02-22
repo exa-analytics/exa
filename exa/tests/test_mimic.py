@@ -31,7 +31,7 @@ class TestMimic(UnitTester):
         self.assertTrue(type(self.mc_sca) == Mimic)
         self.assertIsInstance(self.mc_sca, int)
         self.assertEqual(self.mc_sca.bit_length(), 1)
-        self.assertEqual(self.mc_sca, 1)
+        self.assertTrue(self.mc_sca == 1)    # Use this syntax for py2compat
         self.assertLess(0, self.mc_sca)
         self.assertGreater(2, self.mc_sca)
         self.assertGreaterEqual(1, self.mc_sca)
