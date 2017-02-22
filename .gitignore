@@ -71,3 +71,4 @@ target/*
 *.swp
 .ipynb*
 *~
+node_modules
