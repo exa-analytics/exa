@@ -111,28 +111,25 @@ class Mimic(object):
         self._obj.__format__(*args, **kwargs)
 
     def __eq__(self, other):
-        try:
-            return self._obj.__eq__(other)
-        except AttributeError:
-            return self._obj.__cmp__(other)
+        return self._obj == other
 
     def __ge__(self, other):
-        return self._obj.__ge__(other)
+        return self._obj >= other
 
     def __gt__(self, other):
-        return self._obj.__gt__(other)
+        return self._obj > other
 
     def __le__(self, other):
-        return self._obj.__le__(other)
+        return self._obj <= other
 
     def __lt__(self, other):
-        return self._obj.__lt__(other)
+        return self._obj < other
 
     def __ne__(self, other):
-        return self._obj.__ne__(other)
+        return self._obj != other
 
     def __hash__(self):
-        return self._obj.__hash__()
+        return hash(self._obj)
 
     def __reduce__(self, *args, **kwargs):
         return self._obj.__reduce__(*args, **kwargs)
@@ -144,10 +141,10 @@ class Mimic(object):
         return self._obj.__sizeof__()
 
     def __len__(self):
-        return self._obj.__len__()
+        return len(self._obj)
 
     def __str__(self):
-        return self._obj.__str__()
+        return str(self._obj)
 
     def __repr__(self):
         return repr(self._obj)
