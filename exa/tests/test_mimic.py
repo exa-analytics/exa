@@ -16,11 +16,13 @@ class TestMimic(UnitTester):
     def setUp(self):
         """Sample objects to test."""
         self.sca = 1
+        self.txt = "1: {}"
         self.lst = ['a', 'b', 3]
         self.tup = ('a', 'b', 3)
         self.dct = {'a': 0, 'b': 1, 3: 2}
         self.cpx = DataFrame()
         self.mc_sca = Mimic(self.sca)
+        self.mc_txt = Mimic(self.txt)
         self.mc_lst = Mimic(self.lst)
         self.mc_tup = Mimic(self.tup)
         self.mc_dct = Mimic(self.dct)
@@ -45,6 +47,13 @@ class TestMimic(UnitTester):
         self.assertEqual(str(self.mc_sca), "1")
         self.assertIsInstance(self.mc_sca.__sizeof__(), int)
         self.assertEqual(repr(self.mc_sca), "1")
+
+    def test_txt(self):
+        """Test strings."""
+        self.assertTrue(type(self.mc_txt) == Mimic)
+        self.assertIsInstance(self.mc_txt, str)
+        txt = self.mc_txt.format("2")
+        self.assertEqual(txt, "1: 2")
 
     def test_lst(self):
         """Test lists."""
