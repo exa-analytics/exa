@@ -111,7 +111,10 @@ class Mimic(object):
         self._obj.__format__(*args, **kwargs)
 
     def __eq__(self, other):
-        return self._obj.__eq__(other)
+        try:
+            return self._obj.__eq__(other)
+        except AttributeError:
+            return self._obj.__cmp__(other)
 
     def __ge__(self, other):
         return self._obj.__ge__(other)
