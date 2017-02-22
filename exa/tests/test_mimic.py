@@ -19,7 +19,7 @@ class TestMimic(UnitTester):
         self.lst = ['a', 'b', 3]
         self.tup = ('a', 'b', 3)
         self.dct = {'a': 0, 'b': 1, 3: 2}
-        self.cpx = Mimic(DataFrame())
+        self.cpx = DataFrame()
         self.mc_sca = Mimic(self.sca)
         self.mc_lst = Mimic(self.lst)
         self.mc_tup = Mimic(self.tup)
@@ -31,6 +31,20 @@ class TestMimic(UnitTester):
         self.assertTrue(type(self.mc_sca) == Mimic)
         self.assertIsInstance(self.mc_sca, int)
         self.assertEqual(self.mc_sca.bit_length(), 1)
+        self.assertEqual(self.mc_sca, 1)
+        self.assertLess(0, self.mc_sca)
+        self.assertGreater(2, self.mc_sca)
+        self.assertGreaterEqual(1, self.mc_sca)
+        self.assertLessEqual(1, self.mc_sca)
+        self.assertNotEqual(0, self.mc_sca)
+        self.assertEqual(hash(self.mc_sca), hash(self.sca))
+        with self.assertRaises(TypeError):
+            self.mc_sca.__reduce__()
+        with self.assertRaises(TypeError):
+            self.mc_sca.__reduce_ex__()
+        self.assertEqual(str(self.mc_sca), "1")
+        self.assertIsInstance(self.mc_sca.__sizeof__(), int)
+        self.assertEqual(repr(self.mc_sca), "1")
 
     def test_lst(self):
         """Test lists."""
@@ -62,3 +76,7 @@ class TestMimic(UnitTester):
         self.assertTrue(type(self.mc_cpx) == Mimic)
         self.assertIsInstance(self.mc_cpx, DataFrame)
         self.assertEqual(len(self.mc_cpx), 0)
+        self.mc_cpx.test = None
+        self.assertTrue(hasattr(self.cpx, "test"))
+        del self.mc_cpx.test
+        self.assertFalse(hasattr(self.cpx, "test"))
