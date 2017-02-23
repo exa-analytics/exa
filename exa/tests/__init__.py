@@ -6,4 +6,4 @@ Tests for 'root' modules. Note that tests for :mod:`~exa._config` are imported a
 the root level.
 """
 from exa.tests import (test_tester, test_errors, test_mpl, test_typed, test_tex,
-                       test_mimic, test_units, test_config)
+                       test_mimic, test_units, test_config, test_dispatcher)

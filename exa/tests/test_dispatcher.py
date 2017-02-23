@@ -6,7 +6,7 @@ Tests for :mod:`~exa.compute.dispatcher`
 ##########################################
 """
 import numpy as np
-from exa.compute.dispatcher import dispatch, Dispatcher, arg_count
+from exa.dispatcher import dispatch, Dispatcher, arg_count
 from exa.tester import UnitTester
 
 

@@ -36,10 +36,6 @@ def _jupyter_nbextension_paths():
     }]
 
 
-from ._version import __version__
-from .compute import dispatch
-
-
 # Import base modules
 #from exa import _version, _config, tester, errors, typed, mimic, mpl, tex, units
 
