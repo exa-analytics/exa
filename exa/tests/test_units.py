@@ -10,11 +10,11 @@ the Exa package.
 """
 import sympy
 import sympy.physics
-from exa.tester import UnitTester
+from unittest import TestCase
 from exa import units
 
 
-class TestUnits(UnitTester):
+class TestUnits(TestCase):
     """
     Test that module level imports worked and new values are leveraging Sympy
     correctly.

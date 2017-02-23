@@ -4,8 +4,8 @@
 """
 Text Utilities
 #############################
-Utilities for formatting `LaTeX`_ and other text. Functions provided by this
-module make use of module level attributes which can be modified as needed.
+Utilities for formatting `LaTeX`_ and other text processing. Functions provided
+by this module make use of module level attributes which can be modified as needed.
 
 .. code-block:: Python
 

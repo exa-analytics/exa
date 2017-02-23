@@ -18,19 +18,17 @@
 
 .. toctree::
     :maxdepth: 2
-    :caption: Contributors
+    :caption: Developers
 
     contrib.rst
     concepts.rst
+    extension.rst
 
 .. toctree::
     :maxdepth: 2
     :caption: API
 
-    root.rst
-    compute.rst
-    core.rst
-    js.rst
+    api.rst
 
 * :ref:`genindex`
 

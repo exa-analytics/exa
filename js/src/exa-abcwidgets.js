@@ -9,7 +9,8 @@
  * namespace provides a default DOMWidgetView that sets up a resizable element 
  * with a default stylesheet.
  *
- * Note:
+ * .. note::
+ *
  *     The terms module and namespace are used interchangeably.
  */
 "use strict";

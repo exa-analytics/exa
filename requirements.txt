@@ -12,7 +12,6 @@ notebook
 ipywidgets
 nose
 numba
-blosc
 six
 psutil
 sphinx

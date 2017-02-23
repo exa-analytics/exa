@@ -96,7 +96,6 @@ methods can also be defined by hand (i.e. ``clsdict['_private'] = baz`` where
 .. _abc: https://docs.python.org/3/library/abc.html
 """
 from abc import ABCMeta
-from exa.errors import TypeConversionError
 
 
 def create_typed_attr(name, ptypes):
@@ -168,7 +167,7 @@ def create_typed_attr(name, ptypes):
         if isinstance(obj, ptypes) or obj is None:
             setattr(self, pname, obj)
         else:
-            raise TypeConversionError(obj, ptypes)
+            raise TypeError("Cannot convert type {} to {}.".format(type(obj), ptypes))
 
     def deleter(self):
         delattr(self, pname)    # Allows for dynamic attribute deletion

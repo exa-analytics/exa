@@ -40,7 +40,10 @@ For a development installation (npm required):
     jupyter nbextension install --py --symlink --sys-prefix exa
     jupyter nbextension enable --py --sys-prefix exa
 
-Note that the development on Windows is not fully supported.
+.. note::
+    
+    Development on Windows may not be fully supported. Some convience scripts
+    are provided in the ``docs`` and ``js`` directories.
 
 
 .. _Anaconda: https://www.continuum.io/downloads

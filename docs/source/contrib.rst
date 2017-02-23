@@ -4,6 +4,7 @@
 ########################
 Contributing
 ########################
+``TODO`` Describe general contributing principles and preferences
 
 Git
 ############

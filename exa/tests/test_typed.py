@@ -8,7 +8,7 @@ Test Exa's abstract base class, which supports strongly typed attributes.
 Note that an example of usage of this metaclass is provided by this test.
 """
 import six
-from exa.tester import UnitTester
+from unittest import TestCase
 from exa.typed import Meta, simple_function_factory, yield_typed
 
 
@@ -58,7 +58,7 @@ class AdvancedClass(six.with_metaclass(AdvancedMeta, GetterClass)):
         self.bar = bar
 
 
-class TestTyped(UnitTester):
+class TestTyped(TestCase):
     """
     Tests the functionality provided in :mod:`~exa.typed` using the example
     classes (and metaclasses) provided above.

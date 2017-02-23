@@ -9,11 +9,11 @@ Tests for text manipulation functions.
 import re
 import numpy as np
 import pandas as pd
-from exa.tester import UnitTester
+from unittest import TestCase
 from exa import tex
 
 
-class TestTeX(UnitTester):
+class TestTeX(TestCase):
     """Test that modification of module level variables works."""
     def setUp(self):
         self.df = pd.DataFrame(np.random.rand(3, 3))
