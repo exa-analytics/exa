@@ -7,3 +7,7 @@ Data Computation
 .. automodule:: exa.compute.__init__
     :members:
 
+.. toctree::
+    :maxdepth: 1
+
+    compute/01_dispatcher.rst

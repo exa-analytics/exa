@@ -7,10 +7,10 @@ This sub-package provides modules that support:
 - :mod:`~exa.compute.dispatch`: Multiply dispatched functions
 """
 # Import modules
-from exa.compute import dispatcher
+#from exa.compute import dispatcher
 
 # Import sub-packages
-from exa.compute import tests
+#from exa.compute import tests
 
 # Import user/dev API
-from exa.compute.dispatcher import dispatch
+from .dispatcher import dispatch

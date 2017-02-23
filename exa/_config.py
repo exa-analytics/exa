@@ -198,8 +198,8 @@ def reconfigure(test=False):
     except NameError:
         pass
     pkg = os.path.dirname(os.path.realpath(__file__))
-    docnb = join(pkg, "..", "docs/source/notebooks")
-    data = join(pkg, "..", "data")
+    docnb = os.path.abspath(join(pkg, "..", "docs/source/notebooks"))
+    data = os.path.abspath(join(pkg, "..", "data"))
     config['dynamic'] = {'root': exaroot, 'notebook': ipynb, 'pkg': pkg,
                          'docnb': docnb, 'data': data, 'home': home}
     # Set the default static config
@@ -235,38 +235,10 @@ def reconfigure(test=False):
     except AttributeError:
         pass
     engine = create_engine(config['db']['uri'], echo=False)
-    # Initialize db schema and tutorial notebooks
+    # Set DB init flag and save initial config
     if init:
-        initialize()
-
-
-def initialize():
-    """Copy tutorials and set up db schema."""
-    # Load isotope static data (replacing existing data)
-    isotopes = join(config['dynamic']['data'], "isotopes.json")
-    df = pd.read_json(isotopes, orient='values')
-    df.columns = ('A', 'Z', 'af', 'eaf', 'color', 'radius', 'gfactor', 'mass',
-                  'emass', 'name', 'eneg', 'quadmom', 'spin', 'symbol', 'szuid',
-                  'strid')
-    df.to_sql(name='isotope', con=engine, index=True, index_label="pkid",
-              if_exists='replace')
-    # Load physical constants
-#    path = os.path.join(config['dynamic']['data'], "constants.json")
-#    df = pd.read_json(path)
-#    df.reset_index(inplace=True)
-#    df.columns = ['symbol', 'value']
-#    df['pkid'] = df.index
-#    df.to_sql(name='constant', con=engine, index=False, if_exists='replace')
-    # Copy the tutorials
-    source_dir = config['dynamic']['docnb']
-    dest_dir = config['paths']['notebooks']
-    for source in glob(os.path.join(source_dir, "*.ipynb")):
-        dest = os.path.join(dest_dir, os.path.basename(source))
-        shutil.copy(source, dest)
-    # Set the cms initialization flag
-    config['dynamic']['init_cms'] = "true"
-    # Save the config
-    save(False)
+        config['dynamic']['init_cms'] = "true"
+        save(False)
 
 
 # Create the config, db engine, and loggers

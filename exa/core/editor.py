@@ -28,6 +28,7 @@ See Also:
     Common examples of data objects are  :class:`~exa.core.dataseries.DataSeries`
     and :class:`~exa.core.dataframe.DataFrame` among others.
 """
+import json
 import os, re, sys, bz2, gzip, six
 import warnings
 import pandas as pd
@@ -351,15 +352,27 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
         """Convenience name for :func:`~exa.core.editor.Editor.write`."""
         self.write(path, *args, **kwargs)
 
-    def to_data(self, *args, **kwargs):
+    def to_data(self, kind='pdcsv', *args, **kwargs):
         """
         Create a single appropriate data object using pandas read_csv.
+
+        Args:
+            kind (str): One of 'pdcsv', 'pdjson', 'json'
+            args: Arguments to be passed to the pandas function
+            kwargs: Arguments to be passed to the pandas function
 
         Note:
             A list of keyword arguments can be found at
             http://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html
         """
-        return pd.read_csv(self.to_stream(), *args, **kwargs)
+        if kind == 'pdcsv':
+            return pd.read_csv(self.to_stream(), *args, **kwargs)
+        elif kind == 'pdjson':
+            return pd.read_json(self.to_stream(), *args, **kwargs)
+        elif kind == 'json':
+            return json.load(self.to_stream())
+        else:
+            raise ValueError("Unexpected argument for kind, {}".format(kind))
 
     def __eq__(self, other):
         if isinstance(other, Editor) and self._lines == other._lines:

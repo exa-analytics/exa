@@ -64,10 +64,8 @@ class TestConfig(UnitTester):
         By default, the configuration creates a sqlite database in the config
         directory which stores content management and static data.
         """
-        df = pd.read_sql("select * from isotope", con=_config.engine)
+        df = pd.read_sql("select * from file", con=_config.engine)
         self.assertIsInstance(df, pd.DataFrame)
-#        df = pd.read_sql("select * from constant", con=_config.engine)
-#        self.assertIsInstance(df, pd.DataFrame)
 
     def test_info(self):
         """Test :func:`~exa._config.info`."""

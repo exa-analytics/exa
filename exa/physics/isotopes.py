@@ -4,11 +4,14 @@
 """
 Elements and Isotopes
 #########################
-This modules stores isotope data.
+This module creates isotopes from (static) data in the 'data' directory.
 """
 import sys as _sys
 from numpy import nan as _nan
+from exa._config import join as _join
+from exa._config import config as _config
 from exa.single import Singleton as _Singleton
+from exa.core.editor import Editor as _Editor
 
 
 class _Isotope(_Singleton):
@@ -33,34 +36,31 @@ class _Element(_Singleton):
 
 def _create():
     """Generate the isotopes and elements API from their static data."""
-    for name, symbol, isotopes in _isotopes:
-        element = {'name': name, 'symbol': symbol}
-        for isotope in isotopes:
-            dct = {_names[i]: datum for i, datum in enumerate(isotope)}
-            dct.update(element)
-            iso = _Isotope(symbol + str(dct['A']), (), dct)
-            setattr(_this, iso.isotope, iso)
-        element = _Element(symbol, (), element)
-        setattr(_this, symbol, element)
+    def create_isotope_attr(tope):
+        """Helper function to create an isotope attribute."""
+        dct = tope.to_dict()
+        attrname = dct['symbol'] + str(dct['A'])
+        isotope = _Isotope(attrname, (), dct)
+        setattr(_this, attrname, isotope)
+
+    path = _join(_config['dynamic']['data'], "isotopes.json.bz2")
+    isotopes = _Editor(path).to_data('pdjson')
+    isotopes.columns = _columns
+    for name, group in isotopes.groupby('name'):
+        group.apply(create_isotope_attr, axis=1)
+        element = {'name': name, 'Z': group['Z'].values[0],
+                   'color': group['color'].values[0],
+                   'symbol': group['symbol'].values[0],
+                   'electronegativity': group['electronegativity'].values[0]}
+        element['mass'] = (group['abundance_fraction']*group['mass']).sum()
+        element = _Element(element['symbol'], (), element)
+        setattr(_this, element.symbol, element)
 
 
 # Data order of isotopic (nuclear) properties:
-_names = ('A', 'Z', 'abundance_fraction', 'abundance_fraction_error', 'color',
-          'covalent_radius', 'g_factor', 'mass', 'mass_error',
-          'electronegativity', 'quadrupole_moment', 'spin')
-_isotopes = (
-    ("Hydrogen", "H", (
-        (1, 1, 0.999855, 7e-7, '#9b9b9b',
-         0.60471232, 5.5856912, 1.0078250321, 0.0,
-         2.1, 0.0, 0.5), )
-    ),
-    ("Helium", "He", (
-        (4, 2, 0.9999982, 3e-10, '#ffffd9',
-         0.86927396, 0.0, 4.0026032542, 0.0,
-         _nan, 0.0, 0.0), )
-    )
-)
-
-
+_columns = ['A', 'Z', 'abundance_fraction', 'abundance_fraction_error',
+            'covalent_radius', 'g_factor', 'mass', 'mass_error', 'name',
+            'electronegativity', 'quadrupole_moment', 'spin', 'symbol',
+            'color']
 _this = _sys.modules[__name__]    # Reference to this module
 _create()

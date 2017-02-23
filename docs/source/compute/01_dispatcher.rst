@@ -2,7 +2,11 @@
 .. Distributed under the terms of the Apache License 2.0
 
 #########################
-Frontend
+Multiple Dispatch
 #########################
-.. automodule:: exa.__main__
+.. automodule:: exa.compute.dispatcher
     :members:
+
+.. automodule:: exa.compute.tests.test_dispatcher
+    :members:
+

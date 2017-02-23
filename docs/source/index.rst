@@ -6,12 +6,7 @@
 #################################
 *A framework for data management, processing, and visualization.*
 
-This package is built atop the `PyData`_ stack, with specific attention to 
-`pandas`_ and the `Jupyter notebook`_. The former handles organization of 
-numerical and other data in memory while the latter provides an interactive
-user interface.
-
-``TODO FLASHY EXAMPLE``
+``TODO``
 
 .. toctree::
     :maxdepth: 1
@@ -33,10 +28,8 @@ user interface.
     :caption: API
 
     root.rst
-    core.rst
-    cms.rst
     compute.rst
-    app.rst
+    core.rst
     js.rst
 
 * :ref:`genindex`

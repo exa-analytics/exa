@@ -4,8 +4,3 @@
 #########################
 Default Data Objects
 #########################
-.. automodule:: exa.core.data
-    :members:
-
-.. automodule:: exa.core.tests.test_data
-    :members:
