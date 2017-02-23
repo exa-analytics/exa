@@ -135,7 +135,7 @@ setup_args = {
     "version": version,
     "description": "The exa framework for data processing, analytics, and visualization.",
     "long_description": long_description,
-    "package_data": {"exa": ["data/*.bz2"]},
+    "package_data": {"exa": ["_static/*.bz2"]},
     "include_package_data": True,
     "entry_points": {"console_scripts": ["exa=exa.__main__:main"]},
     "data_files": [

@@ -7,8 +7,14 @@ Elements and Isotopes
 This module creates elements and isotopes. Isotopes take the form of
 element symbol followed by mass number (e.g. ``H1``) while elements are
 simply ``H``. Static isotope data is stored in the 'data' directory.
+
+Note:
+    - mass: g/mol
+    - radii: a.u.
+    - quadrupole moment: eb (electron-barns)
+    - electronegativity: Pauling scale
+    - color: HTML rgb syntax
 """
-import os as _os
 import sys as _sys
 from pkg_resources import resource_filename as _resource_filename
 from numpy import nan as _nan
@@ -72,8 +78,7 @@ _columns = ['A', 'Z', 'abundance_fraction', 'abundance_fraction_error',
             'electronegativity', 'quadrupole_moment', 'spin', 'symbol',
             'color']
 _this = _sys.modules[__name__]         # Reference to this module
-#_path = _os.path.join(_os.path.split(__file__)[0], "../data/isotopes.json.bz2")
-_path = _resource_filename("exa", "data/isotopes.json.bz2")
+_path = _resource_filename("exa", "_static/isotopes.json.bz2")
 if not hasattr(_this, "H"):
     _create()
 

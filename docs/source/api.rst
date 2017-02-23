@@ -13,8 +13,10 @@ interactively.
 
 .. code-block:: python
 
-    help(exa.Editor)
-    exa.Editor?      # In Jupyter notebook
+    help(exa)           # Package help
+    help(exa.isotopes)  # Module help
+    help(exa.Editor)    # Class help
+    exa.Editor?         # In an IPython environment (including the notebook)
 
 Visualization is accomplished with in the `Jupyter notebook`_ environment
 using the `ipywidgets`_ machinery. Widgets are written in JavaScript and
