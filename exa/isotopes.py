@@ -47,7 +47,7 @@ def _create():
     def create_isotope_attr(tope):
         """Helper function to create an isotope attribute."""
         dct = tope.to_dict()
-        attrname = dct['symbol'] + str(dct['A'])
+        attrname = str(dct['symbol'] + str(dct['A']))
         isotope = _Isotope(attrname, (), dct)
         setattr(_this, attrname, isotope)
 
@@ -62,8 +62,8 @@ def _create():
                    'electronegativity': group['electronegativity'].values[0],
                    'covalent_radius': group['covalent_radius'].values[0]}
         element['mass'] = (group['abundance_fraction']*group['mass']).sum()
-        element = _Element(element['symbol'], (), element)
-        setattr(_this, element.symbol, element)
+        element = _Element(str(element['symbol']), (), element)
+        setattr(_this, str(element.symbol), element)
 
 
 # Data order of isotopic (nuclear) properties:
