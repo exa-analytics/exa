@@ -7,20 +7,20 @@ Abstract Editors, Containers, and Data
 This module provides abstract base classes for editor, container, and data
 objects.
 """
-import six
+import six, sys
 from uuid import UUID, uuid4
-from abc import abstractmethod
+from abc import abstractmethod, abstractproperty
 from exa.typed import Meta
 
 
 class ABCBaseMeta(Meta):
     """Strongly typed static attributes."""
-    name = str
-    meta = dict
     uid = UUID
+    meta = dict
+    name = str
 
 
-class ABCBase(six.with_metaclass(ABCBaseMeta, object)):
+class ABCBase(six.with_metaclass(ABCBaseMeta)):
     """
     Abstract base class for composite data representations such as editors,
     containers, and higher level data objects.
@@ -34,26 +34,9 @@ class ABCBase(six.with_metaclass(ABCBaseMeta, object)):
 
     def _get_uid(self):
         """Generate a new uid for this object."""
-        self.uid = uuid4()
+        object.__setattr__(self, "uid", uuid4())
 
-    def __init__(self, name=None, uid=None, meta=None, **kwargs):
-        """
-        Base constructor for all data objects, editors, and containers.
-
-        Args:
-            name (str): Container name (optional)
-            uid (UUID): Container uid (optional)
-            meta (dict): Dictionary of metadata (optional)
-
-        Note:
-            Keyword arguments are added to this object's metadata.
-        """
-        if meta is None and kwargs == {}:
-            pass
-        elif meta is None:
-            meta = kwargs
-        else:
-            meta.update(kwargs)
+    def __init__(self, name=None, uid=None, meta=None):
         self.name = name
         self.uid = uid
         self.meta = meta
@@ -76,8 +59,27 @@ class ABCContainer(ABCBase):
 
     @abstractmethod
     def describe(self):
-        """Describe this object."""
-        pass
+        """Display a frame containing information about this object."""
+
+    def _data(self):
+        """Helper method for introspectively obtaining data objects."""
+        return {n: v for n, v in vars(self).items() if not n.startswith("_")}
+
+    def _data_properties(self):
+        """Helper method to estimate data sizes (in MiB)."""
+        data = {}
+        for name, v in self._data().items():
+            if hasattr(v, "memory_usage"):
+                size = v.memory_usage()
+                size = size.sum() if not isinstance(size, int) else size
+            elif hasattr(v, "nbytes"):
+                size = v.nbytes
+            else:
+                size = sys.getsizeof(v)
+            data[name] = (type(v), size)
+        return data
+
+
 
     @abstractmethod
     def _html_repr_(self):

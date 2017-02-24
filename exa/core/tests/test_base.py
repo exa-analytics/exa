@@ -35,7 +35,6 @@ class TestBase(TestCase):
     """
     def setUp(self):
         self.concrete = Concrete()
-        self.concrete1 = Concrete(metadata1='metadata')
 
     def test_raises(self):
         """Test ABC behavior of :class:`~exa.core.base.ABCBase`."""
@@ -57,7 +56,3 @@ class TestBase(TestCase):
         """Tests that overwriting the ``_getters`` attributed works."""
         self.assertIsInstance(self.concrete.meta, dict)
         self.assertEqual(len(self.concrete.meta), 2)
-
-    def test_metadata_kwargs(self):
-        """Test that miscellaneous kwargs become part of the metadata."""
-        self.assertTrue("metadata1" in self.concrete1.meta)

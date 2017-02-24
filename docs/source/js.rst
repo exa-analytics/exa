@@ -15,13 +15,13 @@ API is targeted toward developers; see also :ref:`extensions-label`.
 .. note::
 
     JavaScript documentation is generated using `jsdoc`_ directly
-    from the source code in js/src/ via the jsdoc to reStructuredText
-    template available on the `web`_.
+    from the source code in ``js/src/`` via the jsdoc to 
+    reStructuredText template available on the `web`_.
+
 .. toctree::
     :maxdepth: 2
 
     js/abcwidgets.rst
-
 
 .. _Jupyter notebook: https://jupyter.org
 .. _ipywidgets: https://github.com/ipython/ipywidgets

@@ -2,8 +2,11 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Default Data Objects
+Frame
 #########################
+The :class:`~exa.core.frame.Frame` object looks and behaves just like a
+:class:`~pandas.DataFrame`.
+
 Data consists of dimensions and features. Dimensions describe the extent of the
 space occupied by the data. Features describe the individual values at given
 points in the space of the data. Dimensions can be defined as discrete arrays
@@ -23,13 +26,63 @@ is extended to represent a multidimensional object. TODO
 .. _pandas: http://pandas.pydata.org/
 """
 import six
+import pandas as pd
 from .base import ABCBase, ABCBaseMeta
 
 
-class FrameData(six.with_metaclass(ABCBaseMeta, ABCBase)):
+class _Frame(ABCBaseMeta):
+    """Additional typed attributes."""
+    dimensions = (list, tuple)
+    units = dict
+
+
+class Frame(six.with_metaclass(_Frame, pd.DataFrame, ABCBase)):
     """
+    A thin wrapper around :class:`~pandas.DataFrame` enabling support for
+    multi-featured, explicitly multi-dimensional data.
     """
-    pass
+    # Pandas has its own (partial) system of metadata propagation
+    _metadata = ["name", "units", "dimensions", "uid", "meta"]
+
+    @property
+    def _constructor(self):
+        """
+        Used by pandas finalization mechanism
+        """
+        return Frame
+
+    def copy(self, *args, **kwargs):
+        """Return a copy of this object."""
+        cp = super(FrameData, self).copy(*args, **kwargs).__finalize__(self)
+        return self._constructor(cp)
+
+    def __init__(self, *args, **kwargs):
+        uid = kwargs.pop("uid", None)
+        meta = kwargs.pop("meta", None)
+        name = kwargs.pop("name", None)
+        dimensions = kwargs.pop("dimensions", None)
+        units = kwargs.pop("dimensions", None)
+        super(Frame, self).__init__(*args, **kwargs)
+        self.uid = uid
+        self.meta = meta
+        self.name = name
+        self.dimensions = dimensions
+        self.units = units
+
+
+class Field(pd.DataFrame, ABCBase):
+    """
+    A thin wrapper around :class:`~pandas.DataFrame` enabling support for
+    multi-featured, implicitly multi-dimensional data.
+
+    Implicitly, here, means that the dimensions of the data are described by a
+    function and some parameters. The values of the dimensions do not need to
+    be stored explicitly (as with :class:`~exa.core.frame.Frame`). Only the
+    function and parameters need to be stored.
+    """
+    def __init__(self, *args, **kwargs):
+        pass
+
 
 
 #import six

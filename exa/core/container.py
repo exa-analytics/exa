@@ -20,8 +20,13 @@ both simple and complex data workflows, in a single convenient location (API).
 from .base import ABCContainer
 
 
-class FrameContainer(ABCContainer):
+class Container(ABCContainer):
     """TODO"""
+    _arg_prefix = None
+
+    def copy(self):
+        raise NotImplementedError()
+
     def concat(self):
         return True
 
@@ -30,6 +35,15 @@ class FrameContainer(ABCContainer):
 
     def _html_repr_(self):
         return True
+
+    def __init__(self, **kwargs):
+        uid = kwargs.pop("uid", None)
+        meta = kwargs.pop("meta", None)
+        name = kwargs.pop("name", None)
+        super(Container, self).__init__(name=name, meta=meta, uid=uid)
+        for name, obj in kwargs.items():
+            setattr(self, name, obj)
+
 
 
 

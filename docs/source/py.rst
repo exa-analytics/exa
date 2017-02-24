@@ -23,13 +23,30 @@ interactively.
 
 .. toctree::
     :maxdepth: 2
+    :caption: Base
 
     py/single_typed.rst
     py/base.rst
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Core
+
     py/editor.rst
     py/container.rst
     py/data.rst
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Widgets
+
     py/abcwidgets.rst
     py/threejs.rst
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Miscellaneous
+
     py/physical.rst
-    py/utils.rst
+    py/tex_mpl.rst
+    py/itrtool.rst

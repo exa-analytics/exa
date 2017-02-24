@@ -18,14 +18,11 @@ class Single(six.with_metaclass(Singleton, object)):
 
 class TestSingleton(TestCase):
     """Tests behavior of :class:`~exa.single.Singleton`."""
-    def setUp(self):
-        self.obj0 = Single()
-        self.obj1 = Single()
-
     def test_presence(self):
         """Test that the singleton is registered."""
+        Single()    # Must create an instance of the singleton
         self.assertIn(Single, Singleton._singletons)
 
     def test_singleton(self):
         """Test that singleton character."""
-        self.assertTrue(self.obj0 is self.obj1)
+        self.assertIs(Single(), Single())
