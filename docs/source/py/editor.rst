@@ -2,10 +2,13 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ###########################
-Frame Container
+Editors
 ###########################
-.. automodule:: exa.container
+Editors are a core feature of the Exa framework that facilitate manipulation
+of files.
+
+.. automodule:: exa.core.editor
     :members:
 
-.. automodule:: exa.tests.test_container
+.. automodule:: exa.core.tests.test_editor
     :members:

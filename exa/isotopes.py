@@ -17,9 +17,8 @@ Note:
 """
 import sys as _sys
 from pkg_resources import resource_filename as _resource_filename
-from numpy import nan as _nan
-from exa.single import Singleton as _Singleton
-from exa.editor import Editor as _Editor
+from .single import Singleton as _Singleton
+from .core.editor import Editor as _Editor
 
 
 class _Isotope(_Singleton):

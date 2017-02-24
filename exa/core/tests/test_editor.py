@@ -14,7 +14,7 @@ from io import StringIO
 from uuid import uuid4, UUID
 from unittest import TestCase
 from tempfile import mkdtemp
-from exa.editor import Editor, concat, Sections, Section, SectionsMeta
+from exa.core.editor import Editor, concat, Sections, Section, SectionsMeta
 if not hasattr(bz2, "open"):    # Python 3.x compatibility
     bz2.open = bz2.BZ2File
 

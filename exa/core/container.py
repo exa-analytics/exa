@@ -17,7 +17,6 @@ both simple and complex data workflows, in a single convenient location (API).
 .. _MySQL: https://en.wikipedia.org/wiki/MySQL
 .. _Hadoop: https://en.wikipedia.org/wiki/Apache_Hadoop
 """
-from abc import abstractmethod
 from .base import ABCContainer
 
 

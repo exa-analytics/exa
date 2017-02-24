@@ -37,7 +37,7 @@ from copy import copy, deepcopy
 from collections import Counter
 from io import StringIO, TextIOWrapper
 from exa.typed import simple_function_factory, yield_typed, create_typed_attr
-from exa.base import ABCBase, ABCBaseMeta
+from .base import ABCBase, ABCBaseMeta
 
 
 class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):

@@ -28,7 +28,8 @@
     :maxdepth: 2
     :caption: API
 
-    api.rst
+    py.rst
+    js.rst
 
 * :ref:`genindex`
 

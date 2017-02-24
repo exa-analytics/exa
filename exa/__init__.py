@@ -2,27 +2,32 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Core features of the Exa data science framework. Full documentation available
-at https://exa-analytics.github.io/exa/. The following is a short description.
+Note:
+    The following is a short description of the core modules. Full
+    documentation is available on the web
+    https://exa-analytics.github.io/exa/.
 
 - :mod:`~exa._version`: Version information
-- :mod:`~exa.mpl`: Matplotlib wrappers
-- :mod:`~exa.tex`: Text manipulation utilities
-
 - :mod:`~exa.single`: Singleton metaclass
 - :mod:`~exa.typed`: Strongly typed metaclass
+- :mod:`~exa.mpl`: Matplotlib wrappers
+- :mod:`~exa.tex`: Text manipulation utilities
+- :mod:`~exa.units`: Physical units
+- :mod:`~exa.constants`: Physical constants
+- :mod:`~exa.isotopes`: Chemical isotopes
 
-- :mod:`~exa.base`: Abstract base classes
-- :mod:`~exa.editor`: Base editors
-- :mod:`~exa.container`: Frame container
-- :mod:`~exa.data`: Frame data
+- :mod:`~exa.core.base`: Abstract base classes
+- :mod:`~exa.core.editor`: Base editors
+- :mod:`~exa.core.container`: Frame container
+- :mod:`~exa.core.data`: Frame data
 
-- :mod:`exa.units`: Physical units
-- :mod:`exa.constants`: Physical constants
-- :mod:`exa.isotopes`: Chemical isotopes
+- :mod:`~exa.widgets.abcwidgets`: Abstract base widgets
+- :mod:`~exa.widgets.threejs`: ThreeJS widgets
 
-Note:
-    Static data is stored in the ``_static`` directory.
+Warning:
+    The ``_static`` directory in the source code contains static data. It does
+    not contain Python or other source code files and is not importable. It is
+    included as 'package_data'.
 """
 def _jupyter_nbextension_paths():
     """
@@ -40,6 +45,6 @@ def _jupyter_nbextension_paths():
 
 from ._version import __version__
 from . import mpl, tex
-from .editor import Editor, Sections, Section
-from .container import FrameContainer
-from .data import FrameData
+from .core.editor import Editor, Sections, Section
+from .core.container import FrameContainer
+from .core.data import FrameData

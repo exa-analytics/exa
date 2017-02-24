@@ -1,11 +1,12 @@
 .. Copyright (c) 2015-2017, Exa Analytics Development Team
 .. Distributed under the terms of the Apache License 2.0
 
-########################
-Python API
-########################
-.. automodule:: exa.__init__
+###########################
+Frame Data
+###########################
+.. automodule:: exa.core.data
     :members:
 
-.. automodule:: exa._version
+.. automodule:: exa.core.tests.test_data
     :members:
+

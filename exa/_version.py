@@ -4,12 +4,13 @@
 """
 Version Information
 #####################
-The version can be checked using the following command:
+The version can be checked any of the following ways.
 
 .. code-block:: Python
 
-    exa.version_info
-    exa.__verion__
+    >>> exa.__verion__
+    >>> help(exa)
+    >>> exa._version.version_info
 """
 version_info = (0, 4, 0)
 __version__ = '.'.join(map(str, version_info))

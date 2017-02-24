@@ -27,7 +27,11 @@ from .base import ABCBase, ABCBaseMeta
 
 
 class FrameData(six.with_metaclass(ABCBaseMeta, ABCBase)):
+    """
+    """
     pass
+
+
 #import six
 #import pandas as pd
 #from uuid import UUID, uuid4
