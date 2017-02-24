@@ -5,7 +5,7 @@
 Compiled Itertools
 ###########################
 
-.. automodule:: exa.util.editor
+.. automodule:: exa.util.itrtool
     :members:
 
 .. automodule:: exa.util.tests.test_itrtool

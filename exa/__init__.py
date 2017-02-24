@@ -24,10 +24,16 @@ Note:
 - :mod:`~exa.widgets.abcwidgets`: Abstract base widgets
 - :mod:`~exa.widgets.threejs`: ThreeJS widgets
 
+- :mod:`~exa.util.itrtool`: Compile itertools
+
 Warning:
     The ``_static`` directory in the source code contains static data. It does
     not contain Python or other source code files and is not importable. It is
     included as 'package_data'.
+
+Note:
+    Tests are always located in the ``tests`` directory of each package or
+    sub-package.
 """
 def _jupyter_nbextension_paths():
     """
@@ -45,6 +51,4 @@ def _jupyter_nbextension_paths():
 
 from ._version import __version__
 from . import mpl, tex
-from .core.editor import Editor, Sections, Section
-from .core.container import Container
-from .core.frame import Frame
+from .core import Frame, Field, Container, Editor, Sections, Section

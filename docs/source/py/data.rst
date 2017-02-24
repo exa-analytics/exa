@@ -2,8 +2,11 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ###########################
-Frame Data
+Data
 ###########################
+The Exa framework provides two concrete data implementations that are also the
+default data representations.
+
 .. automodule:: exa.core.data
     :members:
 

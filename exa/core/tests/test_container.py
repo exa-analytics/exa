@@ -9,8 +9,7 @@ import numpy as np
 import pandas as pd
 from uuid import UUID, uuid4
 from unittest import TestCase
-from exa.core.container import Container
-from exa.core.frame import Frame
+from exa.core import Container
 
 
 class TestContainer(TestCase):

@@ -2,7 +2,7 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ###########################
-Frame Container
+Data Container
 ###########################
 This is a concrete implementation of the container concept and is the default
 implementation provided by this package.

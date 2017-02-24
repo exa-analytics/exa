@@ -27,6 +27,7 @@ is extended to represent a multidimensional object. TODO
 """
 import six
 import pandas as pd
+import numpy as np
 from .base import ABCBase, ABCBaseMeta
 
 
@@ -81,7 +82,7 @@ class Field(pd.DataFrame, ABCBase):
     function and parameters need to be stored.
     """
     def __init__(self, *args, **kwargs):
-        pass
+        func = kwargs.pop("function", np.linspace)
 
 
 
