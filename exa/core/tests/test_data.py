@@ -51,6 +51,8 @@ def data_helper(obs=3, n=4):
 
 class TestData(TestCase):
     """
+    Tests for the :class:`~exa.core.data.Frame` and :class:`~exa.core.data.Field`
+    data objects.
     """
     def test_empty(self):
         """Test creation of empty frame object."""
@@ -71,4 +73,6 @@ class TestData(TestCase):
         self.assertEqual(df.uid, uid)
         self.assertEqual(df.name, name)
         self.assertEqual(df.meta, meta)
+
+
 

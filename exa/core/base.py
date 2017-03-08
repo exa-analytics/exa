@@ -20,7 +20,7 @@ class ABCBaseMeta(Meta):
     name = str
 
 
-class ABCBase(six.with_metaclass(ABCBaseMeta)):
+class ABCBase(six.with_metaclass(ABCBaseMeta, object)):
     """
     Abstract base class for composite data representations such as editors,
     containers, and higher level data objects.

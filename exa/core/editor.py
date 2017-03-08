@@ -34,7 +34,7 @@ import warnings
 import pandas as pd
 from abc import abstractmethod
 from copy import copy, deepcopy
-from collections import Counter
+from collections import Counter, defaultdict
 from io import StringIO, TextIOWrapper
 from exa.typed import simple_function_factory, yield_typed, create_typed_attr
 from .base import ABCBase, ABCBaseMeta
@@ -116,23 +116,21 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
         """
         which = kwargs.pop('which', None)
         flags = kwargs.pop('flags', re.MULTILINE)
-        results = {}
+        results = defaultdict(list)
         self_str = str(self)
         for pattern in patterns:
             match = pattern
-            pattern_results = []
             if not type(pattern).__name__ == "SRE_Pattern":
                 match = re.compile(pattern, flags)
             if which == "lineno":
                 for m in match.finditer(self_str):
-                    pattern_results.append(self_str.count("\n", 0, m.start()) + 1)
+                    results[match.pattern].append(self_str.count("\n", 0, m.start()) + 1)
             elif which == "text":
                 for m in match.finditer(self_str):
-                    pattern_results.append(m.group())
+                    results[match.pattern].append(m.group())
             else:
                 for m in match.finditer(self_str):
-                    pattern_results.append((self_str.count("\n", 0, m.start()) + 1, m.group()))
-            results[match.pattern] = pattern_results
+                    results[match.pattern].append((self_str.count("\n", 0, m.start()) + 1, m.group()))
         return results
 
     def find(self, *patterns, **kwargs):
@@ -147,9 +145,9 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
             results (dict): Dictionary with pattern keys and list of (lineno, line) values
         """
         which = kwargs.pop('which', None)
-        results = {pattern: [] for pattern in patterns}   # Iterate twice over
-        for i, line in enumerate(self):                   # patterns because we
-            for pattern in patterns:                      # search line by line
+        results = defaultdict(list)
+        for i, line in enumerate(self):
+            for pattern in patterns:
                 if pattern in line:
                     if which == "lineno":
                         results[pattern].append(i)
