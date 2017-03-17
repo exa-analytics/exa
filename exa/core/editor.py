@@ -36,7 +36,7 @@ from abc import abstractmethod
 from copy import copy, deepcopy
 from collections import Counter, defaultdict
 from io import StringIO, TextIOWrapper
-from exa.typed import simple_function_factory, yield_typed, create_typed_attr
+from exa.special import simple_function_factory, yield_typed, create_typed_attr
 from .base import ABCBase, ABCBaseMeta
 
 

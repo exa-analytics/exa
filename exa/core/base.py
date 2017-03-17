@@ -10,10 +10,10 @@ objects.
 import six, sys
 from uuid import UUID, uuid4
 from abc import abstractmethod, abstractproperty
-from exa.typed import Meta
+from exa.special import Typed
 
 
-class ABCBaseMeta(Meta):
+class ABCBaseMeta(Typed):
     """Strongly typed static attributes."""
     uid = UUID
     meta = dict

@@ -6,14 +6,13 @@ networkx
 sqlalchemy
 paramiko
 pandas
-h5py
+pytables
 sympy
 notebook
 ipywidgets
 nose
 numba
 six
-psutil
 sphinx
 sphinx_rtd_theme
 pandoc

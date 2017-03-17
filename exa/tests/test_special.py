@@ -9,21 +9,22 @@ Note that an example of usage of this metaclass is provided by this test.
 """
 import six
 from unittest import TestCase
-from exa.typed import Meta, simple_function_factory, yield_typed
+from exa.special import (Typed, simple_function_factory, yield_typed, Singleton,
+                         Function)
 
 
-class MinimalMeta(Meta):
+class MinimalTyped(Typed):
     """Minimal working example."""
     foo = int
 
 
-class MinimalClass(six.with_metaclass(MinimalMeta, object)):
+class MinimalClass(six.with_metaclass(MinimalTyped, object)):
     """Minimal working example."""
     def __init__(self, foo=None):
         self.foo = foo
 
 
-class GetterClass(six.with_metaclass(MinimalMeta, MinimalClass)):
+class GetterClass(six.with_metaclass(MinimalTyped, MinimalClass)):
     """Example with custom getter function(s)."""
     _getters = ("compute", )
 
@@ -34,7 +35,7 @@ class GetterClass(six.with_metaclass(MinimalMeta, MinimalClass)):
             return self.foo
 
 
-class AdvancedMeta(MinimalMeta):
+class AdvancedTyped(MinimalTyped):
     """Advanced modification of class objects using :mod:`~exa.typed`."""
     foo = int
     bar = (str, float)
@@ -43,10 +44,10 @@ class AdvancedMeta(MinimalMeta):
         for attr in yield_typed(mcs):
             f = simple_function_factory("compute_all", "compute", attr[0])
             clsdict[f.__name__] = f
-        return super(AdvancedMeta, mcs).__new__(mcs, name, bases, clsdict)
+        return super(AdvancedTyped, mcs).__new__(mcs, name, bases, clsdict)
 
 
-class AdvancedClass(six.with_metaclass(AdvancedMeta, GetterClass)):
+class AdvancedClass(six.with_metaclass(AdvancedTyped, GetterClass)):
     """Example advanced use of metaclass features."""
     def compute_all(self):
         """Computes both 'bar' and 'foo' attributes."""
@@ -104,3 +105,26 @@ class TestTyped(TestCase):
         self.assertEqual(len(typed), 2)
         self.assertIsInstance(typed, list)
         self.assertIsInstance(typed[0], tuple)
+
+
+
+class Single(six.with_metaclass(Singleton, object)):
+    """Example singleton class."""
+    pass
+
+
+class TestSingleton(TestCase):
+    """Tests behavior of :class:`~exa.single.Singleton`."""
+    def test_presence(self):
+        """Test that the singleton is registered."""
+        Single()    # Must create an instance of the singleton
+        self.assertIn(Single, Singleton._singletons)
+
+    def test_singleton(self):
+        """Test that singleton character."""
+        self.assertIs(Single(), Single())
+
+
+class TestFunction(TestCase):
+    """Tests behavior of :class:`~exa.special.Function`."""
+    pass

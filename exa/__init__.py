@@ -2,10 +2,19 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Note:
-    The following is a short description of the core modules. Full
-    documentation is available on the web
-    https://exa-analytics.github.io/exa/.
+The purpose of this package is to provide a framework for reading data from disk,
+organizing this data into related, systematic, and efficient data structures, and
+attaching these data structures to a container to allow visualization and other
+interactive exploration within the `Jupyter notebook`_. The following is a compact
+summary.
+
+- editors: Classes that facilitate creation of data containers
+- data: Classes that facilitate data visualization via the container
+- containers: Flexible device for processing, analyzing and visualizing data
+
+Complete documentation is available on the web https://exa-analytics.github.io/exa/.
+The following is a brief description of the source code structure, which may aid
+in usage.
 
 - :mod:`~exa._version`: Version information
 - :mod:`~exa.single`: Singleton metaclass
@@ -34,6 +43,8 @@ Warning:
 Note:
     Tests are always located in the ``tests`` directory of each package or
     sub-package.
+
+.. _Jupyter notebook: https://jupyter.org/
 """
 def _jupyter_nbextension_paths():
     """
