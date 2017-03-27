@@ -6,7 +6,7 @@ networkx
 sqlalchemy
 paramiko
 pandas
-tables
+pytables
 sympy
 notebook
 ipywidgets
