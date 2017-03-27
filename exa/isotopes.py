@@ -17,7 +17,7 @@ Note:
 """
 import sys as _sys
 from pkg_resources import resource_filename as _resource_filename
-from .single import Singleton as _Singleton
+from .special import Singleton as _Singleton
 from .core.editor import Editor as _Editor
 
 

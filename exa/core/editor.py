@@ -819,7 +819,7 @@ def read_file(path, as_interned=False, encoding='utf-8'):
     read = f.read()
     try:
         read = read.decode(encoding)    # For .gz and .bz2 files
-    except AttributeError:
+    except (AttributeError, UnicodeError):
         pass
     if as_interned:
         lines = [sys.intern(line) for line in read.splitlines()]
