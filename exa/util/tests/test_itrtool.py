@@ -12,7 +12,12 @@ from exa.util import ncr2
 
 class TestItrtool(TestCase):
     """Tests for :mod:`~exa.util.itrtool`."""
-    def test_ncr2(self):
+    def test_py_func_ncr2(self):
+        """Tests for :func:`~exa.util.itrtool.ncr2`."""
+        result = ncr2.py_func(np.array([0, 1, 2], dtype=np.int64))
+        self.assertTrue(np.all(result == np.array([[0, 1], [0, 2], [1, 2]],
+                                                  dtype=np.int64)))
+    def test_compiled_ncr2(self):
         """Tests for :func:`~exa.util.itrtool.ncr2`."""
         result = ncr2(np.array([0, 1, 2], dtype=np.int64))
         self.assertTrue(np.all(result == np.array([[0, 1], [0, 2], [1, 2]],
