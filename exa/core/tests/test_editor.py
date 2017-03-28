@@ -14,7 +14,7 @@ from io import StringIO
 from uuid import uuid4, UUID
 from unittest import TestCase
 from tempfile import mkdtemp
-from exa.core import Editor, Sections, Section
+from exa.core import Editor, Sections, Parser
 from exa.core.editor import concat, SectionsMeta
 if not hasattr(bz2, "open"):    # Python 3.x compatibility
     bz2.open = bz2.BZ2File
@@ -326,8 +326,8 @@ class MockSectionMeta(SectionsMeta):
                      'wordlist': "List of words"}
 
 
-class MockSection(six.with_metaclass(MockSectionMeta, Section)):
-    """Mock example of :class:`~exa.core.editor.Section`."""
+class MockParser(six.with_metaclass(MockSectionMeta, Parser)):
+    """Mock example of :class:`~exa.core.editor.Parser`."""
     name = "default"
     description = "Parser for word regions."
 
@@ -342,25 +342,25 @@ class MockBaseSections(Sections):
     pass
 
 
-class MockBaseSection(Section):
+class MockBaseParser(Parser):
     """Raises TypeError."""
     pass
 
 
-MockSections.add_section_parsers(MockSection)
+MockSections.add_section_parsers(MockParser)
 
 
 class TestSections(TestCase):
     """
     Tests for :class:`~exa.core.editor.Sections`. and
-    :class:`~exa.core.editor.Section.`
+    :class:`~exa.core.editor.Parser.`
     """
     def test_base_sections(self):
         """Tests raising TypeError."""
         with self.assertRaises(TypeError):
             MockBaseSections()
         with self.assertRaises(TypeError):
-            MockBaseSection()
+            MockBaseParser()
 
     def test_describe_pre_parse(self):
         """Test descriptors prior to parsing."""
@@ -398,4 +398,3 @@ class TestSections(TestCase):
             self.assertTrue(hasattr(sec.section0, "wordlist"))
             self.assertTrue(hasattr(sec.section0, "wordcount"))
             self.assertTrue(sec.section1.wordcount > 0)
-

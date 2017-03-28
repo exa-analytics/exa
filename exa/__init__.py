@@ -62,4 +62,5 @@ def _jupyter_nbextension_paths():
 
 from ._version import __version__
 from . import mpl, tex
-from .core import Frame, Field, Container, Editor, Sections, Section
+from .core import Frame, Field, Container, Editor, Sections, Parser
+from . import util

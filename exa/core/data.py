@@ -96,7 +96,7 @@ class Field(pd.DataFrame, ABCBase):
         units = kwargs.pop("dimensions", None)
 
 
-class FieldCollection(ABCBase):
+class Fields(ABCBase):
     """
     Implicity, here, refers to the fact that unlike the
     :class:`~exa.core.frame.Frame`, values of the dimensions are not stored
@@ -120,7 +120,7 @@ class FieldCollection(ABCBase):
         pass
 
     def __init__(self, name=None, uid=None, meta=None, *fields):
-        super(FieldCollection, self).__init__(name=name, uid=uid, meta=meta)
+        super(Fields, self).__init__(name=name, uid=uid, meta=meta)
         for field in fields:
             self.add_field(field)
 

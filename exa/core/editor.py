@@ -484,7 +484,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
     """
     A special editor like object tailored to parsing of files that consist of
     multiple, distinct, regions. Regions may, themselves, consist of sections
-    or may be directly parsed (see :class:`~exa.core.editor.Section`). The
+    or may be directly parsed (see :class:`~exa.core.editor.Parser`). The
     following example shows simple use case.
 
     .. code-block:: python
@@ -498,7 +498,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         text
         '''
 
-        class SectionsExample(exa.core.editor.Sections):
+        class MySections(exa.core.editor.Sections):
             name = 'example_sections_parser'
             description = 'Parses files separated by ---'
             _key_sep = '---'                # Arbitrary section separator
@@ -514,13 +514,13 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
                 names = [self._key_def_sec_name]*len(starts)
                 self.sections = list(zip(names, starts, ends))
 
-        class ParserMeta(exa.core.editor.SectionsMeta):
+        class MyParserMeta(exa.core.editor.SectionsMeta):
             wordcount = int
             wordlist = list
             _descriptions = {'wordcount': "Count of number of words",
                              'wordlist': "List of words"}
 
-        class Parser(six.with_metaclass(ParserMeta, exa.core.editor.Section)):
+        class MyParser(six.with_metaclass(MyParserMeta, exa.core.editor.Parser)):
             description = 'Parser for individual region separated by -* regex'
             name = 'default'
 
@@ -529,19 +529,19 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
                 self.wordlist = [word for line in self.lines for word in line.split()]
                 self.wordcount = len(self.wordlist)
 
-
         # The following needs only be performed once,
         # preferably at the module level, hidden from the user.
-        SectionsExample.add_section_parsers(Parser)
+        MySections.add_section_parsers(MyParser)
 
         # The following shows some useful commands and (commented) print output
         # Prior to using a Sections or Section object one can inspect them
-        SectionsExample.describe()
-            # Class          <class '__main__.SectionsExample'>
+        MySections.describe()
+            # Class          <class '...'>
             # Description    Parses files separated by -* regex
             # Name                      example_sections_parser
             # Parameters                    [sep, def_sec_name]
-        SectionsExample.describe_parsers()
+
+        MySections.describe_parsers()
             # +-------------+------------+------------------+---------------------+
             # | Parser Name | Parameters | Class(es)        | Attributes          |
             # +-------------+------------+------------------+---------------------+
@@ -549,13 +549,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
             # +-------------+------------+------------------+---------------------+
 
         # The object is create just like all editors
-        edit = SectionsExample(text)
-        edit
-            # 0: some
-            # 1: --------------
-            # 2: structured
-            # 3: --------------
-            # 4: text
+        edit = MySections(text)
         edit.describe_sections()
             # +------------+-------------+-------+-----+
             # | Section ID | Parser Name | Start | End |
@@ -582,7 +576,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         Sections follows the [start, end) convention for line numbering.
 
     See Also:
-        The :class:`~exa.core.editor.Section` objects are section parsers.
+        The :class:`~exa.core.editor.Parser` objects are section parsers.
         Example usage can be found in :mod:`~exa.core.tests.test_editor`.
     """
     name = None        # Subclasses may set this if needed
@@ -627,7 +621,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
             secname = "section" + str(i).zfill(self._nsections)
             ptypes = self._parsers[section]
             # Now we perform a bit of class gymnastics:
-            # Because we don't want to attach out typed property paradigm
+            # Because we don't want to attach our typed property paradigm
             # (see exa.typed.create_typed_attr) to all instances of this
             # object's class, we dynamically create a copy of this object's
             # class and attach our properties to that class object.
@@ -729,13 +723,14 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
             Sections.add_section_parsers(Section1, Section2, ...)
         """
         cls._parsers.update({str(s.name): s for s in args})
+        cls._parsers.update(kwargs)
 
 
-class Section(six.with_metaclass(SectionsMeta, Editor)):
+class Parser(six.with_metaclass(SectionsMeta, Editor)):
     """
     An editor like object that corresponds to a specific and distinct region of
     a file and contains parsing functionality tailored to this region. The
-    :class:`~exa.core.editor.Section` object can be used standalone or in concert
+    :class:`~exa.core.editor.Parser` object can be used standalone or in concert
     with the :class:`~exa.core.editor.Sections` object for parsing of complex
     files with multiple regions.
 

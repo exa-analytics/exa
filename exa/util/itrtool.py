@@ -17,10 +17,10 @@ def ncr2(values):
 
     .. math::
 
-        \begin{bmatrix}
+        \\begin{bmatrix}
             n \\
             2
-        \end{bmatrix}
+        \\end{bmatrix}
     """
     m = len(values)
     n = m*(m - 1)//2

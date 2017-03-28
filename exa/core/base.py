@@ -60,6 +60,7 @@ class ABCContainer(ABCBase):
     @abstractmethod
     def describe(self):
         """Display a frame containing information about this object."""
+        pass
 
     def _data(self):
         """Helper method for introspectively obtaining data objects."""
@@ -78,8 +79,6 @@ class ABCContainer(ABCBase):
                 size = sys.getsizeof(v)
             data[name] = (type(v), size)
         return data
-
-
 
     @abstractmethod
     def _html_repr_(self):
