@@ -5,58 +5,18 @@
 Tests for :mod:`~exa.core.data`
 #############################################
 """
+import numpy as np
+import pandas as pd
 from uuid import UUID, uuid4
 from unittest import TestCase
-from exa.util import ncr2
-from exa.core import Frame
-
-
-def data_helper(obs=3, n=4):
-    """
-    Helper function that generates related, multi-featured, multi-dimensional
-    data.
-
-    Data mimics a collection of particles, observed at sequential times, that
-    move in (discretely measured) scalar and vector fields.
-
-    Args:
-        obs (int): Number of observations (time steps)
-        n (int): Number of particles
-
-    Returns:
-        data (tuple): See note below
-
-    Note:
-        Returned data is a tuple of frame objects.
-        - obs: Observations frame
-        - pos: Particle positions frame
-        - dist: Particle distances frame
-        - srf: Scalar field frame
-        - vrf: Vector field frame
-    """
-    nsnap = 3
-    npart = 4
-    snapshots = exa.Frame(np.arange(1, nsnap+1), columns=['time'])
-    snapshots.index.name = 'snapshot'
-    pos = exa.Frame(np.random.rand(nsnap*npart, 3), columns=['x', 'y', 'z'])
-    pos.index.name = "particle"
-    pos['label'] = list(np.arange(1, npart+1))*nsnap
-    pos['snapshot'] = [i for i in snapshots.index.values for j in range(npart)]
-    dist = sp.spatial.distance.pdist(pos[['x', 'y', 'z']])
-    idx = ncr2(pos.index.values)
-    distances = exa.Frame({'particle0': idx[:, 0], 'particle1': idx[:, 1], 'distance': dist})
-    # finally need field example
-    raise NotImplementedError()
+from exa.core import DataFrame
 
 
 class TestData(TestCase):
-    """
-    Tests for the :class:`~exa.core.data.Frame` and :class:`~exa.core.data.Field`
-    data objects.
-    """
+    """Tests for advanced data objects in :mod:`~exa.core.data`."""
     def test_empty(self):
         """Test creation of empty frame object."""
-        df = Frame()
+        df = DataFrame()
         self.assertIsInstance(df.uid, UUID)
 
     def test_abcmeta_attrs(self):
@@ -64,15 +24,24 @@ class TestData(TestCase):
         name = "name"
         meta = {"description": "description"}
         uid = uuid4()
-        df = Frame(uid=uid)
+        df = DataFrame(uid=uid)
         self.assertEqual(df.uid, uid)
-        df = Frame(uid=uid, name=name)
+        df = DataFrame(uid=uid, name=name)
         self.assertEqual(df.uid, uid)
         self.assertEqual(df.name, name)
-        df = Frame(uid=uid, name=name, meta=meta)
+        df = DataFrame(uid=uid, name=name, meta=meta)
         self.assertEqual(df.uid, uid)
         self.assertEqual(df.name, name)
         self.assertEqual(df.meta, meta)
 
-
-
+    def test_interop(self):
+        """Test dataframe interoperability and operations."""
+        data = np.random.rand(4, 4)
+        df0 = DataFrame(data)
+        df1 = pd.DataFrame(data)
+        #self.assertTrue(np.all(data_add == df0 + df1))
+        #self.assertTrue(np.all(data_add == df1 + df0))
+        #self.assertTrue(np.all(data_mul == df0*df1))
+        #self.assertTrue(np.all(data_mul == df1*df0))
+        #self.assertTrue(np.all(data_sub == df0 - df1))
+        #self.assertTrue(np.all(data_sub == df1 - df0))

@@ -9,7 +9,7 @@ objects.
 """
 import six, sys
 from uuid import UUID, uuid4
-from abc import abstractmethod, abstractproperty
+from abc import abstractmethod
 from exa.special import Typed
 
 

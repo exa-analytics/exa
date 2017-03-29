@@ -33,8 +33,6 @@ in usage.
 - :mod:`~exa.widgets.abcwidgets`: Abstract base widgets
 - :mod:`~exa.widgets.threejs`: ThreeJS widgets
 
-- :mod:`~exa.util.itrtool`: Compile itertools
-
 Warning:
     The ``_static`` directory in the source code contains static data. It does
     not contain Python or other source code files and is not importable. It is
@@ -62,5 +60,4 @@ def _jupyter_nbextension_paths():
 
 from ._version import __version__
 from . import mpl, tex
-from .core import Frame, Field, Container, Editor, Sections, Parser
-from . import util
+from .core import DataFrame, Container, Editor, Sections, Parser

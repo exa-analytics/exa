@@ -21,20 +21,24 @@ from .base import ABCContainer
 
 
 class Container(ABCContainer):
-    """TODO"""
+    """
+    A storage object for `pandas`_ like data objects.
+
+    .. _pandas: http://pandas.pydata.org
+    """
     _arg_prefix = None
 
     def copy(self):
         raise NotImplementedError()
 
     def concat(self):
-        return True
+        raise NotImplementedError()
 
     def describe(self):
-        return True
+        raise NotImplementedError()
 
     def _html_repr_(self):
-        return True
+        raise NotImplementedError()
 
     def __init__(self, **kwargs):
         uid = kwargs.pop("uid", None)

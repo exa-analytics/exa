@@ -687,11 +687,10 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         Note:
             This method only has meaning once sections have been parsed.
         """
-        sections = self.sections
-        if len(sections) == 0:
+        if len(self.sections) == 0:
             warnings.warn("No sections identified.")
         else:
-            df = pd.DataFrame(sections, columns=["Parser Name", "Start", "End"])
+            df = pd.DataFrame(self.sections, columns=["Parser Name", "Start", "End"])
             df.index.name = "Section ID"
             return df
 
