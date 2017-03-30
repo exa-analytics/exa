@@ -33,9 +33,8 @@ sns.set(context='poster', style='white', palette='colorblind', font_scale=1.3,
 def _gen_projected(nxplot, nyplot, projection, figargs):
     total = nxplot * nyplot
     fig = sns.mpl.pyplot.figure(**figargs)
-    stargs = (nxplot, nyplot)
     kwargs = {'projection': projection}
-    axs = [fig.add_subplot(*stargs, i, **kwargs) for i in range(1, total + 1)]
+    axs = [fig.add_subplot(nxplot, nyplot, i, **kwargs) for i in range(1, total + 1)]
     return fig, axs
 
 
