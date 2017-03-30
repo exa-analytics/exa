@@ -14,6 +14,7 @@ install:
   - conda install --yes -c conda-forge pytables
   - conda install --yes -c cpcloud npm
   - pip install travis-sphinx codacy-coverage python-coveralls codecov
+  - pip install sphinxcontrib-autoanysrc
   - python setup.py install
   - exa -uu
 script:
