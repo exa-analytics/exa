@@ -215,7 +215,7 @@ class Editor:
             return results[strings[0]]
         return results
 
-    def find_next(self, string, start=None, keys_only=False):
+    def find_next(self, *strings, start=None, keys_only=False):
         """
         From the editor's current cursor position find the next instance of the
         given string.
@@ -234,11 +234,12 @@ class Editor:
         staht = start if start is not None else self.cursor
         for start, stop in [(staht, len(self)), (0, staht)]:
             for i in range(start, stop):
-                if string in self[i]:
-                    tup = (i, self[i])
-                    self.cursor = i + 1
-                    if keys_only: return i
-                    return tup
+                for string in strings:
+                    if string in self[i]:
+                        tup = (i, self[i])
+                        self.cursor = i + 1
+                        if keys_only: return i
+                        return tup
 
     def regex(self, *patterns, start=0, stop=None, keys_only=False, flags=0):
         """
