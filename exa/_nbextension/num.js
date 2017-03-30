@@ -214,7 +214,7 @@ define([], function() {
                 n -= 2;
             };
             return prod;
-        };  
+        };
     };
 
 

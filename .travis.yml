@@ -9,8 +9,8 @@ before_install:
     - export PATH=/home/travis/miniconda3/bin:$PATH
     - conda update --yes conda
 install:
-    - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy pandas
-    - conda install --yes sqlalchemy matplotlib networkx sympy seaborn sphinx nose numba
+    - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy pandas numba
+    - conda install --yes sqlalchemy matplotlib networkx sympy seaborn sphinx nose
     - conda install -c conda-forge --yes jupyter notebook ipywidgets ipyparallel
     - pip install sphinxcontrib-autoanysrc coverage python-coveralls
     - python setup.py install
