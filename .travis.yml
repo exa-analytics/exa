@@ -19,7 +19,7 @@ install:
 script:
   - nosetests --with-coverage
   - coverage xml
-  - travis-sphinx --source=doc -n build
+  - travis-sphinx -n build
 after_success:
   - codecov
   - coveralls
