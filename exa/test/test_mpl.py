@@ -2,6 +2,9 @@
 # Copyright (c) 2015-2016, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 from exa.mpl import _gen_figure
+from exa import UnitTester
+import matplotlib
+matplotlib.use('Agg')
 
 class TestGenFigure(UnitTester):
     """Test matplotlib wrapper function. Needs work."""
