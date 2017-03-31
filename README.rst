@@ -60,7 +60,7 @@ Legal
 .. _sphinx: http://www.sphinx-doc.org/en/stable/
 
 
-.. |logo| image:: doc/source/_static/logo.png
+.. |logo| image:: docs/source/_static/logo.png
     :target: docs/source/_static/logo.png
     :alt: Exa Analytics
 
