@@ -61,7 +61,7 @@ Legal
 
 
 .. |logo| image:: doc/source/_static/logo.png
-    :target: doc/source/_static/logo.png
+    :target: docs/source/_static/logo.png
     :alt: Exa Analytics
 
 .. |build| image:: https://travis-ci.org/exa-analytics/exa.svg?branch=master
