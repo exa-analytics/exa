@@ -22,13 +22,13 @@ def _create():
     """Generate the isotopes and elements API from their static data."""
     dct = _Editor(_path).to_data('json')
     for lclsname, unitvalues in dct.items():
-        clsname = lclsname.title()
+        clsname = str(lclsname.title())
         mcs = type(clsname, (_Unit, ), {})
         setattr(_this, clsname, mcs)
         for name, value in unitvalues.items():
             if hasattr(_this, name):
                 raise Exception("Unable to create unit {} (dimension {}).".format(name, clsname))
-            setattr(_this, name, mcs(name, (), {'_value': value, '_name': name}))
+            setattr(_this, str(name), mcs(name, (), {'_value': float(value), '_name': str(name)}))
 
 
 # Data order of isotopic (nuclear) properties:
