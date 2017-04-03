@@ -19,11 +19,17 @@ class TestUnits(TestCase):
     Test that module level imports worked and new values are leveraging Sympy
     correctly.
     """
-    def test_clean_namespace(self):
-        """Test that importing __all__ worked correctly."""
-        self.assertFalse(hasattr(units, "sympy"))
-        self.assertFalse(hasattr(units, "units"))
+    def test_exists(self):
+        """Test that units were created."""
+        self.assertTrue(hasattr(units, "m"))
+        self.assertTrue(hasattr(units, "Time"))
+        self.assertAlmostEqual(units.m._value, 1.0)
+        self.assertAlmostEqual(units.s._value, 1.0)
+        self.assertIsInstance(units.m, units.Length)
+        self.assertIsInstance(units.s, units.Time)
 
-    def test_new_value_class(self):
-        """Test that new values share types with Sympy units."""
-        self.assertIsInstance(units.atomic_length, (sympy.Mul, sympy.physics.units.Unit))
+    def test_can_create(self):
+        new = units.Time("new", (), {'_value': 2.0, '_name': "new"})
+        self.assertAlmostEqual(new._value, 2.0)
+        self.assertEqual(new._name, "new")
+        self.assertIsInstance(new, units.Time)

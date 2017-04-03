@@ -38,7 +38,7 @@ python setup.py bdist_wheel upload -r pypi
 Publish to the `exa-analytics`_ channel on  `Anaconda`_
 ```bash
 conda install conda-build    # may also need anaconda-client (run `anaconda login` in shell)
-conda build --py all .
+conda build .
 conda convert -f --platform all /path/to/conda-bld/pltfrm/exa-...tar.bz2 -o /path/to/outputdir/
 conda upload /path/to/build/build.tar.bz2    # For each build
 ```

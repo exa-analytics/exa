@@ -17,15 +17,11 @@ here = os.path.dirname(os.path.abspath(__file__))
 node_root = os.path.join(here, "js")
 is_repo = os.path.exists(os.path.join(here, ".git"))
 pltfrm = True if platform.system().lower() == 'windows' else False
-
-npm_path = os.pathsep.join([
-    os.path.join(node_root, "node_modules", ".bin"),
-                os.environ.get("PATH", os.defpath),
-])
-
 log.set_verbosity(log.DEBUG)
 log.info("setup.py entered")
-log.info("$PATH=%s" % os.environ["PATH"])
+log.info("$PATH={}".format(os.environ["PATH"]))
+npm_path = os.pathsep.join([os.path.join(node_root, "node_modules", ".bin"),
+                            os.environ.get("PATH", os.defpath)])
 
 try:
     import pypandoc
