@@ -28,7 +28,7 @@ def _create():
         for name, value in unitvalues.items():
             if hasattr(_this, name):
                 raise Exception("Unable to create unit {} (dimension {}).".format(name, clsname))
-            setattr(_this, str(name), mcs(name, (), {'_value': float(value), '_name': str(name)}))
+            setattr(_this, str(name), mcs(str(name), (), {'_value': float(value), '_name': str(name)}))
 
 
 # Data order of isotopic (nuclear) properties:
