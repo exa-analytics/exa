@@ -8,6 +8,7 @@ from setuptools import setup, find_packages
 
 name = "exa"
 description = "The exa framework for data processing, analytics, and visualization."
+datadir = "data"
 root = os.path.dirname(os.path.abspath(__file__))
 try:
     import pypandoc
@@ -27,7 +28,7 @@ setup_args = {
     'description': description,
     'long_description': long_description,
     'zip_safe': False,
-    'package_data': {name: ["static/*"]},
+    'package_data': {name: [datadir + "/*"]},
     'include_package_data': True,
     'install_requires': dependencies,
     'packages': find_packages(),
