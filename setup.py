@@ -37,7 +37,7 @@ setup_args = {
     'maintainer_email': "exa.data.analytics@gmail.com",
     'url': "https://exa-analytics.github.io/" + name,
     'download_url': "https://github.com/exa-analytics/{}/tarball/{}.tar.gz".format(name, version),
-    'keywords': ["visualization", "analytics", "framework", "data"],
+    'keywords': ["data", "analytics", "framework"],
     'classifiers': [
         "Development Status :: 3 - Alpha",
         "Environment :: Web Environment",
