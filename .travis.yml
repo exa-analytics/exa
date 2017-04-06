@@ -2,7 +2,6 @@ language: python
 
 os:
   - linux
-  - osx
 
 python:
   - "2.7"
@@ -11,21 +10,16 @@ python:
   - "3.6"
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-        wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-        wget http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
-    fi
+  - wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
-  - conda config --set always_yes --set changeps1 no
+  - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
 
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION
-  - conda install --yes -c conda-forge `cat requirements.txt`
-  - conda install --yes -c conda-forge pytables
-  - conda install --yes -c cpcloud npm
+  - conda install -q python=$TRAVIS_PYTHON_VERSION
+  - conda install -q -c conda-forge `cat requirements.txt`
+  - conda install -q -c conda-forge pytables
   - pip install travis-sphinx codacy-coverage python-coveralls codecov
   - python setup.py install
 
