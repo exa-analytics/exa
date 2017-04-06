@@ -1,4 +1,4 @@
-[![exa logo](docs/source/_static/logo.png)](https://exa-analytics.github.io)  
+[![exa logo](docs/source/static/logo.png)](https://exa-analytics.github.io)  
 
 
 # Installation

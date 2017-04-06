@@ -1,5 +1,5 @@
 # Update Version Numbers
-Update `exa/_version.py`, `js/package.json`, and `meta.yaml` version numbers.
+Update `exa/_version.py` and `meta.yaml` version numbers.
 
 
 # Commit and Push Changes

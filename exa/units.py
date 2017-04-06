@@ -33,6 +33,6 @@ def _create():
 
 # Data order of isotopic (nuclear) properties:
 _this = _sys.modules[__name__]
-_path = _resource_filename("exa", "_static/units.json.bz2")
+_path = _resource_filename("exa", "static/units.json.bz2")
 if not hasattr(_this, "s"):
     _create()

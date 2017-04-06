@@ -23,13 +23,7 @@
     contrib.rst
     concepts.rst
     extension.rst
-
-.. toctree::
-    :maxdepth: 2
-    :caption: API
-
     py.rst
-    js.rst
 
 * :ref:`genindex`
 
