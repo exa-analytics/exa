@@ -34,9 +34,8 @@ def _create():
 # Data order of isotopic (nuclear) properties:
 _this = _sys.modules[__name__]
 _path = _resource_filename("exa", "static/units.json.bz2")
-print(_path)
 if not hasattr(_this, "s"):
     try:
         _create()
     except:
-        pass
+        print(_path)

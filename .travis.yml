@@ -23,7 +23,10 @@ install:
   - pip install travis-sphinx codacy-coverage python-coveralls codecov
   - python setup.py install
   - ls -lisah
-  - pwd
+  - ls -lisah exa/static/
+  - ls -lisah /home/travis/build/avmarchenko/exa
+  - ls -lisah /home/travis/build/avmarchenko/exa/exa/
+  - ls -lisah /home/travis/build/avmarchenko/exa/exa/static
 
 script:
   - nosetests --with-coverage
