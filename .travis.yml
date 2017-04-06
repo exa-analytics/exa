@@ -22,6 +22,8 @@ install:
   - conda install -q -c conda-forge pytables
   - pip install travis-sphinx codacy-coverage python-coveralls codecov
   - python setup.py install
+  - ls -lisah
+  - pwd
 
 script:
   - nosetests --with-coverage

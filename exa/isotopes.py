@@ -78,6 +78,10 @@ _columns = ['A', 'Z', 'abundance_fraction', 'abundance_fraction_error',
             'color']
 _this = _sys.modules[__name__]         # Reference to this module
 _path = _resource_filename("exa", "static/isotopes.json.bz2")
+print(_path)
 if not hasattr(_this, "H"):
-    _create()
+    try:
+        _create()
+    except:
+        pass
 
