@@ -22,16 +22,12 @@ def _create():
     """Generate the isotopes and elements API from their static data."""
     lst = _Editor(_path).to_data('json')
     for entry in lst:
-        name = str(entry['name'].replace("{", "").replace("}", "").strip().replace(" ", "_"))
+        name = entry['name']
         setattr(_this, name, _Constant(name, (), entry))
 
 
 # Data order of isotopic (nuclear) properties:
 _this = _sys.modules[__name__]
-_path = _resource_filename("exa", "static/constants.json.bz2")
-print(_path)
-if not hasattr(_this, "220_lattice_spacing_of_silicon"):
-    try:
-        _create()
-    except:
-        pass
+_path = _resource_filename("exa", "data/constants.json.bz2")
+if not hasattr(_this, "a220_lattice_spacing_of_silicon"):
+    _create()
