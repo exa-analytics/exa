@@ -33,7 +33,7 @@ from abc import abstractmethod
 from copy import copy, deepcopy
 from collections import Counter, defaultdict
 from io import StringIO, TextIOWrapper
-import os, re, sys, bz2, gzip, six, zipfile, warnings, json
+import os, re, sys, bz2, gzip, six, warnings, json
 from exa.special import simple_function_factory, yield_typed, create_typed_attr
 from .base import ABCBase, ABCBaseMeta
 if not hasattr(bz2, "open"):
@@ -811,8 +811,6 @@ def read_file(path, as_interned=False, encoding='utf-8'):
         f = gzip.open(path, 'rb')
     elif path.endswith(".bz2"):
         f = bz2.open(path, 'rb')
-    elif path.endswith(".zip"):
-        f = zipfile.open(path, 'rb')
     else:
         f = open(path, 'rb')
     read = f.read()

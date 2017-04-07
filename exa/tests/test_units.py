@@ -15,7 +15,7 @@ class TestUnits(TestCase):
         """Check that all constants have been created."""
         self.assertGreater(len(vars(units)), 230)
 
-    def test_constants(self):
+    def test_units(self):
         """Check attribute values."""
         self.assertTrue(hasattr(units, "mcd"))
-        self.assertAlmostEqual(units.mcd, 1000.0)
+        self.assertAlmostEqual(units.mcd._value, 1000.0)
