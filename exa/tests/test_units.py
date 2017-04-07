@@ -13,7 +13,7 @@ class TestUnits(TestCase):
     """Basic checks that units have been created."""
     def test_count(self):
         """Check that all constants have been created."""
-        self.assertGreater(len(vars(units)), 230)
+        self.assertGreater(len(vars(units)), 220)
 
     def test_units(self):
         """Check attribute values."""
