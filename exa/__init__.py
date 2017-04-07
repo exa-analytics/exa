@@ -59,5 +59,5 @@ def _jupyter_nbextension_paths():
 
 
 from ._version import __version__
-from . import mpl, tex, units, constants, isotopes
-from .core import DataFrame, Container, Editor, Sections, Parser
+from .core import Editor, Sections, Parser, DataSeries, Container
+from . import constants, isotopes, mpl, tex, units
