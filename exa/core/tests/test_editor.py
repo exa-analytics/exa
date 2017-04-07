@@ -6,7 +6,7 @@ Tests for :mod:`~exa.core.editor`
 #############################################
 Tests for base editor and editor-like classes.
 """
-import os, bz2, gzip, six, shutil
+import os, bz2, gzip, six, shutil, zipfile
 from types import GeneratorType
 import numpy as np
 import pandas as pd
@@ -16,7 +16,7 @@ from unittest import TestCase
 from tempfile import mkdtemp
 from exa.core import Editor, Sections, Parser
 from exa.core.editor import concat, SectionsMeta
-if not hasattr(bz2, "open"):    # Python 3.x compatibility
+if not hasattr(bz2, "open"):    # Python 2.7.x compatibility
     bz2.open = bz2.BZ2File
 
 
@@ -88,12 +88,16 @@ class TestEditor(TestCase):
         with open(self.path, "rb") as f_in:
             with bz2.open(self.path + ".bz2", "wb") as f_out:
                 shutil.copyfileobj(f_in, f_out)
+        with open(self.path, "rb") as f_in:
+            with zipfile.open(self.path + ".zip", "wb") as f_out:
+                shutil.copyfileobj(f_in, f_out)
         with open(self.path + '.iso-8859-1', 'wb') as f:
             f.write(editor_string.encode('iso-8859-1'))
         self.from_file = Editor(self.path)
         self.from_file_enc = Editor(self.path, encoding='iso-8859-1')
         self.from_gzip = Editor(self.path + ".gz")
         self.from_bz2 = Editor(self.path + ".bz2")
+        self.from_zip = Editor(self.path + ".zip")
         self.from_stream = Editor(StringIO(editor_string))
         self.from_string = Editor(editor_string)
         self.from_data = Editor(editor_data)
@@ -119,6 +123,7 @@ class TestEditor(TestCase):
         self.assertEqual(self.from_file, self.from_file_enc)
         self.assertEqual(self.from_file, self.from_gzip)
         self.assertEqual(self.from_file, self.from_bz2)
+        self.assertEqual(self.from_file, self.from_zip)
         self.assertEqual(self.from_file, self.from_stream)
         self.assertEqual(self.from_file, self.from_string)
 
@@ -253,6 +258,9 @@ class TestEditor(TestCase):
         self.assertTrue(os.path.exists(path))
         os.remove(path)
         self.from_bz2.to_file(path, template="formatted")
+        self.assertTrue(os.path.exists(path))
+        os.remove(path)
+        self.from_zip.to_file(path, template="formatted")
         self.assertTrue(os.path.exists(path))
         os.remove(path)
 

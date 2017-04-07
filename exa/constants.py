@@ -22,7 +22,7 @@ def _create():
     """Generate the isotopes and elements API from their static data."""
     lst = _Editor(_path).to_data('json')
     for entry in lst:
-        name = entry['name']
+        name = str(entry['name'])
         setattr(_this, name, _Constant(name, (), entry))
 
 

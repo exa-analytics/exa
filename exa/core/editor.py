@@ -28,14 +28,12 @@ See Also:
     Common examples of data objects are  :class:`~exa.core.dataseries.DataSeries`
     and :class:`~exa.core.dataframe.DataFrame` among others.
 """
-import json
-import os, re, sys, bz2, gzip, six
-import warnings
 import pandas as pd
 from abc import abstractmethod
 from copy import copy, deepcopy
 from collections import Counter, defaultdict
 from io import StringIO, TextIOWrapper
+import os, re, sys, bz2, gzip, six, zipfile, warnings, json
 from exa.special import simple_function_factory, yield_typed, create_typed_attr
 from .base import ABCBase, ABCBaseMeta
 if not hasattr(bz2, "open"):
@@ -798,6 +796,9 @@ def read_file(path, as_interned=False, encoding='utf-8'):
     """
     Create a list of file lines from a given filepath.
 
+    Interning lines is useful for large files that contain some repeating
+    information.
+
     Args:
         path (str): File path
         as_interned (bool): List of "interned" strings (default False)
@@ -810,11 +811,13 @@ def read_file(path, as_interned=False, encoding='utf-8'):
         f = gzip.open(path, 'rb')
     elif path.endswith(".bz2"):
         f = bz2.open(path, 'rb')
+    elif path.endswith(".zip"):
+        f = zipfile.open(path, 'rb')
     else:
         f = open(path, 'rb')
     read = f.read()
     try:
-        read = read.decode(encoding)    # For .gz and .bz2 files
+        read = read.decode(encoding)
     except (AttributeError, UnicodeError):
         pass
     if as_interned:
