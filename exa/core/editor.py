@@ -38,6 +38,8 @@ from collections import Counter, defaultdict
 from io import StringIO, TextIOWrapper
 from exa.special import simple_function_factory, yield_typed, create_typed_attr
 from .base import ABCBase, ABCBaseMeta
+if not hasattr(bz2, "open"):
+    bz2.open = bz2.BZ2File
 
 
 class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
