@@ -13,10 +13,11 @@ from .dataseries import DataSeries
 
 class DataFrameMeta(ABCBaseMeta):
     dimensions = (list, tuple)
+    aliases = dict
 
 
 class DataFrame(six.with_metaclass(DataFrameMeta, pd.DataFrame, ABCBase)):
-    _metadata = ["name", "dimensions", "uid", "meta"]
+    _metadata = ["name", "dimensions", "uid", "meta", "aliases"]
     _constructor_sliced = DataSeries
 
     @property
