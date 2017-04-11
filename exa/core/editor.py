@@ -368,8 +368,10 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
             return pd.read_json(self.to_stream(), *args, **kwargs)
         elif kind == 'json':
             return json.load(self.to_stream())
+        elif kind == 'fwf':
+            return pd.read_fwf(self.to_stream(), *args, **kwargs)
         else:
-            raise ValueError("Unexpected argument for kind, {}".format(kind))
+            raise ValueError("Unexpected kind = {}".format(kind))
 
     def __eq__(self, other):
         if isinstance(other, Editor) and self._lines == other._lines:
@@ -648,6 +650,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
             and :func:`~exa.editor.Sections.describe_parsers` show section names
             and numbers, and section parsers, respectively.
         """
+        self.parse()
         for i in range(self._nsections):
             self.parse_section(i)
 
@@ -674,11 +677,30 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         secname = "section" + str(number).zfill(self._nsections)
         # Note that we don't actually parse anything until a value is in fact
         # request, e.g. sections.parser.dataobj
-        setattr(self, secname, self._parsers[section](self[start:end]))
+        sec = self._parsers[section](self[start:end])
+        if hasattr(sec, "parse_all_sections"):
+            sec.parse_all_sections()
+        else:
+            sec.parse()
+        setattr(self, secname, sec)
 
     def delimiters(self):
         """Describes the patterns used to disambiguate regions of the file."""
         return [(name, getattr(self, name)) for name in vars(self) if name.startswith("_key_")]
+
+    def get_section(self, i):
+        """Retrieve a section by name or number."""
+        if isinstance(i, int):
+            name = "section" + str(i)
+        else:
+            name = []
+            for j, nam in enumerate(self.sections):
+                if i in nam:
+                    name.append("section" + str(j))
+            if len(name) > 1:
+                raise ValueError("Multiple sections with name = {}".format(i))
+            name = name[0]
+        return getattr(self, name)
 
     def describe_sections(self):
         """
