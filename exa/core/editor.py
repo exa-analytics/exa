@@ -407,10 +407,10 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
         self._lines[line] = value
 
     def __init__(self, data, as_interned=False, nprint=30, meta=None,
-                 encoding='utf-8', ignore_warning=False, **kwargs):
+                 encoding='utf-8', path_check=True, ignore_warning=False, **kwargs):
         super(Editor, self).__init__(**kwargs)
         filepath = None
-        if check_path(data, ignore_warning):
+        if path_check and check_path(data, ignore_warning):
             self._lines = read_file(data, as_interned, encoding)
             filepath = data
         elif isinstance(data, six.string_types):
@@ -677,7 +677,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         secname = "section" + str(number).zfill(self._nsections)
         # Note that we don't actually parse anything until a value is in fact
         # request, e.g. sections.parser.dataobj
-        sec = self._parsers[section](self[start:end])
+        sec = self._parsers[section](self[start:end], path_check=False)
         if hasattr(sec, "parse_all_sections"):
             sec.parse_all_sections()
         else:
@@ -690,13 +690,14 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
 
     def get_section(self, i):
         """Retrieve a section by name or number."""
+        n = len(str(len(self.sections)))
         if isinstance(i, int):
-            name = "section" + str(i)
+            name = "section" + str(i).zfill(n)
         else:
             name = []
             for j, nam in enumerate(self.sections):
                 if i in nam:
-                    name.append("section" + str(j))
+                    name.append("section" + str(j).zfill(n))
             if len(name) > 1:
                 raise ValueError("Multiple sections with name = {}".format(i))
             name = name[0]
