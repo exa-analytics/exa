@@ -399,7 +399,7 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
     def __getitem__(self, key):
         if isinstance(key, six.string_types):
             return getattr(self, key)
-        kwargs = {'nprint': self.nprint, 'meta': self.meta,
+        kwargs = {'nprint': self.nprint, 'meta': self.meta, 'path_check': False,
                   'encoding': self.encoding, 'as_interned': self.as_interned}
         return self.__class__(self._lines[key], **kwargs)
 
