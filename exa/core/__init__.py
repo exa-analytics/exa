@@ -3,5 +3,6 @@
 # Distributed under the terms of the Apache License 2.0
 from .editor import Editor, Sections, Parser
 from .dataseries import DataSeries
+from .dataframe import DataFrame
 from .container import Container
 from . import tests
