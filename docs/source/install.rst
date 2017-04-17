@@ -1,52 +1,64 @@
-.. Copyright (c) 2015-2017, Exa Analytics Development Team
+.. Copyright (c) 2015-2016, Exa Analytics Development Team
 .. Distributed under the terms of the Apache License 2.0
 
-
-########################
+#####################################
 Installation
-########################
-For information on installing Python see https://www.python.org/ or
-https://www.continuum.io/downloads (`Anaconda`_ is the recommended installation
-method for Python; see also `Miniconda`_). Exa is **Python 2.7+** software.
+#####################################
+Python's external libraries are maintained as packages in repositories.
+There are two main repositories, `pypi`_ and `anaconda`_ and two corresponding
+Python applications that interact with them (pip and conda respectively).
 
-Using `Anaconda`_ or `Miniconda`_
+This project recommends using conda because it is both a package manager and
+a Python virtual environment manager. Anaconda also provides better cross
+platform support especially for Python packages that require compiled external
+dependences.
 
-.. code-block:: bash
 
-    conda install -c exaanalytics exa
-
-Using `pip`_:
-
-.. code-block:: bash
-
-    pip install exa
-    jupyter nbextension enable --py --sys-prefix exa
-
-From tha `source`_:
+Anaconda
+#######################
+Using anaconda or miniconda...
 
 .. code-block:: bash
 
-    cd exa-source/    # contains setup.py
-    python setup.py install
-    jupyter nbextension enable --py --sys-prefix exa
+    conda install numba exa
 
-For a development installation (npm required):
+
+Pypi
+#######################
+Using pip...
 
 .. code-block:: bash
 
-    git clone https://github.com/exa-analytics/exa.git
+    # sudo apt-get install llvm-3.7 or sudo yum install ... etc.
+    sudo pip install numba exa
+
+
+CUDA
+###################
+If working on a system with CUDA supported Nvidia GPUs...
+
+.. code-block:: bash
+
+    conda install cudatoolkit     # or via apt-get or yum etc.
+
+Repository
+#########################
+Manually...
+
+.. code-block:: bash
+
+    # install llvm, numba, cudatoolkit, and CPython3.x
+    git clone https://github.com/exa-analytics/exa
     cd exa
-    pip install -e .
-    jupyter nbextension install --py --symlink --sys-prefix exa
-    jupyter nbextension enable --py --sys-prefix exa
-
-.. note::
-    
-    Development on Windows may not be fully supported. Some convience scripts
-    are provided in the ``docs`` and ``js`` directories.
+    pip install .
 
 
-.. _Anaconda: https://www.continuum.io/downloads
-.. _Miniconda: http://conda.pydata.org/miniconda.html
-.. _pip: https://docs.python.org/3.5/installing/
-.. _source: https://github.com/exa-analytics/exa/releases
+What's Next?
+#####################
+- Users should check out the :ref:`exa-user-overview`
+- Contributors should check out the :ref:`exa-dev-overview`
+- The :ref:`exa-api` contains usage and extension examples, and developer notes
+
+
+.. _pypi: https://pypi.python.org/pypi
+.. _anaconda: https://anaconda.org/anaconda/packages

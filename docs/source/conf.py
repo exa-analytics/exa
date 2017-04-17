@@ -281,8 +281,7 @@ latex_domain_indices = True
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, "exa", "Exa Documentation",
-     [author], 1)
+    (master_doc, "exa", "Exa Documentation", [author], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -387,10 +386,10 @@ epub_use_index = True
 # Example configuration for intersphinx: refer to the Python standard library.
 #intersphinx_mapping = {"https://docs.python.org/": None}
 intersphinx_mapping = {
-#    "python": ("http://docs.python.org/3/", None),
-#    "numpy": ("http://docs.scipy.org/doc/numpy/", None),
-#    "scipy": ("http://scipy.github.io/devdocs/", None),
-#    "pandas": ("http://pandas-docs.github.io/pandas-docs-travis/", None)
+    "python": ("http://docs.python.org/3/", None),
+    "numpy": ("http://docs.scipy.org/doc/numpy/", None),
+    "scipy": ("http://scipy.github.io/devdocs/", None),
+    "pandas": ("http://pandas-docs.github.io/pandas-docs-travis/", None)
 }
 
 autodoc_member_order = "bysource"
