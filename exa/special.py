@@ -163,13 +163,21 @@ class Singleton(type):
         return cls._singletons[cls]
 
 
-class Function(object):
+class LazyFunction(object):
     """
-    A class that behaves like a function.
+    A class that behaves like a function and supports lazy evaluation.
+    """
+    def __call__(self):
+        return self.fn(*self.args, **self.kwargs)
 
-    Although inheritable, this class works like a lazy evaluator.
-    """
-    pass
+    def __init__(self, fn, *args, **kwargs):
+        self.fn = fn
+        self.args = args
+        self.kwargs = kwargs
+
+    def __repr__(self):
+        return "{}(fn={}, nargs={}, nkwargs={})".format(self.__name__, self.fn.__name__,
+                                                        len(self.args), len(self.kwargs))
 
 
 class Typed(ABCMeta):

@@ -4,8 +4,8 @@
 """
 Text Utilities
 #############################
-Utilities for formatting `LaTeX`_ and other text processing. Functions provided
-by this module make use of module level attributes which can be modified as needed.
+Text and `LaTeX`_ processing. Functions provided by this module make use of
+module level attributes which can be modified as needed.
 
 .. code-block:: Python
 
@@ -67,4 +67,22 @@ def constant_decimals(text, n):
             new += '0'*(n - len(new) + 1)
         new += " "
         text = text.replace(item, new)
+    return text
+
+
+def text_value_cleaner(text):
+    """
+    Clean and convert string value to Python object
+    """
+    text = text.strip()
+    if "." in text:
+        try:
+            text = float(text)
+        except ValueError:
+            pass
+    else:
+        try:
+            text = int(text)
+        except ValueError:
+            pass
     return text

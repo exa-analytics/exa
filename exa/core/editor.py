@@ -583,6 +583,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
     """
     name = None        # Subclasses may set this if needed
     description = None # ditto
+    _key_sec_prefix = "sec"
 
     @abstractmethod
     def _parse(self):
@@ -620,7 +621,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
             if section not in self._parsers:
                 warnings.warn("No parser for section '{}'!".format(section))
                 continue
-            secname = "section" + str(i).zfill(self._nsections)
+            secname = self._key_sec_prefix + str(i).zfill(self._nsections)
             ptypes = self._parsers[section]
             # Now we perform a bit of class gymnastics:
             # Because we don't want to attach our typed property paradigm
@@ -652,9 +653,9 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         """
         self.parse()
         for i in range(self._nsections):
-            self.parse_section(i)
+            self.parse_section(i, recursive=True)
 
-    def parse_section(self, number):
+    def parse_section(self, number, recursive=False):
         """
         Parse specific section of this object.
 
@@ -664,6 +665,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
 
         Args:
             number (int): Section number (of the ``sections`` list)
+            recursive (bool): Parse all (possible) sub-sections
 
         See Also:
             Two very useful functions, :func:`~exa.core.editor.Sections.describe_sections`
@@ -674,11 +676,11 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         if section not in self._parsers:
             warnings.warn("No parser for section '{}'!".format(section))
             return
-        secname = "section" + str(number).zfill(self._nsections)
+        secname = self._key_sec_prefix + str(number).zfill(self._nsections)
         # Note that we don't actually parse anything until a value is in fact
         # request, e.g. sections.parser.dataobj
         sec = self._parsers[section](self[start:end], path_check=False)
-        if hasattr(sec, "parse_all_sections"):
+        if hasattr(sec, "parse_all_sections") and recursive:
             sec.parse_all_sections()
         else:
             sec.parse()
@@ -692,12 +694,12 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         """Retrieve a section by name or number."""
         n = len(str(len(self.sections)))
         if isinstance(i, int):
-            name = "section" + str(i).zfill(n)
+            name = self._key_sec_prefix + str(i).zfill(n)
         else:
             name = []
             for j, nam in enumerate(self.sections):
                 if i in nam:
-                    name.append("section" + str(j).zfill(n))
+                    name.append(self._key_sec_prefix + str(j).zfill(n))
             if len(name) > 1:
                 raise ValueError("Multiple sections with name = {}".format(i))
             name = name[0]
