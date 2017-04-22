@@ -10,7 +10,7 @@ Note that an example of usage of this metaclass is provided by this test.
 import six
 from unittest import TestCase
 from exa.special import (Typed, simple_function_factory, yield_typed, Singleton,
-                         Function)
+                         LazyFunction)
 
 
 class MinimalTyped(Typed):
@@ -125,6 +125,18 @@ class TestSingleton(TestCase):
         self.assertIs(Single(), Single())
 
 
-class TestFunction(TestCase):
-    """Tests behavior of :class:`~exa.special.Function`."""
-    pass
+class TestLazyFunction(TestCase):
+    """Tests behavior of :class:`~exa.special.LazyFunction`."""
+    def test_args(self):
+        """Test evaluation of args."""
+        f = LazyFunction(lambda x: x**2, 10)
+        self.assertEqual(f(), 100)
+
+    def test_kwargs(self):
+        """Test evaluation of kwargs."""
+        f = LazyFunction(lambda x: x**2, x=2)
+        self.assertEqual(f(), 4)
+
+    def test_laziness(self):
+        """Test for lazy evaluation."""
+        pass

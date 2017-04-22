@@ -33,7 +33,8 @@ from abc import abstractmethod
 from copy import copy, deepcopy
 from collections import Counter, defaultdict
 from io import StringIO, TextIOWrapper
-import os, re, sys, bz2, gzip, six, warnings, json
+import warnings
+import os, re, sys, bz2, gzip, six, json
 from exa.special import simple_function_factory, yield_typed, create_typed_attr
 from .base import ABCBase, ABCBaseMeta
 if not hasattr(bz2, "open"):
@@ -583,7 +584,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
     """
     name = None        # Subclasses may set this if needed
     description = None # ditto
-    _key_sec_prefix = "sec"
+    _key_sec_prefix = "section"
 
     @abstractmethod
     def _parse(self):
@@ -599,7 +600,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         """
         pass
 
-    def parse(self):
+    def parse(self, verbose=False):
         """
         Parse the sections of this file and set the ``sections`` attribute.
 
@@ -619,7 +620,8 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         for i, sec in enumerate(self.sections):
             section = sec[0]
             if section not in self._parsers:
-                warnings.warn("No parser for section '{}'!".format(section))
+                if verbose:
+                    warnings.warn("No parser for section '{}'!".format(section))
                 continue
             secname = self._key_sec_prefix + str(i).zfill(self._nsections)
             ptypes = self._parsers[section]
@@ -638,7 +640,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
             # And attach a lazy evaluation method using the above helper
             setattr(self, "parse_" + secname, section_parser_helper(i))
 
-    def parse_all_sections(self):
+    def parse_all_sections(self, verbose=False):
         """
         Parse data (or sub-sections) of each section identified by this object.
 
@@ -651,11 +653,11 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
             and :func:`~exa.editor.Sections.describe_parsers` show section names
             and numbers, and section parsers, respectively.
         """
-        self.parse()
+        self.parse(verbose=verbose)
         for i in range(self._nsections):
-            self.parse_section(i, recursive=True)
+            self.parse_section(i, recursive=True, verbose=verbose)
 
-    def parse_section(self, number, recursive=False):
+    def parse_section(self, number, recursive=False, verbose=False):
         """
         Parse specific section of this object.
 
@@ -674,17 +676,18 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         """
         section, start, end = self.sections[number]
         if section not in self._parsers:
-            warnings.warn("No parser for section '{}'!".format(section))
+            if verbose:
+                warnings.warn("No parser for section '{}'!".format(section))
             return
         secname = self._key_sec_prefix + str(number).zfill(self._nsections)
         # Note that we don't actually parse anything until a value is in fact
         # request, e.g. sections.parser.dataobj
         sec = self._parsers[section](self[start:end], path_check=False)
-        if hasattr(sec, "parse_all_sections") and recursive:
-            sec.parse_all_sections()
-        else:
-            sec.parse()
         setattr(self, secname, sec)
+        if hasattr(sec, "parse_all_sections") and recursive:
+            getattr(self, secname).parse_all_sections()
+        else:
+            getattr(self, secname).parse()
 
     def delimiters(self):
         """Describes the patterns used to disambiguate regions of the file."""
