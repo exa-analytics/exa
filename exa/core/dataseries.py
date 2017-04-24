@@ -43,10 +43,11 @@ class DataSeriesMeta(ABCBaseMeta):
         def opwrapper(self, other, *args, **kwargs):
             """Wrapper to propagate units."""
             result = getattr(super(DataSeries, self), op)(other, *args, **kwargs)
+            n = len(result)
             if (hasattr(other, "unit") and other.unit is None
                 and hasattr(other, "meta") and other.meta is None):
                 if isinstance(result, tuple):
-                    for i in range(len(result)):
+                    for i in range(n):
                         result[i].__finalize__(self)
                 else:
                     result.__finalize__(self)
@@ -54,7 +55,7 @@ class DataSeriesMeta(ABCBaseMeta):
         return opwrapper
 
     def __new__(mcs, name, bases, clsdict):
-        for opname, opdct in _op_descriptions.items():
+        for opname in _op_descriptions.keys():
             if opname is None:
                 continue
             prvopname = "__{}__".format(opname)
@@ -63,8 +64,7 @@ class DataSeriesMeta(ABCBaseMeta):
 
 
 class DataSeries(six.with_metaclass(DataSeriesMeta, pd.Series, ABCBase)):
-    """
-    """
+    """A labeled data array."""
     _metadata = ["name", "uid", "unit", "meta"]
 
     def asunit(self, unit, copy=True, force=False):

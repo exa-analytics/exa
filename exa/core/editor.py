@@ -18,7 +18,7 @@ operations can be performed on editors:
     for line in editor:             # Iterate over lines in the file
         pass
     if 'text' in editor:            # True if "text" appears on any line
-        True
+        pass
 
 Text lines are stored in memory; file handles are only open during reading and
 writing. For large repetitive files, memoization can reduce the memory footprint

@@ -31,7 +31,6 @@ can be found at :ref:`examples-label`.
     api/editors/editor.rst
     api/editors/sections.rst
     api/editors/parser.rst
-    api/editors/tests.rst
 
 .. toctree::
     :maxdepth: 2
@@ -58,7 +57,6 @@ Dev Docs
 
 .. toctree::
     :maxdepth: 2
-    :caption: Miscellanous
 
     api/special.rst
     api/base.rst

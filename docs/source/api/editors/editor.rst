@@ -9,7 +9,3 @@ of files.
 
 .. automodule:: exa.core.editor
     :members:
-
-.. automodule:: exa.core.tests.test_editor
-    :members:
-
