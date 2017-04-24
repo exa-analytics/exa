@@ -11,7 +11,7 @@ import six
 import pandas as pd
 from unittest import TestCase
 from exa.core.sections import Sections, SectionsMeta
-from exa.core.parsers import Parser
+from exa.core.parser import Parser
 
 
 sections0 = u"""Sections have some text followed by a delimiter

@@ -2,14 +2,11 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ###########################
-Data
+DataFrame
 ###########################
-The Exa framework provides two concrete data implementations that are also the
-default data representations.
-
-.. automodule:: exa.core.data
+.. automodule:: exa.core.dataframe
     :members:
 
-.. automodule:: exa.core.tests.test_data
+.. automodule:: exa.core.tests.test_dataframe
     :members:
 

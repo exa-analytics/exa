@@ -12,3 +12,4 @@ of files.
 
 .. automodule:: exa.core.tests.test_editor
     :members:
+

@@ -2,11 +2,10 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ###########################
-Compiled Itertools
+Text/LaTeX Utilities
 ###########################
-
-.. automodule:: exa.util.itrtool
+.. automodule:: exa.tex
     :members:
 
-.. automodule:: exa.util.tests.test_itrtool
+.. automodule:: exa.tests.test_tex
     :members:

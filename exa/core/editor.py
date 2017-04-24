@@ -6,9 +6,9 @@ Editor
 ####################################
 The :class:`~exa.core.editor.Editor` class is a way for programmatic text-
 editor-like manipulation of files on disk. The goal of an editor is to facilitate
-easy conversion or extraction of data from a text file. It does not strive to be
-a full featured text editor. A large number of Pythonic operations can be performed
-on editors:
+easy conversion or extraction of data from a text file (aka 'text file parsing`).
+It does not strive to be a full featured text editor. A large number of Pythonic
+operations can be performed on editors:
 
 .. code-block:: python
 
@@ -40,7 +40,7 @@ if not hasattr(bz2, "open"):
 
 class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
     """
-    A representation of a file on disk that can be modified programmatically.
+    In memory text file-like object used to facilitate data parsing.
 
     Editor line numbers start at 0. To increase the number of lines
     displayed, increase the value of the ``nprint`` attribute. For large text
