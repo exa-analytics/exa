@@ -169,6 +169,10 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         """
         pass
 
+    def _gen_sec_attr_name(self, i):
+        """Generate section attribute name (e.g. section001)."""
+        return self._key_sec_prefix + str(i).zfill(self._nsections)
+
     def parse(self, verbose=False):
         """
         Parse the sections of this file and set the ``sections`` attribute.
@@ -192,7 +196,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
                 if verbose:
                     warnings.warn("No parser for section '{}'!".format(section))
                 continue
-            secname = self._key_sec_prefix + str(i).zfill(self._nsections)
+            secname = self._gen_section_name(i)
             ptypes = self._parsers[section]
             # Now we perform a bit of class gymnastics:
             # Because we don't want to attach our typed property paradigm
