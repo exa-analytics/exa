@@ -16,7 +16,7 @@ strongly typed class attributes.
 from abc import ABCMeta
 
 
-def create_typed_attr(name, ptypes):
+def create_typed_attr(name, ptypes, doc=None):
     """
     Create a property that enforces types.
 
@@ -44,14 +44,20 @@ def create_typed_attr(name, ptypes):
     Args:
         name (str): Name of strongly typed attribute
         ptypes (tuple): Iterable of valid types
+        doc (str): Docstring (optional)
 
     Returns:
         prop (property): Strongly typed property object
+
+    Note:
+        Properties created by this function have the docstring containing "__typed__"
+        to signify that this is not a 'normal' property object.
 
     See Also:
         See the module documentation for :mod:`~exa.typed`.
     """
     pname = '_' + name
+    doc = "__typed__" if doc is None else doc + "\n\n__typed__"
     if not isinstance(ptypes, (tuple, list)):
         ptypes = (ptypes, )
     else:
@@ -90,7 +96,7 @@ def create_typed_attr(name, ptypes):
     def deleter(self):
         delattr(self, pname)    # Allows for dynamic attribute deletion
 
-    return property(getter, setter, deleter)
+    return property(getter, setter, deleter, doc=doc)
 
 
 def simple_function_factory(fname, prefix, attr):
@@ -129,10 +135,14 @@ def yield_typed(obj):
     mcs = obj.__class__
     for name, attr in vars(obj).items():
         if not name.startswith("_"):
-            if isinstance(attr, property):
+            # Use the weak constraint of ".." in __doc__ in case additional
+            # documentation has been added.
+            if isinstance(attr, property) and "__typed__" in attr.__doc__:
                 yield (name, getattr(mcs, name))
             elif isinstance(attr, (tuple, list, type)):
                 yield (name, attr)
+
+
 class Singleton(type):
     """
     A metaclass that provides the `singleton`_ paradigm.

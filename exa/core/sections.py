@@ -112,29 +112,33 @@ class SectionsMeta(ABCBaseMeta):
     _descriptions = {"sections": "List of sections"}
     sections = pd.DataFrame
 
-    # Note that we add the describe method to the metaclass so that it appears
-    # on the Parser class (see :class:`~exa.core.parser.Parser`)
-    def describe(cls):
-        """Parser description."""
-        data = {"name": cls.name, "class": cls, "description": cls.description}
-        params = [n.replace("_key_", "") for n in vars(cls) if n.startswith("_key_")]
-        if len(params) == 0:
-            data["parameters"] = None
-        else:
-            data["parameters"] = params
-        return pd.Series(data)
-
     def __new__(mcs, name, bases, clsdict):
         for attr in yield_typed(mcs):
             f = simple_function_factory("parse", "parse", attr[0])
             clsdict[f.__name__] = f
         clsdict['_descriptions'] = mcs._descriptions
         clsdict['_parsers'] = {}
-        clsdict['describe'] = classmethod(mcs.describe)
         return super(SectionsMeta, mcs).__new__(mcs, name, bases, clsdict)
 
 
-class Sections(six.with_metaclass(SectionsMeta, Editor)):
+class Mixin(object):
+    """
+    Mixin object for :class:`~exa.core.sections.Sections` and
+    :class:`~exa.core.parser.Parser`.
+    """
+    def describe(self):
+        """Parser description."""
+        data = {"name": self.name, "description": self.description,
+                "type": "Sections" if isinstance(self, Sections) else "Parser"}
+        params = [n.replace("_key_", "") for n in vars(self) if n.startswith("_key_")]
+        if len(params) == 0:
+            data["parameters"] = None
+        else:
+            data["parameters"] = params
+        return pd.Series(data)
+
+
+class Sections(six.with_metaclass(SectionsMeta, Editor, Mixin)):
     """
     An editor tailored to handling files with distinct regions of text.
 
@@ -212,6 +216,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
             if col not in df:
                 raise ValueError("Sections dataframe requires columns: {}".format(", ".join(self._sections_columns)))
         df['attr'] = [self._section_name_prefix+str(i).zfill(len(str(len(df)))) for i in df.index]
+        df = df.loc[:, list(self._sections_columns) + list(set(df.columns).difference(self._sections_columns))]
         self.sections = df
 
     def parse(self, recursive=False, verbose=False):
@@ -295,7 +300,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         setattr(self, attrname, sec)
         # ...or if recursive is true.
         if recursive:
-            getattr(self, secname).parse(recursive=True, verbose=verbose)
+            sec.parse(recursive=True, verbose=verbose)
 
     def delimiters(self):
         """Describes the patterns used to disambiguate regions of the file."""
@@ -330,8 +335,8 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
             warnings.warn("No parsers added.")
         else:
             df = pd.DataFrame.from_dict(data, orient='index')
-            df.index.name = "Parser Name"
-            df.columns = ["Parameters", "Class(es)", "Attributes"]
+            df.index.name = "parser"
+            df.columns = ["key params", "type", "attrs"]
             return df
 
     @classmethod

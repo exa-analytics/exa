@@ -10,10 +10,10 @@ import pandas as pd
 from abc import abstractmethod
 from exa.special import yield_typed
 from .editor import Editor
-from .sections import SectionsMeta
+from .sections import SectionsMeta, Mixin
 
 
-class Parser(six.with_metaclass(SectionsMeta, Editor)):
+class Parser(six.with_metaclass(SectionsMeta, Editor, Mixin)):
     """
     An editor like object that corresponds to a specific and distinct region of
     a file and contains parsing functionality tailored to this region. The

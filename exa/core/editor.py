@@ -75,8 +75,8 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
         """
         csnt = r"{{[\w\d]*}}"
         tmpl = r"{[\w\d]*}"
-        constants = [match[2:-2] for match in self.regex(csnt, which='text')[csnt]]
-        templates = [match[1:-1] for match in self.regex(tmpl, which='text')[tmpl]]
+        constants = [match[2:-2] for match in self.regex(csnt, num=False)[csnt]]
+        templates = [match[1:-1] for match in self.regex(tmpl, num=False)[tmpl]]
         return sorted(set(templates).difference(constants))
 
     @property
@@ -94,7 +94,7 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
         .. _String formatting: https://docs.python.org/3.6/library/string.html
         """
         csnt = r"{{[\w\d]*}}"
-        constants = [match[2:-2] for match in self.regex(csnt, which='text')[csnt]]
+        constants = [match[2:-2] for match in self.regex(csnt, num=False)[csnt]]
         return sorted(constants)
 
     def regex(self, *patterns, **kwargs):
@@ -103,7 +103,8 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
 
         Args:
             \*patterns: Regular expressions
-            which: If none, returns (lineno, text), else "lineno" or "text"
+            num (bool): Return line number (default true)
+            text (bool): Return line text (default true)
             flags: Python regex flags (default re.MULTILINE)
 
         Returns:
@@ -112,7 +113,8 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
         See Also:
             https://en.wikipedia.org/wiki/Regular_expression
         """
-        which = kwargs.pop('which', None)
+        num = kwargs.pop("num", True)
+        text = kwargs.pop("text", True)
         flags = kwargs.pop('flags', re.MULTILINE)
         results = defaultdict(list)
         self_str = str(self)
@@ -120,15 +122,17 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
             match = pattern
             if not type(pattern).__name__ == "SRE_Pattern":
                 match = re.compile(pattern, flags)
-            if which == "lineno":
+            if num and text:
+                for m in match.finditer(self_str):
+                    results[match.pattern].append((self_str.count("\n", 0, m.start()) + 1, m.group()))
+            elif num:
                 for m in match.finditer(self_str):
                     results[match.pattern].append(self_str.count("\n", 0, m.start()) + 1)
-            elif which == "text":
+            elif text:
                 for m in match.finditer(self_str):
                     results[match.pattern].append(m.group())
             else:
-                for m in match.finditer(self_str):
-                    results[match.pattern].append((self_str.count("\n", 0, m.start()) + 1, m.group()))
+                raise TypeError("Invalid types for num ({}) and text ({})".format(str(num), str(text)))
         return results
 
     def find(self, *patterns, **kwargs):
@@ -137,32 +141,37 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
 
         Args:
             \*strings (str): Any number of strings to search for
-            which: If None, returns (lineno, text), else "lineno" or "text"
+            num (bool): Return line number (default true)
+            text (bool): Return line text (default true)
 
         Returns:
             results (dict): Dictionary with pattern keys and list of (lineno, line) values
         """
-        which = kwargs.pop('which', None)
+        num = kwargs.pop("num", True)
+        text = kwargs.pop("text", True)
         results = defaultdict(list)
         for i, line in enumerate(self):
             for pattern in patterns:
                 if pattern in line:
-                    if which == "lineno":
+                    if num and text:
+                        results[pattern].append((i, line))
+                    elif num:
                         results[pattern].append(i)
-                    elif which == "text":
+                    elif text:
                         results[pattern].append(line)
                     else:
-                        results[pattern].append((i, line))
+                        raise TypeError("Invalid types for num ({}) and text ({})".format(str(num), str(text)))
         return results
 
-    def find_next(self, pattern, which=None, reverse=False):
+    def find_next(self, pattern, num=True, text=True, reverse=False):
         """
         From the current cursor position, find the next occurrence of the pattern.
 
         Args:
             pattern (str): String to search for from the cursor
-            which: If None, returns (lineno, text), else "lineno" or "text"
-            reverse (bool): Find next in reverse
+            num (bool): Return line number (default true)
+            text (bool): Return line text (default true)
+            reverse (bool): Find next in reverse (default false)
 
         Returns:
             tup (tuple): Tuple of line number and line of next occurrence
@@ -183,12 +192,14 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
             for i in range(start, stop, inc):
                 if pattern in str(self[i]):
                     self.cursor = i
-                    if which == "lineno":
+                    if num and text:
+                        return (i, str(self[i]))
+                    elif num:
                         return i
-                    elif which == "text":
+                    elif text:
                         return str(self[i])
                     else:
-                        return (i, str(self[i]))
+                        raise TypeError("Invalid types for num ({}) and text ({})".format(str(num), str(text)))
 
     def copy(self):
         """Create a copy of the current editor."""
@@ -282,8 +293,8 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
         Insert lines into the editor after ``lineno``.
 
         Args:
-            lineno (int): Line number after which to insert lines
-            lines (list, str): List of lines or text to append to the editor
+            num (int): Line number after which to insert lines
+            text (list, str): List of lines or text to append to the editor
 
         Note:
             Occurs in-place, like ``list.insert(...)``.
