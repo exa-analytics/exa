@@ -6,6 +6,7 @@ Parsers
 ####################################
 """
 import six
+import warnings
 import pandas as pd
 from abc import abstractmethod
 from exa.special import yield_typed
@@ -31,7 +32,7 @@ class Parser(six.with_metaclass(SectionsMeta, Editor, Mixin)):
     description = None # ditto
 
     @abstractmethod
-    def _parse(self):
+    def _parse(self, *args, **kwargs):
         """
         The parsing algorithm, specific to this section, belongs here.
 
@@ -44,17 +45,31 @@ class Parser(six.with_metaclass(SectionsMeta, Editor, Mixin)):
         """
         pass
 
-    def parse(self):
-        """Parse all data objects."""
+    def parse(self, **kwargs):
+        """
+        Parse data objects from the current file.
+
+        Args:
+            verbose (bool): Performs a check for missing data objects
+
+        See Also:
+            To see what data objects get populated, see
+            :func:`~exa.core.parser.Parser.describe_data`.
+        """
+        verbose = kwargs.pop("verbose", False)
         self._parse()
+        if verbose:
+            for name, _ in yield_typed(self.__class__):
+                if not hasattr(self, name) or getattr(self, name) is None:
+                    warnings.warn("Missing data object {}".format(name))
 
     @classmethod
-    def describe_attributes(cls):
+    def describe_data(cls):
         """Description of data attributes associated with this parser."""
         df = {}
         for name, types in yield_typed(cls):
             df[name] = (cls._descriptions[name], types)
         df = pd.DataFrame.from_dict(df, orient='index')
-        df.columns = ["Description", "Type"]
-        df.index.name = "Attribute"
+        df.columns = ["description", "type"]
+        df.index.name = "attribute"
         return df

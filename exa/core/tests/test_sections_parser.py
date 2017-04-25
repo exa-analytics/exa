@@ -55,7 +55,7 @@ class MockSections(Sections):
 
     def _parse(self):
         """This is depends on the file structure."""
-        delims = self.find(self._key_marker, which='lineno')[self._key_marker]
+        delims = self.find(self._key_marker, text=False)[self._key_marker]
         starts = [delim + 1 for delim in delims]
         starts.insert(0, 0)
         ends = delims
@@ -136,7 +136,7 @@ class TestSections(TestCase):
             self.assertFalse(hasattr(sec, "parse_section0"))
             sec.parse()
             for i in sec.sections.index:
-                attrname = sec.sections.loc[i, "attr"]
+                attrname = sec.sections.loc[i, "section"]
                 self.assertTrue(hasattr(sec, attrname))
             sec.section1.parse()
             self.assertTrue(hasattr(sec.section0, "wordlist"))

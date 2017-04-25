@@ -66,7 +66,7 @@ efficient objects for parsing can be created.
 
     MySections.describe_parsers()
         # +-------------+------------+------------------+---------------------+
-        # | Parser Name | Parameters | Class(es)        | Attributes          |
+        # | Parser Name | Parameters | Class(es)        | attributes          |
         # +-------------+------------+------------------+---------------------+
         # | default     | None       | <class 'Parser'> | wordcount, wordlist |
         # +-------------+------------+------------------+---------------------+
@@ -153,13 +153,13 @@ class Sections(six.with_metaclass(SectionsMeta, Editor, Mixin)):
     names, titles, and starting/ending lines. Parsing objects are related by
     their names. Below is an example of the ``sections`` tables.
 
-    +----+-------------+---------------+-------+-----+
-    |    | Parser Name | Section Title | Start | End |
-    +----+-------------+---------------+-------+-----+
-    | ID |             |               |       |     |
-    +----+-------------+---------------+-------+-----+
-    | 0  | parser_name | A Title       | 0     |  n  |
-    +----+-------------+---------------+-------+-----+
+    +---------+-------------+---------------+-------+-----+
+    |         | parser      | titlec        | start | end |
+    +---------+-------------+---------------+-------+-----+
+    | section |             |               |       |     |
+    +---------+-------------+---------------+-------+-----+
+    | 0       | parser_name | A Title       | 0     |  n  |
+    +---------+-------------+---------------+-------+-----+
 
     Attributes:
         sections (DataFrame): Dataframe of section numbers, names, titles, and starting/ending lines
@@ -215,8 +215,9 @@ class Sections(six.with_metaclass(SectionsMeta, Editor, Mixin)):
         for col in self._sections_columns:
             if col not in df:
                 raise ValueError("Sections dataframe requires columns: {}".format(", ".join(self._sections_columns)))
-        df['attr'] = [self._section_name_prefix+str(i).zfill(len(str(len(df)))) for i in df.index]
+        df[self._section_name_prefix] = [self._section_name_prefix+str(i).zfill(len(str(len(df)))) for i in df.index]
         df = df.loc[:, list(self._sections_columns) + list(set(df.columns).difference(self._sections_columns))]
+        df.index.name = self._section_name_prefix
         self.sections = df
 
     def parse(self, recursive=False, verbose=False):
@@ -247,7 +248,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor, Mixin)):
             raise ValueError("Parsing method ``_parse`` does not correctly set ``sections``.")
         # Now generate section attributes for the sections present
         for i in self.sections.index:
-            secname, attrname = self.sections.loc[i, ["parser", "attr"]]
+            secname, attrname = self.sections.loc[i, ["parser", "section"]]    # HARDCODED
             if secname not in self._parsers:
                 if verbose:
                     warnings.warn("No parser for section '{}'!".format(secname))
@@ -289,7 +290,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor, Mixin)):
             :func:`~exa.core.sections.Sections.describe_sections`, and
             :func:`~exa.core.sections.Sections.describe_parsers`.
         """
-        secname, start, end, attrname = self.sections.loc[number, ["parser", "start", "end", "attr"]]
+        secname, start, end, attrname = self.sections.loc[number, ["parser", "start", "end", "section"]]    # HARDCODED
         if secname not in self._parsers:
             if verbose:
                 warnings.warn("No parser for section '{}'!".format(section))
@@ -301,6 +302,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor, Mixin)):
         # ...or if recursive is true.
         if recursive:
             sec.parse(recursive=True, verbose=verbose)
+            #getattr(self, attrname).parse(recursive=True, verbose=verbose)
 
     def delimiters(self):
         """Describes the patterns used to disambiguate regions of the file."""
@@ -326,17 +328,16 @@ class Sections(six.with_metaclass(SectionsMeta, Editor, Mixin)):
         """Display available section parsers."""
         data = {}
         for key, item in cls._parsers.items():
-            params = [n.replace("_key_", "") for n in vars(item) if n.startswith("_key_")]
-            params = None if params == [] else ", ".join(params)
-            attrs = [attr[0] for attr in yield_typed(item)]
-            attrs = None if attrs == [] else ", ".join(attrs)
-            data[key] = (params, item, attrs)
+            params = len([n for n in vars(item) if n.startswith("_key_")])
+            attrs = len([attr[0] for attr in yield_typed(item)])
+            typ = "Sections" if item in Sections.__subclasses__() else "Parser"
+            data[key] = (params, typ, attrs)
         if len(data) == 0:
             warnings.warn("No parsers added.")
         else:
             df = pd.DataFrame.from_dict(data, orient='index')
             df.index.name = "parser"
-            df.columns = ["key params", "type", "attrs"]
+            df.columns = ["key parameters", "type", "attributes"]
             return df
 
     @classmethod

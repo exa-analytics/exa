@@ -102,7 +102,7 @@ class TestEditor(TestCase):
         cnst = u"{[\w\d]*}"
         self.assertEqual(len(self.from_file.regex(cnst)[cnst]), 2)
         cnst = u"{[\w\d]*}"
-        self.assertEqual(len(self.from_file.regex(cnst, which='lineno')[cnst]), 2)
+        self.assertEqual(len(self.from_file.regex(cnst, text=False)[cnst]), 2)
 
     def test_head_tail(self):
         """
@@ -172,16 +172,16 @@ class TestEditor(TestCase):
         """Test :func:`~exa.core.editor.Editor.find`."""
         rp = "That was a blank line"
         self.assertEqual(len(self.from_file.find(rp)[rp]), 2)
-        self.assertEqual(len(self.from_file.find(rp, which="lineno")[rp]), 2)
-        self.assertEqual(len(self.from_file.find(rp, which="text")[rp]), 2)
+        self.assertEqual(len(self.from_file.find(rp, text=False)[rp]), 2)
+        self.assertEqual(len(self.from_file.find(rp, num=False)[rp]), 2)
 
     def test_find_next(self):
         """Test :func:`~exa.core.editor.Editor.find_next`."""
         rp = "That was a blank line"
-        self.assertEqual(self.from_file.find_next(rp, "lineno", True), 6)  # Cursor 0 -> 6
-        self.assertEqual(self.from_file.find_next(rp, "lineno"), 2)        # 6 -> 2
-        self.assertEqual(self.from_file.find_next(rp, "lineno"), 6)        # 2 -> 6
-        self.assertEqual(self.from_file.find_next(rp, "text"), rp)     # 2 -> 6
+        self.assertEqual(self.from_file.find_next(rp, text=False, reverse=True), 6)  # Cursor 0 -> 6
+        self.assertEqual(self.from_file.find_next(rp, text=False), 2)        # 6 -> 2
+        self.assertEqual(self.from_file.find_next(rp, text=False), 6)        # 2 -> 6
+        self.assertEqual(self.from_file.find_next(rp, num=False), rp)        # 2 -> 6
         self.assertEqual(self.from_file.find_next(rp), (6, rp))
 
     def test_concat(self):
