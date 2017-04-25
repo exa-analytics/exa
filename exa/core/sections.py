@@ -192,9 +192,11 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         """
         pass
 
-    def _gen_sec_attr_name(self, i):
-        """Generate section attribute name (e.g. section001)."""
-        return self._section_name_prefix + str(i).zfill(len(str(len(self._sections))))
+    def _sections_helper(self, values):
+        """Custom sections dataframe creation."""
+        df = pd.DataFrame(values)
+        df['attr'] = [self._section_name_prefix+str(i).zfill(len(str(len(df)))) for i in df.index]
+        self._sections = df
 
     def parse(self, verbose=False):
         """
@@ -212,14 +214,13 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
         # First perform the file specific parse method
         self._parse()
         # Now generate section attributes for the sections present
-        for i, sec in enumerate(self.sections):
-            section = sec[0]
-            if section not in self._parsers:
+        for i in self.sections.index:
+            secname = self.sections.loc[i, "name"]
+            if secname not in self._parsers:
                 if verbose:
-                    warnings.warn("No parser for section '{}'!".format(section))
+                    warnings.warn("No parser for section '{}'!".format(secname))
                 continue
-            secname = self._gen_section_name(i)
-            ptypes = self._parsers[section]
+            ptypes = self._parsers[secname]
             # Now we perform a bit of class gymnastics:
             # Because we don't want to attach our typed property paradigm
             # (see exa.typed.create_typed_attr) to all instances of this
@@ -274,6 +275,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
             if verbose:
                 warnings.warn("No parser for section '{}'!".format(section))
             return
+        secname = self._section_name_prefix + str(number).zfill(len(str(len(self._nsections))))
         secname = self._gen_sec_attr_name(number)
         # Note that we don't actually parse anything until a value is in fact
         # request, e.g. sections.parser.dataobj
