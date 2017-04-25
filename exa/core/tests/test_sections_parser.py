@@ -61,7 +61,8 @@ class MockSections(Sections):
         ends = delims
         ends.append(len(self))
         names = [self._key_def_sec_name]*len(starts)
-        self.sections = list(zip(names, starts, ends))
+        dct = {"parser": names, "start": starts, "end": ends}
+        self._sections_helper(dct)
 
 
 class MockSectionMeta(SectionsMeta):
@@ -122,8 +123,6 @@ class TestSections(TestCase):
             df = sec.describe_parsers()
             self.assertIsInstance(df, pd.DataFrame)
             self.assertEqual(len(df), 1)
-        with self.assertRaises(TypeError):
-            MockSections.describe_sections()
 
     def test_parsing(self):
         """Test live modification of class objects on parsing."""
@@ -136,10 +135,9 @@ class TestSections(TestCase):
             self.assertFalse(hasattr(sec, "section0"))
             self.assertFalse(hasattr(sec, "parse_section0"))
             sec.parse()
-            for i in range(sec._nsections):
-                name = "section" + str(i)
-                self.assertTrue(hasattr(sec, "parse_" + name))
-                self.assertTrue(hasattr(sec, name))
+            for i in sec.sections.index:
+                attrname = sec.sections.loc[i, "attr"]
+                self.assertTrue(hasattr(sec, attrname))
             sec.section1.parse()
             self.assertTrue(hasattr(sec.section0, "wordlist"))
             self.assertTrue(hasattr(sec.section0, "wordcount"))

@@ -112,14 +112,16 @@ class SectionsMeta(ABCBaseMeta):
     _descriptions = {"sections": "List of sections"}
     sections = pd.DataFrame
 
+    # Note that we add the describe method to the metaclass so that it appears
+    # on the Parser class (see :class:`~exa.core.parser.Parser`)
     def describe(cls):
         """Parser description."""
-        data = {"Name": cls.name, "Class": cls, "Description": cls.description}
+        data = {"name": cls.name, "class": cls, "description": cls.description}
         params = [n.replace("_key_", "") for n in vars(cls) if n.startswith("_key_")]
         if len(params) == 0:
-            data["Parameters"] = None
+            data["parameters"] = None
         else:
-            data["Parameters"] = params
+            data["parameters"] = params
         return pd.Series(data)
 
     def __new__(mcs, name, bases, clsdict):
@@ -147,25 +149,28 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
     names, titles, and starting/ending lines. Parsing objects are related by
     their names. Below is an example of the ``sections`` tables.
 
-    +------------+-------------+-------+-----+
-    | Section ID | Parser Name | Start | End |
-    +------------+-------------+-------+-----+
-    | 0          | default     | 0     | 1   |
-    +------------+-------------+-------+-----+
-    | 1          | default     | 2     | 3   |
-    +------------+-------------+-------+-----+
-    | 2          | default     | 4     | 5   |
-    +------------+-------------+-------+-----+
+    +----+-------------+---------------+-------+-----+
+    |    | Parser Name | Section Title | Start | End |
+    +----+-------------+---------------+-------+-----+
+    | ID |             |               |       |     |
+    +----+-------------+---------------+-------+-----+
+    | 0  | parser_name | A Title       | 0     |  n  |
+    +----+-------------+---------------+-------+-----+
 
     Attributes:
         sections (DataFrame): Dataframe of section numbers, names, titles, and starting/ending lines
 
     See Also:
         :class:`~exa.core.parser.Parser`
+
+    Note:
+        Be careful modifying the :attr:`~exa.core.sections.Sections._sections_columns`
+        attribute, the 'parser', 'start', and 'end' columns are hardcoded.
     """
     name = None        # Subclasses may set this if needed
     description = None # ditto
     _section_name_prefix = "section"
+    _sections_columns = ("parser", "start", "end")
 
     @abstractmethod
     def _parse(self):
@@ -181,41 +186,63 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
 
             class MySections(Sections):
                 def _parse(self):
-                    names = ["first", "second"]
+                    # This function should actually perform parsing
+                    # and generate the sections object using the ``_sections_helper``.
+                    names = ["parser_name", "other_parser"]
                     starts = [0, 10]
                     ends = [10, 20]
-                    titles = [None, None]
-                    self.sections =
+                    titles = ["A Title", "Another Title"]
+                    dct = {"parser": names, "start": starts, "end": ends, "title": titles}
+                    self._sections_helper(DataFrame.from_dict(dct))
 
-                    self.sections = DataFrame.from_dict({"names": ["first", "sect
-
+        See Also:
+            :func:`~exa.core.sections.Sections._sections_helper`
         """
         pass
 
-    def _sections_helper(self, values):
-        """Custom sections dataframe creation."""
-        df = pd.DataFrame(values)
-        df['attr'] = [self._section_name_prefix+str(i).zfill(len(str(len(df)))) for i in df.index]
-        self._sections = df
-
-    def parse(self, verbose=False):
+    def _sections_helper(self, dct):
         """
-        Parse the sections of this file and set the ``sections`` attribute.
+        Sections dataframe creation helper.
+
+        Args:
+            dct (dict): Dictionary of parser names, section titles, starting lines, and ending lines
+        """
+        df = pd.DataFrame.from_dict(dct)
+        for col in self._sections_columns:
+            if col not in df:
+                raise ValueError("Sections dataframe requires columns: {}".format(", ".join(self._sections_columns)))
+        df['attr'] = [self._section_name_prefix+str(i).zfill(len(str(len(df)))) for i in df.index]
+        self.sections = df
+
+    def parse(self, recursive=False, verbose=False):
+        """
+        Parse the current file.
+
+        Args:
+            recursive (bool): If true, parses all sub-section/parser objects' data
+            verbose (bool): Print parser warnings
+
+        Tip:
+            To see what objects exist, see the :attr:`~exa.core.sections.Sections.sections`
+            attribute and :func:`~exa.core.sections.Sections.describe`,
+            :func:`~exa.core.sections.Sections.describe_sections`, and
+            :func:`~exa.core.sections.Sections.describe_parsers`.
 
         See Also:
-            :func:`~exa.core.editor.Sections.describe_sections`
+            :func:`~exa.core.editor.Sections.parse_section`
         """
-        # This helper function is used below; it makes a call self's parse_section
-        # function with a given argument.
+        # This helper function is used to setup auto-parsing, see below.
         def section_parser_helper(i):
             def section_parser():
                 self.parse_section(i)
             return section_parser
-        # First perform the file specific parse method
+        # Set the value of the ``sections`` attribute
         self._parse()
+        if not hasattr(self, "sections") or self.sections is None:
+            raise ValueError("Parsing method ``_parse`` does not correctly set ``sections``.")
         # Now generate section attributes for the sections present
         for i in self.sections.index:
-            secname = self.sections.loc[i, "name"]
+            secname, attrname = self.sections.loc[i, ["parser", "attr"]]
             if secname not in self._parsers:
                 if verbose:
                     warnings.warn("No parser for section '{}'!".format(secname))
@@ -232,26 +259,11 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
                 uniquecls.__unique = True
                 uniquecls.add_section_parsers(*cls._parsers.values())
                 self.__class__ = uniquecls
-            setattr(self.__class__, secname, create_typed_attr(secname, ptypes))
+            setattr(self.__class__, attrname, create_typed_attr(attrname, ptypes))
             # And attach a lazy evaluation method using the above helper
-            setattr(self, "parse_" + secname, section_parser_helper(i))
-
-    def parse_all_sections(self, verbose=False):
-        """
-        Parse data (or sub-sections) of each section identified by this object.
-
-        For each section parsed, a corresponding attributed name ``sectionID``
-        is created; nothing is returned by this function and no arguments are
-        accepted.
-
-        See Also:
-            Two very useful functions, :func:`~exa.core.editor.Sections.describe_sections`
-            and :func:`~exa.editor.Sections.describe_parsers` show section names
-            and numbers, and section parsers, respectively.
-        """
-        self.parse(verbose=verbose)
-        for i in range(len(self.sections)):
-            self.parse_section(i, recursive=True, verbose=verbose)
+            setattr(self, "parse_" + attrname, section_parser_helper(i))
+            if recursive:
+                self.parse_section(i, recursive=True, verbose=verbose)
 
     def parse_section(self, number, recursive=False, verbose=False):
         """
@@ -263,28 +275,27 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
 
         Args:
             number (int): Section number (of the ``sections`` list)
-            recursive (bool): Parse all (possible) sub-sections
+            recursive (bool): Parse sub-section/parser objects
+            verbose (bool): Display additional warnings
 
-        See Also:
-            Two very useful functions, :func:`~exa.core.editor.Sections.describe_sections`
-            and :func:`~exa.editor.Sections.describe_parsers` show section names
-            and numbers, and section parsers, respectively.
+        Tip:
+            To see what objects exist, see the :attr:`~exa.core.sections.Sections.sections`
+            attribute and :func:`~exa.core.sections.Sections.describe`,
+            :func:`~exa.core.sections.Sections.describe_sections`, and
+            :func:`~exa.core.sections.Sections.describe_parsers`.
         """
-        section, start, end = self.sections[number]
-        if section not in self._parsers:
+        secname, start, end, attrname = self.sections.loc[number, ["parser", "start", "end", "attr"]]
+        if secname not in self._parsers:
             if verbose:
                 warnings.warn("No parser for section '{}'!".format(section))
             return
-        secname = self._section_name_prefix + str(number).zfill(len(str(len(self._nsections))))
-        secname = self._gen_sec_attr_name(number)
         # Note that we don't actually parse anything until a value is in fact
-        # request, e.g. sections.parser.dataobj
-        sec = self._parsers[section](self[start:end], path_check=False)
-        setattr(self, secname, sec)
-        if hasattr(sec, "parse_all_sections") and recursive:
-            getattr(self, secname).parse_all_sections()
-        else:
-            getattr(self, secname).parse()
+        # request, e.g. sections.parser.dataobj...
+        sec = self._parsers[secname](self[start:end], path_check=False)
+        setattr(self, attrname, sec)
+        # ...or if recursive is true.
+        if recursive:
+            getattr(self, secname).parse(recursive=True, verbose=verbose)
 
     def delimiters(self):
         """Describes the patterns used to disambiguate regions of the file."""
@@ -304,20 +315,6 @@ class Sections(six.with_metaclass(SectionsMeta, Editor)):
                 raise ValueError("Multiple sections with name = {}".format(i))
             name = name[0]
         return getattr(self, name)
-
-    def describe_sections(self):
-        """
-        Display available section names and numbers.
-
-        Note:
-            This method only has meaning once sections have been parsed.
-        """
-        if len(self.sections) == 0:
-            warnings.warn("No sections identified.")
-        else:
-            df = pd.DataFrame(self.sections, columns=["Parser Name", "Start", "End"])
-            df.index.name = "Section ID"
-            return df
 
     @classmethod
     def describe_parsers(cls):
