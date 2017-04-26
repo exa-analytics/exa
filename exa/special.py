@@ -137,8 +137,9 @@ def yield_typed(obj):
         if not name.startswith("_"):
             # Use the weak constraint of ".." in __doc__ in case additional
             # documentation has been added.
-            if isinstance(attr, property) and "__typed__" in attr.__doc__:
+            if isinstance(attr, property) and "__typed__" in attr.__doc__ and hasattr(mcs, name):
                 yield (name, getattr(mcs, name))
+            # Here we catch multiply statically typed attributes
             elif isinstance(attr, (tuple, list, type)):
                 yield (name, attr)
 
@@ -289,5 +290,5 @@ class Typed(ABCMeta):
         for attr_name, types in yield_typed(mcs):
             clsdict[attr_name] = create_typed_attr(attr_name, types)
         # Other attributes and methods
-        clsdict['_yield_typed'] = yield_typed
+        #clsdict['_yield_typed'] = yield_typed
         return super(Typed, mcs).__new__(mcs, name, bases, clsdict)

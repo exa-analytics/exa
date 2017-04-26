@@ -136,7 +136,7 @@ class TestSections(TestCase):
             self.assertFalse(hasattr(sec, "parse_section0"))
             sec.parse()
             for i in sec.sections.index:
-                attrname = sec.sections.loc[i, "section"]
+                attrname = sec.sections.loc[i, "attribute"]
                 self.assertTrue(hasattr(sec, attrname))
             sec.section1.parse()
             self.assertTrue(hasattr(sec.section0, "wordlist"))

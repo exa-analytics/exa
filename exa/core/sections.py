@@ -33,7 +33,8 @@ efficient objects for parsing can be created.
             ends = delims
             ends.append(len(self))
             names = [self._key_def_sec_name]*len(starts)
-            self.sections = list(zip(names, starts, ends))
+            dct = {'parser': names, 'start': starts, 'end': ends}
+            self._section_helper(dct)
 
     class MyParserMeta(SectionsMeta):
         # The metaclass defines the parser's data objects and types
@@ -95,6 +96,7 @@ Warning:
 """
 import six
 import warnings
+import numpy as np
 import pandas as pd
 from abc import abstractmethod
 from exa.special import simple_function_factory, yield_typed, create_typed_attr
@@ -137,6 +139,21 @@ class Mixin(object):
             data["parameters"] = params
         return pd.Series(data)
 
+    @classmethod
+    def describe_data(cls):
+        """Description of data attributes associated with this parser."""
+        df = {}
+        for name, types in yield_typed(cls):
+            df[name] = (cls._descriptions[name], types)
+        if len(df) == 0:
+            df = pd.DataFrame([[0, 0]])    # Empty dataframe
+            df = df[df[0] != 0]            # with columns as below
+        else:
+            df = pd.DataFrame.from_dict(df, orient='index')
+        df.columns = ["description", "type"]
+        df.index.name = "attribute"
+        return df
+
 
 class Sections(six.with_metaclass(SectionsMeta, Editor, Mixin)):
     """
@@ -154,7 +171,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor, Mixin)):
     their names. Below is an example of the ``sections`` tables.
 
     +---------+-------------+---------------+-------+-----+
-    |         | parser      | titlec        | start | end |
+    |         | parser      | title         | start | end |
     +---------+-------------+---------------+-------+-----+
     | section |             |               |       |     |
     +---------+-------------+---------------+-------+-----+
@@ -215,7 +232,8 @@ class Sections(six.with_metaclass(SectionsMeta, Editor, Mixin)):
         for col in self._sections_columns:
             if col not in df:
                 raise ValueError("Sections dataframe requires columns: {}".format(", ".join(self._sections_columns)))
-        df[self._section_name_prefix] = [self._section_name_prefix+str(i).zfill(len(str(len(df)))) for i in df.index]
+        # HARDCODED
+        df['attribute'] = [self._section_name_prefix+str(i).zfill(len(str(len(df)))) for i in df.index]
         df = df.loc[:, list(self._sections_columns) + list(set(df.columns).difference(self._sections_columns))]
         df.index.name = self._section_name_prefix
         self.sections = df
@@ -248,7 +266,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor, Mixin)):
             raise ValueError("Parsing method ``_parse`` does not correctly set ``sections``.")
         # Now generate section attributes for the sections present
         for i in self.sections.index:
-            secname, attrname = self.sections.loc[i, ["parser", "section"]]    # HARDCODED
+            secname, attrname = self.sections.loc[i, ["parser", "attribute"]]    # HARDCODED
             if secname not in self._parsers:
                 if verbose:
                     warnings.warn("No parser for section '{}'!".format(secname))
@@ -290,10 +308,10 @@ class Sections(six.with_metaclass(SectionsMeta, Editor, Mixin)):
             :func:`~exa.core.sections.Sections.describe_sections`, and
             :func:`~exa.core.sections.Sections.describe_parsers`.
         """
-        secname, start, end, attrname = self.sections.loc[number, ["parser", "start", "end", "section"]]    # HARDCODED
+        secname, start, end, attrname = self.sections.loc[number, ["parser", "start", "end", "attribute"]]    # HARDCODED
         if secname not in self._parsers:
             if verbose:
-                warnings.warn("No parser for section '{}'!".format(section))
+                warnings.warn("No parser for section '{}'!".format(secname))
             return
         # Note that we don't actually parse anything until a value is in fact
         # request, e.g. sections.parser.dataobj...
@@ -308,20 +326,33 @@ class Sections(six.with_metaclass(SectionsMeta, Editor, Mixin)):
         """Describes the patterns used to disambiguate regions of the file."""
         return [(name, getattr(self, name)) for name in vars(self) if name.startswith("_key_")]
 
-    def get_section(self, i):
-        """Retrieve a section by name or number."""
-        n = len(str(len(self.sections)))
-        if isinstance(i, int):
-            name = self._section_name_prefix + str(i).zfill(n)
+    def get_section(self, section):
+        """
+        Select a section by (parser) name or section number.
+
+        Args:
+            section: Section number or parser name
+
+        Returns:
+            section_editor: Editor-like sections or parser object
+
+        Warning:
+            If multiple sections with the same parser name exist, selection must
+            be performed by section number.
+        """
+        if isinstance(section, six.string_types):
+            idx = self.sections[self.sections["parser"] == section].index
+            if len(idx) > 1:
+                raise ValueError("Multiple sections with parser name {} found".format(section))
+            idx = idx[0]
+        elif isinstance(section, six.integer_types + (np.int, np.int8, np.int16, np.int32, np.int64)):
+            idx = section
         else:
-            name = []
-            for j, nam in enumerate(self.sections):
-                if i in nam:
-                    name.append(self._section_name_prefix + str(j).zfill(n))
-            if len(name) > 1:
-                raise ValueError("Multiple sections with name = {}".format(i))
-            name = name[0]
-        return getattr(self, name)
+            raise TypeError("Unknown type for section arg with type {}".format(type(section)))
+        try:
+            return getattr(self, self.sections.loc[idx, "attribute"])
+        except AttributeError:
+            return None
 
     @classmethod
     def describe_parsers(cls):
