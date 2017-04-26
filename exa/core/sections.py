@@ -20,7 +20,6 @@ efficient objects for parsing can be created.
     '''
 
     class MySections(Sections):
-        name = "example_sections_parser"
         description = "Parses files separated by ---"
         _key_sep = "---"                # Arbitrary section separator
         _key_def_sec_name = "default"   # Section name
@@ -46,7 +45,6 @@ efficient objects for parsing can be created.
     class MyParser(six.with_metaclass(MyParserMeta, Parser)):
         # This is a class that parsers the specific section (region)
         description = "Parser for individual region separated by -* regex"
-        name = "default"
 
         def _parse(self):
             # Arbitrary what data objects are created here
@@ -60,30 +58,12 @@ efficient objects for parsing can be created.
     # The following shows some useful commands and (commented) print output
     # Prior to using a Sections or Section object one can inspect them
     MySections.describe()
-        # Class          <class '...'>
-        # Description    Parses files separated by -* regex
-        # Name                      example_sections_parser
-        # Parameters                    [sep, def_sec_name]
-
     MySections.describe_parsers()
-        # +-------------+------------+------------------+---------------------+
-        # | Parser Name | Parameters | Class(es)        | attributes          |
-        # +-------------+------------+------------------+---------------------+
-        # | default     | None       | <class 'Parser'> | wordcount, wordlist |
-        # +-------------+------------+------------------+---------------------+
+    MySections.describe_data()
 
     # The object is create just like all editors
     edit = MySections(text)
-    edit.describe_sections()
-        # +------------+-------------+-------+-----+
-        # | Section ID | Parser Name | Start | End |
-        # +------------+-------------+-------+-----+
-        # | 0          | default     | 0     | 1   |
-        # +------------+-------------+-------+-----+
-        # | 1          | default     | 2     | 3   |
-        # +------------+-------------+-------+-----+
-        # | 2          | default     | 4     | 5   |
-        # +------------+-------------+-------+-----+
+    edit.sections
 
 See Also:
     :mod:`~exa.core.parsers`
@@ -188,7 +168,6 @@ class Sections(six.with_metaclass(SectionsMeta, Editor, Mixin)):
         Be careful modifying the :attr:`~exa.core.sections.Sections._sections_columns`
         attribute, the 'parser', 'start', and 'end' columns are hardcoded.
     """
-    name = None        # Subclasses may set this if needed
     description = None # ditto
     _section_name_prefix = "section"
     _sections_columns = ("parser", "start", "end")
@@ -237,6 +216,27 @@ class Sections(six.with_metaclass(SectionsMeta, Editor, Mixin)):
         df = df.loc[:, list(self._sections_columns) + list(set(df.columns).difference(self._sections_columns))]
         df.index.name = self._section_name_prefix
         self.sections = df
+
+    def _describe_data(self, data=[], inplace=False, section=None):
+        """
+        """
+        df = self.describe_data().reset_index()
+        df["parser"] = self.__class__.name
+        if section is None:
+            try:
+                section = [name for name, var in globals().items() if var is self][0]
+            except:
+                section = "null"
+            df["section"] = section
+        data.append(df[df["attribute"] != "sections"])
+        for i in self.sections.index:
+            sec = self.get_section(i)
+            section += "." + self.sections.loc[i, "attribute"]
+            if sec is not None:
+                sec._describe_data(data, True, section)
+        if not inplace:
+            data = pd.concat(data, ignore_index=True)
+            return data.loc[:, ["section", "attribute", "parser", "description", "type"]]
 
     def parse(self, recursive=False, verbose=False):
         """
@@ -380,5 +380,9 @@ class Sections(six.with_metaclass(SectionsMeta, Editor, Mixin)):
 
             Sections.add_section_parsers(Section1, Section2, ...)
         """
-        cls._parsers.update({str(s.name): s for s in args})
+        for s in args:
+            if s.name is None:
+                kwargs[s.__class__.__name__] = s
+            else:
+                kwargs[s.name] = s
         cls._parsers.update(kwargs)

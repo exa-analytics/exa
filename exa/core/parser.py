@@ -44,6 +44,14 @@ class Parser(six.with_metaclass(SectionsMeta, Editor, Mixin)):
         """
         pass
 
+    def _describe_data(self, data=[], inplace=False, section=None):
+        df = self.describe_data().reset_index()
+        df["parser"] = self.__class__.name
+        df["sectionid"] = section
+        data.append(df)
+        if not inplace:
+            return pd.concat(data, ignore_index=True)
+
     def parse(self, **kwargs):
         """
         Parse data objects from the current file.
