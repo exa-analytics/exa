@@ -4,6 +4,7 @@
 """
 DataSeries
 ########################
+A custom labeled array that supports metadata and unit conversions.
 """
 import six
 import pandas as pd
@@ -14,18 +15,9 @@ from .base import ABCBaseMeta, ABCBase
 
 class DataSeriesMeta(ABCBaseMeta):
     """
-    Metaclass for the advanced series like object :class:`~exa.core.data.DataSeries`.
-
-    The purpose of this class is to enable metadata and unit specifications for labeled
-    arrays with minimal computational overhead. This means that requested mathematical
-    operations take precendence over 'correct' propagation of metadata. Metadata is
-    never attached to an object (after an operation is performed) unless it had metadata
-    before the operation. Metadata is not propogated if objects both objects involved
-    in an operation have metadata before the operation. Units are handled separately.
-
-    See Also:
-        For a description of unit propagation rules see
-        :func:`~exa.core.data.DataSeriesMeta.series_op_with_units`.
+    This metaclass modifies the creation of the class object,
+    :class:`~exa.core.data.DataSeries` on import. All math operations are
+    modified to support units and metadata propagation (where possible).
     """
     unit = _Unit
 
@@ -47,6 +39,7 @@ class DataSeriesMeta(ABCBaseMeta):
             if (hasattr(other, "unit") and other.unit is None
                 and hasattr(other, "meta") and other.meta is None):
                 if isinstance(result, tuple):
+                    print("HERERERER")
                     for i in range(n):
                         result[i].__finalize__(self)
                 else:

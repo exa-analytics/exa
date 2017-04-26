@@ -37,10 +37,7 @@ class ABCBase(six.with_metaclass(ABCBaseMeta, object)):
         object.__setattr__(self, "uid", uuid4())
 
     def __init__(self, name=None, uid=None, meta=None):
-        if name is None:
-            self.name = self.__class__.__name__
-        else:
-            self.name = name
+        self.name = name
         self.uid = uid
         self.meta = meta
 
@@ -56,11 +53,6 @@ class ABCContainer(ABCBase):
     _getters = ("_get", "parse", "compute")
 
     @abstractmethod
-    def concat(self, *args, **kwargs):
-        """Concatenate container objects."""
-        pass
-
-    @abstractmethod
     def describe(self):
         """Display a frame containing information about this object."""
         pass
@@ -69,7 +61,7 @@ class ABCContainer(ABCBase):
         """Helper method for introspectively obtaining data objects."""
         return {n: v for n, v in vars(self).items() if not n.startswith("_")}
 
-    def _data_properties(self):
+    def _data_properties(self):     # To be used by the ``describe`` method
         """Helper method to estimate data sizes (in MiB)."""
         data = {}
         for name, v in self._data().items():
@@ -84,6 +76,6 @@ class ABCContainer(ABCBase):
         return data
 
     @abstractmethod
-    def _html_repr_(self):
+    def _html_repr_(self):    # Jupyter notebook visualization
         """Jupyter notebook representation."""
         pass

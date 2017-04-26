@@ -4,7 +4,11 @@
 """
 Tests for :mod:`~exa.core.editor`
 #############################################
-Tests for base editor and editor-like classes.
+Test features of :class:`~exa.core.editor.Editor`class and related functions.
+Some of the tests here perform disk I/O.
+
+See Also:
+    :mod:`~exa.core.tests.test_parsing`
 """
 import os, bz2, gzip, six, shutil
 from types import GeneratorType
@@ -15,7 +19,7 @@ from uuid import uuid4, UUID
 from unittest import TestCase
 from tempfile import mkdtemp
 from exa.core.editor import concat, Editor
-if not hasattr(bz2, "open"):    # Python 2.7.x compatibility
+if not hasattr(bz2, "open"):    # Python 2.7 compatibility
     bz2.open = bz2.BZ2File
 
 
@@ -29,7 +33,7 @@ That was a blank line
 """
 
 
-editor_data = u"""[[0, 1 ,2],
+editor_data = u"""[[0, 1, 2],
 [3, 4, 5]]
 """
 
@@ -37,8 +41,10 @@ editor_data = u"""[[0, 1 ,2],
 class TestEditor(TestCase):
     """
     The tester reads in a contrived example in the root "tests" directory and
-    proceeds to test the various functions provided by
-    :class:`~exa.core.editor.Editor`.
+    proceeds to test the various functions provided by :class:`~exa.core.editor.Editor`.
+
+    Note:
+        This test performs disk I/O.
     """
     def setUp(self):
         """
@@ -79,8 +85,8 @@ class TestEditor(TestCase):
 
     def test_editor_input_methods(self):
         """
-        Test to make sure all the support input (**read_\***) were read in
-        correctly. This function actually tests
+        Test to make sure all the support input (**read_\*** methods) were
+        read in correctly. This function actually tests
         :func:`~exa.core.editor.Editor.__eq__`.
         """
         self.assertEqual(self.from_file, self.from_file_enc)
@@ -103,6 +109,8 @@ class TestEditor(TestCase):
         self.assertEqual(len(self.from_file.regex(cnst)[cnst]), 2)
         cnst = u"{[\w\d]*}"
         self.assertEqual(len(self.from_file.regex(cnst, text=False)[cnst]), 2)
+        with self.assertRaises(ValueError):
+            self.from_file.regex(cnst, text=False, num=False)
 
     def test_head_tail(self):
         """
@@ -174,6 +182,8 @@ class TestEditor(TestCase):
         self.assertEqual(len(self.from_file.find(rp)[rp]), 2)
         self.assertEqual(len(self.from_file.find(rp, text=False)[rp]), 2)
         self.assertEqual(len(self.from_file.find(rp, num=False)[rp]), 2)
+        with self.assertRaises(ValueError):
+            self.from_file.find(rp, text=False, num=False)
 
     def test_find_next(self):
         """Test :func:`~exa.core.editor.Editor.find_next`."""
@@ -183,6 +193,8 @@ class TestEditor(TestCase):
         self.assertEqual(self.from_file.find_next(rp, text=False), 6)        # 2 -> 6
         self.assertEqual(self.from_file.find_next(rp, num=False), rp)        # 2 -> 6
         self.assertEqual(self.from_file.find_next(rp), (6, rp))
+        with self.assertRaises(ValueError):
+            self.from_file.find_next(rp, text=False, num=False)
 
     def test_concat(self):
         """Test :func:`~exa.core.editor.concat`."""
@@ -261,7 +273,17 @@ class TestEditor(TestCase):
         """Test for :func:`~exa.core.editor.Editor.to_data`."""
         df = self.from_data.to_data()
         self.assertIsInstance(df, pd.DataFrame)
-        df = self.from_data.to_data('pdjson')
+        df = self.from_data.to_data("pdjson")
         self.assertIsInstance(df, pd.DataFrame)
-        df = self.from_data.to_data('json')
+        df = self.from_data.to_data("json")
         self.assertIsInstance(df, (dict, list))
+        df = self.from_data.to_data("fwf", width=2, names=list(range(5)))
+        self.assertIsInstance(df, pd.DataFrame)
+        with self.assertRaises(ValueError):
+            self.from_data.to_data("randomtext")
+
+    def test_string_item_getter(self):
+        """Test getitem works with string keys."""
+        meta = self.from_file["meta"]
+        self.assertTrue(meta is self.from_file.meta)
+        self.assertIsInstance(meta, dict)

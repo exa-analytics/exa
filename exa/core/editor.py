@@ -4,11 +4,11 @@
 """
 Editor
 ####################################
-The :class:`~exa.core.editor.Editor` class is a way for programmatic text-
-editor-like manipulation of files on disk. The goal of an editor is to facilitate
-easy conversion or extraction of data from a text file (aka 'text file parsing`).
-It does not strive to be a full featured text editor. A large number of Pythonic
-operations can be performed on editors:
+The :class:`~exa.core.editor.Editor` class is a way for programmatic manipulation
+of text files (read in from disk). The purpose of this class is to facilitate
+conversion of :class:`~exa.core.container.Container` objects to text (and vice
+versa). This class also provides the base for text file parsing classes in
+:mod:`~exa.core.parsing`.
 
 .. code-block:: python
 
@@ -24,13 +24,16 @@ Text lines are stored in memory; file handles are only open during reading and
 writing. For large repetitive files, memoization can reduce the memory footprint
 (see the **as_interned** kwarg).
 
+Warning:
+    The :class:`~exa.core.editor.Editor` is not a fully-featured text editor.
+
 See Also:
-    Common examples of data objects are  :class:`~exa.core.dataseries.DataSeries`
-    and :class:`~exa.core.dataframe.DataFrame` among others.
+    :mod:`~exa.core.parsing`
 """
 import pandas as pd
 from copy import copy, deepcopy
-from collections import Counter, defaultdict
+from collections import defaultdict
+from itertools import chain
 from io import StringIO, TextIOWrapper
 import os, re, sys, bz2, gzip, six, json
 from .base import ABCBase, ABCBaseMeta
@@ -40,27 +43,29 @@ if not hasattr(bz2, "open"):
 
 class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
     """
-    In memory text file-like object used to facilitate data parsing.
-
-    Editor line numbers start at 0. To increase the number of lines
-    displayed, increase the value of the ``nprint`` attribute. For large text
-    with repeating strings be sure to use the ``as_interned`` argument.
-    To change the print format, modify the ``_fmt`` attribute
+    In memory text file-like object used to facilitate data parsing and
+    container to text conversion.
 
     Args:
-        name (str): Data/file/misc name
-        description (str): Data/file/misc description
-        meta (dict): Additional meta as key, value pairs
-        nrpint (int): Number of lines to display when printing
-        cursor (int): Line number position of the cursor
+        data: File path, text, stream, or archived text file
+        as_intered (bool): Memory saving for large, repeating, files
+        nprint (int): Number of lines shown by the 'repr'
+        encoding (str): File encoding
+        meta (dict): Metadata
+        path_check (bool): Force file path check (default true)
+        ignore_warning (bool): Ignore file path warning (default false)
+
+    Attributes:
+        cursor (int): Line number of cursor
+        fmt (string): Format string for 'repr' display
     """
-    _getters = ('_get', 'parse')
-    _fmt = '{0}: {1}\n'.format   # Format for printing lines (see __repr__)
+    _getters = ("_get", "parse")
+    fmt = "{0}: {1}\n".format
 
     @property
     def templates(self):
         """
-        Display a list of templates.
+        Display a list of Python string templates present in this text.
 
         .. code-block:: text
 
@@ -68,10 +73,9 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
             tmpl.format(template="other text")    # prints "this is a other text"
 
         See Also:
-            Python string formatting is very powerful. See the `docs`_ for more
-            information and usage examples.
+            `String formatting`_.
 
-        .. _docs: https://docs.python.org/3.6/library/string.html
+        .. _String formatting: https://docs.python.org/3.6/library/string.html
         """
         csnt = r"{{[\w\d]*}}"
         tmpl = r"{[\w\d]*}"
@@ -97,9 +101,18 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
         constants = [match[2:-2] for match in self.regex(csnt, num=False)[csnt]]
         return sorted(constants)
 
-    def regex(self, *patterns, **kwargs):
+    def regex(self, *patterns, **kwargs):    # Using **kwargs instead of explicit kwargs for py2 compatibility
         """
         Match a line or lines by the specified regular expression(s).
+
+        Returned values may be a list of (number, text) pairs or a list of line
+        numbers or a list of text strings.
+
+        .. code-block:: python
+
+            ed = Editor(text)
+            ed.regex("^=+$")            # Returns (line number, text) pairs where the line contains only '='
+            ed.regex("^=+$", "find")    # Search for multiple regex simultaneously
 
         Args:
             \*patterns: Regular expressions
@@ -109,6 +122,9 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
 
         Returns:
             results (dict): Dictionary with pattern keys and list of values
+
+        Note:
+            By default, regular expression search multiple lines (``re.MULTILINE``).
 
         See Also:
             https://en.wikipedia.org/wiki/Regular_expression
@@ -120,7 +136,7 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
         self_str = str(self)
         for pattern in patterns:
             match = pattern
-            if not type(pattern).__name__ == "SRE_Pattern":
+            if not type(pattern).__name__ == "SRE_Pattern":    # Compiled regular expression type check
                 match = re.compile(pattern, flags)
             if num and text:
                 for m in match.finditer(self_str):
@@ -132,7 +148,7 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
                 for m in match.finditer(self_str):
                     results[match.pattern].append(m.group())
             else:
-                raise TypeError("Invalid types for num ({}) and text ({})".format(str(num), str(text)))
+                raise ValueError("At least one of ``num`` or ``text`` must be true.")
         return results
 
     def find(self, *patterns, **kwargs):
@@ -160,7 +176,7 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
                     elif text:
                         results[pattern].append(line)
                     else:
-                        raise TypeError("Invalid types for num ({}) and text ({})".format(str(num), str(text)))
+                        raise ValueError("At least one of ``num`` or ``text`` must be true.")
         return results
 
     def find_next(self, pattern, num=True, text=True, reverse=False):
@@ -199,7 +215,7 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
                     elif text:
                         return str(self[i])
                     else:
-                        raise TypeError("Invalid types for num ({}) and text ({})".format(str(num), str(text)))
+                        raise ValueError("At least one of ``num`` or ``text`` must be true.")
 
     def copy(self):
         """Create a copy of the current editor."""
@@ -363,24 +379,25 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
         Create a single appropriate data object using pandas read_csv.
 
         Args:
-            kind (str): One of 'pdcsv', 'pdjson', 'json'
+            kind (str): One of `pdcsv`_, `pdjson`_, `json`_, `fwf`_
             args: Arguments to be passed to the pandas function
             kwargs: Arguments to be passed to the pandas function
 
-        Note:
-            A list of keyword arguments can be found at
-            http://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html
+        .. _pdcsv: http://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html
+        .. _pdjson: http://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_json.html
+        .. _json: https://docs.python.org/3/library/json.html
+        .. _fwf: http://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_fwf.html
         """
-        if kind == 'pdcsv':
+        if kind == "pdcsv":
             return pd.read_csv(self.to_stream(), *args, **kwargs)
-        elif kind == 'pdjson':
+        elif kind == "pdjson":
             return pd.read_json(self.to_stream(), *args, **kwargs)
-        elif kind == 'json':
+        elif kind == "json":
             return json.load(self.to_stream())
-        elif kind == 'fwf':
+        elif kind == "fwf":
             return pd.read_fwf(self.to_stream(), *args, **kwargs)
         else:
-            raise ValueError("Unexpected kind = {}".format(kind))
+            raise ValueError("Unexpected kind ({})".format(kind))
 
     def __eq__(self, other):
         if isinstance(other, Editor) and self._lines == other._lines:
@@ -403,7 +420,7 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
                 return True
 
     def __delitem__(self, line):
-        del self._lines[line]     # "line" is the line number minus one
+        del self._lines[line]
 
     def __getitem__(self, key):
         if isinstance(key, six.string_types):
@@ -415,8 +432,8 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
     def __setitem__(self, line, value):
         self._lines[line] = value
 
-    def __init__(self, data, as_interned=False, nprint=30, meta=None,
-                 encoding='utf-8', path_check=True, ignore_warning=False, **kwargs):
+    def __init__(self, data, as_interned=False, nprint=30, encoding="utf-8",
+                 meta=None, path_check=True, ignore_warning=False, **kwargs):
         super(Editor, self).__init__(**kwargs)
         filepath = None
         if path_check and check_path(data, ignore_warning):
@@ -431,7 +448,7 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
         elif isinstance(data, Editor):
             self._lines = data._lines
         else:
-            raise TypeError('Unknown type for arg data: {}'.format(type(data)))
+            raise TypeError("Unknown type for arg data: {}".format(type(data)))
         self.nprint = nprint
         self.as_interned = as_interned
         self.encoding = encoding
@@ -443,21 +460,21 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
                 self.meta = {'filepath': filepath}
 
     def __repr__(self):
-        r = ''
+        r = ""
         nn = len(self)
         n = len(str(nn))
         if nn > self.nprint * 2:
             for i in range(self.nprint):
-                ln = str(i).rjust(n, ' ')
-                r += self._fmt(ln, self._lines[i])
-            r += '...\n'.rjust(n, ' ')
+                ln = str(i).rjust(n, " ")
+                r += self.fmt(ln, self._lines[i])
+            r += "...\n".rjust(n, " ")
             for i in range(nn - self.nprint, nn):
-                ln = str(i).rjust(n, ' ')
-                r += self._fmt(ln, self._lines[i])
+                ln = str(i).rjust(n, " ")
+                r += self.fmt(ln, self._lines[i])
         else:
             for i, line in enumerate(self):
-                ln = str(i).rjust(n, ' ')
-                r += self._fmt(ln, line)
+                ln = str(i).rjust(n, " ")
+                r += self.fmt(ln, line)
         return r
 
 
@@ -473,15 +490,15 @@ def check_path(path, ignore_warning=False):
         result (bool): True if file path or warning ignored, false otherwise
     """
     try:
-        if (ignore_warning or os.path.exists(path) or
-            (len(path.split("\n")) == 1 and ("\\" in path or "/" in path))):
+        if os.path.exists(path) or (len(path.split("\n")) == 1 and os.sep in path):
+            if ignore_warning:
+                return False
             return True
-    except TypeError:
-        pass
-    return False
+    except TypeError:    # Argument ``path`` is not a string file path
+        return False
 
 
-def read_file(path, as_interned=False, encoding='utf-8'):
+def read_file(path, as_interned=False, encoding="utf-8"):
     """
     Create a list of file lines from a given filepath.
 
@@ -490,18 +507,18 @@ def read_file(path, as_interned=False, encoding='utf-8'):
 
     Args:
         path (str): File path
-        as_interned (bool): List of "interned" strings (default False)
+        as_interned (bool): Memory savings for large repeating text files
 
     Returns:
         strings (list): File line list
     """
     lines = None
     if path.endswith(".gz"):
-        f = gzip.open(path, 'rb')
+        f = gzip.open(path, "rb")
     elif path.endswith(".bz2"):
-        f = bz2.open(path, 'rb')
+        f = bz2.open(path, "rb")
     else:
-        f = open(path, 'rb')
+        f = open(path, "rb")
     read = f.read()
     try:
         read = read.decode(encoding)
@@ -521,7 +538,7 @@ def read_stream(f, as_interned=False):
 
     Args:
         f (:class:`~io.TextIOWrapper`): File stream
-        as_interned (bool): List of "interned" strings (default False)
+        as_interned (bool): Memory savings for large repeating text files
 
     Returns:
         strings (list): File line list
@@ -537,7 +554,7 @@ def read_string(string, as_interned=False):
 
     Args:
         string (str): File string
-        as_interned (bool): List of "interned" strings (default False)
+        as_interned (bool): Memory savings for large repeating text files
 
     Returns:
         strings (list): File line list
@@ -557,10 +574,8 @@ def concat(*editors, **kwargs):
 
     Returns:
         editor: An instance of an editor
+
+    Note:
+        Metadata, names, descriptsion, etc. are not automatically propagated.
     """
-    classes = [ed.__class__ for ed in editors]
-    cls = Counter(classes).most_common(1)[0][0]
-    lines = []
-    for ed in editors:
-        lines += ed._lines
-    return cls(lines, **kwargs)
+    return Editor(list(chain(*(ed._lines for ed in editors))), **kwargs)
