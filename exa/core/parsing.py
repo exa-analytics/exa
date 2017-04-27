@@ -108,14 +108,13 @@ help describe complex structures of parsing editors.
 
 .. code-block:: python
 
-    sections = Sections()
-    sections.describe()           # Describes the sections object
-    sections.describe_parsers()   # Describe available parsing editors
-    sections.describe_data()      # Display available data objects
+    ed = DataSections(text)       # Create the editor like object
+    ed.sections                   # Display the sections dataframe
+    ed.describe()                 # Describe available data objects
+    ed.describe_parsers()         # Description of present parsers
 
-    parser = Parser()
-    parser.describe()             # Description of the parser/parsing algorithm parameters
-    parser.describe_data()        # Display parsed data attributes
+    s0 = ed.section0              # Automatically generated subsection of type Parser
+    s0.describe()                 # Display parsable data objects
 
 Warning:
     Parsers should be added to sections class objects using the
@@ -218,9 +217,9 @@ class Sections(six.with_metaclass(Meta, Editor, Mixin)):
         Be careful modifying the :attr:`~exa.core.sections.Sections._sections_columns`
         attribute, the 'parser', 'start', and 'end' columns are hardcoded.
     """
-    description = None # ditto
-    _section_name_prefix = "section"
-    _sections_columns = ("parser", "start", "end")
+    description = None
+    _section_name_prefix = "section"                  # Hardcoded below
+    _sections_columns = ("parser", "start", "end")    # Hardcoded below
 
     @abstractmethod
     def _parse(self):

@@ -82,3 +82,12 @@ class ABCContainer(ABCBase):
     def _html_repr_(self):    # Jupyter notebook visualization
         """Jupyter notebook representation."""
         pass
+
+    def __init__(self, **kwargs):
+        uid = kwargs.pop("uid", None)
+        meta = kwargs.pop("meta", None)
+        name = kwargs.pop("name", None)
+        super(ABCContainer, self).__init__(name=name, meta=meta, uid=uid)
+        # Sets arbitrary objects via kwargs
+        for name, data in kwargs.items():
+            setattr(self, name, data)

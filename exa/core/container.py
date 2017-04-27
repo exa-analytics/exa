@@ -26,8 +26,6 @@ class Container(ABCContainer):
 
     .. _pandas: http://pandas.pydata.org
     """
-    _arg_prefix = None
-
     def copy(self):
         raise NotImplementedError()
 
@@ -39,15 +37,6 @@ class Container(ABCContainer):
 
     def _html_repr_(self):
         raise NotImplementedError()
-
-    def __init__(self, **kwargs):
-        uid = kwargs.pop("uid", None)
-        meta = kwargs.pop("meta", None)
-        name = kwargs.pop("name", None)
-        super(Container, self).__init__(name=name, meta=meta, uid=uid)
-        for name, obj in kwargs.items():
-            setattr(self, name, obj)
-
 
 
 
