@@ -19,8 +19,6 @@ in usage.
 - :mod:`~exa.core.editor`: Generic editors
 - :mod:`~exa.core.sections`: Section editors
 - :mod:`~exa.core.parser`: Parsers
-- :mod:`~exa.core.dataseries`: Data arrays
-- :mod:`~exa.core.dataframe`: Data tables
 - :mod:`~exa.core.container`: Generic container
 
 - :mod:`~exa.mpl`: Matplotlib wrappers
@@ -39,7 +37,7 @@ Note:
 .. _Jupyter notebook: https://jupyter.org/
 """
 from ._version import __version__
-from .core import Editor, Sections, Parser, DataSeries, DataFrame, Container
+from .core import Editor, Sections, Parser, Container
 from . import mpl, tex, constants, units, isotopes
 
 

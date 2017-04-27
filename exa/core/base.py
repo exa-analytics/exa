@@ -37,9 +37,12 @@ class ABCBase(six.with_metaclass(ABCBaseMeta, object)):
         object.__setattr__(self, "uid", uuid4())
 
     def __init__(self, name=None, uid=None, meta=None):
-        self.name = name
-        self.uid = uid
-        self.meta = meta
+        if name is not None:
+            self.name = name
+        if uid is not None:
+            self.uid = uid
+        if meta is not None:
+            self.meta = meta
 
 
 class ABCContainer(ABCBase):

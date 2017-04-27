@@ -46,7 +46,76 @@ a concrete :class:`~exa.core.parsing.Sections` implementation may be as follows.
             self._section_builder(dct)
 
 This example will only identify sections, actual parsing to data objects is
-performed separately.
+performed by another object. Because each section, identified above, has the
+same format, only a single 'parser' object is needed.
+
+.. code-block:: python
+
+    import six    # Useful for Python 2 compatibility
+    import numpy as np
+
+    class DataParserMeta(Meta):
+        # This metaclass defines the data objects present in the parser
+        array = np.ndarray   # Variable name 'array', type is numpy array
+        _descriptions = {'array': "Data array"}  # Optional data description
+
+    class DataParser(six.with_metaclass(DataParserMeta, Parser)):
+        name = "default"    # This should match what we wrote above in DataSections
+        description = "Parses data array sections of a file delimited by -"
+
+        # This is the only method we need to define to make this concrete
+        def _parse(self):
+            # This function should set all data objects specified in the metaclass.
+            # Note that type conversion, where possible, happens automatically
+            # because we are using the special metaclass Meta.
+            # Also, note that the text slice of 'self' is defined by the [start, end)
+            # line numbers specified by the sections object above.
+            self.array = str(self).split()
+
+    # Last thing to do is to add the parser to the appropriate sections object
+    DataSections.add_sections_parser(DataParser)
+
+Now we have a modular and efficient parsing system for the prototypical text
+example above. An advanced feature of these classes is the ability to combine
+individual section data into combined data objects. For example, if all sections
+delimited by '-' in fact belong to the same 'data space', the the ``DataSections``
+object could look as follows.
+
+.. code-block:: python
+
+    import six
+    import numpy as np
+
+    class DataSectionsMeta(Meta):
+        # Define the combined data object here
+        matrix = np.ndarray
+
+    class DataSections(Sections):
+        # All the same as above plus the following
+        # ...
+        def _get_matrix(self):
+            # This function utilizes an advanced feature of the Meta class
+            # that allows automatic (lazy) generation of composite objects
+            # such as the matrix object which is made from all of the parsed
+            # sections' data.
+            # This is pandas syntax (since sections is a DataFrame)
+            default_sections = self.sections[self.sections['parser'] == "default"]
+            self.matrix = [self.get_section(i).array for i in default_sections.index]
+
+The `_get_matrix` function is automatically called when the matrix data object
+is requested on the DataSections instance. A number of very useful methods can
+help describe complex structures of parsing editors.
+
+.. code-block:: python
+
+    sections = Sections()
+    sections.describe()           # Describes the sections object
+    sections.describe_parsers()   # Describe available parsing editors
+    sections.describe_data()      # Display available data objects
+
+    parser = Parser()
+    parser.describe()             # Description of the parser/parsing algorithm parameters
+    parser.describe_data()        # Display parsed data attributes
 
 Warning:
     Parsers should be added to sections class objects using the
@@ -63,7 +132,7 @@ from .base import ABCBaseMeta
 from .editor import Editor
 
 
-class SectionsMeta(ABCBaseMeta):
+class Meta(ABCBaseMeta):
     """
     Metaclass that automatically generates parsing function wrappers.
 
@@ -79,7 +148,7 @@ class SectionsMeta(ABCBaseMeta):
             clsdict[f.__name__] = f
         clsdict['_descriptions'] = mcs._descriptions
         clsdict['_parsers'] = {}
-        return super(SectionsMeta, mcs).__new__(mcs, name, bases, clsdict)
+        return super(Meta, mcs).__new__(mcs, name, bases, clsdict)
 
 
 class Mixin(object):
@@ -87,6 +156,8 @@ class Mixin(object):
     Mixin object for :class:`~exa.core.sections.Sections` and
     :class:`~exa.core.parser.Parser`.
     """
+    name = None        # Set by subclass
+
     def describe(self):
         """Parser description."""
         data = {"name": self.name, "description": self.description,
@@ -114,7 +185,7 @@ class Mixin(object):
         return df
 
 
-class Sections(six.with_metaclass(SectionsMeta, Editor, Mixin)):
+class Sections(six.with_metaclass(Meta, Editor, Mixin)):
     """
     An editor tailored to handling files with distinct regions of text.
 
@@ -367,7 +438,7 @@ class Sections(six.with_metaclass(SectionsMeta, Editor, Mixin)):
         cls._parsers.update(kwargs)
 
 
-class Parser(six.with_metaclass(SectionsMeta, Editor, Mixin)):
+class Parser(six.with_metaclass(Meta, Editor, Mixin)):
     """
     An editor like object that corresponds to a specific and distinct region of
     a file and contains parsing functionality tailored to this region. The
@@ -381,7 +452,6 @@ class Parser(six.with_metaclass(SectionsMeta, Editor, Mixin)):
     Warning:
         Subclasses must set the class attribute 'name' as the parser name.
     """
-    name = None        # Set by subclass
     description = None # ditto
 
     @abstractmethod
@@ -390,7 +460,7 @@ class Parser(six.with_metaclass(SectionsMeta, Editor, Mixin)):
         The parsing algorithm, specific to this section, belongs here.
 
         This function should set all data object attributes as defined by in
-        the corresponding metaclass (e.g. :class:`~exa.core.editor.SectionsMeta`).
+        the corresponding metaclass (e.g. :class:`~exa.core.editor.Meta`).
 
         See Also:
             An example implementation can be found in the docs of

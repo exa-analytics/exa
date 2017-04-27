@@ -10,8 +10,7 @@ Tests for the related modules, :mod:`~exa.core.sections` and
 import six
 import pandas as pd
 from unittest import TestCase
-from exa.core.sections import Sections, SectionsMeta
-from exa.core.parser import Parser
+from exa.core.parsing import Sections, Meta, Parser
 
 
 sections0 = u"""Sections have some text followed by a delimiter
@@ -65,7 +64,7 @@ class MockSections(Sections):
         self._sections_helper(dct)
 
 
-class MockSectionMeta(SectionsMeta):
+class MockSectionMeta(Meta):
     """Metaclass that defines data objects for the section parser."""
     wordcount = int
     wordlist = list
