@@ -16,18 +16,14 @@ dependences.
 
 Anaconda
 #######################
-Using anaconda or miniconda...
-
-.. code-block:: bash
+Using anaconda or miniconda::
 
     conda install numba exa
 
 
 Pypi
 #######################
-Using pip...
-
-.. code-block:: bash
+Using pip::
 
     # sudo apt-get install llvm-3.7 or sudo yum install ... etc.
     sudo pip install numba exa
@@ -35,17 +31,13 @@ Using pip...
 
 CUDA
 ###################
-If working on a system with CUDA supported Nvidia GPUs...
-
-.. code-block:: bash
+If working on a system with CUDA supported Nvidia GPUs::
 
     conda install cudatoolkit     # or via apt-get or yum etc.
 
 Repository
 #########################
-Manually...
-
-.. code-block:: bash
+Manually (or for a development installation)::
 
     # install llvm, numba, cudatoolkit, and CPython3.x
     git clone https://github.com/exa-analytics/exa
@@ -55,9 +47,9 @@ Manually...
 
 What's Next?
 #####################
-- Users should check out the :ref:`exa-user-overview`
-- Contributors should check out the :ref:`exa-dev-overview`
-- The :ref:`exa-api` contains usage and extension examples, and developer notes
+- Users should check out the :ref:`started-label`
+- Contributors should check out the :ref:`dev-label`
+- The :ref:`api-label` contains usage and extension examples, and developer notes
 
 
 .. _pypi: https://pypi.python.org/pypi

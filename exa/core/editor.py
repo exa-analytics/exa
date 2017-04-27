@@ -57,7 +57,7 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
 
     Attributes:
         cursor (int): Line number of cursor
-        fmt (string): Format string for 'repr' display
+        fmt (string): Format string for repr display
     """
     _getters = ("_get", "parse")
     fmt = "{0}: {1}\n".format
@@ -115,7 +115,7 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
             ed.regex("^=+$", "find")    # Search for multiple regex simultaneously
 
         Args:
-            \*patterns: Regular expressions
+            patterns: Regular expressions
             num (bool): Return line number (default true)
             text (bool): Return line text (default true)
             flags: Python regex flags (default re.MULTILINE)
@@ -156,7 +156,7 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
         Search for patterns line by line.
 
         Args:
-            \*strings (str): Any number of strings to search for
+            strings (str): Any number of strings to search for
             num (bool): Return line number (default true)
             text (bool): Return line text (default true)
 
@@ -232,8 +232,8 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
         Populate the editors templates.
 
         Args:
-            \*args: Args for formatting
-            \*\*kwargs: Kwargs for formatting
+            args: Args for formatting
+            kwargs: Kwargs for formatting
             inplace (bool): If True, overwrite editor's contents (default False)
 
         Returns:
@@ -253,8 +253,8 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
 
         Args:
             path (str): Full file path (default none, prints to stdout)
-            *args: Positional arguments for formatting
-            **kwargs: Keyword arguments for formatting
+            args: Positional arguments for formatting
+            kwargs: Keyword arguments for formatting
         """
         with open(path, "wb") as f:
             if len(args) > 0 or len(kwargs) > 0:
@@ -569,8 +569,8 @@ def concat(*editors, **kwargs):
     Concatenate a collection of editors into a single editor.
 
     Args:
-        \*editors: Collection of editors (in order) to be concatenated
-        \*\*kwargs: Arguments for editor creation
+        editors: Collection of editors (in order) to be concatenated
+        kwargs: Arguments for editor creation
 
     Returns:
         editor: An instance of an editor

@@ -78,8 +78,8 @@ same format, only a single 'parser' object is needed.
 Now we have a modular and efficient parsing system for the prototypical text
 example above. An advanced feature of these classes is the ability to combine
 individual section data into combined data objects. For example, if all sections
-delimited by '-' in fact belong to the same 'data space', the the ``DataSections``
-object could look as follows.
+delimited by '-' belong to the same 'data space', the ``DataSections`` object
+could look the following.
 
 .. code-block:: python
 
@@ -103,8 +103,8 @@ object could look as follows.
             self.matrix = [self.get_section(i).array for i in default_sections.index]
 
 The `_get_matrix` function is automatically called when the matrix data object
-is requested on the DataSections instance. A number of very useful methods can
-help describe complex structures of parsing editors.
+is requested on the ``DataSections`` instance. A number of very useful methods
+can help describe complex structures of parsing editors.
 
 .. code-block:: python
 
@@ -114,11 +114,11 @@ help describe complex structures of parsing editors.
     ed.describe_parsers()         # Description of present parsers
 
     s0 = ed.section0              # Automatically generated subsection of type Parser
-    s0.describe()                 # Display parsable data objects
+    s0.describe()                 # Display available data objects
 
-Warning:
+Tip:
     Parsers should be added to sections class objects using the
-    :func:`~exa.code.editor.Sections.add_section_parsers` function. Parser
+    :func:`~exa.core.parsing.Sections.add_section_parsers` function. Parser
     objects have a ``name`` attribute to identify what section they parse.
 """
 import six
@@ -155,7 +155,6 @@ class Mixin(object):
     Mixin object for :class:`~exa.core.sections.Sections` and
     :class:`~exa.core.parser.Parser`.
     """
-    name = None        # Set by subclass
 
     def describe(self):
         """Parser description."""
@@ -184,40 +183,46 @@ class Mixin(object):
         return df
 
 
-class Sections(six.with_metaclass(Meta, Editor, Mixin)):
+class Sections(six.with_metaclass(Meta, Editor)):
     """
     An editor tailored to handling files with distinct regions of text.
 
     A concrete implementation of this class provides the main editor-like
     object that a user interacts with. This object's purpose is to identify
-    sections of the text it contains. Identified sections can be automatically
-    or manually parsed. Sections may themselves be :class:`~exa.core.sections.Sections`
-    objects (i.e. 'subsections').
+    sections based on the structure of the text it is designed for. Identified
+    sections are automatically parsed. Sections may themselves be
+    :class:`~exa.core.parsing.Sections` objects (i.e. sub-sections).
 
-    The abstract method :func:`~exa.core.sections.Sections._parse` is used to
-    define the ``sections`` attribute, a dataframe containing section numbers,
-    names, titles, and starting/ending lines. Parsing objects are related by
-    their names. Below is an example of the ``sections`` tables.
+    The abstract method :func:`~exa.core.parsing.Sections._parse` is used to
+    define the ``sections`` attribute, a dataframe containing, at a minimum,
+    section starting and ending lines, and the parser name (associated with a
+    :class:`~exa.core.parsing.Sections` or :class:`~exa.core.parsing.Parser`
+    object). An example ``sections`` table is given below with an optional
+    column, ``title``, used to aid the user in identifying unique sections
+    parsed by the same parsing object
 
     +---------+-------------+---------------+-------+-----+
     |         | parser      | title         | start | end |
     +---------+-------------+---------------+-------+-----+
     | section |             |               |       |     |
     +---------+-------------+---------------+-------+-----+
-    | 0       | parser_name | A Title       | 0     |  n  |
+    | 0       | parser_name | Title  1      | 0     |  m  |
+    +---------+-------------+---------------+-------+-----+
+    | 1       | parser_name | Title  2      | m     |  n  |
     +---------+-------------+---------------+-------+-----+
 
     Attributes:
         sections (DataFrame): Dataframe of section numbers, names, titles, and starting/ending lines
 
     See Also:
-        :class:`~exa.core.parser.Parser`
+        :class:`~exa.core.parsing.Parser`
 
     Note:
         Be careful modifying the :attr:`~exa.core.sections.Sections._sections_columns`
         attribute, the 'parser', 'start', and 'end' columns are hardcoded.
     """
-    description = None
+    name = None                                       # Set by subclass
+    description = None                                # Ditto
     _section_name_prefix = "section"                  # Hardcoded below
     _sections_columns = ("parser", "start", "end")    # Hardcoded below
 
@@ -403,6 +408,10 @@ class Sections(six.with_metaclass(Meta, Editor, Mixin)):
         except AttributeError:
             return None
 
+    def describe(self):
+        """Describe available data objects."""
+        pass
+
     @classmethod
     def describe_parsers(cls):
         """Display available section parsers."""
@@ -436,22 +445,28 @@ class Sections(six.with_metaclass(Meta, Editor, Mixin)):
                 kwargs[s.name] = s
         cls._parsers.update(kwargs)
 
+    def __init__(self, *args, **kwargs):
+        kwargs['name'] = super(Sections, self).name
+        super(Sections, self).__init__(*args, **kwargs)
 
-class Parser(six.with_metaclass(Meta, Editor, Mixin)):
+
+class Parser(six.with_metaclass(Meta, Editor)):
     """
-    An editor like object that corresponds to a specific and distinct region of
-    a file and contains parsing functionality tailored to this region. The
-    :class:`~exa.core.editor.Parser` object can be used standalone or in concert
-    with the :class:`~exa.core.editor.Sections` object for parsing of complex
-    files with multiple regions.
+    An editor-like object that is responsible for transforming a system region
+    of text into an appropriate data object or objects.
+
+    This object can be used standalone to handle parsing of a single file or in
+    combination with the :class:`~exa.core.parsing.Sections` object to build a
+    comprehensive but modular parsing system. The latter works best for large
+    files containing (repeating) distinct sections.
+
+    .. code-block:: text
 
     See Also:
-        :class:`exa.core.editor.Sections`
-
-    Warning:
-        Subclasses must set the class attribute 'name' as the parser name.
+        :class:`exa.core.parsing.Sections`
     """
-    description = None # ditto
+    name = None                                       # Set by subclass
+    description = None                                # Ditto
 
     @abstractmethod
     def _parse(self, *args, **kwargs):
@@ -459,11 +474,10 @@ class Parser(six.with_metaclass(Meta, Editor, Mixin)):
         The parsing algorithm, specific to this section, belongs here.
 
         This function should set all data object attributes as defined by in
-        the corresponding metaclass (e.g. :class:`~exa.core.editor.Meta`).
+        the corresponding metaclass (e.g. :class:`~exa.core.parsing.Meta`).
 
         See Also:
-            An example implementation can be found in the docs of
-            :class:`~exa.core.editor.Sections`.
+            An example implementation can be found at :mod:`~exa.core.parsing`.
         """
         pass
 
@@ -484,7 +498,7 @@ class Parser(six.with_metaclass(Meta, Editor, Mixin)):
 
         See Also:
             To see what data objects get populated, see
-            :func:`~exa.core.parser.Parser.describe_data`.
+            :func:`~exa.core.parsing.Parser.describe`.
         """
         verbose = kwargs.pop("verbose", False)
         self._parse()
@@ -492,3 +506,11 @@ class Parser(six.with_metaclass(Meta, Editor, Mixin)):
             for name, _ in yield_typed(self.__class__):
                 if not hasattr(self, name) or getattr(self, name) is None:
                     warnings.warn("Missing data object {}".format(name))
+
+    def describe(self):
+        """Display available data objects and parsing information."""
+        pass
+
+    def __init__(self, *args, **kwargs):
+        kwargs['name'] = super(Parser, self).name
+        super(Parser, self).__init__(*args, **kwargs)

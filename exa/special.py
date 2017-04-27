@@ -187,8 +187,9 @@ class LazyFunction(object):
         self.kwargs = kwargs
 
     def __repr__(self):
-        return "{}(fn={}, nargs={}, nkwargs={})".format(self.__name__, self.fn.__name__,
-                                                        len(self.args), len(self.kwargs))
+        fmt = "{}(fn={}, nargs={}, nkwargs={})".format
+        return fmt(self.__class__.__name__, self.fn.__name__,
+                   len(self.args), len(self.kwargs))
 
 
 class Typed(ABCMeta):

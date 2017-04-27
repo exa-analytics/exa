@@ -127,6 +127,10 @@ class TestSingleton(TestCase):
 
 class TestLazyFunction(TestCase):
     """Tests behavior of :class:`~exa.special.LazyFunction`."""
+    def setUp(self):
+        """Used to check for laziness."""
+        self.check = False
+
     def test_args(self):
         """Test evaluation of args."""
         f = LazyFunction(lambda x: x**2, 10)
@@ -137,6 +141,21 @@ class TestLazyFunction(TestCase):
         f = LazyFunction(lambda x: x**2, x=2)
         self.assertEqual(f(), 4)
 
+    def test_repr(self):
+        """Test repr."""
+        f = LazyFunction(lambda x: x**2, 10)
+        text = repr(f)
+        self.assertIsInstance(text, six.string_types)
+
     def test_laziness(self):
         """Test for lazy evaluation."""
-        pass
+        def concrete_function(x):    # Used to check for laziness
+            self.check = True
+            return x**2
+
+        self.assertFalse(self.check)
+        f = LazyFunction(concrete_function, x=10)
+        self.assertFalse(self.check)
+        result = f()
+        self.assertTrue(self.check)
+        self.assertEqual(result, 100)
