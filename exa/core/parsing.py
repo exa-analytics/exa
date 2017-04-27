@@ -198,8 +198,7 @@ class Sections(six.with_metaclass(Meta, Editor)):
     section starting and ending lines, and the parser name (associated with a
     :class:`~exa.core.parsing.Sections` or :class:`~exa.core.parsing.Parser`
     object). An example ``sections`` table is given below with an optional
-    column, ``title``, used to aid the user in identifying unique sections
-    parsed by the same parsing object
+    column, ``title``, used to aid the user in identifying sections.
 
     +---------+-------------+---------------+-------+-----+
     |         | parser      | title         | start | end |
@@ -212,13 +211,13 @@ class Sections(six.with_metaclass(Meta, Editor)):
     +---------+-------------+---------------+-------+-----+
 
     Attributes:
-        sections (DataFrame): Dataframe of section numbers, names, titles, and starting/ending lines
+        sections (DataFrame): Dataframe of section numbers, names, and starting/ending lines
 
     See Also:
         :class:`~exa.core.parsing.Parser`
 
     Note:
-        Be careful modifying the :attr:`~exa.core.sections.Sections._sections_columns`
+        Be careful modifying the :attr:`~exa.core.parsing.Sections._sections_columns`
         attribute, the 'parser', 'start', and 'end' columns are hardcoded.
     """
     name = None                                       # Set by subclass
@@ -250,7 +249,7 @@ class Sections(six.with_metaclass(Meta, Editor)):
                     self._sections_helper(DataFrame.from_dict(dct))
 
         See Also:
-            :func:`~exa.core.sections.Sections._sections_helper`
+            :func:`~exa.core.parsing.Sections._sections_helper`
         """
         pass
 
@@ -301,13 +300,13 @@ class Sections(six.with_metaclass(Meta, Editor)):
             verbose (bool): Print parser warnings
 
         Tip:
-            To see what objects exist, see the :attr:`~exa.core.sections.Sections.sections`
-            attribute and :func:`~exa.core.sections.Sections.describe`,
-            :func:`~exa.core.sections.Sections.describe_sections`, and
-            :func:`~exa.core.sections.Sections.describe_parsers`.
+            Helpful methods for describing parsing and data are
+            :attr:`~exa.core.parsing.Sections.sections`,
+            :func:`~exa.core.parsing.Sections.describe`, and
+            :func:`~exa.core.parsing.Sections.describe_parsers`.
 
         See Also:
-            :func:`~exa.core.editor.Sections.parse_section`
+            :func:`~exa.core.parsing.Sections.parse_section`
         """
         # This helper function is used to setup auto-parsing, see below.
         def section_parser_helper(i):
@@ -321,27 +320,34 @@ class Sections(six.with_metaclass(Meta, Editor)):
         # Now generate section attributes for the sections present
         for i in self.sections.index:
             secname, attrname = self.sections.loc[i, ["parser", "attribute"]]    # HARDCODED
-            if secname not in self._parsers and verbose:
+            if secname not in self._parsers:
                 if verbose:
                     warnings.warn("No parser for section '{}'!".format(secname))
+                # Default type is a simple editor
+                prop = create_typed_attr(attrname, Editor)
             else:
+                # Otherwise use specific sections/parser
                 ptypes = self._parsers[secname]
-                # Now we perform a bit of class gymnastics:
-                # Because we don't want to attach our typed property paradigm
-                # (see exa.typed.create_typed_attr) to all instances of this
-                # object's class, we dynamically create a copy of this object's
-                # class and attach our properties to that class object.
-                cls = type(self)
-                if not hasattr(cls, '__unique'):
-                    uniquecls = type(cls.__name__, (cls, ), {})
-                    uniquecls.__unique = True
-                    uniquecls.add_section_parsers(*cls._parsers.values())
-                    self.__class__ = uniquecls
-                setattr(self.__class__, attrname, create_typed_attr(attrname, ptypes))
-                # And attach a lazy evaluation method using the above helper
-                setattr(self, "parse_" + attrname, section_parser_helper(i))
-                if recursive:
-                    self.parse_section(i, recursive=True, verbose=verbose)
+                prop = create_typed_attr(attrname, ptypes)
+            # Now we perform a bit of class gymnastics:
+            # Because we don't want to attach our typed property paradigm
+            # (see exa.special.create_typed_attr) to all instances of this
+            # object's class (note that properties must be attached to class
+            # definitions not instances of a class), we dynamically create a
+            # copy of this object's class and attach our properties to that
+            # class definition.
+            cls = type(self)
+            if not hasattr(cls, '__unique'):
+                uniquecls = type(cls.__name__, (cls, ), {})
+                uniquecls.__unique = True
+                uniquecls.add_section_parsers(*cls._parsers.values())
+                self.__class__ = uniquecls
+            setattr(self.__class__, attrname, prop)
+            # And attach a lazy evaluation method using the above helper.
+            # Again, see exa's documentation for more information.
+            setattr(self, "parse_" + attrname, section_parser_helper(i))
+            if recursive:
+                self.parse_section(i, recursive=True, verbose=verbose)
 
     def parse_section(self, number, recursive=False, verbose=False):
         """

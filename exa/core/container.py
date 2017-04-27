@@ -22,9 +22,7 @@ from .base import ABCContainer
 
 class Container(ABCContainer):
     """
-    A storage object for `pandas`_ like data objects.
-
-    .. _pandas: http://pandas.pydata.org
+    empty
     """
     def copy(self):
         raise NotImplementedError()
