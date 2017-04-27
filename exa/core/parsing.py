@@ -34,7 +34,7 @@ a concrete :class:`~exa.core.parsing.Sections` implementation may be as follows.
 
         # This is the only method we need a concrete implementation for.
         # It is responsible for populating the sections attribute.
-        # We use the ``_sections_builder`` function to help build the
+        # We use the ``_sections_helper`` function to help build the
         # ``sections`` attribute.
         def _parse(self):
             delimlines = self.regex(self._key_sep, text=False)[self._key_sep]
@@ -43,7 +43,7 @@ a concrete :class:`~exa.core.parsing.Sections` implementation may be as follows.
             endlines.append(len(self))
             parser_names = [self._key_parser_name]*len(startlines)
             dct = {'start': startlines, 'end': endlines, 'parser': parser_names}
-            self._section_builder(dct)
+            self._section_helper(dct)
 
 This example will only identify sections, actual parsing to data objects is
 performed by another object. Because each section, identified above, has the
