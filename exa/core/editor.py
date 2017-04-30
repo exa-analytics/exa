@@ -366,6 +366,16 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
         for line in self._lines[slice(start, stop, step)]:
             yield line
 
+    def info(self):
+        """
+        Describe the current editor object.
+
+        By default, the editor class displays the length of the text and the
+        file name (if applicable).
+        """
+        return {'length': len(self),
+                'file': self.meta['filepath'] if self.meta is not None and "filepath" in self.meta else "NA"}
+
     def to_stream(self):
         """Send editor text to a file stream (StringIO) object."""
         return StringIO(six.u(str(self)))

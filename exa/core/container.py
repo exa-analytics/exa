@@ -24,7 +24,7 @@ class Container(ABCContainer):
     """
     empty
     """
-    def copy(self):
+    def info(self):
         raise NotImplementedError()
 
     def concat(self):

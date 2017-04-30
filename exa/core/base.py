@@ -28,8 +28,8 @@ class ABCBase(six.with_metaclass(ABCBaseMeta, object)):
     _getters = ('_get', )
 
     @abstractmethod
-    def copy(self):
-        """At a bare minimum a data object must define a copy method."""
+    def info(self):
+        """Display dataframe containing information about the current object."""
         pass
 
     def _get_uid(self):
@@ -37,12 +37,9 @@ class ABCBase(six.with_metaclass(ABCBaseMeta, object)):
         object.__setattr__(self, "uid", uuid4())
 
     def __init__(self, name=None, uid=None, meta=None):
-        if name is not None:
-            self.name = name
-        if uid is not None:
-            self.uid = uid
-        if meta is not None:
-            self.meta = meta
+        self.name = name
+        self.uid = uid
+        self.meta = meta
 
 
 class ABCContainer(ABCBase):

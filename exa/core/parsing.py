@@ -129,6 +129,16 @@ from abc import abstractmethod
 from exa.special import simple_function_factory, yield_typed, create_typed_attr
 from .base import ABCBaseMeta
 from .editor import Editor
+from .dataframe import DataFrame
+
+
+class SectionDataFrame(DataFrame):
+    """
+    """
+    _required_columns = ("parser", "start", "end")
+    _col_descriptions = {'parser': "Name of associated section or parser object",
+                         'start': "Section starting line number",
+                         'end': "Section ending (non-inclusive) line number"}
 
 
 class Meta(ABCBaseMeta):
@@ -139,7 +149,7 @@ class Meta(ABCBaseMeta):
         sections (list): A list of tuples of the form [(name, start, end), ...]
     """
     _descriptions = {"sections": "List of sections"}
-    sections = pd.DataFrame
+    sections = SectionDataFrame
 
     def __new__(mcs, name, bases, clsdict):
         for attr in yield_typed(mcs):
@@ -224,6 +234,9 @@ class Sections(six.with_metaclass(Meta, Editor)):
     description = None                                # Ditto
     _section_name_prefix = "section"                  # Hardcoded below
     _sections_columns = ("parser", "start", "end")    # Hardcoded below
+
+    def info(self):
+        pass
 
     @abstractmethod
     def _parse(self):
@@ -473,6 +486,9 @@ class Parser(six.with_metaclass(Meta, Editor)):
     """
     name = None                                       # Set by subclass
     description = None                                # Ditto
+
+    def info(self):
+        pass
 
     @abstractmethod
     def _parse(self, *args, **kwargs):

@@ -17,8 +17,8 @@ class ConcreteBase(ABCBase):
     """Concrete implementation using :class:`~exa.core.base.ABCBase`."""
     _getters = ("_get", "compute")
 
-    def copy(self):
-        """This makes the class concrete."""
+    def info(self):
+        """Make this class concrete."""
         pass
 
     def _get_name(self):
@@ -47,7 +47,7 @@ class TestBase(TestCase):
             ABCContainer()
 
     def test_concrete(self):
-        """Because we have a implemented the copy method, it works."""
+        """Because we have a implemented the info method, this works."""
         self.assertIsInstance(self.concrete.uid, UUID)
 
     def test_getter(self):
@@ -62,7 +62,7 @@ class TestBase(TestCase):
 
 class ConcreteContainer(ABCContainer):
     """Concrete implementation of the container object for testing."""
-    def copy(self):
+    def info(self):
         """Dummy method implementation."""
         pass
 

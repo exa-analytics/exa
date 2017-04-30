@@ -108,20 +108,20 @@ class TestSections(TestCase):
         with self.assertRaises(TypeError):
             MockBaseParser()
 
-    def test_describe_pre_parse(self):
-        """Test descriptors prior to parsing."""
-        sec0 = MockSections(sections0)
-        sec1 = MockSections(sections1)
-        sec2 = MockSections(sections2)
-        sec3 = MockSections(sections3)
-        secs = [sec0, sec1, sec2, sec3]
-        for sec in secs:
-            df = sec.describe()
-            self.assertIsInstance(df, pd.Series)
-            self.assertEqual(len(df), 4)
-            df = sec.describe_parsers()
-            self.assertIsInstance(df, pd.DataFrame)
-            self.assertEqual(len(df), 1)
+#    def test_describe_pre_parse(self):
+#        """Test descriptors prior to parsing."""
+#        sec0 = MockSections(sections0)
+#        sec1 = MockSections(sections1)
+#        sec2 = MockSections(sections2)
+#        sec3 = MockSections(sections3)
+#        secs = [sec0, sec1, sec2, sec3]
+#        for sec in secs:
+#            df = sec.describe()
+#            self.assertIsInstance(df, pd.Series)
+#            self.assertEqual(len(df), 4)
+#            df = sec.describe_parsers()
+#            self.assertIsInstance(df, pd.DataFrame)
+#            self.assertEqual(len(df), 1)
 
     def test_parsing(self):
         """Test live modification of class objects on parsing."""
