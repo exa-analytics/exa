@@ -8,9 +8,8 @@ Tests for the related modules, :mod:`~exa.core.sections` and
 :mod:`~exa.core.parsers`.
 """
 import six
-import pandas as pd
 from unittest import TestCase
-from exa.core.parsing import Sections, Meta, Parser
+from exa.core.parsing import Sections, Meta, Parser, SectionDataFrame
 
 
 sections0 = u"""Sections have some text followed by a delimiter
@@ -61,7 +60,7 @@ class MockSections(Sections):
         ends.append(len(self))
         names = [self._key_def_sec_name]*len(starts)
         dct = {"parser": names, "start": starts, "end": ends}
-        self._sections_helper(dct)
+        self.sections = SectionDataFrame.from_dct(dct)
 
 
 class MockSectionMeta(Meta):

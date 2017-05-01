@@ -29,7 +29,7 @@ class ColumnError(Exception):
     """Raised when a required dimension or feature (column) is missing."""
     @staticmethod
     def default(*columns):
-        cols = ", ".join(*columns)
+        cols = ", ".join(columns)
         msg = "Missing required column(s): {}"
         return msg.format(cols)
 
@@ -49,8 +49,14 @@ class DataFrame(pd.DataFrame, ABCBase):
 
     def info(self):
         """Information about the current object."""
-        inf = {'required': self._required_columns, 'aliases': self._aliases,
-               'descriptions': self._col_descriptions}
+        inf = pd.Series(self.columns).to_frame().set_index(0)
+        inf.index.name = "column"
+        inf['description'] = ""
+        inf['aliases'] = ""
+        if self._col_descriptions is not None:
+            inf['description'] = inf.index.map(lambda idx: self._col_descriptions[idx] if idx in self._col_descriptions else "")
+        if self._aliases is not None:
+            inf['aliases'] = inf.index.map(lambda idx: self._aliases[idx] if idx in self._aliases else "")
         return inf
 
     @property

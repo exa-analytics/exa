@@ -34,8 +34,6 @@ a concrete :class:`~exa.core.parsing.Sections` implementation may be as follows.
 
         # This is the only method we need a concrete implementation for.
         # It is responsible for populating the sections attribute.
-        # We use the ``_sections_helper`` function to help build the
-        # ``sections`` attribute.
         def _parse(self):
             delimlines = self.regex(self._key_sep, text=False)[self._key_sep]
             startlines = [self._key_start] + [delim + self._key_sp for delim in delimlines]
@@ -43,7 +41,7 @@ a concrete :class:`~exa.core.parsing.Sections` implementation may be as follows.
             endlines.append(len(self))
             parser_names = [self._key_parser_name]*len(startlines)
             dct = {'start': startlines, 'end': endlines, 'parser': parser_names}
-            self._section_helper(dct)
+            self._sections_helper(dct)
 
 This example will only identify sections, actual parsing to data objects is
 performed by another object. Because each section, identified above, has the
@@ -132,13 +130,32 @@ from .editor import Editor
 from .dataframe import DataFrame
 
 
+# Some module level variables
+
+
 class SectionDataFrame(DataFrame):
     """
+    A dataframe that describes the sections given in the current parsing editor.
     """
+    _section_name_prefix = "section"
     _required_columns = ("parser", "start", "end")
     _col_descriptions = {'parser': "Name of associated section or parser object",
                          'start': "Section starting line number",
                          'end': "Section ending (non-inclusive) line number"}
+
+    @classmethod
+    def from_dct(cls, dct):
+        """
+        A helper method for creating this dataframe
+
+        Args:
+            dct (dict): Dictionary containing 'parser', 'start', and 'end' key-value pairs
+        """
+        df = cls.from_dict(dct)
+        df['attribute'] = [cls._section_name_prefix+str(i).zfill(len(str(len(df)))) for i in df.index]
+        df = df.loc[:, list(cls._required_columns) + list(set(df.columns).difference(cls._required_columns))]
+        df.index.name = cls._section_name_prefix
+        return df
 
 
 class Meta(ABCBaseMeta):
@@ -148,8 +165,8 @@ class Meta(ABCBaseMeta):
     Attributes:
         sections (list): A list of tuples of the form [(name, start, end), ...]
     """
-    _descriptions = {"sections": "List of sections"}
     sections = SectionDataFrame
+    _descriptions = {"sections": "Dataframe containing description of text regions"}
 
     def __new__(mcs, name, bases, clsdict):
         for attr in yield_typed(mcs):
@@ -158,39 +175,6 @@ class Meta(ABCBaseMeta):
         clsdict['_descriptions'] = mcs._descriptions
         clsdict['_parsers'] = {}
         return super(Meta, mcs).__new__(mcs, name, bases, clsdict)
-
-
-class Mixin(object):
-    """
-    Mixin object for :class:`~exa.core.sections.Sections` and
-    :class:`~exa.core.parser.Parser`.
-    """
-
-    def describe(self):
-        """Parser description."""
-        data = {"name": self.name, "description": self.description,
-                "type": "Sections" if isinstance(self, Sections) else "Parser"}
-        params = [n.replace("_key_", "") for n in vars(self) if n.startswith("_key_")]
-        if len(params) == 0:
-            data["parameters"] = None
-        else:
-            data["parameters"] = params
-        return pd.Series(data)
-
-    @classmethod
-    def describe_data(cls):
-        """Description of data attributes associated with this parser."""
-        df = {}
-        for name, types in yield_typed(cls):
-            df[name] = (cls._descriptions[name], types)
-        if len(df) == 0:
-            df = pd.DataFrame([[0, 0]])    # Empty dataframe
-            df = df[df[0] != 0]            # with columns as below
-        else:
-            df = pd.DataFrame.from_dict(df, orient='index')
-        df.columns = ["description", "type"]
-        df.index.name = "attribute"
-        return df
 
 
 class Sections(six.with_metaclass(Meta, Editor)):
@@ -225,84 +209,18 @@ class Sections(six.with_metaclass(Meta, Editor)):
 
     See Also:
         :class:`~exa.core.parsing.Parser`
-
-    Note:
-        Be careful modifying the :attr:`~exa.core.parsing.Sections._sections_columns`
-        attribute, the 'parser', 'start', and 'end' columns are hardcoded.
     """
     name = None                                       # Set by subclass
     description = None                                # Ditto
-    _section_name_prefix = "section"                  # Hardcoded below
-    _sections_columns = ("parser", "start", "end")    # Hardcoded below
 
     def info(self):
-        pass
-
-    @abstractmethod
-    def _parse(self):
         """
-        This abstract method is overwritten by a concrete implementation and is
-        responsible for setting the ``sections`` attribute.
-
-        Concrete implementations depend on the specific file. Note that the names
-        column of the dataframe must contain values corresponding to existing
-        parsers.
-
-        .. code-block:: python
-
-            class MySections(Sections):
-                def _parse(self):
-                    # This function should actually perform parsing
-                    # and generate the sections object using the ``_sections_helper``.
-                    names = ["parser_name", "other_parser"]
-                    starts = [0, 10]
-                    ends = [10, 20]
-                    titles = ["A Title", "Another Title"]
-                    dct = {"parser": names, "start": starts, "end": ends, "title": titles}
-                    self._sections_helper(DataFrame.from_dict(dct))
+        Display information about this parser.
 
         See Also:
-            :func:`~exa.core.parsing.Sections._sections_helper`
+            :func:`~exa.core.parsing.Sections.parser_info`
         """
         pass
-
-    def _sections_helper(self, dct):
-        """
-        Sections dataframe creation helper.
-
-        Args:
-            dct (dict): Dictionary of parser names, section titles, starting lines, and ending lines
-        """
-        df = pd.DataFrame.from_dict(dct)
-        for col in self._sections_columns:
-            if col not in df:
-                raise ValueError("Sections dataframe requires columns: {}".format(", ".join(self._sections_columns)))
-        # HARDCODED
-        df['attribute'] = [self._section_name_prefix+str(i).zfill(len(str(len(df)))) for i in df.index]
-        df = df.loc[:, list(self._sections_columns) + list(set(df.columns).difference(self._sections_columns))]
-        df.index.name = self._section_name_prefix
-        self.sections = df
-
-    def _describe_data(self, data=[], inplace=False, section=None):
-        """
-        """
-        df = self.describe_data().reset_index()
-        df["parser"] = self.__class__.name
-        if section is None:
-            try:
-                section = [name for name, var in globals().items() if var is self][0]
-            except:
-                section = "null"
-            df["section"] = section
-        data.append(df[df["attribute"] != "sections"])
-        for i in self.sections.index:
-            sec = self.get_section(i)
-            section += "." + self.sections.loc[i, "attribute"]
-            if sec is not None:
-                sec._describe_data(data, True, section)
-        if not inplace:
-            data = pd.concat(data, ignore_index=True)
-            return data.loc[:, ["section", "attribute", "parser", "description", "type"]]
 
     def parse(self, recursive=False, verbose=False):
         """
@@ -427,12 +345,8 @@ class Sections(six.with_metaclass(Meta, Editor)):
         except AttributeError:
             return None
 
-    def describe(self):
-        """Describe available data objects."""
-        pass
-
     @classmethod
-    def describe_parsers(cls):
+    def parser_info(cls):
         """Display available section parsers."""
         data = {}
         for key, item in cls._parsers.items():
@@ -464,6 +378,42 @@ class Sections(six.with_metaclass(Meta, Editor)):
                 kwargs[s.name] = s
         cls._parsers.update(kwargs)
 
+    @abstractmethod
+    def _parse(self):
+        """
+        This abstract method is overwritten by a concrete implementation and is
+        responsible for setting the ``sections`` attribute.
+
+        Concrete implementations depend on the specific file. Note that the names
+        column of the dataframe must contain values corresponding to existing
+        parsers.
+
+        .. code-block:: python
+
+            class MySections(Sections):
+                def _parse(self):
+                    # This function should actually perform parsing
+                    names = ["parser_name", "other_parser"]
+                    starts = [0, 10]
+                    ends = [10, 20]
+                    titles = ["A Title", "Another Title"]
+                    dct = {"parser": names, "start": starts, "end": ends, "title": titles}
+                    self._sections_helper(dct)
+        """
+        pass
+
+    def _sections_helper(self, dct):
+        """
+        Convenience method for building the ``sections`` object.
+
+        .. code-block:: python
+
+            # End of the _parse() function
+            dct = {'parser': ..., 'start': ..., 'end': ...}
+            self._sections_helper(dct)
+        """
+        self.sections = SectionDataFrame.from_dct(dct)
+
     def __init__(self, *args, **kwargs):
         kwargs['name'] = super(Sections, self).name
         super(Sections, self).__init__(*args, **kwargs)
@@ -490,27 +440,6 @@ class Parser(six.with_metaclass(Meta, Editor)):
     def info(self):
         pass
 
-    @abstractmethod
-    def _parse(self, *args, **kwargs):
-        """
-        The parsing algorithm, specific to this section, belongs here.
-
-        This function should set all data object attributes as defined by in
-        the corresponding metaclass (e.g. :class:`~exa.core.parsing.Meta`).
-
-        See Also:
-            An example implementation can be found at :mod:`~exa.core.parsing`.
-        """
-        pass
-
-    def _describe_data(self, data=[], inplace=False, section=None):
-        df = self.describe_data().reset_index()
-        df["parser"] = self.__class__.name
-        df["sectionid"] = section
-        data.append(df)
-        if not inplace:
-            return pd.concat(data, ignore_index=True)
-
     def parse(self, **kwargs):
         """
         Parse data objects from the current file.
@@ -529,8 +458,17 @@ class Parser(six.with_metaclass(Meta, Editor)):
                 if not hasattr(self, name) or getattr(self, name) is None:
                     warnings.warn("Missing data object {}".format(name))
 
-    def describe(self):
-        """Display available data objects and parsing information."""
+    @abstractmethod
+    def _parse(self, *args, **kwargs):
+        """
+        The parsing algorithm, specific to this section, belongs here.
+
+        This function should set all data object attributes as defined by in
+        the corresponding metaclass (e.g. :class:`~exa.core.parsing.Meta`).
+
+        See Also:
+            An example implementation can be found at :mod:`~exa.core.parsing`.
+        """
         pass
 
     def __init__(self, *args, **kwargs):

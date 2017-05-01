@@ -6,9 +6,9 @@ Tests for :mod:`~exa.core.dataframe`
 #############################################
 """
 import numpy as np
+import pandas as pd
 from unittest import TestCase
 from exa.core.dataframe import DataFrame, ColumnError
-from exa.core.dataseries import DataSeries
 
 
 class MockDataFrame(DataFrame):
@@ -22,11 +22,11 @@ class TestDataFrame(TestCase):
         """Test that slicing (a series) resolve to correct type."""
         df = DataFrame(np.random.rand(3, 2))
         s = df.loc[:, 0]
-        self.assertIsInstance(s, DataSeries)
+        self.assertIsInstance(s, pd.Series)
         s = df.loc[0:2, 0]
-        self.assertIsInstance(s, DataSeries)
+        self.assertIsInstance(s, pd.Series)
         s = df[1]
-        self.assertIsInstance(s, DataSeries)
+        self.assertIsInstance(s, pd.Series)
 
     def test_required_columns(self):
         """Test instantiation with/without required columns."""
