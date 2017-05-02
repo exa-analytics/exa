@@ -2,39 +2,42 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Frame Container
+Generic Container
 ########################
-Data comes in many formats from simple local text or binary files (e.g. `HDF`_)
-to remote distributed databases or filesystems (e.g. `MySQL`_, `Hadoop`_).
-Data may be qualitative, quantitative, analytical, discrete, etc. Data computation
-and analysis can be simple, performed locally in memory (RAM), or complex
-performed on a supercomputer or on a distributed computational cluster, even
-requiring out-of-core (RAM) algorithms. The purpose of the
-:class:`~exa.core.container.Container` object is to synthesize common tasks to
-both simple and complex data workflows, in a single convenient location (API).
+The :class:`~exa.core.container.Container` object is an in memory storage system
+for `Pandas`_ like data objects. Containers can be used to return multiple,
+distinct, tables parsed from a aggregated collection of files on disk. Generally,
+:class:`~exa.core.container.Container`s are used to create a simple API for
+common processing, analysis, and visualization tasks.
 
-.. _HDF: https://en.wikipedia.org/wiki/Hierarchical_Data_Format
-.. _MySQL: https://en.wikipedia.org/wiki/MySQL
-.. _Hadoop: https://en.wikipedia.org/wiki/Apache_Hadoop
+.. _Pandas: http://pandas.pydata.org
 """
-from .base import ABCContainer
+from .base import Base
 
 
-class Container(ABCContainer):
+class Container(Base):
     """
-    empty
+    A generic storage object of a collection of related but distinct data
+    objects.
+
+    .. code-block:: python
+
+        import pandas as pd
+
+        dat1 = pd.DataFrame(...)    # Some data
+        dat2 = pd.DataFrame(...)    # Some other data
+        dat3 = pd.Series(...)       # ditto
+        container = Container(tab1=dat1, tab2=dat2, series=dat3)
+        container.info()            # Display information about data objects
     """
     def info(self):
-        raise NotImplementedError()
-
-    def concat(self):
-        raise NotImplementedError()
-
-    def describe(self):
-        raise NotImplementedError()
+        pass
 
     def _html_repr_(self):
-        raise NotImplementedError()
+        return repr(self)
+
+    def __repr__(self):
+        return "{}(objects={})".format(self.__class__.__name__, len(self._data))
 
 
 

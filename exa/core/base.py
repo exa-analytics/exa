@@ -4,87 +4,48 @@
 """
 Abstract Editors, Containers, and Data
 #######################################
-This module provides abstract base classes for editor, container, and data
-objects.
+This module provides the base classes for editors, data objects, and containers.
+Editors are responsible for parsing data in text files on disk into compact data
+objects housed within containers. Containers provide a systematic API for
+analysis and visualization of that data. Processing, analysis, and visualization
+requires that the data structure (and types) are known; special data objects
+allow for creation of such known structures/types that, in turn, enable a
+cohesive processing API from the single entry object, the container.
+The abstract class in this module provides some requirements for these objects.
 """
 import six, sys
-from uuid import UUID, uuid4
 from abc import abstractmethod
-from exa.special import Typed
 
 
-class ABCBaseMeta(Typed):
-    """Strongly typed static attributes."""
-    uid = UUID
-    meta = dict
-    name = str
-
-
-class ABCBase(six.with_metaclass(ABCBaseMeta, object)):
+class Base(object):
     """
-    Abstract base class for composite data representations such as editors,
-    containers, and higher level data objects.
+    Abstract base class for editors, data, and containers.
+
+    Editors, (custom) data objects, and containers share some common API
+    features that make operation with them systematic and easy to learn for
+    users. For developers it provides a bare minimum requirements for extending
+    the framework.
+
+    Attributes:
+        _getters (tuple): Default prefixes for automatic (lazy) function evalulation
+        info (function): Display summary information about the current object
+        _html_repr_ (function): Representation in the `Jupyter notebook`_
+
+    See Also:
+        :mod:`~exa.special`
+
+    .. _Jupyter notebook: https://jupyter.org
     """
-    _getters = ('_get', )
+    _getters = ("compute", "parse", "_get")
 
     @abstractmethod
     def info(self):
-        """Display dataframe containing information about the current object."""
         pass
 
-    def _get_uid(self):
-        """Generate a new uid for this object."""
-        object.__setattr__(self, "uid", uuid4())
-
-    def __init__(self, name=None, uid=None, meta=None):
-        self.name = name
-        self.uid = uid
-        self.meta = meta
-
-
-class ABCContainer(ABCBase):
-    """
-    An abstract base class for container objects.
-
-    Given a collection of data of some (at least moderately) known structure,
-    this object can facilitate computation, analytics, and visualization. All
-    container objects share a basic API defined by this class.
-    """
-    _getters = ("_get", "parse", "compute")
-
     @abstractmethod
-    def describe(self):
-        """Display a frame containing information about this object."""
-        pass
-
-    def _data(self):
-        """Helper method for introspectively obtaining data objects."""
-        return {n: v for n, v in vars(self).items() if not n.startswith("_")}
-
-    def _data_properties(self):     # To be used by the ``describe`` method
-        """Helper method to estimate data sizes (in MiB)."""
-        data = {}
-        for name, v in self._data().items():
-            if hasattr(v, "memory_usage"):
-                size = v.memory_usage()
-                size = size.sum() if not isinstance(size, int) else size
-            elif hasattr(v, "nbytes"):
-                size = v.nbytes
-            else:
-                size = sys.getsizeof(v)
-            data[name] = (type(v), size)
-        return data
-
-    @abstractmethod
-    def _html_repr_(self):    # Jupyter notebook visualization
-        """Jupyter notebook representation."""
+    def _html_repr_(self):
         pass
 
     def __init__(self, **kwargs):
-        uid = kwargs.pop("uid", None)
-        meta = kwargs.pop("meta", None)
-        name = kwargs.pop("name", None)
-        super(ABCContainer, self).__init__(name=name, meta=meta, uid=uid)
-        # Sets arbitrary objects via kwargs
-        for name, data in kwargs.items():
-            setattr(self, name, data)
+        for name, value in kwargs.items():
+            setattr(self, name, value)

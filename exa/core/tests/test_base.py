@@ -4,90 +4,60 @@
 """
 Tests for :mod:`~exa.core.base`
 #############################################
-Tests for abstract base classes of data, editor, and container objects. Note
-that the source code of this module provides minimal working examples for
-implementations of the aforementioned objects.
+Tests for abstract base classes of data, editor, and container objects.
+This module also tests some advanced usages of the abstract base class
+in combination with the :class:`~exa.special.Typed` metaclass.
 """
-from uuid import UUID
 from unittest import TestCase
-from exa.core.base import ABCBase, ABCContainer
+from exa.core import Base
+from exa.special import Typed
 
 
-class ConcreteBase(ABCBase):
-    """Concrete implementation using :class:`~exa.core.base.ABCBase`."""
-    _getters = ("_get", "compute")
-
+class Concrete(Base):
+    """Example concrete implementation of the abstract base class."""
     def info(self):
-        """Make this class concrete."""
         pass
 
-    def _get_name(self):
-        """Testing method only."""
-        self.name = "Name"
+    def _html_repr_(self):
+        pass
 
-    def compute_meta(self):
-        """Testing method only."""
-        self.meta = [(0, 1), (2, 3)]
+
+class FooMeta(Typed):
+    """Metaclass that defines typed attributes for class Foo."""
+    foo = dict
+    bar = list
+    baz = str
+
+
+class Foo(six.with_metaclass(FooMeta, Concrete)):
+    """Example of strongly typed objects on a concrete implementation."""
+    def _get_foo(self):
+        """Test automatic (lazy) getter with prefix _get."""
+        self.foo = {'value': "foo"}
+
+    def compute_bar(self):
+        """Test automatic (lazy) getter with prefix compute."""
+        self.bar = ["bar"]
+
+    def parse_baz(self):
+        """Test automatic (lazy) getter with prefix parse."""
+        self.baz = "baz"
 
 
 class TestBase(TestCase):
     """Test the abstract base class."""
-    def setUp(self):
-        """Errors if the concrete implementation is incorrect."""
-        try:
-            self.concrete = ConcreteBase()
-        except TypeError:
-            self.fail("Abstract method not implemented in ConcreteBase")
-
-    def test_raises(self):
-        """Test ABC behavior of :class:`~exa.core.base.ABCBase`."""
+    def test_abstract(self):
+        """Test that we require a concrete implementation."""
         with self.assertRaises(TypeError):
-            ABCBase()
-        with self.assertRaises(TypeError):
-            ABCContainer()
+            Base()
 
     def test_concrete(self):
-        """Because we have a implemented the info method, this works."""
-        self.assertIsInstance(self.concrete.uid, UUID)
+        """Test the concrete implementation."""
+        c = Concrete()
+        self.assertIsInstance(c, Base)
+        self.assertTrue(hasattr(c, "info"))
 
-    def test_getter(self):
-        """Tests that the metaclass instantiated ``name`` correctly."""
-        self.assertEqual(self.concrete.name, "Name")
-
-    def test_compute(self):
-        """Tests that overwriting the ``_getters`` attributed works."""
-        self.assertIsInstance(self.concrete.meta, dict)
-        self.assertEqual(len(self.concrete.meta), 2)
-
-
-class ConcreteContainer(ABCContainer):
-    """Concrete implementation of the container object for testing."""
-    def info(self):
-        """Dummy method implementation."""
-        pass
-
-    def describe(self):
-        """Dummy method implementation."""
-        pass
-
-    def _html_repr_(self):
-        """Dummy method implementation."""
-
-
-class TestBaseContainer(TestCase):
-    """Test the abstract base container object."""
-    def setUp(self):
-        """Errors if the concrete implementation is incorrect."""
-        try:
-            self.concrete = ConcreteContainer()
-        except TypeError:
-            self.fail("Abstract method not implemented in ConcreteContainer")
-
-    def test_concrete(self):
-        """Works because all abstract methods have concrete implementations."""
-        self.assertIsInstance(self.concrete.uid, UUID)
-
-    def test_data_properties(self):
-        """Test :func:`~exa.core.base.Container._data_properties."""
-        dct = self.concrete._data_properties()
-        self.assertIsInstance(dct, dict)
+    def test_kwargs(self):
+        c = Concrete(brick=0, slab=1)
+        self.assertTrue(hasattr(c, "brick"))
+        self.assertIsInstance(c.brick, int)
