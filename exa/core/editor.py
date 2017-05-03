@@ -36,12 +36,20 @@ from collections import defaultdict
 from itertools import chain
 from io import StringIO, TextIOWrapper
 import os, re, sys, bz2, gzip, six, json
-from .base import ABCBase, ABCBaseMeta
+from .base import Base
+from exa.special import Typed
 if not hasattr(bz2, "open"):
     bz2.open = bz2.BZ2File
 
 
-class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
+class EditorMeta(Typed):
+    """Typed attributes for editors."""
+    name = str
+    description = str
+    meta = dict
+
+
+class Editor(six.with_metaclass(EditorMeta, Base)):
     """
     In memory text file-like object used to facilitate data parsing and
     container to text conversion.
@@ -332,9 +340,7 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
         """
         lines = []
         for line in self:
-            while pattern in line:
-                line = line.replace(pattern, replacement)
-            lines.append(line)
+            lines.append(line.replace(pattern, replacement))
         if inplace:
             self._lines = lines
         else:
@@ -468,6 +474,9 @@ class Editor(six.with_metaclass(ABCBaseMeta, ABCBase)):
                 self.meta['filepath'] = filepath
             except TypeError:
                 self.meta = {'filepath': filepath}
+
+    def _html_repr_(self):
+        return repr(self)
 
     def __repr__(self):
         r = ""

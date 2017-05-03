@@ -13,11 +13,11 @@ allow for creation of such known structures/types that, in turn, enable a
 cohesive processing API from the single entry object, the container.
 The abstract class in this module provides some requirements for these objects.
 """
-import six, sys
-from abc import abstractmethod
+import six
+from abc import abstractmethod, ABCMeta
 
 
-class Base(object):
+class Base(six.with_metaclass(ABCMeta, object)):
     """
     Abstract base class for editors, data, and containers.
 

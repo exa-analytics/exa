@@ -124,13 +124,9 @@ import warnings
 import numpy as np
 import pandas as pd
 from abc import abstractmethod
-from exa.special import simple_function_factory, yield_typed, create_typed_attr
-from .base import ABCBaseMeta
-from .editor import Editor
+from .editor import Editor, EditorMeta
 from .dataframe import DataFrame
-
-
-# Some module level variables
+from exa.special import simple_function_factory, yield_typed, create_typed_attr
 
 
 class SectionDataFrame(DataFrame):
@@ -158,7 +154,7 @@ class SectionDataFrame(DataFrame):
         return df
 
 
-class Meta(ABCBaseMeta):
+class Meta(EditorMeta):
     """
     Metaclass that automatically generates parsing function wrappers.
 

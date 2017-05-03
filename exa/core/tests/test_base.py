@@ -8,8 +8,9 @@ Tests for abstract base classes of data, editor, and container objects.
 This module also tests some advanced usages of the abstract base class
 in combination with the :class:`~exa.special.Typed` metaclass.
 """
+import six
 from unittest import TestCase
-from exa.core import Base
+from exa.core.base import Base
 from exa.special import Typed
 
 

@@ -22,7 +22,7 @@ its `pandas DataFrame`_ counterpart.
 .. _pandas DataFrame: http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html
 """
 import pandas as pd
-from .base import ABCBase
+from .base import Base
 
 
 class ColumnError(Exception):
@@ -38,11 +38,11 @@ class ColumnError(Exception):
         super(ColumnError, self).__init__(msg)
 
 
-class DataFrame(pd.DataFrame, ABCBase):
+class DataFrame(pd.DataFrame, Base):
     """
     A dataframe like object with support for required columns.
     """
-    _metadata = ("name", "uid", "meta")
+    _metadata = ("name", "meta")
     _required_columns = None
     _col_descriptions = None
     _aliases = None
@@ -63,9 +63,11 @@ class DataFrame(pd.DataFrame, ABCBase):
     def _constructor(self):
         return DataFrame
 
+    def _html_repr_(self):
+        return super(DataFrame, self)._html_repr_()
+
     def __init__(self, *args, **kwargs):
         name = kwargs.pop("name", None)
-        uid = kwargs.pop("uid", None)
         meta = kwargs.pop("meta", None)
         super(DataFrame, self).__init__(*args, **kwargs)
         if self._required_columns is not None:
@@ -73,5 +75,4 @@ class DataFrame(pd.DataFrame, ABCBase):
             if len(missing) > 0:
                 raise ColumnError(*missing)
         self.name = name
-        self.uid = uid
         self.meta = meta

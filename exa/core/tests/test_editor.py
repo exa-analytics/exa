@@ -15,7 +15,7 @@ from types import GeneratorType
 import numpy as np
 import pandas as pd
 from io import StringIO
-from uuid import uuid4, UUID
+from uuid import uuid4
 from unittest import TestCase
 from tempfile import mkdtemp
 from exa.core.editor import concat, Editor
@@ -78,10 +78,6 @@ class TestEditor(TestCase):
         os.remove(self.path + ".bz2")
         os.remove(self.path + ".iso-8859-1")
         shutil.rmtree(self.dirpath)
-
-    def test_editor_has_uid(self):
-        """Test that a uid is generated automatically if needed."""
-        self.assertIsInstance(self.from_file.uid, UUID)
 
     def test_editor_input_methods(self):
         """
@@ -175,6 +171,10 @@ class TestEditor(TestCase):
         self.from_file.replace(rp0, rp1, inplace=True)
         self.assertEqual(str(self.from_file[0]), rp1)
         self.from_file.replace(rp1, rp0)
+        # Check for recursion errors
+        rp0 = "the"
+        rp1 = "the replacement"
+        self.from_file_enc.replace(rp0, rp1, inplace=True)
 
     def test_find(self):
         """Test :func:`~exa.core.editor.Editor.find`."""
