@@ -4,7 +4,10 @@
 """
 Tests for :mod:`~exa.core.container`
 #############################################
+Tests the behavior of the generic container.
 """
+import numpy as np
+import pandas as pd
 from unittest import TestCase
 from exa.core import Container
 
@@ -28,4 +31,9 @@ class TestContainer(TestCase):
 
     def test_with_generic_data(self):
         """Test a container with normal data."""
-        pass
+        arr = np.random.rand(10)
+        mat = np.random.rand(10, 10)
+        ser = pd.Series(arr)
+        df = pd.DataFrame(mat)
+        c = Container(arr=arr, mat=mat, ser=ser, df=df)
+        self.assertEqual(len(c.info()), 4)

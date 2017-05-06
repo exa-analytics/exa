@@ -5,4 +5,3 @@ from .dataframe import DataFrame
 from .editor import Editor
 from .parsing import Sections, Meta, Parser
 from .container import Container
-from . import tests

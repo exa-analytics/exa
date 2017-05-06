@@ -12,6 +12,8 @@ common processing, analysis, and visualization tasks.
 
 .. _Pandas: http://pandas.pydata.org
 """
+import pandas as pd
+from sys import getsizeof
 from .base import Base
 
 
@@ -31,7 +33,29 @@ class Container(Base):
         container.info()            # Display information about data objects
     """
     def info(self):
-        pass
+        """
+        Display information about data objects in this container in tabular
+        format. Sizes are given in bytes.
+        """
+        names = []
+        types = []
+        sizes = []
+        for nam, obj in vars(self).items():
+            if nam.startswith("_") and hasattr(self, nam[1:]):
+                names.append(nam[1:])
+            else:
+                names.append(nam)
+            if hasattr(obj, "memory_usage"):    # Pandas objects
+                try:
+                    sizes.append(obj.memory_usage().sum())
+                except AttributeError:
+                    sizes.append(obj.memory_usage())
+            elif hasattr(obj, "nbytes"):        # Numpy objects
+                sizes.append(obj.nbytes)
+            else:
+                sizes.append(getsizeof(obj))    # Can be very inaccurate
+            types.append(type(obj).__name__)
+        return pd.DataFrame.from_dict({"name": names, "type": types, "size": sizes}).sort_values("name")
 
     def _html_repr_(self):
         return repr(self)
