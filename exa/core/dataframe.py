@@ -33,7 +33,7 @@ class ColumnError(Exception):
         msg = "Missing required column(s): {}"
         return msg.format(cols)
 
-    def __init__(self, *columns, msg=None):
+    def __init__(self, msg=None, *columns):
         msg = self.default(*columns) if msg is None else msg
         super(ColumnError, self).__init__(msg)
 
