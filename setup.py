@@ -8,20 +8,24 @@ from setuptools import setup, find_packages
 
 name = "exa"
 description = "The exa framework for data processing, analytics, and visualization."
-datadir = "data"
+datadir = "_data"
+readme = "README.md"
+requirements = "requirements.txt"
+verfile = "_version.py"
 root = os.path.dirname(os.path.abspath(__file__))
 try:
     import pypandoc
-    long_description = pypandoc.convert("README.md", "rst")
+    long_description = pypandoc.convert(readme, "rst")
 except ImportError:
-    with open("README.md") as f:
+    with open(readme) as f:
         long_description = f.read()
-with open("requirements.txt") as f:
+with open(requirements) as f:
     dependencies = f.read().splitlines()
-with open(os.path.join(root, name, "_version.py")) as f:
+with open(os.path.join(root, name, verfile)) as f:
     v = f.readlines()[-2]
     v = v.split('=')[1].strip()[1:-1]
     version = '.'.join(v.replace(" ", "").split(","))
+
 setup_args = {
     'name': name,
     'version': version,
@@ -37,7 +41,8 @@ setup_args = {
     'author_email': "exa.data.analytics@gmail.com",
     'maintainer_email': "exa.data.analytics@gmail.com",
     'url': "https://exa-analytics.github.io/" + name,
-    'download_url': "https://github.com/exa-analytics/{}/tarball/{}.tar.gz".format(name, version),
+#    'download_url': "https://github.com/exa-analytics/{}/tarball/{}.tar.gz".format(name, version),
+    'download_url': "https://github.com/avmarchenko/{}/tarball/{}.tar.gz".format(name, version),
     'keywords': ["data", "analytics", "framework"],
     'classifiers': [
         "Development Status :: 3 - Alpha",

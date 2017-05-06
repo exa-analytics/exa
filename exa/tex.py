@@ -71,9 +71,7 @@ def constant_decimals(text, n):
 
 
 def text_value_cleaner(text):
-    """
-    Clean and convert string value to Python object
-    """
+    """Clean and convert string value to Python numeric type."""
     text = text.strip()
     if "." in text:
         try:

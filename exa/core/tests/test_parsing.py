@@ -9,7 +9,8 @@ Tests for the related modules, :mod:`~exa.core.sections` and
 """
 import six
 from unittest import TestCase
-from exa.core.parsing import Sections, Meta, Parser, SectionDataFrame
+from exa.core.editor import Editor
+from exa.core.parsing import Sections, Meta, Parser
 
 
 sections0 = u"""Sections have some text followed by a delimiter
@@ -46,12 +47,10 @@ or may have final text.
 
 class MockSections(Sections):
     """Mock example of :class:`~exa.core.editor.Sections`."""
-    name = "example_sections"
-    description = "Parses text sections delimited by ===="
     _key_marker = "===="
-    _key_def_sec_name = 'default'
+    _key_def_sec_name = "MockParser"
 
-    def _parse(self):
+    def _parse(self, fail=False):
         """This is depends on the file structure."""
         delims = self.find(self._key_marker, text=False)[self._key_marker]
         starts = [delim + 1 for delim in delims]
@@ -59,8 +58,10 @@ class MockSections(Sections):
         ends = delims
         ends.append(len(self))
         names = [self._key_def_sec_name]*len(starts)
+        names[-1] = "none"
         dct = {"parser": names, "start": starts, "end": ends}
-        self.sections = SectionDataFrame.from_dct(dct)
+        if not fail:
+            self._sections_helper(dct)
 
 
 class MockSectionMeta(Meta):
@@ -73,13 +74,11 @@ class MockSectionMeta(Meta):
 
 class MockParser(six.with_metaclass(MockSectionMeta, Parser)):
     """Mock example of :class:`~exa.core.editor.Parser`."""
-    name = "default"
-    description = "Parser for word regions."
-
-    def _parse(self):
+    def _parse(self, fail=False):
         """Parse a word section."""
         self.wordlist = [word for line in self._lines for word in line.split()]
-        self.wordcount = len(self.wordlist)
+        if not fail:
+            self.wordcount = len(self.wordlist)
 
 
 class MockBaseSections(Sections):
@@ -107,36 +106,76 @@ class TestSections(TestCase):
         with self.assertRaises(TypeError):
             MockBaseParser()
 
-#    def test_describe_pre_parse(self):
-#        """Test descriptors prior to parsing."""
-#        sec0 = MockSections(sections0)
-#        sec1 = MockSections(sections1)
-#        sec2 = MockSections(sections2)
-#        sec3 = MockSections(sections3)
-#        secs = [sec0, sec1, sec2, sec3]
-#        for sec in secs:
-#            df = sec.describe()
-#            self.assertIsInstance(df, pd.Series)
-#            self.assertEqual(len(df), 4)
-#            df = sec.describe_parsers()
-#            self.assertIsInstance(df, pd.DataFrame)
-#            self.assertEqual(len(df), 1)
-
-    def test_parsing(self):
+    def test_basic_parsing(self):
         """Test live modification of class objects on parsing."""
-        sec0 = MockSections(sections0)
-        sec1 = MockSections(sections1)
-        sec2 = MockSections(sections2)
+        sec = MockSections(sections0)
+        self.assertFalse(hasattr(sec, "section0"))
+        self.assertFalse(hasattr(sec, "parse_section0"))
+        sec.parse()
+        for i in sec.sections.index:
+            attrname = sec.sections.loc[i, "attribute"]
+            self.assertTrue(hasattr(sec, attrname))
+        sec.section1.parse()
+        self.assertTrue(hasattr(sec.section0, "wordlist"))
+        self.assertTrue(hasattr(sec.section0, "wordcount"))
+        self.assertTrue(sec.section1.wordcount > 0)
+
+    def test_recursive_parsing(self):
+        """Test recursive parsing."""
+        sec = MockSections(sections1)
+        self.assertFalse(hasattr(sec, "section0"))
+        self.assertFalse(hasattr(sec, "parse_section0"))
+        sec.parse(recursive=True)
+        for i in sec.sections.index:
+            attrname = sec.sections.loc[i, "attribute"]
+            self.assertTrue(hasattr(sec, attrname))
+        sec.section1.parse()
+        self.assertTrue(hasattr(sec.section0, "wordlist"))
+        self.assertTrue(hasattr(sec.section0, "wordcount"))
+        self.assertTrue(sec.section1.wordcount > 0)
+
+    def test_verbose_parsing(self):
+        """Test both recursive and verbose options."""
+        sec = MockSections(sections2)
+        self.assertFalse(hasattr(sec, "section1"))
+        self.assertFalse(hasattr(sec, "parse_section1"))
+        sec.parse(recursive=True)
+        for i in sec.sections.index:
+            attrname = sec.sections.loc[i, "attribute"]
+            self.assertTrue(hasattr(sec, attrname))
+        sec.section1.parse(verbose=True, recursive=True)
+        self.assertTrue(hasattr(sec.section0, "wordlist"))
+        self.assertTrue(hasattr(sec.section0, "wordcount"))
+        self.assertTrue(sec.section1.wordcount > 0)
+
+    def test_fallback_parsing(self):
+        """Test that missing parsers fallback to Editors."""
+        # Test section without a parser class (see above)
         sec3 = MockSections(sections3)
-        secs = [sec0, sec1, sec2, sec3]
-        for sec in secs:
-            self.assertFalse(hasattr(sec, "section0"))
-            self.assertFalse(hasattr(sec, "parse_section0"))
-            sec.parse()
-            for i in sec.sections.index:
-                attrname = sec.sections.loc[i, "attribute"]
-                self.assertTrue(hasattr(sec, attrname))
-            sec.section1.parse()
-            self.assertTrue(hasattr(sec.section0, "wordlist"))
-            self.assertTrue(hasattr(sec.section0, "wordcount"))
-            self.assertTrue(sec.section1.wordcount > 0)
+        with self.assertRaises(ValueError):
+            sec3.parse(fail=True)    # Also tests keyword args pass through
+        sec3.parse()
+        self.assertTrue(hasattr(sec3, "section2"))    # Default parsing of section to a generic Editor
+        self.assertFalse(hasattr(sec3.section3, "parse"))
+        self.assertTrue(type(sec3.section3) is Editor)
+
+    def test_keys_parsers(self):
+        """Test that dicts are returned with correct data for keys and parsers."""
+        sec = MockSections(sections0)
+        self.assertIsInstance(sec.keys, dict)
+        self.assertDictEqual(sec.keys, {'_key_marker': "====",
+                                        '_key_def_sec_name': "MockParser"})
+
+    def test_get_section(self):
+        """Test :func:`~exa.core.parsing.Sections.get_section`."""
+        sections = MockSections(sections0)
+        sections.parse(recursive=True)
+        sec = sections.get_section(0)
+        self.assertTrue(sec is sections.section0)
+        sec = sections.get_section("none")
+        self.assertTrue(sec is sections.section2)
+        with self.assertRaises(ValueError):
+            sections.get_section("MockParser")
+        with self.assertRaises(TypeError):
+            sections.get_section(1.5)
+        self.assertIsNone(sections.get_section(5))

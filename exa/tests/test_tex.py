@@ -45,3 +45,18 @@ class TestTeX(TestCase):
         # Too many
         text = tex.constant_decimals(self.df.round(4).to_latex(), 3)
         self.assertTrue(all(len(item) == 4 for item in re.findall(regex, text)))
+
+    def test_text_value_cleaner(self):
+        """Test :func:`~exa.tex.text_value_cleaner(text)`."""
+        flt = "  -10.1E1"
+        res = tex.text_value_cleaner(flt)
+        self.assertIsInstance(res, float)
+        self.assertEqual(res, -101)
+        num = " 42    "
+        res = tex.text_value_cleaner(num)
+        self.assertIsInstance(res, int)
+        self.assertEqual(res, 42)
+        fallback = "  -42.."
+        res = tex.text_value_cleaner(fallback)
+        self.assertIsInstance(res, str)
+        self.assertEqual(res, "-42..")

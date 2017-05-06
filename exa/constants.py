@@ -5,10 +5,15 @@
 Physical Constants
 #######################################
 """
+import os as _os
 import sys as _sys
 from pkg_resources import resource_filename as _resource_filename
+from exa import _datadir
 from .special import Singleton as _Singleton
 from .core.editor import Editor as _Editor
+
+
+_resource = "constants.json.bz2"
 
 
 class _Constant(_Singleton):
@@ -28,6 +33,6 @@ def _create():
 
 # Data order of isotopic (nuclear) properties:
 _this = _sys.modules[__name__]
-_path = _resource_filename("exa", "data/constants.json.bz2")
+_path = _resource_filename(_datadir()[0], _os.path.join(_datadir()[1], _resource))
 if not hasattr(_this, "a220_lattice_spacing_of_silicon"):
     _create()

@@ -5,10 +5,15 @@
 Units
 ############################
 """
+import os as _os
 import sys as _sys
 from pkg_resources import resource_filename as _resource_filename
+from exa import _datadir
 from .special import Singleton as _Singleton
 from .core.editor import Editor as _Editor
+
+
+_resource = "units.json.bz2"
 
 
 class _Unit(_Singleton):
@@ -33,6 +38,6 @@ def _create():
 
 # Data order of isotopic (nuclear) properties:
 _this = _sys.modules[__name__]
-_path = _resource_filename("exa", "data/units.json.bz2")
+_path = _resource_filename(_datadir()[0], _os.path.join(_datadir()[1], _resource))
 if not hasattr(_this, "s"):
     _create()

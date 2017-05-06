@@ -36,6 +36,10 @@ Note:
 
 .. _Jupyter notebook: https://jupyter.org/
 """
+def _datadir():
+    """Name of the static data directory."""
+    return ("exa", "_data")
+
 from ._version import __version__
 from .core import Editor, Sections, Parser, Container
-from . import mpl, tex, constants, units, isotopes
+from . import mpl, tex

@@ -26,11 +26,10 @@ a concrete :class:`~exa.core.parsing.Sections` implementation may be as follows.
 .. code-block:: python
 
     class DataSections(Sections):
-        description = "Parses files with sections delimited by -"
         _key_sep = "^-+$"    # Regular expression to find section delimiters
         _key_start = 0       # We make all parsing parameters ``_key_\*``
         _key_sp = 1          # attributes so that ``describe`` methods
-        _key_parser_name = "default"
+        _key_parser_name = "DataParser"    # Class name of parser
 
         # This is the only method we need a concrete implementation for.
         # It is responsible for populating the sections attribute.
@@ -58,9 +57,6 @@ same format, only a single 'parser' object is needed.
         _descriptions = {'array': "Data array"}  # Optional data description
 
     class DataParser(six.with_metaclass(DataParserMeta, Parser)):
-        name = "default"    # This should match what we wrote above in DataSections
-        description = "Parses data array sections of a file delimited by -"
-
         # This is the only method we need to define to make this concrete
         def _parse(self):
             # This function should set all data objects specified in the metaclass.
@@ -113,16 +109,10 @@ can help describe complex structures of parsing editors.
 
     s0 = ed.section0              # Automatically generated subsection of type Parser
     s0.describe()                 # Display available data objects
-
-Tip:
-    Parsers should be added to sections class objects using the
-    :func:`~exa.core.parsing.Sections.add_section_parsers` function. Parser
-    objects have a ``name`` attribute to identify what section they parse.
 """
 import six
 import warnings
 import numpy as np
-import pandas as pd
 from abc import abstractmethod
 from .editor import Editor, EditorMeta
 from .dataframe import DataFrame
@@ -206,25 +196,14 @@ class Sections(six.with_metaclass(Meta, Editor)):
     See Also:
         :class:`~exa.core.parsing.Parser`
     """
-    name = None                                       # Set by subclass
-    description = None                                # Ditto
-
-    def info(self):
-        """
-        Display information about this parser.
-
-        See Also:
-            :func:`~exa.core.parsing.Sections.parser_info`
-        """
-        pass
-
-    def parse(self, recursive=False, verbose=False):
+    def parse(self, recursive=False, verbose=False, **kwargs):
         """
         Parse the current file.
 
         Args:
             recursive (bool): If true, parses all sub-section/parser objects' data
             verbose (bool): Print parser warnings
+            kwargs: Keyword arguments passed to parser
 
         Tip:
             Helpful methods for describing parsing and data are
@@ -241,8 +220,8 @@ class Sections(six.with_metaclass(Meta, Editor)):
                 self.parse_section(i)
             return section_parser
         # Set the value of the ``sections`` attribute
-        self._parse()
-        if not hasattr(self, "sections") or self.sections is None:
+        self._parse(**kwargs)
+        if not hasattr(self, "_sections") or self._sections is None:
             raise ValueError("Parsing method ``_parse`` does not correctly set ``sections``.")
         # Now generate section attributes for the sections present
         for i in self.sections.index:
@@ -276,7 +255,7 @@ class Sections(six.with_metaclass(Meta, Editor)):
             if recursive:
                 self.parse_section(i, recursive=True, verbose=verbose)
 
-    def parse_section(self, number, recursive=False, verbose=False):
+    def parse_section(self, number, recursive=False, verbose=False, **kwargs):
         """
         Parse specific section of this object.
 
@@ -288,6 +267,7 @@ class Sections(six.with_metaclass(Meta, Editor)):
             number (int): Section number (of the ``sections`` list)
             recursive (bool): Parse sub-section/parser objects
             verbose (bool): Display additional warnings
+            kwargs: Keyword arguments passed to parser
 
         Tip:
             To see what objects exist, see the :attr:`~exa.core.sections.Sections.sections`
@@ -307,11 +287,17 @@ class Sections(six.with_metaclass(Meta, Editor)):
         setattr(self, attrname, sec)
         # ...or if recursive is true.
         if recursive and hasattr(sec, "parse"):
-            sec.parse(recursive=True, verbose=verbose)
+            sec.parse(recursive=True, verbose=verbose, **kwargs)
 
-    def delimiters(self):
-        """Describes the patterns used to disambiguate regions of the file."""
-        return [(name, getattr(self, name)) for name in vars(self) if name.startswith("_key_")]
+    @property
+    def keys(self):
+        """List parameters used to identify this object's sections."""
+        return dict([(name, getattr(self, name)) for name in dir(self) if name.startswith("_key_")])
+
+    @property
+    def parsers(self):
+        """List the section parsers attached to this object."""
+        return self._parsers
 
     def get_section(self, section):
         """
@@ -338,25 +324,8 @@ class Sections(six.with_metaclass(Meta, Editor)):
             raise TypeError("Unknown type for section arg with type {}".format(type(section)))
         try:
             return getattr(self, self.sections.loc[idx, "attribute"])
-        except AttributeError:
+        except KeyError:
             return None
-
-    @classmethod
-    def parser_info(cls):
-        """Display available section parsers."""
-        data = {}
-        for key, item in cls._parsers.items():
-            params = len([n for n in vars(item) if n.startswith("_key_")])
-            attrs = len([attr[0] for attr in yield_typed(item)])
-            typ = "Sections" if item in Sections.__subclasses__() else "Parser"
-            data[key] = (params, typ, attrs)
-        if len(data) == 0:
-            warnings.warn("No parsers added.")
-        else:
-            df = pd.DataFrame.from_dict(data, orient='index')
-            df.index.name = "parser"
-            df.columns = ["key parameters", "type", "attributes"]
-            return df
 
     @classmethod
     def add_section_parsers(cls, *args, **kwargs):
@@ -368,14 +337,11 @@ class Sections(six.with_metaclass(Meta, Editor)):
             Sections.add_section_parsers(Section1, Section2, ...)
         """
         for s in args:
-            if s.name is None:
-                kwargs[s.__class__.__name__] = s
-            else:
-                kwargs[s.name] = s
+            kwargs[s.__name__] = s
         cls._parsers.update(kwargs)
 
     @abstractmethod
-    def _parse(self):
+    def _parse(self, **kwargs):
         """
         This abstract method is overwritten by a concrete implementation and is
         responsible for setting the ``sections`` attribute.
@@ -389,7 +355,7 @@ class Sections(six.with_metaclass(Meta, Editor)):
             class MySections(Sections):
                 def _parse(self):
                     # This function should actually perform parsing
-                    names = ["parser_name", "other_parser"]
+                    names = ["ParserName", "OtherParser"]
                     starts = [0, 10]
                     ends = [10, 20]
                     titles = ["A Title", "Another Title"]
@@ -410,10 +376,6 @@ class Sections(six.with_metaclass(Meta, Editor)):
         """
         self.sections = SectionDataFrame.from_dct(dct)
 
-    def __init__(self, *args, **kwargs):
-        kwargs['name'] = super(Sections, self).name
-        super(Sections, self).__init__(*args, **kwargs)
-
 
 class Parser(six.with_metaclass(Meta, Editor)):
     """
@@ -430,12 +392,6 @@ class Parser(six.with_metaclass(Meta, Editor)):
     See Also:
         :class:`exa.core.parsing.Sections`
     """
-    name = None                                       # Set by subclass
-    description = None                                # Ditto
-
-    def info(self):
-        pass
-
     def parse(self, **kwargs):
         """
         Parse data objects from the current file.
@@ -466,7 +422,3 @@ class Parser(six.with_metaclass(Meta, Editor)):
             An example implementation can be found at :mod:`~exa.core.parsing`.
         """
         pass
-
-    def __init__(self, *args, **kwargs):
-        kwargs['name'] = super(Parser, self).name
-        super(Parser, self).__init__(*args, **kwargs)
