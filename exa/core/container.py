@@ -40,7 +40,7 @@ class Container(Base):
         names = []
         types = []
         sizes = []
-        for nam, obj in vars(self).items():
+        for nam, obj in self._dataitems():
             if nam.startswith("_") and hasattr(self, nam[1:]):
                 names.append(nam[1:])
             else:
@@ -57,11 +57,14 @@ class Container(Base):
             types.append(type(obj).__name__)
         return pd.DataFrame.from_dict({"name": names, "type": types, "size": sizes}).sort_values("name")
 
+    def _dataitems(self):
+        return vars(self).items()
+
     def _html_repr_(self):
         return repr(self)
 
     def __repr__(self):
-        return "{}(objects={})".format(self.__class__.__name__, len(self._data))
+        return "{}(data={})".format(self.__class__.__name__, len(self._dataitems()))
 
 
 

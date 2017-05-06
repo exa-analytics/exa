@@ -28,6 +28,10 @@ class TestContainer(TestCase):
         c = Container(name=name, meta=meta)
         self.assertEqual(c.name, name)
         self.assertEqual(c.meta, meta)
+        rep = repr(c)
+        self.assertIsInstance(rep, str)
+        rep = c._html_repr_()
+        self.assertIsInstance(rep, str)
 
     def test_with_generic_data(self):
         """Test a container with normal data."""
@@ -37,3 +41,6 @@ class TestContainer(TestCase):
         df = pd.DataFrame(mat)
         c = Container(arr=arr, mat=mat, ser=ser, df=df)
         self.assertEqual(len(c.info()), 4)
+        # Test ad-hoc attachment
+        c.other = 0
+        self.assertEqual(len(c.info()), 5)

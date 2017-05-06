@@ -56,7 +56,7 @@ class TestTeX(TestCase):
         res = tex.text_value_cleaner(num)
         self.assertIsInstance(res, int)
         self.assertEqual(res, 42)
-        fallback = "  -42.."
+        fallback = " forty two "
         res = tex.text_value_cleaner(fallback)
         self.assertIsInstance(res, str)
-        self.assertEqual(res, "-42..")
+        self.assertEqual(res, "forty two")

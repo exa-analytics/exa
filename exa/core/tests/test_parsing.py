@@ -157,7 +157,8 @@ class TestSections(TestCase):
         sec3.parse()
         self.assertTrue(hasattr(sec3, "section2"))    # Default parsing of section to a generic Editor
         self.assertFalse(hasattr(sec3.section3, "parse"))
-        self.assertTrue(type(sec3.section3) is Editor)
+        self.assertFalse(isinstance(sec3.section3, (Parser, Sections)))
+        self.assertIsInstance(sec3.section3, Editor)
 
     def test_keys_parsers(self):
         """Test that dicts are returned with correct data for keys and parsers."""
@@ -165,6 +166,9 @@ class TestSections(TestCase):
         self.assertIsInstance(sec.keys, dict)
         self.assertDictEqual(sec.keys, {'_key_marker': "====",
                                         '_key_def_sec_name': "MockParser"})
+        self.assertEqual(len(sec.parsers), 1)
+        self.assertIsInstance(sec.parsers, dict)
+        self.assertIn("MockParser", sec.parsers)
 
     def test_get_section(self):
         """Test :func:`~exa.core.parsing.Sections.get_section`."""

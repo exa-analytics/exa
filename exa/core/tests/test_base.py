@@ -57,8 +57,19 @@ class TestBase(TestCase):
         c = Concrete()
         self.assertIsInstance(c, Base)
         self.assertTrue(hasattr(c, "info"))
+        self.assertIsNone(c.info())
+        self.assertIsNone(c._html_repr_())
 
     def test_kwargs(self):
         c = Concrete(brick=0, slab=1)
         self.assertTrue(hasattr(c, "brick"))
         self.assertIsInstance(c.brick, int)
+
+
+    def test_getters(self):
+        """Test that Foo's getters work."""
+        c = Foo()
+        self.assertDictEqual(c.foo, {'value': "foo"})
+        self.assertEquals(c.bar, ["bar"])
+        self.assertEqual(c.baz, "baz")
+

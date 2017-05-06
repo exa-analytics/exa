@@ -11,6 +11,17 @@ from unittest import TestCase
 from exa.core.dataframe import DataFrame, ColumnError
 
 
+class TestColumnError(TestCase):
+    """Test :class:`~exa.core.dataframe.ColumnError`."""
+    def test_working(self):
+        """Test that the basic arg passing works."""
+        self.assertEqual(str(ColumnError("column")), "Missing required column(s): column")
+
+    def test_custom(self):
+        """Test that custom messages work."""
+        self.assertEqual(str(ColumnError(msg="You forgot column")), "You forgot column")
+
+
 class MockDataFrame(DataFrame):
     """Test implementation of :class:`~exa.core.dataframe.DataFrame`."""
     _required_columns = ("col1", )

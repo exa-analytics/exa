@@ -475,6 +475,8 @@ class Editor(six.with_metaclass(EditorMeta, Base)):
                 self.meta['filepath'] = filepath
             except TypeError:
                 self.meta = {'filepath': filepath}
+        else:
+            self.meta = {'filepath': None}
 
     def _html_repr_(self):
         return repr(self)
