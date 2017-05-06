@@ -6,6 +6,3 @@ Abstract Base Objects
 ###########################
 .. automodule:: exa.core.base
     :members:
-
-.. automodule:: exa.core.tests.test_base
-    :members:

@@ -47,6 +47,13 @@ can be found at :ref:`examples-label` or via help::
     api/units.rst
     api/isotopes.rst
 
+.. toctree::
+    :maxdepth: 1
+    :caption: Unittests
+
+    api/units_constants_isotopes_tests.rst
+    api/editor_parser_tests.rst
+
 
 ########################
 Dev Docs
@@ -57,3 +64,4 @@ Dev Docs
 
     api/special.rst
     api/base.rst
+    api/dev_tests.rst

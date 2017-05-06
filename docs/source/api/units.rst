@@ -6,6 +6,3 @@ Units
 ###########################
 .. automodule:: exa.units
     :members:
-
-.. automodule:: exa.tests.test_units
-    :members:

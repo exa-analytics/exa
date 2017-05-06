@@ -8,7 +8,3 @@ Container
 ###########################
 .. automodule:: exa.core.container
     :members:
-
-.. automodule:: exa.core.tests.test_container
-    :members:
-

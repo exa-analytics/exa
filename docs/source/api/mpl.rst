@@ -6,6 +6,3 @@ Matplotlib Utilities
 ###########################
 .. automodule:: exa.mpl
     :members:
-
-.. automodule:: exa.tests.test_mpl
-    :members:

@@ -6,6 +6,3 @@ Constants
 ###########################
 .. automodule:: exa.constants
     :members:
-
-.. automodule:: exa.tests.test_constants
-    :members:
