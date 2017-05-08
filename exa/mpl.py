@@ -24,8 +24,9 @@ import seaborn as sns
 
 legend = {'legend.frameon': True, 'legend.facecolor': 'white',
           'legend.fancybox': True, 'patch.facecolor': 'white',
-          'patch.edgecolor': 'black', 'legend.edgecolor': 'blue'}
+          'patch.edgecolor': 'black', 'legend.edgecolor': 'black'}
 axis = {'axes.formatter.useoffset': False}
+text = {'text.usetex': False, 'font.weight': "normal"}
 mathtext = {'mathtext.default': 'rm', 'mathtext.fontset': 'stix'}
 save = {'savefig.format': 'pdf', 'savefig.bbox': 'tight',
         'savefig.transparent': True, 'savefig.pad_inches': 0.1,
@@ -34,7 +35,7 @@ save = {'savefig.format': 'pdf', 'savefig.bbox': 'tight',
 
 def qualitative(n=5):
     """
-    Perceptually uniform qualitative color palette.
+    Perceptually uniform qualitative color palette (cubehelix).
 
     To set the palette do:
 
@@ -82,9 +83,11 @@ def reconfigure(**kwargs):
     font = kwargs.pop('font', 'serif')
     style = kwargs.pop('style', 'white')
     palette = kwargs.pop('palette', qualitative(5))
-    rc = legend
+    rc = {}
+    rc.update(legend)
     rc.update(axis)
     rc.update(mathtext)
+    rc.update(text)
     rc.update(save)
     rc.update(kwargs)    # User kwargs overrule default kwargs
     sns.set(context=context, style=style, palette=palette, font_scale=font_scale,
