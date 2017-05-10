@@ -182,4 +182,5 @@ class TestSections(TestCase):
             sections.get_section("MockParser")
         with self.assertRaises(TypeError):
             sections.get_section(1.5)
-        self.assertIsNone(sections.get_section(5))
+        with self.assertRaises(KeyError):
+            sections.get_section(5)

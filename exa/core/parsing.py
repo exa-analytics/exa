@@ -313,19 +313,21 @@ class Sections(six.with_metaclass(Meta, Editor)):
             If multiple sections with the same parser name exist, selection must
             be performed by section number.
         """
-        if isinstance(section, six.string_types):
-            idx = self.sections[self.sections["parser"] == section].index
+        inttypes = six.integer_types + (np.int, np.int8, np.int16, np.int32, np.int64)
+        if isinstance(section, six.string_types) and section.startswith("section"):
+            return getattr(self, section)
+        elif isinstance(section, six.string_types):
+            idx = self.sections[self.sections["parser"] == section].index.tolist()
             if len(idx) > 1:
                 raise ValueError("Multiple sections with parser name {} found".format(section))
-            idx = idx[0]
-        elif isinstance(section, six.integer_types + (np.int, np.int8, np.int16, np.int32, np.int64)):
+            elif len(idx) == 0:
+                raise ValueError("No sections with parser name {} found".format(section))
+        elif isinstance(section, inttypes):
             idx = section
         else:
             raise TypeError("Unknown type for section arg with type {}".format(type(section)))
-        try:
-            return getattr(self, self.sections.loc[idx, "attribute"])
-        except KeyError:
-            return None
+        idx = idx[0] if not isinstance(idx, inttypes) else idx
+        return getattr(self, str(self.sections.loc[idx, "attribute"]))
 
     @classmethod
     def add_section_parsers(cls, *args, **kwargs):

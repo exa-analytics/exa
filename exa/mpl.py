@@ -77,7 +77,18 @@ def diverging(name="BrBG", n=5, desat=None):
 
 
 def reconfigure(**kwargs):
-    """Set the Matplotlib configuration."""
+    """
+    Set the Matplotlib configuration using the module level variables ``legend``,
+    ``axis``, ``mathtext``, ``text``, ``save``, and additional kwargs.
+
+    Args:
+        kwargs: Keyword arguments to be passed to matplotlib's `rc`_
+
+    Note:
+        Additional keyword arguments overrule module level arguments.
+
+    .. _rc: http://matplotlib.org/users/customizing.html
+    """
     context = kwargs.pop('context', 'poster')
     font_scale = kwargs.pop('font_scale', 1.6)
     font = kwargs.pop('font', 'serif')
