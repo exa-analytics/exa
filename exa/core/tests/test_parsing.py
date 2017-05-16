@@ -47,21 +47,20 @@ or may have final text.
 
 class MockSections(Sections):
     """Mock example of :class:`~exa.core.editor.Sections`."""
-    _key_marker = "===="
-    _key_def_sec_name = "MockParser"
+    _marker = "===="
+    _def_sec_name = "MockParser"
 
     def _parse(self, fail=False):
         """This is depends on the file structure."""
-        delims = self.find(self._key_marker, text=False)[self._key_marker]
+        delims = self.find(self._marker, text=False)[self._marker]
         starts = [delim + 1 for delim in delims]
         starts.insert(0, 0)
         ends = delims
         ends.append(len(self))
-        names = [self._key_def_sec_name]*len(starts)
+        names = [self._def_sec_name]*len(starts)
         names[-1] = "none"
-        dct = {"parser": names, "start": starts, "end": ends}
         if not fail:
-            self._sections_helper(dct)
+            self._sections_helper(names, starts, ends)
 
 
 class MockSectionMeta(Meta):
@@ -159,16 +158,6 @@ class TestSections(TestCase):
         self.assertFalse(hasattr(sec3.section3, "parse"))
         self.assertFalse(isinstance(sec3.section3, (Parser, Sections)))
         self.assertIsInstance(sec3.section3, Editor)
-
-    def test_keys_parsers(self):
-        """Test that dicts are returned with correct data for keys and parsers."""
-        sec = MockSections(sections0)
-        self.assertIsInstance(sec.keys, dict)
-        self.assertDictEqual(sec.keys, {'_key_marker': "====",
-                                        '_key_def_sec_name': "MockParser"})
-        self.assertEqual(len(sec.parsers), 1)
-        self.assertIsInstance(sec.parsers, dict)
-        self.assertIn("MockParser", sec.parsers)
 
     def test_get_section(self):
         """Test :func:`~exa.core.parsing.Sections.get_section`."""

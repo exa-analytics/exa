@@ -440,11 +440,17 @@ class Editor(six.with_metaclass(EditorMeta, Base)):
         del self._lines[line]
 
     def __getitem__(self, key):
+        # Getting attribute
         if isinstance(key, six.string_types):
             return getattr(self, key)
+        # Slicing a new editor
         kwargs = {'nprint': self.nprint, 'meta': self.meta, 'path_check': False,
                   'encoding': self.encoding, 'as_interned': self.as_interned}
-        return self.__class__(self._lines[key], **kwargs)
+        if isinstance(key, (tuple, list)):
+            lines = [self._lines[i] for i in key]
+        else:
+            lines = self._lines[key]
+        return self.__class__(lines, **kwargs)
 
     def __setitem__(self, line, value):
         self._lines[line] = value

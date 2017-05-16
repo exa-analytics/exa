@@ -287,3 +287,19 @@ class TestEditor(TestCase):
         meta = self.from_file["meta"]
         self.assertTrue(meta is self.from_file.meta)
         self.assertIsInstance(meta, dict)
+
+    def test_getting(self):
+        """Test getting tuple/list slices (i.e. specific lines)."""
+        key = (0, 1, 2)
+        ed = self.from_file[key]
+        self.assertIsInstance(ed, Editor)
+        self.assertEqual(len(ed), 3)
+        self.assertEqual(ed._lines[0], self.from_file._lines[0])
+        self.assertEqual(ed._lines[1], self.from_file._lines[1])
+        self.assertEqual(ed._lines[2], self.from_file._lines[2])
+        key = [-1, 3]
+        ed = self.from_file[key]
+        self.assertIsInstance(ed, Editor)
+        self.assertEqual(len(ed), 2)
+        self.assertEqual(ed._lines[0], self.from_file._lines[-1])
+        self.assertEqual(ed._lines[1], self.from_file._lines[3])

@@ -4,6 +4,8 @@
 """
 Tests for :mod:`~exa.core.dataframe`
 #############################################
+Test facilities of the dataframes with required columns. Also test that
+dynamically generated information about the dataframe is populated correctly.
 """
 import numpy as np
 import pandas as pd
@@ -24,9 +26,7 @@ class TestColumnError(TestCase):
 
 class MockDataFrame(DataFrame):
     """Test implementation of :class:`~exa.core.dataframe.DataFrame`."""
-    _required_columns = ("col1", )
-    _col_descriptions = {'col1': "First column"}
-    _aliases = {'col1': r"$\frac{col}{1}$"}
+    _required_columns = {'col1': ("First column", None, r"$\frac{col}{1}$")}
 
 
 class TestDataFrame(TestCase):
@@ -50,10 +50,14 @@ class TestDataFrame(TestCase):
             MockDataFrame.from_dict({'col2': [0, 1], 'col3': [0, 1]})
 
     def test_info(self):
-        """Test that info works."""
+        """Test that dataframe info works (including column names)."""
         df = MockDataFrame.from_dict({'col1': [0, 1], 'col2': [0, 1]})
         inf = df.info()
         self.assertIsInstance(inf, pd.DataFrame)
         self.assertEqual(len(inf), 2)
         self.assertEqual(inf.iloc[0, 0], "First column")
-        self.assertEqual(inf.iloc[0, 1], r"$\frac{col}{1}$")
+        self.assertEqual(inf.iloc[0, 2], r"$\frac{col}{1}$")
+
+    def test_empty(self):
+        """Test that info on a generic dataframe works."""
+        self.assertIsNone(DataFrame().info())

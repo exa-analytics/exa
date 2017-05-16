@@ -42,23 +42,38 @@ class ColumnError(Exception):
 class DataFrame(pd.DataFrame, Base):
     """
     A dataframe like object with support for required columns.
+
+    The attribute ``_required_columns`` may be used to enforce dataframe creation
+    only when certain minimum requirements are satisfied. By convention this
+    object should be a dictionary with key being the column names and values of
+    3-tuples; the first entry in the tuple is the column description, the second
+    contains valid dtypes, and the third containing aliases.
+
+    .. code-block:: Python
+
+        class MyDF(DataFrame):
+            # Docstring describing purpose of this object
+            _required_columns = {'col': ("description", int, ("Col", "COL"))
+
+    In the above example, the required column is called ``col``. The tuple values
+    first give a description, then the type(s), then the aliases. Multiple types
+    can be given in the same way as multiple aliases are given above.
     """
     _metadata = ("name", "meta")
     _required_columns = None
-    _col_descriptions = None
-    _aliases = None
 
     def info(self):
-        """Information about the current object."""
-        inf = pd.Series(self.columns).to_frame().set_index(0)
-        inf.index.name = "column"
-        inf['description'] = ""
-        inf['aliases'] = ""
-        if self._col_descriptions is not None:
-            inf['description'] = inf.index.map(lambda idx: self._col_descriptions[idx] if idx in self._col_descriptions else "")
-        if self._aliases is not None:
-            inf['aliases'] = inf.index.map(lambda idx: self._aliases[idx] if idx in self._aliases else "")
-        return inf
+        """
+        Display description, data type(s), and alias(es) of required columns.
+
+        If no columns are required, none is returned.
+        """
+        if isinstance(self._required_columns, dict):
+            cols = ["description", "types", "aliases"]
+            rinf = pd.DataFrame.from_dict(self._required_columns, orient="index")
+            rinf.columns = cols[:len(rinf.columns)]
+            inf = pd.Series(self.columns).to_frame().set_index(0)
+            return pd.concat((inf, rinf), axis=1, ignore_index=True)
 
     @property
     def _constructor(self):
@@ -72,7 +87,7 @@ class DataFrame(pd.DataFrame, Base):
         meta = kwargs.pop("meta", None)
         super(DataFrame, self).__init__(*args, **kwargs)
         if self._required_columns is not None:
-            missing = set(self._required_columns).difference(self.columns)
+            missing = set(self._required_columns.keys()).difference(self.columns)
             if len(missing) > 0:
                 raise ColumnError(*missing)
         self.name = name

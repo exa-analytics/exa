@@ -26,19 +26,19 @@ a concrete :class:`~exa.core.parsing.Sections` implementation may be as follows.
 .. code-block:: python
 
     class DataSections(Sections):
-        _key_sep = "^-+$"    # Regular expression to find section delimiters
-        _key_start = 0       # We make all parsing parameters ``_key_\*``
-        _key_sp = 1          # attributes so that ``describe`` methods
-        _key_parser_name = "DataParser"    # Class name of parser
+        _sep = "^-+$"    # Regular expression to find section delimiters
+        _start = 0
+        _sp = 1
+        _parser_name = "DataParser"    # Class name of parser
 
         # This is the only method we need a concrete implementation for.
         # It is responsible for populating the sections attribute.
         def _parse(self):
-            delimlines = self.regex(self._key_sep, text=False)[self._key_sep]
-            startlines = [self._key_start] + [delim + self._key_sp for delim in delimlines]
+            delimlines = self.regex(self._sep, text=False)[self._sep]
+            startlines = [self._start] + [delim + self._sp for delim in delimlines]
             endlines = startlines[1:]
             endlines.append(len(self))
-            parser_names = [self._key_parser_name]*len(startlines)
+            parser_names = [self._parser_name]*len(startlines)
             dct = {'start': startlines, 'end': endlines, 'parser': parser_names}
             self._sections_helper(dct)
 
@@ -119,15 +119,16 @@ from .dataframe import DataFrame
 from exa.special import simple_function_factory, yield_typed, create_typed_attr
 
 
+_ints = six.integer_types + (np.int8, np.int16, np.int32, np.int64)
+
 class SectionDataFrame(DataFrame):
     """
     A dataframe that describes the sections given in the current parsing editor.
     """
     _section_name_prefix = "section"
-    _required_columns = ("parser", "start", "end")
-    _col_descriptions = {'parser': "Name of associated section or parser object",
-                         'start': "Section starting line number",
-                         'end': "Section ending (non-inclusive) line number"}
+    _required_columns = {'parser': ("Name of associated section or parser object", ),
+                         'start': ("Section starting line number", _ints, ),
+                         'end': ("Section ending (non-inclusive) line number", _ints, )}
 
     @classmethod
     def from_dct(cls, dct):
@@ -240,8 +241,8 @@ class Sections(six.with_metaclass(Meta, Editor)):
             # (see exa.special.create_typed_attr) to all instances of this
             # object's class (note that properties must be attached to class
             # definitions not instances of a class), we dynamically create a
-            # copy of this object's class and attach our properties to that
-            # class definition.
+            # copy of this object's class, attach our properties to that
+            # class definition, and set it as the class of our current object.
             cls = type(self)
             if not hasattr(cls, '__unique'):
                 uniquecls = type(cls.__name__, (cls, ), {})
@@ -288,16 +289,6 @@ class Sections(six.with_metaclass(Meta, Editor)):
         # ...or if recursive is true.
         if recursive and hasattr(sec, "parse"):
             sec.parse(recursive=True, verbose=verbose, **kwargs)
-
-    @property
-    def keys(self):
-        """List parameters used to identify this object's sections."""
-        return dict([(name, getattr(self, name)) for name in dir(self) if name.startswith("_key_")])
-
-    @property
-    def parsers(self):
-        """List the section parsers attached to this object."""
-        return self._parsers
 
     def get_section(self, section):
         """
@@ -361,21 +352,21 @@ class Sections(six.with_metaclass(Meta, Editor)):
                     starts = [0, 10]
                     ends = [10, 20]
                     titles = ["A Title", "Another Title"]
-                    dct = {"parser": names, "start": starts, "end": ends, "title": titles}
-                    self._sections_helper(dct)
+                    self._sections_helper(parsers, starts, ends, title=titles)
         """
         pass
 
-    def _sections_helper(self, dct):
+    def _sections_helper(self, parser, start, end, **kwargs):
         """
         Convenience method for building the ``sections`` object.
 
         .. code-block:: python
 
             # End of the _parse() function
-            dct = {'parser': ..., 'start': ..., 'end': ...}
-            self._sections_helper(dct)
+            self._sections_helper(parsers, starts, ends, title=titles)
         """
+        dct = {'parser': parser, 'start': start, 'end': end}
+        dct.update(kwargs)
         self.sections = SectionDataFrame.from_dct(dct)
 
 
