@@ -30,8 +30,6 @@ class TestContainer(TestCase):
         self.assertEqual(c.meta, meta)
         rep = repr(c)
         self.assertIsInstance(rep, str)
-        rep = c._html_repr_()
-        self.assertIsInstance(rep, str)
 
     def test_with_generic_data(self):
         """Test a container with normal data."""
