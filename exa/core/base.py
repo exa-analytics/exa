@@ -40,10 +40,10 @@ class Base(six.with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def info(self):
-        pass
-
-    @abstractmethod
-    def _html_repr_(self):
+        """
+        The info function provides a description of the data/objects associated
+        with the current object.
+        """
         pass
 
     def __init__(self, **kwargs):

@@ -60,9 +60,6 @@ class Container(Base):
     def _dataitems(self):
         return vars(self).items()
 
-    def _html_repr_(self):
-        return repr(self)
-
     def __repr__(self):
         return "{}(data={})".format(self.__class__.__name__, len(self._dataitems()))
 
