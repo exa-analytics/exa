@@ -21,8 +21,13 @@ its `pandas DataFrame`_ counterpart.
 
 .. _pandas DataFrame: http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html
 """
+import six
+import numpy as np
 import pandas as pd
 from .base import Base
+
+
+_ints = six.integer_types + (np.int8, np.int16, np.int32, np.int64)
 
 
 class ColumnError(Exception):
@@ -92,3 +97,28 @@ class DataFrame(pd.DataFrame, Base):
                 raise ColumnError(*missing)
         self.name = name
         self.meta = meta
+
+
+
+class SectionDataFrame(DataFrame):
+    """
+    A dataframe that describes the sections given in the current parsing editor.
+    """
+    _section_name_prefix = "section"
+    _required_columns = {'parser': ("Name of associated section or parser object", ),
+                         'start': ("Section starting line number", _ints, ),
+                         'end': ("Section ending (non-inclusive) line number", _ints, )}
+
+    @classmethod
+    def from_dct(cls, dct):
+        """
+        A helper method for creating this dataframe
+
+        Args:
+            dct (dict): Dictionary containing 'parser', 'start', and 'end' key-value pairs
+        """
+        df = cls.from_dict(dct)
+        df['attribute'] = [cls._section_name_prefix+str(i).zfill(len(str(len(df)))) for i in df.index]
+        df = df.loc[:, list(cls._required_columns) + list(set(df.columns).difference(cls._required_columns))]
+        df.index.name = cls._section_name_prefix
+        return df

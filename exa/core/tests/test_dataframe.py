@@ -10,7 +10,7 @@ dynamically generated information about the dataframe is populated correctly.
 import numpy as np
 import pandas as pd
 from unittest import TestCase
-from exa.core.dataframe import DataFrame, ColumnError
+from exa.core.dataframe import DataFrame, ColumnError, SectionDataFrame
 
 
 class TestColumnError(TestCase):
@@ -61,3 +61,11 @@ class TestDataFrame(TestCase):
     def test_empty(self):
         """Test that info on a generic dataframe works."""
         self.assertIsNone(DataFrame().info())
+
+
+class TestSectionDataFrame(TestCase):
+    """Test :class:`~exa.core.dataframe.SectionDataFrame`."""
+    def test_raises(self):
+        """Test raises error without required columns."""
+        with self.assertRaises(ColumnError):
+            SectionDataFrame()

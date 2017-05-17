@@ -115,34 +115,8 @@ import warnings
 import numpy as np
 from abc import abstractmethod
 from .editor import Editor, EditorMeta
-from .dataframe import DataFrame
+from .dataframe import SectionDataFrame
 from exa.special import simple_function_factory, yield_typed, create_typed_attr
-
-
-_ints = six.integer_types + (np.int8, np.int16, np.int32, np.int64)
-
-class SectionDataFrame(DataFrame):
-    """
-    A dataframe that describes the sections given in the current parsing editor.
-    """
-    _section_name_prefix = "section"
-    _required_columns = {'parser': ("Name of associated section or parser object", ),
-                         'start': ("Section starting line number", _ints, ),
-                         'end': ("Section ending (non-inclusive) line number", _ints, )}
-
-    @classmethod
-    def from_dct(cls, dct):
-        """
-        A helper method for creating this dataframe
-
-        Args:
-            dct (dict): Dictionary containing 'parser', 'start', and 'end' key-value pairs
-        """
-        df = cls.from_dict(dct)
-        df['attribute'] = [cls._section_name_prefix+str(i).zfill(len(str(len(df)))) for i in df.index]
-        df = df.loc[:, list(cls._required_columns) + list(set(df.columns).difference(cls._required_columns))]
-        df.index.name = cls._section_name_prefix
-        return df
 
 
 class Meta(EditorMeta):
