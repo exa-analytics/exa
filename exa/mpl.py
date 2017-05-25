@@ -138,13 +138,13 @@ def _plot_surface(x, y, z, nxlabel, nylabel, nzlabel, method,
     return fig
 
 
-def _plot_contour(x, y, z, vmin, vmax, ncbarlabel, ncbardecimal, nxlabel, nylabel,
-                  method, colorbar, figargs, axargs):
+def _plot_contour(x, y, z, vmin, vmax, ncbarlabel, ncbarlabel, ncbardecimal,
+                  nxlabel, nylabel, method, colorbar, figargs, axargs):
     fig = _gen_figure(x=x, y=y, nxlabel=nxlabel, nylabel=nylabel, figargs=figargs)
-    axs = fig.get_axes()
-    convenience = {'contour': axs[0].contour,
-                  'contourf': axs[0].contourf,
-                'pcolormesh': axs[0].pcolormesh,
+    ax = fig.get_axes()[0]
+    convenience = {'contour': ax.contour,
+                  'contourf': ax.contourf,
+                'pcolormesh': ax.pcolormesh,
                     'pcolor': ax.pcolor}
     if method not in convenience.keys():
         raise Exception('method must be in {}'.format(convenience.keys()))
