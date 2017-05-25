@@ -138,7 +138,7 @@ def _plot_surface(x, y, z, nxlabel, nylabel, nzlabel, method,
     return fig
 
 
-def _plot_contour(x, y, z, vmin, vmax, ncbarlabel, ncbarlabel, ncbardecimal,
+def _plot_contour(x, y, z, vmin, vmax, cbarlabel, ncbarlabel, ncbardecimal,
                   nxlabel, nylabel, method, colorbar, figargs, axargs):
     fig = _gen_figure(x=x, y=y, nxlabel=nxlabel, nylabel=nylabel, figargs=figargs)
     ax = fig.get_axes()[0]
@@ -150,7 +150,9 @@ def _plot_contour(x, y, z, vmin, vmax, ncbarlabel, ncbarlabel, ncbardecimal,
         raise Exception('method must be in {}'.format(convenience.keys()))
     t = convenience[method](x, y, z, **axargs)
     cbar = fig.colorbar(t) if colorbar else None
-    if ncbarlabel is not None:
+    if cbar is not None and cbarlabel is not None:
+        cbar.set_label(cbarlabel)
+    if cbar is not None and ncbarlabel is not None:
         newticks = np.linspace(vmin, vmax, ncbarlabel)
         cbar.set_ticks(newticks)
         if ncbardecimal is not None:
