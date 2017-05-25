@@ -138,7 +138,7 @@ def _plot_surface(x, y, z, nxlabel, nylabel, nzlabel, method,
     return fig
 
 
-def _plot_contour(x, y, z, vmin, vmax, ncbarlabel, ncbarlabel, ncbardecimal,
+def _plot_contour(x, y, z, vmin, vmax, ncbarlabel, ncbardecimal,
                   nxlabel, nylabel, method, colorbar, figargs, axargs):
     fig = _gen_figure(x=x, y=y, nxlabel=nxlabel, nylabel=nylabel, figargs=figargs)
     ax = fig.get_axes()[0]
