@@ -41,4 +41,4 @@ def _datadir():
     return ("exa", "_data")
 
 from ._version import __version__
-from .core import DataFrame, Editor, Sections, Parser, Container
+from .core import DataFrame, Editor, Sections, Parser, Container, Composer

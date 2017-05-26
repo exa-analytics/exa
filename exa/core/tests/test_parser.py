@@ -10,7 +10,7 @@ Tests for the related modules, :mod:`~exa.core.sections` and
 import six
 from unittest import TestCase
 from exa.core.editor import Editor
-from exa.core.parsing import Sections, Meta, Parser
+from exa.core.parser import Sections, Meta, Parser
 
 
 sections0 = u"""Sections have some text followed by a delimiter

@@ -16,7 +16,7 @@ strongly typed class attributes.
 from abc import ABCMeta
 
 
-def create_typed_attr(name, ptypes, doc=None):
+def create_typed_attr(name, ptypes, doc=None, setter_finalize=None):
     """
     Create a property that enforces types.
 
@@ -45,6 +45,7 @@ def create_typed_attr(name, ptypes, doc=None):
         name (str): Name of strongly typed attribute
         ptypes (tuple): Iterable of valid types
         doc (str): Docstring (optional)
+        setter_finalize (function): Function to be called when setting is complete
 
     Returns:
         prop (property): Strongly typed property object
@@ -143,53 +144,6 @@ def yield_typed(obj):
             elif isinstance(attr, (tuple, list, type)):
                 yield (name, attr)
 
-
-class Singleton(type):
-    """
-    A metaclass that provides the `singleton`_ paradigm.
-
-    Class objects that use this metaclass are limited to a single unique instance.
-    A Python example of this is 'None'; all instances of None are references to
-    the same object. This paradigm is useful when only a single instance of an
-    object is necessary. The following is an example usage.
-
-    .. code-block:: python
-
-        import six    # For easy Python 2 compatibility
-
-        class Highlander(six.with_metaclass(Singleton)):
-            pass
-
-    .. _singleton: https://en.wikipedia.org/wiki/Singleton_pattern
-    """
-    _singletons = {}
-
-    def __call__(cls, *args, **kwargs):
-        """
-        Call on class definition creation; returns an already created class
-        if one exists or creates a new one if it does not.
-        """
-        if cls not in cls._singletons:
-            cls._singletons[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._singletons[cls]
-
-
-class LazyFunction(object):
-    """
-    A class that behaves like a function and supports lazy evaluation.
-    """
-    def __call__(self):
-        return self.fn(*self.args, **self.kwargs)
-
-    def __init__(self, fn, *args, **kwargs):
-        self.fn = fn
-        self.args = args
-        self.kwargs = kwargs
-
-    def __repr__(self):
-        fmt = "{}(fn={}, nargs={}, nkwargs={})".format
-        return fmt(self.__class__.__name__, self.fn.__name__,
-                   len(self.args), len(self.kwargs))
 
 
 class Typed(ABCMeta):
