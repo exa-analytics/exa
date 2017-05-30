@@ -65,10 +65,14 @@ class Editor(six.with_metaclass(EditorMeta, Base)):
 
     Attributes:
         cursor (int): Line number of cursor
-        fmt (string): Format string for repr display
+        _fmt (string): Format string for display ('repr')
+        _cnst (string): Regex for identifying constants
+        _tmpl (string): Regex for identifying templates
     """
     _getters = ("_get", "parse")
-    fmt = "{0}: {1}\n".format
+    _fmt = "{0}: {1}\n".format
+    _tmpl = "{[A-z0-9 \":,']+}"
+    _cnst = "{{A-z0-9 \":,']+}}"
 
     @property
     def templates(self):
@@ -85,10 +89,8 @@ class Editor(six.with_metaclass(EditorMeta, Base)):
 
         .. _String formatting: https://docs.python.org/3.6/library/string.html
         """
-        csnt = r"{{[\w\d]*}}"
-        tmpl = r"{[\w\d]*}"
-        constants = [match[2:-2] for match in self.regex(csnt, num=False)[csnt]]
-        templates = [match[1:-1] for match in self.regex(tmpl, num=False)[tmpl]]
+        constants = [match[2:-2] for match in self.regex(self._cnst, num=False)[self._cnst]]
+        templates = [match[1:-1] for match in self.regex(self._tmpl, num=False)[self._tmpl]]
         return sorted(set(templates).difference(constants))
 
     @property
@@ -105,11 +107,10 @@ class Editor(six.with_metaclass(EditorMeta, Base)):
 
         .. _String formatting: https://docs.python.org/3.6/library/string.html
         """
-        csnt = r"{{[\w\d]*}}"
-        constants = [match[2:-2] for match in self.regex(csnt, num=False)[csnt]]
+        constants = [match[2:-2] for match in self.regex(self._cnst, num=False)[self._cnst]]
         return sorted(constants)
 
-    def regex(self, *patterns, **kwargs):    # Using **kwargs instead of explicit kwargs for py2 compatibility
+    def regex(self, *patterns, **kwargs):
         """
         Match a line or lines by the specified regular expression(s).
 
@@ -226,14 +227,16 @@ class Editor(six.with_metaclass(EditorMeta, Base)):
                         raise ValueError("At least one of ``num`` or ``text`` must be true.")
 
     def copy(self):
-        """Create a copy of the current editor."""
+        """Return a copy of the current editor."""
+        special = ("_lines", "as_interned", "nprint", "meta", "encoding")
         cls = self.__class__
         lines = self._lines[:]
         as_interned = copy(self.as_interned)
         nprint = copy(self.nprint)
         meta = deepcopy(self.meta)
         encoding = copy(self.encoding)
-        return cls(lines, as_interned, nprint, meta, encoding)
+        cp = {k: copy(v) for k, v in vars(self).items() if k not in special}
+        return cls(lines, as_interned, nprint, meta, encoding, **cp)
 
     def format(self, *args, **kwargs):
         """
@@ -247,7 +250,7 @@ class Editor(six.with_metaclass(EditorMeta, Base)):
         Returns:
             formatted: Returns the formatted editor (if inplace is False)
         """
-        inplace = kwargs.pop('inplace', False)
+        inplace = kwargs.pop("inplace", False)
         if inplace:
             self._lines = str(self).format(*args, **kwargs).splitlines()
         else:
@@ -494,15 +497,15 @@ class Editor(six.with_metaclass(EditorMeta, Base)):
         if nn > self.nprint * 2:
             for i in range(self.nprint):
                 ln = str(i).rjust(n, " ")
-                r += self.fmt(ln, self._lines[i])
+                r += self._fmt(ln, self._lines[i])
             r += "...\n".rjust(n, " ")
             for i in range(nn - self.nprint, nn):
                 ln = str(i).rjust(n, " ")
-                r += self.fmt(ln, self._lines[i])
+                r += self._fmt(ln, self._lines[i])
         else:
             for i, line in enumerate(self):
                 ln = str(i).rjust(n, " ")
-                r += self.fmt(ln, line)
+                r += self._fmt(ln, line)
         return r
 
 

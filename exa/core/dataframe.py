@@ -113,5 +113,5 @@ class SectionDataFrame(DataFrame):
                          'end': ("Section ending (non-inclusive) line number", _ints, )}
 
     def __init__(self, *args, **kwargs):
-        super(DataFrame, self).__init__(*args, **kwargs)
+        super(SectionDataFrame, self).__init__(*args, **kwargs)
         self['attribute'] = [self._section_name_prefix+str(i).zfill(len(str(len(self)))) for i in self.index]
