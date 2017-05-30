@@ -27,6 +27,9 @@ from .single import Singleton as _Singleton
 from .core.editor import Editor as _Editor
 
 
+_resource = "constants.json.bz2"
+
+
 class Constant(_Singleton):
     """
     By inheriting the :class:`~exa.single.Singleton` class directly, this object
@@ -47,7 +50,6 @@ def _create():
 
 # Data order of isotopic (nuclear) properties:
 _this = _sys.modules[__name__]
-_resource = "constants.json.bz2"
 _path = _resource_filename(_datadir()[0], _os.path.join(_datadir()[1], _resource))
 if not hasattr(_this, "a220_lattice_spacing_of_silicon"):
     _create()

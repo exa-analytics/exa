@@ -9,18 +9,19 @@ import os as _os
 import sys as _sys
 from pkg_resources import resource_filename as _resource_filename
 from exa import _datadir
-from .special import Singleton as _Singleton
+from .single import Singleton as _Singleton
 from .core.editor import Editor as _Editor
 
 
 _resource = "units.json.bz2"
 
 
-class _Unit(_Singleton):
+class Unit(_Singleton):
     """A metaclass for creating units."""
     def __new__(mcs, name, bases, clsdict):
+        #mcs.__repr__ = lambda self: repr(self.values)
         mcs.__repr__ = lambda self: "{}({}, {})".format(self.__class__.__name__, self._name, repr(self._value))
-        return super(_Unit, mcs).__new__(mcs, name, bases, clsdict)
+        return super(Unit, mcs).__new__(mcs, name, bases, clsdict)
 
 
 def _create():
@@ -28,7 +29,7 @@ def _create():
     dct = _Editor(_path).to_data('json')
     for lclsname, unitvalues in dct.items():
         clsname = str(lclsname.title())
-        mcs = type(clsname, (_Unit, ), {})
+        mcs = type(clsname, (Unit, ), {})
         setattr(_this, clsname, mcs)
         for name, value in unitvalues.items():
             if hasattr(_this, name):
