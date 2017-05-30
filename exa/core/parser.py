@@ -341,7 +341,7 @@ class Sections(six.with_metaclass(Meta, Editor)):
         """
         dct = {'parser': parser, 'start': start, 'end': end}
         dct.update(kwargs)
-        self.sections = SectionDataFrame.from_dct(dct)
+        self.sections = SectionDataFrame.from_dict(dct)
 
 
 class Parser(six.with_metaclass(Meta, Editor)):

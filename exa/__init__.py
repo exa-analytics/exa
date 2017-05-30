@@ -42,3 +42,4 @@ def _datadir():
 
 from ._version import __version__
 from .core import DataFrame, Editor, Sections, Parser, Container, Composer
+from .functions import LazyFunction

@@ -12,3 +12,5 @@ from exa import constants
 
 class TestLazyFunction(TestCase):
     """Test
+    """
+    pass

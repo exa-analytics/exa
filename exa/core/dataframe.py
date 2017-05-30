@@ -84,9 +84,6 @@ class DataFrame(pd.DataFrame, Base):
     def _constructor(self):
         return DataFrame
 
-    def _html_repr_(self):
-        return super(DataFrame, self)._html_repr_()
-
     def __init__(self, *args, **kwargs):
         name = kwargs.pop("name", None)
         meta = kwargs.pop("meta", None)
@@ -102,23 +99,19 @@ class DataFrame(pd.DataFrame, Base):
 
 class SectionDataFrame(DataFrame):
     """
-    A dataframe that describes the sections given in the current parsing editor.
+    A dataframe that describes :class:`~exa.core.parser.Sections` object sections.
+
+    Instances of this dataframe describe the starting and ending points of
+    regions of a text file to be parsed. Upon creation of instances of this
+    object, the 'attribute' column is added which suggests the name of the
+    attribute (on the instance of :class:`~exa.core.parser.Sections`) to which
+    a given text region belongs.
     """
     _section_name_prefix = "section"
     _required_columns = {'parser': ("Name of associated section or parser object", ),
                          'start': ("Section starting line number", _ints, ),
                          'end': ("Section ending (non-inclusive) line number", _ints, )}
 
-    @classmethod
-    def from_dct(cls, dct):
-        """
-        A helper method for creating this dataframe
-
-        Args:
-            dct (dict): Dictionary containing 'parser', 'start', and 'end' key-value pairs
-        """
-        df = cls.from_dict(dct)
-        df['attribute'] = [cls._section_name_prefix+str(i).zfill(len(str(len(df)))) for i in df.index]
-        df = df.loc[:, list(cls._required_columns) + list(set(df.columns).difference(cls._required_columns))]
-        df.index.name = cls._section_name_prefix
-        return df
+    def __init__(self, *args, **kwargs):
+        super(DataFrame, self).__init__(*args, **kwargs)
+        self['attribute'] = [self._section_name_prefix+str(i).zfill(len(str(len(self)))) for i in self.index]

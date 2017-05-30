@@ -11,6 +11,51 @@ how to format whatever data it receives. Similarly, composers can be built
 using a standard format or a template and have their data fields/values be
 populated dynamically.
 """
+import six
+from abc import ABC, abstractmethod
+from exa.special import Typed
+from .editor import Editor
 
-class Composer(object):
-    pass
+
+class ComposerMeta(Typed):
+    """
+    """
+    _template = None
+    _join = None
+    _delim = None
+    _sep = None
+
+
+
+class Composer(six.with_metaclass(ComposerMeta, ABC)):
+    """
+    """
+
+    @classmethod
+    def from_string(cls, text):
+        """
+        """
+
+        pass
+
+    @classmethod
+    def from_editor(cls, editor):
+        """Build a composer from an editor."""
+        return cls.from_string(str(editor))
+
+    def to_editor(self):
+        """
+        """
+        return Editor(self.format())
+
+    def format(self):
+        """
+        """
+        pass
+
+    @abstractmethod
+    def _formatter(self):
+        """
+        The formatter builds the
+        """
+        pass
