@@ -96,7 +96,6 @@ class DataFrame(pd.DataFrame, Base):
         self.meta = meta
 
 
-
 class SectionDataFrame(DataFrame):
     """
     A dataframe that describes :class:`~exa.core.parser.Sections` object sections.
@@ -115,3 +114,16 @@ class SectionDataFrame(DataFrame):
     def __init__(self, *args, **kwargs):
         super(SectionDataFrame, self).__init__(*args, **kwargs)
         self['attribute'] = [self._section_name_prefix+str(i).zfill(len(str(len(self)))) for i in self.index]
+
+
+class Composition(DataFrame):
+    """
+    A dataframe that describes the structure of :class:`~exa.core.composer.Composer`.
+
+    Instances of this dataframe contain information used to dynamically
+    construct a compsed editor using data stored in Python objects and a string
+    template.
+    """
+    _required_columns = {'length': ("Number of lines", ),
+                         'joiner': ("String joiner, i.e. used by str.join", ),
+                         'name': ("Attribute/template format name", )}

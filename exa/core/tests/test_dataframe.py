@@ -10,7 +10,8 @@ dynamically generated information about the dataframe is populated correctly.
 import numpy as np
 import pandas as pd
 from unittest import TestCase
-from exa.core.dataframe import DataFrame, ColumnError, SectionDataFrame
+from exa.core.dataframe import (DataFrame, ColumnError, SectionDataFrame,
+                                Composition)
 
 
 class TestColumnError(TestCase):
@@ -69,3 +70,11 @@ class TestSectionDataFrame(TestCase):
         """Test raises error without required columns."""
         with self.assertRaises(ColumnError):
             SectionDataFrame()
+
+
+class TestCompositionDataFrame(TestCase):
+    """Test :class:`~exa.core.dataframe.Composition`."""
+    def test_raises(self):
+        """Test instantiation failure."""
+        with self.assertRaises(ColumnError):
+            Composition()

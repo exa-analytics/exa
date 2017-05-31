@@ -46,6 +46,14 @@ class Base(six.with_metaclass(ABCMeta, object)):
         """
         pass
 
-    def __init__(self, **kwargs):
+    def _vars(self, include_underscore=False):
+        """Helper to return dict items."""
+        if include_underscore:
+            return vars(self)
+        else:
+            return {k: v for k, v in vars(self).items() if not k.startswith("_")}
+
+    def __init__(self, *args, **kwargs):
         for name, value in kwargs.items():
             setattr(self, name, value)
+        self._args = args

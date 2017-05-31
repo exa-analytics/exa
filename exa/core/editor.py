@@ -72,7 +72,7 @@ class Editor(six.with_metaclass(EditorMeta, Base)):
     _getters = ("_get", "parse")
     _fmt = "{0}: {1}\n".format
     _tmpl = "{[A-z0-9 \":,']+}"
-    _cnst = "{{A-z0-9 \":,']+}}"
+    _cnst = "{{[A-z0-9 \":,']+}}"
 
     @property
     def templates(self):
@@ -235,7 +235,7 @@ class Editor(six.with_metaclass(EditorMeta, Base)):
         nprint = copy(self.nprint)
         meta = deepcopy(self.meta)
         encoding = copy(self.encoding)
-        cp = {k: copy(v) for k, v in vars(self).items() if k not in special}
+        cp = {k: copy(v) for k, v in self._vars(True).items() if k not in special}
         return cls(lines, as_interned, nprint, meta, encoding, **cp)
 
     def format(self, *args, **kwargs):
@@ -458,9 +458,14 @@ class Editor(six.with_metaclass(EditorMeta, Base)):
     def __setitem__(self, line, value):
         self._lines[line] = value
 
-    def __init__(self, data, as_interned=False, nprint=30, encoding="utf-8",
-                 meta=None, path_check=True, ignore_warning=False, **kwargs):
-        super(Editor, self).__init__(**kwargs)
+    def __init__(self, data, *args, **kwargs):
+        as_interned = kwargs.pop("as_interned", False)
+        nprint = kwargs.pop("nprint", 30)
+        encoding = kwargs.pop("encoding", "utf-8")
+        meta = kwargs.pop("meta", None)
+        path_check = kwargs.pop("path_check", True)
+        ignore_warning = kwargs.pop("ignore_warning", False)
+        super(Editor, self).__init__(*args, **kwargs)
         filepath = None
         if path_check and check_path(data, ignore_warning):
             self._lines = read_file(data, as_interned, encoding)
@@ -478,6 +483,7 @@ class Editor(six.with_metaclass(EditorMeta, Base)):
         self.nprint = nprint
         self.as_interned = as_interned
         self.encoding = encoding
+        self.meta = meta
         self.cursor = 0
         if filepath is not None:
             try:

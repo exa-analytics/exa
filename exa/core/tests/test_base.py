@@ -60,11 +60,27 @@ class TestBase(TestCase):
         self.assertIsNone(c.info())
         self.assertIsNone(c._html_repr_())
 
+    def test_args(self):
+        """Test that args get attached correctly."""
+        c = Concrete(1, 2, 3, 4)
+        self.assertTupleEqual(c._args, (1, 2, 3, 4))
+
     def test_kwargs(self):
+        """Test kwargs works correctly."""
         c = Concrete(brick=0, slab=1)
         self.assertTrue(hasattr(c, "brick"))
         self.assertIsInstance(c.brick, int)
 
+    def test_args_kwargs(self):
+        """Test both args and kwargs simultaneously."""
+        c = Concrete(1, 2, 3, four=4, five=5, six=6)
+        self.assertTupleEqual(c._args, (1, 2, 3))
+        self.assertTrue(hasattr(c, "four"))
+        self.assertEqual(c.four, 4)
+        self.assertTrue(hasattr(c, "five"))
+        self.assertEqual(c.five, 5)
+        self.assertTrue(hasattr(c, "six"))
+        self.assertEqual(c.six, 6)
 
     def test_getters(self):
         """Test that Foo's getters work."""
@@ -72,4 +88,3 @@ class TestBase(TestCase):
         self.assertDictEqual(c.foo, {'value': "foo"})
         self.assertEquals(c.bar, ["bar"])
         self.assertEqual(c.baz, "baz")
-
