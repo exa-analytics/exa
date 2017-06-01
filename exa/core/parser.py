@@ -334,11 +334,14 @@ class Sections(six.with_metaclass(Meta, Editor)):
         """
         Convenience method for building the ``sections`` object.
 
+        Automatically converts class types to string names.
+
         .. code-block:: python
 
             # End of the _parse() function
             self._sections_helper(parsers, starts, ends, title=titles)
         """
+        parser = [par.__name__ if isinstance(par, type) else par for par in parser]
         dct = {'parser': parser, 'start': start, 'end': end}
         dct.update(kwargs)
         self.sections = SectionDataFrame.from_dict(dct)
