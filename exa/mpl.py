@@ -33,31 +33,37 @@ save = {'savefig.format': 'pdf', 'savefig.bbox': 'tight',
         'pdf.compression': 9}
 
 
-def qualitative(n=5):
+def qualitative(name="cubehelix", n=5):
     """
-    Perceptually uniform qualitative color palette (cubehelix).
-
-    To set the palette do:
+    Perceptually uniform qualitative color palette.
 
     .. code-block:: Python
 
-        n = 8
-        exa.mpl.reconfigure(palette=exa.mpl.qualitative(n))
+        # Alter the global palette
+        from exa import mpl
+        mpl.reconfigure(palette=mpl.qualitative(n=8))
+
+    Args:
+        name (str): Palette name
+        n (int): Number of colors
     """
-    return sns.color_palette("cubehelix", n)
+    return sns.color_palette(name, n)
 
 
 def sequential(name="viridis", n=5, desat=None):
     """
     Perceptually uniform sequential color palette.
 
-    To set the palette do:
-
     .. code-block:: Python
 
-        name = 'plasma'
-        n = 8
-        exa.mpl.reconfigure(palette=exa.mpl.sequential(name=name, n=n))
+        # Alter the global palette
+        from exa import mpl
+        mpl.reconfigure(palette=mpl.sequential(n=5))
+
+    Args:
+        name (str): Palette name
+        n (int): Number of colors
+        desat (float): Color desaturation
     """
     return sns.color_palette(name, n, desat)
 
@@ -66,12 +72,16 @@ def diverging(name="BrBG", n=5, desat=None):
     """
     Colorblind sensitive diverging color palette.
 
-    To set the palette do:
-
     .. code-block:: Python
 
-        n = 8
-        exa.mpl.reconfigure(palette=exa.mpl.divirging(n=n))
+        # Alter the global palette
+        from exa import mpl
+        mpl.reconfigure(palette=mpl.diverging(n=5))
+
+    Args:
+        name (str): Palette name
+        n (int): Number of colors
+        desat (float): Color desaturation
     """
     return sns.color_palette("BrBG", n, desat)
 
@@ -85,7 +95,7 @@ def reconfigure(**kwargs):
         kwargs: Keyword arguments to be passed to matplotlib's `rc`_
 
     Note:
-        Additional keyword arguments overrule module level arguments.
+        Additional keyword arguments overrule module defaults.
 
     .. _rc: http://matplotlib.org/users/customizing.html
     """
@@ -93,7 +103,7 @@ def reconfigure(**kwargs):
     font_scale = kwargs.pop('font_scale', 1.6)
     font = kwargs.pop('font', 'serif')
     style = kwargs.pop('style', 'white')
-    palette = kwargs.pop('palette', qualitative(5))
+    palette = kwargs.pop('palette', qualitative(n=5))
     rc = {}
     rc.update(legend)
     rc.update(axis)
@@ -101,8 +111,8 @@ def reconfigure(**kwargs):
     rc.update(text)
     rc.update(save)
     rc.update(kwargs)    # User kwargs overrule default kwargs
-    sns.set(context=context, style=style, palette=palette, font_scale=font_scale,
-            font=font, rc=rc)
+    sns.set(context=context, style=style, palette=palette,
+            font_scale=font_scale, font=font, rc=rc)
 
 
 reconfigure()

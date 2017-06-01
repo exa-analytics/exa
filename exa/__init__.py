@@ -41,5 +41,8 @@ def _datadir():
     return ("exa", "_data")
 
 from ._version import __version__
-from .core import DataFrame, Editor, Sections, Parser, Container, Composer
+from .core.editor import Editor
+from .core.composer import Composer, ComposerMeta
+from .core.parser import Sections, SectionsMeta, Parser, ParserMeta
+from .core.dataframe import DataFrame
 from .functions import LazyFunction

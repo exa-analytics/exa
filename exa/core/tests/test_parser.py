@@ -10,7 +10,7 @@ Tests for the related modules, :mod:`~exa.core.sections` and
 import six
 from unittest import TestCase
 from exa.core.editor import Editor
-from exa.core.parser import Sections, Meta, Parser
+from exa.core.parser import Sections, ParserMeta, Parser
 
 
 sections0 = u"""Sections have some text followed by a delimiter
@@ -63,7 +63,7 @@ class MockSections(Sections):
             self._sections_helper(names, starts, ends)
 
 
-class MockSectionMeta(Meta):
+class MockParserMeta(ParserMeta):
     """Metaclass that defines data objects for the section parser."""
     wordcount = int
     wordlist = list
@@ -71,7 +71,7 @@ class MockSectionMeta(Meta):
                      'wordlist': "List of words"}
 
 
-class MockParser(six.with_metaclass(MockSectionMeta, Parser)):
+class MockParser(six.with_metaclass(MockParserMeta, Parser)):
     """Mock example of :class:`~exa.core.editor.Parser`."""
     def _parse(self, fail=False):
         """Parse a word section."""

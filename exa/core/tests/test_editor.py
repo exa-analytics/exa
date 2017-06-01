@@ -97,8 +97,8 @@ class TestEditor(TestCase):
         :func:`~exa.core.editor.Editor.constants`,
         and, by proxy, :func:`~exa.core.editor.Editor.regex`.
         """
-        self.assertEqual(self.from_file.templates, ['template'])
-        self.assertEqual(self.from_file.constants, ['constant'])
+        self.assertEqual(self.from_file.templates, ["{template}"])
+        self.assertEqual(self.from_file.constants, ["{{constant}}"])
         cnst = u"{{.+}}"
         self.assertEqual(len(self.from_file.regex(cnst)[cnst]), 1)
         cnst = u"{.+}"
