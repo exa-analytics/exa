@@ -65,14 +65,22 @@ class Editor(six.with_metaclass(EditorMeta, Base)):
 
     Attributes:
         cursor (int): Line number of cursor
-        _fmt (string): Format string for display ('repr')
-        _cnst (string): Regex for identifying constants
-        _tmpl (string): Regex for identifying templates
+        _fmt (str): Format string for display ('repr')
+        _std_tmpl (str): Standard Python string template
+        _exa_tmpl (str): Special string template
+        _cnst (str): Regex for identifying constants
+        _tmpl (str): Regex for identifying templates
+
+    See Also:
+        :class:`~exa.core.composer.Compser`s are useful for building text
+        files programmatically. The :mod:`~exa.core.parser` module provides
+        classes useful for programatic parsing of text files.
     """
     _getters = ("_get", "parse")
     _fmt = "{0}: {1}\n".format
-    _tmpl = "{[A-z0-9 \":,']+}"
-    _cnst = "{{[A-z0-9 \":,']+}}"
+    _std_tmpl = "{.+}"
+    _exa_tmpl = "{.+:.*:.+}"
+    _cnst = "{{.+}}"
 
     @property
     def templates(self):
@@ -89,8 +97,9 @@ class Editor(six.with_metaclass(EditorMeta, Base)):
 
         .. _String formatting: https://docs.python.org/3.6/library/string.html
         """
-        constants = [match[2:-2] for match in self.regex(self._cnst, num=False)[self._cnst]]
-        templates = [match[1:-1] for match in self.regex(self._tmpl, num=False)[self._tmpl]]
+        matches = self.regex(self._std_tmpl, self._exa_tmpl, self._cnst, num=False)
+        constants = [match for match in matches[self._cnst]]
+        templates = matches[self._std_tmpl] + matches[self._exa_tmpl]
         return sorted(set(templates).difference(constants))
 
     @property
@@ -107,8 +116,7 @@ class Editor(six.with_metaclass(EditorMeta, Base)):
 
         .. _String formatting: https://docs.python.org/3.6/library/string.html
         """
-        constants = [match[2:-2] for match in self.regex(self._cnst, num=False)[self._cnst]]
-        return sorted(constants)
+        return sorted(self.regex(self._cnst, num=False)[self._cnst])
 
     def regex(self, *patterns, **kwargs):
         """

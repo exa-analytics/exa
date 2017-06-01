@@ -37,8 +37,10 @@ class TestBasicComposer(TestCase):
     """
     def test_dynamic(self):
         """Test that building a dynamic composer works."""
-        comp = Composer("{}\n{labeled}\n{1: :lbl0}\n{1: :lbl1}\n{1:=:dct}",
-                        1, labeled=5, lbl0=2, lbl1=3, dct={"four": 4})
+        comp = Composer("{0}\n{labeled}\n{1: :lbl0}\n\n{1:=:dct}",
+                        1, labeled=5, lbl0=2, dct={"four": 4})
+        self.assertListEqual(comp.templates,
+                             ["{0}", "{1: :lbl0}", "{1:=:dct}", "{labeled}"])
         text = str(comp.compose())
         self.assertEqual(text, "1\n5\n3\n2\n4")
 

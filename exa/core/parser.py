@@ -119,7 +119,7 @@ from .dataframe import SectionDataFrame
 from exa.special import simple_function_factory, yield_typed, create_typed_attr
 
 
-class Meta(EditorMeta):
+class SectionsMeta(EditorMeta):
     """
     Metaclass that automatically generates parsing function wrappers.
 
@@ -135,10 +135,10 @@ class Meta(EditorMeta):
             clsdict[f.__name__] = f
         clsdict['_descriptions'] = mcs._descriptions
         clsdict['_parsers'] = {}
-        return super(Meta, mcs).__new__(mcs, name, bases, clsdict)
+        return super(SectionsMeta, mcs).__new__(mcs, name, bases, clsdict)
 
 
-class Sections(six.with_metaclass(Meta, Editor)):
+class Sections(six.with_metaclass(SectionsMeta, Editor)):
     """
     An editor tailored to handling files with distinct regions of text.
 
@@ -347,7 +347,19 @@ class Sections(six.with_metaclass(Meta, Editor)):
         self.sections = SectionDataFrame.from_dict(dct)
 
 
-class Parser(six.with_metaclass(Meta, Editor)):
+class ParserMeta(EditorMeta):
+    """Default metaclass for the Parser object."""
+    _descriptions = {}
+
+    def __new__(mcs, name, bases, clsdict):
+        for attr in yield_typed(mcs):
+            f = simple_function_factory("parse", "parse", attr[0])
+            clsdict[f.__name__] = f
+        clsdict['_descriptions'] = mcs._descriptions
+        return super(ParserMeta, mcs).__new__(mcs, name, bases, clsdict)
+
+
+class Parser(six.with_metaclass(ParserMeta, Editor)):
     """
     An editor-like object that is responsible for transforming a system region
     of text into an appropriate data object or objects.
