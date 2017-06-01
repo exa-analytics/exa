@@ -64,7 +64,7 @@ class DataFrame(pd.DataFrame, Base):
     first give a description, then the type(s), then the aliases. Multiple types
     can be given in the same way as multiple aliases are given above.
     """
-    _metadata = ("name", "meta")
+    _metadata = ["name", "meta"]
     _required_columns = None
 
     def info(self):
