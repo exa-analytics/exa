@@ -35,14 +35,23 @@ class TestBasicComposer(TestCase):
     Test dynamic composer creation and composers that utilize base editor
     features.
     """
+    def test_get_compsers(self):
+        """Test that ``_compose_`` methods are correctly identified."""
+        composers = Composer("")._get_composers()
+        self.assertIsInstance(composers, dict)
+        self.assertEqual(len(composers), 5)
+        self.assertIn("dict", composers)
+        self.assertIn("str", composers)
+        self.assertIn("tuple", composers)
+        self.assertIn("list", composers)
+
     def test_dynamic(self):
         """Test that building a dynamic composer works."""
         comp = Composer("{0}\n{labeled}\n{1: :lbl0}\n\n{1:=:dct}",
                         1, labeled=5, lbl0=2, dct={"four": 4})
-        self.assertListEqual(comp.templates,
-                             ["{0}", "{1: :lbl0}", "{1:=:dct}", "{labeled}"])
+        self.assertListEqual(comp.templates, ["0", "labeled", "1: :lbl0", "1:=:dct"])
         text = str(comp.compose())
-        self.assertEqual(text, "1\n5\n3\n2\n4")
+        self.assertEqual(text, "1\n5\n2\n\nfour=4")
 
     def test_simple(self):
         """Test simple template."""
