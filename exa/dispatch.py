@@ -21,15 +21,13 @@ from .single import Singleton
 
 class Dispatcher(Singleton):
     """
+    Related to workflows?
     """
     #def __new__(mcs, *args, **kwargs):
-    #    print("new")
     #    return super(Dispatcher, mcs).__new__(mcs, *args, **kwargs)
 
     def __call__(self):
-        print("call")
         return self.fn()
 
     def __init__(self, fn, *args, **kwargs):
-        print("init")
         self.fn = fn

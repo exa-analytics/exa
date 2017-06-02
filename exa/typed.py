@@ -4,25 +4,43 @@
 """
 Typed Attribute Infrastructure
 #####################################
-This module provides a mechanism for dynamically creating typed class attributes
-(via Python's property mechanism). These typed attributes enable higher level
-class objects (such as :class:`~exa.core.container.Container`s) to have
-systematic behavior for data processing and visualization. Additionally the
-typed attributes of this module provide mechanisms for automatic 'getting' and
-'setting', and other more complex machinery such as 'triggering' of other
-functions on attribute changes.
+This module provides a mechanism for dynamically creating class properties
+that enforce their attribute's type. The :func:`~exa.typed.cta`
+function essentially creates a set of ``property`` related methods. The
+following comparison can be made.
+
+.. code-block:: Python
+
+    class Klass:
+        foo = cta("foo", ptypes)    # Where ptypes is a type or list of types
+
+The above is the same as the following.
+
+    class Klass:
+        @property
+        def foo(self):
+            return self._foo
+
+        @foo.setter
+        def foo(self, value):
+            if isinstance(value, ptypes):
+                self._foo = value
+
+        @foo.deleter
+        def foo(self):
+            del self._foo
+
+In addition to dynamically enforcing types using the ``property`` machinery of
+Python, attributes created by :func:`~exa.typed.cta` enable
+additional features such as lazy (automatic) assignment and triggering of other
+method or function calls. Example usage can be found in the tests
+(:mod:`~exa.tests.test_typed`).
+
+See Also:
+    :class:`~exa.core.base.Base`
 """
+import six
 from abc import ABCMeta
-
-
-class TypedAttribute(object):
-    """
-    A function-like class that creates typed class attributes that may have
-    additional features.
-    """
-#    def __init__(self, types, docs, setter_finalize
-
-    pass
 
 
 def yield_typed(obj):
@@ -30,115 +48,100 @@ def yield_typed(obj):
     Iterate over property names and type definitions.
 
     Args:
-        obj: Instance, class, or metaclass
+        obj: Class instance or definition
 
     Returns:
         iterator: List of (name, types) tuples
     """
     if not isinstance(obj, type):
         obj = obj.__class__
-    mcs = obj.__class__
-    for name, attr in vars(mcs).items():
-        if isinstance(attr, TypedAttribute):
+    for name, attr in vars(obj).items():
+        if isinstance(attr, property) and "__typed__" in attr.__doc__:
             yield (name, attr)
 
 
-class Typed(ABCMeta):
+def cta(name, ptypes, doc=None, setter_finalize=None):
     """
-    An abstract base class that supports strongly typed class attributes via
-    properties and a host of other functionality.
+    Create a class attribute that enforces types and support lazy (automatic)
+    assignment.
 
-    Certain class objects within the Exa framework require static typing. These
-    classes often involve dynamically created methods that are dependent on
-    specific usage or implementation. The :class:`~exa.typed.Typed` object provides
-    a flexible metaclass that addresses these needs leveraging the abstract base
-    class (`abc`_) framework.
+    This function can be used as part of the class definition similarly to the
+    ``property`` function of the standard library.
 
     .. code-block:: python
 
-        import six    # Convenient Python 2.7 compatibility
+        class Klass(object):
+            typed = cta("typed", int, "an int")
 
-        class KlassTyped(Typed):
-            foo = (int, float)
-            bar = DataFrame
+            def __init__(self, typed=None):
+                self.typed = typed
 
-        class Klass(six.with_metaclass(KlassTyped, object)):
-            def __init__(self, foo=None, bar=None):
-                self.foo = foo
-                self.bar = bar
+        inst = Klass("42")
+        inst.typed           # Outputs integer 42
 
-    In the above example, at runtime, the class definition ``Klass`` will be
-    modified such that ``foo`` is a property object whose setter checks to ensure
-    that its value is either an int or a float. Similarly, ``bar`` will become a
-    property whose setter checks to ensure that its value is a DataFrame. If a
-    value is passed for (for example) ``bar`` that can be converted to a DataFrame,
-    automatic type conversion will occur. More advanced uses are also possible.
+    Examples of more advanced usage can be found in :mod:`~exa.tests.test_typed`.
 
-    .. code-block:: python
+    Args:
+        name (str): Variable name (used to build the property)
+        ptypes (type, iterable): Type or list of types
+        doc (str): Docstring
+        setter_finalize (str, function): Function name or function to call after attribute is set
 
-        import six
+    Note:
+        Properties created by this function have the docstring containing "__typed__"
+        to signify that this is not a 'normal' property object.
 
-        class KlassTyped(Typed):
-            foo = DataFrame
-
-        class Klass(six.with_metaclass(KlassTyped, object)):
-            _getters = ("parse", )
-
-            def parse_foo(self):
-                # Perform some operation to obtain the value of attr
-                self.foo = foo
-
-            def __init__(self, foo=None):
-                self.foo = foo
-
-    By specifying the ``_getters`` attribute, statically typed properties can be
-    informed about what method(s) to access if their value has not (yet) been
-    set. This is a form of lazy evaluation. Even more advanced usage is possible.
-
-    .. code-block:: python
-
-        import six
-
-        class KlassTyped(Typed):
-            foo = int
-            bar = int
-            _private = "'static' private attribute"
-
-            def __new__(mcs, name, bases, clsdict):
-                for name in ["attr", "bttr"]:
-                    f = simple_function_factory("parse_all", "parse", name)
-                    clsdict[f.__name__] = f
-                clsdict['_private'] = mcs._private
-                return super(KlassTyped, mcs).__new__(mcs, name, bases, clsdict)
-
-        class Klass(six.with_metaclass(KlassTyped, object)):
-            _getters = ("parse", )
-
-            def parse_all(self):
-                # Perform all parsing here or by calling other methods
-                # Set all values here or in individually in other methods
-                self.foo = 0
-                self.bar = 1
-
-            def __init__(self, foo=None, bar=None):
-                self.foo = foo
-                self.bar = bar
-
-    In this example, the metaclass (``KlassTyped``) utilizes the convenience
-    function, :func:`~exa.special.simple_function_factory`, to generate methods
-    for the class (``Klass``) dynamically. This is useful when you have a single
-    method that typically does all of the work (e.g. ``Klass().parse_all``) and
-    prefer to have convenience methods generated dynamically (e.g. ``Klass().foo``
-    will call the dynamically generated method, ``Klass().parse_foo``, created by
-    the :func:`~exa.special.simple_function_factory`). More complex function
-    factories are possible. Finally, pseudo static (private or not) attributes and
-    methods can also be defined by hand (i.e. ``clsdict['_private'] = baz`` where
-    ``baz`` is the method or attribute in question).
-
-    .. _abc: https://docs.python.org/3/library/abc.html
+    See Also:
+        See the module documentation for :mod:`~exa.typed`.
     """
-    def __new__(mcs, name, bases, clsdict):
-        # Strongly typed attributes
-        for attr_name, typedattr in yield_typed(mcs):
-            clsdict[attr_name] = typedattr.create()
-        return super(Typed, mcs).__new__(mcs, name, bases, clsdict)
+    #if isinstance(ptypes, dict):
+
+    if not isinstance(ptypes, (tuple, list)):
+        ptypes = (ptypes, )
+    else:
+        ptypes = tuple(ptypes)
+    doc = "__typed__" if doc is None else doc + "\n\n__typed__"
+    # The private attribute is where the data content is actually stored
+    pname = '_' + name
+    # Property getter retrieves the private attribute that stores the data
+    def getter(self):
+        # If not set or set to none, try to compute the value on-the-fly
+        if ((not hasattr(self, pname) or getattr(self, pname) is None)
+            and hasattr(self, "_getters")):
+            for prefix in self._getters:
+                cmd = "{}{}".format(prefix, pname)
+                # Get the name of the compute function
+                if hasattr(self, cmd):
+                    getattr(self, cmd)()    # Expect the function to set the value
+                    break
+            # If the attribute wasn't set or is still none, return none
+            if not hasattr(self, pname) or getattr(self, pname) is None:
+                return None
+        return getattr(self, pname)
+    # The setter sets the private attribute with data
+    def setter(self, obj):
+        # Attempt to convert types
+        if not isinstance(obj, ptypes) and obj is not None:
+            for ptype in ptypes:
+                try:
+                    obj = ptype(obj)
+                    break
+                except Exception:  # Many difference exceptions could be raised
+                    pass
+        # Allow setting as none or valid types
+        if isinstance(obj, ptypes) or obj is None:
+            setattr(self, pname, obj)
+        else:
+            raise TypeError("Cannot convert type {} to {}.".format(type(obj), ptypes))
+        # Finally call the setter_finalize method/function
+        if isinstance(setter_finalize, six.string_types):
+            getattr(self, setter_finalize)()
+        elif callable(setter_finalize):
+            try:
+                setter_finalize()    # Assume static function (e.g. staticmethod)
+            except TypeError:
+                setter_finalize(self)    # Else class method
+    # Provide a deleter for deletion of the actual data
+    def deleter(self):
+        delattr(self, pname)    # Allows for dynamic attribute deletion
+    return property(getter, setter, deleter, doc=doc)

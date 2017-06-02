@@ -6,9 +6,9 @@ Tests for :mod:`~exa.core.composer`
 #############################################
 Test composer behavior.
 """
-import six
 from unittest import TestCase
-from exa.core.composer import Composer, ComposerMeta
+from exa.core.composer import Composer
+from exa.typed import cta
 
 
 class SimpleComposer(Composer):
@@ -19,15 +19,11 @@ class SimpleComposer(Composer):
     _template = "{}\n{labeled}"
 
 
-class CmpsrMeta(ComposerMeta):
-    """Data objects for more complex composer."""
-    line2 = dict
-    line3 = list
-
-
-class Cmpsr(six.with_metaclass(CmpsrMeta, Composer)):
+class Cmpsr(Composer):
     """Type enforcing composer."""
     _template = "{}\n{simple}\n{1: :line2}"
+    line2 = cta("line2", dict)
+    line3 = cta("line3", list)
 
 
 class TestBasicComposer(TestCase):

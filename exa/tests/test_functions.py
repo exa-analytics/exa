@@ -4,16 +4,15 @@
 """
 Tests for Special Functions
 #####################################
-Test
+Test the behavior of lazily evaluated functions.
 """
 import six
 from unittest import TestCase
-from exa import constants
 from exa.functions import LazyFunction
 
 
 class TestLazyFunction(TestCase):
-    """Tests behavior of :class:`~exa.special.LazyFunction`."""
+    """Tests behavior of :class:`~exa.functions.LazyFunction`."""
     def setUp(self):
         """Used to check for laziness."""
         self.check = False

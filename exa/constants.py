@@ -18,7 +18,6 @@ are listed in.
 
 .. _NIST: http://physics.nist.gov/cuu/Constants/Table/allascii.txt
 """
-import six
 import os as _os
 import sys as _sys
 from pkg_resources import resource_filename as _resource_filename

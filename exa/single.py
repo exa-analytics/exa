@@ -76,7 +76,6 @@ class Singleton(type):
         If a given class has not yet been created, create it.
         Otherwise return an existing class object (class definition).
         """
-        print("single call")
         if cls not in cls._class_objects:
             cls._class_objects[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._class_objects[cls]

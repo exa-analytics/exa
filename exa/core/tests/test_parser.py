@@ -10,7 +10,8 @@ Tests for the related modules, :mod:`~exa.core.sections` and
 import six
 from unittest import TestCase
 from exa.core.editor import Editor
-from exa.core.parser import Sections, ParserMeta, Parser
+from exa.core.parser import Sections, Parser
+from exa.typed import cta
 
 
 sections0 = u"""Sections have some text followed by a delimiter
@@ -45,10 +46,21 @@ or may have final text.
 """
 
 
+class MockParser(Parser):
+    """Mock example of :class:`~exa.core.editor.Parser`."""
+    wordcount = cta("wordcount", int, "Count of the number of words")
+    wordlist = cta("wordlist", list, "List of words")
+
+    def _parse(self, fail=False):
+        """Parse a word section."""
+        self.wordlist = [word for line in self._lines for word in line.split()]
+        if not fail:
+            self.wordcount = len(self.wordlist)
+
+
 class MockSections(Sections):
     """Mock example of :class:`~exa.core.editor.Sections`."""
     _marker = "===="
-    _def_sec_name = "MockParser"
 
     def _parse(self, fail=False):
         """This is depends on the file structure."""
@@ -57,54 +69,17 @@ class MockSections(Sections):
         starts.insert(0, 0)
         ends = delims
         ends.append(len(self))
-        names = [self._def_sec_name]*len(starts)
+        names = [MockParser]*len(starts)
         names[-1] = "none"
         if not fail:
             self._sections_helper(names, starts, ends)
 
 
-class MockParserMeta(ParserMeta):
-    """Metaclass that defines data objects for the section parser."""
-    wordcount = int
-    wordlist = list
-    _descriptions = {'wordcount': "Count of number of words",
-                     'wordlist': "List of words"}
-
-
-class MockParser(six.with_metaclass(MockParserMeta, Parser)):
-    """Mock example of :class:`~exa.core.editor.Parser`."""
-    def _parse(self, fail=False):
-        """Parse a word section."""
-        self.wordlist = [word for line in self._lines for word in line.split()]
-        if not fail:
-            self.wordcount = len(self.wordlist)
-
-
-class MockBaseSections(Sections):
-    """Raises TypeError."""
-    pass
-
-
-class MockBaseParser(Parser):
-    """Raises TypeError."""
-    pass
-
-
-MockSections.add_section_parsers(MockParser)
-
-
-class TestSections(TestCase):
+class TestParser(TestCase):
     """
-    Tests for :class:`~exa.core.editor.Sections`. and
-    :class:`~exa.core.editor.Parser.`
+    Tests for :class:`~exa.core.parser.Sections` and
+    :class:`~exa.core.parser.Parser.
     """
-    def test_base_sections(self):
-        """Tests raising TypeError."""
-        with self.assertRaises(TypeError):
-            MockBaseSections()
-        with self.assertRaises(TypeError):
-            MockBaseParser()
-
     def test_basic_parsing(self):
         """Test live modification of class objects on parsing."""
         sec = MockSections(sections0)

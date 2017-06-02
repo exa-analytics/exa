@@ -4,34 +4,26 @@
 """
 Tests for :mod:`~exa.core.base`
 #############################################
-Tests for abstract base classes of data, editor, and container objects.
-This module also tests some advanced usages of the abstract base class
-in combination with the :class:`~exa.special.Typed` metaclass.
+Test a simple, concrete implementation of the core abstract base class.
 """
-import six
 from unittest import TestCase
 from exa.core.base import Base
-from exa.special import Typed
+from exa.typed import cta
 
 
 class Concrete(Base):
     """Example concrete implementation of the abstract base class."""
+    foo = cta("foo", dict)
+    bar = cta("bar", list)
+    baz = cta("baz", str)
+
     def info(self):
+        """Implemented to do nothing."""
         pass
 
-    def _html_repr_(self):
-        pass
 
-
-class FooMeta(Typed):
-    """Metaclass that defines typed attributes for class Foo."""
-    foo = dict
-    bar = list
-    baz = str
-
-
-class Foo(six.with_metaclass(FooMeta, Concrete)):
-    """Example of strongly typed objects on a concrete implementation."""
+class Foo(Concrete):
+    """Concrete base classes can, themselves, be subclassed."""
     def _get_foo(self):
         """Test automatic (lazy) getter with prefix _get."""
         self.foo = {'value': "foo"}
@@ -47,18 +39,13 @@ class Foo(six.with_metaclass(FooMeta, Concrete)):
 
 class TestBase(TestCase):
     """Test the abstract base class."""
-    def test_abstract(self):
-        """Test that we require a concrete implementation."""
-        with self.assertRaises(TypeError):
-            Base()
-
     def test_concrete(self):
         """Test the concrete implementation."""
         c = Concrete()
         self.assertIsInstance(c, Base)
         self.assertTrue(hasattr(c, "info"))
         self.assertIsNone(c.info())
-        self.assertIsNone(c._html_repr_())
+        self.assertIsNone(c.foo)
 
     def test_args(self):
         """Test that args get attached correctly."""

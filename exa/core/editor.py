@@ -30,26 +30,19 @@ Warning:
 See Also:
     :mod:`~exa.core.parsing`
 """
+import os, re, sys, bz2, gzip, six, json
 import pandas as pd
 from copy import copy, deepcopy
 from collections import defaultdict
 from itertools import chain
 from io import StringIO, TextIOWrapper
-import os, re, sys, bz2, gzip, six, json
 from .base import Base
-from exa.special import Typed
+from exa.typed import cta
 if not hasattr(bz2, "open"):
     bz2.open = bz2.BZ2File
 
 
-class EditorMeta(Typed):
-    """Typed attributes for editors."""
-    name = str
-    description = str
-    meta = dict
-
-
-class Editor(six.with_metaclass(EditorMeta, Base)):
+class Editor(Base):
     """
     In memory text file-like object used to facilitate data parsing and
     container to text conversion.
@@ -76,6 +69,9 @@ class Editor(six.with_metaclass(EditorMeta, Base)):
     _getters = ("_get", "parse")
     _fmt = "{0}: {1}\n".format
     _tmpl = "{.*?}"
+    name = cta("name", str, "Editor name")
+    description = cta("description", str, "Editor description")
+    meta = cta("meta", dict, "Editor metadata")
 
     @property
     def templates(self):
@@ -492,9 +488,6 @@ class Editor(six.with_metaclass(EditorMeta, Base)):
                 self.meta = {'filepath': filepath}
         else:
             self.meta = {'filepath': None}
-
-    def _html_repr_(self):
-        return repr(self)
 
     def __repr__(self):
         r = ""

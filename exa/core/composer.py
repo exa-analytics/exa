@@ -11,20 +11,13 @@ how to format whatever data it receives. Similarly, composers can be built
 using a standard format or a template and have their data fields/values be
 populated dynamically.
 """
-import six
 from .editor import Editor
-from .parser import Parser, ParserMeta
+from .parser import Parser
 from .dataframe import Composition
+from exa.typed import cta
 
 
-class ComposerMeta(ParserMeta):
-    """Defines typed attributes of composer objects."""
-    composition = Composition
-    _descriptions = {'composition': "Template description",
-                     '_template': "Template"}
-
-
-class Composer(six.with_metaclass(ComposerMeta, Parser)):
+class Composer(Parser):
     """
     An editor like object used to dynamically build text files of predetermined
     structure with data values coming from Python objects. A simple use case is
@@ -54,7 +47,7 @@ class Composer(six.with_metaclass(ComposerMeta, Parser)):
     _key_bl = " "
     _key_dlen = 1
     _key_djin = ""
-    _template = None
+    composition = cta("composition", Composition, "Template description")
 
     def compose(self):
         """
@@ -219,11 +212,12 @@ class Composer(six.with_metaclass(ComposerMeta, Parser)):
 
     def _compose_str(self, val, **kwargs):
         """Modify list keywords."""
-        print(val)
         return val
 
     def __init__(self, data=None, *args, **kwargs):
         # Modify the first argument if a default template is provided
+        if data is None and self._lines is None:
+            raise MissingTemplate()
         if self._template is not None:
             if data is not None:
                 args = (data, ) + args
