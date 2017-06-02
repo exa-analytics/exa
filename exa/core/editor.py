@@ -75,7 +75,7 @@ class Editor(six.with_metaclass(EditorMeta, Base)):
     """
     _getters = ("_get", "parse")
     _fmt = "{0}: {1}\n".format
-    _tmpl = "{.*}"
+    _tmpl = "{.*?}"
 
     @property
     def templates(self):
@@ -108,7 +108,7 @@ class Editor(six.with_metaclass(EditorMeta, Base)):
 
         .. _String formatting: https://docs.python.org/3.6/library/string.html
         """
-        return [match[2:-2] for match in self.regex(self._tmpl, num=False)[self._tmpl] if match.startswith("{{")]
+        return [match[2:-1] for match in self.regex(self._tmpl, num=False)[self._tmpl] if match.startswith("{{")]
 
     def regex(self, *patterns, **kwargs):
         """

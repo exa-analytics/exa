@@ -26,7 +26,7 @@ if not hasattr(bz2, "open"):    # Python 2.7 compatibility
 editor_string = u"""This string is used as the test for the editor class.
 
 That was a blank line
-It contains templates: {template}
+It contains templates: {template0}{template1}
 and constants: {{constant}}
 
 That was a blank line
@@ -97,7 +97,7 @@ class TestEditor(TestCase):
         :func:`~exa.core.editor.Editor.constants`,
         and, by proxy, :func:`~exa.core.editor.Editor.regex`.
         """
-        self.assertEqual(self.from_file.templates, ["template"])
+        self.assertEqual(self.from_file.templates, ["template0", "template1"])
         self.assertEqual(self.from_file.constants, ["constant"])
         cnst = u"{{.+}}"
         self.assertEqual(len(self.from_file.regex(cnst)[cnst]), 1)
@@ -223,16 +223,16 @@ class TestEditor(TestCase):
         :func:`~exa.core.editor.Editor.__contains__` and
         :func:`~exa.core.editor.Editor.__eq__` (false).
         """
-        fmt = self.from_file.format(template="formatted")
+        fmt = self.from_file.format(template0="formatted", template1="")
         self.assertTrue("formatted" in fmt)
-        self.from_gzip.format(template='formatted', inplace=True)
+        self.from_gzip.format(template0="formatted", template1="", inplace=True)
         self.assertTrue("formatted" in fmt)
         self.assertFalse(self.from_file == self.from_gzip)
         path = self.path + ".tmp"
         self.from_bz2.write(path)
         self.assertTrue(os.path.exists(path))
         os.remove(path)
-        self.from_bz2.to_file(path, template="formatted")
+        self.from_bz2.to_file(path, template0="formatted", template1="")
         self.assertTrue(os.path.exists(path))
         os.remove(path)
 
