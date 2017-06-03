@@ -75,3 +75,10 @@ class TestBase(TestCase):
         self.assertDictEqual(c.foo, {'value': "foo"})
         self.assertEquals(c.bar, ["bar"])
         self.assertEqual(c.baz, "baz")
+
+    def test_meta(self):
+        """Test that ``meta`` is handled correctly."""
+        c = Concrete(meta=[("key", 0)])
+        self.assertTrue(hasattr(c, "_meta"))
+        self.assertIsInstance(c.meta, dict)
+        self.assertDictEqual(c.meta, {'key': 0})

@@ -4,95 +4,100 @@
 """
 DataFrame
 ########################
-Dataframes are tabular like data objects with columns and indices. They can
-represent multi-dimensional, multi-featured data. See `pandas DataFrame`_ for
-more information.
+`Dataframes`_ are tabular data structures with columns and indices capable of
+representing multi-dimensional, multi-featured data. The
+:class:`~exa.core.dataframe.DataFrame` behaves identically to Pandas
+`Dataframes`_ but provides support for required columns and column dtype
+enforcement. Subclassing, therefore, allows for the creation of convenience
+methods based on standardized column names (and types). Additionally,
+creation of data processing and visualization systems is easier when data has
+(at least a minimal) structure and type(s).
 
-In order to build data processing and visualization systems, a known and
-systematic data structure is required. The :class:`~exa.core.dataframe.DataFrame`
-provides this by enforcing minimum required columns. This allows for processing
-and visualization algorithms to be built around dataframes containing known
-data (such as coordinates or fields).
-
-The :class:`~exa.core.dataframe.DataFrame` also provides support for additional
-metadata using the ``meta`` attribute, similar to other data objects provided
-within this framework. In all other aspects, this object behaves identically to
-its `pandas DataFrame`_ counterpart.
-
-.. _pandas DataFrame: http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html
+See Also:
+    :class:`~exa.core.container.Container`
 """
-import six
-import numpy as np
 import pandas as pd
 from .base import Base
 
 
-_ints = six.integer_types + (np.int8, np.int16, np.int32, np.int64)
-
-
-class ColumnError(Exception):
-    """Raised when a required dimension or feature (column) is missing."""
-    @staticmethod
-    def default(*columns):
-        cols = ", ".join(columns)
-        msg = "Missing required column(s): {}"
-        return msg.format(cols)
-
-    def __init__(self, *columns, **kwargs):
-        msg = kwargs.pop("msg", None)
-        msg = self.default(*columns) if msg is None else msg
-        super(ColumnError, self).__init__(msg)
-
-
 class DataFrame(pd.DataFrame, Base):
     """
-    A dataframe like object with support for required columns.
+    A `pandas`_ like `dataframe`_ with support for required columns, required
+    column dtypes, and convenience method creation.
 
-    The attribute ``_required_columns`` may be used to enforce dataframe creation
-    only when certain minimum requirements are satisfied. By convention this
-    object should be a dictionary with key being the column names and values of
-    3-tuples; the first entry in the tuple is the column description, the second
-    contains valid dtypes, and the third containing aliases.
+    A special syntax is used to create required columns or statically (d)typed
+    columns. An illustration follows with descriptions in the comments.
 
-    .. code-block:: Python
+    .. code-block:: python
 
-        class MyDF(DataFrame):
-            # Docstring describing purpose of this object
-            _required_columns = {'col': ("description", int, ("Col", "COL"))
+        class MyDataFrame(DataFrame):
+            col0 = float        # Opt. col; enforced dtype float
+            col1 = (int, True)  # Req. col; enforced dtype int
+            col2 = (None, True) # Req. col; any dtype allowed
+            col3 = (int, float) # Opt. col; enforced int, then float
+            col4 = ((int, float), True)  # Req., multiple types
 
-    In the above example, the required column is called ``col``. The tuple values
-    first give a description, then the type(s), then the aliases. Multiple types
-    can be given in the same way as multiple aliases are given above.
+    In the last example ``col3`` (an optional column) is preferred to be of dtype
+    ``int`` with a fallback to ``float``; the column must be coerced to one of
+    these types otherwise a TypeError is raised.
     """
-    _metadata = ["name", "meta"]
-    _required_columns = None
-
-    def info(self):
-        """
-        Display description, data type(s), and alias(es) of required columns.
-
-        If no columns are required, none is returned.
-        """
-        if isinstance(self._required_columns, dict):
-            cols = ["description", "types", "aliases"]
-            rinf = pd.DataFrame.from_dict(self._required_columns, orient="index")
-            rinf.columns = cols[:len(rinf.columns)]
-            inf = pd.Series(self.columns).to_frame().set_index(0)
-            return pd.concat((inf, rinf), axis=1, ignore_index=True)
+    _metadata = ["_reqcols", "_coltypes", "meta"]
 
     @property
     def _constructor(self):
         return DataFrame
 
+    def _enforce_columns(self):
+        """
+        Enforce required columns and dtypes using the ``_coltypes`` and ``_reqcols`` class
+        attribute (i.e. shared between all instances of this class); updated when
+        ``DataFrame.__new__`` is called.
+        """
+        # First check required columns.
+        missing = set(self._reqcols).difference(self.columns)
+        if len(missing) > 0:
+            raise NameError("Missing column(s) {}".format(missing))
+        # Second convert types.
+        dtypes = self.dtypes
+        for name, types in self._coltypes.items():
+            if name in dtypes and types is not None and all(typ != dtypes[name] for typ in types):
+                for typ in types:
+                    try:
+                        super(DataFrame, self).__setitem__(name, self[name].astype(typ))
+                        break    # Stop on successful convert
+                    except TypeError as e:
+                        pass
+                else:
+                    raise TypeError("Unable to enforce column types for {} as types {}".format(name, types))
+
+    def __setitem__(self, *args, **kwargs):
+        """Setitem is called on column manipulations so we recheck columns."""
+        super(DataFrame, self).__setitem__(*args, **kwargs)
+        self._enforce_columns()
+
+    def __new__(cls, *args, **kwargs):
+        """
+        Update the required columns on the fly but share the state for all
+        dataframes of this type so as not to waste RAM.
+        """
+        _reqcols = []
+        _coltypes = {}
+        for name, types in vars(cls).items():
+            if isinstance(types, type):
+                _coltypes[name] = (types, )
+            elif isinstance(types, tuple) and isinstance(types[1], bool):
+                _reqcols.append(name)
+                _coltypes[name] = types[0] if isinstance(types[0], tuple) else (types[0], )
+            elif isinstance(types, tuple) and all(isinstance(typ, type) for typ in types):
+                _coltypes[name] = types
+        cls._coltypes = _coltypes
+        cls._reqcols = _reqcols
+        return super(DataFrame, cls).__new__(cls)
+
     def __init__(self, *args, **kwargs):
-        name = kwargs.pop("name", None)
         meta = kwargs.pop("meta", None)
         super(DataFrame, self).__init__(*args, **kwargs)
-        if self._required_columns is not None:
-            missing = set(self._required_columns.keys()).difference(self.columns)
-            if len(missing) > 0:
-                raise ColumnError(*missing)
-        self.name = name
+        self._enforce_columns()
         self.meta = meta
 
 
@@ -107,9 +112,9 @@ class SectionDataFrame(DataFrame):
     a given text region belongs.
     """
     _section_name_prefix = "section"
-    _required_columns = {'parser': ("Name of associated section or parser object", ),
-                         'start': ("Section starting line number", _ints, ),
-                         'end': ("Section ending (non-inclusive) line number", _ints, )}
+    parser = (object, True)
+    start = (int, True)
+    end = (int, True)
 
     def __init__(self, *args, **kwargs):
         super(SectionDataFrame, self).__init__(*args, **kwargs)
@@ -124,6 +129,6 @@ class Composition(DataFrame):
     construct a compsed editor using data stored in Python objects and a string
     template.
     """
-    _required_columns = {'length': ("Number of lines", ),
-                         'joiner': ("String joiner, i.e. used by str.join", ),
-                         'name': ("Attribute/template format name", )}
+    length = (None, True)
+    joiner = (str, True)
+    name = (str, True)

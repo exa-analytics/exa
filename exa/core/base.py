@@ -13,29 +13,29 @@ to the class instance (by their name).
 """
 import six
 from abc import abstractmethod, ABCMeta
+from exa.typed import cta
 
 
-class BaseMeta(ABCMeta):
-    """Used for Python 2 compatibility."""
-    pass
-
-
-class Base(six.with_metaclass(BaseMeta, object)):
+class Base(six.with_metaclass(ABCMeta, object)):
     """
     Abstract base class for editors, data, and containers.
 
     The base class requires a concrete implementation of the ``info`` method,
     which is used to provide a summary of the object in question. The
     ``_getters`` attribute is used in concert with features to :mod:`~exa.typed`
-    to enforce class attribute types and support lazy evaluation.
+    to enforce class attribute types and support lazy evaluation. Finally,
+    enforces the ``meta`` attribute as a dictionary (for metadata name, value
+    pairs).
 
     Attributes:
         _getters (tuple): Default prefixes for automatic (lazy) function evaluation
+        meta (dict): Dictionary of metadata as name, value pairs
 
     See Also:
         :mod:`~exa.typed`
     """
     _getters = ("compute", "parse", "_get")
+    meta = cta("meta", dict, "Metadata stored in a dict")
 
     @abstractmethod
     def info(self):

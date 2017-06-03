@@ -8,67 +8,66 @@ Test facilities of the dataframes with required columns. Also test that
 dynamically generated information about the dataframe is populated correctly.
 """
 import numpy as np
-import pandas as pd
 from unittest import TestCase
-from exa.core.dataframe import (DataFrame, ColumnError, SectionDataFrame,
-                                Composition)
-
-
-class TestColumnError(TestCase):
-    """Test :class:`~exa.core.dataframe.ColumnError`."""
-    def test_working(self):
-        """Test that the basic arg passing works."""
-        self.assertEqual(str(ColumnError("column")), "Missing required column(s): column")
-
-    def test_custom(self):
-        """Test that custom messages work."""
-        self.assertEqual(str(ColumnError(msg="You forgot column")), "You forgot column")
+from exa.core.dataframe import DataFrame, SectionDataFrame, Composition
 
 
 class MockDataFrame(DataFrame):
     """Test implementation of :class:`~exa.core.dataframe.DataFrame`."""
-    _required_columns = {'col1': ("First column", None, r"$\frac{col}{1}$")}
+    col1 = (None, True)
+    col2 = str
+    col3 = (float, True)
+    col4 = (int, float)
+    col5 = ((float, int), True)
 
 
 class TestDataFrame(TestCase):
     """Ensure behavior of DataFrame mimics pandas."""
-    def test_series_construction(self):
-        """Test that slicing (a series) resolve to correct type."""
-        df = DataFrame(np.random.rand(3, 2))
-        s = df.loc[:, 0]
-        self.assertIsInstance(s, pd.Series)
-        s = df.loc[0:2, 0]
-        self.assertIsInstance(s, pd.Series)
-        s = df[1]
-        self.assertIsInstance(s, pd.Series)
+    def test_basic(self):
+        """Test that the base DataFrame can be used as is."""
+        df = DataFrame()
+        self.assertEqual(len(df.columns), 0)
+        df['col'] = [0, 1, 2]
+        self.assertEqual(len(df), 3)
+        df['col'] *= 2
+        self.assertTrue(np.all(df['col'] == [0, 2, 4]))
 
-    def test_required_columns(self):
-        """Test instantiation with/without required columns."""
-        df = MockDataFrame.from_dict({'col1': [0, 1], 'col2': [0, 1]})
-        self.assertIsInstance(df, DataFrame)
-        self.assertIn("col1", df)
-        with self.assertRaises(ColumnError):
-            MockDataFrame.from_dict({'col2': [0, 1], 'col3': [0, 1]})
+    def test_basic_meta(self):
+        """Test that the additional keyword ``meta`` is handled correctly."""
+        df = DataFrame(meta=[("key", True)])
+        self.assertTrue(hasattr(df, "_meta"))
+        self.assertDictEqual(df.meta, {'key': True})
 
-    def test_info(self):
-        """Test that dataframe info works (including column names)."""
-        df = MockDataFrame.from_dict({'col1': [0, 1], 'col2': [0, 1]})
-        inf = df.info()
-        self.assertIsInstance(inf, pd.DataFrame)
-        self.assertEqual(len(inf), 2)
-        self.assertEqual(inf.iloc[0, 0], "First column")
-        self.assertEqual(inf.iloc[0, 2], r"$\frac{col}{1}$")
+    def test_mock_reqcols(self):
+        """Test required columns work correctly."""
+        dct = {'col1': [0, 1], 'col3': [0, 1], 'col5': [0, 1]}
+        try:
+            MockDataFrame.from_dict(dct)
+        except NameError as e:
+            self.fail(e)
+        with self.assertRaises(NameError):
+            del dct['col1']
+            MockDataFrame.from_dict(dct)
 
-    def test_empty(self):
-        """Test that info on a generic dataframe works."""
-        self.assertIsNone(DataFrame().info())
+    def test_mock_coltypes(self):
+        """Test that column types are enforced."""
+        dct = {'col1': [0, 1], 'col2': [0.0, 0.1], 'col3': [0, 1],
+               'col4': [0., 1.], 'col5': [0, 1]}
+        df = MockDataFrame.from_dict(dct)
+        dtypes = df.dtypes
+        self.assertEqual(dtypes['col2'], object)
+        self.assertEqual(dtypes['col3'], float)
+        self.assertEqual(dtypes['col4'], float)
+        self.assertEqual(dtypes['col5'], float)
+        df['col2'] = df['col2'].astype(float)
+        self.assertEqual(df['col2'].dtype, object)
 
 
 class TestSectionDataFrame(TestCase):
     """Test :class:`~exa.core.dataframe.SectionDataFrame`."""
     def test_raises(self):
         """Test raises error without required columns."""
-        with self.assertRaises(ColumnError):
+        with self.assertRaises(NameError):
             SectionDataFrame()
 
 
@@ -76,5 +75,5 @@ class TestCompositionDataFrame(TestCase):
     """Test :class:`~exa.core.dataframe.Composition`."""
     def test_raises(self):
         """Test instantiation failure."""
-        with self.assertRaises(ColumnError):
+        with self.assertRaises(NameError):
             Composition()
