@@ -60,12 +60,12 @@ class DataFrame(pd.DataFrame, Base):
         # Second convert types.
         dtypes = self.dtypes
         for name, types in self._coltypes.items():
-            if name in dtypes and types is not None and all(typ != dtypes[name] for typ in types):
+            if name in dtypes and types is not None and types[0] != dtypes[name]:
                 for typ in types:
                     try:
                         super(DataFrame, self).__setitem__(name, self[name].astype(typ))
                         break    # Stop on successful convert
-                    except TypeError as e:
+                    except TypeError:
                         pass
                 else:
                     raise TypeError("Unable to enforce column types for {} as types {}".format(name, types))

@@ -57,7 +57,7 @@ class TestDataFrame(TestCase):
         dtypes = df.dtypes
         self.assertEqual(dtypes['col2'], object)
         self.assertEqual(dtypes['col3'], float)
-        self.assertEqual(dtypes['col4'], float)
+        self.assertEqual(dtypes['col4'], int)
         self.assertEqual(dtypes['col5'], float)
         df['col2'] = df['col2'].astype(float)
         self.assertEqual(df['col2'].dtype, object)
