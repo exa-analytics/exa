@@ -11,10 +11,16 @@ keyword arguments that reach its ``init`` method. Positional arguments are
 stored in the ``_args`` keyword while keyword arguments are attached directly
 to the class instance (by their name).
 """
-from abc import abstractmethod, ABC
+import six
+from abc import abstractmethod, ABCMeta
 
 
-class Base(ABC):
+class BaseMeta(ABCMeta):
+    """Used for Python 2 compatibility."""
+    pass
+
+
+class Base(six.with_metaclass(BaseMeta, object)):
     """
     Abstract base class for editors, data, and containers.
 
