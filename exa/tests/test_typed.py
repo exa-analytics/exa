@@ -6,7 +6,6 @@ Tests for :mod:`~exa.typed`
 #############################################
 Tests for strongly styped class attributes.
 """
-import six
 from unittest import TestCase
 from exa.typed import cta, yield_typed
 
@@ -14,22 +13,24 @@ from exa.typed import cta, yield_typed
 class Klass(object):
     """Test static :class:`~exa.typed.TypedAttribute` usage."""
     _getters = ("get", )
-    typed = cta("typed", int, "an int", lambda self: setattr(self, "count", getattr(self, "count") + 1))
+    foo = cta("foo", int, setter_finalize=lambda self: setattr(self, "count", getattr(self, "count") + 1))
+    bar = cta("bar", (str, float))
 
-    def get_typed(self):
+    def get_foo(self):
         """Automatically populate the attribute."""
         # Typically there will be some computation performed here
         # that typed's value depends on.
-        self.typed = 42
+        self.foo = 42
 
-    def __init__(self, typed=None):
+    def __init__(self, foo=None):
         """
         Note that the ``count`` variable is instantiated before the ``typed``
         variable because the ``setter_finalize`` function (the lambda function
         above).
         """
         self.count = 0        # Order of assignment matters here!
-        self.typed = typed
+        self.foo = 42 if foo is None else foo
+        self.bar = "42"
 
 
 class TestSimpleTyped(TestCase):
@@ -37,38 +38,50 @@ class TestSimpleTyped(TestCase):
     Test the basic features of :func:`~exa.typed.cta` and
     :func:`~exa.typed.yield_typed`.
     """
+    def test_automatic_assignment(self):
+        """Test that the ``foo`` and ``bar`` are automatically assigned."""
+        klass = Klass()
+        self.assertEqual(klass.foo, 42)
+        self.assertEqual(klass.bar, "42")
+
     def test_typed_attr(self):
         """Test the attribute behavior."""
         klass = Klass(10)
-        self.assertEqual(klass.typed, 10)
+        self.assertEqual(klass.foo, 10)
         self.assertEqual(klass.count, 1)
-        klass.typed = 42
-        self.assertEqual(klass.typed, 42)
+        klass.foo = 42
+        self.assertEqual(klass.foo, 42)
         self.assertEqual(klass.count, 2)
 
     def test_type_conversion(self):
         """Test automatic type conversion for ``typed``."""
         klass = Klass("10")
-        self.assertIsInstance(klass.typed, six.integer_types)
+        self.assertIsInstance(klass.foo, int)
         klass = Klass(False)
-        self.assertIsInstance(klass.typed, six.integer_types)
+        self.assertIsInstance(klass.foo, int)
 
     def test_yielding(self):
         """Test that yielding typed attributes works."""
         yielded = list(yield_typed(Klass))
-        self.assertListEqual(yielded, [("typed", Klass.typed)])
-        klass = Klass(42)
-        yielded = list(yield_typed(klass))
-        self.assertListEqual(yielded, [("typed", Klass.typed)])
-
-    def test_automatic_assignment(self):
-        """Test that the ``typed`` attribute is automatically assigned."""
-        klass = Klass()
-        self.assertEqual(klass.typed, 42)
+        self.assertEqual(len(yielded), 2)
 
     def test_distinct(self):
         """Test that two instances do not clash."""
         klass0 = Klass(42)
         klass1 = Klass(10)
-        self.assertEqual(klass0.typed, 42)
-        self.assertEqual(klass1.typed, 10)
+        klass1.bar = 42.0
+        self.assertEqual(klass0.foo, 42)
+        self.assertEqual(klass1.foo, 10)
+        self.assertNotEqual(id(klass0.foo), id(klass1.foo))
+        self.assertIsNot(klass0.bar, klass1.bar)
+        self.assertNotEqual(id(klass0.bar), id(klass1.bar))
+
+    def test_delattr(self):
+        """Test that typed attrs can be deleted."""
+        klass = Klass()
+        self.assertTrue(hasattr(klass, "foo"))
+        self.assertEqual(klass.foo, 42)
+        del klass.foo
+        self.assertFalse(hasattr(klass, "_foo"))
+        self.assertTrue(hasattr(klass, "foo"))
+        self.assertEqual(klass.foo, 42)    # Automatic get

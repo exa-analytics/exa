@@ -45,21 +45,24 @@ class LazyFunction(object):
                    len(self.args), len(self.kwargs))
 
 
-def simple_function_factory(fname, prefix, attr):
+def simple_fn_builder(func_name, caller_name):
     """
-    Create a function of the following form:
+    Create a function that calls another function (used to dynamically build
+    an API).
 
     .. code-block: Python
 
-        def prefix_attr(self):
-            self.fname()
+        class Klass(object):
+            def oldfunc(*args, **kwargs):
+                pass
+            newfunc = simple_fn_builder("newfunc", "oldfunc")
+        obj = Klass()
+        obj.newfunc(*args, **kwargs)    # Calls "oldfunc" function
 
-        f = simple_function_factory('parse_all', 'parse', 'section')
-        # The function 'f' looks like:
-        # def parse_section(self):
-        #   self.parse_all()
+    See Also:
+        Example usage in :mod:`~exa.tests.test_functions`.
     """
     def func(self, *args, **kwargs):
-        getattr(self, fname)(*args, **kwargs)
-    func.__name__ = "_".join((prefix, attr))
+        getattr(self, caller_name)(*args, **kwargs)
+    func.__name__ = func_name
     return func

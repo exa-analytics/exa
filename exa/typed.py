@@ -125,7 +125,7 @@ def cta(name, ptypes, doc=None, setter_finalize=None):
                 try:
                     obj = ptype(obj)
                     break
-                except Exception:  # Many difference exceptions could be raised
+                except Exception:  # Many different exceptions could be raised
                     pass
         # Allow setting as none or valid types
         if isinstance(obj, ptypes) or obj is None:
