@@ -11,6 +11,7 @@ how to format whatever data it receives. Similarly, composers can be built
 using a standard format or a template and have their data fields/values be
 populated dynamically.
 """
+from copy import copy, deepcopy
 from .editor import Editor
 from .parser import Parser
 from .dataframe import Composition
@@ -117,6 +118,17 @@ class Composer(Parser):
         text = self._format(text, *args, **kwargs)
         return self._postformat(text)
 
+    def copy(self):
+        """Return a copy of the current editor."""
+        special = ("_lines", "as_interned", "nprint", "meta", "encoding")
+        lines = self._lines[:]
+        as_interned = copy(self.as_interned)
+        nprint = copy(self.nprint)
+        meta = deepcopy(self.meta)
+        encoding = copy(self.encoding)
+        cp = {k: copy(v) for k, v in self._vars(True).items() if k not in special}
+        return Editor(lines, as_interned, nprint, meta, encoding, **cp)
+
     def _preformat(self):
         """
         Generate the text representation of the current composer template.
@@ -179,6 +191,10 @@ class Composer(Parser):
         dct = {'length': lengths, 'joiner': joiners, 'name': names, 'type': types}
         self.composition = Composition.from_dict(dct)
 
+    def _get_composition(self):
+        """Lazy assignment of ``composition``."""
+        self.parse()
+
     def _get_composers(self):
         """Helper function to identify ``_compose_\*`` functions."""
         composers = {}
@@ -216,12 +232,12 @@ class Composer(Parser):
 
     def __init__(self, data=None, *args, **kwargs):
         # Modify the first argument if a default template is provided
-        if data is None and self._lines is None:
-            raise MissingTemplate()
-        if self._template is not None:
+        if hasattr(self, "_lines"):
             if data is not None:
                 args = (data, ) + args
-            data = self._template
-        elif isinstance(data, str) and self._template is None:
-            self._template = data
+            data = self._lines
+        elif isinstance(data, str) and not hasattr(self, "_lines") and "{" in data:
+            pass    # This is a check to make sure data is in fact a template
+        else:
+            raise TypeError("Missing ``data`` or ``_lines`` attribute.")
         super(Composer, self).__init__(data, *args, **kwargs)

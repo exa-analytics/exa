@@ -7,7 +7,6 @@ Tests for Sections and Parsers`
 Tests for the related modules, :mod:`~exa.core.sections` and
 :mod:`~exa.core.parsers`.
 """
-import six
 from unittest import TestCase
 from exa.core.editor import Editor
 from exa.core.parser import Sections, Parser

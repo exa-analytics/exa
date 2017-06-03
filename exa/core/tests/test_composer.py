@@ -16,12 +16,12 @@ class SimpleComposer(Composer):
     Trivial composer used to test that original editor functionality has not
     been mangled.
     """
-    _template = "{}\n{labeled}"
+    _lines = "{}\n{labeled}"
 
 
 class Cmpsr(Composer):
     """Type enforcing composer."""
-    _template = "{}\n{simple}\n{1: :line2}"
+    _lines = "{}\n{simple}\n{1: :line2}"
     line2 = cta("line2", dict)
     line3 = cta("line3", list)
 
@@ -33,7 +33,7 @@ class TestBasicComposer(TestCase):
     """
     def test_get_compsers(self):
         """Test that ``_compose_`` methods are correctly identified."""
-        composers = Composer("")._get_composers()
+        composers = Composer("{}")._get_composers()
         self.assertIsInstance(composers, dict)
         self.assertEqual(len(composers), 5)
         self.assertIn("dict", composers)

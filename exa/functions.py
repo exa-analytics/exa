@@ -43,3 +43,23 @@ class LazyFunction(object):
         fmt = "{}(fn={}, nargs={}, nkwargs={})".format
         return fmt(self.__class__.__name__, self.fn.__name__,
                    len(self.args), len(self.kwargs))
+
+
+def simple_function_factory(fname, prefix, attr):
+    """
+    Create a function of the following form:
+
+    .. code-block: Python
+
+        def prefix_attr(self):
+            self.fname()
+
+        f = simple_function_factory('parse_all', 'parse', 'section')
+        # The function 'f' looks like:
+        # def parse_section(self):
+        #   self.parse_all()
+    """
+    def func(self, *args, **kwargs):
+        getattr(self, fname)(*args, **kwargs)
+    func.__name__ = "_".join((prefix, attr))
+    return func

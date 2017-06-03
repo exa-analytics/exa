@@ -40,7 +40,6 @@ See Also:
     :class:`~exa.core.base.Base`
 """
 import six
-from abc import ABCMeta
 
 
 def yield_typed(obj):

@@ -141,17 +141,16 @@ class Sections(Editor):
         if not hasattr(self, "_sections") or self._sections is None:
             raise ValueError("Parsing method ``_parse`` does not correctly set ``sections``.")
         # Now generate section attributes for the sections present
-        for i in self.sections.index:
-            secname, attrname = self.sections.loc[i, ["parser", "attribute"]]    # HARDCODED
-            if secname not in self._parsers:
+        for i, sec in self.sections.iterrows():
+            parser, attrname = sec[['parser', 'attribute']]
+            if not isinstance(parser, type):
                 if verbose:
-                    warnings.warn("No parser for section '{}'!".format(secname))
+                    warnings.warn("No parser for section '{}'!".format(parser.__class__))
                 # Default type is a simple editor
                 prop = cta(attrname, Editor)
             else:
                 # Otherwise use specific sections/parser
-                ptypes = self._parsers[secname]
-                prop = cta(attrname, ptypes)
+                prop = cta(attrname, parser)
             # Now we perform a bit of class gymnastics:
             # Because we don't want to attach our typed property paradigm
             # (see exa.special.cta) to all instances of this
@@ -192,9 +191,9 @@ class Sections(Editor):
             :func:`~exa.core.sections.Sections.describe_parsers`.
         """
         parser, start, end, attrname = self.sections.loc[number, ["parser", "start", "end", "attribute"]]    # HARDCODED
-        if parser is None:
+        if not isinstance(parser, type):
             if verbose:
-                warnings.warn("No parser for section '{}'! Using generic editor.".format(secname))
+                warnings.warn("No parser for section '{}'! Using generic editor.".format(parser.__name__))
             sec = Editor(self[start:end], path_check=False)
         else:
             # Note that we don't actually parse anything until an
@@ -251,13 +250,17 @@ class Sections(Editor):
             class MySections(Sections):
                 def _parse(self):
                     # This function should actually perform parsing
-                    names = ["ParserName", "OtherParser"]
+                    names = [Parser0, Parser1]
                     starts = [0, 10]
                     ends = [10, 20]
                     titles = ["A Title", "Another Title"]
                     self._sections_helper(parsers, starts, ends, title=titles)
         """
         pass
+
+    def _get_sections(self):
+        """Convenience method that lazily evaluates ``sections``."""
+        self.parse()
 
     def _sections_helper(self, parser, start, end, **kwargs):
         """
@@ -270,7 +273,6 @@ class Sections(Editor):
             # End of the _parse() function
             self._sections_helper(parsers, starts, ends, title=titles)
         """
-        parser = [par.__name__ if isinstance(par, type) else par for par in parser]
         dct = {'parser': parser, 'start': start, 'end': end}
         dct.update(kwargs)
         self.sections = SectionDataFrame.from_dict(dct)
