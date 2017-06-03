@@ -27,7 +27,7 @@ doc/build/
 target/
 .settings/
 js/node_modules/
-exa/_static/
+exa/_nbextension/
 node_modules/
 
 
