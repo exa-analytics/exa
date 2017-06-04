@@ -40,8 +40,10 @@ class Base(six.with_metaclass(ABCMeta, object)):
     @abstractmethod
     def info(self):
         """
-        The info function provides a summary of the data or objects
-        contained in the current instance.
+        The info function provides a summary of the data or objects contained
+        in the current instance. Note that this method should not be relied
+        upon to provide data to other functions; it should only display/print
+        (i.e. read-only) relevant information about the current object.
         """
         pass
 

@@ -378,9 +378,9 @@ class Editor(Base):
         By default, the editor class displays the length of the text and the
         file name (if applicable).
         """
-        return {'length': len(self),
-                'file': self.meta['filepath'] if self.meta is not None and "filepath" in self.meta else "NA",
-                'type': type(self)}
+        print({'length': len(self),
+               'file': self.meta['filepath'] if self.meta is not None and "filepath" in self.meta else "NA",
+               'type': type(self)})
 
     def to_stream(self):
         """Send editor text to a file stream (StringIO) object."""

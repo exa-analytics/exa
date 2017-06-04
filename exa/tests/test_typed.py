@@ -14,13 +14,17 @@ class Klass(object):
     """Test static :class:`~exa.typed.TypedAttribute` usage."""
     _getters = ("get", )
     foo = cta("foo", int, setter_finalize=lambda self: setattr(self, "count", getattr(self, "count") + 1))
-    bar = cta("bar", (str, float))
+    bar = cta("bar", (str, float), setter_finalize="increment")
 
     def get_foo(self):
         """Automatically populate the attribute."""
         # Typically there will be some computation performed here
         # that typed's value depends on.
         self.foo = 42
+
+    def increment(self):
+        """Called by name (``setter_finalize``)."""
+        self.count += 1
 
     def __init__(self, foo=None):
         """
@@ -48,10 +52,13 @@ class TestSimpleTyped(TestCase):
         """Test the attribute behavior."""
         klass = Klass(10)
         self.assertEqual(klass.foo, 10)
-        self.assertEqual(klass.count, 1)
+        self.assertEqual(klass.count, 2)
         klass.foo = 42
         self.assertEqual(klass.foo, 42)
-        self.assertEqual(klass.count, 2)
+        self.assertEqual(klass.count, 3)
+        klass.bar = "0"
+        self.assertEqual(klass.bar, "0")
+        self.assertEqual(klass.count, 4)
 
     def test_type_conversion(self):
         """Test automatic type conversion for ``typed``."""
@@ -59,10 +66,14 @@ class TestSimpleTyped(TestCase):
         self.assertIsInstance(klass.foo, int)
         klass = Klass(False)
         self.assertIsInstance(klass.foo, int)
+        with self.assertRaises(TypeError):
+            klass.foo = "cannot convert to int"
 
     def test_yielding(self):
         """Test that yielding typed attributes works."""
         yielded = list(yield_typed(Klass))
+        self.assertEqual(len(yielded), 2)
+        yielded = list(yield_typed(Klass()))
         self.assertEqual(len(yielded), 2)
 
     def test_distinct(self):

@@ -39,9 +39,6 @@ method or function calls. Example usage can be found in the tests
 See Also:
     :class:`~exa.core.base.Base`
 """
-import six
-
-
 def yield_typed(obj):
     """
     Iterate over property names and type definitions.
@@ -127,13 +124,11 @@ def cta(name, ptypes, doc=None, setter_finalize=None):
                     break
                 except Exception:  # Many different exceptions could be raised
                     pass
-        # Allow setting as none or valid types
-        if isinstance(obj, ptypes) or obj is None:
-            setattr(self, pname, obj)
-        else:
-            raise TypeError("Cannot convert type {} to {}.".format(type(obj), ptypes))
+            else:
+                raise TypeError("Cannot convert type {} to {}.".format(type(obj), ptypes))
+        setattr(self, pname, obj)
         # Finally call the setter_finalize method/function
-        if isinstance(setter_finalize, six.string_types):
+        if isinstance(setter_finalize, str):
             getattr(self, setter_finalize)()
         elif callable(setter_finalize):
             try:

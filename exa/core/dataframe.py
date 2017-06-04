@@ -41,7 +41,14 @@ class DataFrame(pd.DataFrame, Base):
     ``int`` with a fallback to ``float``; the column must be coerced to one of
     these types otherwise a TypeError is raised.
     """
+    # Note that the ``Base`` class, which requires the creation of an ``info``
+    # method is satisfied by the pandas DataFrame which provides that method.
     _metadata = ["_reqcols", "_coltypes", "meta"]
+
+    def info(self, verbose=True, *args, **kwargs):
+        """Call the pandas DataFrame info method."""
+        kwargs['verbose'] = verbose
+        return super(DataFrame, self).info(*args, **kwargs)
 
     @property
     def _constructor(self):

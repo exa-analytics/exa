@@ -35,9 +35,8 @@ class TestBasicComposer(TestCase):
         """Test that ``_compose_`` methods are correctly identified."""
         composers = Composer("{}")._get_composers()
         self.assertIsInstance(composers, dict)
-        self.assertEqual(len(composers), 5)
+        self.assertEqual(len(composers), 4)
         self.assertIn("dict", composers)
-        self.assertIn("str", composers)
         self.assertIn("tuple", composers)
         self.assertIn("list", composers)
 

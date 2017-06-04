@@ -60,23 +60,9 @@ class Composer(Parser):
         template. Positional arguments are taken from the special ``_args``
         attribute without modification.
 
-        By default, only str, dict, list, and tuples types have composition
-        functions: ``_compose_str``, ``_compose_list``, etc. Additional kw
-        composition functions can added (or existing ones can be modified).
-
-        .. code-block:: python
-
-            class CmpsrMeta(ComposerMeta):
-                myvar = str
-
-            class Cmpsr(six.with_metaclass(CmpsrMeta, Composer):
-                def _compose_str(self, value):
-                    # Put single quotes around the value and do nothing else
-                    return "'" + str(value) + "'"
-
         See Also:
-            The :attr:`~exa.core.composer.Composition.composition` provides
-            information about the template.
+            The :attr:`~exa.core.composer.Composer.composition` provides
+            information about the template's parameters.
         """
         dct = vars(self)
         kws = {}
@@ -146,7 +132,8 @@ class Composer(Parser):
                 text = text.replace(tmpl, tmpl.split(self._key_d0)[-1])
         return text
 
-    def _format(self, text, *args, **kwargs):
+    @staticmethod
+    def _format(text, *args, **kwargs):
         """
         This function, by default, behaves similarly to the default editor's
         format function but can be overwritten by subclasses if necessary. A
@@ -196,7 +183,22 @@ class Composer(Parser):
         self.parse()
 
     def _get_composers(self):
-        """Helper function to identify ``_compose_\*`` functions."""
+        """
+        Helper function to identify ``_compose_\*`` functions.
+
+        By default, only str, dict, list, and tuples types have composition
+        functions: ``_compose_list``, etc. Additional keyword composition
+        functions can added (or existing ones can be modified).
+
+        .. code-block:: python
+
+            class MyComposer(Composer):
+                myvar = cta("myvar", str)
+
+                def _compose_str(self, value):
+                    # Put single quotes around the value and do nothing else
+                    return "'" + str(value) + "'"
+        """
         composers = {}
         for name in dir(self):
             if name.startswith("_compose_"):
@@ -225,10 +227,6 @@ class Composer(Parser):
     def _compose_tuple(self, val, **kwargs):
         """Modify tuple keywords."""
         return self._compose_list(val, **kwargs)
-
-    def _compose_str(self, val, **kwargs):
-        """Modify list keywords."""
-        return val
 
     def __init__(self, data=None, *args, **kwargs):
         # Modify the first argument if a default template is provided
