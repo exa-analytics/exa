@@ -62,6 +62,14 @@ class TestDataFrame(TestCase):
         df['col2'] = df['col2'].astype(float)
         self.assertEqual(df['col2'].dtype, object)
 
+    def test_info(self):
+        """Info is really a function of pandas."""
+        try:
+            dct = {'col1': [0, 1], 'col3': [0, 1], 'col5': [0, 1]}
+            MockDataFrame(dct).info()
+        except Exception as e:
+            self.fail(str(e))
+
 
 class TestSectionDataFrame(TestCase):
     """Test :class:`~exa.core.dataframe.SectionDataFrame`."""
