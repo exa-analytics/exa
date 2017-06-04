@@ -39,6 +39,10 @@ method or function calls. Example usage can be found in the tests
 See Also:
     :class:`~exa.core.base.Base`
 """
+from abc import ABCMeta
+from .functions import LazyFunction
+
+
 def yield_typed(obj):
     """
     Iterate over property names and type definitions.
@@ -139,3 +143,19 @@ def cta(name, ptypes, doc=None, setter_finalize=None):
     def deleter(self):
         delattr(self, pname)    # Allows for dynamic attribute deletion
     return property(getter, setter, deleter, doc=doc)
+
+
+class Typed(ABCMeta):
+    def __new__(mcs, *args, **kwargs):
+        print("here", args, kwargs)
+        for name, attr in vars(mcs).items():
+            print(name, attr)
+            if isinstance(attr, TypedAttr):
+                object.__setattr__(mcs, name, attr(name=name))
+        return super(Typed, mcs).__new__(mcs, *args, **kwargs)
+
+
+class TypedAttr(LazyFunction):
+    def __init__(self, *args, **kwargs):
+        kwargs['fn'] = cta
+        super(TypedAttr, self).__init__(*args, **kwargs)

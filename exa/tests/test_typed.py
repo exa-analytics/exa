@@ -6,14 +6,16 @@ Tests for :mod:`~exa.typed`
 #############################################
 Tests for strongly styped class attributes.
 """
+import six
 from unittest import TestCase
-from exa.typed import cta, yield_typed
+from exa.typed import cta, yield_typed, Typed, TypedAttr
 
 
-class Klass(object):
+class Klass(six.with_metaclass(Typed, object)):
     """Test static :class:`~exa.typed.TypedAttribute` usage."""
     _getters = ("get", )
-    foo = cta("foo", int, setter_finalize=lambda self: setattr(self, "count", getattr(self, "count") + 1))
+    #foo = cta("foo", int, setter_finalize=lambda self: setattr(self, "count", getattr(self, "count") + 1))
+    foo = TypedAttr(ptypes=int, setter_finalize=lambda self: setattr(self, "count", getattr(self, "count") + 1))
     bar = cta("bar", (str, float), setter_finalize="increment")
 
     def get_foo(self):
