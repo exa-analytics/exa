@@ -23,11 +23,12 @@ class Dispatcher(Singleton):
     """
     Related to workflows?
     """
+    pass
     #def __new__(mcs, *args, **kwargs):
     #    return super(Dispatcher, mcs).__new__(mcs, *args, **kwargs)
 
-    def __call__(self):
-        return self.fn()
-
-    def __init__(self, fn, *args, **kwargs):
-        self.fn = fn
+#    def __call__(self):
+#        return self.fn()
+#
+#    def __init__(self, fn, *args, **kwargs):
+#        self.fn = fn

@@ -126,7 +126,7 @@ def cta(name, ptypes, doc=None, setter_finalize=None):
                     pass
             else:
                 raise TypeError("Cannot convert type {} to {}.".format(type(obj), ptypes))
-        setattr(self, pname, obj)
+        object.__setattr__(self, pname, obj)
         # Finally call the setter_finalize method/function
         if isinstance(setter_finalize, str):
             getattr(self, setter_finalize)()

@@ -163,7 +163,7 @@ class Composer(Parser):
         for tmpl in self.templates:
             try:
                 length, joiner, name = tmpl.split(self._key_d0)
-            except:
+            except Exception:
                 name = tmpl
                 length = self._key_dlen
                 joiner = self._key_djin
