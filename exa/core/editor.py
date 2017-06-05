@@ -37,7 +37,7 @@ from collections import defaultdict
 from itertools import chain
 from io import StringIO, TextIOWrapper
 from .base import Base
-from exa.typed import cta
+from exa.typed import TypedProperty
 if not hasattr(bz2, "open"):
     bz2.open = bz2.BZ2File
 
@@ -69,9 +69,9 @@ class Editor(Base):
     _getters = ("_get", "parse")
     _fmt = "{0}: {1}\n".format
     _tmpl = "{.*?}"
-    name = cta("name", str, "Editor name")
-    description = cta("description", str, "Editor description")
-    meta = cta("meta", dict, "Editor metadata")
+    name = TypedProperty(str, "Editor name")
+    description = TypedProperty(str, "Editor description")
+    meta = TypedProperty(dict, "Editor metadata")
 
     @property
     def templates(self):

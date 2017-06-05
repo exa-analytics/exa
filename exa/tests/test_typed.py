@@ -8,15 +8,14 @@ Tests for strongly styped class attributes.
 """
 import six
 from unittest import TestCase
-from exa.typed import cta, yield_typed, Typed, TypedAttr
+from exa.typed import TypedProperty, yield_typed, Typed
 
 
-class Klass(six.with_metaclass(Typed, object)):
-    """Test static :class:`~exa.typed.TypedAttribute` usage."""
+class Klass(Typed):
+    """Test static :class:`~exa.typed.TypedPropertyibute` usage."""
     _getters = ("get", )
-    #foo = cta("foo", int, setter_finalize=lambda self: setattr(self, "count", getattr(self, "count") + 1))
-    foo = TypedAttr(ptypes=int, setter_finalize=lambda self: setattr(self, "count", getattr(self, "count") + 1))
-    bar = cta("bar", (str, float), setter_finalize="increment")
+    foo = TypedProperty(int, sf=lambda self: setattr(self, "count", getattr(self, "count") + 1))
+    bar = TypedProperty((str, float), sf="increment")
 
     def get_foo(self):
         """Automatically populate the attribute."""
@@ -25,13 +24,13 @@ class Klass(six.with_metaclass(Typed, object)):
         self.foo = 42
 
     def increment(self):
-        """Called by name (``setter_finalize``)."""
+        """Called by name (``sf``)."""
         self.count += 1
 
     def __init__(self, foo=None):
         """
         Note that the ``count`` variable is instantiated before the ``typed``
-        variable because the ``setter_finalize`` function (the lambda function
+        variable because the ``sf`` function (the lambda function
         above).
         """
         self.count = 0        # Order of assignment matters here!
@@ -39,11 +38,22 @@ class Klass(six.with_metaclass(Typed, object)):
         self.bar = "42"
 
 
-class TestSimpleTyped(TestCase):
+class TestTyped(TestCase):
     """
-    Test the basic features of :func:`~exa.typed.cta` and
+    Test the basic features of :func:`~exa.typed.TypedProperty` and
     :func:`~exa.typed.yield_typed`.
     """
+    def test_simple(self):
+        """Test the most basic usage."""
+        class K(Typed):
+            foo = TypedProperty(int)
+
+        k = K()
+        self.assertIsInstance(K.foo, property)
+        k.foo = "1"
+        self.assertEqual(k.foo, 1)
+        self.assertIsInstance(k.foo, int)
+
     def test_automatic_assignment(self):
         """Test that the ``foo`` and ``bar`` are automatically assigned."""
         klass = Klass()

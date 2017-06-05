@@ -5,14 +5,14 @@
 Typed Attribute Infrastructure
 #####################################
 This module provides a mechanism for dynamically creating class properties
-that enforce their attribute's type. The :func:`~exa.typed.cta`
+that enforce their attribute's type. The :func:`~exa.typed.typed_property`
 function essentially creates a set of ``property`` related methods. The
 following comparison can be made.
 
 .. code-block:: Python
 
     class Klass:
-        foo = cta("foo", ptypes)    # Where ptypes is a type or list of types
+        foo = typed_property("foo", ptypes)    # Where ptypes is a type or list of types
 
 The above is the same as the following.
 
@@ -31,7 +31,7 @@ The above is the same as the following.
             del self._foo
 
 In addition to dynamically enforcing types using the ``property`` machinery of
-Python, attributes created by :func:`~exa.typed.cta` enable
+Python, attributes created by :func:`~exa.typed.typed_property` enable
 additional features such as lazy (automatic) assignment and triggering of other
 method or function calls. Example usage can be found in the tests
 (:mod:`~exa.tests.test_typed`).
@@ -39,6 +39,7 @@ method or function calls. Example usage can be found in the tests
 See Also:
     :class:`~exa.core.base.Base`
 """
+import six
 from abc import ABCMeta
 from .functions import LazyFunction
 
@@ -47,8 +48,12 @@ def yield_typed(obj):
     """
     Iterate over property names and type definitions.
 
+    Strongly typed properties are distinguished from standard property
+    objects by the inclusion of the string '__typed__' in the ``__doc__``
+    attribute of the (property) object.
+
     Args:
-        obj: Class instance or definition
+        obj: Instance of a class or the class itself.
 
     Returns:
         iterator: List of (name, types) tuples
@@ -60,7 +65,7 @@ def yield_typed(obj):
             yield (name, attr)
 
 
-def cta(name, ptypes, doc=None, setter_finalize=None):
+def typed_property(name, ptypes, docs=None, sf=None):
     """
     Create a class attribute that enforces types and support lazy (automatic)
     assignment.
@@ -71,7 +76,7 @@ def cta(name, ptypes, doc=None, setter_finalize=None):
     .. code-block:: python
 
         class Klass(object):
-            typed = cta("typed", int, "an int")
+            typed = typed_property("typed", int, "an int")
 
             def __init__(self, typed=None):
                 self.typed = typed
@@ -84,8 +89,8 @@ def cta(name, ptypes, doc=None, setter_finalize=None):
     Args:
         name (str): Variable name (used to build the property)
         ptypes (type, iterable): Type or list of types
-        doc (str): Docstring
-        setter_finalize (str, function): Function name or function to call after attribute is set
+        docs (str): Docstring
+        sf (str, function): Function name or function to call after attribute is set
 
     Note:
         Properties created by this function have the docstring containing "__typed__"
@@ -100,7 +105,7 @@ def cta(name, ptypes, doc=None, setter_finalize=None):
         ptypes = (ptypes, )
     else:
         ptypes = tuple(ptypes)
-    doc = "__typed__" if doc is None else doc + "\n\n__typed__"
+    docs = "__typed__" if docs is None else docs + "\n\n__typed__"
     # The private attribute is where the data content is actually stored
     pname = '_' + name
     # Property getter retrieves the private attribute that stores the data
@@ -131,31 +136,84 @@ def cta(name, ptypes, doc=None, setter_finalize=None):
             else:
                 raise TypeError("Cannot convert type {} to {}.".format(type(obj), ptypes))
         object.__setattr__(self, pname, obj)
-        # Finally call the setter_finalize method/function
-        if isinstance(setter_finalize, str):
-            getattr(self, setter_finalize)()
-        elif callable(setter_finalize):
+        # Finally call the sf method/function
+        if isinstance(sf, str):
+            getattr(self, sf)()
+        elif callable(sf):
             try:
-                setter_finalize()    # Assume static function (e.g. staticmethod)
+                sf()    # Assume static function (e.g. staticmethod)
             except TypeError:
-                setter_finalize(self)    # Else class method
+                sf(self)    # Else class method
     # Provide a deleter for deletion of the actual data
     def deleter(self):
         delattr(self, pname)    # Allows for dynamic attribute deletion
-    return property(getter, setter, deleter, doc=doc)
+    return property(getter, setter, deleter, doc=docs)
 
 
-class Typed(ABCMeta):
-    def __new__(mcs, *args, **kwargs):
-        print("here", args, kwargs)
-        for name, attr in vars(mcs).items():
-            print(name, attr)
-            if isinstance(attr, TypedAttr):
-                object.__setattr__(mcs, name, attr(name=name))
-        return super(Typed, mcs).__new__(mcs, *args, **kwargs)
+class TypedProperty(LazyFunction):
+    """
+    Helper for creating typed attributes. Accepts the same arguments as
+    :func:`~exa.typed.typed_property`. Example usage is as follows. For
+    more typical usage see :class:`~exa.core.base.Base`.
+
+    .. code-block:: python
+
+        import six
+        class Klass(six.with_metaclass(TypedMeta, object)):
+            foo = TypedProperty(str, docs="foo attr")
+            bar = TypedProperty(int, sf=lambda: print("bar set"))
+
+    See Also:
+        More common usage examples can be found in the docs related to
+        :class:`~exa.typed.Typed` and :class:`~exa.core.base.Base`.
+    """
+    def __init__(self, ptypes, docs=None, sf=None, *args, **kwargs):
+        super(TypedProperty, self).__init__(fn=typed_property, ptypes=ptypes,
+                                            docs=docs, sf=sf, *args, **kwargs)
 
 
-class TypedAttr(LazyFunction):
-    def __init__(self, *args, **kwargs):
-        kwargs['fn'] = cta
-        super(TypedAttr, self).__init__(*args, **kwargs)
+class TypedMeta(ABCMeta):
+    """
+    Metaclass for preparing strongly typed property attributes.
+    Properties are attached to class definitions; this metaclass automatically
+    creates type enforcing properties (see :func:`~exa.typed.typed_property`)
+    for all class attributes defined as follows. Typical usage is through
+    either the :class:`~exa.typed.Typed` object or :class:`~exa.core.base.Base`.
+
+    .. code-block:: python
+
+        import six   # Python 2 compatibility
+        class Klass(six.with_metaclass(TypedMeta, bases)):
+            attr = TypedProperty(*args, **kwargs)
+    """
+    def __new__(mcs, name, bases, namespace):
+        for attr_name, attr in namespace.items():
+            if isinstance(attr, TypedProperty):
+                # Here we get the attribute name from the class definition
+                # (in kwargs) and call the typed_property by calling
+                # TypedProperty (which is a LazyFunction: calling a it
+                # calls typed_property
+                namespace[attr_name] = attr(name=attr_name)
+        return super(TypedMeta, mcs).__new__(mcs, name, bases, namespace)
+
+
+class Typed(six.with_metaclass(TypedMeta, object)):
+    """
+    A concrete base class that supports strongly attributes, used when
+    subclassing ``object`` is all that is needed (as the base).
+
+    .. code-block:: python
+
+        class Klass(Typed):
+            foo = TypedProperty(dict)
+
+    The above is functionally the same (but shorter and cleaner) than the
+    following explicit code.
+
+    .. code-block:: python
+
+        import six
+        class Klass(six.with_metaclass(TypedMeta, object)):
+            foo = TypedProperty(dict)
+    """
+    pass

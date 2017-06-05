@@ -8,14 +8,14 @@ Test a simple, concrete implementation of the core abstract base class.
 """
 from unittest import TestCase
 from exa.core.base import Base
-from exa.typed import cta
+from exa.typed import TypedProperty
 
 
 class Concrete(Base):
     """Example concrete implementation of the abstract base class."""
-    foo = cta("foo", dict)
-    bar = cta("bar", list)
-    baz = cta("baz", str)
+    foo = TypedProperty(dict)
+    bar = TypedProperty(list)
+    baz = TypedProperty(str)
 
     def info(self):
         """Implemented to do nothing."""

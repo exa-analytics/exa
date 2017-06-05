@@ -11,12 +11,11 @@ keyword arguments that reach its ``init`` method. Positional arguments are
 stored in the ``_args`` keyword while keyword arguments are attached directly
 to the class instance (by their name).
 """
-import six
-from abc import abstractmethod, ABCMeta
-from exa.typed import cta
+from abc import abstractmethod
+from exa.typed import Typed, TypedProperty
 
 
-class Base(six.with_metaclass(ABCMeta, object)):
+class Base(Typed):
     """
     Abstract base class for editors, data, and containers.
 
@@ -35,7 +34,7 @@ class Base(six.with_metaclass(ABCMeta, object)):
         :mod:`~exa.typed`
     """
     _getters = ("compute", "parse", "_get")
-    meta = cta("meta", dict, "Metadata stored in a dict")
+    meta = TypedProperty(ptypes=dict, docs="Metadata stored in a dict")
 
     @abstractmethod
     def info(self):

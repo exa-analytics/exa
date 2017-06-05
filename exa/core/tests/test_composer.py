@@ -8,7 +8,7 @@ Test composer behavior.
 """
 from unittest import TestCase
 from exa.core.composer import Composer
-from exa.typed import cta
+from exa.typed import TypedProperty
 
 
 class SimpleComposer(Composer):
@@ -22,8 +22,8 @@ class SimpleComposer(Composer):
 class Cmpsr(Composer):
     """Type enforcing composer."""
     _lines = "{}\n{simple}\n{1: :line2}"
-    line2 = cta("line2", dict)
-    line3 = cta("line3", list)
+    line2 = TypedProperty(dict)
+    line3 = TypedProperty(list)
 
 
 class TestBasicComposer(TestCase):

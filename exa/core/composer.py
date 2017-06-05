@@ -15,7 +15,7 @@ from copy import copy, deepcopy
 from .editor import Editor
 from .parser import Parser
 from .dataframe import Composition
-from exa.typed import cta
+from exa.typed import TypedProperty
 
 
 class Composer(Parser):
@@ -48,7 +48,7 @@ class Composer(Parser):
     _key_bl = " "
     _key_dlen = 1
     _key_djin = ""
-    composition = cta("composition", Composition, "Template description")
+    composition = TypedProperty(Composition, "Template description")
 
     def compose(self):
         """
@@ -193,7 +193,7 @@ class Composer(Parser):
         .. code-block:: python
 
             class MyComposer(Composer):
-                myvar = cta("myvar", str)
+                myvar = TypedProperty(str)
 
                 def _compose_str(self, value):
                     # Put single quotes around the value and do nothing else

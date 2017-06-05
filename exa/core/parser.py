@@ -25,10 +25,10 @@ is responsible for performing the actual parsing. We start with the parser
 
 .. code-block:: python
 
-    from exa.typed import cta
+    from exa.typed import TypedProperty
 
     class Block(Parser):
-        array = cta("array", pd.Series)
+        array = TypedProperty(pd.Series)
 
         def _parse(self):
             # For simplicity we use built-in functionality of the
@@ -63,7 +63,7 @@ whole; it doesn't expect a single section like the parser above.
 
 Now we have a modular and efficient parsing system for the prototypical text
 example above. Advanced machinery for lazy (automatic) parsing and additional
-triggering is possible via the ``cta`` function provided by
+triggering is possible via the ``TypedProperty`` function provided by
 :mod:`~exa.typed`. For examples see the tests of the aforementioned module and
 of this module (:mod:`~exa.tests.test_typed` and
 :mod:`~exa.core.tests.test_parser`).
@@ -74,7 +74,7 @@ import numpy as np
 from abc import abstractmethod
 from .editor import Editor
 from .dataframe import SectionDataFrame
-from exa.typed import yield_typed, cta
+from exa.typed import yield_typed, TypedProperty
 
 
 class Sections(Editor):
@@ -111,7 +111,7 @@ class Sections(Editor):
         :class:`~exa.core.parsing.Parser`
     """
     _parsers = {}
-    sections = cta("sections", SectionDataFrame, "Parser sections")
+    sections = TypedProperty(SectionDataFrame, "Parser sections")
 
     def parse(self, recursive=False, verbose=False, **kwargs):
         """
@@ -147,13 +147,13 @@ class Sections(Editor):
                 if verbose:
                     warnings.warn("No parser for section '{}'!".format(parser.__class__))
                 # Default type is a simple editor
-                prop = cta(attrname, Editor)
+                prop = TypedProperty(Editor)
             else:
                 # Otherwise use specific sections/parser
-                prop = cta(attrname, parser)
+                prop = TypedProperty(parser)
             # Now we perform a bit of class gymnastics:
             # Because we don't want to attach our typed property paradigm
-            # (see exa.special.cta) to all instances of this
+            # (see exa.special.TypedProperty) to all instances of this
             # object's class (note that properties must be attached to class
             # definitions not instances of a class), we dynamically create a
             # copy of this object's class, attach our properties to that
@@ -163,7 +163,9 @@ class Sections(Editor):
                 uniquecls = type(cls.__name__, (cls, ), {})
                 uniquecls.__unique = True
                 self.__class__ = uniquecls
-            setattr(self.__class__, attrname, prop)
+            # TypedProperty (prop) is LazyFunction so we evaluate it
+            # here and pass name since we know the name at this point.
+            setattr(self.__class__, attrname, prop(name=attrname))
             # And attach a lazy evaluation method using the above helper.
             # Again, see exa's documentation for more information.
             setattr(self, "parse_" + attrname, section_parser_helper(i))
@@ -290,15 +292,15 @@ class Parser(Editor):
     .. code-block:: python
 
         import pandas as pd
-        from exa.typed import cta
+        from exa.typed import TypedProperty
 
         text = '''comment1: 1
         comment2: 2
         comment3: 3'''
 
         class MyParser(Parser):
-            comments = cta("comments", list, "List of comments")
-            data = cta("data", pd.Series)
+            comments = TypedProperty(list, doc="List of comments")
+            data = TypedProperty(pd.Series)
             _key_d = ":"
 
             def _parse(self):

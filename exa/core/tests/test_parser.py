@@ -10,7 +10,7 @@ Tests for the related modules, :mod:`~exa.core.sections` and
 from unittest import TestCase
 from exa.core.editor import Editor
 from exa.core.parser import Sections, Parser
-from exa.typed import cta
+from exa.typed import TypedProperty
 
 
 sections0 = u"""Sections have some text followed by a delimiter
@@ -47,8 +47,8 @@ or may have final text.
 
 class MockParser(Parser):
     """Mock example of :class:`~exa.core.editor.Parser`."""
-    wordcount = cta("wordcount", int, "Count of the number of words")
-    wordlist = cta("wordlist", list, "List of words")
+    wordcount = TypedProperty(int, "Count of the number of words")
+    wordlist = TypedProperty(list, "List of words")
 
     def _parse(self, fail=False):
         """Parse a word section."""

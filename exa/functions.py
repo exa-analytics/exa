@@ -30,9 +30,11 @@ class LazyFunction(object):
         # evalulate the functions.
         results = [f() for f in fs]
     """
-    def __call__(self):
+    def __call__(self, **kwargs):
         """Evaluate the function and return the results."""
-        return self.fn(*self.args, **self.kwargs)
+        kws = dict(self.kwargs)
+        kws.update(kwargs)
+        return self.fn(*self.args, **kws)
 
     def __init__(self, fn, *args, **kwargs):
         self.fn = fn
