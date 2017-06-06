@@ -208,8 +208,8 @@ class Typed(six.with_metaclass(TypedMeta, object)):
         class Klass(Typed):
             foo = TypedProperty(dict)
 
-    The above is functionally the same (but shorter and cleaner) than the
-    following explicit code.
+    The above is functionally the same (but shorter) than the following,
+    more explicit, code.
 
     .. code-block:: python
 
