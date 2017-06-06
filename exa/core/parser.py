@@ -74,10 +74,38 @@ import numpy as np
 from abc import abstractmethod
 from .editor import Editor
 from .dataframe import SectionDataFrame
-from exa.typed import yield_typed, TypedProperty
+from exa.typed import yield_typed, TypedProperty, TypedMeta
 
 
-class Sections(Editor):
+class ParserMeta(TypedMeta):
+    """
+    Modified :class:`~exa.typed.TypedMeta` that additionally creates automatic
+    parsing functions for sections and data objects.
+
+    See Also:
+        :class:`~exa.typed.TypedMeta`
+    """
+    def __new__(mcs, name, bases, namespace):
+        clsdict = {}
+        prefix = namespace.pop("_getters", "_get")
+        if not isinstance(prefix, (list, tuple)):
+            prefix = (prefix, )
+        for attr_name, attr in namespace.items():
+            if isinstance(attr, TypedProperty):
+                for pref in prefix:
+                    clsdict["_".join((pref, attr_name))] = lambda self: self.parse()
+                clsdict[attr_name] = attr(name=attr_name)
+            else:
+                clsdict[attr_name] = attr
+        return super(ParserMeta, mcs).__new__(mcs, name, bases, clsdict)
+
+
+class ParserBase(six.with_metaclass(ParserMeta, Editor)):
+    """A concrete base class."""
+    pass
+
+
+class Sections(ParserBase):
     """
     An editor tailored to handling files with distinct regions of text.
 
@@ -87,10 +115,10 @@ class Sections(Editor):
     sections are automatically parsed. Sections may themselves be
     :class:`~exa.core.parsing.Sections` objects (i.e. sub-sections).
 
-    The abstract method :func:`~exa.core.parsing.Sections._parse` is used to
+    The abstract method :func:`~exa.core.parser.Sections._parse` is used to
     define the ``sections`` attribute, a dataframe containing, at a minimum,
     section starting and ending lines, and the parser name (associated with a
-    :class:`~exa.core.parsing.Sections` or :class:`~exa.core.parsing.Parser`
+    :class:`~exa.core.parser.Sections` or :class:`~exa.core.parser.Parser`
     object). An example ``sections`` table is given below with an optional
     column, ``title``, used to aid the user in identifying sections.
 
@@ -108,9 +136,8 @@ class Sections(Editor):
         sections (DataFrame): Dataframe of section numbers, names, and starting/ending lines
 
     See Also:
-        :class:`~exa.core.parsing.Parser`
+        :class:`~exa.core.parser.Parser`
     """
-    _parsers = {}
     sections = TypedProperty(SectionDataFrame, "Parser sections")
 
     def parse(self, recursive=False, verbose=False, **kwargs):
@@ -121,15 +148,6 @@ class Sections(Editor):
             recursive (bool): If true, parses all sub-section/parser objects' data
             verbose (bool): Print parser warnings
             kwargs: Keyword arguments passed to parser
-
-        Tip:
-            Helpful methods for describing parsing and data are
-            :attr:`~exa.core.parsing.Sections.sections`,
-            :func:`~exa.core.parsing.Sections.describe`, and
-            :func:`~exa.core.parsing.Sections.describe_parsers`.
-
-        See Also:
-            :func:`~exa.core.parsing.Sections.parse_section`
         """
         # This helper function is used to setup auto-parsing, see below.
         def section_parser_helper(i):
@@ -185,12 +203,6 @@ class Sections(Editor):
             recursive (bool): Parse sub-section/parser objects
             verbose (bool): Display additional warnings
             kwargs: Keyword arguments passed to parser
-
-        Tip:
-            To see what objects exist, see the :attr:`~exa.core.sections.Sections.sections`
-            attribute and :func:`~exa.core.sections.Sections.describe`,
-            :func:`~exa.core.sections.Sections.describe_sections`, and
-            :func:`~exa.core.sections.Sections.describe_parsers`.
         """
         parser, start, end, attrname = self.sections.loc[number, ["parser", "start", "end", "attribute"]]    # HARDCODED
         if not isinstance(parser, type):
@@ -206,6 +218,11 @@ class Sections(Editor):
         if recursive and hasattr(sec, "parse"):
             # Propagate recursion
             sec.parse(recursive=True, verbose=verbose, **kwargs)
+
+    def itersections(self):
+        """Iterate over each section object."""
+        for name in self.sections['attribute']:
+            yield self.get_section(name)
 
     def get_section(self, section):
         """
@@ -260,10 +277,6 @@ class Sections(Editor):
         """
         pass
 
-    def _get_sections(self):
-        """Convenience method that lazily evaluates ``sections``."""
-        self.parse()
-
     def _sections_helper(self, parser, start, end, **kwargs):
         """
         Convenience method for building the ``sections`` attribute.
@@ -280,13 +293,13 @@ class Sections(Editor):
         self.sections = SectionDataFrame.from_dict(dct)
 
 
-class Parser(Editor):
+class Parser(ParserBase):
     """
     An editor-like object that is responsible for transforming a region
     of text into an appropriate data object or objects.
 
     This class can be used individually or in concert with the
-    :class:`~exa.core.parsing.Sections` class to build a comprehensive parsing
+    :class:`~exa.core.parser.Sections` class to build a comprehensive parsing
     system.
 
     .. code-block:: python
@@ -314,7 +327,7 @@ class Parser(Editor):
                 self.comments = comments
 
     See Also:
-        :class:`~exa.core.parsing.Sections`
+        :class:`~exa.core.parser.Sections`
     """
     def parse(self, **kwargs):
         """

@@ -36,8 +36,10 @@ from copy import copy, deepcopy
 from collections import defaultdict
 from itertools import chain
 from io import StringIO, TextIOWrapper
+from IPython.display import display
 from .base import Base
-from exa.typed import TypedProperty
+from exa import TypedProperty
+from exa.typed import yield_typed
 if not hasattr(bz2, "open"):
     bz2.open = bz2.BZ2File
 
@@ -69,8 +71,6 @@ class Editor(Base):
     _getters = ("_get", "parse")
     _fmt = "{0}: {1}\n".format
     _tmpl = "{.*?}"
-    name = TypedProperty(str, "Editor name")
-    description = TypedProperty(str, "Editor description")
     meta = TypedProperty(dict, "Editor metadata")
 
     @property
@@ -371,16 +371,28 @@ class Editor(Base):
         for line in self._lines[slice(start, stop, step)]:
             yield line
 
-    def info(self):
+    def info(self, df=False):
         """
-        Describe the current editor object.
+        Describe the current editor and its data objects.
 
-        By default, the editor class displays the length of the text and the
-        file name (if applicable).
+        Args:
+            df (bool): If true, returns the full dataframe
         """
-        print({'length': len(self),
-               'file': self.meta['filepath'] if self.meta is not None and "filepath" in self.meta else "NA",
-               'type': type(self)})
+        l = len(self)
+        f = self.meta['filepath'] if self.meta is not None and "filepath" in self.meta else "NA"
+        print("Basic Info:\n    length: {0}\n    file: {2}".format(l, f))
+        names = []
+        types = []
+        docs = []
+        for name, _ in yield_typed(self):
+            attr = getattr(self, name)
+            names.append(name)
+            types.append(type(attr))
+            docs.append(attr.__doc__)
+        df_ = pd.DataFrame.from_dict({'name': names, 'data_type': types, 'docs': docs}).set_index('name')
+        display(df_)
+        if df:
+            return df_
 
     def to_stream(self):
         """Send editor text to a file stream (StringIO) object."""

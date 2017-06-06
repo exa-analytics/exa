@@ -60,12 +60,13 @@ def yield_typed(obj):
     """
     if not isinstance(obj, type):
         obj = obj.__class__
-    for name, attr in vars(obj).items():
+    for name in dir(obj):
+        attr = getattr(obj, name)
         if isinstance(attr, property) and "__typed__" in attr.__doc__:
             yield (name, attr)
 
 
-def typed_property(name, ptypes, docs=None, sf=None):
+def typed_property(name, ptypes, docs=None, sf=None, *args, **kwargs):
     """
     Create a class attribute that enforces types and support lazy (automatic)
     assignment.
@@ -167,10 +168,8 @@ class TypedProperty(LazyFunction):
         More common usage examples can be found in the docs related to
         :class:`~exa.typed.Typed` and :class:`~exa.core.base.Base`.
     """
-    def __init__(self, ptypes, docs=None, sf=None, *args, **kwargs):
-        fn = kwargs.pop("fn", typed_property)
-        super(TypedProperty, self).__init__(fn=fn, ptypes=ptypes,
-                                            docs=docs, sf=sf, *args, **kwargs)
+    def __init__(self, ptypes, docs=None, sf=None):
+        super(TypedProperty, self).__init__(fn=typed_property, ptypes=ptypes, sf=sf, docs=docs)
 
 
 class TypedMeta(ABCMeta):

@@ -45,26 +45,3 @@ class LazyFunction(object):
         fmt = "{}(fn={}, nargs={}, nkwargs={})".format
         return fmt(self.__class__.__name__, self.fn.__name__,
                    len(self.args), len(self.kwargs))
-
-
-def simple_fn_builder(func_name, caller_name):
-    """
-    Create a function that calls another function (used to dynamically build
-    an API).
-
-    .. code-block: Python
-
-        class Klass(object):
-            def oldfunc(*args, **kwargs):
-                pass
-            newfunc = simple_fn_builder("newfunc", "oldfunc")
-        obj = Klass()
-        obj.newfunc(*args, **kwargs)    # Calls "oldfunc" function
-
-    See Also:
-        Example usage in :mod:`~exa.tests.test_functions`.
-    """
-    def func(self, *args, **kwargs):
-        getattr(self, caller_name)(*args, **kwargs)
-    func.__name__ = func_name
-    return func

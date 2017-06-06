@@ -8,7 +8,7 @@ Test the behavior of lazily evaluated functions.
 """
 import six
 from unittest import TestCase
-from exa.functions import LazyFunction, simple_fn_builder
+from exa.functions import LazyFunction
 
 
 class TestLazyFunction(TestCase):
@@ -45,28 +45,3 @@ class TestLazyFunction(TestCase):
         result = f()
         self.assertTrue(self.check)
         self.assertEqual(result, 100)
-
-
-class TestSimpleFunctionFactory(TestCase):
-    """Test simple function generation."""
-    def test_func_gen(self):
-        """Test that the simple factory generates a function."""
-        class Klass(object):
-            # The fn builder allows us to define newfunc before
-            # old func is defined.
-            newfunc = simple_fn_builder("newfunc", "oldfunc")
-
-            def oldfunc(self, *args, **kwargs):
-                self.oldcalled = True
-
-            def __init__(self):
-                self.oldcalled = False
-
-        obj = Klass()
-        self.assertFalse(obj.oldcalled)
-        obj.oldfunc()
-        self.assertTrue(obj.oldcalled)
-        obj = Klass()
-        self.assertFalse(obj.oldcalled)
-        obj.newfunc()
-        self.assertTrue(obj.oldcalled)
