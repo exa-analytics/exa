@@ -16,11 +16,54 @@ creation of data processing and visualization systems is easier when data has
 See Also:
     :class:`~exa.core.container.Container`
 """
+import six
 import pandas as pd
 from .base import Base
+from exa.functions import LazyFunction
+from exa.typed import TypedMeta, TypedProperty
 
 
-class DataFrame(pd.DataFrame, Base):
+class Feature(LazyFunction):
+    """
+    A description of a column in a :class:`~exa.core.dataframe.DataFrame`.
+    """
+    def to_dict(self, *args, **kwargs):
+        """Returns a dictionary of kwargs."""
+        return self.kwargs
+
+    def __init__(self, dtypes, required=False, findex=None):
+        """
+        Args:
+            dtypes (iterable, type): Dtype or iterable of dtypes of the feature (column)
+            required (bool): Required column for dataframe creation
+            findex (iterable): Foreign index names (on which groupby occurs)
+            func (function):
+        """
+        if not isinstance(dtypes, (list, tuple)):
+            dtypes = (dtypes, )
+        super(Feature, self).__init__(fn=self.to_dict, required=required,
+                                      findex=findex, dtypes=dtypes)
+
+
+class BaseMeta(TypedMeta):
+    """A typed metaclass for dataframes."""
+    def __new__(mcs, name, bases, namespace):
+        reqcols = []
+        coltypes = {}
+        # Make a copy of the namespace and modify the original
+        for attr_name, attr in dict(namespace).items():
+            if isinstance(attr, Feature):
+                # Remove the attr from the name space
+                kwargs = attr()
+                coltypes[attr_name] = kwargs['dtypes']
+                if kwargs['required']:
+                    reqcols.append(attr_name)
+        namespace['reqcols'] = reqcols
+        namespace['coltypes'] = coltypes
+        return super(BaseMeta, mcs).__new__(mcs, name, bases, namespace)
+
+
+class DataFrame(six.with_metaclass(BaseMeta, pd.DataFrame, Base)):
     """
     A `pandas`_ like `dataframe`_ with support for required columns, required
     column dtypes, and convenience method creation.
@@ -43,7 +86,9 @@ class DataFrame(pd.DataFrame, Base):
     """
     # Note that the ``Base`` class, which requires the creation of an ``info``
     # method is satisfied by the pandas DataFrame which provides that method.
-    _metadata = ["_reqcols", "_coltypes", "meta"]
+    _metadata = ["reqcols", "coltypes", "meta"]
+    reqcols = TypedProperty(list, "Required columns")
+    coltypes = TypedProperty(dict, "Column types")
 
     def info(self, verbose=True, *args, **kwargs):
         """Call the pandas DataFrame info method."""
@@ -56,50 +101,32 @@ class DataFrame(pd.DataFrame, Base):
 
     def _enforce_columns(self):
         """
-        Enforce required columns and dtypes using the ``_coltypes`` and ``_reqcols`` class
+        Enforce required columns and dtypes using the ``coltypes`` and ``reqcols`` class
         attribute (i.e. shared between all instances of this class); updated when
         ``DataFrame.__new__`` is called.
         """
         # First check required columns.
-        missing = set(self._reqcols).difference(self.columns)
-        if len(missing) > 0:
-            raise NameError("Missing column(s) {}".format(missing))
-        # Second convert types.
-        dtypes = self.dtypes
-        for name, types in self._coltypes.items():
-            if name in dtypes and types is not None and types[0] != dtypes[name]:
-                for typ in types:
-                    try:
-                        super(DataFrame, self).__setitem__(name, self[name].astype(typ))
-                        break    # Stop on successful convert
-                    except TypeError:
-                        pass
-                else:
-                    raise TypeError("Unable to enforce column types for {} as types {}".format(name, types))
+        if self.reqcols is not None:
+            missing = set(self.reqcols).difference(self.columns)
+            if len(missing) > 0:
+                raise NameError("Missing column(s) {}".format(missing))
+            # Second convert types.
+            dtypes = self.dtypes
+            for name, types in self.coltypes.items():
+                if name in dtypes and types is not None and types[0] != dtypes[name]:
+                    for typ in types:
+                        try:
+                            super(DataFrame, self).__setitem__(name, self[name].astype(typ))
+                            break    # Stop on successful convert
+                        except TypeError:
+                            pass
+                    else:
+                        raise TypeError("Unable to enforce column types for {} as types {}".format(name, types))
 
     def __setitem__(self, *args, **kwargs):
         """Setitem is called on column manipulations so we recheck columns."""
         super(DataFrame, self).__setitem__(*args, **kwargs)
         self._enforce_columns()
-
-    def __new__(cls, *args, **kwargs):
-        """
-        Update the required columns on the fly but share the state for all
-        dataframes of this type so as not to waste RAM.
-        """
-        _reqcols = []
-        _coltypes = {}
-        for name, types in vars(cls).items():
-            if isinstance(types, type):
-                _coltypes[name] = (types, )
-            elif isinstance(types, tuple) and isinstance(types[1], bool):
-                _reqcols.append(name)
-                _coltypes[name] = types[0] if isinstance(types[0], tuple) else (types[0], )
-            elif isinstance(types, tuple) and all(isinstance(typ, type) for typ in types):
-                _coltypes[name] = types
-        cls._coltypes = _coltypes
-        cls._reqcols = _reqcols
-        return super(DataFrame, cls).__new__(cls)
 
     def __init__(self, *args, **kwargs):
         meta = kwargs.pop("meta", None)
@@ -119,9 +146,9 @@ class SectionDataFrame(DataFrame):
     a given text region belongs.
     """
     _section_name_prefix = "section"
-    parser = (object, True)
-    start = (int, True)
-    end = (int, True)
+    parser = Feature(object, True)
+    start = Feature(int, True)
+    end = Feature(int, True)
 
     def __init__(self, *args, **kwargs):
         super(SectionDataFrame, self).__init__(*args, **kwargs)
@@ -136,6 +163,6 @@ class Composition(DataFrame):
     construct a compsed editor using data stored in Python objects and a string
     template.
     """
-    length = (None, True)
-    joiner = (str, True)
-    name = (str, True)
+    length = Feature(None, True)
+    joiner = Feature(str, True)
+    name = Feature(str, True)

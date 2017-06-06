@@ -168,7 +168,8 @@ class TypedProperty(LazyFunction):
         :class:`~exa.typed.Typed` and :class:`~exa.core.base.Base`.
     """
     def __init__(self, ptypes, docs=None, sf=None, *args, **kwargs):
-        super(TypedProperty, self).__init__(fn=typed_property, ptypes=ptypes,
+        fn = kwargs.pop("fn", typed_property)
+        super(TypedProperty, self).__init__(fn=fn, ptypes=ptypes,
                                             docs=docs, sf=sf, *args, **kwargs)
 
 
