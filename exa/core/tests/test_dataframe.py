@@ -9,16 +9,17 @@ dynamically generated information about the dataframe is populated correctly.
 """
 import numpy as np
 from unittest import TestCase
-from exa.core.dataframe import DataFrame, SectionDataFrame, Composition
+from exa import DataFrame, Feature
+from exa.core.dataframe import SectionDataFrame, Composition
 
 
 class MockDataFrame(DataFrame):
     """Test implementation of :class:`~exa.core.dataframe.DataFrame`."""
-    col1 = (None, True)
-    col2 = str
-    col3 = (float, True)
-    col4 = (int, float)
-    col5 = ((float, int), True)
+    col1 = Feature(None, True)
+    col2 = Feature(str)
+    col3 = Feature(float, True)
+    col4 = Feature((int, float))
+    col5 = Feature((float, int), True)
 
 
 class TestDataFrame(TestCase):
