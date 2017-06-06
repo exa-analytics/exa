@@ -380,7 +380,7 @@ class Editor(Base):
         """
         l = len(self)
         f = self.meta['filepath'] if self.meta is not None and "filepath" in self.meta else "NA"
-        print("Basic Info:\n    length: {0}\n    file: {2}".format(l, f))
+        print("Basic Info:\n    length: {0}\n    file: {1}".format(l, f))
         names = []
         types = []
         docs = []
