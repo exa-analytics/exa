@@ -4,5 +4,6 @@
 """
 Automated Numba Compilation
 #########################################
-Automates handling of `numba`_ compilation.
+Automates handling of `numba`_ compilation as a standalone feature or in
+conjunction with :func:`~exa.workflow.dispatch.dispatch`.
 """
