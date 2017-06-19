@@ -1,8 +1,8 @@
-[![exa logo](docs/source/_static/logo.png)](https://exa-analytics.github.io)  
-
+[![exa logo](docs/source/_static/logo.png)](https://exa-analytics.github.io) 
+*A framework for file parsing, data processing, and visualization*
 
 # Installation
-[![conda Badge](https://anaconda.org/exaanalytics/exa/badges/installer/conda.svg)](https://conda.anaconda.org/exaanalytics)  
+[![conda Badge](https://anaconda.org/avmarchenko/exa/badges/installer/conda.svg)](https://conda.anaconda.org/avmarchenko)  
 [![pypi badge](https://badge.fury.io/py/exa.svg)](https://badge.fury.io/py/exa)  
 Exa is available through [anaconda](https://www.continuum.io/downloads)
 
@@ -11,7 +11,8 @@ Exa is available through [anaconda](https://www.continuum.io/downloads)
 or [pypi](https://pypi.python.org/pypi).
 
     $ pip install exa
-    $ jupyter nbextension enable --py --sys-prefix exa
+    $ jupyter nbextension install exa --py --sys-prefix --overwrite
+    $ jupyter nbextension enable exa --py --sys-prefix
 
 
 # Getting Started
@@ -30,19 +31,18 @@ On Windows:
 
 
 # Contributing
-[![travis](https://travis-ci.org/exa-analytics/exa.svg?branch=master)](https://travis-ci.org/exa-analytics/exa)  
-[![Coverage](https://coveralls.io/repos/github/exa-analytics/exa/badge.svg?branch=master)](https://coveralls.io/github/exa-analytics/exa?branch=master)  
-[![Codacy](https://api.codacy.com/project/badge/Grade/221e700665c74c85b8255e5b399490d4)](https://www.codacy.com/app/alexvmarch/exa?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=exa-analytics/exa&amp;utm_campaign=Badge_Grade)  
+[![travis](https://travis-ci.org/avmarchenko/exa.svg?branch=master)](https://travis-ci.org/exa-analytics/exa)  
+[![Coverage](https://coveralls.io/repos/github/avmarchenko/exa/badge.svg?branch=master)](https://coveralls.io/github/avmarchenko/exa?branch=master)  
+[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/221e700665c74c85b8255e5b399490d4)](https://www.codacy.com/app/alexvmarch/exa?utm_source=github.com&utm_medium=referral&utm_content=avmarchenko/exa&utm_campaign=Badge_Coverage)
 
 For a development ready installation:
 
-    $ git clone https://github.com/exa-analytics/exa.git
+    $ git clone https://github.com/avmarchenko/exa.git
     $ cd exa
     $ pip install -e .
-    $ jupyter nbextension install --py --symlink --sys-prefix exa
-    $ jupyter nbextension enable --py --sys-prefix exa
+    $ ./js/nmpinstall.sh    # or .\js\npminstall.bat
 
-Note that this requires npm and is not fully supported on Windows.
+Note that this requires npm (Node.js).
 
 
 # Reference

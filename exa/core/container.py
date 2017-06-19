@@ -15,9 +15,10 @@ common processing, analysis, and visualization tasks.
 import pandas as pd
 from sys import getsizeof
 from .base import Base
+from .widget import Widget
 
 
-class Container(Base):
+class Container(Base, Widget):
     """
     A generic storage object of a collection of related but distinct data
     objects.
@@ -61,7 +62,7 @@ class Container(Base):
         return self._vars().items()
 
     def __repr__(self):
-        return "{}(data={})".format(self.__class__.__name__, len(self._iterdata()))
+        return "{}(data_count={})".format(self.__class__.__name__, len(self._iterdata()))
 
 
 

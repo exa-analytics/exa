@@ -2,10 +2,9 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Tests for Sections and Parsers`
+Tests for Sections and Parsers
 #############################################
-Tests for the related modules, :mod:`~exa.core.sections` and
-:mod:`~exa.core.parsers`.
+Tests for parsing functionality (:mod:`~exa.core.parser`).
 """
 from unittest import TestCase
 from exa.core.editor import Editor

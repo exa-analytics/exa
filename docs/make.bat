@@ -1,8 +1,8 @@
 @ECHO OFF
 REM First build JavaScript docs
-REM call cd ..\js
-REM call .\rst.bat
-REM call cd ..\docs
+CALL cd ..\js
+CALL .\rst.bat
+CALL cd ..\docs
 
 REM Command file for Sphinx documentation
 

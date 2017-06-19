@@ -4,7 +4,7 @@
 #############################
 `Exa Analytics Framework`_
 #############################
-*A framework for file parsing and data processing*
+*A framework for data processing, computation, and visualization.*
 
 This package provides a framework for programmatic file manipulation and data
 organization and processing. :ref:`editors-label` and :ref:`parsing-label` 
