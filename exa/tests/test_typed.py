@@ -6,7 +6,6 @@ Tests for :mod:`~exa.typed`
 #############################################
 Tests for strongly styped class attributes.
 """
-import six
 from unittest import TestCase
 from exa.typed import TypedProperty, yield_typed, Typed
 

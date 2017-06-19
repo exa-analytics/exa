@@ -2,16 +2,13 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ########################################
-Tests for DataFrames and Containers
+Tests for Data Objects 
 ########################################
-.. automodule:: exa.tests.test_special
-    :members:
-
 .. automodule:: exa.core.tests.test_base
     :members:
 
-.. automodule:: exa.tests.test_mpl
+.. automodule:: exa.core.tests.test_dataframe
     :members:
 
-.. automodule:: exa.tests.test_tex
+.. automodule:: exa.core.tests.test_container
     :members:

@@ -26,16 +26,18 @@ can be found at :ref:`examples-label` or via help::
 
 .. toctree::
     :maxdepth: 2
-    :caption: Editors
+    :caption: Text Processing
 
-    api/editor.rst
-    api/parsing.rst
+    api/text/editor.rst
+    api/text/composer.rst
+    api/text/parser.rst
 
 .. toctree::
     :maxdepth: 2
     :caption: Data Objects
 
-    api/container.rst
+    api/data/dataframe.rst
+    api/data/container.rst
 
 .. toctree::
     :maxdepth: 2
@@ -47,21 +49,58 @@ can be found at :ref:`examples-label` or via help::
     api/units.rst
     api/isotopes.rst
 
-.. toctree::
-    :maxdepth: 1
-    :caption: Unittests
-
-    api/units_constants_isotopes_tests.rst
-    api/editor_parser_tests.rst
-
 
 ########################
-Dev Docs
+Other Docs
 ########################
+Additional module documentation is provided here. These modules are typically
+useful for extension by developers.
 
 .. toctree::
     :maxdepth: 2
+    :caption: Base
 
-    api/special.rst
-    api/base.rst
-    api/dev_tests.rst
+    api/single_functions.rst
+    api/typed.rst
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Core
+
+    api/core/base.rst
+
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Compute
+
+    api/compute/base.rst
+
+
+
+########################
+Unittest Docs
+########################
+Source code of tests can sometimes provide useful information for developers
+and users.
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Base
+
+    api/tests1.rst
+    api/tests2.rst
+    api/tests3.rst
+
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Core 
+
+    api/core/tests1.rst
+    api/core/tests2.rst
+
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Compute

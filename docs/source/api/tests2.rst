@@ -2,10 +2,10 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ########################################
-Tests for Editors and Parsers
+Tests for Utilities
 ########################################
-.. automodule:: exa.core.tests.test_editor
+.. automodule:: exa.tests.test_mpl
     :members:
 
-.. automodule:: exa.core.tests.test_parsing
+.. automodule:: exa.tests.test_tex
     :members:

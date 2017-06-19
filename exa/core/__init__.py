@@ -6,8 +6,10 @@ Core objects include the :class:`~exa.core.editor.Editor`,
 :class:`~exa.core.parser.Sections`, :class:`~exa.core.parser.Parser`,
 :class:`~exa.core.composer.Composer`, and :class:`~exa.core.container.Container`.
 Additional objects provided by the ``core`` sub-package include
-:class:`~exa.core.dataframe.DataFrame`, used to create standardized `Pandas`_
+:class:`~exa.core.dataframe.DataFrame`, used to create standardized `pandas`_
 like dataframes.
+
+.. _pandas: http://pandas.pydata.org/
 """
 from .dataframe import DataFrame, Feature
 from .container import Container
