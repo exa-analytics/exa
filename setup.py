@@ -24,8 +24,7 @@ root = os.path.dirname(os.path.abspath(__file__))
 is_repo = os.path.exists(os.path.join(root, ".git"))
 prckws = {'shell': True} if platform.system().lower() == "windows" else {}
 jsroot = os.path.join(root, "js")
-nodemodules = "node_modules_win" if platform.system().lower() == "windows" else "node_modules_nix"
-node_modules = os.path.join(jsroot, node_modules)
+node_modules = os.path.join(jsroot, "node_modules")
 npm_path = os.pathsep.join([os.path.join(node_modules, ".bin"),
                             os.environ.get('PATH', os.defpath)])
 log.set_verbosity(log.DEBUG)

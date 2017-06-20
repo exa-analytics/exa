@@ -59,7 +59,8 @@ class TestDOMWidgetView extends widget.DOMWidgetView {
         var bc = this.model.get("backend_counter");
         bc++;
         this.model.set("backend_counter", bc);
-        this.touch();
+        this.model.save_changes();
+        //this.touch();
     }
 }
 
@@ -78,13 +79,13 @@ class TestKontainerModel extends TestDOMWidgetModel {
 }
 
 /** Mock view for exa.core.tests.test_widget.Kontainer */
-class TestKontainerView extends TestDOMWidgetViev {}
+class TestKontainerView extends TestDOMWidgetView {}
 
 
 
 module.exports = {
     TestDOMWidgetModel: TestDOMWidgetModel,
-    TestDOMWidgetView: TestDOMWidgetViev,
+    TestDOMWidgetView: TestDOMWidgetView,
     TestKontainerModel: TestKontainerModel,
     TestKontainerView: TestKontainerView
 };

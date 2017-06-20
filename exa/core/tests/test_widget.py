@@ -74,7 +74,7 @@ class TestWidgets(TestCase):
         try:
             with open(tmppath) as f:
                 result = [line.strip() for line in f.readlines()]
-#            self.assertListEqual(result, expected)
+            #self.assertListEqual(result, expected)
         except Exception as e:
             self.fail(msg=str(e))
 
