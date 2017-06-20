@@ -34,6 +34,7 @@ requirements:
     - nose
     - numba
     - six
+    - pytables
     - sphinx
     - sphinx_rtd_theme
     - pandoc
@@ -48,8 +49,3 @@ about:
     license: Apache-2.0
     license_file: LICENSE
     summary: A framework for data processing, analytics, and visualization.
-
-extra:
-  recipe-maintainers:
-    - avmarchenko
-    - tjduigna
