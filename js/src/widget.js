@@ -1,16 +1,18 @@
 // Copyright (c) 2015-2017, Exa Analytics Development Team
 // Distributed under the terms of the Apache License 2.0
 /**
- * Base DOMWidget
  * This module provides the base model and view used by
  * exa.core.widget.DOMWidget.
+ * @module
  */
 "use strict";
 var ipywidgets = require("jupyter-js-widgets");
 var _ = require("underscore");
 
 
-/** Model class for all "Exa" DOMWidgets. */
+/**
+ * Model class for all "Exa" DOMWidgets.
+ */
 class DOMWidgetModel extends ipywidgets.DOMWidgetModel {
     /**
      * Get the default class values.
@@ -29,7 +31,9 @@ class DOMWidgetModel extends ipywidgets.DOMWidgetModel {
 }
 
 
-/** View class for all "Exa" DOMWidgets. */
+/**
+ * View class for all "Exa" DOMWidgets.
+ */
 class DOMWidgetView extends ipywidgets.DOMWidgetView {
 }
 

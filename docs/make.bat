@@ -73,9 +73,9 @@ if errorlevel 9009 (
 
 
 if "%1" == "html" (
-    cd ../js
+    cd ..\js
     .\makedocs.bat
-    cd ../docs
+    cd ..\docs
 	%SPHINXBUILD% -b html %ALLSPHINXOPTS% %BUILDDIR%/html
 	if errorlevel 1 exit /b 1
 	echo.

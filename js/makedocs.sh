@@ -5,4 +5,4 @@ npm install jsdoc
 npm install jsdoc-sphinx
 mkdir -p ../docs/source/js
 ./node_modules/.bin/jsdoc -t node_modules/jsdoc-sphinx/template/ -d ../docs/source/js/ -r src/
-rm ../docs/source/js/conf.py
+rm -rf ../docs/source/js/conf.py

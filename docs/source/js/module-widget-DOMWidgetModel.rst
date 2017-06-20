@@ -1,7 +1,10 @@
+.. _module-widget.DOMWidgetModel:
+
 =========================
 Class: ``DOMWidgetModel``
 =========================
 
+Member Of :doc:`module-widget`
 
 .. contents:: Local Navigation
    :local:
@@ -20,7 +23,7 @@ Description
 
 
 
-.. _DOMWidgetModel.defaults:
+.. _module-widget-DOMWidgetModel.defaults:
 
 Member: ``defaults``: Get the default class values.
 Used by jupyter-js-widgets.

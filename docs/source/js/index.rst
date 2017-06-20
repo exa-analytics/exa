@@ -11,8 +11,7 @@ Contents
    :maxdepth: 1
 
    
+   module-widget
    TestDOMWidgetModel
    TestDOMWidgetView
-   DOMWidgetModel
-   DOMWidgetView
    

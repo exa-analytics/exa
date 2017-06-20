@@ -6,4 +6,4 @@ CALL rmdir /s /q ..\docs\source\js
 CALL npm install jsdoc
 CALL npm install jsdoc-sphinx
 CALL node_modules\.bin\jsdoc -t node_modules\jsdoc-sphinx\template\ -d ..\docs\source\js\ -r src\
-CALL del /s /q ..\docs\source\js\jsdoc_rst\conf.py
+CALL del /s /q ..\docs\source\js\conf.py
