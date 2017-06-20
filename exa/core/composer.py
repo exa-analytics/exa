@@ -6,9 +6,9 @@ Composers
 ####################################
 Composers are editor like objects that are used to programmatically create
 text files using a standard structure of template. This is akin to, for example,
-JSON; the JSON library does not know a priori what data it will contain only
+JSON. The JSON library does not know a priori what data it will contain only
 how to format whatever data it receives. Similarly, composers can be built
-using a standard format or a template and have their data fields/values be
+using a standard format or a template and have their data fields or values be
 populated dynamically.
 """
 from copy import copy, deepcopy
@@ -27,7 +27,7 @@ class Composer(Parser):
     .. code-block:: python
 
         class SimpleComposer(Composer):
-            _template = "{}\n{labeled}"
+            _lines = "{}\n{labeled}"
 
         comp = SimpleComposer(1, labeled="one")
         comp.compose()    # Renders "1\none"

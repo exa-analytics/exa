@@ -1,42 +1,70 @@
 // Copyright (c) 2015-2017, Exa Analytics Development Team
 // Distributed under the terms of the Apache License 2.0
-/*""""
-========================================
-Tests for ``widget.js``
-========================================
-Test for successful widget creation and bidirectional communication.
-*/
+/**
+ * Tests for Base Widgets
+ */
 "use strict";
 var QUnit = require("qunitjs");
-var widget = require("jupyter-exa");
 var _ = require("underscore");
-console.log(QUnit);
+var widget = require("../widget.js");
 
 
-class TestWidgetModel extends widget.WidgetModel {
+/** Model class for testing bidirectional communication. */
+class TestDOMWidgetModel extends widget.DOMWidgetModel {
+    /**
+     * Get the default class values.
+     * Used by jupyter-js-widgets.
+     */
     get defaults() {
-        return _.extend({}, widget.WidgetModel.prototype.defaults, {
-            _view_name: "TestWidgetView",
-            _model_name: "TestWidgetModel",
-            text: "Hello World!"
-        })
+        return _.extend({}, widget.DOMWidgetModel.prototype.defaults, {
+            _view_name: "TestDOMWidgetView",
+            _model_name: "TestDOMWidgetModel",
+            frontend_text: "Hello World!",
+            backend_counter: 0
+        });
     }
 }
 
 
-class TestWidgetView extends widget.WidgetView {
+/** View class for testing bidirectional communication. */
+class TestDOMWidgetView extends widget.DOMWidgetView {
+    /**
+     * Render the view in the notebook.
+     * Call order it initialize, constructor, render.
+     */
     render() {
-        this.value_changed();
-        this.model.on("change:value", this.value_changed, this);
+        this.set_frontend();
+        this.listenTo(this.model, "change:frontend_text", this.change, this);
     }
 
-    value_changed() {
-        this.el.textContent = this.model.get("value");
+    /**
+     * Set the value of the widget text
+     */
+    set_frontend() {
+        this.el.textContent = this.model.get("frontend_text");
+    }
+
+    /**
+     * Call front end setter and then backend incrementer.
+     */
+    change() {
+        this.set_frontend();
+        this.inc_backend();
+    }
+
+    /**
+     * Increment backend counter and set the model.
+     */
+    inc_backend() {
+        var bc = this.model.get("backend_counter");
+        bc++;
+        this.model.set("backend_counter", bc);
+        this.touch();
     }
 }
 
 
 module.exports = {
-    TestWidgetModel: TestWidgetModel,
-    TestWidgetView: TestWidgetView
-}
+    TestDOMWidgetModel: TestDOMWidgetModel,
+    TestDOMWidgetView: TestDOMWidgetView
+};

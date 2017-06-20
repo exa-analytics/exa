@@ -1,10 +1,8 @@
 // Copyright (c) 2015-2017, Exa Analytics Development Team
 // Distributed under the terms of the Apache License 2.0
-/*"""
-===============================
-Exported Modules
-===============================
-*/
+/**
+ * Exported Modules
+ */
 "use strict";
 var _ = require("underscore");
 
@@ -16,7 +14,7 @@ var modules = _.extend(
 
 var tests = _.extend(
     {},
-    require("tests/test_widget.js");
+    require("./tests/test_widget.js")
 );
 
 
@@ -28,4 +26,4 @@ module.exports = {
         modules,
         tests,
         {"version": require("../package.json").version})
-}
+};

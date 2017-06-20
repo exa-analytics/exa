@@ -20,8 +20,9 @@ install:
   - conda install -q python=$TRAVIS_PYTHON_VERSION
   - conda install -q -c conda-forge `cat requirements.txt`
   - conda install -q -c conda-forge pytables
-  - pip install travis-sphinx codacy-coverage python-coveralls codecov
+  - pip install travis-sphinx codacy-coverage python-coveralls
   - pip install .
+  - cd js; ./npminstall.sh; ./makedocs.sh; cd ../;
 
 script:
   - nosetests --with-coverage
@@ -29,7 +30,6 @@ script:
   - travis-sphinx -n build
 
 after_success:
-  - codecov
   - coveralls
   - python-codacy-coverage -r coverage.xml
   - travis-sphinx -n deploy

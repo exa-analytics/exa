@@ -2,13 +2,13 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Tests for :mod:`~exa.core.editor`
+Tests for Editors
 #############################################
 Test features of :class:`~exa.core.editor.Editor`class and related functions.
 Some of the tests here perform disk I/O.
 
 See Also:
-    :mod:`~exa.core.tests.test_parsing`
+    :mod:`~exa.core.tests.test_parser`
 """
 import os, bz2, gzip, six, shutil
 from types import GeneratorType

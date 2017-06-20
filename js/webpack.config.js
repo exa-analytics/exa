@@ -1,4 +1,5 @@
 var version = require("./package.json").version;
+var nbdir = "../exa/_nbextension";
 
 // Custom webpack loaders are generally the same for all webpack bundles, hence
 // stored in a separate local variable.
@@ -19,7 +20,7 @@ module.exports = [
         entry: "./src/extension.js",
         output: {
             filename: "extension.js",
-            path: "../exa/_nbextension",
+            path: nbdir,
             libraryTarget: "amd"
         }
     },
@@ -32,7 +33,7 @@ module.exports = [
         entry: "./src/index.js",
         output: {
             filename: "index.js",
-            path: "../exa/_nbextension",
+            path: nbdir,
             libraryTarget: "amd"
         },
         devtool: "source-map",
@@ -60,7 +61,7 @@ module.exports = [
             filename: "index.js",
             path: "./dist/",
             libraryTarget: "amd",
-            publicPath: "https://unpkg.com/jupyter-exawidgets@" + version + "/dist/"
+            publicPath: "https://unpkg.com/jupyter-exa@" + version + "/dist/"
         },
         devtool: "source-map",
         module: {

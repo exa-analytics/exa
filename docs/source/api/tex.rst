@@ -6,6 +6,3 @@ Text/LaTeX Utilities
 ###########################
 .. automodule:: exa.tex
     :members:
-
-.. automodule:: exa.tests.test_tex
-    :members:

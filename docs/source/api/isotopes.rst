@@ -6,6 +6,3 @@ Isotopes
 ###########################
 .. automodule:: exa.isotopes
     :members:
-
-.. automodule:: exa.tests.test_isotopes
-    :members:

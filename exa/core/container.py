@@ -7,7 +7,7 @@ Generic Container
 The :class:`~exa.core.container.Container` object is an in memory storage system
 for `Pandas`_ like data objects. Containers can be used to return multiple,
 distinct, tables parsed from a aggregated collection of files on disk. Generally,
-:class:`~exa.core.container.Container`s are used to create a simple API for
+:class:`~exa.core.container.Container` objects are used to create a simple API for
 common processing, analysis, and visualization tasks.
 
 .. _Pandas: http://pandas.pydata.org

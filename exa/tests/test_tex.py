@@ -47,7 +47,7 @@ class TestTeX(TestCase):
         self.assertTrue(all(len(item) == 4 for item in re.findall(regex, text)))
 
     def test_text_value_cleaner(self):
-        """Test :func:`~exa.tex.text_value_cleaner(text)`."""
+        """Test :func:`~exa.tex.text_value_cleaner`."""
         flt = "  -10.1E1"
         res = tex.text_value_cleaner(flt)
         self.assertIsInstance(res, float)

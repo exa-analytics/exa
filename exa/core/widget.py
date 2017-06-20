@@ -7,7 +7,8 @@ Base JavaScript Widget
 """
 import six
 from traitlets import MetaHasTraits, Unicode
-from ipywidgets import DOMWidget, register
+from ipywidgets import DOMWidget as _DOMWidget
+from ipywidgets import register
 from exa.typed import TypedMeta
 from .base import Base
 
@@ -17,15 +18,16 @@ class Meta(MetaHasTraits, TypedMeta):
     pass
 
 
-#@register
-class Widget(six.with_metaclass(Meta, DOMWidget, Base)):
+#@register                          # ipywidgets 7.x
+@register("jupyter-exa.DOMWidget")    # ipywidgets 6.x
+class DOMWidget(six.with_metaclass(Meta, _DOMWidget, Base)):
     """
     Base DOMWidget
     """
-    _view_name = Unicode("WidgetView").tag(sync=True)
+    _view_name = Unicode("DOMWidgetView").tag(sync=True)
     _view_module = Unicode("jupyter-exa").tag(sync=True)
     _view_module_version = Unicode("^0.4.0").tag(sync=True)    # Matches js/package.json
-    _model_name = Unicode("WidgetModel").tag(sync=True)
+    _model_name = Unicode("DOMWidgetModel").tag(sync=True)
     _model_module = Unicode("jupyter-exa").tag(sync=True)
     _model_module_version = Unicode("^0.4.0").tag(sync=True)   # Matches js/package.json
 

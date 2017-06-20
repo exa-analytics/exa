@@ -6,5 +6,5 @@ inside the [Jupyter](https://jupyter.org) notebook.
 # Installation
 Note that [npm](http://nodejs.org/) is required.
 ```bash
-npm install --save jupyter-exa
+./npminstall.sh    # or .\npminstall.bat
 ```

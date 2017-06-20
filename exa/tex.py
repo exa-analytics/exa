@@ -7,7 +7,7 @@ Text Utilities
 Text and `LaTeX`_ processing. Functions provided by this module make use of
 module level attributes which can be modified as needed.
 
-.. code-block:: Python
+.. code-block:: python
 
     exa.tex.cleaners.append(("pattern", "replacement"))
     fixed = exa.tex.cleanup_pandas(text)
@@ -27,7 +27,7 @@ cleaners = [("textbackslash", ""), ("\\textasciicircum", "^"), ("\\{", "{"),
 
 def cleanup_pandas(text):
     """
-    Cleanup output of :func:`~pandas.DataFrame.to_latex`.
+    Cleanup output of pandas `to_latex`_.
 
     Typically the output text of a call to the pandas function ``to_latex``,
     where the pandas object contains, for example, math text or other special
@@ -38,6 +38,8 @@ def cleanup_pandas(text):
 
     Returns:
         modtext (str): Cleaned text
+
+    .. _to_latex: https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_latex.html#pandas.DataFrame.to_latex
     """
     for pat, rep in cleaners:
         text = text.replace(pat, rep)

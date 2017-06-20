@@ -15,6 +15,8 @@ creation of data processing and visualization systems is easier when data has
 
 See Also:
     :class:`~exa.core.container.Container`
+
+.. _DataFrames: https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html
 """
 import six
 import pandas as pd
@@ -83,6 +85,9 @@ class DataFrame(six.with_metaclass(BaseMeta, pd.DataFrame, Base)):
     In the last example ``col3`` (an optional column) is preferred to be of dtype
     ``int`` with a fallback to ``float``; the column must be coerced to one of
     these types otherwise a TypeError is raised.
+
+    .. _pandas: http://pandas.pydata.org/
+    .. _dataframe: https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html
     """
     # Note that the ``Base`` class, which requires the creation of an ``info``
     # method is satisfied by the pandas DataFrame which provides that method.

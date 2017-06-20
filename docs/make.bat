@@ -1,8 +1,4 @@
 @ECHO OFF
-REM First build JavaScript docs
-CALL cd ..\js
-CALL .\rst.bat
-CALL cd ..\docs
 
 REM Command file for Sphinx documentation
 
@@ -77,6 +73,9 @@ if errorlevel 9009 (
 
 
 if "%1" == "html" (
+    cd ../js
+    .\makedocs.bat
+    cd ../docs
 	%SPHINXBUILD% -b html %ALLSPHINXOPTS% %BUILDDIR%/html
 	if errorlevel 1 exit /b 1
 	echo.

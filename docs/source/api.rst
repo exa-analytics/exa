@@ -77,6 +77,12 @@ useful for extension by developers.
     api/compute/base.rst
 
 
+.. toctree::
+    :maxdepth: 2
+    :caption: JavaScript
+
+    js/index.rst
+
 
 ########################
 Unittest Docs

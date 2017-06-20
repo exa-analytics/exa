@@ -1,9 +1,5 @@
 # Makefile for Sphinx documentation
 #
-# First make JavaScript docs
-cd ../js
-./makedocs.sh
-cd ../docs
 
 # You can set these variables from the command line.
 SPHINXOPTS    =

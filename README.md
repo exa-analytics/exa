@@ -6,7 +6,7 @@
 [![pypi badge](https://badge.fury.io/py/exa.svg)](https://badge.fury.io/py/exa)  
 Exa is available through [anaconda](https://www.continuum.io/downloads)
 
-    $ conda install -c exaanalytics exa
+    $ conda install -c avmarchenko exa
 
 or [pypi](https://pypi.python.org/pypi).
 
@@ -21,13 +21,10 @@ or [pypi](https://pypi.python.org/pypi).
 Building the docs requires [sphinx](http://www.sphinx-doc.org/en/stable).
 On Linux or Mac OS:
 
-    $ cd docs
-    $ make html
-
-On Windows:
-
-    $ cd docs
-    $ ./make.bat html
+    $ cd js
+    $ ./makedocs.sh       # .\makedocs.bat
+    $ cd ../docs
+    $ make html           # .\make.bat html
 
 
 # Contributing
@@ -40,9 +37,12 @@ For a development ready installation:
     $ git clone https://github.com/avmarchenko/exa.git
     $ cd exa
     $ pip install -e .
-    $ ./js/nmpinstall.sh    # or .\js\npminstall.bat
+    $ cd js
+    $ ./npminstall.sh    # or .\npminstall.bat
 
-Note that this requires npm (Node.js).
+Note that npm (Node.js) is required. The last command must be rerun every time 
+JavaScript is changed. Creating symlinks is possible (instead of rerunning
+``npminstall``) but does not work on Windows.
 
 
 # Reference

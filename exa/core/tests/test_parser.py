@@ -76,7 +76,7 @@ class MockSections(Sections):
 class TestParser(TestCase):
     """
     Tests for :class:`~exa.core.parser.Sections` and
-    :class:`~exa.core.parser.Parser.
+    :class:`~exa.core.parser.Parser`.
     """
     def test_basic_parsing(self):
         """Test live modification of class objects on parsing."""

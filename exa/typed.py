@@ -9,12 +9,14 @@ that enforce their attribute's type. The :func:`~exa.typed.typed_property`
 function essentially creates a set of ``property`` related methods. The
 following comparison can be made.
 
-.. code-block:: Python
+.. code-block:: python
 
     class Klass:
         foo = typed_property("foo", ptypes)    # Where ptypes is a type or list of types
 
 The above is the same as the following.
+
+.. code-block:: python
 
     class Klass:
         @property
