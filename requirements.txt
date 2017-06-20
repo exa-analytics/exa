@@ -10,6 +10,11 @@ sympy
 notebook
 nose
 numba
+ipywidgets
+ipyparallel
+dask
+distributed
+mpi4py
 six
 sphinx
 sphinx_rtd_theme

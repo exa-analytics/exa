@@ -1,2 +1,2 @@
-recursive-include exa/static *.*
-recursive-include exa/data *.*
+recursive-include exa/_data *.*
+recursive-include exa/_nbextension *.*
