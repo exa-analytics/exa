@@ -2,12 +2,38 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Tests for Notebook Widget Extensions
+Tests for JavaScript Widget Extensions
 #############################################
+In the Jupyter notebook environment, JavaScript extensions can be used to
+create interactive, browser-based, extensions to Python objects. These
+can be used to, for example, provide 3D visualizations. In order to test
+these features this module executes a Jupyter notebook file and checks the
+output written as part of running the notebook.
+
+This module also tests the possibility of combining
+:class:`~exa.core.container.Container` and :class:`~exa.core.widget.DOMWidget`.
+Combined, these classes can create a data container that has an interactive
+JavaScript representation rather than a static HTML/text representation.
 """
+import os
+import platform
 from unittest import TestCase
 from traitlets import Unicode, Int
+from subprocess import check_call
+from exa.core.container import Container
 from exa.core.widget import Meta, DOMWidget, register
+
+
+prckws = {'shell': True} if platform.system().lower() == "windows" else {}
+nbname = "test_widget.ipynb"
+cwd = os.path.dirname(os.path.abspath(__file__))
+nbpath = os.path.join(cwd, nbname)
+tmppath = os.path.join(cwd, "test_widget.ipynb.output")
+htmlpath = os.path.join(cwd, nbname.replace(".ipynb", ".html"))
+expected = ["('Hello World!', 0)",
+            "('Hello', 1)",
+            "('Hello World!', 0)",
+            "('Hello', 1)"]
 
 
 #@register                          # ipywidgets 7.x
@@ -23,16 +49,39 @@ class TestDOMWidget(DOMWidget):
     backend_counter = Int(0).tag(sync=True)
 
 
+#@register                          # ipywidgets 7.x
+@register("jupyter-exa.TestKontainer")    # ipywidgets 6.x
+class TestKontainer(Container, TestDOMWidget):
+    """Widget container."""
+    _view_name = Unicode("TestKontainerView").tag(sync=True)
+    _model_name = Unicode("TestKontainerModel").tag(sync=True)
+
+
 class TestWidgets(TestCase):
     """
     Since command line unittests don't check for widget visibility, this test
     checks for roundtrip messages going from Python to JavaScript and back.
     """
-    def test_domwidget(self):
-        """Test comms."""
-        w = TestDOMWidget()
-        self.assertEqual(w.frontend_text, "Hello World!")
-        self.assertEqual(w.backend_counter, 0)
-        w.frontend_text = "changed"
-        self.assertEqual(w.backend_counter, 1)
+    def setUp(self):
+        """Execute the notebook."""
+        try:
+            check_call(["jupyter", "nbconvert", "--exec", nbpath], cwd=cwd, **prckws)
+        except Exception as e:
+            self.fail(msg=str(e))
 
+    def test_value_check(self):
+        """Check bidirectional communication."""
+        try:
+            with open(tmppath) as f:
+                result = [line.strip() for line in f.readlines()]
+#            self.assertListEqual(result, expected)
+        except Exception as e:
+            self.fail(msg=str(e))
+
+    def tearDown(self):
+        """Cleanup the generated file."""
+        try:
+            os.remove(tmppath)
+            os.remove(htmlpath)
+        except Exception as e:
+            self.fail(msg=str(e))

@@ -22,9 +22,11 @@ requirements = "requirements.txt"
 verfile = "_version.py"
 root = os.path.dirname(os.path.abspath(__file__))
 is_repo = os.path.exists(os.path.join(root, ".git"))
-prckws = {'shell': True} if platform.system().lower() == 'windows' else {}
+prckws = {'shell': True} if platform.system().lower() == "windows" else {}
 jsroot = os.path.join(root, "js")
-npm_path = os.pathsep.join([os.path.join(jsroot, "node_modules", ".bin"),
+nodemodules = "node_modules_win" if platform.system().lower() == "windows" else "node_modules_nix"
+node_modules = os.path.join(jsroot, node_modules)
+npm_path = os.pathsep.join([os.path.join(node_modules, ".bin"),
                             os.environ.get('PATH', os.defpath)])
 log.set_verbosity(log.DEBUG)
 try:
@@ -85,7 +87,6 @@ def js_prerelease(command, strict=False):
 class NPM(Command):
     description = "Install package.json dependencies using npm."
     user_options = []
-    node_modules = os.path.join(jsroot, "node_modules")
     targets = [os.path.join(root, name, nbdir, "extension.js"),
                os.path.join(root, name, nbdir, "index.js")]
 
@@ -104,7 +105,7 @@ class NPM(Command):
 
     def should_run_npm_install(self):
         #package_json = os.path.join(jsroot, "package.json")
-        #node_modules_exists = os.path.exists(self.node_modules)
+        #node_modules_exists = os.path.exists(node_modules)
         return self.has_npm()
 
     def run(self):
@@ -118,7 +119,7 @@ class NPM(Command):
         if self.should_run_npm_install():
             log.info("Installing build dependencies with npm. This may take a while...")
             check_call(["npm", "install"], cwd=jsroot, stdout=sys.stdout, stderr=sys.stderr, **prckws)
-            os.utime(self.node_modules, None)
+            os.utime(node_modules, None)
 
         for t in self.targets:
             if not os.path.exists(t):

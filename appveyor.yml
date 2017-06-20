@@ -55,9 +55,6 @@ install:
   - cmd: conda config --add channels defaults
   - cmd: conda config --add channels avmarchenko
 
-  # Configure the VM.
-  - cmd: conda install -n root --quiet --yes obvious-ci
-
 # Skip .NET project specific build phase.
 build: off
 

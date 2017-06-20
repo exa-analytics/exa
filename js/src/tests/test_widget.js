@@ -64,7 +64,27 @@ class TestDOMWidgetView extends widget.DOMWidgetView {
 }
 
 
+/** Mock model for exa.core.tests.test_widget.Kontainer */
+class TestKontainerModel extends TestDOMWidgetModel {
+    /**
+     * Get the default class values.
+     */
+    get defaults() {
+        return _.extend({}, TestDOMWidgetModel.prototype.defaults, {
+            _view_name: "TestKontainerView",
+            _model_name: "TestKontainerModel",
+        });
+    }
+}
+
+/** Mock view for exa.core.tests.test_widget.Kontainer */
+class TestKontainerView extends TestDOMWidgetViev {}
+
+
+
 module.exports = {
     TestDOMWidgetModel: TestDOMWidgetModel,
-    TestDOMWidgetView: TestDOMWidgetView
+    TestDOMWidgetView: TestDOMWidgetViev,
+    TestKontainerModel: TestKontainerModel,
+    TestKontainerView: TestKontainerView
 };
