@@ -16,3 +16,4 @@ from .container import Container
 from .editor import Editor
 from .parser import Sections, Parser
 from .composer import Composer
+from .widget import Widget

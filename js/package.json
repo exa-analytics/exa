@@ -10,10 +10,12 @@
     "url": "https://github.com/avmarchenko/exa.git"
   },
   "keywords": [
-    "parsing",
-    "big data",
-    "visualization",
-    "analytics"
+    "data",
+    "analytics",
+    "hpc",
+    "jupyter",
+    "notebook",
+    "visualization"
   ],
   "scripts": {
     "prepublish": "webpack",

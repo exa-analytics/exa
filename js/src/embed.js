@@ -5,16 +5,5 @@
 // already be loaded by the notebook otherwise.
 
 // Export widget models and views, and the npm package version number.
-var _ = require("underscore");
-module.exports = _.extend(
-    {},
-    require("./example.js")
-//    require("./base.js"),
-//    require("./base-three.js"),
-//    require("./utility.js"),
-//    require("./app3d.js"),
-//    require("./field.js"),
-//    require("./test.js"),
-//    require("./num.js")
-);
-module.exports["version"] = require("../package.json").version;
+var exports = require("./exports.js");
+module.exports = exports.required;

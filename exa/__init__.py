@@ -40,8 +40,17 @@ def _datadir():
     """Name of the static data directory."""
     return ("exa", "_data")
 
+
+def _jupyter_nbextension_paths():
+    """Jupyter notebook extension directory paths."""
+    return [{'section': "notebook",
+             'src': "_nbextension",
+             'dest': "jupyter-exa",
+             'require': "jupyter-exa/extension"}]
+
+
 from ._version import __version__
 from .typed import TypedProperty
 from .functions import LazyFunction
 from .core import (Editor, Sections, Parser, Composer, Container, DataFrame,
-                   Feature)
+                   Feature, Widget)

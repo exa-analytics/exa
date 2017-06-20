@@ -15,10 +15,9 @@ common processing, analysis, and visualization tasks.
 import pandas as pd
 from sys import getsizeof
 from .base import Base
-from .widget import Widget
 
 
-class Container(Base, Widget):
+class Container(Base):
     """
     A generic storage object of a collection of related but distinct data
     objects.

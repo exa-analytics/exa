@@ -6,10 +6,18 @@ Tests for Notebook Widget Extensions
 #############################################
 """
 from unittest import TestCase
-from exa.core.widget import Meta, Widget
+from traitlets import Unicode
+from exa.core.widget import Meta, Widget, register
 
 
-class TestWidget(TestCase):
+#@register
+class TestWidget(Widget):
+    _view_name = Unicode("TestWidgetView").tag(sync=True)
+    _model_name = Unicode("TestWidgetModel").tag(sync=True)
+    value = Unicode("Hello World!").tag(sync=True)
+
+
+class TestWidgets(TestCase):
     """
     """
     pass

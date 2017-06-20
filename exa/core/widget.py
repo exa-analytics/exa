@@ -9,6 +9,7 @@ import six
 from traitlets import MetaHasTraits, Unicode
 from ipywidgets import DOMWidget, register
 from exa.typed import TypedMeta
+from .base import Base
 
 
 class Meta(MetaHasTraits, TypedMeta):
@@ -16,8 +17,8 @@ class Meta(MetaHasTraits, TypedMeta):
     pass
 
 
-@register
-class Widget(six.with_metaclass(Meta, DOMWidget)):
+#@register
+class Widget(six.with_metaclass(Meta, DOMWidget, Base)):
     """
     Base DOMWidget
     """
@@ -27,3 +28,7 @@ class Widget(six.with_metaclass(Meta, DOMWidget)):
     _model_name = Unicode("WidgetModel").tag(sync=True)
     _model_module = Unicode("jupyter-exa").tag(sync=True)
     _model_module_version = Unicode("^0.4.0").tag(sync=True)   # Matches js/package.json
+
+    def info(self):
+        """Display information about the widget parameters."""
+        pass

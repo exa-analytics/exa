@@ -12,5 +12,5 @@ The version can be checked any of the following ways.
     >>> help(exa)
     >>> exa._version.version_info
 """
-version_info = (0, 4, 0, "dev0")
+version_info = (0, 4, 0)
 __version__ = '.'.join(map(str, version_info))

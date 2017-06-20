@@ -18,8 +18,8 @@ class WidgetModel extends ipywidgets.WidgetModel {
             _view_name: "WidgetView",
             _view_module: "jupyter-exa",
             _view_module_version: "^0.4.0",
-            _model_module: "jupyter-exa",
             _model_name: "WidgetModel",
+            _model_module: "jupyter-exa",
             _model_module_version: "^0.4.0"
         })
     }
@@ -36,4 +36,4 @@ class WidgetView extends ipywidgets.WidgetView {
 module.exports = {
     WidgetModel: WidgetModel,
     WidgetView: WidgetView
-}
+};

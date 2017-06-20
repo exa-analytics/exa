@@ -7,7 +7,7 @@ if (window.require) {
     window.require.config({
         map: {
             "*" : {
-                "jupyter-exawidgets": "nbextensions/jupyter-exawidgets/index",
+                "jupyter-exa": "nbextensions/jupyter-exa/index",
                 "jupyter-js-widgets": "nbextensions/jupyter-js-widgets/extension"
             }
         }
