@@ -26,7 +26,7 @@ prckws = {'shell': True} if platform.system().lower() == "windows" else {}
 jsroot = os.path.join(root, "js")
 node_modules = os.path.join(jsroot, "node_modules")
 npm_path = os.pathsep.join([os.path.join(node_modules, ".bin"),
-                            os.environ.get('PATH', os.defpath)])
+                            os.environ.get("PATH", os.defpath)])
 log.set_verbosity(log.DEBUG)
 try:
     import pypandoc
