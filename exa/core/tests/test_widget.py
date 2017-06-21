@@ -21,7 +21,7 @@ from unittest import TestCase
 from traitlets import Unicode, Int
 from subprocess import check_call
 from exa.core.container import Container
-from exa.core.widget import Meta, DOMWidget, register
+from exa.core.widget import DOMWidget, register
 
 
 prckws = {'shell': True} if platform.system().lower() == "windows" else {}
@@ -65,16 +65,25 @@ class TestWidgets(TestCase):
     def setUp(self):
         """Execute the notebook."""
         try:
-            check_call(["jupyter", "nbconvert", "--exec", nbpath], cwd=cwd, **prckws)
-        except Exception as e:
-            self.fail(msg=str(e))
+            check_call(["jupyter", "nbconvert", "--exec",
+                        "--ExecutePreprocessor.kernel_name=python", nbpath], cwd=cwd, **prckws)
+        except AssertionError:
+            try:
+                check_call(["jupyter", "nbconvert", "--exec",
+                            "--ExecutePreprocessor.kernel_name=python2", nbpath], cwd=cwd, **prckws)
+            except AssertionError:
+                try:
+                    check_call(["jupyter", "nbconvert", "--exec",
+                                "--ExecutePreprocessor.kernel_name=python3", nbpath], cwd=cwd, **prckws)
+                except Exception as e:
+                    self.fail(msg=str(e))
 
     def test_value_check(self):
         """Check bidirectional communication."""
         try:
             with open(tmppath) as f:
                 result = [line.strip() for line in f.readlines()]
-            #self.assertListEqual(result, expected)
+            self.assertListEqual(result, expected)
         except Exception as e:
             self.fail(msg=str(e))
 
