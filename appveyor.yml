@@ -36,7 +36,7 @@ install:
   - cmd: rmdir C:\cygwin /s /q
   - cmd: call %CONDA_INSTALL_LOCN%\Scripts\activate.bat
   - cmd: conda update --yes --quiet conda
-  - cmd: conda install -q -c conda-forge (type requirements.txt)
+  - ps: conda install -q -c conda-forge (type requirements.txt)
   - cmd: conda install -q -c conda-forge pytables
 
 # Skip .NET project specific build phase.
