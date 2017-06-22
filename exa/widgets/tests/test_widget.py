@@ -21,7 +21,7 @@ import platform
 from traitlets import Unicode, List, Int, Bool
 #from subprocess import check_call
 #from exa.core.container import Container
-from exa.core.widget import DOMWidget
+from exa.widgets.widget import DOMWidget
 
 
 prckws = {'shell': True} if platform.system().lower() == "windows" else {}

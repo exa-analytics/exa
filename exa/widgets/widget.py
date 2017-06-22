@@ -2,6 +2,7 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
+
 Base JavaScript Widget
 #########################
 """
@@ -10,7 +11,7 @@ from traitlets import MetaHasTraits, Unicode
 from ipywidgets import DOMWidget as _DOMWidget
 from ipywidgets import register
 from exa.typed import TypedMeta
-from .base import Base
+from exa.core.base import Base
 
 
 class Meta(MetaHasTraits, TypedMeta):
