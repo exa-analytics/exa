@@ -17,11 +17,11 @@ JavaScript representation rather than a static HTML/text representation.
 """
 import os
 import platform
-from unittest import TestCase
+#from unittest import TestCase
 from traitlets import Unicode, List, Int, Bool
-from subprocess import check_call
-from exa.core.container import Container
-from exa.core.widget import DOMWidget, register
+#from subprocess import check_call
+#from exa.core.container import Container
+from exa.core.widget import DOMWidget
 
 
 prckws = {'shell': True} if platform.system().lower() == "windows" else {}
@@ -38,7 +38,7 @@ class TestMSG(DOMWidget):
     switch = Bool(False).tag(sync=True)
     telephone = List(trait=Int).tag(sync=True)
 
-    def handle_msg(self, *args, **kwargs):
+    def _handle_custom_msg(self, *args, **kwargs):
         print("msg received")
         print(args)
         print(kwargs)

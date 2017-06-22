@@ -25,8 +25,11 @@ class TestMSGView extends widget.DOMWidgetView {
     }
 
     inc_list() {
+        console.log("here");
         var list = this.model.get("telephone");
+        console.log(list);
         var last = list[list.length-1];
+        console.log(last);
         last++;
         list.push(last);
         this.model.set("telephone", list);
@@ -34,8 +37,8 @@ class TestMSGView extends widget.DOMWidgetView {
         this.send({"tele": list});
     }
 
-    on_msg(args) {
-        console.log("msg received");
+    _handle_custom_msg(args) {
+        console.log("msg rec js");
         console.log(args);
     }
 }
