@@ -13,6 +13,7 @@ class TestMSGView extends widget.DOMWidgetView {
     render() {
         console.log("rendering");
         this.listenTo(this.model, "change:switch", this.change, this);
+        console.log(this);
     }
 
     set_frontend() {
@@ -34,12 +35,7 @@ class TestMSGView extends widget.DOMWidgetView {
         list.push(last);
         this.model.set("telephone", list);
         this.touch();
-        this.send({"tele": list});
-    }
-
-    _handle_custom_msg(args) {
-        console.log("msg rec js");
-        console.log(args);
+        //this.send({"stuff": "things"}); // recieved by _handle_custom_msg
     }
 }
 

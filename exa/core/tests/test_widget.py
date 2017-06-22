@@ -31,6 +31,35 @@ nbpath = os.path.join(cwd, nbname)
 tmppath = os.path.join(cwd, "test_widget.ipynb.output")
 htmlpath = os.path.join(cwd, nbname.replace(".ipynb", ".html"))
 
+from functools import wraps
+def yield_for_change(widget, attribute):
+    """
+    Pause a generator to wait for a widget change event.
+
+    This is a decorator for a generator function which pauses the generator on yield
+    until the given widget attribute changes. The new value of the attribute is
+    sent to the generator and is the value of the yield.
+    """
+    def f(iterator):
+        @wraps(iterator)
+        def inner():
+            print(iterator)
+            i = iterator()
+            def next_i(change):
+                try:
+                    print("changing", change)
+                    i.send(change.new)
+                except StopIteration as e:
+                    print("stopping")
+                    print(str(e))
+                    print("unobs")
+                    widget.unobserve(next_i, attribute)
+            widget.observe(next_i, attribute)
+            # start the generator
+            next(i)
+        return inner
+    return f
+
 
 class TestMSG(DOMWidget):
     _view_name = Unicode("TestMSGView").tag(sync=True)
@@ -46,6 +75,17 @@ class TestMSG(DOMWidget):
     def __init__(self, *args, **kwargs):
         super(TestMSG, self).__init__(*args, **kwargs)
         self.telephone = [0]
+        builder(self)
+
+
+def builder(obj):
+    @yield_for_change(obj, "telephone")
+    def watcher():
+        for i in range(1000):
+            print("tele updated")
+            x = yield
+            print("continue with value {}".format(x))
+    watcher()
 
 
 
