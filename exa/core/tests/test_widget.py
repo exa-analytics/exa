@@ -65,7 +65,7 @@ class TestMSG(DOMWidget):
     _view_name = Unicode("TestMSGView").tag(sync=True)
     _model_name = Unicode("TestMSGModel").tag(sync=True)
     switch = Bool(False).tag(sync=True)
-    telephone = List(trait=Int).tag(sync=True)
+    telephone = Int(0).tag(sync=True)
 
     def _handle_custom_msg(self, *args, **kwargs):
         print("msg received")
@@ -74,15 +74,14 @@ class TestMSG(DOMWidget):
 
     def __init__(self, *args, **kwargs):
         super(TestMSG, self).__init__(*args, **kwargs)
-        self.telephone = [0]
         builder(self)
 
 
 def builder(obj):
     @yield_for_change(obj, "telephone")
     def watcher():
-        for i in range(1000):
-            print("tele updated")
+        for i in range(5):
+            print("telephone updated observed")
             x = yield
             print("continue with value {}".format(x))
     watcher()

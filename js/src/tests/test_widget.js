@@ -18,6 +18,7 @@ class TestMSGView extends widget.DOMWidgetView {
 
     set_frontend() {
         this.el.textContent = this.model.get("switch");
+        this.send("Frontend updated");    // recieved by _handle_custom_msg
     }
 
     change() {
@@ -27,15 +28,11 @@ class TestMSGView extends widget.DOMWidgetView {
 
     inc_list() {
         console.log("here");
-        var list = this.model.get("telephone");
-        console.log(list);
-        var last = list[list.length-1];
-        console.log(last);
-        last++;
-        list.push(last);
-        this.model.set("telephone", list);
+        var value = this.model.get("telephone");
+        console.log(value);
+        value++;
+        this.model.set("telephone", value);
         this.touch();
-        //this.send({"stuff": "things"}); // recieved by _handle_custom_msg
     }
 }
 
