@@ -33,10 +33,10 @@ platform:
   - x64
 
 install:
-  - ps: .\%CONDA_INSTALL_LOCN%\Scripts\activate.bat
+  - ps: cmd.exe /k %CONDA_INSTALL_LOCN%\Scripts\activate.bat
   - ps: conda update --yes --quiet conda
-  - ps: conda install -q -c conda-forge (type requirements.txt)
-  - ps: conda install -q -c conda-forge pytables
+  - ps: conda install --yes -q -c conda-forge (type requirements.txt)
+  - ps: conda install --yes -q -c conda-forge pytables
 
 # Skip .NET project specific build phase.
 build: off

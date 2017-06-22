@@ -80,10 +80,12 @@ class TestMSG(DOMWidget):
 def builder(obj):
     @yield_for_change(obj, "telephone")
     def watcher():
-        for i in range(5):
+        while True:
+        #for i in range(5):
             print("telephone updated observed")
-            x = yield
-            print("continue with value {}".format(x))
+            yield
+            #x = yield
+            #print("continue with value {}".format(x))
     watcher()
 
 
