@@ -8,6 +8,7 @@
 "use strict";
 var ipywidgets = require("jupyter-js-widgets");
 var _ = require("underscore");
+var $ = require("jquery");
 var three = require("three");
 three.TrackballControls = require("three-trackballcontrols");
 console.log(three);
@@ -42,13 +43,6 @@ class DOMWidgetView extends ipywidgets.DOMWidgetView {
 
 
 class ModelTemplate extends DOMWidgetModel {
-    constructor(name, fn) {
-        console.log("creating: " + name);
-        this.model_name = name + "Model";
-        this.view_name = name + "View";
-        this.fn = fn;
-    }
-
     get defaults() {
         return _.extend({}, DOMWidgetModel.prototype.defaults, {
             _view_name: this.view_name,
@@ -66,13 +60,20 @@ function builder() {
     console.log(module);
     var names = Object.getOwnPropertyNames(three);
     var n = names.length;
-    for (var i = 0; i < 1; i++) {
+    for (var i = 0; i < 10; i++) {
         var name = names[i];
         var attr = three[name];
         var type = typeof attr;
+        console.log(type);
         if (type === "function") {
             console.log(attr);
-            var cls = new ModelTemplate(name);
+            var cls = $.extend({}, ModelTemplate);
+            console.log(name + "View");
+            console.log(name + "Model");
+            console.log(cls);
+            cls.prototype.view_name = name + "View";
+            cls.prototype.model_name = name + "Model";
+            console.log(cls);
             dynamic_exports[cls.model_name] = cls;
         }
     }

@@ -33,7 +33,7 @@ platform:
   - x64
 
 install:
-  - ps: cmd.exe /k %CONDA_INSTALL_LOCN%\Scripts\activate.bat
+  - cmd: %CONDA_INSTALL_LOCN%\Scripts\activate.bat
   - ps: conda update --yes --quiet conda
   - ps: conda install --yes -q -c conda-forge (type requirements.txt)
   - ps: conda install --yes -q -c conda-forge pytables
