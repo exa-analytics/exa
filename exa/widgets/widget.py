@@ -7,9 +7,9 @@ Base JavaScript Widget
 #########################
 """
 import six
-from traitlets import MetaHasTraits, Unicode, List
+from traitlets import MetaHasTraits, Unicode, List, Dict
 from ipywidgets import DOMWidget as _DOMWidget
-from ipywidgets import register, observe
+from ipywidgets import register
 from exa.typed import TypedMeta
 from exa.core.base import Base
 
