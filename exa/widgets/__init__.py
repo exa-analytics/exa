@@ -3,4 +3,5 @@
 # Distributed under the terms of the Apache License 2.0
 """
 """
+from . import widget
 from .widget import DOMWidget

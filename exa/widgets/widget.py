@@ -7,9 +7,9 @@ Base JavaScript Widget
 #########################
 """
 import six
-from traitlets import MetaHasTraits, Unicode
+from traitlets import MetaHasTraits, Unicode, List
 from ipywidgets import DOMWidget as _DOMWidget
-from ipywidgets import register
+from ipywidgets import register, observe
 from exa.typed import TypedMeta
 from exa.core.base import Base
 
@@ -35,3 +35,26 @@ class DOMWidget(six.with_metaclass(Meta, _DOMWidget, Base)):
     def info(self):
         """Display information about the widget parameters."""
         pass
+
+    def build_api(self, widget):
+        pass
+
+    def __init__(self, *args, **kwargs):
+        super(DOMWidget, self).__init__(*args, **kwargs)
+        self.on_msg(self.build_api)
+
+
+class Builder(DOMWidget):
+    _view_name = Unicode("BuilderView").tag(sync=True)
+    _model_name = Unicode("BuilderModel").tag(sync=True)
+    extensions = List(trait=Unicode).tag(sync=True)
+    classes = Dict().tag(sync=True)
+    dynamic = Dict().tag(sync=True)
+
+    def __init__(self, *extensions, **kwargs):
+        super(Builder, self).__init__(**kwargs)
+        self.extensions = [str(item) for item in extensions]
+
+
+builder = Builder("three", "three-trackballcontrols")
+builder._ipython_display_()
