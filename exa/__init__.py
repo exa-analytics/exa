@@ -53,5 +53,4 @@ from ._version import __version__
 from .typed import TypedProperty
 from .functions import LazyFunction
 from .core import (Editor, Sections, Parser, Composer, Container, DataFrame, Feature)
-from .widgets import DOMWidget
-DOMWidget()
+from . import widgets
