@@ -4,6 +4,24 @@
 """
 Parsing Editors
 ####################################
+This module provides editors tailored to parsing small/medium sized text files
+that do not have a consistent structure (like, for example, comma-separated
+value - CSV - files). Generally, the most difficult aspect of parsing such
+files (into appropriate data objects) is isolating the relavent text segment or
+segments. Once the text is isolated, an algorithm can usually be devised to
+create the appropriate in memory representation of the data for further
+manipulation, visualization, etc.
+
+This parsing is handled by :class:`~exa.core.parser.Parser`. Since those
+parsers require isolated text, machinery for automatic isolation of text is
+also provided in this module (:class:`~exa.core.parser.Sections`). These
+two classes work in tandem to facilitate parsing of text files like those
+described above.
+
+
+
+
+
 This module provides editors specifically tailored to parsing text files that
 have distinct, typically repeating, regions. The paradigm followed here is to
 divide up regions of text until a logical unit text is obtained. A logical
