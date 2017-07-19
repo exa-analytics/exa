@@ -16,49 +16,59 @@ This parsing is handled by :class:`~exa.core.parser.Parser`. Since those
 parsers require isolated text, machinery for automatic isolation of text is
 also provided in this module (:class:`~exa.core.parser.Sections`). These
 two classes work in tandem to facilitate parsing of text files like those
-described above.
-
-
-
-
-
-This module provides editors specifically tailored to parsing text files that
-have distinct, typically repeating, regions. The paradigm followed here is to
-divide up regions of text until a logical unit text is obtained. A logical
-unit of text is one that contains distinct datas. A specific 'parser' is
-responsible for converting that text to data.
+described above. An example of how this works is given below.
 
 .. code-block:: text
 
-    42.0 42.0 42.0
-    --------------
-    42.0 42.0 42.0
-    --------------
-    42.0 42.0 42.0
+    # medium text file from some program
+    ...
+    # sysmetatic data to be parsed
+    -----------------
+    1.0    2.0    3.0
+    4.0    5.0    1.0
+    2.0    3.0    4.0
+    ...
+    -----------------
+    5.0    5.0    2.0
+    2.0    3.0    1.0
+    1.0    4.0    4.0
+    ...
 
-Given the above text, a parser might look like the following. Note that the
-``Data`` class acts as the user facing class and the ``Block`` class is what
-is responsible for performing the actual parsing. We start with the parser
-(``Block``) that converts a line of text between '---' delimiters to an array.
+The elipsis in the example represent other sections that potentially contain
+data. Focusing only on the example given, data to be parsed is proceeded by
+some dashes. Asumming that a 'parsing' editor is created that contains only
+the lines below the dashes, parsing can be accomplished as follows.
 
 .. code-block:: python
 
-    from exa.typed import TypedProperty
+    from exa import Parser, TypedProperty, DataFrame
 
-    class Block(Parser):
-        array = TypedProperty(pd.Series)
+    class DataBlock(Parser):
+        _names = ("A", "B", "C")    # Always 3 columns, named like this
+        data = TypedProperty(DataFrame, doc="block of data")
 
         def _parse(self):
-            # For simplicity we use built-in functionality of the
-            # Editor class (of which Parser is a subclass). There are
-            # other ways we could have done this and typically parsing
-            # is not this straightforward or easy.
-            self.array = self.to_data(delim_whitespace=True, names=range(3))
+            self.data = self.to_data(delim_whitespace=True, names=self._names)
 
-The user facing object is the editor that accepts the text sample above as a
-whole; it doesn't expect a single section like the parser above.
+While this editor can be used directly (manually, see below), if multiple data
+sections exist (like in the text example above), it may be useful to hook this
+parser together with a sections identifier class that can parse all of the
+(sub) sections automatically.
 
 .. code-block:: python
+
+    # Manual usage of the DataBlock parser
+    myslice = "/path/to/sliced/text/file"    # Assume we manually sliced the text above
+    block = DataBlock(myslice)
+
+    # Here we build the sections
+
+    class DataFile(Sections):
+
+
+
+
+
 
     class Data(Sections):
         _key_sep = "^-+$"    # Regular expression to find section delimiters
