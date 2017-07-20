@@ -7,7 +7,7 @@ Parsing Editors
 This module provides editors tailored to parsing small/medium sized text files
 that do not have a consistent structure (like, for example, comma-separated
 value - CSV - files). Generally, the most difficult aspect of parsing such
-files (into appropriate data objects) is isolating the relavent text segment or
+files (into appropriate data objects) is isolating the relevant text segment or
 segments. Once the text is isolated, an algorithm can usually be devised to
 create the appropriate in memory representation of the data for further
 manipulation, visualization, etc.
@@ -121,6 +121,10 @@ class ParserMeta(TypedMeta):
         for attr_name, attr in namespace.items():
             if isinstance(attr, TypedProperty):
                 for pref in prefix:
+                    # Create a function "_get_attrname" where "attrname" is some
+                    # attribute of interest. The function simply call self.parse()
+                    # so all parsing remains handled by the builtin .parse and
+                    # custom implemented ._parse methods.
                     clsdict["_".join((pref, attr_name))] = lambda self: self.parse()
                 clsdict[attr_name] = attr(name=attr_name)
             else:
@@ -128,12 +132,67 @@ class ParserMeta(TypedMeta):
         return super(ParserMeta, mcs).__new__(mcs, name, bases, clsdict)
 
 
-class ParserBase(six.with_metaclass(ParserMeta, Editor)):
-    """A concrete base class."""
-    pass
+class Parser(six.with_metaclass(ParserMeta, Editor)):
+    """
+    An editor-like object that is responsible for transforming a region
+    of text into an appropriate data object or objects.
+
+    This class can be used individually or in concert with the
+    :class:`~exa.core.parser.Sections` class to build a comprehensive parsing
+    system.
+
+    .. code-block:: python
+
+        import pandas as pd
+        from exa.typed import TypedProperty
+
+        text = '''comment1: 1
+        comment2: 2
+        comment3: 3'''
+
+        class MyParser(Parser):
+            comments = TypedProperty(list, doc="List of comments")
+            data = TypedProperty(pd.Series)
+            _key_d = ":"
+
+            def _parse(self):
+                comments = []
+                data = []
+                for line in self:
+                    comment, dat = line.split(self._key_d)
+                    comments.append(comment)
+                    data.append(dat)
+                self.data = data     # Automatic type conversion
+                self.comments = comments
+
+    See Also:
+        :class:`~exa.core.parser.Sections`
+    """
+    def parse(self, **kwargs):
+        """
+        Parse data objects from the current file.
+
+        Args:
+            verbose (bool): Performs a check for missing data objects
+        """
+        verbose = kwargs.pop("verbose", False)
+        self._parse()
+        if verbose:
+            for name, _ in yield_typed(self.__class__):
+                if not hasattr(self, name) or getattr(self, name) is None:
+                    warnings.warn("Missing data object {}".format(name))
+
+    @abstractmethod
+    def _parse(self, *args, **kwargs):
+        """
+        The parsing algorithm, specific to the text in question, should be
+        developed here. This function should assign the values of relevant
+        data objects based on the parsed text.
+        """
+        pass
 
 
-class Sections(ParserBase):
+class Sections(six.with_metaclass(ParserMeta, Editor)):
     """
     An editor tailored to handling files with distinct regions of text.
 
@@ -167,6 +226,60 @@ class Sections(ParserBase):
         :class:`~exa.core.parser.Parser`
     """
     sections = TypedProperty(SectionDataFrame, "Parser sections")
+
+#    @property
+#    @abstractmethod
+#    def fdelimiters(self):
+#        """
+#        Dictionary of delimiter keys, parser classes values identified by the
+#        find method.
+#
+#        This property returns a dictionary of delimiter keys and Parser class
+#        values. Since it is ambiguous whether the class parses the text after
+#        or before the delimiter the convention is taken that class always
+#        applies to the text after a delimiter. A special key, "__HEADER__", is
+#        reserved for the text preceding the first delimiter instance.
+#
+#        .. code-block:: python
+#
+#            class Parser0(Parser):
+#                def _parse(self):
+#                    # Parse for some text segment
+#
+#            class Parser1(Parser):
+#                def _parse(self):
+#                    # Parse some other text segment
+#
+#            class MySections(Sections):
+#                fdelimiters = {'__HEADER__': Parser0, '-----': Parser1}
+#
+#                # Alternatively can do
+#                @property
+#                def fdelimiters(self):
+#                    return {'__HEADER__': Parser0, '-----': Parser1}
+#
+#        In the given example the only delimiter is "-----". ``Parser0`` handles
+#        the text preceding the first instance of the delimiter. Text in between
+#        (or simply after) the delimiters is parsed by ``Parser1``.
+#        """
+#        pass
+#
+#    @property
+#    @abstractmethod
+#    def rdelimiters(self):
+#        """
+#        Dictionary of delimiter keys, parser classes values identified by the
+#        regex method.
+#
+#        See Also:
+#            :func:`~exa.core.parser.Sections.fdelimiters`
+#
+#        Occasionally delimiters are found via regular expressions rather than
+#        simple matching. This property behaves exactly as
+#        :func:`~exa.core.parser.Sections.fdelimiters` except that delimiters
+#        are identified via regular expression searches.
+#        """
+#        pass
 
     def parse(self, recursive=False, verbose=False, **kwargs):
         """
@@ -282,9 +395,9 @@ class Sections(ParserBase):
         idx = idx[0] if not isinstance(idx, inttypes) else idx
         return getattr(self, str(self.sections.loc[idx, "attribute"]))
 
-    @abstractmethod
     def _parse(self, **kwargs):
         """
+        Systematic identification of regions of text
         This abstract method is overwritten by a concrete implementation and is
         responsible for setting the ``sections`` attribute.
 
@@ -321,61 +434,3 @@ class Sections(ParserBase):
         self.sections = SectionDataFrame.from_dict(dct)
 
 
-class Parser(ParserBase):
-    """
-    An editor-like object that is responsible for transforming a region
-    of text into an appropriate data object or objects.
-
-    This class can be used individually or in concert with the
-    :class:`~exa.core.parser.Sections` class to build a comprehensive parsing
-    system.
-
-    .. code-block:: python
-
-        import pandas as pd
-        from exa.typed import TypedProperty
-
-        text = '''comment1: 1
-        comment2: 2
-        comment3: 3'''
-
-        class MyParser(Parser):
-            comments = TypedProperty(list, doc="List of comments")
-            data = TypedProperty(pd.Series)
-            _key_d = ":"
-
-            def _parse(self):
-                comments = []
-                data = []
-                for line in self:
-                    comment, dat = line.split(self._key_d)
-                    comments.append(comment)
-                    data.append(dat)
-                self.data = data     # Automatic type conversion
-                self.comments = comments
-
-    See Also:
-        :class:`~exa.core.parser.Sections`
-    """
-    def parse(self, **kwargs):
-        """
-        Parse data objects from the current file.
-
-        Args:
-            verbose (bool): Performs a check for missing data objects
-        """
-        verbose = kwargs.pop("verbose", False)
-        self._parse()
-        if verbose:
-            for name, _ in yield_typed(self.__class__):
-                if not hasattr(self, name) or getattr(self, name) is None:
-                    warnings.warn("Missing data object {}".format(name))
-
-    @abstractmethod
-    def _parse(self, *args, **kwargs):
-        """
-        The parsing algorithm, specific to the text in question, should be
-        developed here. This function should assign the values of relevant
-        data objects based on the parsed text.
-        """
-        pass
