@@ -7,9 +7,5 @@ pandas
 networkx
 sympy
 seaborn
-jupyter
-notebook
-ipywidgets
-ipyparallel
 sphinx
 nose
