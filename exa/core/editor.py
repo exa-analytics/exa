@@ -162,6 +162,7 @@ class Editor(Base):
 
         Args:
             strings (str): Any number of strings to search for
+            case (bool): Check case (default true)
             num (bool): Return line number (default true)
             text (bool): Return line text (default true)
 
@@ -170,10 +171,15 @@ class Editor(Base):
         """
         num = kwargs.pop("num", True)
         text = kwargs.pop("text", True)
+        case = kwargs.pop("case", True)
         results = defaultdict(list)
         for i, line in enumerate(self):
             for pattern in patterns:
-                if pattern in line:
+                if case:
+                    check = pattern in line
+                else:
+                    check = pattern.lower() in line.lower()
+                if check:
                     if num and text:
                         results[pattern].append((i, line))
                     elif num:
