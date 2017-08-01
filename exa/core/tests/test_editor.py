@@ -182,6 +182,7 @@ class TestEditor(TestCase):
         self.assertEqual(len(self.from_file.find(rp)[rp]), 2)
         self.assertEqual(len(self.from_file.find(rp, text=False)[rp]), 2)
         self.assertEqual(len(self.from_file.find(rp, num=False)[rp]), 2)
+        self.assertEqual(len(self.from_file.find(rp, case=False)[rp]), 2)
         with self.assertRaises(ValueError):
             self.from_file.find(rp, text=False, num=False)
 
