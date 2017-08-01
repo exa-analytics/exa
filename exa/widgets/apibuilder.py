@@ -23,7 +23,8 @@ class APIBuilder(DOMWidget):
         """
         """
         print("build api")
-        print(*args, **kwargs)
+        print(args)
+        print(kwargs)
 
     def __init__(self, *args, **kwargs):
         super(APIBuilder).__init__(*args, **kwargs)
