@@ -7,9 +7,11 @@
 var _ = require("underscore");
 
 
-module.exports = _.extend({}, {
-        version: require("../package.json").version
-    },
-    require("./base.js"),
-    require("./apibuilder.js")
-);
+module.exports = {
+    exports: _.extend({}, {
+            version: require("../package.json").version
+        },
+        require("./base.js")
+    )
+};
+console.log(module.exports);

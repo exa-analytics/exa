@@ -8,4 +8,5 @@
 var __webpack_public_path__ = document.querySelector("body").getAttribute("data-base-url") + "nbextensions/jupyter-exa/";
 
 // Export widget models and views, and the npm package version number.
-module.exports = require("./exports.js");
+module.exports = require("./base.js");
+module.exports['version'] = require("../package.json").version;

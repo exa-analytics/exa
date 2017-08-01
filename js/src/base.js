@@ -6,7 +6,7 @@
  * @module
  */
 "use strict";
-var ipyw = require("jupyter-js-widgets");
+var ipyw = require("@jupyter-widgets/base");
 var _ = require("underscore");
 var jsver = "^0.4.0";
 var jsmod = "jupyter-exa";

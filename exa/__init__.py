@@ -38,7 +38,7 @@ Note:
 """
 def _datadir():
     """Name of the static data directory."""
-    return ("exa", "_data")
+    return ("exa", "data")
 
 
 def _jupyter_nbextension_paths():

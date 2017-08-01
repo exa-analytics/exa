@@ -1,5 +1,6 @@
+// This file was generated using the ipywidgets cookiecutter template
+//
 var version = require("./package.json").version;
-var nbdir = "../exa/_nbextension";
 
 // Custom webpack loaders are generally the same for all webpack bundles, hence
 // stored in a separate local variable.
@@ -20,7 +21,7 @@ module.exports = [
         entry: "./src/extension.js",
         output: {
             filename: "extension.js",
-            path: nbdir,
+            path: "../exa/static",
             libraryTarget: "amd"
         }
     },
@@ -33,14 +34,14 @@ module.exports = [
         entry: "./src/index.js",
         output: {
             filename: "index.js",
-            path: nbdir,
+            path: "../exa/static",
             libraryTarget: "amd"
         },
         devtool: "source-map",
         module: {
             loaders: loaders
         },
-        externals: ["jupyter-js-widgets"]
+        externals: ["@jupyter-widgets/base"]
     },
     {// Embeddable jupyter-exawidgets bundle
      //
@@ -67,6 +68,6 @@ module.exports = [
         module: {
             loaders: loaders
         },
-        externals: ["jupyter-js-widgets"]
+        externals: ["@jupyter-widgets/base"]
     }
 ];
