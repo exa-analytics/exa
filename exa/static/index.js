@@ -76,65 +76,104 @@ define(["@jupyter-widgets/base"], function(__WEBPACK_EXTERNAL_MODULE_2__) { retu
 	var jsmod = "jupyter-exa";
 	
 	
-	/**
-	 * Base Model Class
-	 */
-	class WidgetModel extends ipyw.WidgetModel {
+	class HelloModel extends ipyw.DOMWidgetModel {
 	    get defaults() {
-	        return _.extend({}, ipyw.WidgetModel.prototype.defaults, {
-	            _view_name: "WidgetView",
-	            _view_module: jsmod,
-	            _view_module_version: jsver,
-	            _model_name: "WidgetModel",
+	        return _.extend(ipyw.DOMWidgetModel.prototype.defaults(), {
+	            _model_name: "HelloModel",
 	            _model_module: jsmod,
-	            _model_module_version: jsver
+	            _model_version: jsver,
+	            _view_name: "HelloView",
+	            _view_module: jsmod,
+	            _view_version: jsver,
+	            value: "Hello World"
 	        });
 	    }
 	}
 	
 	
-	/**
-	 * Base View Class
-	 */
-	class WidgetView extends ipyw.WidgetView {
-	}
-	
-	
-	/**
-	 * Base (DOM) Model Class
-	 */
-	class DOMWidgetModel extends ipyw.DOMWidgetModel {
-	    /**
-	     * Used by Jupyter
-	     */
-	    get defaults() {
-	        return _.extend({}, ipyw.DOMWidgetModel.prototype.defaults, {
-	            _view_name: "DOMWidgetView",
-	            _view_module: jsmod,
-	            _view_module_version: jsver,
-	            _model_name: "DOMWidgetModel",
-	            _model_module: jsmod,
-	            _model_module_version: jsver
-	        });
+	class HelloView extends ipyw.DOMWidgetView {
+	    render() {
+	        this.value_changed();
+	        this.model.on("change:value", this.value_changed, this);
 	    }
-	}
 	
-	
-	/**
-	 * Base (DOM) View Class
-	 */
-	class DOMWidgetView extends ipyw.DOMWidgetView {
+	    value_changed() {
+	        this.el.textContext = this.model.get("value");
+	    }
 	}
 	
 	
 	module.exports = {
-	    jsver: jsver,
-	    jsmod: jsmod,
-	    WidgetModel: WidgetModel,
-	    WidgetView: WidgetView,
-	    DOMWidgetModel: DOMWidgetModel,
-	    DOMWidgetView: DOMWidgetView
+	    HelloModel: HelloModel,
+	    HelloView: HelloView
 	};
+	
+	
+	//var ipyw = require("@jupyter-widgets/base");
+	//var _ = require("underscore");
+	//var jsver = "^0.4.0";
+	//var jsmod = "jupyter-exa";
+	//
+	//
+	///**
+	// * Base Model Class
+	// */
+	//class WidgetModel extends ipyw.WidgetModel {
+	//    get defaults() {
+	//        return _.extend({}, ipyw.WidgetModel.prototype.defaults, {
+	//            _view_name: "WidgetView",
+	//            _view_module: jsmod,
+	//            _view_module_version: jsver,
+	//            _model_name: "WidgetModel",
+	//            _model_module: jsmod,
+	//            _model_module_version: jsver
+	//        });
+	//    }
+	//}
+	//
+	//
+	///**
+	// * Base View Class
+	// */
+	//class WidgetView extends ipyw.WidgetView {
+	//}
+	//
+	//
+	///**
+	// * Base (DOM) Model Class
+	// */
+	//class DOMWidgetModel extends ipyw.DOMWidgetModel {
+	//    /**
+	//     * Used by Jupyter
+	//     */
+	//    get defaults() {
+	//        return _.extend({}, ipyw.DOMWidgetModel.prototype.defaults, {
+	//            _view_name: "DOMWidgetView",
+	//            _view_module: jsmod,
+	//            _view_module_version: jsver,
+	//            _model_name: "DOMWidgetModel",
+	//            _model_module: jsmod,
+	//            _model_module_version: jsver
+	//        });
+	//    }
+	//}
+	//
+	//
+	///**
+	// * Base (DOM) View Class
+	// */
+	//class DOMWidgetView extends ipyw.DOMWidgetView {
+	//}
+	//
+	//
+	//module.exports = {
+	//    jsver: jsver,
+	//    jsmod: jsmod,
+	//    WidgetModel: WidgetModel,
+	//    WidgetView: WidgetView,
+	//    DOMWidgetModel: DOMWidgetModel,
+	//    DOMWidgetView: DOMWidgetView
+	//};
 
 
 /***/ }),
@@ -1701,7 +1740,42 @@ define(["@jupyter-widgets/base"], function(__WEBPACK_EXTERNAL_MODULE_2__) { retu
 /* 4 */
 /***/ (function(module, exports) {
 
-	module.exports = {"name":"jupyter-exa","version":"0.4.0","description":"A framework for data processing, computation, and visualization.","author":"Thomas J. Duignan and Alex Marchenko","license":"Apache-2.0","main":"src/index.js","repository":{"type":"git","url":"https://github.com/avmarchenko/exa.git"},"keywords":["data","analytics","hpc","jupyter","notebook","visualization"],"scripts":{"prepublish":"webpack","test":"echo \"Error: no test specified\" && exit 1"},"devDependencies":{"json-loader":"^0.5.4","webpack":"^1.12.14","jsdoc":"^3.4.3"},"dependencies":{"@jupyter-widgets/base":"^0.6.5","underscore":"^1.8.3","three":"^0.86.0","three-trackballcontrols":"^0.0.5","d3":"^4.10.0"}}
+	module.exports = {
+		"name": "jupyter-exa",
+		"version": "0.4.0",
+		"description": "A framework for data processing, computation, and visualization.",
+		"author": "Thomas J. Duignan and Alex Marchenko",
+		"license": "Apache-2.0",
+		"main": "src/index.js",
+		"repository": {
+			"type": "git",
+			"url": "https://github.com/avmarchenko/exa.git"
+		},
+		"keywords": [
+			"data",
+			"analytics",
+			"hpc",
+			"jupyter",
+			"notebook",
+			"visualization"
+		],
+		"scripts": {
+			"prepublish": "webpack",
+			"test": "echo \"Error: no test specified\" && exit 1"
+		},
+		"devDependencies": {
+			"json-loader": "^0.5.4",
+			"webpack": "^1.12.14",
+			"jsdoc": "^3.4.3"
+		},
+		"dependencies": {
+			"@jupyter-widgets/base": "^0.6.5",
+			"underscore": "^1.8.3",
+			"three": "^0.86.0",
+			"three-trackballcontrols": "^0.0.5",
+			"d3": "^4.10.0"
+		}
+	};
 
 /***/ })
 /******/ ])});;

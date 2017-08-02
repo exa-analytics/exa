@@ -14,7 +14,7 @@ from exa.typed import TypedMeta
 from exa.core.base import Base
 
 
-jsver = "^0.40"
+jsver = "^0.4.0"
 jsmod = "jupyter-exa"
 
 
@@ -23,50 +23,66 @@ class Meta(MetaHasTraits, TypedMeta):
     pass
 
 
-@register("jupyter-exa.Widget")
-class Widget(six.with_metaclass(Meta, _Widget, Base)):
-    """Base Widget."""
+#@register("hello.Hello")
+class HelloWorld(six.with_metaclass(Meta, _DOMWidget, Base)):
+    """
+    """
     _view_name = Unicode("WidgetView").tag(sync=True)
     _view_module = Unicode(jsmod).tag(sync=True)
     _view_module_version = Unicode(jsver).tag(sync=True)
     _model_name = Unicode("WidgetModel").tag(sync=True)
     _model_module = Unicode(jsmod).tag(sync=True)
     _model_module_version = Unicode(jsver).tag(sync=True)
+    value = "Hello World!"
 
     def info(self):
         pass
 
 
-#@register                             # ipywidgets 7.x
-@register("jupyter-exa.DOMWidget")    # ipywidgets 6.x
-class DOMWidget(six.with_metaclass(Meta, _DOMWidget, Base)):
-    """
-    Base DOMWidget
-    """
-    _view_name = Unicode("DOMWidgetView").tag(sync=True)
-    _model_name = Unicode("DOMWidgetModel").tag(sync=True)
-
-    def info(self):
-        """Display information about the widget parameters."""
-        pass
-
-
-
-#class Builder(DOMWidget):
-#    _view_name = Unicode("BuilderView").tag(sync=True)
-#    _model_name = Unicode("BuilderModel").tag(sync=True)
-#    extensions = List(trait=Unicode).tag(sync=True)
-#    classes = Dict().tag(sync=True)
-#    dynamic = Dict().tag(sync=True)
+#@register("jupyter-exa.Widget")
+#class Widget(six.with_metaclass(Meta, _Widget, Base)):
+#    """Base Widget."""
+#    _view_name = Unicode("WidgetView").tag(sync=True)
+#    _view_module = Unicode(jsmod).tag(sync=True)
+#    _view_module_version = Unicode(jsver).tag(sync=True)
+#    _model_name = Unicode("WidgetModel").tag(sync=True)
+#    _model_module = Unicode(jsmod).tag(sync=True)
+#    _model_module_version = Unicode(jsver).tag(sync=True)
 #
-#    def __init__(self, *extensions, **kwargs):
-#        super(Builder, self).__init__(**kwargs)
-#        self.extensions = [str(item) for item in extensions]
+#    def info(self):
+#        pass
 #
-#    def __init__(self, *args, **kwargs):
-#        super(DOMWidget, self).__init__(*args, **kwargs)
-#        self.on_msg(self.build_api)
-
-
-#builder = Builder("three", "three-trackballcontrols")
-#builder._ipython_display_()
+#
+##@register                             # ipywidgets 7.x
+#@register("jupyter-exa.DOMWidget")    # ipywidgets 6.x
+#class DOMWidget(six.with_metaclass(Meta, _DOMWidget, Base)):
+#    """
+#    Base DOMWidget
+#    """
+#    _view_name = Unicode("DOMWidgetView").tag(sync=True)
+#    _model_name = Unicode("DOMWidgetModel").tag(sync=True)
+#
+#    def info(self):
+#        """Display information about the widget parameters."""
+#        pass
+#
+#
+#
+##class Builder(DOMWidget):
+##    _view_name = Unicode("BuilderView").tag(sync=True)
+##    _model_name = Unicode("BuilderModel").tag(sync=True)
+##    extensions = List(trait=Unicode).tag(sync=True)
+##    classes = Dict().tag(sync=True)
+##    dynamic = Dict().tag(sync=True)
+##
+##    def __init__(self, *extensions, **kwargs):
+##        super(Builder, self).__init__(**kwargs)
+##        self.extensions = [str(item) for item in extensions]
+##
+##    def __init__(self, *args, **kwargs):
+##        super(DOMWidget, self).__init__(*args, **kwargs)
+##        self.on_msg(self.build_api)
+#
+#
+##builder = Builder("three", "three-trackballcontrols")
+##builder._ipython_display_()

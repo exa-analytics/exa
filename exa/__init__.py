@@ -44,7 +44,7 @@ def _datadir():
 def _jupyter_nbextension_paths():
     """Jupyter notebook extension directory paths."""
     return [{'section': "notebook",
-             'src': "_nbextension",
+             'src': "static",
              'dest': "jupyter-exa",
              'require': "jupyter-exa/extension"}]
 
