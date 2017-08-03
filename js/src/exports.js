@@ -7,11 +7,8 @@
 var _ = require("underscore");
 
 
-module.exports = {
-    exports: _.extend({}, {
-            version: require("../package.json").version
-        },
-        require("./base.js")
-    )
-};
-console.log(module.exports);
+module.exports = _.extend({},
+    require("./base.js"),
+    require("./tests/test_base.js")
+);
+module.exports['version'] = require("../package.json").version;

@@ -1,4 +1,4 @@
-define(["@jupyter-widgets/base"], function(__WEBPACK_EXTERNAL_MODULE_2__) { return /******/ (function(modules) { // webpackBootstrap
+define(["jupyter-js-widgets"], function(__WEBPACK_EXTERNAL_MODULE_4__) { return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -55,7 +55,6 @@ define(["@jupyter-widgets/base"], function(__WEBPACK_EXTERNAL_MODULE_2__) { retu
 	
 	// Export widget models and views, and the npm package version number.
 	module.exports = __webpack_require__(1);
-	module.exports['version'] = __webpack_require__(4).version;
 
 
 /***/ }),
@@ -65,125 +64,21 @@ define(["@jupyter-widgets/base"], function(__WEBPACK_EXTERNAL_MODULE_2__) { retu
 	// Copyright (c) 2015-2017, Exa Analytics Development Team
 	// Distributed under the terms of the Apache License 2.0
 	/**
-	 * This module provides the base model and view used by
-	 * exa.core.widget.DOMWidget.
-	 * @module
+	 * Exported Modules
 	 */
 	"use strict";
-	var ipyw = __webpack_require__(2);
-	var _ = __webpack_require__(3);
-	var jsver = "^0.4.0";
-	var jsmod = "jupyter-exa";
+	var _ = __webpack_require__(2);
 	
 	
-	class HelloModel extends ipyw.DOMWidgetModel {
-	    get defaults() {
-	        return _.extend(ipyw.DOMWidgetModel.prototype.defaults(), {
-	            _model_name: "HelloModel",
-	            _model_module: jsmod,
-	            _model_version: jsver,
-	            _view_name: "HelloView",
-	            _view_module: jsmod,
-	            _view_version: jsver,
-	            value: "Hello World"
-	        });
-	    }
-	}
-	
-	
-	class HelloView extends ipyw.DOMWidgetView {
-	    render() {
-	        this.value_changed();
-	        this.model.on("change:value", this.value_changed, this);
-	    }
-	
-	    value_changed() {
-	        this.el.textContext = this.model.get("value");
-	    }
-	}
-	
-	
-	module.exports = {
-	    HelloModel: HelloModel,
-	    HelloView: HelloView
-	};
-	
-	
-	//var ipyw = require("@jupyter-widgets/base");
-	//var _ = require("underscore");
-	//var jsver = "^0.4.0";
-	//var jsmod = "jupyter-exa";
-	//
-	//
-	///**
-	// * Base Model Class
-	// */
-	//class WidgetModel extends ipyw.WidgetModel {
-	//    get defaults() {
-	//        return _.extend({}, ipyw.WidgetModel.prototype.defaults, {
-	//            _view_name: "WidgetView",
-	//            _view_module: jsmod,
-	//            _view_module_version: jsver,
-	//            _model_name: "WidgetModel",
-	//            _model_module: jsmod,
-	//            _model_module_version: jsver
-	//        });
-	//    }
-	//}
-	//
-	//
-	///**
-	// * Base View Class
-	// */
-	//class WidgetView extends ipyw.WidgetView {
-	//}
-	//
-	//
-	///**
-	// * Base (DOM) Model Class
-	// */
-	//class DOMWidgetModel extends ipyw.DOMWidgetModel {
-	//    /**
-	//     * Used by Jupyter
-	//     */
-	//    get defaults() {
-	//        return _.extend({}, ipyw.DOMWidgetModel.prototype.defaults, {
-	//            _view_name: "DOMWidgetView",
-	//            _view_module: jsmod,
-	//            _view_module_version: jsver,
-	//            _model_name: "DOMWidgetModel",
-	//            _model_module: jsmod,
-	//            _model_module_version: jsver
-	//        });
-	//    }
-	//}
-	//
-	//
-	///**
-	// * Base (DOM) View Class
-	// */
-	//class DOMWidgetView extends ipyw.DOMWidgetView {
-	//}
-	//
-	//
-	//module.exports = {
-	//    jsver: jsver,
-	//    jsmod: jsmod,
-	//    WidgetModel: WidgetModel,
-	//    WidgetView: WidgetView,
-	//    DOMWidgetModel: DOMWidgetModel,
-	//    DOMWidgetView: DOMWidgetView
-	//};
+	module.exports = _.extend({},
+	    __webpack_require__(3),
+	    __webpack_require__(5)
+	);
+	module.exports['version'] = __webpack_require__(6).version;
 
 
 /***/ }),
 /* 2 */
-/***/ (function(module, exports) {
-
-	module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
-
-/***/ }),
-/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Underscore.js 1.8.3
@@ -1737,45 +1632,153 @@ define(["@jupyter-widgets/base"], function(__WEBPACK_EXTERNAL_MODULE_2__) { retu
 
 
 /***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	// Copyright (c) 2015-2017, Exa Analytics Development Team
+	// Distributed under the terms of the Apache License 2.0
+	/**
+	 * This module provides the base model and view used by
+	 * exa.core.widget.DOMWidget.
+	 * @module
+	 */
+	"use strict";
+	var ipyw = __webpack_require__(4);
+	var _ = __webpack_require__(2);
+	var jsver = "^0.4.0";
+	var jsmod = "jupyter-exa";
+	
+	
+	console.log(ipyw.DOMWidgetModel.prototype.defaults());
+	
+	
+	//var ipyw = require("@jupyter-widgets/base");
+	//var _ = require("underscore");
+	//var jsver = "^0.4.0";
+	//var jsmod = "jupyter-exa";
+	//
+	//
+	///**
+	// * Base Model Class
+	// */
+	//class WidgetModel extends ipyw.WidgetModel {
+	//    get defaults() {
+	//        return _.extend({}, ipyw.WidgetModel.prototype.defaults, {
+	//            _view_name: "WidgetView",
+	//            _view_module: jsmod,
+	//            _view_module_version: jsver,
+	//            _model_name: "WidgetModel",
+	//            _model_module: jsmod,
+	//            _model_module_version: jsver
+	//        });
+	//    }
+	//}
+	//
+	//
+	///**
+	// * Base View Class
+	// */
+	//class WidgetView extends ipyw.WidgetView {
+	//}
+	//
+	//
+	/**
+	 * Base (DOM) Model Class
+	 */
+	class DOMWidgetModel extends ipyw.DOMWidgetModel {
+	    /**
+	     * Used by Jupyter
+	     */
+	    defaults() {
+	        return _.extend({}, ipyw.DOMWidgetModel.prototype.defaults, {
+	            _view_name: "DOMWidgetView",
+	            _view_module: jsmod,
+	            _view_module_version: jsver,
+	            _model_name: "DOMWidgetModel",
+	            _model_module: jsmod,
+	            _model_module_version: jsver
+	        });
+	    }
+	}
+	
+	
+	/**
+	 * Base (DOM) View Class
+	 */
+	class DOMWidgetView extends ipyw.DOMWidgetView {
+	}
+	
+	
+	module.exports = {
+	    jsver: jsver,
+	    jsmod: jsmod,
+	    DOMWidgetModel: DOMWidgetModel,
+	    DOMWidgetView: DOMWidgetView
+	}
+
+
+/***/ }),
 /* 4 */
 /***/ (function(module, exports) {
 
+	module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	// Copyright (c) 2015-2017, Exa Analytics Development Team
+	// Distributed under the terms of the Apache License 2.0
+	/**
+	 * Tests for Base Widgets
+	 */
+	"use strict";
+	//var QUnit = require("qunitjs");
+	var _ = __webpack_require__(2);
+	var base = __webpack_require__(3);
+	
+	
+	
+	class HelloModel extends base.DOMWidgetModel {
+	    defaults() {
+	        return _.extend({}, base.DOMWidgetModel.prototype.defaults(), {
+	            _model_name: "HelloModel",
+	            _model_module: base.jsmod,
+	            _model_version: base.jsver,
+	            _view_name: "HelloView",
+	            _view_module: base.jsmod,
+	            _view_version: base.jsver,
+	            value: "Hello World"
+	        });
+	    }
+	}
+	
+	
+	class HelloView extends base.DOMWidgetView {
+	    render() {
+	        this.value_changed();
+	        this.model.on("change:value", this.value_changed, this);
+	    }
+	
+	    value_changed() {
+	        console.log(this);
+	        console.log(this.el);
+	        this.el.textContent = this.model.get("value");
+	    }
+	}
+	
+	
 	module.exports = {
-		"name": "jupyter-exa",
-		"version": "0.4.0",
-		"description": "A framework for data processing, computation, and visualization.",
-		"author": "Thomas J. Duignan and Alex Marchenko",
-		"license": "Apache-2.0",
-		"main": "src/index.js",
-		"repository": {
-			"type": "git",
-			"url": "https://github.com/avmarchenko/exa.git"
-		},
-		"keywords": [
-			"data",
-			"analytics",
-			"hpc",
-			"jupyter",
-			"notebook",
-			"visualization"
-		],
-		"scripts": {
-			"prepublish": "webpack",
-			"test": "echo \"Error: no test specified\" && exit 1"
-		},
-		"devDependencies": {
-			"json-loader": "^0.5.4",
-			"webpack": "^1.12.14",
-			"jsdoc": "^3.4.3"
-		},
-		"dependencies": {
-			"@jupyter-widgets/base": "^0.6.5",
-			"underscore": "^1.8.3",
-			"three": "^0.86.0",
-			"three-trackballcontrols": "^0.0.5",
-			"d3": "^4.10.0"
-		}
+	    HelloModel: HelloModel,
+	    HelloView: HelloView
 	};
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
+	module.exports = {"name":"jupyter-exa","version":"0.4.0","description":"A framework for data processing, computation, and visualization.","author":"Thomas J. Duignan and Alex Marchenko","license":"Apache-2.0","main":"src/index.js","repository":{"type":"git","url":"https://github.com/avmarchenko/exa.git"},"keywords":["data","analytics","hpc","jupyter","notebook","visualization"],"scripts":{"prepublish":"webpack","test":"echo \"Error: no test specified\" && exit 1"},"devDependencies":{"json-loader":"^0.5.4","webpack":"^1.12.14","jsdoc":"^3.4.3"},"dependencies":{"jupyter-js-widgets":"^2.1.4","underscore":"^1.8.3","jquery":"^3.2.1","three":"^0.86.0","three-trackballcontrols":"^0.0.5","d3":"^4.9.0"}}
 
 /***/ })
 /******/ ])});;

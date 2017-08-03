@@ -27,13 +27,13 @@ class Meta(MetaHasTraits, TypedMeta):
 class HelloWorld(six.with_metaclass(Meta, _DOMWidget, Base)):
     """
     """
-    _view_name = Unicode("WidgetView").tag(sync=True)
+    _view_name = Unicode("HelloView").tag(sync=True)
     _view_module = Unicode(jsmod).tag(sync=True)
     _view_module_version = Unicode(jsver).tag(sync=True)
-    _model_name = Unicode("WidgetModel").tag(sync=True)
+    _model_name = Unicode("HelloModel").tag(sync=True)
     _model_module = Unicode(jsmod).tag(sync=True)
     _model_module_version = Unicode(jsver).tag(sync=True)
-    value = "Hello World!"
+    value = Unicode("Hello World!").tag(sync=True)
 
     def info(self):
         pass
