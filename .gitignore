@@ -27,7 +27,8 @@ doc/build/
 target/
 .settings/
 js/node_modules/
-exa/_nbextension/
+exa/static/*.js
+exa/static/*.map
 node_modules/
 
 
