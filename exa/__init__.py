@@ -36,11 +36,6 @@ Note:
 
 .. _Jupyter notebook: https://jupyter.org/
 """
-def _datadir():
-    """Name of the static data directory."""
-    return ("exa", "data")
-
-
 def _jupyter_nbextension_paths():
     """Jupyter notebook extension directory paths."""
     return [{'section': "notebook",

@@ -18,7 +18,7 @@ Note:
 import os as _os
 import sys as _sys
 from pkg_resources import resource_filename as _resource_filename
-from exa import _datadir
+from exa import _jupyter_nbextension_paths
 from .single import Singleton as _Singleton
 from .core.editor import Editor as _Editor
 
@@ -82,6 +82,8 @@ _columns = ['A', 'Z', 'abundance_fraction', 'abundance_fraction_error',
             'electronegativity', 'quadrupole_moment', 'spin', 'symbol',
             'color']
 _this = _sys.modules[__name__]         # Reference to this module
-_path = _resource_filename(_datadir()[0], _os.path.join(_datadir()[1], _resource))
+_pkg = _jupyter_nbextension_paths()[0]['dest'].split("-")[1]
+_static = _jupyter_nbextension_paths()[0]['src']
+_path = _resource_filename(_pkg, _os.path.join(_static, _resource))
 if not hasattr(_this, "H"):
     _create()
