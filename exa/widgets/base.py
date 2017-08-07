@@ -23,6 +23,20 @@ class Meta(MetaHasTraits, TypedMeta):
     pass
 
 
+#@register("jupyter-exa.Widget")
+class Widget(six.with_metaclass(Meta, _Widget, Base)):
+    """Base Widget."""
+    _view_name = Unicode("WidgetView").tag(sync=True)
+    _view_module = Unicode(jsmod).tag(sync=True)
+    _view_module_version = Unicode(jsver).tag(sync=True)
+    _model_name = Unicode("WidgetModel").tag(sync=True)
+    _model_module = Unicode(jsmod).tag(sync=True)
+    _model_module_version = Unicode(jsver).tag(sync=True)
+
+    def info(self):
+        pass
+
+
 #@register("hello.Hello")
 class HelloWorld(six.with_metaclass(Meta, _DOMWidget, Base)):
     """
@@ -39,18 +53,6 @@ class HelloWorld(six.with_metaclass(Meta, _DOMWidget, Base)):
         pass
 
 
-#@register("jupyter-exa.Widget")
-#class Widget(six.with_metaclass(Meta, _Widget, Base)):
-#    """Base Widget."""
-#    _view_name = Unicode("WidgetView").tag(sync=True)
-#    _view_module = Unicode(jsmod).tag(sync=True)
-#    _view_module_version = Unicode(jsver).tag(sync=True)
-#    _model_name = Unicode("WidgetModel").tag(sync=True)
-#    _model_module = Unicode(jsmod).tag(sync=True)
-#    _model_module_version = Unicode(jsver).tag(sync=True)
-#
-#    def info(self):
-#        pass
 #
 #
 ##@register                             # ipywidgets 7.x

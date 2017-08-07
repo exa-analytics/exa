@@ -1644,44 +1644,40 @@ define(["jupyter-js-widgets"], function(__WEBPACK_EXTERNAL_MODULE_4__) { return 
 	 */
 	"use strict";
 	var ipyw = __webpack_require__(4);
+	//var ipyw = require("@jupyter-widgets/base");    // ipywidgets >= 7.0.0
 	var _ = __webpack_require__(2);
 	var jsver = "^0.4.0";
 	var jsmod = "jupyter-exa";
-	
-	
 	console.log(ipyw.DOMWidgetModel.prototype.defaults());
 	
 	
-	//var ipyw = require("@jupyter-widgets/base");
-	//var _ = require("underscore");
-	//var jsver = "^0.4.0";
-	//var jsmod = "jupyter-exa";
-	//
-	//
-	///**
-	// * Base Model Class
-	// */
-	//class WidgetModel extends ipyw.WidgetModel {
-	//    get defaults() {
-	//        return _.extend({}, ipyw.WidgetModel.prototype.defaults, {
-	//            _view_name: "WidgetView",
-	//            _view_module: jsmod,
-	//            _view_module_version: jsver,
-	//            _model_name: "WidgetModel",
-	//            _model_module: jsmod,
-	//            _model_module_version: jsver
-	//        });
-	//    }
-	//}
-	//
-	//
-	///**
-	// * Base View Class
-	// */
-	//class WidgetView extends ipyw.WidgetView {
-	//}
-	//
-	//
+	/**
+	 * Base Model Class
+	 */
+	class WidgetModel extends ipyw.WidgetModel {
+	    get defaults() {
+	        return _.extend({}, ipyw.WidgetModel.prototype.defaults, {
+	            _view_name: "WidgetView",
+	            _view_module: jsmod,
+	            _view_module_version: jsver,
+	            _model_name: "WidgetModel",
+	            _model_module: jsmod,
+	            _model_module_version: jsver
+	        });
+	    }
+	}
+	
+	
+	/**
+	 * Base View Class
+	 */
+	class WidgetView extends ipyw.WidgetView {
+	    render() {
+	        console.log("widgetview");
+	    }
+	}
+	
+	
 	/**
 	 * Base (DOM) Model Class
 	 */
@@ -1712,6 +1708,8 @@ define(["jupyter-js-widgets"], function(__WEBPACK_EXTERNAL_MODULE_4__) { return 
 	module.exports = {
 	    jsver: jsver,
 	    jsmod: jsmod,
+	    WidgetModel: WidgetModel,
+	    WidgetView: WidgetView,
 	    DOMWidgetModel: DOMWidgetModel,
 	    DOMWidgetView: DOMWidgetView
 	}

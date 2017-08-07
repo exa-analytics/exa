@@ -2,12 +2,14 @@
 // Distributed under the terms of the Apache License 2.0
 /**
  * Tests for Base Widgets
+ *
+ * The code here tests functionality in ``base.js``. Tests are executed
+ * by Python and are contained within the Jupyter framework; they are not
+ * standalone JavaScript unittests.
  */
 "use strict";
-//var QUnit = require("qunitjs");
 var _ = require("underscore");
 var base = require("../base.js");
-
 
 
 class HelloModel extends base.DOMWidgetModel {
@@ -37,6 +39,15 @@ class HelloView extends base.DOMWidgetView {
         this.el.textContent = this.model.get("value");
     }
 }
+
+
+/**
+ * Test non DOM widgets
+ */
+class HiddenHello extends base.WidgetModel {
+}
+
+
 
 
 module.exports = {

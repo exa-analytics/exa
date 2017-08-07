@@ -7,44 +7,43 @@
  */
 "use strict";
 var ipyw = require("jupyter-js-widgets");
+//var ipyw = require("@jupyter-widgets/base");    // ipywidgets >= 7.0.0
 var _ = require("underscore");
 var jsver = "^0.4.0";
 var jsmod = "jupyter-exa";
-
-
 console.log(ipyw.DOMWidgetModel.prototype.defaults());
 
 
-//var ipyw = require("@jupyter-widgets/base");
-//var _ = require("underscore");
-//var jsver = "^0.4.0";
-//var jsmod = "jupyter-exa";
-//
-//
-///**
-// * Base Model Class
-// */
-//class WidgetModel extends ipyw.WidgetModel {
-//    get defaults() {
-//        return _.extend({}, ipyw.WidgetModel.prototype.defaults, {
-//            _view_name: "WidgetView",
-//            _view_module: jsmod,
-//            _view_module_version: jsver,
-//            _model_name: "WidgetModel",
-//            _model_module: jsmod,
-//            _model_module_version: jsver
-//        });
-//    }
-//}
-//
-//
-///**
-// * Base View Class
-// */
-//class WidgetView extends ipyw.WidgetView {
-//}
-//
-//
+/**
+ * Base Model Class
+ *
+ * The Widget can be used to create "hidden" JavaScript functionality.
+ * For interactive (visual) widgets use DOMWidget instead.
+ */
+class WidgetModel extends ipyw.WidgetModel {
+    get defaults() {
+        return _.extend({}, ipyw.WidgetModel.prototype.defaults, {
+            _view_name: "WidgetView",
+            _view_module: jsmod,
+            _view_module_version: jsver,
+            _model_name: "WidgetModel",
+            _model_module: jsmod,
+            _model_module_version: jsver
+        });
+    }
+}
+
+
+/**
+ * Base View Class
+ */
+class WidgetView extends ipyw.WidgetView {
+    render() {
+        console.log("widgetview");
+    }
+}
+
+
 /**
  * Base (DOM) Model Class
  */
@@ -75,6 +74,8 @@ class DOMWidgetView extends ipyw.DOMWidgetView {
 module.exports = {
     jsver: jsver,
     jsmod: jsmod,
+    WidgetModel: WidgetModel,
+    WidgetView: WidgetView,
     DOMWidgetModel: DOMWidgetModel,
     DOMWidgetView: DOMWidgetView
 }
