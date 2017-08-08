@@ -27,13 +27,14 @@ class WidgetTest(Widget):
     _model_name = Unicode("WidgetTestModel").tag(sync=True)
     value = Unicode("WidgetTest value").tag(sync=True)
 
-    def _handle_custom_msg(self, *args, **kwargs):
+    def set_value_response(self, response):
         """
         """
         self.value_response = args[0]
 
     def __init__(self, *args, **kwargs):
         super(WidgetTest, self).__init__(*args, **kwargs)
+        self.on_msg(self.set_value_response)
         self.value_response = ""
 
 
