@@ -6,16 +6,17 @@
  * @module
  */
 "use strict";
-var base = require("./base.js");
 var _ = require("underscore");
+var base = require("./base.js");
+var imports = require("./imports.js");
 
 
 /**
  * API Builder Class
  */
-class APIBuilderModel extends base.DOMWidgetModel {
-    get defaults() {
-        return _.extend({}, base.DOMWidgetModel.prototype.defaults, {
+class APIBuilderModel extends base.WidgetModel {
+    defaults() {
+        return _.extend({}, base.WidgetModel.prototype.defaults, {
             _view_name: "APIBuilderView",
             _model_name: "APIBuilderModel"
         });
@@ -26,12 +27,22 @@ class APIBuilderModel extends base.DOMWidgetModel {
 /**
  * API Builder View
  */
-class APIBuilderView extends base.DOMWidgetView {
+class APIBuilderView extends base.WidgetView {
     /**
      * Called on widget load
      */
     render() {
-        console.log("here");
+        console.log("Building API");
+        this.build();
+    }
+
+    build() {
+        console.log(imports);
+        var n = imports.length;
+        for (var i = 0; i < n; i++) {
+            var mod = imports[i];
+            console.log(mod);
+        }
     }
 }
 

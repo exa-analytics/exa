@@ -10,7 +10,6 @@ from .base import Widget
 from traitlets import Unicode
 
 
-#@register("jupyter-exa.APIBuilder")
 class APIBuilder(Widget):
     """
     """

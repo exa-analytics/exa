@@ -27,7 +27,7 @@ class WidgetTest(Widget):
     _model_name = Unicode("WidgetTestModel").tag(sync=True)
     value = Unicode("WidgetTest value").tag(sync=True)
 
-    def set_value_response(self, response):
+    def set_value_response(self, *args, **kwargs):
         """
         """
         self.value_response = args[0]
