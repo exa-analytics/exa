@@ -12,22 +12,18 @@ var _ = require("underscore");
 var base = require("../base.js");
 
 
-class HelloModel extends base.DOMWidgetModel {
+class DOMWidgetTestModel extends base.DOMWidgetModel {
     defaults() {
-        return _.extend({}, base.DOMWidgetModel.prototype.defaults(), {
-            _model_name: "HelloModel",
-            _model_module: base.jsmod,
-            _model_version: base.jsver,
-            _view_name: "HelloView",
-            _view_module: base.jsmod,
-            _view_version: base.jsver,
+        return _.extend({}, base.DOMWidgetModel.prototype.defaults, {
+            _model_name: "DOMWidgetTestModel",
+            _view_name: "DOMWidgetTestView",
             value: "Hello World"
         });
     }
 }
 
 
-class HelloView extends base.DOMWidgetView {
+class DOMWidgetTestView extends base.DOMWidgetView {
     render() {
         this.value_changed();
         this.model.on("change:value", this.value_changed, this);
@@ -44,13 +40,41 @@ class HelloView extends base.DOMWidgetView {
 /**
  * Test non DOM widgets
  */
-class HiddenHello extends base.WidgetModel {
+class WidgetTestModel extends base.WidgetModel {
+    defaults() {
+        return _.extend({}, base.WidgetModel.prototype.defaults, {
+            _model_name: "WidgetTestModel",
+            _view_name: "WidgetTestView"
+        });
+    }
+}
+
+
+/**
+ * Test non DOM Widgets
+ */
+class WidgetTestView extends base.WidgetView {
+    render() {
+        this.log_value();
+        this.send_value();
+    }
+
+    log_value() {
+        var value = this.model.get("value");
+        console.log(value);
+    }
+
+    send_value() {
+        var value = this.model.get("value");
+        this.send(value);
+    }
 }
 
 
 
-
 module.exports = {
-    HelloModel: HelloModel,
-    HelloView: HelloView
+    WidgetTestModel: WidgetTestModel,
+    WidgetTestView: WidgetTestView,
+    DOMWidgetTestModel: DOMWidgetTestModel,
+    DOMWidgetTestView: DOMWidgetTestView
 };

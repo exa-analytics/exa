@@ -1653,6 +1653,9 @@ define(["jupyter-js-widgets"], function(__WEBPACK_EXTERNAL_MODULE_4__) { return 
 	
 	/**
 	 * Base Model Class
+	 *
+	 * The Widget can be used to create "hidden" JavaScript functionality.
+	 * For interactive (visual) widgets use DOMWidget instead.
 	 */
 	class WidgetModel extends ipyw.WidgetModel {
 	    get defaults() {
@@ -1729,30 +1732,28 @@ define(["jupyter-js-widgets"], function(__WEBPACK_EXTERNAL_MODULE_4__) { return 
 	// Distributed under the terms of the Apache License 2.0
 	/**
 	 * Tests for Base Widgets
+	 *
+	 * The code here tests functionality in ``base.js``. Tests are executed
+	 * by Python and are contained within the Jupyter framework; they are not
+	 * standalone JavaScript unittests.
 	 */
 	"use strict";
-	//var QUnit = require("qunitjs");
 	var _ = __webpack_require__(2);
 	var base = __webpack_require__(3);
 	
 	
-	
-	class HelloModel extends base.DOMWidgetModel {
+	class DOMWidgetTestModel extends base.DOMWidgetModel {
 	    defaults() {
-	        return _.extend({}, base.DOMWidgetModel.prototype.defaults(), {
-	            _model_name: "HelloModel",
-	            _model_module: base.jsmod,
-	            _model_version: base.jsver,
-	            _view_name: "HelloView",
-	            _view_module: base.jsmod,
-	            _view_version: base.jsver,
+	        return _.extend({}, base.DOMWidgetModel.prototype.defaults, {
+	            _model_name: "DOMWidgetTestModel",
+	            _view_name: "DOMWidgetTestView",
 	            value: "Hello World"
 	        });
 	    }
 	}
 	
 	
-	class HelloView extends base.DOMWidgetView {
+	class DOMWidgetTestView extends base.DOMWidgetView {
 	    render() {
 	        this.value_changed();
 	        this.model.on("change:value", this.value_changed, this);
@@ -1766,9 +1767,46 @@ define(["jupyter-js-widgets"], function(__WEBPACK_EXTERNAL_MODULE_4__) { return 
 	}
 	
 	
+	/**
+	 * Test non DOM widgets
+	 */
+	class WidgetTestModel extends base.WidgetModel {
+	    defaults() {
+	        return _.extend({}, base.WidgetModel.prototype.defaults, {
+	            _model_name: "WidgetTestModel",
+	            _view_name: "WidgetTestView"
+	        });
+	    }
+	}
+	
+	
+	/**
+	 * Test non DOM Widgets
+	 */
+	class WidgetTestView extends base.WidgetView {
+	    render() {
+	        this.log_value();
+	        this.send_value();
+	    }
+	
+	    log_value() {
+	        var value = this.model.get("value");
+	        console.log(value);
+	    }
+	
+	    send_value() {
+	        var value = this.model.get("value");
+	        this.send(value);
+	    }
+	}
+	
+	
+	
 	module.exports = {
-	    HelloModel: HelloModel,
-	    HelloView: HelloView
+	    WidgetTestModel: WidgetTestModel,
+	    WidgetTestView: WidgetTestView,
+	    DOMWidgetTestModel: DOMWidgetTestModel,
+	    DOMWidgetTestView: DOMWidgetTestView
 	};
 
 

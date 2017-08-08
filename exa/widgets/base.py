@@ -23,7 +23,6 @@ class Meta(MetaHasTraits, TypedMeta):
     pass
 
 
-#@register("jupyter-exa.Widget")
 class Widget(six.with_metaclass(Meta, _Widget, Base)):
     """Base Widget."""
     _view_name = Unicode("WidgetView").tag(sync=True)
@@ -34,23 +33,22 @@ class Widget(six.with_metaclass(Meta, _Widget, Base)):
     _model_module_version = Unicode(jsver).tag(sync=True)
 
     def info(self):
-        pass
+        print("info")
 
 
-#@register("hello.Hello")
-class HelloWorld(six.with_metaclass(Meta, _DOMWidget, Base)):
+class DOMWidget(six.with_metaclass(Meta, _DOMWidget, Base)):
     """
     """
-    _view_name = Unicode("HelloView").tag(sync=True)
+    _view_name = Unicode("DOMWidgetView").tag(sync=True)
     _view_module = Unicode(jsmod).tag(sync=True)
     _view_module_version = Unicode(jsver).tag(sync=True)
-    _model_name = Unicode("HelloModel").tag(sync=True)
+    _model_name = Unicode("DOMWidgetModel").tag(sync=True)
     _model_module = Unicode(jsmod).tag(sync=True)
     _model_module_version = Unicode(jsver).tag(sync=True)
-    value = Unicode("Hello World!").tag(sync=True)
 
     def info(self):
-        pass
+        print("info")
+
 
 
 #
