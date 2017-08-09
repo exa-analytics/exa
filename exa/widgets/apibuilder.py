@@ -16,13 +16,13 @@ class APIBuilder(Widget):
     _view_name = Unicode("APIBuilderView").tag(sync=True)
     _model_name = Unicode("APIBuilderModel").tag(sync=True)
 
-    def build_api(self, *args, **kwargs):
-        """
-        """
-        print("build api")
-        print(args)
-        print(kwargs)
-
-    def __init__(self, *args, **kwargs):
-        super(APIBuilder).__init__(*args, **kwargs)
-        self.on_msg(self.build_api)
+#    def build_api(self, *args, **kwargs):
+#        """
+#        """
+#        print("build api")
+#        print(args)
+#        print(kwargs)
+#
+#    def __init__(self, *args, **kwargs):
+#        super(APIBuilder).__init__(*args, **kwargs)
+#        self.on_msg(self.build_api)

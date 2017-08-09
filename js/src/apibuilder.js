@@ -8,46 +8,69 @@
 "use strict";
 var _ = require("underscore");
 var base = require("./base.js");
-var imports = require("./imports.js");
+var modules = require("./imports.js");
 
 
-/**
- * API Builder Class
- */
+class APIBuilderView extends base.WidgetView {
+    render() {
+        console.log("here");
+    }
+}
+
+
 class APIBuilderModel extends base.WidgetModel {
-    defaults() {
+    defauts() {
         return _.extend({}, base.WidgetModel.prototype.defaults(), {
-            _view_name: "APIBuilderView",
-            _model_name: "APIBuilderModel"
+            _model_name: "APIBuilderModel",
+            _view_name: "APIBuilderView"
         });
     }
 }
 
 
-/**
- * API Builder View
- */
-class APIBuilderView extends base.WidgetView {
-    /**
-     * Called on widget load
-     */
-    render() {
-        console.log("Building API");
-        this.build();
-    }
-
-    build() {
-        console.log(imports);
-        var n = imports.length;
-        for (var i = 0; i < n; i++) {
-            var mod = imports[i];
-            console.log(mod);
-        }
-    }
-}
-
-
 module.exports = {
-    APIBuilderModel: APIBuilderModel,
-    APIBuilderView: APIBuilderView
-}
+    APIBuilderView: APIBuilderView,
+    APIBuilderModel: APIBuilderModel
+};
+
+
+///**
+// * API Builder Class
+// */
+//class APIBuilderModel extends base.WidgetModel {
+//    defaults() {
+//        return _.extend({}, base.WidgetModel.prototype.defaults(), {
+//            _view_name: "APIBuilderView",
+//            _model_name: "APIBuilderModel"
+//        });
+//    }
+//}
+//
+//
+///**
+// * API Builder View
+// */
+//class APIBuilderView extends base.WidgetView {
+//    /**
+//     * Called on widget load
+//     */
+//    render() {
+//        console.log("Building API");
+//        this.build();
+//    }
+//
+//    build() {
+//        console.log(modules);
+//        var n = modules.length;
+//        for (var i = 0; i < n; i++) {
+//            var mod = modules[i];
+//            console.log(mod);
+//        }
+//    }
+//}
+//
+//
+//module.exports = {
+//    APIBuilderModel: APIBuilderModel,
+//    APIBuilderView: APIBuilderView
+//}

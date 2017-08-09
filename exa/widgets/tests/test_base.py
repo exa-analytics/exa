@@ -26,16 +26,16 @@ class WidgetTest(Widget):
     _view_name = Unicode("WidgetTestView").tag(sync=True)
     _model_name = Unicode("WidgetTestModel").tag(sync=True)
     value = Unicode("WidgetTest value").tag(sync=True)
+    responded = False
 
     def set_value_response(self, *args, **kwargs):
         """
         """
-        self.value_response = args[0]
+        WidgetTest.responded = True
 
     def __init__(self, *args, **kwargs):
         super(WidgetTest, self).__init__(*args, **kwargs)
         self.on_msg(self.set_value_response)
-        self.value_response = ""
 
 
 class DOMWidgetTest(DOMWidget):
@@ -56,9 +56,9 @@ class TestWidgets(TestCase):
                             "--ExecutePreprocessor.kernel_name=python", nbpath],
                            cwd=cwd, **prckws)
         print(ret)
-        self.expected = ["WidgetTest value", "DOMWidgetTest value", "test", "test"]
-        self.expected_dom = self.expected[:]
-        self.expected_dom[0] = ""
+        self.expected = ["False", "True", "DOMWidgetTest value", "test", "test"]
+        self.expected_nodom = self.expected[:]
+        self.expected_nodom[1] = "False"
 
     def test_value_check(self):
         """
@@ -68,7 +68,7 @@ class TestWidgets(TestCase):
                 result = [line.strip() for line in f.readlines()]
             check = result == self.expected
             if check == False:
-                check = result == self.expected_dom
+                check = result == self.expected_nodom
             self.assertTrue(check)
         except Exception as e:
             self.fail(msg=str(e))

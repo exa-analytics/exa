@@ -42,7 +42,7 @@ class DOMWidgetTestView extends base.DOMWidgetView {
  */
 class WidgetTestModel extends base.WidgetModel {
     defaults() {
-        return _.extend({}, base.WidgetModel.prototype.defaults, {
+        return _.extend({}, base.WidgetModel.prototype.defaults(), {
             _model_name: "WidgetTestModel",
             _view_name: "WidgetTestView"
         });

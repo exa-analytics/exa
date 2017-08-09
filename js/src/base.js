@@ -12,9 +12,6 @@ var _ = require("underscore");
 var jsver = "^0.4.0";
 var jsmod = "jupyter-exa";
 
-console.log(ipyw.DOMWidgetModel.prototype.defaults);
-console.log(ipyw.DOMWidgetModel.prototype.defaults());
-
 
 /**
  * Base Model Class
@@ -23,7 +20,7 @@ console.log(ipyw.DOMWidgetModel.prototype.defaults());
  * For interactive (visual) widgets use DOMWidget instead.
  */
 class WidgetModel extends ipyw.WidgetModel {
-    get defaults() {
+    defaults() {
         return _.extend({}, ipyw.WidgetModel.prototype.defaults, {
             _view_name: "WidgetView",
             _view_module: jsmod,
