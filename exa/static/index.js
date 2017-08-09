@@ -1650,6 +1650,8 @@ define(["jupyter-js-widgets"], function(__WEBPACK_EXTERNAL_MODULE_4__) { return 
 	var _ = __webpack_require__(2);
 	var jsver = "^0.4.0";
 	var jsmod = "jupyter-exa";
+	
+	console.log(ipyw.DOMWidgetModel.prototype.defaults);
 	console.log(ipyw.DOMWidgetModel.prototype.defaults());
 	
 	
@@ -114372,7 +114374,7 @@ define(["jupyter-js-widgets"], function(__WEBPACK_EXTERNAL_MODULE_4__) { return 
 	 */
 	class APIBuilderModel extends base.WidgetModel {
 	    defaults() {
-	        return _.extend({}, base.WidgetModel.prototype.defaults, {
+	        return _.extend({}, base.WidgetModel.prototype.defaults(), {
 	            _view_name: "APIBuilderView",
 	            _model_name: "APIBuilderModel"
 	        });

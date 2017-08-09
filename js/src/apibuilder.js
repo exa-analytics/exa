@@ -16,7 +16,7 @@ var imports = require("./imports.js");
  */
 class APIBuilderModel extends base.WidgetModel {
     defaults() {
-        return _.extend({}, base.WidgetModel.prototype.defaults, {
+        return _.extend({}, base.WidgetModel.prototype.defaults(), {
             _view_name: "APIBuilderView",
             _model_name: "APIBuilderModel"
         });

@@ -11,6 +11,8 @@ var ipyw = require("jupyter-js-widgets");
 var _ = require("underscore");
 var jsver = "^0.4.0";
 var jsmod = "jupyter-exa";
+
+console.log(ipyw.DOMWidgetModel.prototype.defaults);
 console.log(ipyw.DOMWidgetModel.prototype.defaults());
 
 
