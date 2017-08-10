@@ -14,6 +14,34 @@ var modules = require("./imports.js");
 class APIBuilderView extends base.WidgetView {
     render() {
         console.log("here");
+        this.build();
+    }
+
+    /**
+     * Analyze modules and build an api
+     */
+    build() {
+        console.log("building...");
+        console.log(modules);
+        for (var module in modules) {
+            if (modules.hasOwnProperty(module)) {
+                this.analyze_module(module);
+            }
+        }
+    }
+
+    /**
+     * Analyze a module, extracting function names and
+     * arguments in order to build an API.
+     */
+    analyze_module(module) {
+        console.log("analyzing...", module);
+        var names = Object.getOwnPropertyNames(module);
+        var n = names.length;
+        for (var i = 0; i < n; i++) {
+            var name = names[i];
+            console.log(name);
+        }
     }
 }
 
@@ -32,45 +60,3 @@ module.exports = {
     APIBuilderView: APIBuilderView,
     APIBuilderModel: APIBuilderModel
 };
-
-
-///**
-// * API Builder Class
-// */
-//class APIBuilderModel extends base.WidgetModel {
-//    defaults() {
-//        return _.extend({}, base.WidgetModel.prototype.defaults(), {
-//            _view_name: "APIBuilderView",
-//            _model_name: "APIBuilderModel"
-//        });
-//    }
-//}
-//
-//
-///**
-// * API Builder View
-// */
-//class APIBuilderView extends base.WidgetView {
-//    /**
-//     * Called on widget load
-//     */
-//    render() {
-//        console.log("Building API");
-//        this.build();
-//    }
-//
-//    build() {
-//        console.log(modules);
-//        var n = modules.length;
-//        for (var i = 0; i < n; i++) {
-//            var mod = modules[i];
-//            console.log(mod);
-//        }
-//    }
-//}
-//
-//
-//module.exports = {
-//    APIBuilderModel: APIBuilderModel,
-//    APIBuilderView: APIBuilderView
-//}
