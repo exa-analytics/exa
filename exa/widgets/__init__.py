@@ -3,5 +3,6 @@
 # Distributed under the terms of the Apache License 2.0
 """
 """
-from . import base
+jsver = "^0.4.0"
+jsmod = "jupyter-exa"
 from . import apibuilder

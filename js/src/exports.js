@@ -10,7 +10,6 @@ var _ = require("underscore");
 module.exports = _.extend({},
     require("./base.js"),
     require("./tests/test_base.js"),
-    require("./apibuilder.js"),
-    require("./imports.js")
+    require("./apibuilder.js")
 );
 module.exports['version'] = require("../package.json").version;

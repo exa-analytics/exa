@@ -8,8 +8,9 @@ Test Base Widgets
 import os, platform
 from traitlets import Unicode
 from unittest import TestCase
+from ipywidgets import DOMWidget, Widget
 from subprocess import check_output
-from exa.widgets.base import Widget, DOMWidget
+from exa.widgets import jsver, jsmod
 
 
 nbname = "test_base.ipynb"
@@ -23,7 +24,11 @@ prckws = {'shell': True} if platform.system().lower() == "windows" else {}
 class WidgetTest(Widget):
     """
     """
+    _view_module = Unicode(jsmod).tag(sync=True)
+    _view_module_version = Unicode(jsver).tag(sync=True)
     _view_name = Unicode("WidgetTestView").tag(sync=True)
+    _model_module = Unicode(jsmod).tag(sync=True)
+    _model_module_version = Unicode(jsver).tag(sync=True)
     _model_name = Unicode("WidgetTestModel").tag(sync=True)
     value = Unicode("WidgetTest value").tag(sync=True)
     responded = False
@@ -41,7 +46,11 @@ class WidgetTest(Widget):
 class DOMWidgetTest(DOMWidget):
     """
     """
+    _view_module = Unicode(jsmod).tag(sync=True)
+    _view_module_version = Unicode(jsver).tag(sync=True)
     _view_name = Unicode("DOMWidgetTestView").tag(sync=True)
+    _model_module = Unicode(jsmod).tag(sync=True)
+    _model_module_version = Unicode(jsver).tag(sync=True)
     _model_name = Unicode("DOMWidgetTestModel").tag(sync=True)
     value = Unicode("DOMWidgetTest value").tag(sync=True)
 
