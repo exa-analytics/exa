@@ -72,10 +72,9 @@ function create_mv(name, attr, argnames) {
                 args[argname] = this.model.get(argname);
             }
             console.log(args);
-            console.log(this.el);
             this.obj = new attr(args);
             console.log(this.obj);
-            this.setElement(this.obj.domElement);
+            this.el.appendChild(this.obj.domElement);
         }
     });
 

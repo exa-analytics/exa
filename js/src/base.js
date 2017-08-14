@@ -6,7 +6,7 @@
  */
 "use strict";
 var three = require("three");
-//three.trackballcontrols = require("three-trackballcontrols");
+var three_trackballcontrols = require("three-trackballcontrols");
 //var d3 = require("d3");
 
 var module_version = "^0.4.0";
@@ -22,7 +22,8 @@ module.exports = {
     },
 
     modules: {
-        three: three
+        three: three,
+        three_trackballcontrols: three_trackballcontrols
     //    d3: d3
     }
 };

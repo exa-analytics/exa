@@ -73,3 +73,15 @@ class APIBuilder(Widget):
 
 APIBuilder = APIBuilder()
 display(APIBuilder)
+
+
+
+class Demo(DOMWidget):
+    """
+    """
+    _view_name = Unicode("DemoView").tag(sync=True)
+    _view_module = Unicode(jsmod).tag(sync=True)
+    _view_module_version = Unicode(jsver).tag(sync=True)
+    _model_name = Unicode("DemoModel").tag(sync=True)
+    _model_module = Unicode(jsmod).tag(sync=True)
+    _model_module_version = Unicode(jsver).tag(sync=True)
