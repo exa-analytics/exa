@@ -127,16 +127,29 @@ class DataFrame(six.with_metaclass(BaseMeta, pd.DataFrame, Base)):
                             pass
                     else:
                         raise TypeError("Unable to enforce column types for {} as types {}".format(name, types))
+    def _enforce_index(self):
+        """
+        Ensure that we have a unique index to use with the same name as the
+        class name (lowercase).
+        """
+        if isinstance(self.index, MultiIndex):
+            self.reset_index(inplace=True)
+        self.index.name = self.__class__.__name__.lower()
+
+    def _enforce(self):
+        """Enforce format of columns and indices."""
+        self._enforce_index()
+        self._enforce_columns()
 
     def __setitem__(self, *args, **kwargs):
         """Setitem is called on column manipulations so we recheck columns."""
         super(DataFrame, self).__setitem__(*args, **kwargs)
-        self._enforce_columns()
+        self._enforce()
 
     def __init__(self, *args, **kwargs):
         meta = kwargs.pop("meta", None)
         super(DataFrame, self).__init__(*args, **kwargs)
-        self._enforce_columns()
+        self._enforce()
         self.meta = meta
 
 
