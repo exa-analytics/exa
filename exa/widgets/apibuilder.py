@@ -30,27 +30,29 @@ class APIWidget(DOMWidget):
             setattr(self, name, attr)
 
 
-def build_class(name, args):
+def build_class(name, info):
     """
     """
-    clsdict = {arg: Any(allow_none=True).tag(sync=True, **widget_serialization) for arg in args}
-    clsdict['_view_name'] = Unicode(name + "View").tag(sync=True)
-    clsdict['_model_name'] = Unicode(name + "Model").tag(sync=True)
-    clsdict['_order'] = args
-    clsdict['__doc__'] = "Args:\n    " + "\n    ".join(args)
-    return type(name, (APIWidget, ), clsdict)
+    return None
+    #clsdict = {arg: Any(allow_none=True).tag(sync=True, **widget_serialization) for arg in args}
+    #clsdict['_view_name'] = Unicode(name + "View").tag(sync=True)
+    #clsdict['_model_name'] = Unicode(name + "Model").tag(sync=True)
+    #clsdict['_order'] = args
+    #clsdict['__doc__'] = "Args:\n    " + "\n    ".join(args)
+    #return type(name, (APIWidget, ), clsdict)
 
 
 def build_api(modules):
     """
     Generate classes and modules.
     """
-    for modname, attrs in modules.items():
-        classes = {}
-        for attrname, args in attrs.items():
-            classes[attrname] = build_class(attrname, args)
+    for modname, classes in modules.items():
+        clses = {}     # Python classes to be created
+        for name, info in classes.items():
+            clses[name] = build_class(name, info)
         setattr(sys.modules['exa.widgets'], modname, type(modname, (object, ), classes))
 
+tmp = None
 
 class APIBuilder(Widget):
     """
@@ -66,22 +68,26 @@ class APIBuilder(Widget):
         """
         """
         if content['method'] == "build":
+            global tmp
+            tmp = content['content']
             build_api(content['content'])
         else:
             super(APIBuilder, self)._handle_custom_msg(content, buffers)
 
 
-APIBuilder = APIBuilder()
-display(APIBuilder)
+
+api = APIBuilder()
+api._ipython_display_()
+#display(api)
 
 
 
-class Demo(DOMWidget):
-    """
-    """
-    _view_name = Unicode("DemoView").tag(sync=True)
-    _view_module = Unicode(jsmod).tag(sync=True)
-    _view_module_version = Unicode(jsver).tag(sync=True)
-    _model_name = Unicode("DemoModel").tag(sync=True)
-    _model_module = Unicode(jsmod).tag(sync=True)
-    _model_module_version = Unicode(jsver).tag(sync=True)
+#class Demo(DOMWidget):
+#    """
+#    """
+#    _view_name = Unicode("DemoView").tag(sync=True)
+#    _view_module = Unicode(jsmod).tag(sync=True)
+#    _view_module_version = Unicode(jsver).tag(sync=True)
+#    _model_name = Unicode("DemoModel").tag(sync=True)
+#    _model_module = Unicode(jsmod).tag(sync=True)
+#    _model_module_version = Unicode(jsver).tag(sync=True)

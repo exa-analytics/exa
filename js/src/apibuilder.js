@@ -2,8 +2,16 @@
 // Distributed under the terms of the Apache License 2.0
 /**
  * Automatic Python API generation for JavaScript libraries.
- * For an example usage see exa-three.js
- * @module
+ *
+ * This module scans predefined third party JavaScript libraries (e.g. three.js)
+ * and identifies top level objects for which an API is dynamically generated.
+ * This API allows developers and users to access features of third-party
+ * libraries directly from Python (through the ipywidgets - itself built on
+ * Backbone.js - infrastructure). An attempt is made to provide a fully featured
+ * API automatically but this may not always be possible.
+ *
+ * See the style comment in base.js for technical information about syntax and
+ * style.
  */
 "use strict";
 var _ = require("underscore");
@@ -11,18 +19,37 @@ var _ = require("underscore");
 var ipy = require("jupyter-js-widgets");    // <=6.x
 var base = require("./base.js");
 // These variables store dynamically created models and views (for backbone.js)
-var exports = {};
-var pyclasses = {};
+// The exports variable contains (Backbone.js via ipywidgets' widgetsnbextension
+// module) Model and View objects.
+var jsexports = {};
+// The pyexports contains a full specification of a single ipywidgets 'Widget'
+// to be created (dynamically) in Python.
+var pyexports = {};
 
 
+/**
+ * Python API Builder Widget View
+ *
+ * This widget is responsible for sending dynamically generated
+ * class skeletons to Python for API creation.
+ */
 var APIBuilderView = ipy.WidgetView.extend({
     render: function() {
-        console.log("Sending architecture for building Python classes.");
-        this.send({'method': "build", 'content': pyclasses});
+        // 'Rendering' this widget simply sends classes skeletons to
+        // the Python backend for Python API creation.
+        console.log("Sending class skeletons for Python API creation...");
+        this.send({'method': "build", 'content': pyexports});
+    },
+
+    on_msg: function(args) {
+        console.log("MESSAGE RECIEVED....", args);
     }
 });
 
 
+/**
+ * Python API Builder Widget Model
+ */
 var APIBuilderModel = ipy.WidgetModel.extend({
     defauts: _.extend({}, ipy.WidgetModel.prototype.defaults, base.defaults, {
         _model_name: "APIBuilderModel",
@@ -32,49 +59,65 @@ var APIBuilderModel = ipy.WidgetModel.extend({
 
 
 /**
- * Identify string argument names of a function/class.
+ * Analyze a function (or class) and determine arguments (class constructor
+ * arguments) and method names. Return a dictionary of these values names
+ * as strings. Used to create a skeleton for Python API creation.
  */
-function get_arg_names(func) {
-    var strfn = func.toString().replace(/((\/\/.*$)|(\/\/*[\s\S]*?\*\/))/mg, "");
-    var result = strfn.slice(strfn.indexOf("(") + 1, strfn.indexOf(")")).match(/([^\s,]+)/g);
-    if (result === null) {
-        result = [];
+function analyze_object(obj) {
+    var strobj = obj.toString().replace(/((\/\/.*$)|(\/\/*[\s\S]*?\*\/))/mg, "");
+    var args = strobj.slice(strobj.indexOf("(")+1, strobj.indexOf(")")).match(/([^\s,]+)/g);
+    if (args === null) {
+        args = [];
     }
-    return result;
+
+    var methods = [];
+//    try {
+//        methods = Object.getOwnPropertyNames(new obj());
+//    }
+//    finally {}
+
+    return {
+        args: args,
+        methods: methods
+    };
 }
 
 
 /**
- * Create the model and view
+ * Model and View Creation
  *
- * By separating the class creation into a function, we force a 'new' instance
- * of the (backbon.js) prototype to be made.
+ * This function creates two 'class' definitions and (Backbone.js) Model  and
+ * View. By separating creation into a separate function we avoid multiple
+ * referencing of variables (used in class definition creation).
  */
-function create_mv(name, attr, argnames) {
-    var vname = name + "View";
-    var mname = name + "Model";
+function create_mv(name, obj) {
+    //var vname = name + "View";
+    //var mname = name + "Model";
 
     var modelcls = ipy.DOMWidgetModel.extend({
         defaults: _.extend({}, ipy.DOMWidgetModel.prototype.defaults, base.defaults, {
-            _view_name: vname,
-            _model_name: mname
+            _view_name: name + "View",
+            _model_name: name + "Model"
         })
     });
 
     var viewcls = ipy.DOMWidgetView.extend({
         render: function() {
-            console.log("Hello from...", name);
-            console.log(attr);
-            var args = {};
-            var n = argnames.length;
-            for (var i = 0; i < n; i++) {
-                var argname = argnames[i];
-                args[argname] = this.model.get(argname);
-            }
-            console.log(args);
-            this.obj = new attr(args);
-            console.log(this.obj);
-            this.el.appendChild(this.obj.domElement);
+            console.log("Rendering...", name);
+            console.log(obj);
+//            var args = {};
+//            var n = argnames.length;
+//            for (var i = 0; i < n; i++) {
+//                var argname = argnames[i];
+//                args[argname] = this.model.get(argname);
+//            }
+//            console.log(args);
+//            this.obj = new attr(args);
+//            console.log(this.obj);
+//            console.log(document.getElementById(this));
+//            console.log(document.getElementById(this.obj));
+//            // TODO THIS DOESNT WORK FOR EVERYTHING
+//            this.el.appendChild(this.obj.domElement);
         }
     });
 
@@ -86,79 +129,98 @@ function create_mv(name, attr, argnames) {
 
 
 /**
- * Analyze a module, extracting function names and
- * arguments in order to build an API.
+ * Analyze JavaScript Library
+ *
+ * This function analyzes a JavaScript library, identifies top level API
+ * functions/classes and populates the `jsexports' and `pyexports' global
+ * variables used to create a dynamic API. The API exists in the Python
+ * backend and can be used after importing the Python package. It utilizes
+ * the infrastructure provided by ipywidgets for bidirectional communication
+ * between JavaScript and Python. The use case is for dynamic frontend
+ * content powered by JavaScript in the Jupyter notebook, with the data
+ * coming from a Python data processing backend.
  */
-function analyze_module(modname, module) {
-    console.log("Analyzing module...", module);
-    pyclasses[modname] = {};
-    var names = Object.getOwnPropertyNames(module);
-    var n = names.length;
+function analyze_library(libname, library, ignore) {
+    console.log("Analyzing the ", libname, " library/function/class");
+    // If the library is actually just a function things are easier to
+    // handle so we check for that first.
+    if (typeof library === "function") {
+        console.log("LIB IS FUNC");
+        console.log(libname);
+    }
+    pyexports[libname] = {};
+    var topnames = Object.getOwnPropertyNames(library);
+    var n = topnames.length;
     for (var i = 0; i < n; i++) {
-        var name = names[i];
-        var attr = module[name];
-        var type = typeof attr;
-        if (type === "function") {
-            var view_name = name + "View";
-            var model_name = name + "Model";
-            var argnames = get_arg_names(attr);
-            var classes = create_mv(name, attr, argnames);
-            exports[view_name] = classes.view;
-            exports[model_name] = classes.model;
-            pyclasses[modname][name] = argnames;
-        };
-    };
-};
-
-
-/**
- * Analyze modules and build an api
- */
-function build() {
-    console.log("Building Models and Views...");
-    for (var modname in base.modules) {
-        if (base.modules.hasOwnProperty(modname)) {
-            analyze_module(modname, base.modules[modname]);
+        var topname = topnames[i];
+        var topobj = library[topname];
+        var objtype = typeof topobj;
+        var check = false;
+        if (ignore.indexOf(topname) > -1) {
+            check = true;
+        }
+        if ((objtype === "function") && (check === false)) {
+            if (topname === "VideoTexture") {
+                console.log("ERROR");
+                console.log(ignore);
+                return null;
+            }
+            var skeleton = analyze_object(topobj);
+            var mvclasses = create_mv(topname, topobj);
+            // Add to exported names
+            jsexports[topname+"View"] = mvclasses.view;
+            jsexports[topname+"Model"] = mvclasses.model;
+            pyexports[topname] = skeleton;
+            if (topname === "AmbientLight") {
+                console.log(topname);
+                console.log(topobj);
+                console.log(topobj.prototype);
+                console.log(JSON.stringify(topobj));
+                var light = new topobj();
+                console.log(light);
+                console.log(typeof light);
+                console.log(Object.getOwnPropertyNames(light));
+            }
         }
     }
 }
 
 
-// Call the builder so that we can export the required models and views
+/**
+ * Build the API
+ *
+ * This function iterates over imported libraries predefined for API
+ * creation.
+ */
+function build() {
+    console.log("Starting API construction...");
+    for (var libname in base.libraries) {
+        if (base.libraries.hasOwnProperty(libname)) {
+            var library = base.libraries[libname].lib;
+            var ignore = base.libraries[libname].ignore;
+            analyze_library(libname, library, ignore);
+        }
+    }
+}
+
+
+// The build function iterates over the imported libraries
+// and populates the global variables `jsexports` and `pyexports`.
 build();
-exports['APIBuilderView'] = APIBuilderView;
-exports['APIBuilderModel'] = APIBuilderModel;
+// Add additional exports.
+jsexports['build'] = build;
+jsexports['analyze_library'] = analyze_library;
+jsexports['analyze_object'] = analyze_object;
+jsexports['create_mv'] = create_mv;
+jsexports['APIBuilderView'] = APIBuilderView;
+jsexports['APIBuilderModel'] = APIBuilderModel;
 
 
-//var AmbientLightModel = ipy.DOMWidgetModel.extend({
-//    defaults: _.extend({}, ipy.DOMWidgetModel.prototype.defaults, base.defaults, {
-//        _model_name: "AmbientLightModel",
-//        _view_name: "AmbientLightView",
-//        value: "Hello World...."
-//    })
-//});
-//
-//
-//var AmbientLightView = ipy.DOMWidgetView.extend({
-//    render: function() {
-//        this.value_changed();
-//        this.model.on("change:value", this.value_changed, this);
-//    },
-//
-//    value_changed: function() {
-//        console.log(this);
-//        console.log(this.el);
-//        this.el.textContent = this.model.get("value");
-//    }
-//});
-//
-//exports['AmbientLightView'] = AmbientLightView;
-//exports['AmbientLightModel'] = AmbientLightModel;
-//pyclasses['three'] = {};
-//pyclasses['three']['WebGLRenderer'] = ["value"];
-console.log(exports);
-console.log(exports['AmbientLightView']);
-console.log(exports['AmbientLightModel']);
+console.log("SUMMARY");
+console.log(jsexports);
+console.log(pyexports);
+console.log(APIBuilderView);
+console.log(APIBuilderModel);
 
 
-module.exports = exports;
+module.exports = jsexports;

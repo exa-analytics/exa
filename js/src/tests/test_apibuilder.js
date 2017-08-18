@@ -7,10 +7,8 @@
  */
 var ipy = require("jupyter-js-widgets");
 var base = require("../base.js");
-var three = base.modules.three;
-//var THREE = require("three");
-//THREE.TrackballControls = require("three-trackballcontrols");
-var three_trackballcontrols = base.modules.three_trackballcontrols;
+var three = base.libraries.three;
+var trackballcontrols = base.libraries.trackballcontrols;
 
 
 var DemoModel = ipy.DOMWidgetModel.extend({
@@ -34,7 +32,7 @@ var DemoView = ipy.DOMWidgetView.extend({
         camera.position.y = 150;
         camera.position.z = 150;
         camera.lookAt(mesh.position);
-        var controls = new three_trackballcontrols(camera, renderer.domElement);
+        var controls = new trackballcontrols(camera, renderer.domElement);
         var scene = new three.Scene();
         scene.fog = new three.FogExp2(0xcccccc, 0.002);
         scene.add(light);

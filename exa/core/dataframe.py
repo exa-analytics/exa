@@ -107,7 +107,8 @@ class DataFrame(six.with_metaclass(BaseMeta, pd.DataFrame, Base)):
 
     def _enforce_aliases(self):
         """Automatic column naming using aliases."""
-        self.rename(columns=self.aliases, inplace=True)
+        if isinstance(self.aliases, dict):
+            self.rename(columns=self.aliases, inplace=True)
 
     def _enforce_columns(self):
         """
