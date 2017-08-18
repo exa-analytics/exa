@@ -94,6 +94,7 @@ class DataFrame(six.with_metaclass(BaseMeta, pd.DataFrame, Base)):
     _metadata = ["reqcols", "coltypes", "meta"]
     reqcols = TypedProperty(list, "Required columns")
     coltypes = TypedProperty(dict, "Column types")
+    aliases = TypedProperty(dict, docs="Column name aliases for automatic renaming")
 
     def info(self, verbose=True, *args, **kwargs):
         """Call the pandas DataFrame info method."""
@@ -103,6 +104,10 @@ class DataFrame(six.with_metaclass(BaseMeta, pd.DataFrame, Base)):
     @property
     def _constructor(self):
         return DataFrame
+
+    def _enforce_aliases(self):
+        """Automatic column naming using aliases."""
+        self.rename(columns=self.aliases, inplace=True)
 
     def _enforce_columns(self):
         """
@@ -127,17 +132,19 @@ class DataFrame(six.with_metaclass(BaseMeta, pd.DataFrame, Base)):
                             pass
                     else:
                         raise TypeError("Unable to enforce column types for {} as types {}".format(name, types))
+
     def _enforce_index(self):
         """
         Ensure that we have a unique index to use with the same name as the
         class name (lowercase).
         """
-        if isinstance(self.index, MultiIndex):
+        if isinstance(self.index, pd.MultiIndex):
             self.reset_index(inplace=True)
         self.index.name = self.__class__.__name__.lower()
 
     def _enforce(self):
         """Enforce format of columns and indices."""
+        self._enforce_aliases()
         self._enforce_index()
         self._enforce_columns()
 
