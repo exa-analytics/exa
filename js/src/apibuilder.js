@@ -27,6 +27,7 @@ var jsexports = {};
 var pyexports = {};
 
 
+
 /**
  * Python API Builder Widget View
  *
@@ -70,7 +71,8 @@ function analyze_object(obj) {
         args = [];
     }
 
-    var methods = [];
+    var methods = Object.getOwnPropertyNames(new obj());
+
 //    try {
 //        methods = Object.getOwnPropertyNames(new obj());
 //    }
@@ -154,34 +156,14 @@ function analyze_library(libname, library, ignore) {
     for (var i = 0; i < n; i++) {
         var topname = topnames[i];
         var topobj = library[topname];
-        var objtype = typeof topobj;
-        var check = false;
-        if (ignore.indexOf(topname) > -1) {
-            check = true;
-        }
-        if ((objtype === "function") && (check === false)) {
-            if (topname === "VideoTexture") {
-                console.log("ERROR");
-                console.log(ignore);
-                return null;
-            }
-            var skeleton = analyze_object(topobj);
-            var mvclasses = create_mv(topname, topobj);
-            // Add to exported names
-            jsexports[topname+"View"] = mvclasses.view;
-            jsexports[topname+"Model"] = mvclasses.model;
-            pyexports[topname] = skeleton;
-            if (topname === "AmbientLight") {
-                console.log(topname);
-                console.log(topobj);
-                console.log(topobj.prototype);
-                console.log(JSON.stringify(topobj));
-                var light = new topobj();
-                console.log(light);
-                console.log(typeof light);
-                console.log(Object.getOwnPropertyNames(light));
-            }
-        }
+        var prototype = Object.getPrototypeOf(topobj);
+//        if (prototype.hasOwnProperty("constructor")) {
+//            var skeleton = analyze_object(topobj);
+//            var mvclasses = create_mv(topname, topobj);
+//            jsexports[topname+"View"] = mvclasses.view;
+//            jsexports[topname+"Model"] = mvclasses.model;
+//            pyexports[topname] = skeleton;
+//        }
     }
 }
 
@@ -221,6 +203,8 @@ console.log(jsexports);
 console.log(pyexports);
 console.log(APIBuilderView);
 console.log(APIBuilderModel);
+
+console.log(base.libraries.three);
 
 
 module.exports = jsexports;
