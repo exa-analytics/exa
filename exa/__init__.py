@@ -44,6 +44,7 @@ def _jupyter_nbextension_paths():
              'require': "jupyter-exa/extension"}]
 
 
+import seaborn # Without this, an import error (due to seaborn) occurs when running nosetests
 from ._version import __version__
 from .typed import TypedProperty
 from .functions import LazyFunction

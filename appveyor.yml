@@ -11,9 +11,9 @@ install:
   - cmd: for /F "tokens=*" %i in (requirements.txt) do conda install -y -q -c conda-forge %i
   - cmd: conda install -q -y -c conda-forge pytables nodejs 
   - cmd: pip install travis-sphinx codacy-coverage python-coveralls
-
-build:
   - cmd: pip install .
+
+build: false
 
 test_script:
   - cmd: nosetests --with-coverage 
