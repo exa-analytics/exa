@@ -13,8 +13,7 @@ from setuptools.command.egg_info import egg_info
 
 name = "exa"
 description = "A framework for data processing, computation, and visualization."
-datadir = "data"
-nbdir = "static"
+staticdir = "static"
 readme = "README.md"
 requirements = "requirements.txt"
 verfile = "_version.py"
@@ -84,8 +83,8 @@ def js_prerelease(command, strict=False):
 class NPM(Command):
     description = "Install package.json dependencies using npm."
     user_options = []
-    targets = [os.path.join(root, name, nbdir, "extension.js"),
-               os.path.join(root, name, nbdir, "index.js")]
+    targets = [os.path.join(root, name, staticdir, "extension.js"),
+               os.path.join(root, name, staticdir, "index.js")]
 
     def initialize_options(self):
         pass
@@ -137,12 +136,12 @@ setup_args = {
     'include_package_data': True,
     'data_files': [
         ("share/jupyter/nbextensions/jupyter-" + name, [
-            os.path.join(name, nbdir, "extension.js"),
-            os.path.join(name, nbdir, "index.js"),
-            os.path.join(name, nbdir, "index.js.map")
+            os.path.join(name, staticdir, "extension.js"),
+            os.path.join(name, staticdir, "index.js"),
+            os.path.join(name, staticdir, "index.js.map")
         ]),
     ],
-    'package_data': {name: [datadir + "/*"]},
+    'package_data': {name: [staticdir + "/*"]},
     'include_package_data': True,
     'install_requires': dependencies,
     'packages': find_packages(),
