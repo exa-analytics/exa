@@ -7,9 +7,8 @@ environment:
 
 install:
   - cmd: call %CONDA_INSTALL_LOCN%\Scripts\activate.bat
-  - cmd: conda update -q -y --all
-  - cmd: for /F "tokens=*" %i in (requirements.txt) do conda install -y -q -c conda-forge %i
-  - cmd: conda install -q -y -c conda-forge pytables nodejs 
+  - cmd: conda update -q --all
+  - cmd: conda install -q -c conda-forge numpy scipy matplotlib seaborn networkx sqlalchemy paramiko pandas sympy notebook nose numba ipywidgets ipyparallel dask distributed mpi4py h5py pytables six sphinx sphinx_rtd_theme pandoc nbsphinx nodejs
   - cmd: pip install travis-sphinx codacy-coverage python-coveralls
   - cmd: pip install .
 

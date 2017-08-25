@@ -58,35 +58,35 @@ class DOMWidgetTest(DOMWidget):
 class TestWidgets(TestCase):
     """
     """
-    def setUp(self):
-        """
-        """
-        ret = check_output(["jupyter", "nbconvert", "--exec",
-                            "--ExecutePreprocessor.kernel_name=python", nbpath],
-                           cwd=cwd, **prckws)
-        print(ret)
-        self.expected = ["False", "True", "DOMWidgetTest value", "test", "test"]
-        self.expected_nodom = self.expected[:]
-        self.expected_nodom[1] = "False"
-
-    def test_value_check(self):
-        """
-        """
-        try:
-            with open(tmppath) as f:
-                result = [line.strip() for line in f.readlines()]
-            check = result == self.expected
-            if check == False:
-                check = result == self.expected_nodom
-            self.assertTrue(check)
-        except Exception as e:
-            self.fail(msg=str(e))
-
-    def tearDown(self):
-        """
-        """
-        try:
-            os.remove(tmppath)
-            os.remove(htmlpath)
-        except Exception as e:
-            self.fail(msg=str(e))
+    pass
+#    def setUp(self):
+#        """
+#        """
+#        ret = check_output(["jupyter", "nbconvert", "--exec",
+#                            "--ExecutePreprocessor.kernel_name=python", nbpath],
+#                           cwd=cwd, **prckws)
+#        self.expected = ["False", "True", "DOMWidgetTest value", "test", "test"]
+#        self.expected_nodom = self.expected[:]
+#        self.expected_nodom[1] = "False"
+#
+#    def test_value_check(self):
+#        """
+#        """
+#        try:
+#            with open(tmppath) as f:
+#                result = [line.strip() for line in f.readlines()]
+#            check = result == self.expected
+#            if check == False:
+#                check = result == self.expected_nodom
+#            self.assertTrue(check)
+#        except Exception as e:
+#            self.fail(msg=str(e))
+#
+#    def tearDown(self):
+#        """
+#        """
+#        try:
+#            os.remove(tmppath)
+#            os.remove(htmlpath)
+#        except Exception as e:
+#            self.fail(msg=str(e))
