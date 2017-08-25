@@ -27,7 +27,6 @@ var jsexports = {};
 var pyexports = {};
 
 
-
 /**
  * Python API Builder Widget View
  *
@@ -71,12 +70,12 @@ function analyze_object(obj) {
         args = [];
     }
 
-    var methods = Object.getOwnPropertyNames(new obj());
-
-//    try {
-//        methods = Object.getOwnPropertyNames(new obj());
-//    }
-//    finally {}
+    var methods = [];
+    try {
+        methods = Object.getOwnPropertyNames(new obj());
+    }
+    finally {
+    }
 
     return {
         args: args,
@@ -142,7 +141,7 @@ function create_mv(name, obj) {
  * content powered by JavaScript in the Jupyter notebook, with the data
  * coming from a Python data processing backend.
  */
-function analyze_library(libname, library, ignore) {
+function analyze_library(libname, library) {
     console.log("Analyzing the ", libname, " library/function/class");
     // If the library is actually just a function things are easier to
     // handle so we check for that first.
@@ -157,13 +156,13 @@ function analyze_library(libname, library, ignore) {
         var topname = topnames[i];
         var topobj = library[topname];
         var prototype = Object.getPrototypeOf(topobj);
-//        if (prototype.hasOwnProperty("constructor")) {
-//            var skeleton = analyze_object(topobj);
-//            var mvclasses = create_mv(topname, topobj);
-//            jsexports[topname+"View"] = mvclasses.view;
-//            jsexports[topname+"Model"] = mvclasses.model;
-//            pyexports[topname] = skeleton;
-//        }
+        if (prototype.hasOwnProperty("constructor")) {
+            var skeleton = analyze_object(topobj);
+            var mvclasses = create_mv(topname, topobj);
+            jsexports[topname+"View"] = mvclasses.view;
+            jsexports[topname+"Model"] = mvclasses.model;
+            pyexports[topname] = skeleton;
+        }
     }
 }
 
@@ -178,9 +177,8 @@ function build() {
     console.log("Starting API construction...");
     for (var libname in base.libraries) {
         if (base.libraries.hasOwnProperty(libname)) {
-            var library = base.libraries[libname].lib;
-            var ignore = base.libraries[libname].ignore;
-            analyze_library(libname, library, ignore);
+            var library = base.libraries[libname];
+            analyze_library(libname, library);
         }
     }
 }
@@ -201,10 +199,6 @@ jsexports['APIBuilderModel'] = APIBuilderModel;
 console.log("SUMMARY");
 console.log(jsexports);
 console.log(pyexports);
-console.log(APIBuilderView);
-console.log(APIBuilderModel);
-
-console.log(base.libraries.three);
 
 
 module.exports = jsexports;

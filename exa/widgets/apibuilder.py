@@ -7,7 +7,6 @@ API Builder
 This module dynamically builds an API for available JavaScript libraries.
 """
 import sys
-from IPython.display import display
 from ipywidgets import DOMWidget, Widget, widget_serialization
 from traitlets import Unicode, Any
 from exa.widgets import jsver, jsmod
@@ -78,7 +77,6 @@ class APIBuilder(Widget):
 
 api = APIBuilder()
 api._ipython_display_()
-#display(api)
 
 
 

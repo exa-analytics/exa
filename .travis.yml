@@ -20,9 +20,9 @@ install:
   - conda install -q python=$TRAVIS_PYTHON_VERSION
   - conda install -q -c conda-forge `cat requirements.txt`
   - conda install -q -c conda-forge pytables
+  - conda install -q -c cpcloud nodejs npm
   - pip install travis-sphinx codacy-coverage python-coveralls
   - pip install .
-  - cd js; ./npminstall.sh; ./makedocs.sh; cd ../;
 
 script:
   - nosetests --with-coverage

@@ -13,7 +13,7 @@
  */
 "use strict";
 var three = require("three");
-var trackballcontrols = require("three-trackballcontrols");
+//var trackballcontrols = require("three-trackballcontrols");
 //var d3 = require("d3");
 
 var module_version = "^0.4.0";
@@ -29,8 +29,8 @@ module.exports = {
     },
 
     libraries: {
-        three: {lib: three, ignore: ["VideoTexture"]},
-        trackballcontrols: {lib: trackballcontrols, ignore: []}
-    //    d3: d3
+        three: three
+        //trackballcontrols: trackballcontrols,
+        //d3: d3
     }
 };

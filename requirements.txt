@@ -15,6 +15,7 @@ ipyparallel
 dask
 distributed
 mpi4py
+h5py
 six
 sphinx
 sphinx_rtd_theme
