@@ -72,10 +72,16 @@ function analyze_object(obj) {
 
     var methods = [];
     try {
-        methods = Object.getOwnPropertyNames(new obj());
+        var inst = new obj();
+        methods = Object.getOwnPropertyNames(inst);
+    } catch (err) {
+        console.log(err);
     }
-    finally {
-    }
+//    try {
+//        methods = Object.getOwnPropertyNames(new obj());
+//    }
+//    finally {
+//    }
 
     return {
         args: args,

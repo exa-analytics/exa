@@ -1,22 +1,15 @@
 envivronment:
-  global:
-    # SDK v7.0 MSVC Express 2008's SetEnv.cmd script will fail if the
-    # /E:ON and /V:ON options are not enabled in the batch script intepreter
-    # See: http://stackoverflow.com/a/13751649/163740
-    CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\appveyor\\run_with_env.cmd"
-
   matrix:
     - PYTHON_VERSION: "3.6"
-      PYTHON_ARCH: "64"
-      CONDA_PY: "36"
-      CONDA_INSTALL_LOCN: "C:\\Miniconda36-x64"
+    - PYTHON_ARCH: "64"
+    - CONDA_PY: "36"
+    - CONDA_INSTALL_LOCN: "C:\\Miniconda36-x64"
 
 install:
   - cmd: call %CONDA_INSTALL_LOCN%\Scripts\activate.bat
   - cmd: conda update -q -y --all
   - cmd: for /F "tokens=*" %i in (requirements.txt) do conda install -y -q -c conda-forge %i
-  - cmd: conda install -q -y -c conda-forge pytables 
-  - cmd: conda install -q -y -c cpcloud nodejs npm
+  - cmd: conda install -q -y -c conda-forge pytables nodejs 
   - cmd: pip install travis-sphinx codacy-coverage python-coveralls
 
 build:
