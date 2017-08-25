@@ -77,6 +77,7 @@ class APIBuilder(Widget):
 
 api = APIBuilder()
 api._ipython_display_()
+api.send({"suff": "things"})
 
 
 

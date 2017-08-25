@@ -41,8 +41,8 @@ var APIBuilderView = ipy.WidgetView.extend({
         this.send({'method': "build", 'content': pyexports});
     },
 
-    on_msg: function(args) {
-        console.log("MESSAGE RECIEVED....", args);
+    on_custom: function(content) {
+        console.log("custom msg...", content);
     }
 });
 
@@ -71,12 +71,12 @@ function analyze_object(obj) {
     }
 
     var methods = [];
-    try {
-        var inst = new obj();
-        methods = Object.getOwnPropertyNames(inst);
-    } catch (err) {
-        console.log(err);
-    }
+//    try {
+//        var inst = new obj();
+//        methods = Object.getOwnPropertyNames(inst);
+//    } catch (err) {
+//        console.log(err);
+//    }
 //    try {
 //        methods = Object.getOwnPropertyNames(new obj());
 //    }
