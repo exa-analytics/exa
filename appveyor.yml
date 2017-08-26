@@ -16,6 +16,3 @@ build: false
 
 test_script:
   - cmd: nosetests --with-coverage 
-
-after_test:
-  - cmd: python-codacy-coverage -r coverage.xml
