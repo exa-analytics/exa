@@ -1,15 +1,34 @@
 environment:
   matrix:
-    - PYTHON_VERSION: "3.6"
-    - PYTHON_ARCH: "64"
-    - CONDA_PY: "36"
-    - CONDA_INSTALL_LOCN: "C:\\Miniconda36-x64"
+    - PYTHON_VERSION: 2.7
+      PYTHON_ARCH: 32
+      CONDA_PY: 27
+      CONDA_INSTALL_LOCN: C:\Miniconda
+    - PYTHON_VERSION: 3.5
+      PYTHON_ARCH: 32
+      CONDA_PY: 35
+      CONDA_INSTALL_LOCN: C:\Miniconda35
+    - PYTHON_VERSION: 3.6
+      PYTHON_ARCH: 32
+      CONDA_PY: 36
+      CONDA_INSTALL_LOCN: C:\Miniconda36
+    - PYTHON_VERSION: 2.7
+      PYTHON_ARCH: 64
+      CONDA_PY: 27
+      CONDA_INSTALL_LOCN: C:\Miniconda-x64
+    - PYTHON_VERSION: 3.5
+      PYTHON_ARCH: 64
+      CONDA_PY: 35
+      CONDA_INSTALL_LOCN: C:\Miniconda35-x64
+    - PYTHON_VERSION: 3.6
+      PYTHON_ARCH: 64
+      CONDA_PY: 36
+      CONDA_INSTALL_LOCN: C:\Miniconda36-x64
 
 install:
   - cmd: call %CONDA_INSTALL_LOCN%\Scripts\activate.bat
   - cmd: conda update -q -y --all
   - cmd: conda install -q -y -c conda-forge numpy scipy matplotlib seaborn networkx sqlalchemy paramiko pandas sympy notebook nose numba ipywidgets ipyparallel dask distributed mpi4py h5py pytables six sphinx sphinx_rtd_theme pandoc nbsphinx nodejs
-  - cmd: pip install travis-sphinx codacy-coverage python-coveralls
   - cmd: pip install .
 
 build: false
