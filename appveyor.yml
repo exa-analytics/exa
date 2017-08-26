@@ -16,10 +16,6 @@ build: false
 
 test_script:
   - cmd: nosetests --with-coverage 
-  - cmd: coverage xml
-  - cmd: travis-sphinx -n build
 
 after_test:
-  - cmd: coveralls
   - cmd: python-codacy-coverage -r coverage.xml
-  - cmd: travis-sphinx -n deploy
