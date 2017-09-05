@@ -15,8 +15,8 @@
  */
 "use strict";
 var _ = require("underscore");
-//var ipy = require("@jupyter-widgets/base");    // >=7.x
-var ipy = require("jupyter-js-widgets");    // <=6.x
+var ipy = require("@jupyter-widgets/base");    // >=7.x
+//var ipy = require("jupyter-js-widgets");    // <=6.x
 var base = require("./base.js");
 // These variables store dynamically created models and views (for backbone.js)
 // The exports variable contains (Backbone.js via ipywidgets' widgetsnbextension

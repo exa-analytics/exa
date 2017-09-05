@@ -4,11 +4,13 @@
 """
 Editor
 ####################################
-The :class:`~exa.core.editor.Editor` class is a way for programmatic manipulation
-of text files (read in from disk). The purpose of this class is to facilitate
-conversion of :class:`~exa.core.container.Container` objects to text (and vice
-versa). This class also provides the base for text file parsing classes in
-:mod:`~exa.core.parsing`.
+This module provides the :class:`~exa.core.editor.Editor` object which is a
+programmatic way of manipulating small to medium sized text files that contain
+an irregular (or semi-regular) structure (i.e. they are not of a standardized
+format such as CSV). For large text files Python provides other mechanisms for
+performant reading and writing (e.g. pandas.read_csv). The
+:class:`~exa.core.editor.Editor` is the base class for building text file
+parsers.
 
 .. code-block:: python
 
@@ -19,16 +21,12 @@ versa). This class also provides the base for text file parsing classes in
         pass
     if 'text' in editor:            # True if "text" appears on any line
         pass
-
-Text lines are stored in memory; file handles are only open during reading and
-writing. For large repetitive files, memoization can reduce the memory footprint
-(see the **as_interned** kwarg).
-
-Warning:
-    The :class:`~exa.core.editor.Editor` is not a fully-featured text editor.
+    editor.find("text", "to find")  # Returns a dictionary of keys and entries found
+    editor.regex("pattern")         # Same as find but using regular expressions
 
 See Also:
-    :mod:`~exa.core.parsing`
+    Specific editors for parsing and composition can be found in
+    :mod:`~exa.core.parser` and :mod:`~exa.core.composer`, respectively.
 """
 import os, re, sys, bz2, gzip, six, json
 import pandas as pd
@@ -46,8 +44,7 @@ if not hasattr(bz2, "open"):
 
 class Editor(Base):
     """
-    In memory text file-like object used to facilitate data parsing and
-    container to text conversion.
+    An in memory representation of a text file.
 
     Args:
         data: File path, text, stream, or archived text file
@@ -59,7 +56,7 @@ class Editor(Base):
         ignore_warning (bool): Ignore file path warning (default false)
 
     Attributes:
-        cursor (int): Line number of cursor
+        cursor (int): Cursor position (line number)
         _fmt (str): Format string for display ('repr')
         _tmpl (str): Regex for identifying templates
 

@@ -2,7 +2,7 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Abstract Base Class for Core Objects
+Strongly Typed Classes
 #######################################
 This module provides a standard base class for all core objects. Core objects
 are required to have an implementation of the :func:`~exa.core.base.Base.info`

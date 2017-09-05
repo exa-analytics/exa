@@ -11,7 +11,7 @@ from exa.typed import TypedProperty, yield_typed, Typed
 
 
 class Klass(Typed):
-    """Test static :class:`~exa.typed.TypedPropertyibute` usage."""
+    """Test static :class:`~exa.typed.TypedProperty` usage."""
     _getters = ("get", )
     foo = TypedProperty(int, sf=lambda self: setattr(self, "count", getattr(self, "count") + 1))
     bar = TypedProperty((str, float), sf="increment")

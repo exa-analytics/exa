@@ -9,7 +9,6 @@ The version can be checked any of the following ways.
 .. code-block:: Python
 
     >>> exa.__verion__
-    >>> help(exa)
     >>> exa._version.version_info
 """
 version_info = (0, 4, 0)

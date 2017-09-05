@@ -5,7 +5,10 @@
 Parsing Editors
 ####################################
 This module provides editors tailored to parsing small/medium sized text files
-that do not have a consistent structure (like, for example, comma-separated
+that do not have a consistent structure.
+
+
+####
 value - CSV - files). Generally, the most difficult aspect of parsing such
 files (into appropriate data objects) is isolating the relevant text segment or
 segments. Once the text is isolated, an algorithm can usually be devised to

@@ -34,7 +34,7 @@ class SharedState(object):
         obj0.value is obj1.value    # True
 
     Note:
-        This is sometimes called the Borg design pattern
+        This is sometimes called the Borg design pattern.
     """
     __shared_state = {}
 
