@@ -2,70 +2,83 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Typed Attribute Infrastructure
+Strongly Typed Class Attributes
 #####################################
-This module provides a mechanism for dynamically creating class properties
-that enforce their attribute's type. The :func:`~exa.typed.typed_property`
-function essentially creates a set of ``property`` related methods. The
-following comparison can be made.
+This module provides a mechanism for enforcing class attribute types.
+Knowing (and/or converting) variable types is useful for building high
+performance workflows and algorithms. This feature is leveraged by
+:class:`~exa.core.container.Container` objects for data organization,
+analysis, and visualization.
 
 .. code-block:: python
 
-    class Klass:
-        foo = typed_property("foo", ptypes)    # Where ptypes is a type or list of types
+    class MyClass(Typed):
+        myint = Typed(int, docs="Integer")
 
-The above is the same as the following.
+The :class:`~exa.typed.Typed` object is both a class and a callable. The above
+class definition essentially creates the following class definition.
 
 .. code-block:: python
 
-    class Klass:
+    class MyClass(object):
         @property
-        def foo(self):
-            return self._foo
+        def myint(self):
+            return self._myint
 
-        @foo.setter
-        def foo(self, value):
-            if isinstance(value, ptypes):
-                self._foo = value
+        @myint.setter
+        def myint(self, value):
+            if not isinstance(value, int):
+                try:
+                    value = int(value)
+                except Exception as e:
+                    raise TypeError("Cannot convert value") from e
+            self._myint = value
 
-        @foo.deleter
-        def foo(self):
-            del self._foo
-
-In addition to dynamically enforcing types using the ``property`` machinery of
-Python, attributes created by :func:`~exa.typed.typed_property` enable
-additional features such as lazy (automatic) assignment and triggering of other
-method or function calls. Example usage can be found in the tests
-(:mod:`~exa.tests.test_typed`).
-
-See Also:
-    :class:`~exa.core.base.Base`
+Strongly typed attributes also provide a mechanism for triggering other
+function calls (of the class to which they belong). Example usage can be found
+in :mod:`~exa.tests.test_typed`.
 """
 import six
 from abc import ABCMeta
-from .functions import LazyFunction
 
 
-def yield_typed(obj):
+class Attr(object):
     """
-    Iterate over property names and type definitions.
+    """
+    pass
 
-    Strongly typed properties are distinguished from standard property
-    objects by the inclusion of the string '__typed__' in the ``__doc__``
-    attribute of the (property) object.
+
+class Meta(ABCMeta):
+    """
+    Metaclass that parses a class definition and creates strongly
+    typed attributes as properties on import.
 
     Args:
-        obj: Instance of a class or the class itself.
+        flags (int):
 
-    Returns:
-        iterator: List of (name, types) tuples
+    See Also:
+        :class:`~exa.typed.Typed`
     """
-    if not isinstance(obj, type):
-        obj = obj.__class__
-    for name in dir(obj):
-        attr = getattr(obj, name)
-        if isinstance(attr, property) and "__typed__" in attr.__doc__:
-            yield (name, attr)
+    def __new__(mcs, name, bases, namespace, flags=None):
+        for attr_name, attr in namespace.items():
+            if isinstance(attr, TypedProperty):
+                # Here we get the attribute name from the class definition
+                # (in kwargs) and call the typed_property by calling
+                # TypedProperty (which is a LazyFunction: calling a it
+                # calls typed_property
+                namespace[attr_name] = attr(name=attr_name)
+        return super(TypedMeta, mcs).__new__(mcs, name, bases, namespace)
+
+
+class Typed(six.with_metaclass(Meta, object)):
+    """
+    """
+    pass
+
+
+Attr = Attr()
+
+
 
 
 def typed_property(name, ptypes, docs=None, sf=None, *args, **kwargs):
@@ -219,3 +232,27 @@ class Typed(six.with_metaclass(TypedMeta, object)):
             foo = TypedProperty(dict)
     """
     pass
+
+
+def yield_typed(obj):
+    """
+    Iterate over property names and type definitions.
+
+    Strongly typed properties are distinguished from standard property
+    objects by the inclusion of the string '__typed__' in the ``__doc__``
+    attribute of the (property) object.
+
+    Args:
+        obj: Instance of a class or the class itself.
+
+    Returns:
+        iterator: List of (name, types) tuples
+    """
+    if not isinstance(obj, type):
+        obj = obj.__class__
+    for name in dir(obj):
+        attr = getattr(obj, name)
+        if isinstance(attr, property) and "__typed__" in attr.__doc__:
+            yield (name, attr)
+
+

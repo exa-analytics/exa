@@ -33,7 +33,7 @@ def _jupyter_nbextension_paths():
              'require': "jupyter-exa/extension"}]
 
 
-import seaborn    # Prevent nosetest error
+import seaborn    # Prevents nosetest error (Python 3.5, 3.6; Linux only)
 from ._version import __version__
 from .typed import TypedProperty
 from .functions import LazyFunction
