@@ -3,256 +3,253 @@
 # Distributed under the terms of the Apache License 2.0
 """
 Strongly Typed Class Attributes
-#####################################
-This module provides a mechanism for enforcing class attribute types.
-Knowing (and/or converting) variable types is useful for building high
-performance workflows and algorithms. This feature is leveraged by
-:class:`~exa.core.container.Container` objects for data organization,
-analysis, and visualization.
+######################################
+This module provides a typed attribute class and class decorator/base class for
+creating classes with type enforced attributes. Enforcing an attribute's type is
+handled by Python's property mechanism (the property's set function checks the
+value's type). A simple usage example follows.
+
+.. code-block:: Python
+
+    @typed
+    class Foo(object):
+        bar = Typed(int, doc="Always an integer type")
+
+The simple code example generates code similar to the following when the module
+is executed (i.e. imported).
 
 .. code-block:: python
 
-    class MyClass(Typed):
-        myint = Typed(int, docs="Integer")
-
-The :class:`~exa.typed.Typed` object is both a class and a callable. The above
-class definition essentially creates the following class definition.
-
-.. code-block:: python
-
-    class MyClass(object):
+    class Foo(object):
         @property
-        def myint(self):
-            return self._myint
+        def bar(self):
+            return self._bar
 
-        @myint.setter
-        def myint(self, value):
+        @bar.setter
+        def bar(self, value):
             if not isinstance(value, int):
                 try:
                     value = int(value)
                 except Exception as e:
                     raise TypeError("Cannot convert value") from e
-            self._myint = value
+            self._bar = value
 
-Strongly typed attributes also provide a mechanism for triggering other
-function calls (of the class to which they belong). Example usage can be found
-in :mod:`~exa.tests.test_typed`.
+The :class:`~exa.typed.Typed` object additionally provides mechanisms for
+triggering function calls before and after get, set, and delete, and attempts
+automatic conversion (as shown above) for all types supported for a given
+attribute.
 """
 import six
-from abc import ABCMeta
 
 
-class Attr(object):
+def _typed_from_items(items):
     """
-    """
-    pass
-
-
-class Meta(ABCMeta):
-    """
-    Metaclass that parses a class definition and creates strongly
-    typed attributes as properties on import.
-
-    Args:
-        flags (int):
+    Construct strongly typed attributes (properties) from a dictionary of
+    name and :class:`~exa.typed.Typed` object pairs.
 
     See Also:
-        :class:`~exa.typed.Typed`
+        :func:`~exa.typed.typed`
     """
-    def __new__(mcs, name, bases, namespace, flags=None):
-        for attr_name, attr in namespace.items():
-            if isinstance(attr, TypedProperty):
-                # Here we get the attribute name from the class definition
-                # (in kwargs) and call the typed_property by calling
-                # TypedProperty (which is a LazyFunction: calling a it
-                # calls typed_property
-                namespace[attr_name] = attr(name=attr_name)
-        return super(TypedMeta, mcs).__new__(mcs, name, bases, namespace)
+    dct = {}
+    for name, attr in items:
+        if isinstance(attr, Typed):
+            dct[name] = attr(name)
+    return dct
 
 
-class Typed(six.with_metaclass(Meta, object)):
+def _typed(cls):
     """
-    """
-    pass
-
-
-Attr = Attr()
-
-
-
-
-def typed_property(name, ptypes, docs=None, sf=None, *args, **kwargs):
-    """
-    Create a class attribute that enforces types and support lazy (automatic)
-    assignment.
-
-    This function can be used as part of the class definition similarly to the
-    ``property`` function of the standard library.
-
-    .. code-block:: python
-
-        class Klass(object):
-            typed = typed_property("typed", int, "an int")
-
-            def __init__(self, typed=None):
-                self.typed = typed
-
-        inst = Klass("42")
-        inst.typed           # Outputs integer 42
-
-    Examples of more advanced usage can be found in :mod:`~exa.tests.test_typed`.
-
-    Args:
-        name (str): Variable name (used to build the property)
-        ptypes (type, iterable): Type or list of types
-        docs (str): Docstring
-        sf (str, function): Function name or function to call after attribute is set
-
-    Note:
-        Properties created by this function have the docstring containing "__typed__"
-        to signify that this is not a 'normal' property object.
+    Class decorator that updates a class definition with strongly typed
+    property attributes.
 
     See Also:
-        See the module documentation for :mod:`~exa.typed`.
+        :func:`~exa.typed.typed`
     """
-    #if isinstance(ptypes, dict):
-
-    if not isinstance(ptypes, (tuple, list)):
-        ptypes = (ptypes, )
-    else:
-        ptypes = tuple(ptypes)
-    docs = "__typed__" if docs is None else docs + "\n\n__typed__"
-    # The private attribute is where the data content is actually stored
-    pname = '_' + name
-    # Property getter retrieves the private attribute that stores the data
-    def getter(self):
-        # If not set or set to none, try to compute the value on-the-fly
-        if ((not hasattr(self, pname) or getattr(self, pname) is None)
-            and hasattr(self, "_getters")):
-            for prefix in self._getters:
-                cmd = "{}{}".format(prefix, pname)
-                # Get the name of the compute function
-                if hasattr(self, cmd):
-                    getattr(self, cmd)()    # Expect the function to set the value
-                    break
-            # If the attribute wasn't set or is still none, return none
-            if not hasattr(self, pname) or getattr(self, pname) is None:
-                return None
-        return getattr(self, pname)
-    # The setter sets the private attribute with data
-    def setter(self, obj):
-        # Attempt to convert types
-        if not isinstance(obj, ptypes) and obj is not None:
-            for ptype in ptypes:
-                try:
-                    obj = ptype(obj)
-                    break
-                except Exception:  # Many different exceptions could be raised
-                    pass
-            else:
-                raise TypeError("Cannot convert type {} to {}.".format(type(obj), ptypes))
-        object.__setattr__(self, pname, obj)
-        # Finally call the sf method/function
-        if isinstance(sf, str):
-            getattr(self, sf)()
-        elif callable(sf):
-            try:
-                sf()    # Assume static function (e.g. staticmethod)
-            except TypeError:
-                sf(self)    # Else class method
-    # Provide a deleter for deletion of the actual data
-    def deleter(self):
-        delattr(self, pname)    # Allows for dynamic attribute deletion
-    return property(getter, setter, deleter, doc=docs)
+    for name, attr in _typed_from_items(vars(cls).items()).items():
+        setattr(cls, name, attr)
+    return cls
 
 
-class TypedProperty(LazyFunction):
+def typed(cls=None, **kwargs):
     """
-    Helper for creating typed attributes. Accepts the same arguments as
-    :func:`~exa.typed.typed_property`. Example usage is as follows. For
-    more typical usage see :class:`~exa.core.base.Base`.
+    Class decorator used to create a class with typed attributes and other
+    features.
 
-    .. code-block:: python
+    .. code-block:: Python
 
-        import six
-        class Klass(six.with_metaclass(TypedMeta, object)):
-            foo = TypedProperty(str, docs="foo attr")
-            bar = TypedProperty(int, sf=lambda: print("bar set"))
-
-    See Also:
-        More common usage examples can be found in the docs related to
-        :class:`~exa.typed.Typed` and :class:`~exa.core.base.Base`.
-    """
-    def __init__(self, ptypes, docs=None, sf=None):
-        super(TypedProperty, self).__init__(fn=typed_property, ptypes=ptypes, sf=sf, docs=docs)
-
-
-class TypedMeta(ABCMeta):
-    """
-    Metaclass for preparing strongly typed property attributes.
-    Properties are attached to class definitions; this metaclass automatically
-    creates type enforcing properties (see :func:`~exa.typed.typed_property`)
-    for all class attributes defined as follows. Typical usage is through
-    either the :class:`~exa.typed.Typed` object or :class:`~exa.core.base.Base`.
-
-    .. code-block:: python
-
-        import six   # Python 2 compatibility
-        class Klass(six.with_metaclass(TypedMeta, bases)):
-            attr = TypedProperty(*args, **kwargs)
-    """
-    def __new__(mcs, name, bases, namespace):
-        for attr_name, attr in namespace.items():
-            if isinstance(attr, TypedProperty):
-                # Here we get the attribute name from the class definition
-                # (in kwargs) and call the typed_property by calling
-                # TypedProperty (which is a LazyFunction: calling a it
-                # calls typed_property
-                namespace[attr_name] = attr(name=attr_name)
-        return super(TypedMeta, mcs).__new__(mcs, name, bases, namespace)
-
-
-class Typed(six.with_metaclass(TypedMeta, object)):
-    """
-    A concrete base class that supports strongly attributes, used when
-    subclassing ``object`` is all that is needed (as the base).
-
-    .. code-block:: python
-
-        class Klass(Typed):
-            foo = TypedProperty(dict)
-
-    The above is functionally the same (but shorter) than the following,
-    more explicit, code.
-
-    .. code-block:: python
-
-        import six
-        class Klass(six.with_metaclass(TypedMeta, object)):
-            foo = TypedProperty(dict)
-    """
-    pass
-
-
-def yield_typed(obj):
-    """
-    Iterate over property names and type definitions.
-
-    Strongly typed properties are distinguished from standard property
-    objects by the inclusion of the string '__typed__' in the ``__doc__``
-    attribute of the (property) object.
+        @typed
+        class Foo(object):
+            bar = Typed(int, doc="Always of type int")
 
     Args:
-        obj: Instance of a class or the class itself.
+        cls (type): Class with 'Typed' attributes
 
     Returns:
-        iterator: List of (name, types) tuples
+        cls (type): Modified class definition
     """
-    if not isinstance(obj, type):
-        obj = obj.__class__
-    for name in dir(obj):
-        attr = getattr(obj, name)
-        if isinstance(attr, property) and "__typed__" in attr.__doc__:
-            yield (name, attr)
+    if isinstance(cls, type):
+        return _typed(cls)
+    return _typed
 
 
+class Typed(object):
+    """
+    A representation of a strongly typed class attribute.
+
+    .. code-block:: Python
+
+        @typed
+        class Strong(object):
+            foo = Typed(int, doc="my int")
+
+    The above example creates a class object that has a property-like attribute
+    which requires its value to be of type int. Additional arguments provide
+    the ability to have the property's getter, setter, and deleter functions call
+    other functions or methods of the class. If provided by the class, strongly
+    typed attributes created by here automatically attempt to to set themselves
+    (see below).
+
+    .. code-block:: Python
+
+        @typed
+        class Strong(object):
+            _setters = ("_set", )
+            foo = Typed(int, doc="my int")
+
+            def _set_foo(self):
+                self.foo = 42
+
+    By defining a `_getters` class attribute the strongly typed property knows that,
+    if the foo attribute's value (i.e. `_foo`) is not defined (or is defined as None),
+    that the property getter should first call the `_set_foo` class method, and after
+    it should proceed with getting the property value. Note that `_set_foo` cannot
+    accept arguments (it must be 'automatic').
+
+    Args:
+        types (iterable, type): Iterable of types or type
+        doc (str): Documentation
+        autoconv (True): Attempt automatic type conversion when setting
+        pre_set (callable, str): Callable or class method name called before setter
+        post_set (callable, str): Callabel or class method name called after setter
+        pre_get (callable, str): Callable or class method name called before getter
+        pre_del (callable, str): Callable or class method name called before setter
+        post_del (callable, str): Callabel or class method name called after setter
+    """
+    def __call__(self, name):
+        """
+        Construct the property.
+
+        Args:
+            name (str): Attribute (property) name
+
+        Returns:
+            prop (property): Custom property definition with support for typing
+        """
+        priv = "_" + name    # Reference to the variable's value
+        # The following is a definition of a Python property. Properties have
+        # get, set, and delete functions as well as documentation. The variable
+        # "this" references the class object instance where the property exists;
+        # it does not reference the instance of this ("Typed") class.
+        def getter(this):
+            # If the variable value (reference by priv) does not exist
+            # or is None AND the class has some automatic way of setting the value,
+            # set the value first then proceed to getting it.
+            if (not hasattr(this, priv) or getattr(this, priv)) and hasattr(this, "_setters"):
+                for prefix in self._setters:
+                    cmd = "{}{}".format(prefix, priv)
+                    if hasattr(this, cmd):
+                        getattr(this, cmd)()    # Automatic method call
+                        if hasattr(this, priv):
+                            break
+            # Perform pre-get actions (if any)
+            if isinstance(self.pre_get, str):
+                getattr(this, self.pre_get)()
+            elif callable(self.pre_get):
+                self.pre_get()
+            return getattr(this, priv, None)    # Returns None by default
+
+        def setter(this, value):
+            # If auto-conversion is on and the value is not the correct type (and
+            # also is not None), attempt to convert types
+            if self.autoconv and not isinstance(value, self.types) and value is not None:
+                for t in self.types:
+                    try:
+                        value = t(value)
+                        break
+                    except:    # Catch all exceptions but if conversion fails ...
+                        pass
+                else:          # ... raise a TypeError
+                    raise TypeError("Cannot convert object of type {} to any of {}.".format(type(value), self.types))
+            elif not isinstance(value, self.types):
+                raise TypeError("Object is the wrong type ({})".format(type(value)))
+            # Perform pre-set actions (if any)
+            if isinstance(self.pre_set, str):
+                getattr(this, self.pre_set)()
+            elif callable(self.pre_set):
+                self.pre_set()
+            setattr(this, priv, value)    # Set the property value
+            # Perform post-set actions (if any)
+            if isinstance(self.post_set, str):
+                getattr(this, self.post_set)()
+            elif callable(self.post_set):
+                self.post_set()
+
+        def deleter(this):
+            # Perform pre-del actions (if any)
+            if isinstance(self.pre_del, str):
+                getattr(this, self.pre_del)()
+            elif callable(self.pre_del):
+                self.pre_del()
+            delattr(this, priv)    # Delete the attribute (allows for dynamic naming)
+            # Perform post-del actions (if any)
+            if isinstance(self.post_del, str):
+                getattr(this, self.post_del)()
+            elif callable(self.post_del):
+                self.post_del()
+
+        return property(getter, setter, deleter, doc=self.doc)
+
+    def __init__(self, types, doc=None, autoconv=True, pre_set=None,
+                 post_set=None, pre_get=None, pre_del=None, post_del=None):
+        self.types = types if isinstance(types, (tuple, list)) else (types, )
+        self.doc = doc
+        self.autoconv = autoconv
+        self.pre_set = pre_set
+        self.post_set = post_set
+        self.pre_get = pre_get
+        self.pre_del = pre_del
+        self.post_del = post_del
+
+
+class TypedMeta(type):
+    """
+    A metaclass for creating typed attributes which can be used instead of
+    the class decorator.
+
+    .. code-block:: Python
+
+        class Foo(six.with_metaclass(TypedMeta, object)):
+            bar = Typed(int, doc="Always an int")
+
+    See Also:
+        :func:`~exa.typed.typed`
+    """
+    def __new__(cls, name, bases, namespace):
+        namespace.update(_typed_from_items(namespace.items()))
+        return super(TypedMeta, cls).__new__(cls, name, bases, namespace)
+
+
+class TypedClass(six.with_metaclass(TypedMeta, object)):
+    """
+    A mixin class which can be used to create a class with strongly typed
+    attributes.
+
+    .. code-block:: Python
+
+        class Foo(TypedClass):
+            bar = Typed(int, doc="Still and int")
+
+    See Also:
+        :func:`~exa.typed.typed`
+    """
+    pass

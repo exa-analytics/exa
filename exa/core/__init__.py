@@ -11,8 +11,8 @@ like dataframes.
 
 .. _pandas: http://pandas.pydata.org/
 """
-from .dataframe import DataFrame, Feature
-from .container import Container
-from .editor import Editor
-from .parser import Sections, Parser
-from .composer import Composer
+#from .dataframe import DataFrame, Feature
+#from .container import Container
+#from .editor import Editor
+#from .parser import Sections, Parser
+#from .composer import Composer

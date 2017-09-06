@@ -6,14 +6,14 @@ Tests for :mod:`~exa.mpl`
 #############################################
 Tests for matplotlib wrappers.
 """
-from unittest import TestCase
-from exa.mpl import qualitative, sequential, diverging
-
-
-class TestMPL(TestCase):
-    """Test internal matplotlib configuration."""
-    def test_color_palettes(self):
-        """Test default color palettes."""
-        self.assertTrue(len(qualitative()), 5)
-        self.assertTrue(len(sequential()), 5)
-        self.assertTrue(len(diverging()), 5)
+#from unittest import TestCase
+#from exa.mpl import qualitative, sequential, diverging
+#
+#
+#class TestMPL(TestCase):
+#    """Test internal matplotlib configuration."""
+#    def test_color_palettes(self):
+#        """Test default color palettes."""
+#        self.assertTrue(len(qualitative()), 5)
+#        self.assertTrue(len(sequential()), 5)
+#        self.assertTrue(len(diverging()), 5)
