@@ -4,7 +4,6 @@
 """
 Tests for :mod:`~exa.typed`
 #############################################
-Test
 """
 import six
 from unittest import TestCase

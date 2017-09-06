@@ -35,6 +35,4 @@ def _jupyter_nbextension_paths():
 
 import seaborn    # Prevents nosetest error (Python 3.5, 3.6; Linux only)
 from ._version import __version__
-#from .functions import LazyFunction
-#from .core import (Editor, Sections, Parser, Composer, Container, DataFrame, Feature)
-#from . import widgets
+from .editor import Editor

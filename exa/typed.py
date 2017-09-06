@@ -146,6 +146,7 @@ class Typed(object):
             prop (property): Custom property definition with support for typing
         """
         priv = "_" + name    # Reference to the variable's value
+
         # The following is a definition of a Python property. Properties have
         # get, set, and delete functions as well as documentation. The variable
         # "this" references the class object instance where the property exists;
@@ -154,7 +155,8 @@ class Typed(object):
             # If the variable value (reference by priv) does not exist
             # or is None AND the class has some automatic way of setting the value,
             # set the value first then proceed to getting it.
-            if (not hasattr(this, priv) or getattr(this, priv)) and hasattr(this, "_setters"):
+            if ((not hasattr(this, priv) or getattr(this, priv)) and
+                hasattr(this, "_setters") and isinstance(this._setters, (list, tuple))):
                 for prefix in self._setters:
                     cmd = "{}{}".format(prefix, priv)
                     if hasattr(this, cmd):
