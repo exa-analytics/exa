@@ -45,7 +45,7 @@ class TestEditor(TestCase):
         self.from_file_iso = Editor(self.path, encoding='iso-8859-1')
         self.from_gzip = Editor(self.path + ".gz")
         self.from_bz2 = Editor(self.path + ".bz2")
-        self.from_stream = Editor(StringIO(self.text))
+        self.from_stream = Editor(StringIO(self.text.decode("utf-8", "ignore"))
         self.from_string = Editor(self.text)
         self.from_lines = Editor(self.text.splitlines())
 
