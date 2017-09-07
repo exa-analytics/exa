@@ -46,7 +46,8 @@ def read_file(path, encoding=None):
     read = f.read()
     if encoding is not None:
         read = read.decode(encoding)
-    read = read.decode("utf-8", "ignore")
+    else:
+        read = read.decode("utf-8", "ignore")
     f.close()
     return read.splitlines()
 
