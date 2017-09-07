@@ -2,22 +2,31 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Exa provides containers. Containers are Python classes which store or hold all
-types of data, from numpy arrays to pandas dataframes to scikit images.
-TODO: one sentence container value-add.
+Exa provides a framework for building data specific containers. Containers are
+storage objects which house a collection of data objects (scalars, lists,
+arrays, dataframes, images, etc.) and provide a unified API for processing,
+analysis, and visualization.
 
 Containers can be constructed from well organized data (such as HDF or CSV data
 on disk) or from irregular or semi-regular text files (for example output from
-another software). In order to facilitate the latter, exa provides editors.
-Editors, including parsers and composers can be utilized to programmatically
-manipulated, parse, and compose text files into/out of container objects.
+another software). In order to facilitate the latter, exa provides editors,
+parsers, and composers, which are used to programmatically manipulate text
+data on disk.
 
-Specific data containers can also be used for data visualization. Exa provides
-a widgets mechanism, built upon the `ipywidgets`_ framework for web-based data
-exploration and complex visualizations within the `Jupyter notebook`_.
+Containers plug-in to exa's workflow framework which can be used to construct
+data processing pipelines that are interoperable with external computational
+resources (such as a dedicated computing cluster) and other features such as
+out-of-core processing (for task too large to fit in RAM).
 
-.. _ipywidgets: https://ipywidgets.readthedocs.io/
-.. _Jupyter notebook: https://jupyter.org/
+Note:
+    Exa takes advantage of Python's extensive suite of tools for data science,
+    including the `Jupyter notebook`_, `ipywidgets`_ framework, and `JIT`_
+    compilation provided by `numba`_.
+
+.. _Jupyter notebook: https://jupyter.org
+.. _ipywidgets: https://ipywidgets.readthedocs.io
+.. _JIT: https://en.wikipedia.org/wiki/Just-in-time_compilation
+.. _numba: https://numba.pydata.org
 """
 def _jupyter_nbextension_paths():
     """
@@ -33,6 +42,6 @@ def _jupyter_nbextension_paths():
              'require': "jupyter-exa/extension"}]
 
 
-import seaborn    # Prevents nosetest error (Python 3.5, 3.6; Linux only)
 from ._version import __version__
 from .editor import Editor
+from .container import Container

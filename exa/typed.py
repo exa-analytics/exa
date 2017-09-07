@@ -128,7 +128,8 @@ class Typed(object):
     Args:
         types (iterable, type): Iterable of types or type
         doc (str): Documentation
-        autoconv (True): Attempt automatic type conversion when setting
+        autoconv (bool): Attempt automatic type conversion when setting (default true)
+        allow_none (bool): As an additional type, allow None (default true)
         pre_set (callable, str): Callable or class method name called before setter
         post_set (callable, str): Callabel or class method name called after setter
         pre_get (callable, str): Callable or class method name called before getter
@@ -182,8 +183,12 @@ class Typed(object):
                         pass
                 else:          # ... raise a TypeError
                     raise TypeError("Cannot convert object of type {} to any of {}.".format(type(value), self.types))
-            elif not isinstance(value, self.types):
-                raise TypeError("Object is the wrong type ({})".format(type(value)))
+            # If the value is none and none is not allowed,
+            # or the value is some other type (that is not none) and not of a type
+            # that is allowed, raise an error.
+            elif ((value is None and self.allow_none == False) or
+                  (not isinstance(value, self.types) and value is not None)):
+                raise TypeError("Object is the wrong type ({}) or None isn't allowed.".format(type(value)))
             # Perform pre-set actions (if any)
             if isinstance(self.pre_set, str):
                 getattr(this, self.pre_set)()
@@ -211,11 +216,12 @@ class Typed(object):
 
         return property(getter, setter, deleter, doc=self.doc)
 
-    def __init__(self, types, doc=None, autoconv=True, pre_set=None,
+    def __init__(self, types, doc=None, autoconv=True, pre_set=None, allow_none=True,
                  post_set=None, pre_get=None, pre_del=None, post_del=None):
         self.types = types if isinstance(types, (tuple, list)) else (types, )
         self.doc = doc
         self.autoconv = autoconv
+        self.allow_none = allow_none
         self.pre_set = pre_set
         self.post_set = post_set
         self.pre_get = pre_get

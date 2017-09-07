@@ -70,7 +70,27 @@ class TestEditor(TestCase):
         self.assertListEqual(self.from_file.lines, self.from_string.lines)
         self.assertIsNot(self.from_file.lines, self.from_string.lines)
 
+    def test_str_len(self):
+        """Test string, length."""
+        self.assertEqual(self.text, str(self.from_file))
+        self.assertEqual(len(self.from_file), len(self.text.splitlines()))
 
+    def test_setgetdel(self):
+        """Test setting, getting, deleting, and contains methods."""
+        old = self.from_file[0]
+        self.assertIn(str(old), str(self.from_file))
+        self.from_file[0] = "new"
+        self.assertIn("new", str(self.from_file))
+        del self.from_file[0]
+        self.assertNotIn("new", str(self.from_file))
+        self.from_file[0] = old
+
+    def test_copy(self):
+        """Test that copy correctly copies the lines."""
+        cp = self.from_file.copy()
+        self.assertListEqual(cp.lines, self.from_file.lines)
+        self.assertIsNot(cp.lines, self.from_file.lines)
+        self.assertIsNot(cp, self.from_file)
 
 
 #import os, bz2, gzip, six, shutil

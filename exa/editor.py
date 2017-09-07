@@ -13,7 +13,6 @@ for reading and writing text.
 import os
 import bz2
 import gzip
-from copy import copy, deepcopy
 from io import StringIO, TextIOWrapper
 from .typed import Typed, typed
 # Python 2 compatibility
@@ -48,7 +47,7 @@ def read_file(path, encoding=None):
     if encoding is not None:
         read = read.decode(encoding)
     f.close()
-    return read.splitlines()
+    return str(read, "utf-8").splitlines()
 
 
 def write_file(path, encoding=None):
@@ -67,7 +66,7 @@ class Editor(object):
     Attributes:
         lines (list):
     """
-    def copy(self, *args, **kwargs):
+    def copy(self):
         """
         Create a copy of the current editor's text.
 
@@ -76,9 +75,78 @@ class Editor(object):
         """
         cls = self.__class__
         lines = self.lines[:]
-        return cls(lines, *args, **kwargs)
+        return cls(lines)
 
-    def __init__(self, textobj, encoding=None, nprint=30, fmt="{0}: {1}\n"):
+    def format(self, *args, **kwargs):
+        """
+        Populate the editors templates.
+
+        Templating uses Python's string formatting system.
+
+        Args:
+            args: Args for formatting
+            kwargs: Kwargs for formatting
+            inplace (bool): If True, overwrite editor's contents (default False)
+
+        Returns:
+            formatted: Returns the formatted editor (if inplace is False)
+        """
+        inplace = kwargs.pop("inplace", False)
+        if inplace:
+            self.lines = str(self).format(*args, **kwargs).splitlines()
+        else:
+            cp = self.copy()
+            cp._lines = str(cp).format(*args, **kwargs).splitlines()
+            return cp
+
+#    def write(self, path, *args, **kwargs):
+#        """
+#        Write the editor contents to a file.
+#
+#        Args:
+#            path (str): Full file path (default none, prints to stdout)
+#            args: Positional arguments for formatting
+#            kwargs: Keyword arguments for formatting
+#        """
+#        with open(path, "wb") as f:
+#            if len(args) > 0 or len(kwargs) > 0:
+#                f.write(six.b(str(self.format(*args, **kwargs))))
+#            else:
+#                f.write(six.b(str(self)))
+
+    def __iter__(self):
+        for line in self.lines:
+            yield line
+
+    def __contains__(self, text):
+        if not isinstance(text, str):
+            text = str(text)
+        for line in self.lines:
+            if text in line:
+                yield True
+
+    def __delitem__(self, line):
+        del self.lines[line]
+
+    def __getitem__(self, key):
+        cls = self.__class__
+        # The following makes a copy
+        if isinstance(key, (tuple, list)):
+            lines = [self.lines[i] for i in key]
+        else:
+            lines = self.lines[key]
+        return cls(lines)
+
+    def __setitem__(self, line, value):
+        self.lines[line] = value
+
+    def __str__(self):
+        return "\n".join(self.lines)
+
+    def __len__(self):
+        return len(self.lines)
+
+    def __init__(self, textobj, encoding=None, nprint=30, fmt="{0}: {1}"):
         if isinstance(textobj, str) and os.path.exists(textobj):
             lines = read_file(textobj)
         elif isinstance(textobj, str):
@@ -93,6 +161,18 @@ class Editor(object):
         self.cursor = 0
         self.nprint = nprint
         self.fmt = fmt
+
+    def __repr__(self):
+        r = ""
+        nn = len(self)
+        n = len(str(nn))
+        if nn > 2*self.nprint:
+            r += "\n".join(map(self.fmt.format, enumerate(self.lines[:self.nprint])))
+            r += "...\n".rjust(n, " ")
+            r += "\n".join(map(self.fmt.format, enumerate(self.lines[-self.nprint:])))
+        else:
+            r += "\n".join(map(self.fmt.format, enumerate(self.lines)))
+        return r
 
 
 

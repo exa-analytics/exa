@@ -43,6 +43,13 @@ class Foo3(object):
         self.bar = bar
 
 
+class Foo4(TypedClass):
+    bar = Typed(int, allow_none=False)
+
+    def __init__(self, bar):
+        self.bar = bar
+
+
 class TestTyped(TestCase):
     """
     Test the strongly typed infrastructure provided by :mod:`~exa.typed`.
@@ -70,3 +77,10 @@ class TestTyped(TestCase):
             Foo0("failure")
         with self.assertRaises(TypeError):
             Foo3("failure")
+
+    def test_setting_none(self):
+        """Test that None is always an acceptable typed value."""
+        obj = Foo3(None)
+        self.assertIsNone(obj.bar)
+        with self.assertRaises(TypeError):
+            Foo4(None)
