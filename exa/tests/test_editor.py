@@ -75,6 +75,13 @@ class TestEditor(TestCase):
         self.assertEqual(self.text, str(self.from_file))
         self.assertEqual(len(self.from_file), len(self.text.splitlines()))
 
+    def test_repr(self):
+        """
+        Test that the repr, which has a slightly complex algo, returns a string.
+        """
+        s = repr(self.from_file)
+        self.assertIsInstance(s, str)
+
     def test_setgetdel(self):
         """Test setting, getting, deleting, and contains methods."""
         old = self.from_file[0]

@@ -46,8 +46,9 @@ def read_file(path, encoding=None):
     read = f.read()
     if encoding is not None:
         read = read.decode(encoding)
+    read = read.decode("utf-8", "ignore")
     f.close()
-    return str(read, "utf-8").splitlines()
+    return read.splitlines()
 
 
 def write_file(path, encoding=None):
@@ -61,7 +62,6 @@ class Editor(object):
         data: File path, text, stream, or archived text file
         nprint (int): Number of lines shown by the 'repr'
         encoding (str): File encoding
-        fmt (str): Format for pretty printing
 
     Attributes:
         lines (list):
@@ -146,7 +146,7 @@ class Editor(object):
     def __len__(self):
         return len(self.lines)
 
-    def __init__(self, textobj, encoding=None, nprint=30, fmt="{0}: {1}"):
+    def __init__(self, textobj, encoding=None, nprint=30):
         if isinstance(textobj, str) and os.path.exists(textobj):
             lines = read_file(textobj)
         elif isinstance(textobj, str):
@@ -160,18 +160,18 @@ class Editor(object):
         self.lines = lines
         self.cursor = 0
         self.nprint = nprint
-        self.fmt = fmt
 
     def __repr__(self):
         r = ""
         nn = len(self)
         n = len(str(nn))
+        fmt = "{0}: {1}".format
         if nn > 2*self.nprint:
-            r += "\n".join(map(self.fmt.format, enumerate(self.lines[:self.nprint])))
+            r += "\n".join(map(fmt, range(self.nprint), self.lines[:self.nprint]))
             r += "...\n".rjust(n, " ")
-            r += "\n".join(map(self.fmt.format, enumerate(self.lines[-self.nprint:])))
+            r += "\n".join(map(fmt, range(self.nprint), self.lines[-self.nprint:]))
         else:
-            r += "\n".join(map(self.fmt.format, enumerate(self.lines)))
+            r += "\n".join(map(fmt, range(len(self)), self.lines))
         return r
 
 
