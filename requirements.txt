@@ -21,3 +21,4 @@ sphinx
 sphinx_rtd_theme
 pandoc
 nbsphinx
+tqdm

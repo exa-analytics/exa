@@ -15,24 +15,156 @@ names of different dataframes).
 The :class:`~exa.container.Container` is highly extensible and can be used to
 construct a unified API for a data specific task.
 """
+import pandas as pd
 from .typed import TypedClass, Typed
 
 
 class Container(TypedClass):
-    """
-    A collection of data objects such as scalars, lists, arrays, dataframes,
-    etc.
+    _default_prefix = Typed(str, doc="Default prefix for container args.")
+    metadata = Typed(dict, doc="Metadata dictionary.")
 
-    .. code-block:: Python
+    @classmethod
+    def from_hdf(cls, path, original_types="original_types", spec_store_name="__SPECIAL__"):
+        """
+        Load a container from an HDF file.
+        """
+        forbidden = ("CLASS", "TITLE", "VERSION", "pandas_type", "pandas_version",
+                     "encoding", "index_variety", "name", original_types)
+        kwargs = {}
+        store = pd.HDFStore(path, mode="r")
+        otypes = {}
+        if spec_store_name in store:
+            attrs = store.get_storer(spec_store_name).attrs
+            otypes = getattr(attrs, original_types)
+            kwargs.update({name: item for name, item in vars(attrs).items() if not name.startswith("_") and name not in forbidden})
+        for name, item in store.items():
+            if name == spec_store_name:
+                continue
+            if name in otypes:
+                kwargs[name] = otypes[name](item)
+            else:
+                kwargs[name] = item
+        return cls(**kwargs)
 
-        c = Container(var0, data0=array, data1=image)    # Create container
-        c.info()    # Display information about what data the container holds
-    """
-    metadata = Typed(dict, doc="Metadata can be anything but must be stored as a dict")
+    def to_hdf(self, path, mode='a', append=None, sparse=0.95, original_types="original_types",
+               spec_store_name="__SPECIAL__", **kwargs):
+        """
+        Save the container's data to an HDF file.
+
+        Not all data objects are compatible with the HDF format. Scalars (such as int,
+        floats, etc.) and metadata (dict, if present) are saved
+
+        Args:
+            path (str): File path
+            mode (str): Writing mode
+            append (list): List of data object names which should written in an appendable format
+            sparse (float): Minimum density for sparse data structure
+            spec_store_name (str): Name of the HDF storer where scalars and specials are stored
+            kwargs: Additional keyword arguments to be passed to pandas.HDFStore
+
+        Warning:
+            Existing data objects with the same name in the current HDF file
+            (if applicable) will be overwritten unless the correct mode and append
+            arguments are used. Scalar variables will always be overwritten (if
+            they exist) or added to the collection of existing scalars (if they don't).
+
+        See Also:
+            Additional arguments can be found in pandas.HDFStore documentation.
+        """
+        dct = vars(self)
+        append = [] if append is None else append
+        forbidden = ("CLASS", "TITLE", "VERSION", "pandas_type", "pandas_version",
+                     "encoding", "index_variety", "name", original_types)
+        conv = {'ss': pd.SparseSeries, 's': pd.Series,
+                'sd': pd.SparseDataFrame, 'd': pd.DataFrame}
+        # Since not all data can be saved, filter through and determine what can
+        # be saved and raise a warning for what can't.
+        to_save = {}
+        for key, data in dct.items():
+            # Determine the correct name to use
+            if (key.startswith("_") and hasattr(self.__class__, key[1:]) and
+                isinstance(getattr(self.__class__, key[1:]), property)):
+                name = key[1:]
+            else:
+                name = key
+            # Determine if storage is possible
+            typ = None
+            if isinstance(data, (pd.Series, pd.SparseSeries,
+                                 pd.DataFrame, pd.SparseDataFrame)):
+                typ = "array"
+            elif (isinstance(data, (str, int, float, complex)) or
+                  (name == "metadata" and isinstance(data, dict))):
+                typ = "scalar"
+            else:
+                try:
+                    rho = pd.SparseSeries(data).density
+                    if rho < sparse:
+                        typ = "ss"
+                    else:
+                        typ = "s"
+                except:
+                    try:
+                        rho = pd.SparseDataFrame(data).density
+                        if rho < sparse:
+                            typ = "sd"
+                        else:
+                            typ = "d"
+                    except:
+                        pass
+                    pass
+            # Raise a warning if the data cannot be saved.
+            if typ is None and data is not None:
+                warnings.warn("Unable to store '{}', {}, in HDF format.".format(name, type(data)))
+            elif data is not None:
+                to_save[name] = [key, typ, type(data)]
+        df = pd.DataFrame.from_dict(to_save, orient="index")
+        df.columns = ["key", "stored_type", "original_type"]
+        # Open the HDF file and begin saving data
+        store = pd.HDFStore(path, mode=mode, **kwargs)
+        if spec_store_name not in store:
+            store.put(spec_store_name, pd.Series())
+        attrs = store.get_storer(spec_store_name).attrs
+        setattr(attrs, original_types, df['original_type'].to_dict())
+        for typ, group in df.groupby("stored_type"):
+            if typ == "scalar":
+                for name, key in group['key'].items():
+                    setattr(attrs, name, dct[key])
+            elif typ in conv.keys():
+                for name, key in group['key'].items():
+                    if name in append:
+                        store.put(name, conv[typ](dct[key]), append=True, format="table")
+                    else:
+                        store.put(name, conv[typ](dct[key]), format="fixed")
+            else:
+                for name, key in group['key'].items():
+                    if name in append:
+                        store.put(name, dct[key], append=True, format="table")
+                    else:
+                        store.put(name, dct[key], format="fixed")
+        store.close()
 
     def info(self):
-        """Display information about data the container holds."""
-        pass
+        """
+        Display information about the container and the data objects it holds.
+        """
+
+    def __init__(self, *args, **kwargs):
+        if "default_prefix" in kwargs.keys():
+            self._default_prefix = kwargs.pop("default_prefix", "obj_")
+        else:
+            self._default_prefix = kwargs.pop("_default_prefix", "obj_")
+        self.metadata = kwargs.pop("metadata", None)
+        for arg in args:
+            do = True
+            while do:
+                name = self._default_prefix + uuid4().hex
+                if not hasattr(self, name):
+                    setattr(self, name, arg)
+                    do = False
+        for name, data in kwargs.items():
+            if hasattr(self, name):
+                raise NameError("Cannot set data with existing name {}.".format(name))
+            setattr(self, name, data)
 
 
 
