@@ -12,6 +12,7 @@ for reading and writing text.
 """
 import os
 import bz2
+import six
 import gzip
 from io import StringIO, TextIOWrapper
 from .typed import Typed, typed
@@ -150,9 +151,9 @@ class Editor(object):
     def __init__(self, textobj, encoding=None, nprint=30):
         if isinstance(textobj, str) and os.path.exists(textobj):
             lines = read_file(textobj)
-        elif isinstance(textobj, str):
-            lines = textobj.splitlines()
-        elif isinstance(textobj, (list, tuple)) and isinstance(textobj[0], str):
+        elif isinstance(textobj, six.string_types):
+            lines = str(textobj).splitlines()
+        elif isinstance(textobj, (list, tuple)) and isinstance(textobj[0], six.string_types):
             lines = textobj
         elif isinstance(textobj, (TextIOWrapper, StringIO)):
             lines = textobj.read().splitlines()
