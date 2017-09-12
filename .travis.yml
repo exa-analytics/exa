@@ -18,7 +18,7 @@ before_install:
 install:
   - conda install -q python=$TRAVIS_PYTHON_VERSION
   - conda install -q -c conda-forge `cat requirements.txt`
-  - conda install -q -c conda-forge pytables nodejs
+  - conda install -q -c conda-forge pytables
   - pip install travis-sphinx codacy-coverage python-coveralls
   - pip install .
 

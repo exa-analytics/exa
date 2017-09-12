@@ -2,7 +2,7 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ###########################
-Strongly Typed Objects
+Class Attribute Typing
 ###########################
 .. automodule:: exa.typed
     :members:

@@ -34,6 +34,7 @@ class TestContainer(TestCase):
         with pd.HDFStore(self.path) as store:
             self.assertIn("/__SPECIAL__", store.keys())
         c = Container.from_hdf(self.path)
+        self.assertEqual(c.a, self.c.a)
 
     def tearDown(self):
         os.remove(self.path)

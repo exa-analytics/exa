@@ -2,10 +2,7 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ###########################
-Helper Classes
+Singletons
 ###########################
-.. automodule:: exa.functions
-    :members:
-
 .. automodule:: exa.single
     :members:

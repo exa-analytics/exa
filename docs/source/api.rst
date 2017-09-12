@@ -26,28 +26,28 @@ can be found at :ref:`examples-label` or via help::
 
 .. toctree::
     :maxdepth: 2
-    :caption: Text Processing
+    :caption: Containers and Data
 
-    api/text/editor.rst
-    api/text/composer.rst
-    api/text/parser.rst
+    api/container.rst
+    api/frame.rst
 
 .. toctree::
     :maxdepth: 2
-    :caption: Data Objects
+    :caption: Text Processing
 
-    api/data/dataframe.rst
-    api/data/container.rst
+    api/editor.rst
+    api/parser.rst
+    api/composer.rst
 
 .. toctree::
     :maxdepth: 2
     :caption: Utilities
 
-    api/mpl.rst
-    api/tex.rst
-    api/constants.rst
-    api/units.rst
-    api/isotopes.rst
+    api/util/mpl.rst
+    api/util/tex.rst
+    api/util/constants.rst
+    api/util/units.rst
+    api/util/isotopes.rst
 
 
 ########################
@@ -58,30 +58,10 @@ useful for extension by developers.
 
 .. toctree::
     :maxdepth: 2
-    :caption: Base
+    :caption: Typing
 
-    api/single_functions.rst
     api/typed.rst
-
-.. toctree::
-    :maxdepth: 2
-    :caption: Core
-
-    api/core/base.rst
-
-
-.. toctree::
-    :maxdepth: 2
-    :caption: Compute
-
-    api/compute/base.rst
-
-
-.. toctree::
-    :maxdepth: 2
-    :caption: JavaScript
-
-    js/index.rst
+    api/single.rst
 
 
 ########################
@@ -92,21 +72,8 @@ and users.
 
 .. toctree::
     :maxdepth: 2
-    :caption: Base
-
-    api/tests1.rst
-    api/tests2.rst
-    api/tests3.rst
-
+    :caption: Tests
 
 .. toctree::
     :maxdepth: 2
-    :caption: Core 
-
-    api/core/tests1.rst
-    api/core/tests2.rst
-
-
-.. toctree::
-    :maxdepth: 2
-    :caption: Compute
+    :caption: Util Tests 

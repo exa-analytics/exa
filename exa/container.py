@@ -7,44 +7,27 @@ Containers
 This module provides the generic :class:`~exa.container.Container` object.
 Containers are used to store a collection of data objects (such as scalars,
 lists, arrays, dataframes, etc.). By default the :class:`~exa.container.Container`
-enables investigation of the metadata of the data objects it holds. For well
-structured data such as dataframes, the :class:`~exa.container.Container` can
-identify relationships (i.e. relationships between index names and column
-names of different dataframes).
-
-The :class:`~exa.container.Container` is highly extensible and can be used to
-construct a unified API for a data specific task.
+enables investigation of the metadata of the data objects it holds. The object
+also provides methods for saving the data to disk in common formats such as HDF.
+For well structured data such as dataframes, the :class:`~exa.container.Container`
+can identify relationships (i.e. relationships between index names and column
+names of different dataframes). The :class:`~exa.container.Container` is
+extensible and can be used to construct a unified API for a data specific task.
 """
 import pandas as pd
 from .typed import TypedClass, Typed
 
 
 class Container(TypedClass):
+    """
+    A storage object for data such as scalars (ints, floats, strs), arrays
+    (lists, numpy objects), and structured data (pandas series and dataframe
+    objects).
+
+    TODO
+    """
     _default_prefix = Typed(str, doc="Default prefix for container args.")
     metadata = Typed(dict, doc="Metadata dictionary.")
-
-    @classmethod
-    def from_hdf(cls, path, original_types="original_types", spec_store_name="__SPECIAL__"):
-        """
-        Load a container from an HDF file.
-        """
-        forbidden = ("CLASS", "TITLE", "VERSION", "pandas_type", "pandas_version",
-                     "encoding", "index_variety", "name", original_types)
-        kwargs = {}
-        store = pd.HDFStore(path, mode="r")
-        otypes = {}
-        if spec_store_name in store:
-            attrs = store.get_storer(spec_store_name).attrs
-            otypes = getattr(attrs, original_types)
-            kwargs.update({name: item for name, item in vars(attrs).items() if not name.startswith("_") and name not in forbidden})
-        for name, item in store.items():
-            if name == spec_store_name:
-                continue
-            if name in otypes:
-                kwargs[name] = otypes[name](item)
-            else:
-                kwargs[name] = item
-        return cls(**kwargs)
 
     def to_hdf(self, path, mode='a', append=None, sparse=0.95, original_types="original_types",
                spec_store_name="__SPECIAL__", **kwargs):
@@ -80,13 +63,7 @@ class Container(TypedClass):
         # Since not all data can be saved, filter through and determine what can
         # be saved and raise a warning for what can't.
         to_save = {}
-        for key, data in dct.items():
-            # Determine the correct name to use
-            if (key.startswith("_") and hasattr(self.__class__, key[1:]) and
-                isinstance(getattr(self.__class__, key[1:]), property)):
-                name = key[1:]
-            else:
-                name = key
+        for key, name, data in self._items(dct, include_keys=True):
             # Determine if storage is possible
             typ = None
             if isinstance(data, (pd.Series, pd.SparseSeries,
@@ -143,10 +120,48 @@ class Container(TypedClass):
                         store.put(name, dct[key], format="fixed")
         store.close()
 
-    def info(self):
+    @classmethod
+    def from_hdf(cls, path, original_types="original_types", spec_store_name="__SPECIAL__"):
         """
-        Display information about the container and the data objects it holds.
+        Load a container from an HDF file.
         """
+        forbidden = ("CLASS", "TITLE", "VERSION", "pandas_type", "pandas_version",
+                     "encoding", "index_variety", "name", original_types)
+        kwargs = {}
+        store = pd.HDFStore(path, mode="r")
+        otypes = {}
+        if spec_store_name in store:
+            attrs = store.get_storer(spec_store_name).attrs
+            otypes = getattr(attrs, original_types)
+            kwargs.update({name: item for name, item in vars(attrs).items() if not name.startswith("_") and name not in forbidden})
+        for name, item in store.items():
+            if name == spec_store_name:
+                continue
+            if name in otypes:
+                kwargs[name] = otypes[name](item)
+            else:
+                kwargs[name] = item
+        store.close()
+        return cls(**kwargs)
+
+
+    def _items(self, dct=None, include_keys=False):
+        """
+        Iterator for looping over data objects in the current container.
+        """
+        if dct is None:
+            dct = vars(self)
+        for key, data in dct.items():
+            # Determine the correct name to use
+            if (key.startswith("_") and hasattr(self.__class__, key[1:]) and
+                isinstance(getattr(self.__class__, key[1:]), property)):
+                name = key[1:]
+            else:
+                name = key
+            if include_keys == True:
+                yield key, name, data
+            else:
+                yield name, data
 
     def __init__(self, *args, **kwargs):
         if "default_prefix" in kwargs.keys():
@@ -165,8 +180,6 @@ class Container(TypedClass):
             if hasattr(self, name):
                 raise NameError("Cannot set data with existing name {}.".format(name))
             setattr(self, name, data)
-
-
 
 
 #import pandas as pd

@@ -33,7 +33,6 @@ enable visualization within the `Jupyter notebook`_.
     :caption: Contributors
 
     contrib.rst
-    concepts.rst
 
 
 ##################

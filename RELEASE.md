@@ -42,19 +42,3 @@ conda build .
 conda convert -f --platform all /path/to/conda-bld/pltfrm/exa-...tar.bz2 -o /path/to/outputdir/
 conda upload /path/to/build/build.tar.bz2    # For each build
 ```
-
-
-# Release on NPM
-Creates a new release of the JavaScript package jupyter-exa
-
-```bash
-git clean -fdx
-cd js
-npm install
-npm publish
-```
-
-.. _PyPI: https://pypi.python.org/pypi
-.. _TestPyPI: https://testpypi.python.org/pypi
-.. _exa-analytics: https://anaconda.org/exaanalytics
-.. _Anaconda: https://anaconda.org/

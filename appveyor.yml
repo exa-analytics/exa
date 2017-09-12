@@ -28,7 +28,7 @@ environment:
 install:
   - cmd: call %CONDA_INSTALL_LOCN%\Scripts\activate.bat
   - cmd: conda update -q -y --all
-  - cmd: conda install -q -y -c conda-forge numpy scipy matplotlib seaborn networkx sqlalchemy paramiko pandas sympy notebook nose numba ipywidgets ipyparallel dask distributed mpi4py h5py pytables six sphinx sphinx_rtd_theme pandoc nbsphinx nodejs
+  - cmd: conda install -q -y -c conda-forge numpy scipy matplotlib seaborn networkx sqlalchemy paramiko pandas sympy notebook nose numba ipywidgets ipyparallel dask distributed mpi4py h5py pytables six sphinx sphinx_rtd_theme pandoc nbsphinx tqdm
   - cmd: pip install .
 
 build: false

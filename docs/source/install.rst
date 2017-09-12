@@ -18,28 +18,20 @@ Anaconda
 #######################
 Using anaconda or miniconda::
 
-    conda install numba exa
+    conda install -c exaanalytics exa
 
 
 Pypi
 #######################
 Using pip::
 
-    # sudo apt-get install llvm-3.7 or sudo yum install ... etc.
-    sudo pip install numba exa
+    sudo pip install exa
 
-
-CUDA
-###################
-If working on a system with CUDA supported Nvidia GPUs::
-
-    conda install cudatoolkit     # or via apt-get or yum etc.
 
 Repository
 #########################
 Manually (or for a development installation)::
 
-    # install llvm, numba, cudatoolkit, and CPython3.x
     git clone https://github.com/exa-analytics/exa
     cd exa
     pip install .

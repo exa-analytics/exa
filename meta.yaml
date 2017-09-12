@@ -39,6 +39,7 @@ requirements:
     - sphinx_rtd_theme
     - pandoc
     - nbsphinx
+    - tqdm
 
 test:
   imports:
