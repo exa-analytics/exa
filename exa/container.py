@@ -15,7 +15,10 @@ names of different dataframes). The :class:`~exa.container.Container` is
 extensible and can be used to construct a unified API for a data specific task.
 """
 import pandas as pd
+from sys import getsizeof
 from .typed import TypedClass, Typed
+if not hasattr(pd.Series, "items"):
+    pd.Series.items = pd.Series.iteritems
 
 
 class Container(TypedClass):
@@ -26,8 +29,28 @@ class Container(TypedClass):
 
     TODO
     """
-    _default_prefix = Typed(str, doc="Default prefix for container args.")
+    default_prefix = Typed(str, doc="Default prefix for container args.")
     metadata = Typed(dict, doc="Metadata dictionary.")
+
+    def info(self):
+        df = []
+        for name, item in self._items():
+            typ = item.__class__.__name__
+            size = getsizeof(item)/1024**2
+            if hasattr(item, "shape"):
+                shape = str(item.shape)
+            elif hasattr(item, "size"):
+                if callable(item.size):
+                    shape = str(item.size().to_dict())
+                else:
+                    shape = item.size
+            else:
+                try:
+                    shape = str(len(item))
+                except (TypeError, AttributeError):
+                    shape = "nan"
+            df.append([name, typ, size, shape])
+        return pd.DataFrame(df, columns=["attribute", "type", "size (MiB)", "shape"]).set_index("attribute").sort_index()
 
     def to_hdf(self, path, mode='a', append=None, sparse=0.95, original_types="original_types",
                spec_store_name="__SPECIAL__", **kwargs):
@@ -164,15 +187,15 @@ class Container(TypedClass):
                 yield name, data
 
     def __init__(self, *args, **kwargs):
-        if "default_prefix" in kwargs.keys():
-            self._default_prefix = kwargs.pop("default_prefix", "obj_")
-        else:
-            self._default_prefix = kwargs.pop("_default_prefix", "obj_")
+        self.default_prefix = kwargs.pop("default_prefix", "obj_")
         self.metadata = kwargs.pop("metadata", None)
         for arg in args:
             do = True
+            # The while check is used to make sure names do not overlap...
+            # ... chances of that are incredibly small so I am not sure it
+            # is necessary but it doesn't really affect performance???
             while do:
-                name = self._default_prefix + uuid4().hex
+                name = self.default_prefix + uuid4().hex
                 if not hasattr(self, name):
                     setattr(self, name, arg)
                     do = False

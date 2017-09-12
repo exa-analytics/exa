@@ -26,6 +26,7 @@ class TestContainer(TestCase):
                   'h': pd.DataFrame(np.random.rand(10, 3)),
                   'i': pd.SparseSeries(np.random.rand(10)),
                   'j': pd.SparseDataFrame(np.random.rand(10, 3))}
+        self.kwargs = kwargs
         self.c = Container(**kwargs)
 
     def test_hdf(self):
@@ -35,6 +36,11 @@ class TestContainer(TestCase):
             self.assertIn("/__SPECIAL__", store.keys())
         c = Container.from_hdf(self.path)
         self.assertEqual(c.a, self.c.a)
+
+    def test_info(self):
+        """Test the information method works."""
+        inf = self.c.info()
+        self.assertEqual(len(inf), len(self.kwargs) + 2)    # 2 for the two typed attrs
 
     def tearDown(self):
         os.remove(self.path)
