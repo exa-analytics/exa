@@ -40,7 +40,7 @@ class Container(TypedClass):
         df = []
         for name, item in self._items():
             typ = item.__class__.__name__
-            size = getsizeof(item)/1024**2
+            size = float(getsizeof(item))/(1024.0**2)
             if hasattr(item, "shape"):
                 shape = str(item.shape)
             elif hasattr(item, "size"):

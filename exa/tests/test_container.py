@@ -51,7 +51,7 @@ class TestContainer(TestCase):
         self.assertTrue(np.isclose(self.c.memory_usage(), self.c.info()['size (MiB)'].sum()))
         size = self.c.info()['size (MiB)']*1024**2
         size = int(size.apply(np.ceil).sum())
-        self.assertTrue(np.isclose(getsizeof(self.c), size, atol=10, rtol=10))
+        self.assertTrue(np.isclose(getsizeof(self.c), size, atol=10, rtol=100))
 
     def test_del(self):
         """Test item deletion."""
