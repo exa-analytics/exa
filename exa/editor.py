@@ -53,8 +53,18 @@ def read_file(path, encoding=None):
     return read.splitlines()
 
 
-def write_file(path, encoding=None):
-    raise NotImplementedError()
+def write_file(text, path, encoding="utf-8", newline=""):
+    """
+    Write an editor to a file on disk.
+
+    Args:
+        text (str): Text to write
+        path (str): Full file path
+        encoding (str): File encoding (default utf-8)
+        newline (str): Newline delimiter
+    """
+    with open(path, "w", newline=newline, encoding=encoding) as f:
+        f.write(text)
 
 
 @typed
@@ -94,12 +104,25 @@ class Editor(object):
             formatted: Returns the formatted editor (if inplace is False)
         """
         inplace = kwargs.pop("inplace", False)
+        if len(args) == len(kwargs) == 0:
+            return self
         if inplace:
             self.lines = str(self).format(*args, **kwargs).splitlines()
         else:
             cp = self.copy()
             cp._lines = str(cp).format(*args, **kwargs).splitlines()
             return cp
+
+    def write(self, path, *args, **kwargs):
+        """
+        Write editor contents to file.
+
+        Args:
+            path (str): Full file path
+            args: Positional arguments for formatting
+            kwargs: Keyword arguments for formatting
+
+        """
 
 #    def write(self, path, *args, **kwargs):
 #        """
@@ -150,7 +173,7 @@ class Editor(object):
 
     def __init__(self, textobj, encoding=None, nprint=30):
         if isinstance(textobj, str) and os.path.exists(textobj):
-            lines = read_file(textobj)
+            lines = read_file(textobj, encoding=encoding)
         elif isinstance(textobj, six.string_types):
             lines = str(textobj).splitlines()
         elif isinstance(textobj, (list, tuple)) and isinstance(textobj[0], six.string_types):

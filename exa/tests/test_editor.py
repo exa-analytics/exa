@@ -99,6 +99,12 @@ class TestEditor(TestCase):
         self.assertIsNot(cp.lines, self.from_file.lines)
         self.assertIsNot(cp, self.from_file)
 
+    def test_write(self):
+        """Test :func:`~exa.editor.write_file`."""
+        fp = self.path + ".test"
+        self.from_file.write(fp)
+
+
 
 #import os, bz2, gzip, six, shutil
 #from types import GeneratorType
