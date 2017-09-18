@@ -139,6 +139,58 @@ class Foo11(TypedClass):
         self.bar = 42
 
 
+class Foo12(TypedClass):
+    """Testing deletion functions."""
+    bar = Typed(int, pre_del="pre_del")
+
+    def pre_del(self):
+        self.pre_del_called = True
+
+    def __init__(self):
+        self.bar = 42
+        self.pre_del_called = False
+
+
+def external_pre_del(foo):
+    """See external_pre_set."""
+    foo.pre_del_called = True
+
+
+class Foo13(TypedClass):
+    """Testing deletion functions."""
+    bar = Typed(int, pre_del=external_pre_del)
+
+    def __init__(self):
+        self.bar = 42
+        self.pre_del_called = False
+
+
+class Foo14(TypedClass):
+    """Testing deletion functions."""
+    bar = Typed(int, post_del="pre_del")
+
+    def pre_del(self):
+        self.post_del_called = True
+
+    def __init__(self):
+        self.bar = 42
+        self.post_del_called = False
+
+
+def external_post_del(foo):
+    """See external_pre_set."""
+    foo.post_del_called = True
+
+
+class Foo15(TypedClass):
+    """Testing deletion functions."""
+    bar = Typed(int, post_del=external_post_del)
+
+    def __init__(self):
+        self.bar = 42
+        self.post_del_called = False
+
+
 # Testing begins here.
 class TestTyped(TestCase):
     """
@@ -226,3 +278,33 @@ class TestTyped(TestCase):
         self.assertFalse(hasattr(obj, "_bar"))
         self.assertEqual(obj.bar, 42)
 
+    def test_pre_del(self):
+        """Test pre_del functions."""
+        obj = Foo12()
+        self.assertFalse(obj.pre_del_called)
+        self.assertEqual(obj.bar, 42)
+        del obj.bar
+        self.assertTrue(obj.pre_del_called)
+        self.assertIsNone(obj.bar)
+        obj = Foo13()
+        self.assertFalse(obj.pre_del_called)
+        self.assertEqual(obj.bar, 42)
+        del obj.bar
+        self.assertTrue(obj.pre_del_called)
+        self.assertIsNone(obj.bar)
+
+
+    def test_post_del(self):
+        """Test post_del functions."""
+        obj = Foo14()
+        self.assertFalse(obj.post_del_called)
+        self.assertEqual(obj.bar, 42)
+        del obj.bar
+        self.assertTrue(obj.post_del_called)
+        self.assertIsNone(obj.bar)
+        obj = Foo15()
+        self.assertFalse(obj.post_del_called)
+        self.assertEqual(obj.bar, 42)
+        del obj.bar
+        self.assertTrue(obj.post_del_called)
+        self.assertIsNone(obj.bar)

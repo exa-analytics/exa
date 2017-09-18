@@ -1,14 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
-import sys
-import platform
-from distutils import log
-from subprocess import check_call
-from setuptools import setup, find_packages, Command
-from setuptools.command.sdist import sdist
-from setuptools.command.build_py import build_py
-from setuptools.command.egg_info import egg_info
+from setuptools import setup, find_packages
 
 
 name = "exa"
@@ -38,7 +31,6 @@ setup_args = {
     'version': version,
     'description': description,
     'long_description': long_description,
-    'include_package_data': True,
     'package_data': {name: [staticdir + "/*"]},
     'include_package_data': True,
     'install_requires': dependencies,
