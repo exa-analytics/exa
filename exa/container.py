@@ -16,6 +16,7 @@ extensible and can be used to construct a unified API for a data specific task.
 """
 import numpy as np
 import pandas as pd
+from uuid import uuid4
 from sys import getsizeof
 from .typed import TypedClass, Typed
 if not hasattr(pd.Series, "items"):
@@ -46,8 +47,6 @@ class Container(TypedClass):
             elif hasattr(item, "size"):
                 if callable(item.size):
                     shape = str(item.size().to_dict())
-                else:
-                    shape = item.size
             else:
                 try:
                     shape = str(len(item))
@@ -178,7 +177,6 @@ class Container(TypedClass):
         store.close()
         return cls(**kwargs)
 
-
     def _items(self, dct=None, include_keys=False):
         """
         Iterator for looping over data objects in the current container.
@@ -222,8 +220,6 @@ class Container(TypedClass):
                     setattr(self, name, arg)
                     do = False
         for name, data in kwargs.items():
-            if hasattr(self, name):
-                raise NameError("Cannot set data with existing name {}.".format(name))
             setattr(self, name, data)
 
     def __repr__(self):

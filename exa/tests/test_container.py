@@ -62,3 +62,14 @@ class TestContainer(TestCase):
     def test_len(self):
         """Test length check."""
         self.assertEqual(len(self.c), len(self.kwargs) + 2)
+
+    def test_repr(self):
+        """Test default container repr."""
+        string = repr(self.c)
+        self.assertIn(self.c.__class__.__name__, string)
+
+    def test_arg_objs(self):
+        """Test that args are created correctly."""
+        c = Container("arg", 42)
+        self.assertEqual(len(c), 4)
+        self.assertEqual(len([arg for arg in c._items() if "obj_" in arg[0]]), 2)
