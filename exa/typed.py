@@ -57,7 +57,7 @@ def _typed_from_items(items):
     return dct
 
 
-def _typed(cls):
+def typed(cls):
     """
     Class decorator that updates a class definition with strongly typed
     property attributes.
@@ -68,28 +68,6 @@ def _typed(cls):
     for name, attr in _typed_from_items(vars(cls).items()).items():
         setattr(cls, name, attr)
     return cls
-
-
-def typed(cls=None, **kwargs):
-    """
-    Class decorator used to create a class with typed attributes and other
-    features.
-
-    .. code-block:: Python
-
-        @typed
-        class Foo(object):
-            bar = Typed(int, doc="Always of type int")
-
-    Args:
-        cls (type): Class with 'Typed' attributes
-
-    Returns:
-        cls (type): Modified class definition
-    """
-    if isinstance(cls, type):
-        return _typed(cls)
-    return _typed
 
 
 class Typed(object):
@@ -158,7 +136,7 @@ class Typed(object):
             # set the value first then proceed to getting it.
             if ((not hasattr(this, priv) or getattr(this, priv)) and
                 hasattr(this, "_setters") and isinstance(this._setters, (list, tuple))):
-                for prefix in self._setters:
+                for prefix in this._setters:
                     cmd = "{}{}".format(prefix, priv)
                     if hasattr(this, cmd):
                         getattr(this, cmd)()    # Automatic method call
@@ -168,7 +146,7 @@ class Typed(object):
             if isinstance(self.pre_get, str):
                 getattr(this, self.pre_get)()
             elif callable(self.pre_get):
-                self.pre_get()
+                self.pre_get(this)
             return getattr(this, priv, None)    # Returns None by default
 
         def setter(this, value):
@@ -193,26 +171,26 @@ class Typed(object):
             if isinstance(self.pre_set, str):
                 getattr(this, self.pre_set)()
             elif callable(self.pre_set):
-                self.pre_set()
+                self.pre_set(this)
             setattr(this, priv, value)    # Set the property value
             # Perform post-set actions (if any)
             if isinstance(self.post_set, str):
                 getattr(this, self.post_set)()
             elif callable(self.post_set):
-                self.post_set()
+                self.post_set(this)
 
         def deleter(this):
             # Perform pre-del actions (if any)
             if isinstance(self.pre_del, str):
                 getattr(this, self.pre_del)()
             elif callable(self.pre_del):
-                self.pre_del()
+                self.pre_del(this)
             delattr(this, priv)    # Delete the attribute (allows for dynamic naming)
             # Perform post-del actions (if any)
             if isinstance(self.post_del, str):
                 getattr(this, self.post_del)()
             elif callable(self.post_del):
-                self.post_del()
+                self.post_del(this)
 
         return property(getter, setter, deleter, doc=self.doc)
 
