@@ -27,3 +27,4 @@ Note:
 """
 from ._version import __version__
 from .container import Container
+from .editor import Editor

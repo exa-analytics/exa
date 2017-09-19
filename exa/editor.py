@@ -110,10 +110,10 @@ class Editor(object):
             self.lines = str(self).format(*args, **kwargs).splitlines()
         else:
             cp = self.copy()
-            cp._lines = str(cp).format(*args, **kwargs).splitlines()
+            cp.lines = str(cp).format(*args, **kwargs).splitlines()
             return cp
 
-    def write(self, path, *args, encoding="utf-8", newline="", **kwargs):
+    def write(self, path, encoding="utf-8", newline="", *args, **kwargs):
         """
         Write editor contents to file.
 
