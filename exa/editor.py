@@ -65,7 +65,10 @@ def write_file(text, path, encoding="utf-8", newline=""):
         newline (str): Newline delimiter
     """
     with io.open(path, "w", newline=newline, encoding=encoding) as f:
-        f.write(text)
+        try:
+            f.write(text)
+        except TypeError:
+            f.write(unicode(text))
 
 
 @typed
