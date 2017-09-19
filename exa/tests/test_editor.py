@@ -117,6 +117,7 @@ class TestEditor(TestCase):
         self.assertEqual(fmttxt, fmted)
         self.from_file.format(tmp="new", inplace=True)
         self.assertEqual(fmttxt, str(self.from_file))
+        self.assertIs(self.from_file.format(), self.from_file)
 
     def test_iter(self):
         """Test editor iteration."""

@@ -9,7 +9,7 @@ tests, which may be helpful for developers.
 """
 import six
 from unittest import TestCase
-from exa.typed import Typed, typed, TypedClass, TypedMeta
+from exa.typed import Typed, typed, TypedClass, TypedMeta, yield_typed
 
 
 # The following are objects used in testing
@@ -191,6 +191,14 @@ class Foo15(TypedClass):
         self.post_del_called = False
 
 
+class Foo16(TypedClass):
+    bar = Typed(int)
+
+    @property
+    def foo(self):
+        return 42
+
+
 # Testing begins here.
 class TestTyped(TestCase):
     """
@@ -308,3 +316,8 @@ class TestTyped(TestCase):
         del obj.bar
         self.assertTrue(obj.post_del_called)
         self.assertIsNone(obj.bar)
+
+    def test_yield_typed(self):
+        """Test :func:`~exa.typed.yield_typed`."""
+        names = list(yield_typed(Foo16))
+        self.assertListEqual(names, ["bar"])

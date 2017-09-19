@@ -19,6 +19,7 @@ import pandas as pd
 from uuid import uuid4
 from sys import getsizeof
 from .typed import TypedClass, Typed
+from .util.hdf import _spec_name, _forbidden, _conv
 if not hasattr(pd.Series, "items"):
     pd.Series.items = pd.Series.iteritems
 
@@ -68,23 +69,6 @@ class Container(TypedClass):
         # Pick a default plotting system (bokeh, mpl, seaborn, etc.)
         raise NotImplementedError()
 
-    def _network(self):
-        """Helper function to generate the nodes and edges of the network."""
-        nodes = {}
-        edges = []
-        for name, item in self._items():
-            if isinstance(item, pd.DataFrame):
-                nodes[name] = (item.index.name, item.columns.values)
-        for key0, (index_name0, column_names0) in nodes.items():
-            for key1, (index_name1, column_names1) in nodes.items():
-                if key0 == key1:
-                    continue
-                if ((index_name0 is not None and any(col == index_name0 for col in column_names1)) or
-                    (index_name1 is not None and any(col == index_name1 for col in column_names0))):
-                    pair = sorted((key0, key1))
-                    if pair not in edges:
-                        edges.append(pair)
-        return sorted(nodes.keys()), edges
 
     def memory_usage(self):
         """
@@ -92,8 +76,9 @@ class Container(TypedClass):
         """
         return self.info()['size (MiB)'].sum()
 
-    def to_hdf(self, path, mode='a', append=None, sparse=0.95, original_types="original_types",
-               spec_store_name="__SPECIAL__", **kwargs):
+    def to_hdf(self, path, mode='a', append=None, sparse=0.95, types_names=_types_name,
+               spec_name=_spec_name, mode=None, complevel=None, complib=None, fletcher32=False,
+               **kwargs):
         """
         Save the container's data to an HDF file.
 
@@ -119,10 +104,6 @@ class Container(TypedClass):
         """
         dct = vars(self)
         append = [] if append is None else append
-        forbidden = ("CLASS", "TITLE", "VERSION", "pandas_type", "pandas_version",
-                     "encoding", "index_variety", "name", original_types)
-        conv = {'ss': pd.SparseSeries, 's': pd.Series,
-                'sd': pd.SparseDataFrame, 'd': pd.DataFrame}
         # Since not all data can be saved, filter through and determine what can
         # be saved and raise a warning for what can't.
         to_save = {}
@@ -206,6 +187,24 @@ class Container(TypedClass):
                 kwargs[name] = item
         store.close()
         return cls(**kwargs)
+
+    def _network(self):
+        """Helper function to generate the nodes and edges of the network."""
+        nodes = {}
+        edges = []
+        for name, item in self._items():
+            if isinstance(item, pd.DataFrame):
+                nodes[name] = (item.index.name, item.columns.values)
+        for key0, (index_name0, column_names0) in nodes.items():
+            for key1, (index_name1, column_names1) in nodes.items():
+                if key0 == key1:
+                    continue
+                if ((index_name0 is not None and any(col == index_name0 for col in column_names1)) or
+                    (index_name1 is not None and any(col == index_name1 for col in column_names0))):
+                    pair = sorted((key0, key1))
+                    if pair not in edges:
+                        edges.append(pair)
+        return sorted(nodes.keys()), sorted(edges)
 
     def _items(self, dct=None, include_keys=False):
         """
