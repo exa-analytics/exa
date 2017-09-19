@@ -10,6 +10,7 @@ text editor. It provides basic features for searching text (including
 regular expressions). This module additionally provides convenience methods
 for reading and writing text.
 """
+import io
 import os
 import bz2
 import six
@@ -43,7 +44,7 @@ def read_file(path, encoding=None):
     elif path.endswith(".bz2"):
         f = bz2.open(path, "rb")
     else:
-        f = open(path, "rb")
+        f = io.open(path, "rb")
     read = f.read()
     if encoding is not None:
         read = read.decode(encoding)
@@ -63,7 +64,7 @@ def write_file(text, path, encoding="utf-8", newline=""):
         encoding (str): File encoding (default utf-8)
         newline (str): Newline delimiter
     """
-    with open(path, "w", newline=newline, encoding=encoding) as f:
+    with io.open(path, "w", newline=newline, encoding=encoding) as f:
         f.write(text)
 
 
