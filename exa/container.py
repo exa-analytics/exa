@@ -56,6 +56,17 @@ class Container(TypedClass):
         columns = ("attribute", "type", "size (MiB)", "shape")
         return pd.DataFrame(df, columns=columns).set_index("attribute").sort_index()
 
+    def network(self):
+        """
+        Display information about relationships between data objects.
+
+        Dataframes with unique indices are like database tables where the index
+        is a primary key. If, in another dataframe, a column with the same name
+        as that index exists, it is akin to a database table's foreign key.
+        Foreign keys define relationships between dataframes.
+        """
+        pass
+
     def memory_usage(self):
         """
         Return total (estimated) memory usage (in MiB).

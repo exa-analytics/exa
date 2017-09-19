@@ -16,7 +16,7 @@ can be found at :ref:`examples-label` or via help::
     help(exa)           # Package help
     help(exa.isotopes)  # Module help
     help(exa.Editor)    # Class help
-    exa.Editor?         # In an IPython environment (including the Jupyter notebook)
+    exa.Editor?         # Help in the Jupyter notebook
 
 .. automodule:: exa.__init__
     :members:
@@ -26,18 +26,11 @@ can be found at :ref:`examples-label` or via help::
 
 .. toctree::
     :maxdepth: 2
-    :caption: Containers and Data
+    :caption: Containers, Editors, Data Objects
 
     api/container.rst
     api/frame.rst
-
-.. toctree::
-    :maxdepth: 2
-    :caption: Text Processing
-
     api/editor.rst
-    api/parser.rst
-    api/composer.rst
 
 .. toctree::
     :maxdepth: 2
@@ -74,6 +67,5 @@ and users.
     :maxdepth: 2
     :caption: Tests
 
-.. toctree::
-    :maxdepth: 2
-    :caption: Util Tests 
+    api/tests1.rst
+    api/tests3.rst

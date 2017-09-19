@@ -2,11 +2,8 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ########################################
-Tests for Base Functionality
+Tests for Special Classes
 ########################################
-.. automodule:: exa.tests.test_functions
-    :members:
-
 .. automodule:: exa.tests.test_single
     :members:
 

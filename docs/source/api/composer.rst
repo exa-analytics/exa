@@ -6,5 +6,5 @@
 ###########################
 Composers
 ###########################
-.. automodule:: exa.core.composer
+.. automodule:: exa.composer
     :members:

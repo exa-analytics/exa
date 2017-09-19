@@ -6,5 +6,5 @@
 ###########################
 Container
 ###########################
-.. automodule:: exa.core.container
+.. automodule:: exa.container
     :members:

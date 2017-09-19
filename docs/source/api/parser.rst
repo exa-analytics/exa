@@ -6,5 +6,5 @@
 ###########################
 Parsing Editors
 ###########################
-.. automodule:: exa.core.parser
+.. automodule:: exa.parser
     :members:

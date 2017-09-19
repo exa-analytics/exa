@@ -4,10 +4,13 @@
 .. _editors-label:
 
 ###########################
-Editors
+Editors, Parsers, Composers
 ###########################
-Editors are a core feature of the Exa framework that facilitate manipulation
-of files. For parsing specific editors, see :ref:`parsing-label`.
+.. automodule:: exa.editor
+    :members:
 
-.. automodule:: exa.core.editor
+.. automodule:: exa.parser
+    :members:
+
+.. automodule:: exa.composer
     :members:

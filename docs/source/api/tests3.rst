@@ -2,13 +2,19 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ########################################
-Tests for Constants, Isotopes, and Units
+Tests for Utilities
 ########################################
-.. automodule:: exa.tests.test_constants
+.. automodule:: exa.util.tests.test_mpl
     :members:
 
-.. automodule:: exa.tests.test_isotopes
+.. automodule:: exa.util.tests.test_tex
     :members:
 
-.. automodule:: exa.tests.test_units
+.. automodule:: exa.util.tests.test_constants
+    :members:
+
+.. automodule:: exa.util.tests.test_isotopes
+    :members:
+
+.. automodule:: exa.util.tests.test_units
     :members:
