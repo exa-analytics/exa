@@ -103,6 +103,10 @@ class TestEditor(TestCase):
         """Test :func:`~exa.editor.write_file`."""
         fp = self.path + ".test"
         self.from_file.write(fp)
+        with open(fp, "r") as f:
+            text = f.read()
+        self.assertEqual(text, str(self.from_file))
+        os.remove(fp)
 
 
 

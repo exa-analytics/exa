@@ -113,7 +113,7 @@ class Editor(object):
             cp._lines = str(cp).format(*args, **kwargs).splitlines()
             return cp
 
-    def write(self, path, *args, **kwargs):
+    def write(self, path, *args, encoding="utf-8", newline="", **kwargs):
         """
         Write editor contents to file.
 
@@ -123,21 +123,11 @@ class Editor(object):
             kwargs: Keyword arguments for formatting
 
         """
-
-#    def write(self, path, *args, **kwargs):
-#        """
-#        Write the editor contents to a file.
-#
-#        Args:
-#            path (str): Full file path (default none, prints to stdout)
-#            args: Positional arguments for formatting
-#            kwargs: Keyword arguments for formatting
-#        """
-#        with open(path, "wb") as f:
-#            if len(args) > 0 or len(kwargs) > 0:
-#                f.write(six.b(str(self.format(*args, **kwargs))))
-#            else:
-#                f.write(six.b(str(self)))
+        if len(args) > 0 or len(kwargs) > 0:
+            text = str(self.format(*args, **kwargs))
+        else:
+            text = str(self)
+        return write_file(text, path, encoding newline)
 
     def __iter__(self):
         for line in self.lines:
