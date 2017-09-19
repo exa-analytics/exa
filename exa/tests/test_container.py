@@ -73,3 +73,16 @@ class TestContainer(TestCase):
         c = Container("arg", 42)
         self.assertEqual(len(c), 4)
         self.assertEqual(len([arg for arg in c._items() if "obj_" in arg[0]]), 2)
+
+    def test_network(self):
+        """Test that we correctly get nodes and edges."""
+        a = pd.DataFrame.from_dict({'size': [3]*3})
+        a.index.name = "adx"
+        b = pd.DataFrame.from_dict({'x': np.random.rand(9), 'adx': [i for i in range(3) for _ in range(3)]})
+        b.index.name = "bdx"
+        d = pd.DataFrame.from_dict({'y': np.random.rand(36), 'bdx': [i for i in range(9) for _ in range(4)]})
+        e = pd.DataFrame(np.random.rand(10))
+        c = Container(a=a, b=b, d=d, e=e)
+        nodes, edges = c._network()
+        self.assertListEqual(nodes, ["a", "b", "d", "e"])
+        self.assertListEqual(edges, [["a", "b"], ["b", "d"]])

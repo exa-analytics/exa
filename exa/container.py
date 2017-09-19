@@ -65,7 +65,26 @@ class Container(TypedClass):
         as that index exists, it is akin to a database table's foreign key.
         Foreign keys define relationships between dataframes.
         """
-        pass
+        # Pick a default plotting system (bokeh, mpl, seaborn, etc.)
+        raise NotImplementedError()
+
+    def _network(self):
+        """Helper function to generate the nodes and edges of the network."""
+        nodes = {}
+        edges = []
+        for name, item in self._items():
+            if isinstance(item, pd.DataFrame):
+                nodes[name] = (item.index.name, item.columns.values)
+        for key0, (index_name0, column_names0) in nodes.items():
+            for key1, (index_name1, column_names1) in nodes.items():
+                if key0 == key1:
+                    continue
+                if ((index_name0 is not None and any(col == index_name0 for col in column_names1)) or
+                    (index_name1 is not None and any(col == index_name1 for col in column_names0))):
+                    pair = sorted((key0, key1))
+                    if pair not in edges:
+                        edges.append(pair)
+        return sorted(nodes.keys()), edges
 
     def memory_usage(self):
         """
