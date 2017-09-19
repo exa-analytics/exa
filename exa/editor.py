@@ -127,7 +127,7 @@ class Editor(object):
             text = str(self.format(*args, **kwargs))
         else:
             text = str(self)
-        return write_file(text, path, encoding newline)
+        return write_file(text, path, encoding, newline)
 
     def __iter__(self):
         for line in self.lines:
