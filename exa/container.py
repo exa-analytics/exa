@@ -69,16 +69,14 @@ class Container(TypedClass):
         # Pick a default plotting system (bokeh, mpl, seaborn, etc.)
         raise NotImplementedError()
 
-
     def memory_usage(self):
         """
         Return total (estimated) memory usage (in MiB).
         """
         return self.info()['size (MiB)'].sum()
 
-    def to_hdf(self, path, mode='a', append=None, sparse=0.95, types_names=_types_name,
-               spec_name=_spec_name, mode=None, complevel=None, complib=None, fletcher32=False,
-               **kwargs):
+    def to_hdf(self, path, mode='a', append=None, sparse=0.95,
+               complevel=None, complib=None, fletcher32=False, **kwargs):
         """
         Save the container's data to an HDF file.
 
@@ -103,13 +101,18 @@ class Container(TypedClass):
             Additional arguments can be found in pandas.HDFStore documentation.
         """
         dct = vars(self)
+        spec_name = kwargs.pop("spec_name", _spec_name)
+        conv = kwargs.pop("conv", _conv)
+        forbidden = kwargs.pop("forbidden", _forbidden)
         append = [] if append is None else append
-        # Since not all data can be saved, filter through and determine what can
-        # be saved and raise a warning for what can't.
+        # Containers can store any kind of data. Not all data can be saved to HDF.
+        # First we filter what data can be saved, raising warnings for what we
+        # don't (currently) support.
         to_save = {}
         for key, name, data in self._items(dct, include_keys=True):
             # Determine if storage is possible
             typ = None
+            if isinstance(DataFrame, DataSeries)
             if isinstance(data, (pd.Series, pd.SparseSeries,
                                  pd.DataFrame, pd.SparseDataFrame)):
                 typ = "array"

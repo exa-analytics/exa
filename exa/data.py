@@ -58,6 +58,32 @@ class _Base(TypedClass):
         self.__class__ = cls
         store.close()
 
+    @classmethod
+    def from_hdf(cls, path_or_buf, key, **kwargs):
+        """
+        Read a data object (including metadata attributes) from an HDF file.
+
+        Args:
+            path_or_buf (str): Full file path to HDF or HDF buffer
+            key (str): Name of data object to load
+        """
+        spec_name = kwargs.pop("spec_name", _spec_name)
+        store = path_or_buf
+        if not isinstance(store, pd.HDFStore):
+            store = pd.HDFStore(path_or_buf)
+        kwargs = {}
+        if spec_name in store:
+            storer = store.get_storer(spec_name).attrs
+            for suffix in yield_typed(cls):
+                name = key + "_" + suffix
+                try:
+                    kwargs[suffix] = storer[name]
+                except KeyError:
+                    pass
+        data = store.get(key)
+        store.close()
+        return cls(data, **kwargs)
+
 
 class DataSeries(pd.Series, _Base):
     """
@@ -101,6 +127,13 @@ class DataFrame(pd.DataFrame, _Base):
         super(DataFrame, self).__init__(*args, **kwargs)
         self.metadata = metadata     # Prevents recursion error
 
+
+class SparseDataSeries(pd.SparseSeries, _Base):
+    pass
+
+
+class SparseDataFrame(pd.SparseDataFrame, _Base):
+    pass
 
 
 #import six
