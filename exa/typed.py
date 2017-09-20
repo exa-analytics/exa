@@ -86,7 +86,8 @@ def yield_typed(obj_or_cls):
         if hasattr(obj_or_cls, attrname):
             attr = getattr(obj_or_cls, attrname)
             # !!! Important hardcoded value here !!!
-            if isinstance(attr, property) and "__typed__" in attr.__doc__:
+            if (isinstance(attr, property) and isinstance(attr.__doc__, six.string_types)
+                and "__typed__" in attr.__doc__):
                 yield attrname
 
 
