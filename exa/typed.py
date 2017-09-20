@@ -86,7 +86,7 @@ def yield_typed(obj_or_cls):
         if hasattr(obj_or_cls, attrname):
             attr = getattr(obj_or_cls, attrname)
             # !!! Important hardcoded value here !!!
-            if isinstance(attr, property) and "Typed" in repr(attr.fget):
+            if isinstance(attr, property) and "__typed__" in attr.__doc__:
                 yield attrname
 
 
@@ -217,7 +217,7 @@ class Typed(object):
     def __init__(self, types, doc=None, autoconv=True, pre_set=None, allow_none=True,
                  post_set=None, pre_get=None, pre_del=None, post_del=None):
         self.types = types if isinstance(types, (tuple, list)) else (types, )
-        self.doc = doc
+        self.doc = str(doc) + "\n\n__typed__"
         self.autoconv = autoconv
         self.allow_none = allow_none
         self.pre_set = pre_set
