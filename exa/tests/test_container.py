@@ -34,10 +34,9 @@ class TestContainer(TestCase):
     def test_hdf(self):
         """Test saving to and loading from HDF."""
         self.c.to_hdf(self.path)
-        with pd.HDFStore(self.path, "r") as store:
-            self.assertIn("/__SPECIAL__", store.keys())
         c = Container.from_hdf(self.path)
         self.assertEqual(c.a, self.c.a)
+        self.assertEqual(c, self.c)
         os.remove(self.path)
         shutil.rmtree(self.dirpath)
 

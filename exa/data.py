@@ -8,8 +8,14 @@ Exa provides a `pandas`_ like Series and DataFrame object which support saving
 and loading metadata when using the HDF format.
 """
 import pandas as pd
+from pandas.io import pytables
 from .typed import Typed, TypedClass, yield_typed
-from .util.hdf import _spec_name
+
+
+# Default values used for pandas compatibility
+_spec_name = "__exa_storer__"
+_forbidden = ("CLASS", "TITLE", "VERSION", "pandas_type", "pandas_version",
+              "encoding", "index_variety", "name")
 
 
 class Feature(object):
@@ -24,77 +30,68 @@ class _Base(TypedClass):
     _metadata = ['name', 'metadata']
     metadata = Typed(dict, doc="Persistent metadata")
 
-    def to_hdf(self, path_or_buf, key, mode=None, complevel=None,
+    def to_hdf(self, store, name, mode=None, complevel=None,
                complib=None, fletcher32=False, append=False, **kwargs):
         """
-        Write the dataframe to and HDF.
+        Write data to an HDF file.
 
         Args:
-            path_or_buf (str, HDFStore): Path to HDF file or HDF file buffer
-            key (str): Data object name
+            store (str, HDFStore): Path to HDF file or HDF file buffer
+            name (str): Data object name
             mode (str): R/W mode for HDF file object
-            complevel (str): Compression level
+            complevel (int): Compression level
             complib (str): Compression library
             fletcher32 (bool): Checksum
             append (bool): Data for future appending
             kwargs: Passed to HDFStore.put/HDFStore.append
         """
-        spec_name = kwargs.pop("spec_name", _spec_name)
-        store = path_or_buf
+        close = kwargs.pop("close", True)
         if not isinstance(store, pd.HDFStore):
-            store = pd.HDFStore(path_or_buf, mode, complevel, complib, fletcher32)
-        cls = self.__class__
-        if spec_name not in store:
-            store.put(spec_name, pd.Series())
-        storer = store.get_storer(spec_name).attrs
-        for suffix in yield_typed(cls):
-            name = key + "_" + suffix
-            storer[name] = getattr(self, suffix)
-        self.__class__ = self._constructor_pandas
+            store = pd.HDFStore(store, mode=mode, complevel=complevel,
+                                complib=complib, fletcher32=fletcher32)
+        # Save the data
         if append:
-            store.append(key, self, **kwargs)
+            store.append(name, self, **kwargs)
         else:
-            store.put(key, self, **kwargs)
-        self.__class__ = cls
-        store.close()
+            store.put(name, self, **kwargs)
+        # Save the additional attributes (e.g. metadata)
+        storer = store.get_storer(name)
+        for key in yield_typed(self):
+            storer.attrs[key] = getattr(self, key)
+        if close == True:
+            store.close()
 
     @classmethod
-    def from_hdf(cls, path_or_buf, key, **kwargs):
+    def from_hdf(cls, store, name):
         """
-        Read a data object (including metadata attributes) from an HDF file.
+        Read a data object (including attrs, e.g. metadata) from an HDF file.
 
         Args:
-            path_or_buf (str): Full file path to HDF or HDF buffer
-            key (str): Name of data object to load
+            store (str, HDFStore): Full file path to HDF or HDF buffer
+            name (str): Name of data object to load
         """
-        spec_name = kwargs.pop("spec_name", _spec_name)
-        store = path_or_buf
         if not isinstance(store, pd.HDFStore):
-            store = pd.HDFStore(path_or_buf)
+            store = pd.HDFStore(store, mode="r")
+        # Load data
+        data = store.get(name)
+        # Load metadata
         kwargs = {}
-        if spec_name in store:
-            storer = store.get_storer(spec_name).attrs
-            for suffix in yield_typed(cls):
-                name = key + "_" + suffix
-                try:
-                    kwargs[suffix] = storer[name]
-                except KeyError:
-                    pass
-        data = store.get(key)
+        storer = store.get_storer(name)
+        for key in yield_typed(cls):
+            if key in storer.attrs:
+                kwargs[key] = storer.attrs[key]
         store.close()
         return cls(data, **kwargs)
 
 
-class DataSeries(pd.Series, _Base):
+class DataSeries(_Base, pd.Series):
     """
     """
+    _constructor_pandas = pd.Series
+
     @property
     def _constructor(self):
         return DataSeries
-
-    @property
-    def _constructor_pandas(self):
-        return pd.Series
 
     @property
     def _constructor_expanddim(self):
@@ -106,17 +103,15 @@ class DataSeries(pd.Series, _Base):
         self.metadata = metadata    # Prevents recursion error
 
 
-class DataFrame(pd.DataFrame, _Base):
+class DataFrame(_Base, pd.DataFrame):
     """
     """
+    _constructor_pandas = pd.DataFrame
 
     @property
     def _constructor(self):
         return DataFrame
 
-    @property
-    def _constructor_pandas(self):
-        return pd.DataFrame
 
     @property
     def _constructor_sliced(self):
@@ -128,12 +123,44 @@ class DataFrame(pd.DataFrame, _Base):
         self.metadata = metadata     # Prevents recursion error
 
 
-class SparseDataSeries(pd.SparseSeries, _Base):
-    pass
+class SparseDataSeries(_Base, pd.SparseSeries):
+    """
+    """
+    _constructor_pandas = pd.SparseSeries
+
+    @property
+    def _constructor(self):
+        return SparseDataSeries
+
+    @property
+    def _constructor_expanddim(self):
+        return SparseDataFrame
+
+    def __init__(self, *args, **kwargs):
+        metadata = kwargs.pop("metadata", None)
+        super(SparseDataSeries, self).__init__(*args, **kwargs)
+        self.metadata = metadata    # Prevents recursion error
 
 
-class SparseDataFrame(pd.SparseDataFrame, _Base):
-    pass
+class SparseDataFrame(_Base, pd.SparseDataFrame):
+    """
+    """
+    _constructor_pandas = pd.SparseDataFrame
+    _constructor_sliced = SparseDataSeries
+
+    @property
+    def _constructor(self):
+        return SparseDataFrame
+
+    def __init__(self, *args, **kwargs):
+        metadata = kwargs.pop("metadata", None)
+        super(SparseDataFrame, self).__init__(*args, **kwargs)
+        self.metadata = metadata    # Prevents recursion error
+
+
+# Required exa data objects' HDF compatibility
+for cls in (DataFrame, DataSeries, SparseDataFrame, SparseDataSeries):
+    pytables._TYPE_MAP[cls] = pytables._TYPE_MAP[cls._constructor_pandas]
 
 
 #import six

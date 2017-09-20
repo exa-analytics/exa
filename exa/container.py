@@ -14,12 +14,14 @@ can identify relationships (i.e. relationships between index names and column
 names of different dataframes). The :class:`~exa.container.Container` is
 extensible and can be used to construct a unified API for a data specific task.
 """
+import tables
+import warnings
 import numpy as np
 import pandas as pd
 from uuid import uuid4
 from sys import getsizeof
 from .typed import TypedClass, Typed
-from .util.hdf import _spec_name, _forbidden, _conv
+from .data import _spec_name, _forbidden
 if not hasattr(pd.Series, "items"):
     pd.Series.items = pd.Series.iteritems
 
@@ -76,118 +78,102 @@ class Container(TypedClass):
         return self.info()['size (MiB)'].sum()
 
     def to_hdf(self, path, mode='a', append=None, sparse=0.95,
-               complevel=None, complib=None, fletcher32=False, **kwargs):
+               complevel=0, complib=None, fletcher32=False, **kwargs):
         """
         Save the container's data to an HDF file.
 
-        Not all data objects are compatible with the HDF format. Scalars (such as int,
-        floats, etc.) and metadata (dict, if present) are saved
+        Exa specific data objects save their data as well as any additional
+        (typed) attributes (e.g. dictionary of metadata). This method addtionally
+        handles Python built-in types and numpy objects. Built-in types are
+        saved as attributes of the special storer (default '__exa_storer__').
+        Numpy arrays are saved using `pytables`_ machinery.
 
         Args:
             path (str): File path
             mode (str): Writing mode
-            append (list): List of data object names which should written in an appendable format
+            append (list): List of object names which are appendable
             sparse (float): Minimum density for sparse data structure
-            spec_store_name (str): Name of the HDF storer where scalars and specials are stored
-            kwargs: Additional keyword arguments to be passed to pandas.HDFStore
+            complevel (int): Compression level
+            complib (str): Compression library
+            fletcher32 (bool): Checksum
+            kwargs: Additional keyword arguments to be passed to put/append
 
         Warning:
             Existing data objects with the same name in the current HDF file
             (if applicable) will be overwritten unless the correct mode and append
             arguments are used. Scalar variables will always be overwritten (if
             they exist) or added to the collection of existing scalars (if they don't).
+            Numpy and Python objects do not support append operations.
 
         See Also:
-            Additional arguments can be found in pandas.HDFStore documentation.
+            Additional arguments can be found in `pandas`_ documentation.
+
+        .. _pytables: http://www.pytables.org
+        .. _pandas: https://pandas.pydata.org
         """
-        dct = vars(self)
-        spec_name = kwargs.pop("spec_name", _spec_name)
-        conv = kwargs.pop("conv", _conv)
-        forbidden = kwargs.pop("forbidden", _forbidden)
-        append = [] if append is None else append
-        # Containers can store any kind of data. Not all data can be saved to HDF.
-        # First we filter what data can be saved, raising warnings for what we
-        # don't (currently) support.
-        to_save = {}
-        for key, name, data in self._items(dct, include_keys=True):
-            # Determine if storage is possible
-            typ = None
-            if isinstance(DataFrame, DataSeries)
-            if isinstance(data, (pd.Series, pd.SparseSeries,
-                                 pd.DataFrame, pd.SparseDataFrame)):
-                typ = "array"
-            elif (isinstance(data, (str, int, float, complex)) or
-                  (name == "metadata" and isinstance(data, dict))):
-                typ = "scalar"
-            else:
-                try:
-                    rho = pd.SparseSeries(data).density
-                    if rho < sparse:
-                        typ = "ss"
-                    else:
-                        typ = "s"
-                except:
-                    try:
-                        rho = pd.SparseDataFrame(data).density
-                        if rho < sparse:
-                            typ = "sd"
-                        else:
-                            typ = "d"
-                    except:
-                        pass
-                    pass
-            # Raise a warning if the data cannot be saved.
-            if typ is None and data is not None:
-                warnings.warn("Unable to store '{}', {}, in HDF format.".format(name, type(data)))
+        # On first pass, identify which data objects we can save
+        # and what method (pandas/pytables) must be used.
+        numpy_save = {}
+        pandas_save = {}
+        special_save = {}
+        for name, data in self._items():
+            if isinstance(data, np.ndarray):
+                numpy_save[name] = data
+            elif isinstance(data, (pd.Series, pd.DataFrame, pd.SparseSeries,
+                                   pd.SparseDataFrame)):
+                pandas_save[name] = data
+            elif isinstance(data, (str, int, float, complex, dict, list, tuple)):
+                special_save[name] = data
             elif data is not None:
-                to_save[name] = [key, typ, type(data)]
-        df = pd.DataFrame.from_dict(to_save, orient="index")
-        df.columns = ["key", "stored_type", "original_type"]
-        # Open the HDF file and begin saving data
-        store = pd.HDFStore(path, mode=mode, **kwargs)
-        if spec_store_name not in store:
-            store.put(spec_store_name, pd.Series())
-        attrs = store.get_storer(spec_store_name).attrs
-        setattr(attrs, original_types, df['original_type'].to_dict())
-        for typ, group in df.groupby("stored_type"):
-            if typ == "scalar":
-                for name, key in group['key'].items():
-                    setattr(attrs, name, dct[key])
-            elif typ in conv.keys():
-                for name, key in group['key'].items():
-                    if name in append:
-                        store.put(name, conv[typ](dct[key]), append=True, format="table")
-                    else:
-                        store.put(name, conv[typ](dct[key]), format="fixed")
+                warnings.warn("Data object '{}' ({}) not saved (unsupported).".format(name, type(data)))
+        # First save numpy objects
+        if len(numpy_save) > 0:
+            filters = tables.Filters(complib=complib, complevel=complevel)
+            store = tables.open_file(path, mode=mode, filters=filters)
+            for name, data in numpy_save.items():
+                store.create_carray("/", name, obj=data)
+            store.close()
+        # Save remaining objects
+        store = pd.HDFStore(path, mode=mode, complevel=complevel,
+                            complib=complib, fletcher32=fletcher32)
+        if _spec_name not in store:
+            store.put(_spec_name, pd.Series())
+        special = store.get_storer(_spec_name).attrs
+        for name, data in special_save.items():
+            special[name] = data
+        for name, data in pandas_save.items():
+            if (isinstance(append, (list, tuple)) and name in append) or append == True:
+                data.to_hdf(store, name, append=True, close=False, **kwargs)
             else:
-                for name, key in group['key'].items():
-                    if name in append:
-                        store.put(name, dct[key], append=True, format="table")
-                    else:
-                        store.put(name, dct[key], format="fixed")
+                data.to_hdf(store, name, close=False)
         store.close()
 
     @classmethod
-    def from_hdf(cls, path, original_types="original_types", spec_store_name="__SPECIAL__"):
+    def from_hdf(cls, path, complib=None, complevel=0, fletcher32=False):
         """
         Load a container from an HDF file.
+
+        Args:
+            path (str): Path to HDF file
         """
-        forbidden = ("CLASS", "TITLE", "VERSION", "pandas_type", "pandas_version",
-                     "encoding", "index_variety", "name", original_types)
         kwargs = {}
-        store = pd.HDFStore(path, mode="r")
-        otypes = {}
-        if spec_store_name in store:
-            attrs = store.get_storer(spec_store_name).attrs
-            otypes = getattr(attrs, original_types)
-            kwargs.update({name: item for name, item in vars(attrs).items() if not name.startswith("_") and name not in forbidden})
-        for name, item in store.items():
-            if name == spec_store_name:
-                continue
-            if name in otypes:
-                kwargs[name] = otypes[name](item)
-            else:
-                kwargs[name] = item
+        # First load pandas-like and special objects
+        store = pd.HDFStore(path, mode="r", complib=complib,
+                            complevel=complevel, fletcher32=fletcher32)
+        if _spec_name in store:
+            for name, data in vars(store.get_storer(_spec_name).attrs).items():
+                if name in _forbidden:
+                    continue
+                kwargs[name] = data
+        for name, data in store.items():
+            kwargs[name] = data
+        store.close()
+        # Second load numpy-like objects
+        filters = tables.Filters(complib=complib, complevel=complevel)
+        store = tables.open_file(path, mode="r", filters=filters)
+        for data in store.walk_nodes():
+            if hasattr(data, "name") and data.name not in kwargs:
+                kwargs[data.name] = data.read()
         store.close()
         return cls(**kwargs)
 
@@ -226,6 +212,16 @@ class Container(TypedClass):
                 yield key, name, data
             else:
                 yield name, data
+
+    def __contains__(self, key):
+        if hasattr(self, key):
+            return True
+
+    def __eq__(self, other):
+        for name, data in self._items():
+            if name in other and not np.all(getattr(other, name) == data):
+                return False
+        return True
 
     def __len__(self):
         return len(vars(self).keys())

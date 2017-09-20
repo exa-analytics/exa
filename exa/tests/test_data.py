@@ -12,8 +12,7 @@ import pandas as pd
 from uuid import uuid4
 from tempfile import mkdtemp
 from unittest import TestCase
-from exa.data import DataSeries, DataFrame
-from exa.util.hdf import _spec_name
+from exa.data import DataSeries, DataFrame, SparseDataSeries, SparseDataFrame
 
 
 class _Tester(TestCase):
@@ -25,16 +24,18 @@ class _Tester(TestCase):
         with self.assertRaises(TypeError):
             self.d0.metadata = ["universe", 42]
 
+    def test_pdcons(self):
+        """Test that the pandas constructor is correct."""
+        self.assertIsInstance(self.d0, self.d0._constructor_pandas)
+
     def test_hdf(self):
         """Test custom writing to hdf (including metadata)."""
-        path = os.path.join((mkdtemp(), uuid4().hex))
+        path = os.path.join(mkdtemp(), uuid4().hex)
         self.d1.to_hdf(path, "test")
         self.assertTrue(os.path.exists(path))
-        store = pd.HDFStore(path)
-        self.assertIn(_spec_name, store)
         df1 = self.d1.__class__.from_hdf(path, "test")
-        self.assertDictEqual(df1.metadata, df.metadata)
-        self.assertTrue(np.all(df.values == df1.values))
+        self.assertDictEqual(df1.metadata, self.d1.metadata)
+        self.assertTrue(np.all(df1.values == self.d1.values))
 
 
 class TestDataSeries(_Tester):
@@ -45,11 +46,8 @@ class TestDataSeries(_Tester):
 
     def test_constructors(self):
         """Test constructor types."""
-        self.assertIsInstance(self.d0, DataSeries)
-        self.assertIs(type(self.d0), DataSeries)
         self.assertIs(self.d0._constructor, DataSeries)
         self.assertIs(self.d0._constructor_expanddim, DataFrame)
-        self.assertIs(self.d0._constructor_pandas, pd.Series)
 
 
 class TestDataFrame(_Tester):
@@ -60,8 +58,28 @@ class TestDataFrame(_Tester):
 
     def test_constructors(self):
         """Test constructor types."""
-        self.assertIsInstance(self.d0, DataFrame)
-        self.assertIs(type(self.d0), DataFrame)
         self.assertIs(self.d0._constructor, DataFrame)
         self.assertIs(self.d0._constructor_sliced, DataSeries)
-        self.assertIs(self.d0._constructor_pandas, pd.DataFrame)
+
+class TestSparseDataSeries(_Tester):
+    """Tests for :class:`~exa.data.SparseDataSeries`."""
+    def setUp(self):
+        self.d0 = SparseDataSeries(np.random.rand(10))
+        self.d1 = SparseDataSeries(self.d0, metadata={'uni': 42})
+
+    def test_constructors(self):
+        """Test constructor types."""
+        self.assertIs(self.d0._constructor, SparseDataSeries)
+        self.assertIs(self.d0._constructor_expanddim, SparseDataFrame)
+
+
+class TestSparseDataFrame(_Tester):
+    """Tests for :class:`~exa.data.SparseDataFrame`."""
+    def setUp(self):
+        self.d0 = SparseDataFrame(np.random.rand(10, 3))
+        self.d1 = SparseDataFrame(self.d0, metadata={'uni': 42})
+
+    def test_constructors(self):
+        """Test constructor types."""
+        self.assertIs(self.d0._constructor, SparseDataFrame)
+        self.assertIs(self.d0._constructor_sliced, SparseDataSeries)

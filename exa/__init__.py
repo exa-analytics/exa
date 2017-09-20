@@ -26,5 +26,6 @@ Note:
 .. _numba: https://numba.pydata.org
 """
 from ._version import __version__
-from .container import Container
+#from .container import Container
 from .editor import Editor
+from .data import DataFrame, DataSeries, SparseDataSeries, SparseDataFrame
