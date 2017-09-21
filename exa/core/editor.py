@@ -142,9 +142,11 @@ class Editor(object):
     def __contains__(self, text):
         if not isinstance(text, str):
             text = str(text)
-        for line in self.lines:
+        # Use __iter__
+        for line in self:
             if text in line:
-                yield True
+                return True
+        return False
 
     def __delitem__(self, line):
         del self.lines[line]

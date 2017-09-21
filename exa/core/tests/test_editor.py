@@ -127,6 +127,7 @@ class TestEditor(TestCase):
     def test_contains(self):
         """Test 'in' checks on editors."""
         self.assertIn("text", self.from_file)
+        self.assertNotIn(0, self.from_file)
 
     def test_getitem(self):
         """Test line getting."""

@@ -7,9 +7,10 @@ Data Objects
 Exa provides a `pandas`_ like Series and DataFrame object which support saving
 and loading metadata when using the HDF format.
 """
+import six
 import pandas as pd
 from pandas.io import pytables
-from exa.typed import Typed, TypedClass, yield_typed
+from exa.typed import Typed, TypedMeta, yield_typed, TypedClass
 
 
 # Default values used for pandas compatibility
@@ -18,17 +19,81 @@ _forbidden = ("CLASS", "TITLE", "VERSION", "pandas_type", "pandas_version",
               "encoding", "index_variety", "name")
 
 
-class Feature(object):
+class _Param(TypedClass):
     """
+    Args:
+        typ (type): Acceptable type or types
     """
-    pass
+    dtype = Typed(type)
+    dtypes = Typed(dict)
+    index = Typed((bool, pd.Index))
+    value = Typed(str)
+
+    def __call__(self, name):
+        self.name = name
+        return self
+
+    def __init__(self, typ=None, required=False, auto=True):
+        self.typ = typ if isinstance(typ, (list, tuple)) else (typ, )
+        self.required = required
+        self.auto = auto
 
 
-class _Base(TypedClass):
+class Index(_Param):
+    """A required index."""
+    def check(self, data):
+        print(data.index.names)
+        print(self.auto)
+        if self.name not in data.index.names and self.auto:
+            print("here")
+            data.index.set_names(self.name, level=self.level, inplace=True)
+        if self.required:
+            assert self.name in data.index.names
+
+    def __init__(self, *args, **kwargs):
+        level = kwargs.pop("level", None)
+        super(Index, self).__init__(*args, **kwargs)
+        self.level = level
+
+
+class Column(_Param):
+    """A required column."""
+    def check(self, data):
+        if self.required:
+            assert self.name in data.columns
+        if self.name in data.columns:
+            ty = data[self.name].dtype.type
+            assert (any(t is ty for t in self.typ) or
+                    any(isinstance(ty, t) for t in self.typ))
+
+
+class _BaseMeta(TypedMeta):
     """
+    This metaclass inspects data class objects and modifies their
+    required data parameters upon instantiation.
+    """
+    def __new__(mcs, name, bases, clsdict):
+        kwargs = {}
+        params = []
+        for key, item in clsdict.items():
+            if isinstance(item, _Param):
+                params.append(item(key))
+            else:
+                kwargs[key] = item
+        kwargs['_params'] = params
+        return super(_BaseMeta, mcs).__new__(mcs, name, bases, kwargs)
+
+
+class _Base(six.with_metaclass(_BaseMeta)):
+    """
+    A base class for structured data objects. Structured data objects may
+    have requirements on their indices/features. These features are handled
+    by the :class:`~exa.core.data._BaseMeta` metaclass and
+    :class:`~exa.core.data._Param` objects (e.g. :class:`~exa.core.data.Column`).
     """
     _metadata = ['name', 'meta']
-    meta = Typed(dict, doc="Persistent metadata")
+    _params = Typed(tuple, doc="Column/index requirements of the data object.")
+    meta = Typed(dict, doc="Persistent metadata.")
 
     def to_hdf(self, store, name, mode=None, complevel=None,
                complib=None, fletcher32=False, append=False, **kwargs):
@@ -83,6 +148,22 @@ class _Base(TypedClass):
         store.close()
         return cls(data, **kwargs)
 
+    def _enforce(self):
+        """Enforce format of columns and indices."""
+        for param in self._params:
+            param.check(self)
+
+    def __setitem__(self, *args, **kwargs):
+        """Setitem is called on column manipulations so we recheck columns."""
+        super(_Base, self).__setitem__(*args, **kwargs)
+        self._enforce()
+
+    def __init__(self, *args, **kwargs):
+        meta = kwargs.pop("meta", None)
+        super(_Base, self).__init__(*args, **kwargs)
+        self.meta = meta
+        self._enforce()
+
 
 class DataSeries(_Base, pd.Series):
     """
@@ -96,11 +177,6 @@ class DataSeries(_Base, pd.Series):
     @property
     def _constructor_expanddim(self):
         return DataFrame
-
-    def __init__(self, *args, **kwargs):
-        meta = kwargs.pop("meta", None)
-        super(DataSeries, self).__init__(*args, **kwargs)
-        self.meta = meta    # Prevents recursion error
 
 
 class DataFrame(_Base, pd.DataFrame):
@@ -116,11 +192,6 @@ class DataFrame(_Base, pd.DataFrame):
     def _constructor_sliced(self):
         return DataSeries
 
-    def __init__(self, *args, **kwargs):
-        meta = kwargs.pop("meta", None)
-        super(DataFrame, self).__init__(*args, **kwargs)
-        self.meta = meta     # Prevents recursion error
-
 
 class SparseDataSeries(_Base, pd.SparseSeries):
     """
@@ -135,11 +206,6 @@ class SparseDataSeries(_Base, pd.SparseSeries):
     def _constructor_expanddim(self):
         return SparseDataFrame
 
-    def __init__(self, *args, **kwargs):
-        meta = kwargs.pop("meta", None)
-        super(SparseDataSeries, self).__init__(*args, **kwargs)
-        self.meta = meta    # Prevents recursion error
-
 
 class SparseDataFrame(_Base, pd.SparseDataFrame):
     """
@@ -150,11 +216,6 @@ class SparseDataFrame(_Base, pd.SparseDataFrame):
     @property
     def _constructor(self):
         return SparseDataFrame
-
-    def __init__(self, *args, **kwargs):
-        meta = kwargs.pop("meta", None)
-        super(SparseDataFrame, self).__init__(*args, **kwargs)
-        self.meta = meta    # Prevents recursion error
 
 
 def concat(*data, **kwargs):

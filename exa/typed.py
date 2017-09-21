@@ -239,7 +239,7 @@ class TypedMeta(type):
             bar = Typed(int, doc="Always an int")
 
     See Also:
-        :func:`~exa.typed.typed`
+        :func:`~exa.typed.typed` and :mod:`~exa.core.data`
     """
     def __new__(mcs, name, bases, namespace):
         namespace.update(_typed_from_items(namespace.items()))
@@ -254,7 +254,7 @@ class TypedClass(six.with_metaclass(TypedMeta, object)):
     .. code-block:: Python
 
         class Foo(TypedClass):
-            bar = Typed(int, doc="Still and int")
+            bar = Typed(int, doc="Still an int")
 
     See Also:
         :func:`~exa.typed.typed`

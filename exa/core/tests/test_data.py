@@ -14,6 +14,12 @@ from unittest import TestCase
 from exa.core.data import DataSeries, DataFrame, SparseDataSeries, SparseDataFrame
 
 
+class FooSeries(DataSeries):
+    """
+    """
+    pass
+
+
 class _Tester(TestCase):
     """This is a mixin tester - see below for usage."""
     def test_meta(self):

@@ -95,7 +95,7 @@ class TestContainer(TestCase):
         nv = sorted(Container()._items())
         n = len(knv)
         self.assertTrue(all(knv[i][1] == nv[i][0] for i in range(n)))
-        self.assertTrue(any("_metadata" in obj for obj in knv))
+        self.assertTrue(any("_meta" in obj for obj in knv))
 
     def test_equality(self):
         """Test that containers can be compared."""
