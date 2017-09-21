@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 from uuid import uuid4
 from sys import getsizeof
-from .typed import TypedClass, Typed
+from exa.typed import TypedClass, Typed
 from .data import _spec_name, _forbidden
 if not hasattr(pd.Series, "items"):
     pd.Series.items = pd.Series.iteritems
@@ -102,15 +102,20 @@ class Container(TypedClass):
             Existing data objects with the same name in the current HDF file
             (if applicable) will be overwritten unless the correct mode and append
             arguments are used. Scalar variables will always be overwritten (if
-            they exist) or added to the collection of existing scalars (if they don't).
-            Numpy and Python objects do not support append operations.
+            they exist) or added to the collection of existing scalars (if they
+            don't). Numpy and Python objects do not support append operations.
 
         See Also:
             Additional arguments can be found in `pandas`_ documentation.
 
+        Note:
+            Passing the keyword argument warn = False will prevent warnings from
+            being shown.
+
         .. _pytables: http://www.pytables.org
         .. _pandas: https://pandas.pydata.org
         """
+        warn = kwargs.pop("warn", True)
         # On first pass, identify which data objects we can save
         # and what method (pandas/pytables) must be used.
         numpy_save = {}
@@ -124,7 +129,7 @@ class Container(TypedClass):
                 pandas_save[name] = data
             elif isinstance(data, (str, int, float, complex, dict, list, tuple)):
                 special_save[name] = data
-            elif data is not None:
+            elif data is not None and warn == True:
                 warnings.warn("Data object '{}' ({}) not saved (unsupported).".format(name, type(data)))
         # First save numpy objects
         if len(numpy_save) > 0:
@@ -142,7 +147,8 @@ class Container(TypedClass):
         for name, data in special_save.items():
             special[name] = data
         for name, data in pandas_save.items():
-            if (isinstance(append, (list, tuple)) and name in append) or append == True:
+            if ((isinstance(append, (list, tuple)) and name in append) or
+                append == True or name == append):
                 data.to_hdf(store, name, append=True, close=False, **kwargs)
             else:
                 data.to_hdf(store, name, close=False)
@@ -254,6 +260,19 @@ class Container(TypedClass):
         n = self.__class__.__name__
         size = np.round(self.memory_usage(), 3)
         return "{}(data={}, size (MiB)={})".format(n, len(self), size)
+
+
+def concatenate(*containers, **kwargs):
+    """
+    Concatenate containers' data and create a new container object.
+
+    Args:
+        containers (iterable): Collection of container objects to concatenate
+        axis (int, dict): Axis along which to concatenate (dictionary with data object name, int pairs)
+        join (str): How to join indices of other axis (default, 'outer')
+        ignore_index (bool): Reset concatenation index values (default False)
+    """
+    raise NotImplementedError()
 
 
 ##    def network(self, figsize=(14, 9), fig=True):

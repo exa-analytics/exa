@@ -320,4 +320,6 @@ class TestTyped(TestCase):
     def test_yield_typed(self):
         """Test :func:`~exa.typed.yield_typed`."""
         names = list(yield_typed(Foo16))
+        self.assertIsInstance(Foo16.foo, property)
+        self.assertEqual(Foo16().foo, 42)
         self.assertListEqual(names, ["bar"])

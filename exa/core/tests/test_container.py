@@ -14,7 +14,7 @@ from sys import getsizeof
 from uuid import uuid4
 from tempfile import mkdtemp
 from unittest import TestCase
-from exa.container import Container
+from exa.core.container import Container
 
 
 class TestContainer(TestCase):
@@ -22,18 +22,21 @@ class TestContainer(TestCase):
         """Generate a test file."""
         self.dirpath = mkdtemp()
         self.path = os.path.join(self.dirpath, uuid4().hex)
+        df = pd.DataFrame.from_dict({'a': np.random.rand(10),
+                                     'b': [0, 0, 0, 0, 1, 1, 1, 2, 2, 2]}).astype(int)
         kwargs = {'a': "string", 'b': 42, 'c': 1.0, 'd': complex(42, 42),
                   'e': np.random.rand(10), 'f': np.random.rand(10, 3),
                   'g': pd.Series(np.random.rand(10)),
-                  'h': pd.DataFrame(np.random.rand(10, 3)),
+                  'h': df,
                   'i': pd.SparseSeries(np.random.rand(10)),
                   'j': pd.SparseDataFrame(np.random.rand(10, 3))}
+        kwargs['k'] = kwargs['h'].groupby('b')
         self.kwargs = kwargs
         self.c = Container(**kwargs)
 
     def test_hdf(self):
         """Test saving to and loading from HDF."""
-        self.c.to_hdf(self.path)
+        self.c.to_hdf(self.path, append="g", warn=False)
         c = Container.from_hdf(self.path)
         self.assertEqual(c.a, self.c.a)
         self.assertEqual(c, self.c)
@@ -85,3 +88,20 @@ class TestContainer(TestCase):
         nodes, edges = c._network()
         self.assertListEqual(nodes, ["a", "b", "d", "e"])
         self.assertListEqual(edges, [["a", "b"], ["b", "d"]])
+
+    def test_items(self):
+        """Test correct keys and names."""
+        knv = sorted(Container()._items(include_keys=True))
+        nv = sorted(Container()._items())
+        n = len(knv)
+        self.assertTrue(all(knv[i][1] == nv[i][0] for i in range(n)))
+        self.assertTrue(any("_metadata" in obj for obj in knv))
+
+    def test_equality(self):
+        """Test that containers can be compared."""
+        c0 = Container(a=42)
+        c1 = Container(a=42)
+        c2 = Container(a=43)
+        self.assertIsNot(c0, c1)
+        self.assertEqual(c0, c1)
+        self.assertNotEqual(c0, c2)

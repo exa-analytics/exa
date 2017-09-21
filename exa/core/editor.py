@@ -16,7 +16,7 @@ import bz2
 import six
 import gzip
 from io import StringIO, TextIOWrapper
-from .typed import Typed, typed
+from exa.typed import Typed, typed
 # Python 2 compatibility
 if not hasattr(bz2, "open"):
     bz2.open = bz2.BZ2File

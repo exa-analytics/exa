@@ -9,7 +9,7 @@ and loading metadata when using the HDF format.
 """
 import pandas as pd
 from pandas.io import pytables
-from .typed import Typed, TypedClass, yield_typed
+from exa.typed import Typed, TypedClass, yield_typed
 
 
 # Default values used for pandas compatibility
@@ -27,8 +27,8 @@ class Feature(object):
 class _Base(TypedClass):
     """
     """
-    _metadata = ['name', 'metadata']
-    metadata = Typed(dict, doc="Persistent metadata")
+    _metadata = ['name', 'meta']
+    meta = Typed(dict, doc="Persistent metadata")
 
     def to_hdf(self, store, name, mode=None, complevel=None,
                complib=None, fletcher32=False, append=False, **kwargs):
@@ -98,9 +98,9 @@ class DataSeries(_Base, pd.Series):
         return DataFrame
 
     def __init__(self, *args, **kwargs):
-        metadata = kwargs.pop("metadata", None)
+        meta = kwargs.pop("meta", None)
         super(DataSeries, self).__init__(*args, **kwargs)
-        self.metadata = metadata    # Prevents recursion error
+        self.meta = meta    # Prevents recursion error
 
 
 class DataFrame(_Base, pd.DataFrame):
@@ -112,15 +112,14 @@ class DataFrame(_Base, pd.DataFrame):
     def _constructor(self):
         return DataFrame
 
-
     @property
     def _constructor_sliced(self):
         return DataSeries
 
     def __init__(self, *args, **kwargs):
-        metadata = kwargs.pop("metadata", None)
+        meta = kwargs.pop("meta", None)
         super(DataFrame, self).__init__(*args, **kwargs)
-        self.metadata = metadata     # Prevents recursion error
+        self.meta = meta     # Prevents recursion error
 
 
 class SparseDataSeries(_Base, pd.SparseSeries):
@@ -137,9 +136,9 @@ class SparseDataSeries(_Base, pd.SparseSeries):
         return SparseDataFrame
 
     def __init__(self, *args, **kwargs):
-        metadata = kwargs.pop("metadata", None)
+        meta = kwargs.pop("meta", None)
         super(SparseDataSeries, self).__init__(*args, **kwargs)
-        self.metadata = metadata    # Prevents recursion error
+        self.meta = meta    # Prevents recursion error
 
 
 class SparseDataFrame(_Base, pd.SparseDataFrame):
@@ -153,14 +152,16 @@ class SparseDataFrame(_Base, pd.SparseDataFrame):
         return SparseDataFrame
 
     def __init__(self, *args, **kwargs):
-        metadata = kwargs.pop("metadata", None)
+        meta = kwargs.pop("meta", None)
         super(SparseDataFrame, self).__init__(*args, **kwargs)
-        self.metadata = metadata    # Prevents recursion error
+        self.meta = meta    # Prevents recursion error
 
 
 # Required exa data objects' HDF compatibility
 for cls in (DataFrame, DataSeries, SparseDataFrame, SparseDataSeries):
     pytables._TYPE_MAP[cls] = pytables._TYPE_MAP[cls._constructor_pandas]
+    if cls._constructor_pandas in pytables._AXES_MAP:
+        pytables._AXES_MAP[cls] = pytables._AXES_MAP[cls._constructor_pandas]
 
 
 #import six
