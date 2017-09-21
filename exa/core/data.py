@@ -157,6 +157,10 @@ class SparseDataFrame(_Base, pd.SparseDataFrame):
         self.meta = meta    # Prevents recursion error
 
 
+def concat(*data, **kwargs):
+    raise NotImplementedError()
+
+
 # Required exa data objects' HDF compatibility
 for cls in (DataFrame, DataSeries, SparseDataFrame, SparseDataSeries):
     pytables._TYPE_MAP[cls] = pytables._TYPE_MAP[cls._constructor_pandas]

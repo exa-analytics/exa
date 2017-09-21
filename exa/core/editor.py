@@ -82,6 +82,8 @@ class Editor(object):
     Attributes:
         lines (list):
     """
+    meta = Typed(dict, doc="Document metadata")
+
     def copy(self):
         """
         Create a copy of the current editor's text.

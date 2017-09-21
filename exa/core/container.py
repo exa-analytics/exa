@@ -35,7 +35,7 @@ class Container(TypedClass):
     TODO
     """
     default_prefix = Typed(str, doc="Default prefix for container args.")
-    metadata = Typed(dict, doc="Metadata dictionary.")
+    meta = Typed(dict, doc="Document metadata")
 
     def info(self):
         """
@@ -242,7 +242,7 @@ class Container(TypedClass):
 
     def __init__(self, *args, **kwargs):
         self.default_prefix = kwargs.pop("default_prefix", "obj_")
-        self.metadata = kwargs.pop("metadata", None)
+        self.meta = kwargs.pop("meta", None)
         for arg in args:
             do = True
             # The while check is used to make sure names do not overlap...

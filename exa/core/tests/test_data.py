@@ -2,13 +2,12 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Tests for :mod:`~exa.data`
+Tests for :mod:`~exa.core.data`
 #############################################
 Test data objects' behavior.
 """
 import os
 import numpy as np
-import pandas as pd
 from uuid import uuid4
 from tempfile import mkdtemp
 from unittest import TestCase

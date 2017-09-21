@@ -241,9 +241,9 @@ class TypedMeta(type):
     See Also:
         :func:`~exa.typed.typed`
     """
-    def __new__(cls, name, bases, namespace):
+    def __new__(mcs, name, bases, namespace):
         namespace.update(_typed_from_items(namespace.items()))
-        return super(TypedMeta, cls).__new__(cls, name, bases, namespace)
+        return super(TypedMeta, mcs).__new__(mcs, name, bases, namespace)
 
 
 class TypedClass(six.with_metaclass(TypedMeta, object)):
