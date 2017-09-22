@@ -7,7 +7,8 @@ Parsing Editors
 This module provides editors tailored to parsing small/medium sized text files
 that do not have a consistent structure.
 """
-from abc import ABC, abstractmethod
+import six
+from abc import ABCMeta, abstractmethod
 from exa.typed import Typed
 from .editor import Editor
 from .data import DataFrame, Column
@@ -19,10 +20,11 @@ class Sections(DataFrame):
     pass
 
 
-class Parser(Editor, ABC):
+class Parser(six.with_metaclass(ABCMeta, Editor)):
     """
     """
     sections = Typed(Sections, doc="Parsing sections.")
+
     def parse(self):
         pass
 
