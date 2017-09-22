@@ -92,10 +92,21 @@ class Match(object):
 
 
 @typed
-class Pattern(object):
+class Matches(object):
     """A Dictionary like object for storing matches of text searches."""
     _matches = Typed(list)
     _pattern = Typed(str)
+
+    def numpairs(self):
+        """Yield sequential line numbers of matches."""
+        n = len(self._matches)//2
+        for i in range(n):
+            yield self._matches[i].num, self._matches[i+1].num
+
+    def items(self):
+        """Iterator that yields individual matches as tuples."""
+        for match in self._matches:
+            yield match.num, match.text
 
     def add(self, *matches):
         self._matches = sorted(self._matches+list(matches), key=lambda m: m.num)
@@ -112,11 +123,19 @@ class Pattern(object):
         self.add(*matches)
 
     def __repr__(self):
-        return "Pattern({}, matches={})".format(self._pattern, len(self._matches))
+        return "Matches({}, matches={})".format(self._pattern, len(self._matches))
 
 
 class Found(object):
     """Result of an editor search."""
+    def all(self):
+        matches = [m for match in self._patterns.values() for m in match._matches]
+        return Matches(None, *matches)
+
+    def __iter__(self):
+        for i, pattern in self._patterns.items():
+            yield i, pattern
+
     def __getitem__(self, key):
         if isinstance(key, str):
             for i in self._patterns.keys():
@@ -129,7 +148,7 @@ class Found(object):
         return len(self._patterns)
 
     def __init__(self, *patterns):
-        self._patterns = {i: Pattern(pattern) for i, pattern in enumerate(patterns)}
+        self._patterns = {i: Matches(pattern) for i, pattern in enumerate(patterns)}
 
     def __repr__(self):
         return "Found(n={})".format(len(self._patterns))

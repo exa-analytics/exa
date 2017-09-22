@@ -28,6 +28,7 @@ class Parser(six.with_metaclass(ABCMeta, Editor)):
     sections = Typed(Sections, doc="High level description of the file")
 
     def parse(self):
+        """Perform automatic parsing."""
         pass
 
     @abstractmethod

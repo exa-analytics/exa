@@ -21,7 +21,7 @@ class DocString(Parser):
     """Docstring parser."""
     def _parse(self):
         """Parse docstrings."""
-        found = self.find('"""', "'''")
+        df = list(self.find('"""', "'''").all().numpairs())
 
 
 class PyFunc(Parser):

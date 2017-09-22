@@ -14,7 +14,7 @@ from uuid import uuid4
 from io import StringIO
 from unittest import TestCase
 from tempfile import mkdtemp
-from exa.core.editor import Match, Pattern, Found, Editor
+from exa.core.editor import Match, Matches, Found, Editor
 # Python 2 compatibility
 if not hasattr(bz2, "open"):
     bz2.open = bz2.BZ2File
@@ -22,12 +22,12 @@ if not hasattr(bz2, "open"):
 
 class TestAuxiliary(TestCase):
     """
-    Tests for :class:`~exa.core.editor.Match`, :class:`~exa.core.editor.Pattern`,
+    Tests for :class:`~exa.core.editor.Match`, :class:`~exa.core.editor.Matches`,
     and :class:`~exa.core.editor.Found`.
     """
     def setUp(self):
         self.matches = [Match(i, "text") for i in range(3)]
-        self.patterns = [Pattern("text", *self.matches), Pattern("stuff")]
+        self.patterns = [Matches("text", *self.matches), Matches("stuff")]
 
     def test_match(self):
         self.assertEqual(self.matches[0].num, 0)
