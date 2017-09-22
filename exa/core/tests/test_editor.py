@@ -14,10 +14,34 @@ from uuid import uuid4
 from io import StringIO
 from unittest import TestCase
 from tempfile import mkdtemp
-from exa.core.editor import Editor
+from exa.core.editor import Match, Pattern, Found, Editor
 # Python 2 compatibility
 if not hasattr(bz2, "open"):
     bz2.open = bz2.BZ2File
+
+
+class TestAuxiliary(TestCase):
+    """
+    Tests for :class:`~exa.core.editor.Match`, :class:`~exa.core.editor.Pattern`,
+    and :class:`~exa.core.editor.Found`.
+    """
+    def setUp(self):
+        self.matches = [Match(i, "text") for i in range(3)]
+        self.patterns = [Pattern("text", *self.matches), Pattern("stuff")]
+
+    def test_match(self):
+        self.assertEqual(self.matches[0].num, 0)
+        self.assertEqual(self.matches[0].text, "text")
+
+    def test_pattern(self):
+        self.assertEqual(self.patterns[1]._pattern, "stuff")
+        self.assertEqual(len(self.patterns[0]), 3)
+        self.patterns[0].add(Match(4, "stuff"))
+        self.assertEqual(len(self.patterns[0]), 4)
+
+    def test_found(self):
+        found = Found(*self.patterns)
+        self.assertEqual(len(found), 2)
 
 
 class TestEditor(TestCase):
@@ -142,3 +166,11 @@ class TestEditor(TestCase):
         """Test init raising type error."""
         with self.assertRaises(TypeError):
             Editor(Editor)
+
+    def test_find(self):
+        """Test line by line searching."""
+        found = self.from_file_iso.format(tmp="test").find("test")
+        self.assertEqual(len(found), 1)
+        self.assertEqual(len(found[0]), 2)
+        self.assertEqual(found[0][0].num, 0)
+        self.assertEqual(found[0][1].num, 1)

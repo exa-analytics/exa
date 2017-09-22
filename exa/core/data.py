@@ -8,7 +8,6 @@ Exa provides a `pandas`_ like Series and DataFrame object which support saving
 and loading metadata when using the HDF format.
 """
 import six
-import warnings
 import numpy as np
 import pandas as pd
 from pandas.io import pytables
@@ -89,7 +88,7 @@ class Index(_Param):
         for t in self.typ:
             if t is ty or t in _npmap and ty in _npmap[t]:
                 return
-        raise TypeError("Wrong type for index {} with type {} (expected {})".format(self.name, ty), self.typ)
+        raise TypeError("Wrong type for index {} with type {} (expected {})".format(self.name, ty, self.typ))
 
     def __init__(self, *args, **kwargs):
         level = kwargs.pop("level", None)
@@ -126,7 +125,7 @@ class Column(_Param):
             for t in self.typ:
                 if t is ty or t in _npmap and ty in _npmap[t]:
                     return
-            raise TypeError("Wrong type for column {} with type {} (expected {})".format(self.name, ty), self.typ)
+            raise TypeError("Wrong type for column {} with type {} (expected {})".format(self.name, ty, self.typ))
 
 
 class _BaseMeta(TypedMeta):

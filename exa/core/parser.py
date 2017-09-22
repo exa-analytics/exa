@@ -17,13 +17,15 @@ from .data import DataFrame, Column
 class Sections(DataFrame):
     """
     """
-    pass
+    start = Column(int, required=True)
+    stop = Column(int, required=True)
+    parser = Column(required=True)
 
 
 class Parser(six.with_metaclass(ABCMeta, Editor)):
     """
     """
-    sections = Typed(Sections, doc="Parsing sections.")
+    sections = Typed(Sections, doc="High level description of the file")
 
     def parse(self):
         pass

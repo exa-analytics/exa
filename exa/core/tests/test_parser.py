@@ -10,10 +10,18 @@ from unittest import TestCase
 from exa.core.parser import Parser
 
 
-class PySrcParser(Parser):
-    """
-    """
-    pass
+class SrcParser(Parser):
+    """Top level parser for Python source code (testing)."""
+    def _parse(self):
+        """Only parses auxiliary text at the top of files."""
+        pass
+
+
+class DocString(Parser):
+    """Docstring parser."""
+    def _parse(self):
+        """Parse docstrings."""
+        found = self.find('"""', "'''")
 
 
 class PyFunc(Parser):

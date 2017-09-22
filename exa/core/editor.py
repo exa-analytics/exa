@@ -72,6 +72,70 @@ def write_file(text, path, encoding="utf-8", newline=""):
 
 
 @typed
+class Match(object):
+    """A key/value pair containing line number and line text."""
+    num = Typed(int)
+    text = Typed(str)
+    rep = Typed(int)
+
+    def __init__(self, num, text, rep=20):
+        self.num = num
+        self.text = text
+        self.rep = rep
+
+    def __repr__(self):
+        if len(self.text) > self.rep:
+            text = self.text[:self.rep] + "..."
+        else:
+            text = self.text
+        return "{}: {}".format(self.num, text)
+
+
+@typed
+class Pattern(object):
+    """A Dictionary like object for storing matches of text searches."""
+    _matches = Typed(list)
+    _pattern = Typed(str)
+
+    def add(self, *matches):
+        self._matches = sorted(self._matches+list(matches), key=lambda m: m.num)
+
+    def __getitem__(self, num):
+        return self._matches[num]
+
+    def __len__(self):
+        return len(self._matches)
+
+    def __init__(self, pattern, *matches):
+        self._matches = []
+        self._pattern = pattern
+        self.add(*matches)
+
+    def __repr__(self):
+        return "Pattern({}, matches={})".format(self._pattern, len(self._matches))
+
+
+class Found(object):
+    """Result of an editor search."""
+    def __getitem__(self, key):
+        if isinstance(key, str):
+            for i in self._patterns.keys():
+                if key == self._patterns[i]._pattern:
+                    return self._patterns[i]
+        else:
+            return self._patterns[key]
+
+    def __len__(self):
+        return len(self._patterns)
+
+    def __init__(self, *patterns):
+        self._patterns = {i: Pattern(pattern) for i, pattern in enumerate(patterns)}
+
+    def __repr__(self):
+        return "Found(n={})".format(len(self._patterns))
+
+
+@typed
 class Editor(object):
     """
     Args:
@@ -134,6 +198,33 @@ class Editor(object):
         else:
             text = str(self)
         return write_file(text, path, encoding, newline)
+
+    def find(self, *patterns, **kwargs):
+        """
+        Search line by line for given patterns.
+
+        Args:
+            patterns: String text to search for
+            case (bool): Consider character case (default true)
+
+        Returns:
+            found (:class:`~exa.core.editor.Found`): Enumerated results
+
+        Note:
+            For multiline patterns use :func:`~exa.core.editor.Editor.regex`.
+        """
+        case = kwargs.pop("case", True)
+        if case:
+            check = lambda pat, lin: pat in lin
+        else:
+            patterns = [pattern.lower() for pattern in patterns]
+            check = lambda pat, lin: pat in lin.lower()
+        matches = Found(*patterns)
+        for i, line in enumerate(self):
+            for pattern in patterns:
+                if check(pattern, line):
+                    matches[pattern].add(Match(i, line))
+        return matches
 
     def __iter__(self):
         for line in self.lines:
