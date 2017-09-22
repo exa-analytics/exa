@@ -8,12 +8,19 @@ Exa provides a `pandas`_ like Series and DataFrame object which support saving
 and loading metadata when using the HDF format.
 """
 import six
+import warnings
+import numpy as np
 import pandas as pd
 from pandas.io import pytables
 from exa.typed import Typed, TypedMeta, yield_typed, TypedClass
 
 
-# Default values used for pandas compatibility
+#4 Default values used for pandas compatibility
+_npmap = {int: (np.int, np.int_, np.int0, np.int8, np.int16, np.int32,
+                np.int64),
+          float: (np.float, np.float_, np.float16, np.float32, np.float64),
+          str: (np.object, np.object_, np.object0),
+          complex: (np.complex, np.complex_, np.complex64, np.complex128)}
 _spec_name = "__exa_storer__"
 _forbidden = ("CLASS", "TITLE", "VERSION", "pandas_type", "pandas_version",
               "encoding", "index_variety", "name")
@@ -22,12 +29,24 @@ _forbidden = ("CLASS", "TITLE", "VERSION", "pandas_type", "pandas_version",
 class _Param(TypedClass):
     """
     Args:
-        typ (type): Acceptable type or types
+        typ: Type or iterable of acceptable types
+        required (bool): Mandatory name/value (default True)
+        auto (bool): Attempt automatic conversion (default True)
     """
     dtype = Typed(type)
     dtypes = Typed(dict)
     index = Typed((bool, pd.Index))
     value = Typed(str)
+
+    def check(self, data):
+        """Perform internal checks then default checks."""
+        self._check(data)
+        if len(self.typ) > 0 and self.typ[0] is not None:
+            self.check_type(data)
+
+    def check_type(self, data):
+        """Overwritten below."""
+        raise NotImplementedError()
 
     def __call__(self, name):
         self.name = name
@@ -40,31 +59,74 @@ class _Param(TypedClass):
 
 
 class Index(_Param):
-    """A required index."""
-    def check(self, data):
-        print(data.index.names)
-        print(self.auto)
+    """
+    A required index.
+
+    .. code-block:: python
+
+        class Foo(DataFrame):
+            idx0 = Index(int, level=0)
+            idx1 = Index(int, level=1)
+
+    Args:
+        typ: Type or iterable of acceptable types
+        required (bool): Mandatory name/value (default True)
+        level (int): If multiindex, index level (default None)
+
+    Note:
+        Numeric types must used must be numpy types.
+    """
+    def _check(self, data):
+        """Assert data object validity."""
         if self.name not in data.index.names and self.auto:
-            print("here")
             data.index.set_names(self.name, level=self.level, inplace=True)
-        if self.required:
-            assert self.name in data.index.names
+        if self.required and self.name not in data.index.names:
+            raise NameError("No index with name {}".format(self.name))
+
+    def check_type(self, data):
+        """Type check."""
+        ty = data.index.get_level_values(self.level).dtype.type
+        for t in self.typ:
+            if t is ty or t in _npmap and ty in _npmap[t]:
+                return
+        raise TypeError("Wrong type for index {} with type {} (expected {})".format(self.name, ty), self.typ)
 
     def __init__(self, *args, **kwargs):
         level = kwargs.pop("level", None)
+        kwargs['required'] = kwargs.pop("required", True)
         super(Index, self).__init__(*args, **kwargs)
         self.level = level
 
 
 class Column(_Param):
-    """A required column."""
-    def check(self, data):
-        if self.required:
-            assert self.name in data.columns
+    """
+    A required column.
+
+    .. code-block:: python
+
+        class Foo(DataFrame):
+            reqcol = Column(int, required=True)
+
+    Args:
+        typ: Type or iterable of acceptable types
+        required (bool): Mandatory name/value (default True)
+
+    Note:
+        Numeric types must used must be numpy types.
+    """
+    def _check(self, data):
+        """Custom checks specific to columns."""
+        if self.required and self.name not in data.columns:
+            raise NameError("No column with name {}".format(self.name))
+
+    def check_type(self, data):
+        """Check type."""
         if self.name in data.columns:
             ty = data[self.name].dtype.type
-            assert (any(t is ty for t in self.typ) or
-                    any(isinstance(ty, t) for t in self.typ))
+            for t in self.typ:
+                if t is ty or t in _npmap and ty in _npmap[t]:
+                    return
+            raise TypeError("Wrong type for column {} with type {} (expected {})".format(self.name, ty), self.typ)
 
 
 class _BaseMeta(TypedMeta):

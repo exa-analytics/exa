@@ -8,18 +8,38 @@ Test data objects' behavior.
 """
 import os
 import numpy as np
+import pandas as pd
 from uuid import uuid4
 from tempfile import mkdtemp
 from unittest import TestCase
-from exa.core.data import DataSeries, DataFrame, SparseDataSeries, SparseDataFrame
+from exa.core.data import (DataSeries, DataFrame, SparseDataSeries,
+                           SparseDataFrame, Index, Column, _Param)
 
 
+# Some simple Param tests
 class FooSeries(DataSeries):
-    """
-    """
-    pass
+    idx = Index()
 
 
+class FooMSeries(DataSeries):
+    idx0 = Index(level=0)
+    idx1 = Index(level=1)
+
+
+class FooFrame(DataFrame):
+    idx = Index()
+    a0 = Column(int, required=True)
+    b1 = Column((float, str))
+
+
+class FooFrame(DataFrame):
+    idx0 = Index(int, level=0)
+    idx1 = Index(str, level=1)
+    a0 = Column(int, required=True)
+    b1 = Column((float, str))
+
+
+# Testers (_Tester is a mixin with some 'universal' tests)
 class _Tester(TestCase):
     """This is a mixin tester - see below for usage."""
     def test_meta(self):
@@ -66,6 +86,17 @@ class TestDataSeries(_Tester):
         self.assertTrue(np.all(df1.values == np.concatenate((self.d1.values, self.d1.values))))
         os.remove(path)
 
+    def test_params(self):
+        """Test the params machinery."""
+        # Confirm _Param raises (instead of abstract class)
+        with self.assertRaises(NotImplementedError):
+            _Param().check_type(None)
+        s = FooSeries()
+        self.assertEqual(s.index.name, "idx")
+        index = pd.MultiIndex.from_product([[0, 1, 2], ["green", "purple"]])
+        s = FooMSeries(index=index)
+        self.assertListEqual(list(s.index.names), ["idx0", "idx1"])
+
 
 class TestDataFrame(_Tester):
     """Tests for :class:`~exa.data.DataFrame`."""
@@ -88,6 +119,14 @@ class TestDataFrame(_Tester):
         self.assertEqual(len(df1), 2*len(self.d1))
         self.assertTrue(np.all(df1.values == np.concatenate((self.d1.values, self.d1.values))))
         os.remove(path)
+
+    def test_params(self):
+        """Test params machinery."""
+        index = pd.MultiIndex.from_product([[0, 1], ["green", "purple"]])
+        s = FooFrame([0, 1, 2, 3], columns=("a0", ), index=index)
+        self.assertListEqual(list(s.index.names), ["idx0", "idx1"])
+        with self.assertRaises(NameError):
+            s = FooFrame(index=index)
 
 
 class TestSparseDataSeries(_Tester):
