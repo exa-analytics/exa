@@ -63,7 +63,7 @@ def typed(cls):
     property attributes.
 
     See Also:
-        :func:`~exa.typed.typed`
+        If the class will be inherited, use :class:`~exa.typed.TypedClass`.
     """
     for name, attr in _typed_from_items(vars(cls).items()).items():
         setattr(cls, name, attr)

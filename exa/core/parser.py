@@ -22,18 +22,18 @@ class Sections(DataFrame):
     parser = Column(required=True)
 
 
-class Parser(six.with_metaclass(ABCMeta, Editor)):
-    """
-    """
-    sections = Typed(Sections, doc="High level description of the file")
-
-    def parse(self):
-        """Perform automatic parsing."""
-        pass
-
-    @abstractmethod
-    def _parse(self):
-        pass
+#class Parser(six.with_metaclass(ABCMeta, Editor)):
+#    """
+#    """
+#    sections = Typed(Sections, doc="High level description of the file")
+#
+#    def parse(self):
+#        """Perform automatic parsing."""
+#        pass
+#
+#    @abstractmethod
+#    def _parse(self):
+#        pass
 
 
 #####

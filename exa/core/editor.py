@@ -16,7 +16,7 @@ import bz2
 import six
 import gzip
 from io import StringIO, TextIOWrapper
-from exa.typed import Typed, typed
+from exa.typed import Typed, typed, TypedClass
 # Python 2 compatibility
 if not hasattr(bz2, "open"):
     bz2.open = bz2.BZ2File
@@ -123,7 +123,7 @@ class Matches(object):
         self.add(*matches)
 
     def __repr__(self):
-        return "Matches({}, matches={})".format(self._pattern, len(self._matches))
+        return "Matches({}, match={})".format(self._pattern, len(self._matches))
 
 
 class Found(object):
@@ -151,11 +151,10 @@ class Found(object):
         self._patterns = {i: Matches(pattern) for i, pattern in enumerate(patterns)}
 
     def __repr__(self):
-        return "Found(n={})".format(len(self._patterns))
+        return "Found(matches={})".format(len(self._patterns))
 
 
-@typed
-class Editor(object):
+class Editor(TypedClass):
     """
     Args:
         data: File path, text, stream, or archived text file
