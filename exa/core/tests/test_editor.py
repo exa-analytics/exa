@@ -26,18 +26,22 @@ class TestAuxiliary(TestCase):
     and :class:`~exa.core.editor.Found`.
     """
     def setUp(self):
-        self.matches = [Match(i, "text") for i in range(3)]
+        self.matches = [Match(i, "text") for i in range(4)]
         self.patterns = [Matches("text", *self.matches), Matches("stuff")]
 
     def test_match(self):
         self.assertEqual(self.matches[0].num, 0)
         self.assertEqual(self.matches[0].text, "text")
+        self.assertListEqual([(self.matches[0].num, self.matches[1].num),
+                              (self.matches[2].num, self.matches[3].num)],
+                              list(self.patterns[0].numpairs()))
 
     def test_pattern(self):
         self.assertEqual(self.patterns[1]._pattern, "stuff")
-        self.assertEqual(len(self.patterns[0]), 3)
-        self.patterns[0].add(Match(4, "stuff"))
         self.assertEqual(len(self.patterns[0]), 4)
+        self.patterns[0].add(Match(4, "stuff"))
+        self.assertEqual(len(self.patterns[0]), 5)
+        self.assertIsInstance(repr(self.patterns[0]), str)
 
     def test_found(self):
         found = Found(*self.patterns)

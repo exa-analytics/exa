@@ -66,10 +66,7 @@ def write_file(text, path, encoding="utf-8", newline=""):
         newline (str): Newline delimiter
     """
     with io.open(path, "w", newline=newline, encoding=encoding) as f:
-        try:
-            f.write(text)
-        except TypeError:
-            f.write(unicode(text))
+        f.write(text)
 
 
 @typed
@@ -263,8 +260,9 @@ class Editor(TypedClass):
                 lines.append(line.replace(pattern, replacement))
             return self.__class__(lines)
 
-    def find_next(self, patterns, case=True, reverse=False):
+    def find_next(self, pattern, case=True, reverse=False):
         """
+        Find the next line with the given text pattern.
         """
         n = len(self)
         n1 = n - 1
@@ -287,6 +285,7 @@ class Editor(TypedClass):
 
     def regex_next(self, pattern, reverse=False, flags=re.MULTILINE):
         """
+        Find the next line with a given regular expression pattern.
         """
         pass
 

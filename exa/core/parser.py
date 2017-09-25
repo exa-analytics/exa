@@ -15,13 +15,13 @@ from exa.typed import Typed
 
 class Sections(object):
     """
+    A representation of parts of specific parts of a file to be parsed.
     """
     def as_df(self):
         return DataFrame.from_dict({'start': self.start, 'stop': self.stop,
                                     'parser': self.parser})
 
     def __iter__(self):
-        n = len(self)
         for i, start in enumerate(self.start):
             yield start, self.stop[i], self.parser[i]
 
@@ -29,7 +29,8 @@ class Sections(object):
         return len(self.start)
 
     def __init__(self, start, stop, parser):
-        assert len(start) == len(stop) == len(parser)
+        if not (len(start) == len(stop) == len(parser)):
+            raise Exception("Argument lengths don't match, {}, {}, {}".format(len(start), len(stop), len(parser)))
         self.start = start
         self.stop = stop
         self.parser = parser
@@ -104,8 +105,9 @@ class Parser(Editor):
     def _parse(self):
         pass
 
-    def add_parsers(self, *parsers):
-        self._parsers += list(parsers)
+    @classmethod
+    def add_parsers(cls, *parsers):
+        cls._parsers += list(parsers)
 
 
 #class Parser(six.with_metaclass(ABCMeta, Editor)):
