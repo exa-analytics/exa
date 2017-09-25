@@ -287,6 +287,8 @@ class Editor(TypedClass):
             lines = textobj
         elif isinstance(textobj, (TextIOWrapper, StringIO)):
             lines = textobj.read().splitlines()
+        elif isinstance(textobj, Editor):
+            lines = textobj.lines
         else:
             raise TypeError("Object of type {} not supported by Editors.".format(type(textobj)))
         self.lines = lines

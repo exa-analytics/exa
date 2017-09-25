@@ -276,30 +276,11 @@ def concatenate(*containers, **kwargs):
 
 
 ##    def network(self, figsize=(14, 9), fig=True):
-##        """
-##        Display information about the container's object relationships.
-##
-##        Nodes correspond to data objects. The size of the node corresponds
-##        to the size of the table in memory. The color of the node corresponds
-##        to its fundamental data type. Nodes are labeled by their container
-##        name; class information is listed below. The color of the connections
-##        correspond to the type of relationship; either an index of one table
-##        corresponds to a column in another table or the two tables share an
-##        index.
-##
-##        Args:
-##            figsize (tuple): Tuple containing figure dimensions
-##            fig (bool): Generate the figure (default true)
-##
-##        Returns:
-##            graph: Network graph object containing data relationships
-##        """
 ##        conn_types = ['index-index', 'index-column']
 ##        conn_colors = mpl.color_palette(n=len(conn_types))
 ##        conn = dict(zip(conn_types, conn_colors))
 ##
 ##        def get_node_type_color(obj):
-##            """Gets the color of a node based on the node's (sub)type."""
 ##            typs = [Field, SparseSeries, DataFrame, SparseDataFrame, Series, pd.DataFrame, pd.Series]
 ##            cols = mpl.color_palette(n=len(typs))
 ##            for typ, col in zip(typs, cols):
@@ -308,7 +289,6 @@ def concatenate(*containers, **kwargs):
 ##            return 'other', 'gray'
 ##
 ##        def legend(items, name, loc, ax):
-##            """Legend creation helper function."""
 ##            proxies = []
 ##            descriptions = []
 ##            for label, color in items:
