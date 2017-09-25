@@ -12,6 +12,7 @@ for reading and writing text.
 """
 import io
 import os
+import re
 import bz2
 import six
 import gzip
@@ -99,8 +100,8 @@ class Matches(object):
 
     def numpairs(self):
         """Yield sequential line numbers of matches."""
-        n = len(self._matches)//2
-        for i in range(n):
+        n = len(self._matches)
+        for i in range(0, n, 2):
             yield self._matches[i].num, self._matches[i+1].num
 
     def items(self):
@@ -244,6 +245,51 @@ class Editor(TypedClass):
                     matches[pattern].add(Match(i, line))
         return matches
 
+    def replace(self, pattern, replacement, inplace=False):
+        """
+        Replace a pattern with some text.
+
+        Args:
+            pattern (str): Pattern to replace
+            replacement (str): Value for replacement
+            inplace (bool): Perform replacement in place
+        """
+        if inplace:
+            for i in range(len(self)):
+                self.line[i] = self.line[i].replace(pattern, replacement)
+        else:
+            lines = []
+            for line in self:
+                lines.append(line.replace(pattern, replacement))
+            return self.__class__(lines)
+
+    def find_next(self, patterns, case=True, reverse=False):
+        """
+        """
+        n = len(self)
+        n1 = n - 1
+        if reverse:
+            self.cursor = 0 if self.cursor == 0 else self.cursor - 1
+            positions = ((self.cursor - 1, 0, -1), (n1, self.cursor, -1))
+        else:
+            self.cursor = 0 if self.cursor == n1 else self.cursor + 1
+            positions = ((self.cursor, n, 1), (0, self.cursor, 1))
+        if case:
+            check = lambda lin: pattern in lin
+        else:
+            pattern = pattern.lower()
+            check = lambda lin: pattern in lin.lower()
+        for start, stop, inc in positions:
+            for i in range(start, stop, inc):
+                if check(line):
+                    self.cursor = i
+                    return Match(i, line)
+
+    def regex_next(self, pattern, reverse=False, flags=re.MULTILINE):
+        """
+        """
+        pass
+
     def __iter__(self):
         for line in self.lines:
             yield line
@@ -299,11 +345,11 @@ class Editor(TypedClass):
         r = ""
         nn = len(self)
         n = len(str(nn))
-        fmt = "{0}: {1}".format
+        fmt = lambda x, y: " "*(n-len(str(x))) + "{0}: {1}".format(x, y)
         if nn > 2*self.nprint:
             r += "\n".join(map(fmt, range(self.nprint), self.lines[:self.nprint]))
-            r += "...\n".rjust(n, " ")
-            r += "\n".join(map(fmt, range(self.nprint), self.lines[-self.nprint:]))
+            r += "\n" + "."*n + "\n"
+            r += "\n".join(map(fmt, range(nn-self.nprint, nn), self.lines[-self.nprint:]))
         else:
             r += "\n".join(map(fmt, range(len(self)), self.lines))
         return r

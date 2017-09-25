@@ -178,8 +178,9 @@ class Typed(object):
                     try:
                         value = t(value)
                         break
-                    except:    # Catch all exceptions but if conversion fails ...
-                        pass
+                    except Exception as e:    # Catch all exceptions but if conversion fails ...
+                        if self.verbose:
+                            warnings.warn("Conversion of {} (with type {}) failed to type {}\n{}".format(name, type(value), t, str(e)))
                 else:          # ... raise a TypeError
                     raise TypeError("Cannot convert object of type {} to any of {}.".format(type(value), self.types))
             # If the value is none and none is not allowed,
@@ -216,7 +217,7 @@ class Typed(object):
         return property(getter, setter, deleter, doc=self.doc)
 
     def __init__(self, types, doc=None, autoconv=True, pre_set=None, allow_none=True,
-                 post_set=None, pre_get=None, pre_del=None, post_del=None):
+                 post_set=None, pre_get=None, pre_del=None, post_del=None, verbose=False):
         self.types = types if isinstance(types, (tuple, list)) else (types, )
         self.doc = str(doc) + "\n\n__typed__"
         self.autoconv = autoconv
@@ -226,6 +227,7 @@ class Typed(object):
         self.pre_get = pre_get
         self.pre_del = pre_del
         self.post_del = post_del
+        self.verbose = verbose
 
 
 class TypedMeta(type):

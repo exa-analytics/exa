@@ -7,19 +7,105 @@ Parsing Editors
 This module provides editors tailored to parsing small/medium sized text files
 that do not have a consistent structure.
 """
-import six
-from abc import ABCMeta, abstractmethod
-from exa.typed import Typed
 from .editor import Editor
-from .data import DataFrame, Column
+from .data import DataFrame
+from exa.typed import Typed
 
 
-class Sections(DataFrame):
+
+class Sections(object):
     """
     """
-    start = Column(int, required=True)
-    stop = Column(int, required=True)
-    parser = Column(required=True)
+    def as_df(self):
+        return DataFrame.from_dict({'start': self.start, 'stop': self.stop,
+                                    'parser': self.parser})
+
+    def __iter__(self):
+        n = len(self)
+        for i, start in enumerate(self.start):
+            yield start, self.stop[i], self.parser[i]
+
+    def __len__(self):
+        return len(self.start)
+
+    def __init__(self, start, stop, parser):
+        assert len(start) == len(stop) == len(parser)
+        self.start = start
+        self.stop = stop
+        self.parser = parser
+
+    def __repr__(self):
+        df = self.as_df()
+        if len(df) > 0:
+            return repr(df)
+        return "Sections(n=0)"
+
+class Parser(Editor):
+    """
+    An Editor-like object built for parsing small/medium files that are
+    semi-structured.
+
+    Attributes:
+        _s_cmd (tuple): See below
+    """
+    _prefix = "section"
+    _s_cmd = None
+    _s_args = None
+    _setters = ("parse", "_parse")
+    _parsers = []
+    sections = Typed(Sections)
+
+    def parse(self):
+        """Parse data from file."""
+        # First parse sections
+        n = len(self.sections)
+        # Second parse current
+        if n == 0:
+            self._parse()
+        m = len(str(n))
+        # Third parse internal (of same parser type)
+        for i, (start, stop, cls) in enumerate(self.sections):
+            obj = cls(self[start:stop])
+            setattr(self, self._prefix+str(i).zfill(m), obj)
+            obj.parse()
+
+    def parse_sections(self):
+        """Parse sections (if applicable)."""
+        if self._s_cmd is None:
+            self._parse_sections()
+        else:
+            getattr(self, "_parse_sections_{}".format(self._s_cmd))()
+
+    def _empty_sections(self):
+        """Empty sections"""
+        self.sections = Sections([], [], [])
+
+    def _parse_sections(self):
+        """Custom sections parsing which may be overwritten in parser."""
+        self._empty_sections()
+
+    def _parse_sections_0(self):
+        """
+        Parse sections using the same delimiter(s) for start and stop points.
+        """
+        args = self._s_args if isinstance(self._s_args, (tuple, list)) else (self._s_args, )
+        matches = self.find(*args).all()
+        n = len(matches)
+        if n == 2:    # We found ourselves only
+            self._empty_sections()
+        elif n > 1 and np.mod(n, 2) == 0:
+            start, stop = list(zip(*self.find(*args).all().numpairs()))
+            stop = [s + 1 for s in stop]
+            parser = [self.__class__]*len(start)
+            self.sections = Sections(start, stop, parser)
+        else:
+            raise Exception("Sections parsing appears incorrect (found {} matches with delimiter {}).".format(n, args))
+
+    def _parse(self):
+        pass
+
+    def add_parsers(self, *parsers):
+        self._parsers += list(parsers)
 
 
 #class Parser(six.with_metaclass(ABCMeta, Editor)):

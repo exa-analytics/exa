@@ -228,6 +228,7 @@ class _Base(six.with_metaclass(_BaseMeta)):
 
 class DataSeries(_Base, pd.Series):
     """
+    Labeled, structured, n-dimensional, singly featured array.
     """
     _constructor_pandas = pd.Series
 
@@ -242,6 +243,7 @@ class DataSeries(_Base, pd.Series):
 
 class DataFrame(_Base, pd.DataFrame):
     """
+    Labeled, structured, n-dimensional, multiply featured array.
     """
     _constructor_pandas = pd.DataFrame
 
@@ -256,6 +258,7 @@ class DataFrame(_Base, pd.DataFrame):
 
 class SparseDataSeries(_Base, pd.SparseSeries):
     """
+    Sparse, labeled, structured, n-dimensional, singly featured array.
     """
     _constructor_pandas = pd.SparseSeries
 
@@ -270,6 +273,7 @@ class SparseDataSeries(_Base, pd.SparseSeries):
 
 class SparseDataFrame(_Base, pd.SparseDataFrame):
     """
+    Sparse, labeled, structured, n-dimensional, multiply featured array.
     """
     _constructor_pandas = pd.SparseDataFrame
     _constructor_sliced = SparseDataSeries
