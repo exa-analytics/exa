@@ -315,7 +315,7 @@ class Editor(TypedClass):
                     self.cursor = i
                     return Match(i, self.lines[i])
 
-    def regex(self, *patterns, flags=re.MULTILINE):
+    def regex(self, *patterns, **kwargs):
         """
         Search text for specific regular expressions.
 
@@ -334,6 +334,7 @@ class Editor(TypedClass):
         Returns:
             found (:class:`~exa.core.editor.Found`): Enumerated results
         """
+        flags = kwargs.pop("flags", re.MULTILINE)
         regexes = []
         for pattern in patterns:
             if not type(pattern).__name__ == "SRE_Pattern":    # Compiled regex type check
