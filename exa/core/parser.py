@@ -58,24 +58,25 @@ class Parser(Editor):
 
     def parse(self):
         """Parse data from file."""
+        pass
         # First parse sections
-        n = len(self.sections)
-        # Second parse current
-        if n == 0:
-            self._parse()
-        m = len(str(n))
-        # Third parse internal (of same parser type)
-        for i, (start, stop, cls) in enumerate(self.sections):
-            obj = cls(self[start:stop])
-            setattr(self, self._prefix+str(i).zfill(m), obj)
-            obj.parse()
+#        n = len(self.sections)
+#        # Second parse current
+#        if n == 0:
+#            self._parse()
+#        m = len(str(n))
+#        # Third parse internal (of same parser type)
+#        for i, (start, stop, cls) in enumerate(self.sections):
+#            obj = cls(self[start:stop])
+#            setattr(self, self._prefix+str(i).zfill(m), obj)
+#            obj.parse()
 
     def parse_sections(self):
-        """Parse sections (if applicable)."""
-        if self._s_cmd is None:
-            self._parse_sections()
-        else:
-            getattr(self, "_parse_sections_{}".format(self._s_cmd))()
+        """
+        Analyze the editor line by line and identify all possible sections that
+        exist, given the attached parsers.
+        """
+        pass
 
     def _empty_sections(self):
         """Empty sections"""

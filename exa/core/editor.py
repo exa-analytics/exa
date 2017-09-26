@@ -16,6 +16,8 @@ import re
 import bz2
 import six
 import gzip
+import numpy as np
+from numba import jit
 from io import StringIO, TextIOWrapper
 from exa.typed import Typed, typed, TypedClass
 # Python 2 compatibility
@@ -70,6 +72,16 @@ def write_file(text, path, encoding="utf-8", newline=""):
             f.write(text)
         except TypeError:
             f.write(unicode(text))
+
+
+@jit(nopython=True, nogil=True)
+def _regex_index(char_cum_sum, spans):
+    """Used by :func:`~exa.core.editor.Editor.regex`."""
+    n = len(spans)
+    idx = np.empty((n, ), dtype=np.int64)
+    for i, span in enumerate(spans):
+        idx[i] = np.argmax(char_cum_sum > span) - 1
+    return idx
 
 
 @typed
@@ -303,11 +315,49 @@ class Editor(TypedClass):
                     self.cursor = i
                     return Match(i, self.lines[i])
 
-    def regex_next(self, pattern, reverse=False, flags=re.MULTILINE):
+    def regex(self, *patterns, flags=re.MULTILINE):
+        """
+        Search text for specific regular expressions.
+
+        If not matches are found, returns None. Multiline searches can be
+        accomplished using the multiline regular expression flag.
+
+        .. code-block:: python
+
+            ed = Editor(text)
+            found = ed.regex("[a-z0-9]", re.compile("text\nother", re.MULTILINE))
+
+        Args:
+            patterns: Regular expressions
+            flags: Python regular expression flags
+
+        Returns:
+            found (:class:`~exa.core.editor.Found`): Enumerated results
+        """
+        regexes = []
+        for pattern in patterns:
+            if not type(pattern).__name__ == "SRE_Pattern":    # Compiled regex type check
+                regexes.append(re.compile(pattern, flags))
+            else:
+                regexes.append(pattern)
+        matches = Found(*[Matches(pattern.pattern) for pattern in patterns])
+        text = str(self)
+        char_cum_sum = np.cumsum(list(map(len, self.lines)))
+        for pattern in patterns:
+            if pattern.search(text):
+                searches = list(pattern.finditer(text))
+                texts = [search.text for search in searches]
+                spans = np.array([search.span[0] for search in searches])
+                nums = _regex_index(char_cum_sum, spans)
+                matches[pattern.pattern].append(*[Match(num, texts[i]) for i, num in enumerate(nums)])
+        return matches
+
+    def regex_next(self, pattern, reverse=False, flags=0):
         """
         Find the next line with a given regular expression pattern.
 
-        If no matches are found, None is returned.
+        If no matches are found, None is returned. Certain flags (such as
+        multiline) are not supported by this function.
         """
         n = len(self)
         n1 = n - 1
@@ -321,7 +371,7 @@ class Editor(TypedClass):
             pattern = re.compile(pattern, flags)
         for start, stop, inc in positions:
             for i in range(start, stop, inc):
-                if pattern.match(self.lines[i]):
+                if pattern.search(self.lines[i]):
                     self.cursor = i
                     return Match(i, self.lines[i])
 
