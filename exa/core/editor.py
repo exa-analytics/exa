@@ -101,7 +101,7 @@ class Match(object):
         self.text = text
 
     def __repr__(self):
-        return "{}: {}".format(self.num, text)
+        return "{}: {}".format(self.num, self.text)
 
 
 @typed
@@ -179,7 +179,7 @@ class Found(object):
         self.patterns = {i: matchs for i, matchs in enumerate(matches)}
 
     def __repr__(self):
-        return "Found(matches={})".format(len(self._patterns))
+        return "Found(matches={})".format(len(self.patterns))
 
 
 class Editor(TypedClass):
@@ -257,9 +257,6 @@ class Editor(TypedClass):
 
         Returns:
             found (:class:`~exa.core.editor.Found`): Enumerated results
-
-        Note:
-            For multiline patterns use :func:`~exa.core.editor.Editor.regex`.
         """
         case = kwargs.pop("case", True)
         if case:
@@ -317,7 +314,7 @@ class Editor(TypedClass):
 
     def regex(self, *patterns, **kwargs):
         """
-        Search text for specific regular expressions.
+        Search text for specific regular expressions (line by line).
 
         If not matches are found, returns None. Multiline searches can be
         accomplished using the multiline regular expression flag.
@@ -334,23 +331,19 @@ class Editor(TypedClass):
         Returns:
             found (:class:`~exa.core.editor.Found`): Enumerated results
         """
-        flags = kwargs.pop("flags", re.MULTILINE)
+        flags = kwargs.pop("flags", re.DOTALL)
         regexes = []
         for pattern in patterns:
             if not type(pattern).__name__ == "SRE_Pattern":    # Compiled regex type check
                 regexes.append(re.compile(pattern, flags))
             else:
                 regexes.append(pattern)
-        matches = Found(*[Matches(pattern.pattern) for pattern in patterns])
-        text = str(self)
+        matches = Found(*[Matches(regex.pattern) for regex in regexes])
         char_cum_sum = np.cumsum(list(map(len, self.lines)))
-        for pattern in patterns:
-            if pattern.search(text):
-                searches = list(pattern.finditer(text))
-                texts = [search.text for search in searches]
-                spans = np.array([search.span[0] for search in searches])
-                nums = _regex_index(char_cum_sum, spans)
-                matches[pattern.pattern].append(*[Match(num, texts[i]) for i, num in enumerate(nums)])
+        for i, line in enumerate(self):
+            for regex in regexes:
+                if regex.search(line):
+                    matches[regex.pattern].append(Match(i, line))
         return matches
 
     def regex_next(self, pattern, reverse=False, flags=0):
