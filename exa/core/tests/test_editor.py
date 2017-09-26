@@ -25,27 +25,24 @@ class TestAuxiliary(TestCase):
     Tests for :class:`~exa.core.editor.Match`, :class:`~exa.core.editor.Matches`,
     and :class:`~exa.core.editor.Found`.
     """
-    def setUp(self):
-        self.matches = [Match(i, "text") for i in range(4)]
-        self.patterns = [Matches("text", *self.matches), Matches("stuff")]
-
     def test_match(self):
-        self.assertEqual(self.matches[0].num, 0)
-        self.assertEqual(self.matches[0].text, "text")
-        self.assertListEqual([(self.matches[0].num, self.matches[1].num),
-                              (self.matches[2].num, self.matches[3].num)],
-                              list(self.patterns[0].numpairs()))
+        match = Match(0, "text")
+        self.assertEqual(match.num, 0)
+        self.assertEqual(match.text, "text")
 
-    def test_pattern(self):
-        self.assertEqual(self.patterns[1]._pattern, "stuff")
-        self.assertEqual(len(self.patterns[0]), 4)
-        self.patterns[0].add(Match(4, "stuff"))
-        self.assertEqual(len(self.patterns[0]), 5)
-        self.assertIsInstance(repr(self.patterns[0]), str)
+    def test_matches(self):
+        matches = Matches("pattern", *[Match(i, "text") for i in range(4)])
+        self.assertEqual(len(matches), 4)
+        self.assertIsInstance(matches[0], Match)
+        self.assertListEqual(list(matches.seqpairs()), [(0, 1), (2, 3)])
 
     def test_found(self):
-        found = Found(*self.patterns)
+        found = Found(Matches("pattern0", *[Match(i, "text") for i in range(4)]),
+                      Matches("pattern1", *[Match(i, "text") for i in range(4)]))
+        self.assertIsInstance(found[0], Matches)
         self.assertEqual(len(found), 2)
+        self.assertEqual(len(found[0]), 4)
+        self.assertEqual(len(found.as_matches()), 8)
 
 
 class TestEditor(TestCase):

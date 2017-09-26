@@ -66,87 +66,105 @@ def write_file(text, path, encoding="utf-8", newline=""):
         newline (str): Newline delimiter
     """
     with io.open(path, "w", newline=newline, encoding=encoding) as f:
-        f.write(text)
+        try:
+            f.write(text)
+        except TypeError:
+            f.write(unicode(text))
 
 
 @typed
 class Match(object):
-    """A key/value pair containing line number and line text."""
+    """
+    The result of a particular editor search stored as a key, value pair.
+
+    Attributes:
+        num (int): Integer line number (zero based)
+        text (str): Line text
+    """
     num = Typed(int)
     text = Typed(str)
-    rep = Typed(int)
 
-    def __init__(self, num, text, rep=20):
+    def __init__(self, num, text):
         self.num = num
         self.text = text
-        self.rep = rep
 
     def __repr__(self):
-        if len(self.text) > self.rep:
-            text = self.text[:self.rep] + "..."
-        else:
-            text = self.text
         return "{}: {}".format(self.num, text)
 
 
 @typed
 class Matches(object):
-    """A Dictionary like object for storing matches of text searches."""
-    _matches = Typed(list)
-    _pattern = Typed(str)
+    """
+    A dictionary-like object that stores matches of particular editor searches.
 
-    def numpairs(self):
-        """Yield sequential line numbers of matches."""
-        n = len(self._matches)
+    This object stores a collection of match objects obtained from a specific
+    search string or pattern.
+    """
+    matches = Typed(list)
+    pattern = Typed(str)
+
+    def seqpairs(self):
+        """
+        Yield sequential, pairwise line numbers using the collection of
+        matches.
+        """
+        n = len(self.matches)
         for i in range(0, n, 2):
-            yield self._matches[i].num, self._matches[i+1].num
+            yield self.matches[i].num, self.matches[i+1].num
 
-    def items(self):
-        """Iterator that yields individual matches as tuples."""
-        for match in self._matches:
+    def append(self, *matches):
+        """Append (in-place) additional matches to the collection."""
+        self.matches = sorted(self.matches+list(matches), key=lambda m: m.num)
+
+    def __iter__(self):
+        for match in self.matches:
             yield match.num, match.text
 
-    def add(self, *matches):
-        self._matches = sorted(self._matches+list(matches), key=lambda m: m.num)
-
     def __getitem__(self, num):
-        return self._matches[num]
+        return self.matches[num]
 
     def __len__(self):
-        return len(self._matches)
+        return len(self.matches)
 
     def __init__(self, pattern, *matches):
-        self._matches = []
-        self._pattern = pattern
-        self.add(*matches)
+        self.matches = []
+        self.pattern = pattern
+        self.append(*matches)
 
     def __repr__(self):
-        return "Matches({}, match={})".format(self._pattern, len(self._matches))
+        return "Matches({}, match={})".format(self.pattern, len(self.matches))
 
 
 class Found(object):
-    """Result of an editor search."""
-    def all(self):
-        matches = [m for match in self._patterns.values() for m in match._matches]
+    """
+    An enumerated collection of dictionaries, each of which contain the results
+    of a particular editor search.
+    """
+    def as_matches(self):
+        """
+        Return a single :class:`~exa.core.editor.Matches` object regardless of
+        the pattern(s) used.
+        """
+        matches = [match for matchs in self.patterns.values() for match in matchs.matches]
         return Matches(None, *matches)
 
     def __iter__(self):
-        for i, pattern in self._patterns.items():
-            yield i, pattern
+        for i, matchs in self.patterns.items():
+            yield i, matchs
 
     def __getitem__(self, key):
         if isinstance(key, str):
-            for i in self._patterns.keys():
-                if key == self._patterns[i]._pattern:
-                    return self._patterns[i]
+            for i, matchs in self.patterns.items():
+                if key == self.patterns[i].pattern:
+                    return matchs
         else:
-            return self._patterns[key]
+            return self.patterns[key]
 
     def __len__(self):
-        return len(self._patterns)
+        return len(self.patterns)
 
-    def __init__(self, *patterns):
-        self._patterns = {i: Matches(pattern) for i, pattern in enumerate(patterns)}
+    def __init__(self, *matches):
+        self.patterns = {i: matchs for i, matchs in enumerate(matches)}
 
     def __repr__(self):
         return "Found(matches={})".format(len(self._patterns))
@@ -219,6 +237,8 @@ class Editor(TypedClass):
         """
         Search line by line for given patterns.
 
+        If not matches are found, returns None.
+
         Args:
             patterns: String text to search for
             case (bool): Consider character case (default true)
@@ -235,11 +255,11 @@ class Editor(TypedClass):
         else:
             patterns = [pattern.lower() for pattern in patterns]
             check = lambda pat, lin: pat in lin.lower()
-        matches = Found(*patterns)
+        matches = Found(*[Matches(pattern) for pattern in patterns])
         for i, line in enumerate(self):
             for pattern in patterns:
                 if check(pattern, line):
-                    matches[pattern].add(Match(i, line))
+                    matches[pattern].append(Match(i, line))
         return matches
 
     def replace(self, pattern, replacement, inplace=False):
@@ -279,15 +299,31 @@ class Editor(TypedClass):
             check = lambda lin: pattern in lin.lower()
         for start, stop, inc in positions:
             for i in range(start, stop, inc):
-                if check(line):
+                if check(self.lines[i]):
                     self.cursor = i
-                    return Match(i, line)
+                    return Match(i, self.lines[i])
 
     def regex_next(self, pattern, reverse=False, flags=re.MULTILINE):
         """
         Find the next line with a given regular expression pattern.
+
+        If no matches are found, None is returned.
         """
-        pass
+        n = len(self)
+        n1 = n - 1
+        if reverse:
+            self.cursor = 0 if self.cursor == 0 else self.cursor - 1
+            positions = ((self.cursor - 1, 0, -1), (n1, self.cursor, -1))
+        else:
+            self.cursor = 0 if self.cursor == n1 else self.cursor + 1
+            positions = ((self.cursor, n, 1), (0, self.cursor, 1))
+        if not type(pattern).__name__ == "SRE_Pattern":    # Compiled regex type check
+            pattern = re.compile(pattern, flags)
+        for start, stop, inc in positions:
+            for i in range(start, stop, inc):
+                if pattern.match(self.lines[i]):
+                    self.cursor = i
+                    return Match(i, self.lines[i])
 
     def __iter__(self):
         for line in self.lines:
