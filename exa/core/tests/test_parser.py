@@ -4,39 +4,54 @@
 """
 Tests for :mod:`~exa.core.parser`
 #############################################
-Test the parsing engine on this file.
+Parsing is tested on static data provided in the included data directory.
 """
+import os, re
 from unittest import TestCase
 from exa.core.parser import Parser, Sections
 from exa.typed import Typed
+from exa.static import datadir
 
 
-class Docs(Parser):
-    _s_cmd = 0
-    _s_args = ("'''", '"""')
-    text = Typed(str)
-
-    def _parse(self):
-        self.text = str(self.replace("'''", "").replace('"""', ""))
+name = "parser.bz2"
 
 
-class CodeBlock(Parser):
-    def _parse_sections(self):
-        found = self.find(".. code-block::").all()
-        start = []
-        stop = []
-        for m in found:
-            indent = len(m.text) - len(m.text.lstrip(" "))
-            for i, line in enumerate(self.lines[m.num+1:]):
-                if len(line) - len(line.lstrip(" ")) == indent and line != "":
-                    start.append(m.num)
-                    stop.append(m.num + i + 1)
-                    break
-        self.sections = Sections(start, stop, [self.__class__]*len(start))
+# Simple test parsers
+class SCF(Parser):
+    _start = "Self-consistent Calculation"
+    _stop = re.compile("^\s*End of self-consistent calculation$", re.MULTILINE)
 
 
-Docs.add_parsers(CodeBlock)
+class XYZ(Parser):
+    _start = re.compile("^ATOMIC_POSITIONS", re.MULTILINE)
+    _stop = 0
+
+
+class Output(Parser):
+    pass
+
+
+Output.add_parsers(SCF, XYZ)
+
+
+# Testing begins here
+class TestSections(TestCase):
+    """Test the sections dataframe works correctly."""
+    def test_create(self):
+        sec = Sections.from_lists([0], [0], [None], None)
+        self.assertIsInstance(sec['start'].tolist()[0], int)
+        self.assertIsNone(sec._ed)
+        self.assertEqual(len(sec), 1)
+
+    def test_false_create(self):
+        with self.assertRaises(TypeError):
+            Sections.from_lists([0.0], [0], [None], None)
 
 
 class TestParser(TestCase):
-    pass
+    """Check basic parsing functionality on a test file."""
+    def setUp(self):
+        self.ed = Output(os.path.join(datadir(), name))
+
+    def test_basic(self):
+        self.assertEqual(len(self.ed), 2002)

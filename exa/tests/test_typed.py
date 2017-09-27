@@ -8,6 +8,7 @@ There are a large number of test implementations in the source code of these
 tests, which may be helpful for developers.
 """
 import six
+import numpy as np
 from unittest import TestCase
 from exa.typed import Typed, typed, TypedClass, TypedMeta, yield_typed
 
@@ -199,6 +200,17 @@ class Foo16(TypedClass):
         return 42
 
 
+class Foo17(TypedClass):
+    _setters = ("compute", )
+    bar = Typed(np.ndarray)
+
+    def compute_bar(self):
+        self.bar = np.random.rand(10)
+
+    def __init__(self, bar):
+        self.bar = bar
+
+
 # Testing begins here.
 class TestTyped(TestCase):
     """
@@ -323,3 +335,14 @@ class TestTyped(TestCase):
         self.assertIsInstance(Foo16.foo, property)
         self.assertEqual(Foo16().foo, 42)
         self.assertListEqual(names, ["bar"])
+
+    def test_foo17(self):
+        """
+        Test array attribute types (includes series, dataframe objects)
+        since their truth value is determined by not being None.
+        """
+        obj = Foo17(None)
+        self.assertIsNotNone(obj.bar)
+        a = np.random.rand(10)
+        obj = Foo17(a)
+        self.assertTrue(np.allclose(obj.bar, a))

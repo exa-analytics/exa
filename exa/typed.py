@@ -155,7 +155,7 @@ class Typed(object):
             # If the variable value (reference by priv) does not exist
             # or is None AND the class has some automatic way of setting the value,
             # set the value first then proceed to getting it.
-            if ((not hasattr(this, priv) or getattr(this, priv)) and
+            if ((not hasattr(this, priv) or getattr(this, priv) is None) and
                 hasattr(this, "_setters") and isinstance(this._setters, (list, tuple))):
                 for prefix in this._setters:
                     cmd = "{}{}".format(prefix, priv)

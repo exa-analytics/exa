@@ -84,7 +84,8 @@ class Index(_Param):
 
     def check_type(self, data):
         """Type check."""
-        ty = data.index.get_level_values(self.level).dtype.type
+        lvl = 0 if self.level is None else self.level
+        ty = data.index.get_level_values(lvl).dtype.type
         for t in self.typ:
             if t is ty or t in _npmap and ty in _npmap[t]:
                 return

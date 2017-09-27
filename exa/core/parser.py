@@ -7,122 +7,119 @@ Parsing Editors
 This module provides editors tailored to parsing small/medium sized text files
 that do not have a consistent structure.
 """
+import re
 from .editor import Editor
-from .data import DataFrame
+from .data import DataFrame, Column, Index
 from exa.typed import Typed
 
 
-
-class Sections(object):
+class Sections(DataFrame):
     """
     A representation of parts of specific parts of a file to be parsed.
     """
-    def as_df(self):
-        return DataFrame.from_dict({'start': self.start, 'stop': self.stop,
-                                    'parser': self.parser})
+    section = Index(int)
+    start = Column(int)
+    stop = Column(int)
+    parser = Column()
+    _ed = Typed(Editor)
 
-    def __iter__(self):
-        for i, start in enumerate(self.start):
-            yield start, self.stop[i], self.parser[i]
+    @classmethod
+    def from_lists(cls, start, stop, parser, ed):
+        """
+        Create a dataframe corresponding to sections of an editor.
 
-    def __len__(self):
-        return len(self.start)
+        Args:
+            start (array): Array of starting line numbers
+            stop (array): Array of stopping line numbers
+            parser (array): Array of parser classes for specific sections
+        """
+        df = cls.from_dict({'start': start, 'stop': stop, 'parser': parser})
+        df._ed = ed
+        return df
 
-    def __init__(self, start, stop, parser):
-        if not (len(start) == len(stop) == len(parser)):
-            raise Exception("Argument lengths don't match, {}, {}, {}".format(len(start), len(stop), len(parser)))
-        self.start = start
-        self.stop = stop
-        self.parser = parser
+    def get_section(self, key):
+        """
+        Generate an editor corresponding to an identified section.
 
-    def __repr__(self):
-        df = self.as_df()
-        if len(df) > 0:
-            return repr(df)
-        return "Sections(n=0)"
+        Args:
+            key (int): Integer corresponding to section
+
+        Returns:
+            ed (Editor): A correct editor/parser corresponding to the section
+        """
+        start, stop, cls = self.loc[key, ["start", "stop", "parser"]]
+        return cls(self._ed.lines[start:stop])
+
 
 class Parser(Editor):
     """
     An Editor-like object built for parsing small/medium files that are
     semi-structured.
-
-    Attributes:
-        _s_cmd (tuple): See below
     """
-    _prefix = "section"
-    _s_cmd = None
-    _s_args = None
     _setters = ("parse", "_parse")
     _parsers = []
+    _start = None
+    _stop = None
+    _0 = re.compile("^\s*$")
     sections = Typed(Sections)
 
-    def parse(self):
-        """Parse data from file."""
-        pass
-        # First parse sections
-#        n = len(self.sections)
-#        # Second parse current
-#        if n == 0:
-#            self._parse()
-#        m = len(str(n))
-#        # Third parse internal (of same parser type)
-#        for i, (start, stop, cls) in enumerate(self.sections):
-#            obj = cls(self[start:stop])
-#            setattr(self, self._prefix+str(i).zfill(m), obj)
-#            obj.parse()
-
     def parse_sections(self):
-        """
-        Analyze the editor line by line and identify all possible sections that
-        exist, given the attached parsers.
-        """
-        pass
+        """Identify sections of the file."""
+        def selector(parser):
+            """Do not perform redundant file searching."""
+            for attrname in ("_start", "_stop"):
+                attr = getattr(parser, attrname)
+                if type(attr).__name__ == "SRE_Pattern":
+                    regex.append(attr)
+                elif isinstance(attr, str):
+                    find.append(attr)
+        # Start processing
+        regex = []    # for .regex()
+        find = []     # for .find
+        selector(self)
+        for parser in self._parsers:
+            selector(parser)
+        # Perform file searching
+        rfound = self.regex(*regex)
+        ffound = self.find(*find)
+        # Identify sections
+        startnums = []
+        stopnums = []
+        parsers = []
+        for parser in self._parsers:
+            if isinstance(parser._start, int):
+                pass
+            elif isinstance(parser._start, str):
+                starts = ffound[parser._start]
+            else:
+                starts = rfound[parser._start]
+            if isinstance(parser._stop, int):
+                stops = self._parse_stops(parser._stop, starts)
+            elif isinstance(parser._stop, str):
+                stops = ffound[parser._stop]
+            else:
+                stops = rfound[parser._stop]
+            startnums += [start[0] for start in starts]
+            stopnums += [stop[0] + 1 for stop in stops]
+            parsers += [parser]*len(starts)
+        self.sections = Sections.from_lists(startnums, stopnums, parsers, self)
 
-    def _empty_sections(self):
-        """Empty sections"""
-        self.sections = Sections([], [], [])
+    def _parse_stops(self, which, *args, **kwargs):
+        if which == 0:
+            return self._parse_stops_0(*args, **kwargs)
 
-    def _parse_sections(self):
-        """Custom sections parsing which may be overwritten in parser."""
-        self._empty_sections()
-
-    def _parse_sections_0(self):
-        """
-        Parse sections using the same delimiter(s) for start and stop points.
-        """
-        args = self._s_args if isinstance(self._s_args, (tuple, list)) else (self._s_args, )
-        matches = self.find(*args).all()
-        n = len(matches)
-        if n == 2:    # We found ourselves only
-            self._empty_sections()
-        elif n > 1 and np.mod(n, 2) == 0:
-            start, stop = list(zip(*self.find(*args).all().numpairs()))
-            stop = [s + 1 for s in stop]
-            parser = [self.__class__]*len(start)
-            self.sections = Sections(start, stop, parser)
-        else:
-            raise Exception("Sections parsing appears incorrect (found {} matches with delimiter {}).".format(n, args))
-
-    def _parse(self):
-        pass
+    def _parse_stops_0(self, starts):
+        stop = []
+        for start in starts:
+            self.cursor = start[0]
+            found = self.regex_next(self._0)
+            stop.append(found)
+        return Matches(self._0, *stop)
 
     @classmethod
     def add_parsers(cls, *parsers):
-        cls._parsers += list(parsers)
+        cls._parsers = list(set(cls._parsers + list(parsers)))
 
-
-#class Parser(six.with_metaclass(ABCMeta, Editor)):
-#    """
-#    """
-#    sections = Typed(Sections, doc="High level description of the file")
-#
-#    def parse(self):
-#        """Perform automatic parsing."""
-#        pass
-#
-#    @abstractmethod
-#    def _parse(self):
-#        pass
 
 
 #####

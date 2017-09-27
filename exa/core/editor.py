@@ -10,12 +10,7 @@ text editor. It provides basic features for searching text (including
 regular expressions). This module additionally provides convenience methods
 for reading and writing text.
 """
-import io
-import os
-import re
-import bz2
-import six
-import gzip
+import io, os, re, bz2, six, gzip
 import numpy as np
 from numba import jit
 from io import StringIO, TextIOWrapper
@@ -165,9 +160,11 @@ class Found(object):
             yield i, matchs
 
     def __getitem__(self, key):
-        if isinstance(key, str):
+        if not isinstance(key, int):
+            if hasattr(key, "pattern"):
+                key = key.pattern
             for i, matchs in self.patterns.items():
-                if key == self.patterns[i].pattern:
+                if key == self.patterns[i].pattern or key is self.patterns[i].pattern:
                     return matchs
         else:
             return self.patterns[key]
@@ -264,7 +261,7 @@ class Editor(TypedClass):
         else:
             patterns = [pattern.lower() for pattern in patterns]
             check = lambda pat, lin: pat in lin.lower()
-        matches = Found(*[Matches(pattern) for pattern in patterns])
+        matches = Found(*[Matches(pattern) for pattern in set(patterns)])
         for i, line in enumerate(self):
             for pattern in patterns:
                 if check(pattern, line):
@@ -338,7 +335,7 @@ class Editor(TypedClass):
                 regexes.append(re.compile(pattern, flags))
             else:
                 regexes.append(pattern)
-        matches = Found(*[Matches(regex.pattern) for regex in regexes])
+        matches = Found(*[Matches(regex.pattern) for regex in set(regexes)])
         char_cum_sum = np.cumsum(list(map(len, self.lines)))
         for i, line in enumerate(self):
             for regex in regexes:
