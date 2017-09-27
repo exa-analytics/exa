@@ -8,7 +8,7 @@ This module provides editors tailored to parsing small/medium sized text files
 that do not have a consistent structure.
 """
 import re
-from .editor import Editor
+from .editor import Editor, Matches
 from .data import DataFrame, Column, Index
 from exa.typed import Typed
 

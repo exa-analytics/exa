@@ -71,7 +71,12 @@ def write_file(text, path, encoding="utf-8", newline=""):
 
 @jit(nopython=True, nogil=True)
 def _regex_index(char_cum_sum, spans):
-    """Used by :func:`~exa.core.editor.Editor.regex`."""
+    """
+    For an array of sequentially increasing numbers and another array of
+    numbers, for each of the numbers in the second array, identify the
+    indices in the first array that correspond to the location in the
+    first sequential array.
+    """
     n = len(spans)
     idx = np.empty((n, ), dtype=np.int64)
     for i, span in enumerate(spans):

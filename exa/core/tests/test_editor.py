@@ -10,11 +10,12 @@ import os
 import bz2
 import gzip
 import shutil
+import numpy as np
 from uuid import uuid4
 from io import StringIO
 from unittest import TestCase
 from tempfile import mkdtemp
-from exa.core.editor import Match, Matches, Found, Editor
+from exa.core.editor import Match, Matches, Found, Editor, _regex_index
 # Python 2 compatibility
 if not hasattr(bz2, "open"):
     bz2.open = bz2.BZ2File
@@ -43,6 +44,12 @@ class TestAuxiliary(TestCase):
         self.assertEqual(len(found), 2)
         self.assertEqual(len(found[0]), 4)
         self.assertEqual(len(found.as_matches()), 8)
+
+    def test_regex_index(self):
+        char_cum_sum = np.cumsum(np.random.randint(0, 100, size=(10, )))
+        spans = np.random.randint(0, char_cum_sum.max(), size=(1, ))
+        check = np.argmax(char_cum_sum > spans[0]) - 1
+        self.assertEqual(check, _regex_index(char_cum_sum, spans))
 
 
 class TestEditor(TestCase):

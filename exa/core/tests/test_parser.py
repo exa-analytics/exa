@@ -55,3 +55,7 @@ class TestParser(TestCase):
 
     def test_basic(self):
         self.assertEqual(len(self.ed), 2002)
+
+    def test_sections(self):
+        sec = self.ed.sections
+        self.assertEqual(len(sec), 10)

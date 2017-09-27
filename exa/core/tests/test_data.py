@@ -97,6 +97,12 @@ class TestDataSeries(_Tester):
         s = FooMSeries(index=index)
         self.assertListEqual(list(s.index.names), ["idx0", "idx1"])
 
+    def test_index_name(self):
+        class Foo_(DataSeries):
+            idx = Index(auto=False)
+        with self.assertRaises(NameError):
+            Foo_(index=pd.Index([0, 1, 2], name="things"))
+
 
 class TestDataFrame(_Tester):
     """Tests for :class:`~exa.data.DataFrame`."""
