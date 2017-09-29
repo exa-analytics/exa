@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
 from distutils import log
@@ -42,7 +42,7 @@ setup_args = {
     'author_email': "exa.data.analytics@gmail.com",
     'maintainer_email': "exa.data.analytics@gmail.com",
     'url': "https://exa-analytics.github.io/" + name,
-    'download_url': "https://github.com/avmarchenko/" + name + "/tarball/{}.tar.gz".format(version),
+    'download_url': "https://github.com/exa-analytics/{}/archive/{}.tar.gz".format(name, version),
     'keywords': ["data", "analytics", "hpc", "jupyter", "notebook", "visualization"],
     'classifiers': [
         "Development Status :: 3 - Alpha",

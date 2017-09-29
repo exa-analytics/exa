@@ -3,13 +3,11 @@ scipy
 matplotlib
 seaborn
 networkx
-sqlalchemy
 pandas
 sympy
 notebook
 nose
 numba
-h5py
 six
 sphinx
 sphinx_rtd_theme

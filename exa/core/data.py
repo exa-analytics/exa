@@ -39,9 +39,10 @@ class _Param(TypedClass):
 
     def check(self, data):
         """Perform internal checks then default checks."""
-        self._check(data)
-        if len(self.typ) > 0 and self.typ[0] is not None:
-            self.check_type(data)
+        if len(data) > 0:
+            self._check(data)
+            if len(self.typ) > 0 and self.typ[0] is not None:
+                self.check_type(data)
 
     def check_type(self, data):
         """Overwritten below."""
@@ -89,7 +90,7 @@ class Index(_Param):
         for t in self.typ:
             if t is ty or t in _npmap and ty in _npmap[t]:
                 return
-        raise TypeError("Wrong type for index {} with type {} (expected {})".format(self.name, ty, self.typ))
+        raise TypeError("Wrong type for index '{}' with type {} (expected {})".format(self.name, ty, self.typ))
 
     def __init__(self, *args, **kwargs):
         level = kwargs.pop("level", None)
@@ -126,7 +127,7 @@ class Column(_Param):
             for t in self.typ:
                 if t is ty or t in _npmap and ty in _npmap[t]:
                     return
-            raise TypeError("Wrong type for column {} with type {} (expected {})".format(self.name, ty, self.typ))
+            raise TypeError("Wrong type for column '{}' with type {} (expected {})".format(self.name, ty, self.typ))
 
 
 class _BaseMeta(TypedMeta):

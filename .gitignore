@@ -63,3 +63,4 @@ coverage.xml
 
 # Project specific
 record.txt
+node_modules

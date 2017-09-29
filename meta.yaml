@@ -26,7 +26,6 @@ requirements:
     - matplotlib
     - seaborn
     - networkx
-    - sqlalchemy
     - paramiko
     - pandas
     - sympy
@@ -39,7 +38,6 @@ requirements:
     - sphinx_rtd_theme
     - pandoc
     - nbsphinx
-    - tqdm
 
 test:
   imports:

@@ -2,7 +2,7 @@
 .. Distributed under the terms of the Apache License 2.0
 
 #############################
-`Exa Analytics Framework`_
+`Exa`_
 #############################
 *A framework for data processing, computation, and visualization.*
 
@@ -44,5 +44,5 @@ Info
 * :ref:`modindex`
 * :ref:`search`
 
-.. _Exa Analytics Framework: https://exa-analytics.github.io/
+.. _Exa: https://exa-analytics.github.io/
 .. _Jupyter notebook: https://jupyter.org

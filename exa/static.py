@@ -4,7 +4,7 @@
 """
 Static Data Directory
 #############################################
-Provide the location of the static data
+Provide the location of the static data.
 """
 import os
 

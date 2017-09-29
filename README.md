@@ -1,6 +1,7 @@
 [![exa logo](docs/source/static/logo.png)](https://exa-analytics.github.io) 
 *A framework for data processing, computation, and visualization*
 
+
 # Installation
 [![conda Badge](https://anaconda.org/exaanalytics/exa/badges/installer/conda.svg)](https://conda.anaconda.org/exaanalytics)  
 [![pypi badge](https://badge.fury.io/py/exa.svg)](https://badge.fury.io/py/exa)  
@@ -16,6 +17,14 @@ or [pypi](https://pypi.python.org/pypi).
 # Getting Started
 [![docs](https://readthedocs.org/projects/exa/badge/?version=latest)](https://exa-analytics.github.io/exa/)  
 [![gitter](https://badges.gitter.im/exa-analytics/exa.svg)](https://gitter.im/exa-analytics/exa)  
+Building the docs requires [sphinx](http://www.sphinx-doc.org/en/stable).
+On Linux or Mac OS:
+
+    $ cd js
+    $ ./makedocs.sh       # .\makedocs.bat
+    $ cd ../docs
+    $ make html           # .\make.bat html
+
 
 # Development
 [![Appveyor](https://ci.appveyor.com/api/projects/status/j6h8pb23xduq5vqs/branch/master?svg=true)](https://ci.appveyor.com/project/exaanalytics/exa/branch/master)
@@ -28,14 +37,6 @@ For a development ready installation:
     $ git clone https://github.com/exa-analytics/exa.git
     $ cd exa
     $ pip install -e .
-
-Building the docs requires [sphinx](http://www.sphinx-doc.org/en/stable).
-On Linux or Mac OS:
-
-    $ cd js
-    $ ./makedocs.sh       # .\makedocs.bat
-    $ cd ../docs
-    $ make html           # .\make.bat html
 
 
 # Reference

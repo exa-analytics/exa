@@ -405,7 +405,7 @@ class Editor(TypedClass):
     def __len__(self):
         return len(self.lines)
 
-    def __init__(self, textobj, encoding=None, nprint=30):
+    def __init__(self, textobj, encoding=None, nprint=15):
         if isinstance(textobj, str) and os.path.exists(textobj):
             lines = read_file(textobj, encoding=encoding)
         elif isinstance(textobj, six.string_types):
