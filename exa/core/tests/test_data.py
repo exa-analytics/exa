@@ -139,7 +139,7 @@ class TestDataFrame(_Tester):
         index = pd.MultiIndex.from_product([[0, 1], ["green", "purple"]])
         s = FooFrame1([0, 1, 2, 3], columns=("a0", ), index=index)
         self.assertListEqual(list(s.index.names), ["idx0", "idx1"])
-        with self.assertRaises(TypeError):
+        with self.assertRaises((TypeError, NameError)):
             FooFrame(index=index)
 
 
