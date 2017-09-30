@@ -31,8 +31,12 @@ class FooFrame(DataFrame):
     a0 = Column(int, required=True)
     b1 = Column((float, str))
 
+    @property
+    def _constructor(self):
+        return FooFrame
 
-class FooFrame(DataFrame):
+
+class FooFrame1(DataFrame):
     idx0 = Index(int, level=0)
     idx1 = Index(str, level=1)
     a0 = Column(int, required=True)
@@ -114,6 +118,10 @@ class TestDataFrame(_Tester):
         """Test constructor types."""
         self.assertIs(self.d0._constructor, DataFrame)
         self.assertIs(self.d0._constructor_sliced, DataSeries)
+        df = FooFrame.from_dict({'a0': self.d0[0].astype(int),
+                                 'b': np.random.rand(10)})
+        print(type(df.iloc[0:5, :]))
+        self.assertIsInstance(df.iloc[0:5, :], FooFrame)
 
     def test_hdf_append(self):
         """Test appending data."""
@@ -129,10 +137,10 @@ class TestDataFrame(_Tester):
     def test_params(self):
         """Test params machinery."""
         index = pd.MultiIndex.from_product([[0, 1], ["green", "purple"]])
-        s = FooFrame([0, 1, 2, 3], columns=("a0", ), index=index)
+        s = FooFrame1([0, 1, 2, 3], columns=("a0", ), index=index)
         self.assertListEqual(list(s.index.names), ["idx0", "idx1"])
-        with self.assertRaises(NameError):
-            s = FooFrame(index=index)
+        with self.assertRaises(TypeError):
+            FooFrame(index=index)
 
 
 class TestSparseDataSeries(_Tester):
