@@ -39,10 +39,9 @@ class _Param(TypedClass):
 
     def check(self, data):
         """Perform internal checks then default checks."""
-        if len(data) > 0:
-            self._check(data)
-            if len(self.typ) > 0 and self.typ[0] is not None:
-                self.check_type(data)
+        self._check(data)
+        if len(data) > 0 and len(self.typ) > 0 and self.typ[0] is not None:
+            self.check_type(data)
 
     def check_type(self, data):
         """Overwritten below."""
