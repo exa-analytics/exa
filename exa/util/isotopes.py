@@ -2,88 +2,137 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Elements and Isotopes
-#########################
-This module creates elements and isotopes. Isotopes take the form of
-element symbol followed by mass number (e.g. ``H1``) while elements are
-simply ``H``. Static isotope data is stored in the 'data' directory.
+Periodic Table of Elements and Isotopes
+########################################
+This module provides a database of the atomic elements and their isotopes.
+Visualization parameters are also provided. Data is provided and maintained
+by `NIST`_. The full api is given in the code example below. Note that not
+all attributes that are present on isotopes are present on elements (and vice
+versa).
 
-Note:
-    - mass: g/mol
-    - radii: a.u.
-    - quadrupole moment: eb (electron-barns)
-    - electronegativity: Pauling scale
-    - color: HTML rgb syntax
+.. code-block:: python
+
+    from exa.util import isotopes
+    isotopes.H            # Hydrogen element
+    isotopes.H[2]         # Hydrogen isotopes 2 (deuterium)
+    isotopes.H.radius     # Empirical covalent radius (a.u. - Bohr)
+    isotopes.H.af         # Abundance fraction
+    isotopes.H.afu        # Abundance fraction uncertainty
+    isotopes.H.mass       # Atomic mass (g/mol)
+    isotopes.H.massu      # Atomic mass uncertainty (g/mol)
+    isotopes.H.eneg       # Electronegativity (Pauling scale)
+    isotopes.H[2].quad    # Nuclear quadrupole moment (eb - electron-barn - e10^(-28)m^2)
+    isotopes.H[2].A       # Atomic mass number (g/mol)
+    isotopes.H.Z          # Proton number
+    isotopes.H[2].g       # Nuclear g-factor (dimensionless magnetic moment)
+    isotopes.H[2].spin    # Nuclear spin
+    isotopes.H.color      # Traditional atomic color (HTML)
+    isotopes.H.name       # Full element name
+
+Warning:
+    Isotopes are provided as part of the static data directory.
+
+.. _NIST: https://www.nist.gov/
 """
 import os as _os
 import sys as _sys
-from pkg_resources import resource_filename as _resource_filename
-from exa import _jupyter_nbextension_paths
-from .single import Singleton as _Singleton
-from .core.editor import Editor as _Editor
+from io import StringIO as _SIO
+from pandas import read_json as _rj
+from exa import Editor as _E
 
 
-_resource = "isotopes.json.bz2"
+class Element(object):
+    """
+    An element from Mendeleev's periodic table.
+
+    .. code-block:: python
+
+        from exa.util import isotopes
+        H = isotopes.H         # Hydrogen element (isotope averaged)
+        D = isotopes.H['2']    # Deuterium (2H, a specific isotope)
+        isotopes.H.isotopes    # List of available isotopes
+    """
+    @property
+    def isotopes(self):
+        return [v for k, v in vars(self).items() if k.startswith("_")]
+
+    def __init__(self, symbol, name, mass, znum, radius, color):
+        self.symbol = symbol
+        self.name = name
+        self.mass = mass
+        self.znum = znum
+        self.radius = radius
+        self.color = color
+
+    def __getitem__(self, key):
+        if isinstance(key, str):
+            return getattr(self, "_"+key)
+        return getattr(self, key)
+
+    def __repr__(self):
+        return self.symbol
 
 
-class _Isotope(_Singleton):
-    """A metaclass for creating isotopes - not an isotope itself."""
-    def __new__(mcs, name, bases, clsdict):
-        """Sets up some convenience aliases for various attributes."""
-        mcs.isotope = property(lambda cls: cls.__name__)
-        mcs.af = property(lambda cls: cls.abundance_fraction)
-        mcs.afe = property(lambda cls: cls.abundance_fraction_error)
-        mcs.rad = property(lambda cls: cls.covalent_radius)
-        mcs.masse = property(lambda cls: cls.mass_error)
-        mcs.eneg = property(lambda cls: cls.electronegativity)
-        mcs.quad = property(lambda cls: cls.quadrupole_moment)
-        return super(_Isotope, mcs).__new__(mcs, name, bases, clsdict)
+class Isotope(object):
+    """
+    A specific atomic isotope (the physical manifestation of an element).
 
+    .. code-block:: python
 
-class _Element(_Singleton):
-    """A metaclass for creating elements - not an element itself."""
-    def __new__(mcs, name, bases, clsdict):
-        mcs.af = property(lambda cls: cls.abundance_fraction)
-        mcs.afe = property(lambda cls: cls.abundance_fraction_error)
-        mcs.rad = property(lambda cls: cls.covalent_radius)
-        mcs.masse = property(lambda cls: cls.mass_error)
-        mcs.eneg = property(lambda cls: cls.electronegativity)
-        mcs.quad = property(lambda cls: cls.quadrupole_moment)
-        return super(_Element, mcs).__new__(mcs, name, bases, clsdict)
+        from exa.util import isotopes
+        isotopes.U['235'].mass    # Mass of 235-U
+    """
+    def __init__(self, anum, znum, af, afu, radius, g, mass, massu, name, eneg, quad, spin, symbol, color):
+        self.A = anum
+        self.Z = znum
+        self.af = af
+        self.afu = afu
+        self.radius = radius
+        self.g = g
+        self.mass = mass
+        self.massu = massu
+        self.name = name
+        self.eneg = eneg
+        self.quad = quad
+        self.spin = spin
+        self.symbol = symbol
+        self.color = color
+
+    def __repr__(self):
+        return str(self.A) + self.symbol
+
 
 
 def _create():
-    """Generate the isotopes and elements API from their static data."""
-    def create_isotope_attr(tope):
-        """Helper function to create an isotope attribute."""
-        dct = tope.to_dict()
-        attrname = str(dct['symbol'] + str(dct['A']))
-        isotope = _Isotope(attrname, (), dct)
-        setattr(_this, attrname, isotope)
+    """Globally called function for creating the isotope/element API."""
+    def creator(group):
+        """Helper function applied to each symbol group of the raw isotope table."""
+        symbol = group['symbol'].values[0]
+        mass = (group['mass']*group['af']).sum()/group['af'].sum()
+        znum = group['Z'].max()
+        radius = group['radius'].mean()
+        try:
+            color = group.loc[group['af'].idxmax(), 'color']
+        except TypeError:
+            color = group['color'].values[0]
+        name = group['name'].values[0]
+        ele = Element(symbol, name, mass, znum, radius, color)
+        # Attached isotopes
+        for tope in group.apply(lambda s: Isotope(*s.tolist()), axis=1):
+            setattr(ele, "_"+str(tope.A), tope)
+        return ele
 
-    # Start processing isotopes
-    isotopes = _Editor(_path).to_data('pdjson')
-    isotopes.columns = _columns
-    for name, group in isotopes.groupby('name'):
-        group.apply(create_isotope_attr, axis=1)
-        element = {'name': name, 'Z': group['Z'].values[0],
-                   'color': group['color'].values[0],
-                   'symbol': group['symbol'].values[0],
-                   'electronegativity': group['electronegativity'].values[0],
-                   'covalent_radius': group['covalent_radius'].values[0]}
-        element['mass'] = (group['abundance_fraction']*group['mass']).sum()
-        element = _Element(str(element['symbol']), (), element)
-        setattr(_this, str(element.symbol), element)
+    iso = _rj(_SIO(str(_E(_path))))
+    iso.columns = _columns
+    for element in iso.groupby("symbol").apply(creator):
+        setattr(_this, element.symbol, element)
 
 
 # Data order of isotopic (nuclear) properties:
-_columns = ['A', 'Z', 'abundance_fraction', 'abundance_fraction_error',
-            'covalent_radius', 'g_factor', 'mass', 'mass_error', 'name',
-            'electronegativity', 'quadrupole_moment', 'spin', 'symbol',
-            'color']
+_resource = "../../static/isotopes.json.bz2"    # HARDCODED
+_columns = ("A", "Z", "af", "afu", "radius", "g", "mass", "massu", "name",
+            "eneg", "quad", "spin", "symbol", "color")
 _this = _sys.modules[__name__]         # Reference to this module
-_pkg = _jupyter_nbextension_paths()[0]['dest'].split("-")[1]
-_static = _jupyter_nbextension_paths()[0]['src']
-_path = _resource_filename(_pkg, _os.path.join(_static, _resource))
+_path = _os.path.abspath(_os.path.join(_os.path.abspath(__file__), _resource))
 if not hasattr(_this, "H"):
     _create()
