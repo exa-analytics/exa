@@ -39,6 +39,7 @@ import sys as _sys
 from io import StringIO as _SIO
 from pandas import read_json as _rj
 from exa import Editor as _E
+from exa import DataFrame as _DF
 
 
 class Element(object):
@@ -60,7 +61,7 @@ class Element(object):
         self.symbol = symbol
         self.name = name
         self.mass = mass
-        self.znum = znum
+        self.Z = znum
         self.radius = radius
         self.color = color
 
@@ -102,7 +103,6 @@ class Isotope(object):
         return str(self.A) + self.symbol
 
 
-
 def _create():
     """Globally called function for creating the isotope/element API."""
     def creator(group):
@@ -126,6 +126,17 @@ def _create():
     iso.columns = _columns
     for element in iso.groupby("symbol").apply(creator):
         setattr(_this, element.symbol, element)
+
+
+def as_df():
+    """Return a dataframe of isotopes."""
+    records = []
+    for sym, ele in vars(_this).items():
+        if sym not in ["Element", "Isotope"] and not sym.startswith("_"):
+            for k, v in vars(ele).items():
+                if k.startswith("_") and k[1].isdigit():
+                    records.append({kk: vv for kk, vv in vars(v).items() if not kk.startswith("_")})
+    return _DF.from_records(records)
 
 
 # Data order of isotopic (nuclear) properties:

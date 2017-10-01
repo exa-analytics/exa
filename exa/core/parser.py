@@ -60,7 +60,7 @@ class Parser(Editor):
     _parsers = []
     _start = None
     _stop = None
-    _0 = re.compile("^\s*$")
+    _1 = re.compile("^\s*$")
     sections = Typed(Sections)
 
     def parse(self):
@@ -91,8 +91,11 @@ class Parser(Editor):
         stopnums = []
         parsers = []
         for parser in self._parsers:
+            if parser._start is None or parser._stop is None:
+                continue
+            delay = False
             if isinstance(parser._start, int):
-                pass
+                delay = True
             elif isinstance(parser._start, str):
                 starts = ffound[parser._start]
             else:
@@ -103,6 +106,8 @@ class Parser(Editor):
                 stops = ffound[parser._stop]
             else:
                 stops = rfound[parser._stop]
+            if delay:
+                starts = self._parse_starts(parser._start, stops)
             startnums += [start[0] for start in starts]
             stopnums += [stop[0] + 1 for stop in stops]
             parsers += [parser]*len(starts)
@@ -112,22 +117,29 @@ class Parser(Editor):
         """To be overwritten - parses file specific data."""
         pass
 
-    def _parse_stops(self, which, *args, **kwargs):
-        if which == 0:
-            return self._parse_stops_0(*args, **kwargs)
+    def _parse_starts(self, which, stops):
+        """Determine which starting search to perform."""
+        return getattr(self, "_parse_starts"+str(which).replace("-", "_"))(stops)
 
-    def _parse_stops_0(self, starts):
+    def _parse_stops(self, which, starts):
+        """Determine which stopping search to perform."""
+        return getattr(self, "_parse_stops"+str(which).replace("-", "_"))(starts)
+
+    def _parse_stops1(self, starts):
+        """Find the next blank (whitespace only) line."""
         stop = []
         for start in starts:
             self.cursor = start[0]
-            found = self.regex_next(self._0)
-            stop.append(found)
-        return Matches(self._0, *stop)
+            stop.append(self.regex_next(self._1))
+        return Matches(self._1, *stop)
 
     @classmethod
     def add_parsers(cls, *parsers):
         cls._parsers = list(set(cls._parsers + list(parsers)))
 
+    def __init__(self, *args, **kwargs):
+        super(Parser, self).__init__(*args, **kwargs)
+        self.add_parsers(self.__class__)
 
 
 #####

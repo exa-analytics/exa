@@ -251,8 +251,6 @@ class Editor(TypedClass):
         """
         Search line by line for given patterns.
 
-        If not matches are found, returns None.
-
         Args:
             patterns: String text to search for
             case (bool): Consider character case (default true)
@@ -318,9 +316,6 @@ class Editor(TypedClass):
         """
         Search text for specific regular expressions (line by line).
 
-        If not matches are found, returns None. Multiline searches can be
-        accomplished using the multiline regular expression flag.
-
         .. code-block:: python
 
             ed = Editor(text)
@@ -335,12 +330,14 @@ class Editor(TypedClass):
         """
         flags = kwargs.pop("flags", re.DOTALL)
         regexes = []
-        for pattern in patterns:
-            if not type(pattern).__name__ == "SRE_Pattern":    # Compiled regex type check
-                regexes.append(re.compile(pattern, flags))
-            else:
-                regexes.append(pattern)
-        matches = Found(*[Matches(regex.pattern) for regex in set(regexes)])
+        for p in patterns:
+            if type(p).__name__ != "SRE_Pattern":    # Compiled regex type check
+                reg = re.compile(p, flags)
+                if p not in [r.pattern for r in regexes]:
+                    regexes.append(reg)
+            elif p.pattern not in [r.pattern for r in regexes]:
+                regexes.append(p)
+        matches = Found(*[Matches(regex.pattern) for regex in regexes])
         char_cum_sum = np.cumsum(list(map(len, self.lines)))
         for i, line in enumerate(self):
             for regex in regexes:

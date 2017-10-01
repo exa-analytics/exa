@@ -24,7 +24,7 @@ class SCF(Parser):
 
 class XYZ(Parser):
     _start = re.compile("^ATOMIC_POSITIONS", re.MULTILINE)
-    _stop = 0
+    _stop = 1
 
 
 class Output(Parser):
