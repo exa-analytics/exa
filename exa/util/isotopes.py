@@ -122,7 +122,10 @@ def _create():
             setattr(ele, "_"+str(tope.A), tope)
         return ele
 
-    iso = _rj(_SIO(str(_E(_path))))
+    try:
+        iso = _rj(_SIO(str(_E(_path))))
+    except TypeError:
+        iso = _rj(_SIO(unicode(_E(_path))))
     iso.columns = _columns
     for element in iso.groupby("symbol").apply(creator):
         setattr(_this, element.symbol, element)
