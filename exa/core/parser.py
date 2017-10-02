@@ -63,9 +63,9 @@ class Parser(Editor):
     _1 = re.compile("^\s*$")
     sections = Typed(Sections)
 
-    def parse(self):
+    def parse(self, *args, **kwargs):
         """Recursively parse all data objects from the file."""
-        self._parse()
+        self._parse(*args, **kwargs)
 
     def parse_sections(self):
         """Identify sections of the file."""
@@ -113,7 +113,7 @@ class Parser(Editor):
             parsers += [parser]*len(starts)
         self.sections = Sections.from_lists(startnums, stopnums, parsers, self)
 
-    def _parse(self):
+    def _parse(self, *args, **kwargs):
         """To be overwritten - parses file specific data."""
         pass
 

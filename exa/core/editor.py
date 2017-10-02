@@ -63,11 +63,7 @@ def write_file(text, path, encoding="utf-8", newline=""):
         newline (str): Newline delimiter
     """
     with io.open(path, "w", newline=newline, encoding=encoding) as f:
-        try:
-            f.write(text)
-        except TypeError:
-            f.write(unicode(text))
-
+        f.write(six.u(text))
 
 @jit(nopython=True, nogil=True)
 def _regex_index(char_cum_sum, spans):
@@ -367,6 +363,10 @@ class Editor(TypedClass):
                 if pattern.search(self.lines[i]):
                     self.cursor = i
                     return Match(i, self.lines[i])
+
+    def to_stream(self):
+        """Return a stream object of the current editor."""
+        return StringIO(six.u(str(self)))
 
     def __iter__(self):
         for line in self.lines:
@@ -807,10 +807,6 @@ class Editor(TypedClass):
 #        display(df_)
 #        if df:
 #            return df_
-#
-#    def to_stream(self):
-#        """Send editor text to a file stream (StringIO) object."""
-#        return StringIO(six.u(str(self)))
 #
 #    def to_file(self, path, *args, **kwargs):
 #        """Convenience name for :func:`~exa.core.editor.Editor.write`."""

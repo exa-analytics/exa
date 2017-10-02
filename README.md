@@ -27,10 +27,10 @@ On Linux or Mac OS:
 
 
 # Development
-[![Appveyor](https://ci.appveyor.com/api/projects/status/j6h8pb23xduq5vqs/branch/master?svg=true)](https://ci.appveyor.com/project/exaanalytics/exa/branch/master)
-[![Travis](https://travis-ci.org/exaanalytics/exa.svg?branch=master)](https://travis-ci.org/exa-analytics/exa)  
-[![Coverage](https://coveralls.io/repos/github/exa-analytics/exa/badge.svg?branch=master)](https://coveralls.io/github/exa-analytics/exa?branch=master)  
-[![Codacy](https://api.codacy.com/project/badge/Grade/221e700665c74c85b8255e5b399490d4)](https://www.codacy.com/app/alexvmarch/exa?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=exaanalytics/exa&amp;utm_campaign=Badge_Grade)
+[![Travis-CI](https://travis-ci.org/exa-analytics/exa.svg?branch=master)](https://travis-ci.org/exa-analytics/exa)
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/j6h8pb23xduq5vqs/branch/master?svg=true)](https://ci.appveyor.com/project/avmarchenko/exa/branch/master)
+[![Coveralls](https://coveralls.io/repos/github/exa-analytics/exa/badge.svg)](https://coveralls.io/github/exa-analytics/exa)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/d7f1c1b3e8f14153b67d54f7f7ccdd05)](https://www.codacy.com/app/exa-analytics/exa-org?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=exa-analytics/exa&amp;utm_campaign=Badge_Grade)
 
 For a development ready installation:
 

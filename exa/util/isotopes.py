@@ -34,6 +34,7 @@ Warning:
 
 .. _NIST: https://www.nist.gov/
 """
+import six as _six
 import os as _os
 import sys as _sys
 from io import StringIO as _SIO
@@ -122,10 +123,7 @@ def _create():
             setattr(ele, "_"+str(tope.A), tope)
         return ele
 
-    try:
-        iso = _rj(_SIO(str(_E(_path))))
-    except TypeError:
-        iso = _rj(_SIO(unicode(_E(_path))))
+    iso = _rj(_E(_path).to_stream())
     iso.columns = _columns
     for element in iso.groupby("symbol").apply(creator):
         setattr(_this, element.symbol, element)
