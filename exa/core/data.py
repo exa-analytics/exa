@@ -11,6 +11,7 @@ import six
 import numpy as np
 import pandas as pd
 from pandas.io import pytables
+from pandas.core.dtypes.dtypes import CategoricalDtypeType
 from exa.typed import Typed, TypedMeta, yield_typed, TypedClass
 
 
@@ -93,6 +94,7 @@ class Index(_Param):
         if self.auto:
             if hasattr(self.index, "levels"):
                 for t in self.typ:
+                    t = 'category' if t is CategoricalDtypeType else t
                     try:
                         setter = []
                         for i, l in enumerate(df.index.levels):
@@ -106,6 +108,7 @@ class Index(_Param):
                         pass
             else:
                 for t in self.typ:
+                    t = 'category' if t is CategoricalDtypeType else t
                     try:
                         df.index = df.index.astype(t)
                         return
@@ -150,6 +153,7 @@ class Column(_Param):
                     return
             if self.auto:
                 for t in self.typ:
+                    t = 'category' if t is CategoricalDtypeType else t
                     try:
                         data[self.name] = data[self.name].astype(t)
                         return

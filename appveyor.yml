@@ -53,7 +53,7 @@ install:
   - cmd: conda config --set show_channel_urls true
   - cmd: conda config --set always_yes yes --set changeps1 no
   - cmd: conda update -q -y --all
-  - cmd: conda install -q -y -c conda-forge numpy scipy matplotlib seaborn networkx pandas nose numba pytables six sphinx sphinx_rtd_theme pandoc nbsphinx
+  - cmd: conda install -q -y -c conda-forge numpy scipy matplotlib seaborn networkx pandas nose numba pytables six
   - cmd: pip install -e .
 
 build: false
