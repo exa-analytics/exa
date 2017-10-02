@@ -26,9 +26,7 @@ requirements:
     - matplotlib
     - seaborn
     - networkx
-    - paramiko
     - pandas
-    - sympy
     - notebook
     - nose
     - numba

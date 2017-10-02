@@ -53,10 +53,10 @@ install:
   - cmd: conda config --set show_channel_urls true
   - cmd: conda config --set always_yes yes --set changeps1 no
   - cmd: conda update -q -y --all
-  - cmd: conda install -q -y -c conda-forge numpy scipy matplotlib seaborn networkx sqlalchemy paramiko pandas sympy notebook nose numba ipywidgets ipyparallel dask distributed mpi4py h5py pytables six sphinx sphinx_rtd_theme pandoc nbsphinx numexpr psutil
+  - cmd: conda install -q -y -c conda-forge numpy scipy matplotlib seaborn networkx pandas nose numba pytables six sphinx sphinx_rtd_theme pandoc nbsphinx
+  - cmd: pip install -e .
 
-build: off
+build: false
 
 test_script:
-  - cmd: pip install -e .
   - cmd: nosetests --with-coverage 
