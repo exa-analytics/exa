@@ -126,6 +126,13 @@ class Column(_Param):
             for t in self.typ:
                 if t is ty or t in _npmap and ty in _npmap[t]:
                     return
+            if self.auto:
+                for t in self.typ:
+                    try:
+                        data[self.name] = data[self.name].astype(t)
+                        return
+                    except Exception:
+                        pass
             raise TypeError("Wrong type for column '{}' with type {} (expected {})".format(self.name, ty, self.typ))
 
 
