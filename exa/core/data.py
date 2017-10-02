@@ -89,6 +89,28 @@ class Index(_Param):
         for t in self.typ:
             if t is ty or t in _npmap and ty in _npmap[t]:
                 return
+        # If not already the correct type and conversion is set to occur
+        if self.auto:
+            if hasattr(self.index, "levels"):
+                for t in self.typ:
+                    try:
+                        setter = []
+                        for i, l in enumerate(df.index.levels):
+                            if i == lvl:
+                                setter.append(l.astype(t))
+                            else:
+                                setter.append(l)
+                        df.index = df.index.set_levels(setter)
+                        return
+                    except Exception:
+                        pass
+            else:
+                for t in self.typ:
+                    try:
+                        df.index = df.index.astype(t)
+                        return
+                    except Exception:
+                        pass
         raise TypeError("Wrong type for index '{}' with type {} (expected {})".format(self.name, ty, self.typ))
 
     def __init__(self, *args, **kwargs):

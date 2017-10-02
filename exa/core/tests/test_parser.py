@@ -43,10 +43,6 @@ class TestSections(TestCase):
         self.assertIsNone(sec._ed)
         self.assertEqual(len(sec), 1)
 
-    def test_false_create(self):
-        with self.assertRaises(TypeError):
-            Sections.from_lists([0.0], [0], [None], None)
-
 
 class TestParser(TestCase):
     """Check basic parsing functionality on a test file."""
