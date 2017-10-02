@@ -59,4 +59,4 @@ install:
 build: false
 
 test_script:
-  - cmd: nosetests --with-coverage 
+  - cmd: nosetests

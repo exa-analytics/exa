@@ -6,7 +6,7 @@ Tests for :mod:`~exa.core.parser`
 #############################################
 Parsing is tested on static data provided in the included data directory.
 """
-import os, re
+import six, os, re
 from unittest import TestCase
 from exa.core.parser import Parser, Sections
 from exa.typed import Typed
@@ -39,7 +39,7 @@ class TestSections(TestCase):
     """Test the sections dataframe works correctly."""
     def test_create(self):
         sec = Sections.from_lists([0], [0], [None], None)
-        self.assertIsInstance(sec['start'].tolist()[0], int)
+        self.assertIsInstance(sec['start'].tolist()[0], six.integer_types)
         self.assertIsNone(sec._ed)
         self.assertEqual(len(sec), 1)
 
