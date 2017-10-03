@@ -7,6 +7,7 @@ Tests for :mod:`~exa.core.parser`
 Parsing is tested on static data provided in the included data directory.
 """
 import six, os, re
+import pandas as pd
 from unittest import TestCase
 from exa.core.parser import Parser, Sections
 from exa.typed import Typed
@@ -26,6 +27,11 @@ class XYZ(Parser):
     _start = re.compile("^ATOMIC_POSITIONS", re.MULTILINE)
     _stop = 1
 
+    def _parse(self):
+        self.atom = pd.read_csv(self[1:].to_stream(),
+                                names=("symbol", "x", "y", "z"),
+                                delim_whitespace=True)
+
 
 class Output(Parser):
     pass
@@ -43,6 +49,11 @@ class TestSections(TestCase):
         self.assertIsNone(sec._ed)
         self.assertEqual(len(sec), 1)
 
+    def test_empty_get(self):
+        sec = Sections.from_lists([0], [0], [None], None)
+        with self.assertRaises(AttributeError):
+            sec.get_section(0)
+
 
 class TestParser(TestCase):
     """Check basic parsing functionality on a test file."""
@@ -55,3 +66,11 @@ class TestParser(TestCase):
     def test_sections(self):
         sec = self.ed.sections
         self.assertEqual(len(sec), 10)
+
+    def test_get_section(self):
+        ed = self.ed.sections.get_section(0)
+        self.assertIsInstance(ed, Parser)
+        self.assertFalse(hasattr(ed, "atom"))
+        ed.parse()
+        self.assertTrue(hasattr(ed, "atom"))
+        self.assertEqual(len(ed.atom), 3)

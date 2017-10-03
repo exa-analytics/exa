@@ -30,12 +30,14 @@ class TestAuxiliary(TestCase):
         match = Match(0, "text")
         self.assertEqual(match.num, 0)
         self.assertEqual(match.text, "text")
+        self.assertIn(str(match.num), repr(match))
 
     def test_matches(self):
         matches = Matches("pattern", *[Match(i, "text") for i in range(4)])
         self.assertEqual(len(matches), 4)
         self.assertIsInstance(matches[0], Match)
         self.assertListEqual(list(matches.seqpairs()), [(0, 1), (2, 3)])
+        self.assertIn("4", repr(matches))
 
     def test_found(self):
         found = Found(Matches("pattern0", *[Match(i, "text") for i in range(4)]),
@@ -44,6 +46,8 @@ class TestAuxiliary(TestCase):
         self.assertEqual(len(found), 2)
         self.assertEqual(len(found[0]), 4)
         self.assertEqual(len(found.as_matches()), 8)
+        self.assertEqual(len([m for m in found]), 2)    # Number of Matches objects
+        self.assertIn("2", repr(found))
 
     def test_regex_index(self):
         char_cum_sum = np.cumsum(np.random.randint(0, 100, size=(10, )))
