@@ -36,10 +36,6 @@ can be found at :ref:`examples-label` or via help::
     :maxdepth: 2
     :caption: Utilities
 
-    api/util/mpl.rst
-    api/util/tex.rst
-    api/util/constants.rst
-    api/util/units.rst
     api/util/isotopes.rst
 
 

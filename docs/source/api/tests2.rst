@@ -4,8 +4,18 @@
 ############################################
 Tests for Containers, Editors, Data Objects
 ############################################
-.. automodule:: exa.tests.test_container
+.. automodule:: exa.core.tests.test_editor
     :members:
 
-.. automodule:: exa.tests.test_editor
+.. automodule:: exa.core.tests.test_composer
     :members:
+
+.. automodule:: exa.core.tests.test_parser
+    :members:
+
+.. automodule:: exa.core.tests.test_data
+    :members:
+
+.. automodule:: exa.core.tests.test_container
+    :members:
+

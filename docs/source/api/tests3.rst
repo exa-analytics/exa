@@ -4,17 +4,5 @@
 ########################################
 Tests for Utilities
 ########################################
-.. automodule:: exa.util.tests.test_mpl
-    :members:
-
-.. automodule:: exa.util.tests.test_tex
-    :members:
-
-.. automodule:: exa.util.tests.test_constants
-    :members:
-
 .. automodule:: exa.util.tests.test_isotopes
-    :members:
-
-.. automodule:: exa.util.tests.test_units
     :members:
