@@ -285,10 +285,18 @@ class Editor(TypedClass):
                 lines.append(line.replace(pattern, replacement))
             return self.__class__(lines)
 
-    def find_next(self, pattern, case=True, reverse=False):
+    def find_next(self, pattern, case=True, reverse=False, cursor=None):
         """
         Find the next line with the given text pattern.
+
+        Args:
+            pattern (str): String pattern to search for
+            case (bool): Respect case
+            reverse (bool): Search in reverse
+            cursor (int): Set the line cursor prior to search (optional)
         """
+        if cursor is not None:
+            self.cursor = cursor
         n = len(self)
         n1 = n - 1
         if reverse:
@@ -341,13 +349,15 @@ class Editor(TypedClass):
                     matches[regex.pattern].append(Match(i, line))
         return matches
 
-    def regex_next(self, pattern, reverse=False, flags=0):
+    def regex_next(self, pattern, reverse=False, flags=0, cursor=None):
         """
         Find the next line with a given regular expression pattern.
 
         If no matches are found, None is returned. Certain flags (such as
         multiline) are not supported by this function.
         """
+        if cursor is not None:
+            self.cursor = cursor
         n = len(self)
         n1 = n - 1
         if reverse:

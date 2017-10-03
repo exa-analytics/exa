@@ -101,7 +101,7 @@ class Parser(Editor):
             else:
                 starts = rfound[parser._start]
             if isinstance(parser._stop, int):
-                stops = self._parse_stops(parser._stop, starts)
+                stops = self._parse_stops(parser, starts)
             elif isinstance(parser._stop, str):
                 stops = ffound[parser._stop]
             else:
@@ -117,13 +117,13 @@ class Parser(Editor):
         """To be overwritten - parses file specific data."""
         pass
 
-    def _parse_starts(self, which, stops):
+    def _parse_starts(self, parser, stops):
         """Determine which starting search to perform."""
-        return getattr(self, "_parse_starts"+str(which).replace("-", "_"))(stops)
+        return getattr(parser, "_parse_starts"+str(parser._start).replace("-", "_"))(self, stops)
 
-    def _parse_stops(self, which, starts):
+    def _parse_stops(self, parser, starts):
         """Determine which stopping search to perform."""
-        return getattr(self, "_parse_stops"+str(which).replace("-", "_"))(starts)
+        return getattr(parser, "_parse_stops"+str(parser._stop).replace("-", "_"))(self, starts)
 
     def _parse_stops1(self, starts):
         """Find the next blank (whitespace only) line."""
