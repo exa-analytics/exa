@@ -4,5 +4,5 @@
 ###########################
 Isotopes
 ###########################
-.. automodule:: exa.isotopes
+.. automodule:: exa.core.isotopes
     :members:

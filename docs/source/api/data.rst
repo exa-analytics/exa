@@ -4,5 +4,5 @@
 ###########################
 Structured DataFrames
 ###########################
-.. automodule:: exa.dataframe
+.. automodule:: exa.core.data
     :members:

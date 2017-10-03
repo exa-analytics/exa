@@ -4,5 +4,5 @@
 ###########################
 Units
 ###########################
-.. automodule:: exa.units
+.. automodule:: exa.util.units
     :members:

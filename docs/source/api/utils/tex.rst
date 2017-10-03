@@ -4,5 +4,5 @@
 ###########################
 Text/LaTeX Utilities
 ###########################
-.. automodule:: exa.tex
+.. automodule:: exa.util.tex
     :members:

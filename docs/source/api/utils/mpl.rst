@@ -4,5 +4,5 @@
 ###########################
 Matplotlib Utilities
 ###########################
-.. automodule:: exa.mpl
+.. automodule:: exa.core.mpl
     :members:

@@ -4,5 +4,5 @@
 ###########################
 Constants
 ###########################
-.. automodule:: exa.constants
+.. automodule:: exa.util.constants
     :members:

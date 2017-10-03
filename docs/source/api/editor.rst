@@ -6,11 +6,11 @@
 ###########################
 Editors, Parsers, Composers
 ###########################
-.. automodule:: exa.editor
+.. automodule:: exa.core.editor
     :members:
 
-.. automodule:: exa.parser
+.. automodule:: exa.core.parser
     :members:
 
-.. automodule:: exa.composer
+.. automodule:: exa.core.composer
     :members:

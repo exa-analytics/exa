@@ -26,7 +26,7 @@ can be found at :ref:`examples-label` or via help::
 
 .. toctree::
     :maxdepth: 2
-    :caption: Containers, Editors, Data Objects
+    :caption: Core API
 
     api/container.rst
     api/frame.rst

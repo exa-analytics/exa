@@ -4,7 +4,7 @@
 ########################################
 Tests for Special Classes
 ########################################
-.. automodule:: exa.tests.test_single
+.. automodule:: exa.tests.test_static
     :members:
 
 .. automodule:: exa.tests.test_typed
