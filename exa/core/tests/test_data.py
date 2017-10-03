@@ -28,7 +28,7 @@ class FooMSeries(DataSeries):
 
 class FooFrame(DataFrame):
     idx = Index()
-    a0 = Column(int, required=True)
+    a0 = Column(int, required=True, verbose=False)
     b1 = Column((float, str))
 
     @property
@@ -36,10 +36,10 @@ class FooFrame(DataFrame):
         return FooFrame
 
 
-class FooFrame1(DataFrame):
-    idx0 = Index(int, level=0)
-    idx1 = Index(str, level=1)
-    a0 = Column(int, required=True)
+class BarFrame(DataFrame):
+    idx0 = Index(int, level=0, verbose=False)
+    idx1 = Index(str, level=1, verbose=False)
+    a0 = Column(int, required=True, verbose=False)
     b1 = Column((float, str))
 
 
@@ -137,10 +137,23 @@ class TestDataFrame(_Tester):
     def test_params(self):
         """Test params machinery."""
         index = pd.MultiIndex.from_product([[0, 1], ["green", "purple"]])
-        s = FooFrame1([0, 1, 2, 3], columns=("a0", ), index=index)
+        s = BarFrame([0, 1, 2, 3], columns=("a0", ), index=index)
         self.assertListEqual(list(s.index.names), ["idx0", "idx1"])
         with self.assertRaises((TypeError, NameError)):
             FooFrame(index=index)
+
+    def test_enforce_autoconv(self):
+        """Test automatic conversion."""
+        idx0 = np.random.rand(2).tolist()
+        idx1 = ["green", "purple"]
+        index = pd.MultiIndex.from_product([idx0, idx1])
+        self.assertIsInstance(index.levels[0][0], float)
+        s = BarFrame(list(range(4)), columns=("a0", ), index=index)
+        self.assertIsInstance(s.index.levels[0][0], (np.int32, np.int64))
+        s = FooFrame([1.5, 1.2, 1.5, 1.2], columns=("a0", ))
+        self.assertIsInstance(s.iloc[0, 0], (np.int32, np.int64))
+        s['a0'] = [1.0, 2.0, 3.0, 4.0]
+        self.assertEqual(s.iloc[0, 0], 1)
 
 
 class TestSparseDataSeries(_Tester):

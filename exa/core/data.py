@@ -8,6 +8,7 @@ Exa provides a `pandas`_ like Series and DataFrame object which support saving
 and loading metadata when using the HDF format.
 """
 import six
+import warnings
 import numpy as np
 import pandas as pd
 from pandas.io import pytables
@@ -52,10 +53,11 @@ class _Param(TypedClass):
         self.name = name
         return self
 
-    def __init__(self, typ=None, required=False, auto=True):
+    def __init__(self, typ=None, required=False, auto=True, verbose=True):
         self.typ = typ if isinstance(typ, (list, tuple)) else (typ, )
         self.required = required
         self.auto = auto
+        self.verbose = verbose
 
 
 class Index(_Param):
@@ -72,6 +74,8 @@ class Index(_Param):
         typ: Type or iterable of acceptable types
         required (bool): Mandatory name/value (default True)
         level (int): If multiindex, index level (default None)
+        auto (bool): Automatic type conversion
+        verbose (bool): Report warnings
 
     Note:
         Numeric types must used must be numpy types.
@@ -92,27 +96,31 @@ class Index(_Param):
                 return
         # If not already the correct type and conversion is set to occur
         if self.auto:
-            if hasattr(self.index, "levels"):
+            if hasattr(data.index, "levels"):
                 for t in self.typ:
                     t = 'category' if t is CategoricalDtypeType else t
                     try:
                         setter = []
-                        for i, l in enumerate(df.index.levels):
+                        for i, l in enumerate(data.index.levels):
                             if i == lvl:
                                 setter.append(l.astype(t))
                             else:
                                 setter.append(l)
-                        df.index = df.index.set_levels(setter)
+                        data.index = data.index.set_levels(setter)
+                        if self.verbose:
+                            warnings.warn("Index {} type converted to {}".format(lvl, t.__name__))
                         return
-                    except Exception:
+                    except (TypeError, ):
                         pass
             else:
                 for t in self.typ:
                     t = 'category' if t is CategoricalDtypeType else t
                     try:
-                        df.index = df.index.astype(t)
+                        data.index = data.index.astype(t)
+                        if self.verbose:
+                            warnings.warn("Index type converted to {}".format(t.__name__))
                         return
-                    except Exception:
+                    except (TypeError, ):
                         pass
         raise TypeError("Wrong type for index '{}' with type {} (expected {})".format(self.name, ty, self.typ))
 
@@ -135,6 +143,8 @@ class Column(_Param):
     Args:
         typ: Type or iterable of acceptable types
         required (bool): Mandatory name/value (default True)
+        auto (bool): Automatic type conversion
+        verbose (bool): Report warnings
 
     Note:
         Numeric types must used must be numpy types.
@@ -156,6 +166,8 @@ class Column(_Param):
                     t = 'category' if t is CategoricalDtypeType else t
                     try:
                         data[self.name] = data[self.name].astype(t)
+                        if self.verbose:
+                            warnings.warn("Column '{}' type converted to {}".format(self.name, t.__name__))
                         return
                     except Exception:
                         pass
