@@ -18,16 +18,16 @@ before_install:
 install:
   - conda install -q python=$TRAVIS_PYTHON_VERSION
   - conda install -q -c conda-forge `cat requirements.txt`
-  - conda install -q -c conda-forge pytables python-coveralls ply pandoc nbsphinx nose
+  - conda install -q -c conda-forge pytables python-coveralls ply pandoc pypandoc nbsphinx
   - pip install travis-sphinx codacy-coverage coverage
   - pip install .
 
 script:
-    #- nosetests
+  #- nosetests
   #- coverage xml
-  #- travis-sphinx -n build
+  - travis-sphinx -n build
 
 after_success:
   #- coveralls
   #- python-codacy-coverage -r coverage.xml
-  #- travis-sphinx -n deploy
+  - travis-sphinx -n deploy
