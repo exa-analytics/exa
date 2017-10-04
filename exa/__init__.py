@@ -27,4 +27,4 @@ Note:
 """
 from ._version import __version__
 from .core import (DataFrame, DataSeries, SparseDataSeries, SparseDataFrame,
-                   Editor, Parser, Container)
+                   Editor, Parser, Composer, Container, Matches, Match, Found)
