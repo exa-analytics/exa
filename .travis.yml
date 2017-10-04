@@ -23,11 +23,11 @@ install:
   - pip install .
 
 script:
-  - nosetests --with-coverage
-  - coverage xml
+  - nosetests
+  #- coverage xml
   - travis-sphinx -n build
 
 after_success:
-  - coveralls
-  - python-codacy-coverage -r coverage.xml
+  #- coveralls
+  #- python-codacy-coverage -r coverage.xml
   - travis-sphinx -n deploy
