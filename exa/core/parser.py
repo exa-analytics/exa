@@ -119,11 +119,11 @@ class Parser(Editor):
 
     def _parse_starts(self, parser, stops):
         """Determine which starting search to perform."""
-        return getattr(parser, "_parse_starts"+str(parser._start).replace("-", "_"))(self, stops)
+        return getattr(parser, "_parse_starts"+str(parser._start).replace("-", "_"))(parser(self), stops)
 
     def _parse_stops(self, parser, starts):
         """Determine which stopping search to perform."""
-        return getattr(parser, "_parse_stops"+str(parser._stop).replace("-", "_"))(self, starts)
+        return getattr(parser, "_parse_stops"+str(parser._stop).replace("-", "_"))(parser(self), starts)
 
     def _parse_stops1(self, starts):
         """Find the next blank (whitespace only) line."""

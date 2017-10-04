@@ -68,7 +68,8 @@ class TestParser(TestCase):
         self.assertEqual(len(sec), 10)
 
     def test_get_section(self):
-        ed = self.ed.sections.get_section(1)
+        i = self.ed.sections[self.ed.sections['parser'] == XYZ].index[0]
+        ed = self.ed.sections.get_section(i)
         self.assertIsInstance(ed, Parser)
         self.assertFalse(hasattr(ed, "atom"))
         ed.parse()
