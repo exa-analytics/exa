@@ -4,7 +4,6 @@ matplotlib
 seaborn
 networkx
 pandas
-notebook
 nose
 numba
 six
