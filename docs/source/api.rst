@@ -28,29 +28,17 @@ can be found at :ref:`examples-label` or via help::
     :maxdepth: 2
     :caption: Core API
 
-    api/container.rst
-    api/frame.rst
     api/editor.rst
+    api/data.rst
+    api/container.rst
 
 .. toctree::
     :maxdepth: 2
-    :caption: Utilities
+    :caption: Util
 
     api/util/isotopes.rst
-
-
-########################
-Other Docs
-########################
-Additional module documentation is provided here. These modules are typically
-useful for extension by developers.
-
-.. toctree::
-    :maxdepth: 2
-    :caption: Typing
-
     api/typed.rst
-    api/single.rst
+    api/static.rst
 
 
 ########################
@@ -64,4 +52,5 @@ and users.
     :caption: Tests
 
     api/tests1.rst
+    api/tests2.rst
     api/tests3.rst
