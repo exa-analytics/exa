@@ -35,6 +35,7 @@ class Sections(DataFrame):
         """
         df = cls.from_dict({'start': start, 'stop': stop, 'parser': parser})
         df._ed = ed
+        df.sort_values('start', inplace=True)
         return df
 
     def get_section(self, key):
@@ -112,6 +113,10 @@ class Parser(Editor):
             stopnums += [stop[0] + 1 for stop in stops]
             parsers += [parser]*len(starts)
         self.sections = Sections.from_lists(startnums, stopnums, parsers, self)
+
+    def get_section(self, key):
+        """Get an editor representation of a given section."""
+        return self.sections.get_section(key)
 
     def _parse(self, *args, **kwargs):
         """To be overwritten - parses file specific data."""
