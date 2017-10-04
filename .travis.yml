@@ -19,7 +19,7 @@ install:
   - conda install -q python=$TRAVIS_PYTHON_VERSION
   - conda install -q -c conda-forge `cat requirements.txt`
   - conda install -q -c conda-forge pytables python-coveralls
-  - pip install travis-sphinx codacy-coverage
+  - pip install travis-sphinx codacy-coverage coverage
   - pip install .
 
 script:
