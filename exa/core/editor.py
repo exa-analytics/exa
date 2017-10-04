@@ -90,7 +90,7 @@ class Match(object):
         text (str): Line text
     """
     num = Typed(int)
-    text = Typed(str)
+    text = Typed(six.string_types)
 
     def __init__(self, num, text):
         self.num = num
@@ -109,7 +109,7 @@ class Matches(object):
     search string or pattern.
     """
     matches = Typed(list)
-    pattern = Typed(str)
+    pattern = Typed(six.string_types)
 
     def seqpairs(self):
         """
@@ -186,6 +186,7 @@ class Editor(TypedClass):
         data: File path, text, stream, or archived text file
         nprint (int): Number of lines shown by the 'repr'
         encoding (str): File encoding
+        ignore (bool): Ignore file path check (default false)
 
     Attributes:
         lines (list):
@@ -383,7 +384,7 @@ class Editor(TypedClass):
             yield line
 
     def __contains__(self, text):
-        if not isinstance(text, str):
+        if not isinstance(text, six.string_types):
             text = str(text)
         # Use __iter__
         for line in self:
@@ -412,7 +413,12 @@ class Editor(TypedClass):
     def __len__(self):
         return len(self.lines)
 
-    def __init__(self, textobj, encoding=None, nprint=15):
+    def __init__(self, textobj, encoding=None, nprint=15, ignore=False):
+        # Check if accidental filepath but missing file or wrong dir
+        if (isinstance(textobj, six.string_types) and
+            len(textobj.split(os.path.sep)) == 1 and ignore == False):
+            if not os.path.exists(textobj):
+                warnings.warn("Possibly incorrect path!")
         if isinstance(textobj, str) and os.path.exists(textobj):
             lines = read_file(textobj, encoding=encoding)
         elif isinstance(textobj, six.string_types):
