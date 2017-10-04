@@ -11,6 +11,7 @@ regular expressions). This module additionally provides convenience methods
 for reading and writing text.
 """
 import io, os, re, bz2, six, gzip
+import warnings
 import numpy as np
 from numba import jit
 from io import StringIO, TextIOWrapper
