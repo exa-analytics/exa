@@ -35,7 +35,6 @@ class Sections(DataFrame):
         """
         df = cls.from_dict({'start': start, 'stop': stop, 'parser': parser})
         df._ed = ed
-        df.sort_values('start', inplace=True)
         return df
 
     def get_section(self, key):
@@ -50,6 +49,13 @@ class Sections(DataFrame):
         """
         start, stop, cls = self.loc[key, ["start", "stop", "parser"]]
         return cls(self._ed.lines[start:stop])
+
+    def __init__(self, *args, **kwargs):
+        ed = kwargs.pop("ed", None)
+        super(Sections, self).__init__(*args, **kwargs)
+        self.sort_values('start', inplace=True)
+        self.reset_index(drop=True, inplace=True)
+        self._ed = ed
 
 
 class Parser(Editor):

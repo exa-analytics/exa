@@ -108,9 +108,9 @@ class Index(_Param):
                                 setter.append(l)
                         data.index = data.index.set_levels(setter)
                         if self.verbose:
-                            warnings.warn("Index {} type converted to {}".format(lvl, t.__name__))
+                            warnings.warn("Index {} type converted to {}".format(lvl, t))
                         return
-                    except (TypeError, ):
+                    except TypeError:
                         pass
             else:
                 for t in self.typ:
@@ -118,9 +118,9 @@ class Index(_Param):
                     try:
                         data.index = data.index.astype(t)
                         if self.verbose:
-                            warnings.warn("Index type converted to {}".format(t.__name__))
+                            warnings.warn("Index type converted to {}".format(t))
                         return
-                    except (TypeError, ):
+                    except TypeError:
                         pass
         raise TypeError("Wrong type for index '{}' with type {} (expected {})".format(self.name, ty, self.typ))
 
@@ -167,9 +167,9 @@ class Column(_Param):
                     try:
                         data[self.name] = data[self.name].astype(t)
                         if self.verbose:
-                            warnings.warn("Column '{}' type converted to {}".format(self.name, t.__name__))
+                            warnings.warn("Column '{}' type converted to {}".format(self.name, t))
                         return
-                    except Exception:
+                    except TypeError:
                         pass
             raise TypeError("Wrong type for column '{}' with type {} (expected {})".format(self.name, ty, self.typ))
 
