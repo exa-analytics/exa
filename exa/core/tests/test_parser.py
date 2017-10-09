@@ -19,13 +19,20 @@ name = "parser.bz2"
 
 # Simple test parsers
 class SCF(Parser):
+    """Test find and regex section searches."""
     _start = "Self-consistent Calculation"
-    _stop = re.compile("^\s*End of self-consistent calculation$", re.MULTILINE)
+    _end = re.compile("^\s*End of self-consistent calculation$", re.MULTILINE)
 
 
 class XYZ(Parser):
+    """Test regex and custom section searches."""
     _start = re.compile("^ATOMIC_POSITIONS", re.MULTILINE)
-    _stop = 1
+    _endregex = re.compile("^\s*$")
+
+    def _parse_end(self, starts):
+        # Special parser for ends
+        r = self._endregex
+        return [self.regex_next(r, cursor=match.num) for match in starts]
 
     def _parse(self):
         self.atom = pd.read_csv(self[1:].to_stream(),
@@ -34,6 +41,7 @@ class XYZ(Parser):
 
 
 class Output(Parser):
+    """Test generic parser wrapper."""
     pass
 
 
@@ -45,7 +53,7 @@ class TestSections(TestCase):
     """Test the sections dataframe works correctly."""
     def test_create(self):
         sec = Sections.from_lists([0], [0], [None], None)
-        self.assertIsInstance(sec['start'].tolist()[0], six.integer_types)
+        self.assertIsInstance(sec['startline'].tolist()[0], six.integer_types)
         self.assertIsNone(sec._ed)
         self.assertEqual(len(sec), 1)
 

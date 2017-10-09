@@ -127,7 +127,7 @@ class Matches(object):
 
     def __iter__(self):
         for match in self.matches:
-            yield match.num, match.text
+            yield match
 
     def __getitem__(self, num):
         return self.matches[num]
@@ -183,16 +183,33 @@ class Found(object):
 
 class Editor(TypedClass):
     """
+    A text reader object for opening small/medium files on disk.
+
+    The editor can be used to open compressed files (gzip, bz2) directly.
+    Editors can write files in a safe manner. Editors can be converted to
+    streams in order to facilitate procssing using other tools.
+
+    .. code-block:: python
+
+        ed = Editor(text)
+        ed = Editor(myfile)
+        ed = Editor(file.gz)
+        ed = Editor(file.bz2)
+
     Args:
         data: File path, text, stream, or archived text file
         nprint (int): Number of lines shown by the 'repr'
         encoding (str): File encoding
         ignore (bool): Ignore file path check (default false)
+        cursor (int): Positional search line number
+        meta (dict): Dictionary of metadata
 
     Attributes:
         lines (list):
     """
     meta = Typed(dict, doc="Document metadata")
+    lines = Typed(list, doc="Line list")
+    cursor = Typed(int, doc="Line number for positional searching.")
 
     def copy(self):
         """
@@ -203,7 +220,7 @@ class Editor(TypedClass):
         """
         cls = self.__class__
         lines = self.lines[:]
-        return cls(lines)
+        return cls(lines, ignore=True)
 
     def format(self, *args, **kwargs):
         """
@@ -287,9 +304,11 @@ class Editor(TypedClass):
                 lines.append(line.replace(pattern, replacement))
             return self.__class__(lines)
 
-    def find_next(self, pattern, case=True, reverse=False, cursor=None):
+    def find_next(self, pattern, case=True, reverse=False, wrap=False, cursor=None):
         """
         Find the next line with the given text pattern.
+
+        If no match is found, none is returned.
 
         Args:
             pattern (str): String pattern to search for
@@ -297,16 +316,7 @@ class Editor(TypedClass):
             reverse (bool): Search in reverse
             cursor (int): Set the line cursor prior to search (optional)
         """
-        if cursor is not None:
-            self.cursor = cursor
-        n = len(self)
-        n1 = n - 1
-        if reverse:
-            self.cursor = 0 if self.cursor == 0 else self.cursor - 1
-            positions = ((self.cursor - 1, 0, -1), (n1, self.cursor, -1))
-        else:
-            self.cursor = 0 if self.cursor == n1 else self.cursor + 1
-            positions = ((self.cursor, n, 1), (0, self.cursor, 1))
+        positions = self._next_positions(wrap, reverse, cursor)
         if case:
             check = lambda lin: pattern in lin
         else:
@@ -351,23 +361,21 @@ class Editor(TypedClass):
                     matches[regex.pattern].append(Match(i, line))
         return matches
 
-    def regex_next(self, pattern, reverse=False, flags=0, cursor=None):
+    def regex_next(self, pattern, flags=0, reverse=False, wrap=False, cursor=None):
         """
         Find the next line with a given regular expression pattern.
 
         If no matches are found, None is returned. Certain flags (such as
         multiline) are not supported by this function.
+
+        Args:
+            pattern (regex): Regular expression to search for
+            flags (int): Regularexpression compilation flags
+            reverse (bool): Search backwards
+            wrap (bool): Continue search from beginning/end of file (wraparound end of file)
+            cursor (int): Set the cursor prior to searching
         """
-        if cursor is not None:
-            self.cursor = cursor
-        n = len(self)
-        n1 = n - 1
-        if reverse:
-            self.cursor = 0 if self.cursor == 0 else self.cursor - 1
-            positions = ((self.cursor - 1, 0, -1), (n1, self.cursor, -1))
-        else:
-            self.cursor = 0 if self.cursor == n1 else self.cursor + 1
-            positions = ((self.cursor, n, 1), (0, self.cursor, 1))
+        positions = self._next_positions(wrap, reverse, cursor)
         if not type(pattern).__name__ == "SRE_Pattern":    # Compiled regex type check
             pattern = re.compile(pattern, flags)
         for start, stop, inc in positions:
@@ -375,6 +383,50 @@ class Editor(TypedClass):
                 if pattern.search(self.lines[i]):
                     self.cursor = i
                     return Match(i, self.lines[i])
+
+    def _next_positions(self, wrap=False, reverse=False, cursor=None):
+        """
+        Helper function that correctly gets the positions to search
+        for the find_next and regex_next functions. The returned tuple
+        are arguments for ``range``.
+
+        See Also:
+            :func:`~exa.core.editor.find_next`,
+            :func:`~exa.core.editor.regex_next`
+        """
+        n = len(self)
+        n1 = n - 1
+        # Set the cursor
+        if cursor is not None:
+            self.cursor = cursor
+        while True:
+            if self.cursor > n1:
+                self.cursor -= n
+            elif self.cursor < 0:
+                self.cursor += n
+            else:
+                break
+        # Determine how the searching positions should go
+        if wrap == False and reverse == False:
+            # Search from the cursor + 1 until the end of the file.
+            self.cursor = 0 if self.cursor == n1 else self.cursor + 1
+            positions = ((self.cursor, n, 1), )
+        elif wrap == False and reverse == True:
+            # Search from the cursor - 1 until the beginning of the file.
+            self.cursor = n1 if self.cursor == 0 else self.cursor - 1
+            positions = ((self.cursor, 0, -1), )
+        elif wrap == True and reverse == False:
+            # Search from the cursor + 1 until the end of the file and then
+            # continue from the beginning until the original cursor position.
+            self.cursor = 0 if self.cursor == n1 else self.cursor + 1
+            positions = ((self.cursor, n, 1), (0, self.cursor, 1))
+        else:
+            # Search from the cursor - 1 until the beginning of the file
+            # and then continue from the end of the file until the original
+            # cursor position.
+            self.cursor = n1 if self.cursor == 0 else self.cursor - 1
+            positions = ((self.cursor, 0, -1), (n1, self.cursor, -1))
+        return positions
 
     def to_stream(self):
         """Return a stream object of the current editor."""
@@ -397,13 +449,13 @@ class Editor(TypedClass):
         del self.lines[line]
 
     def __getitem__(self, key):
-        cls = self.__class__
         # The following makes a copy
+        cls = self.__class__
         if isinstance(key, (tuple, list)):
             lines = [self.lines[i] for i in key]
         else:
             lines = self.lines[key]
-        return cls(lines)
+        return cls(textobj=lines, ignore=True)
 
     def __setitem__(self, line, value):
         self.lines[line] = value
@@ -415,11 +467,14 @@ class Editor(TypedClass):
         return len(self.lines)
 
     def __init__(self, textobj, encoding=None, nprint=15, ignore=False):
-        # Check if accidental filepath but missing file or wrong dir
+        """
+        Check if accidental filepath but missing file or wrong directory.
+        Warn the user unless ignore is true.
+        """
         if (isinstance(textobj, six.string_types) and
-            len(textobj.split(os.path.sep)) == 1 and ignore == False):
-            if not os.path.exists(textobj):
-                warnings.warn("Possibly incorrect path!")
+            os.path.sep in textobj and len(textobj.split("\n")) == 1
+            and ignore == False and not os.path.exists(textobj)):
+            warnings.warn("Possibly incorrect file path! {}".format(textobj))
         if isinstance(textobj, str) and os.path.exists(textobj):
             lines = read_file(textobj, encoding=encoding)
         elif isinstance(textobj, six.string_types):

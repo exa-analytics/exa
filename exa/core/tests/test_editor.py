@@ -96,6 +96,7 @@ class TestEditor(TestCase):
 
     def test_all_lines_read_correctly(self):
         """Check that lines are equivalent."""
+        pass
         self.assertListEqual(self.from_file.lines, self.from_file_iso.lines)
         self.assertIsNot(self.from_file.lines, self.from_file_iso.lines)
         self.assertListEqual(self.from_file.lines, self.from_gzip.lines)
@@ -187,3 +188,16 @@ class TestEditor(TestCase):
         self.assertEqual(len(found[0]), 2)
         self.assertEqual(found[0][0].num, 0)
         self.assertEqual(found[0][1].num, 1)
+
+    def test_regex(self):
+        """Test regex searching."""
+        found = self.from_file_iso.format(tmp="test").regex("test")
+        self.assertEqual(len(found), 1)
+        self.assertEqual(len(found[0]), 2)
+        self.assertEqual(found[0][0].num, 0)
+        self.assertEqual(found[0][1].num, 1)
+
+    def test_copy_vs_view(self):
+        """Check if soft copy copies line data."""
+        cp = Editor(self.from_file)
+        self.assertIs(cp.lines, self.from_file.lines)
