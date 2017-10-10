@@ -20,37 +20,37 @@ are listed in.
 """
 import os as _os
 import sys as _sys
-from pkg_resources import resource_filename as _resource_filename
-from exa import _jupyter_nbextension_paths
-from .single import Singleton as _Singleton
-from .core.editor import Editor as _Editor
+from json import loads as _loads
+from exa import Editor as _E
+from exa import DataFrame as _DF
+from exa.util.units import get as _get
 
 
-_resource = "constants.json.bz2"
+class Constant(float):
+    """A physical constant."""
+    def __new__(cls, value, name, units, error):
+        return super(Constant, cls).__new__(cls, value)
 
-
-class Constant(_Singleton):
-    """
-    By inheriting the :class:`~exa.single.Singleton` class directly, this object
-    is in fact a singleton factory.
-    """
-    def __new__(mcs, name, bases, clsdict):
-        mcs.__repr__ = lambda self: repr(self.value)
-        return super(Constant, mcs).__new__(mcs, name, bases, clsdict)
+    def __init__(self, value, name, units, error):
+        float.__init__(value)
+        self.name = name
+        self.units = _get(units)
+        self.error = error
 
 
 def _create():
-    """Generate the isotopes and elements API from their static data."""
-    lst = _Editor(_path).to_data('json')
-    for entry in lst:
-        name = str(entry['name'])
-        setattr(_this, name, Constant(name, (), entry))
+    """Generate physical constants from static data."""
+    for entry in _loads(str(_E(_path))):
+        name = entry['name']
+        value = entry['value']
+        units = entry['units']
+        error = entry['error']
+        setattr(_this, name, Constant(value, name, units, error))
 
 
 # Data order of isotopic (nuclear) properties:
+_resource = "../../static/constants.json.bz2"
 _this = _sys.modules[__name__]
-_pkg = _jupyter_nbextension_paths()[0]['dest'].split("-")[1]
-_static = _jupyter_nbextension_paths()[0]['src']
-_path = _resource_filename(_pkg, _os.path.join(_static, _resource))
+_path = _os.path.abspath(_os.path.join(_os.path.abspath(__file__), _resource))
 if not hasattr(_this, "a220_lattice_spacing_of_silicon"):
     _create()

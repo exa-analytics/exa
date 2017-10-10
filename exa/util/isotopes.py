@@ -37,7 +37,6 @@ Warning:
 import six as _six
 import os as _os
 import sys as _sys
-from io import StringIO as _SIO
 from pandas import read_json as _rj
 from exa import Editor as _E
 from exa import DataFrame as _DF
