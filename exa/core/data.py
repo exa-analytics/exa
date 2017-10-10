@@ -53,7 +53,7 @@ class _Param(TypedClass):
         self.name = name
         return self
 
-    def __init__(self, typ=None, required=False, auto=True, verbose=True):
+    def __init__(self, typ=None, required=False, auto=True, verbose=False):
         self.typ = typ if isinstance(typ, (list, tuple)) else (typ, )
         self.required = required
         self.auto = auto

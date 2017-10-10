@@ -62,6 +62,7 @@ See Also:
     :class:`~exa.core.editor.Matches`, and :class:`~exa.core.editor.Found`.
 """
 import six
+import warnings
 from .editor import Editor
 from .data import DataFrame, Column, Index
 from exa.typed import Typed
@@ -247,26 +248,26 @@ class Parser(Editor):
         Wrapper for calling custom end parsing. The function
         :func:`~exa.core.parser.Parser._parse_end` is called.
         """
-        return parser(self)._parse_end(starts)
+        return parser(self)._parse_end(starts)     # Do not copy lines
 
     def _parse_3(self, parser):
         """
         Wrapper for calling custom start and end parsing. The function
         :func:`~exa.core.parser.Parser._parse_both` is called.
         """
-        return parser(self)._parse_both()
+        return parser(self)._parse_both()          # Ditto
 
     def _parse_start(self, stops):
         """To be overwritten."""
-        pass
+        warnings.warn("No implementation of _parse_start for {}".format(self.__class__))
 
     def _parse_end(self, starts):
         """To be overwritten."""
-        pass
+        warnings.warn("No implementation of _parse_end for {}".format(self.__class__))
 
     def _parse_both(self):
         """To be overwritten."""
-        pass
+        warnings.warn("No implementation of _parse_both for {}".format(self.__class__))
 
     @classmethod
     def add_parsers(cls, *parsers):
