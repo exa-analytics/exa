@@ -14,7 +14,7 @@ from exa import Typed, TypedClass, DataSeries
 from exa.typed import yield_typed
 
 
-empty_set = u"\u2205"
+empty_set = "Ø"
 fundamentals = {'length': "L", 'temperature': "Θ", 'mass': "M", 'time': "T",
                 'current': "I", 'amount': "N", 'luminosity': "J"}
 empty_set_array = DataSeries(index=list(fundamentals.keys()))
