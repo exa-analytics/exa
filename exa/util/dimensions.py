@@ -60,43 +60,54 @@ class Dimensions(TypedClass):
 #             'amount', "luminosity"]
 #        self.array = DataSeries(v, index=i, dtype=int).sort_index()
 
+    def __eq__(self, other):
+        """Equality checks each labeled unit."""
+        if isinstance(other, Dimensions):
+            return np.all(self.array == other.array)
+        elif isinstance(other, pd.Series):
+            return np.all(self.array == other)
+        return False
+
     def __add__(self, other):
-        if isinstance(other, Dimensions) and np.all(other.array == self.array):
+        """Addition/subtraction checks for equality."""
+        if self == other:
             return self
         else:
             raise DimensionsError("Dimensions must match! Expected {}, got {}".format(self, other))
 
     def __mul__(self, other):
+        """Multiplication is addition of powers."""
         if isinstance(other, Dimensions):
             array = self.array + other.array
             return Dimensions(**array.to_dict())
         return self
 
     def __truediv__(self, other):
+        """Division is subtraction of powers."""
         if isinstance(other, Dimensions):
             array = self.array - other.array
             return Dimensions(**array.to_dict())
         else:
             return self**-1
 
-    def __rtruediv__(self, other):
-        return self.__truediv__(other)
-
     def __pow__(self, other):
+        """Exponentiation is multiplication."""
         array = self.array*abs(other)
         if other < 0:
             return Dimensions(**(-array).to_dict())
         return Dimensions(**array.to_dict())
 
+    def __rtruediv__(self, other):
+        return self.__truediv__(other)
+
+    def __div__(self, other):
+        return self.__truediv__(other)
+
+    def __rdiv__(self, other):
+        return self.__truediv__(other)
+
     def __sub__(self, other):
         return self.__add__(other)    # Subtraction is the same check as addition
-
-    def __eq__(self, other):
-        if isinstance(other, Dimensions):
-            return np.all(self.array == other.array)
-        elif isinstance(other, pd.Series):
-            return np.all(self.array == other)
-        return False
 
     def __ne__(self, other):
         return not self.__eq__(other)
