@@ -8,12 +8,18 @@ Mathematical operations between dimensions are different than for dimensionless
 numbers. Dimensions are the basis of creating :class:`~exa.util.units.Unit`
 objects.
 """
+import numpy as np
+import pandas as pd
 from exa import Typed, TypedClass, DataSeries
 from exa.typed import yield_typed
 
 
-symbols = {'length': "L", 'temperature': "Θ", 'mass': "M", 'time': "T",
-           'current': "I", 'amount': "N", 'luminosity': "J"}
+empty_set = u"\u2205"
+fundamentals = {'length': "L", 'temperature': "Θ", 'mass': "M", 'time': "T",
+                'current': "I", 'amount': "N", 'luminosity': "J"}
+empty_set_array = DataSeries(index=list(fundamentals.keys()))
+empty_set_array.fillna(0, inplace=True)
+empty_set_array = empty_set_array.astype(int).sort_index()
 
 
 class DimensionsError(Exception):
@@ -41,9 +47,9 @@ class Dimensions(TypedClass):
     luminosity = Typed(int, allow_none=False)
     array = Typed(DataSeries)
 
-#    def to_dict(self):
-#        return self.array.to_dict()
-#
+    def to_dict(self):
+        return self.array.to_dict()
+
 #    def decompose(self):
 #        return tuple(sorted(self._symbols[k]+"^"+str(v) for k, v in self.to_dict().items() if v != 0))
 #
@@ -60,81 +66,68 @@ class Dimensions(TypedClass):
         else:
             raise DimensionsError("Dimensions must match! Expected {}, got {}".format(self, other))
 
-    def __sub__(self, other):
-        if isinstance(other, Dimensions) and np.all(other.array == self.array):
-            return self
-        else:
-            raise DimensionsError("Dimensions must match! Expected {}, got {}".format(self, other))
-
-    def __radd__(self, other):
-        return self.__add__(other)
-
-    def __rsub__(self, other):
-        return self.__add__(other)
-
-    def __rmul__(self, other):
-        return self.__mul__(other)
-
     def __mul__(self, other):
         if isinstance(other, Dimensions):
             array = self.array + other.array
-        else:
-            array = self.array*other
-        return Dimensions(**array.to_dict())
-
-    def __div__(self, other):
-        if isinstance(other, Dimensions):
-            array = self.array - other.array
-        else:
-            array = -self.array
-        return Dimensions(**array.to_dict())
+            return Dimensions(**array.to_dict())
+        return self
 
     def __truediv__(self, other):
-        return self.__div__(other)
+        if isinstance(other, Dimensions):
+            array = self.array - other.array
+            return Dimensions(**array.to_dict())
+        else:
+            return self**-1
 
     def __rtruediv__(self, other):
-        return self.__div__(other)
-
-    def __rdiv__(self, other):
-        return self.__div__(other)
+        return self.__truediv__(other)
 
     def __pow__(self, other):
-        if isinstance(other, Dimensions) and other.array.abs().sum() > 0:
-            raise DimensionsError("Exponentiation must be dimensionless (got {})!".fromat(other))
-        elif other < 0:
-            return self.__truediv__(other)
-        else:
-            return self.__mul__(other)
+        array = self.array*abs(other)
+        if other < 0:
+            return Dimensions(**(-array).to_dict())
+        return Dimensions(**array.to_dict())
 
-    def __init__(self, length=0, mass=0, time=0, current=0,
-                 temperature=0, amount=0, luminosity=0):
+    def __sub__(self, other):
+        return self.__add__(other)    # Subtraction is the same check as addition
+
+    def __eq__(self, other):
+        if isinstance(other, Dimensions):
+            return np.all(self.array == other.array)
+        elif isinstance(other, pd.Series):
+            return np.all(self.array == other)
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __init__(self, length=0, mass=0, time=0, current=0, temperature=0,
+                 amount=0, luminosity=0):
         self.array = DataSeries({'length': length, 'mass': mass, 'time': time,
                                  'current': current, 'temperature': temperature,
                                  'amount': amount, 'luminosity': luminosity},
-                                dtype=int)
+                                dtype=int).sort_index()
 
     def __repr__(self):
-        rep = []
-        for measure in yield_typed(self):
-            if measure not in ("array", ) and getattr(self, measure) != 0:
-                rep.append(self._symbols[measure] + "^{}".format(getattr(self, measure)))
-        if len(rep) == 0:
-            return u"\u2205"
-        return " ".join(rep).strip()
-#
-#
-#
-## Base Dimensions
-#angle = Dimensions()
-#mass = Dimensions(mass=1)
-#length = Dimensions(length=1)
-#time = Dimensions(time=1)
-#current = Dimensions(current=1)
-#temperature = Dimensions(temperature=1)
-#amount = Dimensions(amount=1)
-#luminosity = Dimensions(luminosity=1)
-#
-#
+        if self.array.abs().sum() == 0:
+            return empty_set
+        arr = self.array[self.array != 0]
+        symbol = arr.index.map(lambda x: fundamentals[x]).astype(str)
+        power = arr.astype(str)
+        return " ".join(sorted((symbol+"^"+power).tolist()))
+
+
+# Base Dimensions
+angle = Dimensions()
+mass = Dimensions(mass=1)
+length = Dimensions(length=1)
+time = Dimensions(time=1)
+current = Dimensions(current=1)
+temperature = Dimensions(temperature=1)
+amount = Dimensions(amount=1)
+luminosity = Dimensions(luminosity=1)
+
+
 ## Derived Dimensions
 #area = length**2
 #volume = length**3

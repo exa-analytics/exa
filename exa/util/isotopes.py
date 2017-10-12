@@ -108,7 +108,10 @@ def _create():
     def creator(group):
         """Helper function applied to each symbol group of the raw isotope table."""
         symbol = group['symbol'].values[0]
-        mass = (group['mass']*group['af']).sum()/group['af'].sum()
+        try:    # Ghosts and custom atoms don't necessarily have an abundance fraction
+            mass = (group['mass']*group['af']).sum()/group['af'].sum()
+        except ZeroDivisionError:
+            mass = group['mass'].mean()
         znum = group['Z'].max()
         radius = group['radius'].mean()
         try:
@@ -145,5 +148,6 @@ _columns = ("A", "Z", "af", "afu", "radius", "g", "mass", "massu", "name",
             "eneg", "quad", "spin", "symbol", "color")
 _this = _sys.modules[__name__]         # Reference to this module
 _path = _os.path.abspath(_os.path.join(_os.path.abspath(__file__), _resource))
+print(_path)
 if not hasattr(_this, "H"):
     _create()

@@ -2,50 +2,24 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 from unittest import TestCase
+from exa.util.dimensions import (angle, mass, length, time, current, amount,
+                                 temperature, luminosity, DimensionsError)
+from exa.util.dimensions import empty_set_array as esa
+
 
 
 class TestDimensions(TestCase):
-    def test_null_ops(self):
+    def test_angle_ops(self):
         """Test that operations on zero dimensions do nothing."""
-        null = u"\u2205"
-        self.assertEqual(str(angle), null)
-        self.assertEqual(str(angle**2), null)
-        self.assertEqual(str(1/angle), null)
-        self.assertEqual(angle+angle, angle)
-        self.assertEqual(angle-angle, angle)
+        self.assertEqual(angle, esa)
+        self.assertEqual(angle**2, esa)
+        self.assertEqual(angle/2, esa)
+        self.assertEqual(1/angle, esa)
+        self.assertEqual(angle*-5, esa)
 
-    def test_basic_error(self):
-        """Test basic ops raise errors"""
+    def test_raises(self):
+        """Test invalid operations."""
         with self.assertRaises(DimensionsError):
-            angle +1
-
-    def test_add(self):
-        """Test addition operations."""
-        self.assertEqual(str(length+length), "L^1")
-        self.assertEqual(time+time, time)
+            angle + 1
         with self.assertRaises(DimensionsError):
-            time + length
-
-    def test_sub(self):
-        """Test subtraction."""
-        self.assertEqual(str(mass-mass), "M^1")
-        self.assertEqual(luminosity-luminosity, luminosity)
-        with self.assertRaises(DimensionsError):
-            temperature - current
-
-    def test_mul(self):
-        """Test multiplication."""
-        self.assertEqual(str(amount*amount), "N^2")
-        self.assertEqual(str(time*mass*length), "L^1 M^1 T^1")
-        self.assertEqual(str(luminosity*current*temperature), "I^1 J^1 Θ^1")
-
-    def test_div(self):
-        """Test division."""
-        self.assertEqual(str(amount/amount), u"\u2205")
-        self.assertEqual(str(time/mass/length), "L^-1 M^-1 T^1")
-        self.assertEqual(str(luminosity/current/temperature), "I^-1 J^1 Θ^-1")
-
-    def test_pow(self):
-        """Test exponentiation."""
-        self.assertEqual(str(amount**2), "N^2")
-        self.assertEqual(str(time**-2), "T^-1")
+            angle - 1
