@@ -47,22 +47,13 @@ class Dimensions(TypedClass):
     luminosity = Typed(int, allow_none=False)
     array = Typed(DataSeries)
 
-    def to_dict(self):
-        return self.array.to_dict()
-
-#    def decompose(self):
-#        return tuple(sorted(self._symbols[k]+"^"+str(v) for k, v in self.to_dict().items() if v != 0))
-#
-#    def _as_array(self):
-#        v = [self.length, self.mass, self.time, self.current,
-#             self.temperature, self.amount, self.luminosity]
-#        i = ['length', 'mass', 'time', 'current', 'temperature',
-#             'amount', "luminosity"]
-#        self.array = DataSeries(v, index=i, dtype=int).sort_index()
+    @property
+    def _constructor(self):
+        return Dimensions
 
     def __eq__(self, other):
         """Equality checks each labeled unit."""
-        if isinstance(other, Dimensions):
+        if isinstance(other, self._constructor):
             return np.all(self.array == other.array)
         elif isinstance(other, pd.Series):
             return np.all(self.array == other)
@@ -70,23 +61,23 @@ class Dimensions(TypedClass):
 
     def __add__(self, other):
         """Addition/subtraction checks for equality."""
-        if self == other:
+        if isinstance(other, self._constructor) and self == other:
             return self
         else:
             raise DimensionsError("Dimensions must match! Expected {}, got {}".format(self, other))
 
     def __mul__(self, other):
         """Multiplication is addition of powers."""
-        if isinstance(other, Dimensions):
+        if isinstance(other, self._constructor):
             array = self.array + other.array
-            return Dimensions(**array.to_dict())
+            return self._constructor(**array.to_dict())
         return self
 
     def __truediv__(self, other):
         """Division is subtraction of powers."""
         if isinstance(other, Dimensions):
             array = self.array - other.array
-            return Dimensions(**array.to_dict())
+            return self._constructor(**array.to_dict())
         else:
             return self**-1
 
@@ -94,8 +85,8 @@ class Dimensions(TypedClass):
         """Exponentiation is multiplication."""
         array = self.array*abs(other)
         if other < 0:
-            return Dimensions(**(-array).to_dict())
-        return Dimensions(**array.to_dict())
+            return self._constructor(**(-array).to_dict())
+        return self._constructor(**array.to_dict())
 
     def __rtruediv__(self, other):
         return self.__truediv__(other)
@@ -139,54 +130,55 @@ amount = Dimensions(amount=1)
 luminosity = Dimensions(luminosity=1)
 
 
-## Derived Dimensions
-#area = length**2
-#volume = length**3
-#speed = velocity = length/time
-#acceleration = speed/time
-#jerk = acceleration/time
-#wave_number = 1/length
-#mass_density = mass/volume
-#current_density = current/area
-#magnetic_field_strength = current/length
-#luminance = luminosity/area
-#frequency = 1/time
-#force = mass*length/time**2
-#pressure = force/area
-#energy = force*length
-#power = energy/time
-#electric_charge = current*time
-#electric_potential = power/current
-#capacitance = electric_charge/electric_potential
-#electric_resistance = electric_potential/current
-#electric_conductance = 1/electric_resistance
-#magnetic_flux = electric_potential*time
-#magnetic_flux_density = magnetic_flux/area
-#inductance = magnetic_flux/current
-#dose = energy/mass
-#catalytic_activity = amount/time
-#
-## Additional derived
-#dynamic_viscosity = pressure*time
-#moment_of_force = force*length
-#surface_tension = force/length
-#angular_velocity = angle/time
-#angular_acceleration = angle/time**2
-#irradiance = power/area
-#heat_capacity = energy/temperature
-#specific_heat_capacity = energy/temperature/mass
-#specific_energy = energy/mass
-#thermal_conductivity = power/length/temperature
-#energy_density = energy/volume
-#electric_field_strength = electric_potential/length
-#electric_charge_density = electric_charge/volume
-#electric_charge_flux = electric_charge/area
-#permittivity = capacitance/length
-#permeability = inductance/length
-#molar_energy = energy/amount
-#molar_heat_capacity = energy/temperature/amount
-#exposure = electric_charge/mass
-#dose_rate = dose/time
-#radiant_intensity = power/angle
-#radiance = radiant_intensity/area
-#catalytic_concentration = catalytic_activity/volume
+# Derived Dimensions
+area = length**2
+volume = length**3
+speed = velocity = length/time
+acceleration = speed/time
+jerk = acceleration/time
+wave_number = 1/length
+mass_density = mass/volume
+current_density = current/area
+magnetic_field_strength = current/length
+luminance = luminosity/area
+frequency = 1/time
+force = mass*length/time**2
+pressure = force/area
+energy = force*length
+power = energy/time
+electric_charge = current*time
+electric_potential = power/current
+capacitance = electric_charge/electric_potential
+electric_resistance = electric_potential/current
+electric_conductance = 1/electric_resistance
+magnetic_flux = electric_potential*time
+magnetic_flux_density = magnetic_flux/area
+inductance = magnetic_flux/current
+dose = energy/mass
+catalytic_activity = amount/time
+
+
+# Additional derived
+dynamic_viscosity = pressure*time
+moment_of_force = force*length
+surface_tension = force/length
+angular_velocity = angle/time
+angular_acceleration = angle/time**2
+irradiance = power/area
+heat_capacity = energy/temperature
+specific_heat_capacity = energy/temperature/mass
+specific_energy = energy/mass
+thermal_conductivity = power/length/temperature
+energy_density = energy/volume
+electric_field_strength = electric_potential/length
+electric_charge_density = electric_charge/volume
+electric_charge_flux = electric_charge/area
+permittivity = capacitance/length
+permeability = inductance/length
+molar_energy = energy/amount
+molar_heat_capacity = energy/temperature/amount
+exposure = electric_charge/mass
+dose_rate = dose/time
+radiant_intensity = power/angle
+radiance = radiant_intensity/area
+catalytic_concentration = catalytic_activity/volume

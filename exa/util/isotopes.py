@@ -148,6 +148,5 @@ _columns = ("A", "Z", "af", "afu", "radius", "g", "mass", "massu", "name",
             "eneg", "quad", "spin", "symbol", "color")
 _this = _sys.modules[__name__]         # Reference to this module
 _path = _os.path.abspath(_os.path.join(_os.path.abspath(__file__), _resource))
-print(_path)
 if not hasattr(_this, "H"):
     _create()

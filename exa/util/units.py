@@ -7,27 +7,171 @@ Units and Unit Systems
 The :class:`~exa.util.units.Unit` is a :class:`~exa.util.dimensions.Dimension`
 that has a name.
 """
-#class UnitError(Exception):
-#    pass
-#
-#
-#class Unit(TypedClass):
-#    """A named dimension."""
-#    value = Typed(float)
-#    _name2sym = {'yotta': "Y", 'zetta': "Z", 'exa': "E", 'tera': "T",
-#                 'giga': "G", 'mega': "M", 'kilo': "k", 'hecto': "h",
-#                 'deka': "da", 'deci': "d", 'centi': "c", 'milli': "m",
-#                 'micro': "µ", 'nano': "n", 'pico': "p", 'femto': "f",
-#                 'atto': "a", 'zepto': "z", 'yocto': "y"}
-#    _sym2name = {'E': 'exa', 'G': 'giga', 'M': 'mega', 'T': 'tera', 'Y': 'yotta',
-#                 'Z': 'zetta', 'a': 'atto', 'c': 'centi', 'd': 'deci', 'da': 'deka',
-#                 'f': 'femto', 'h': 'hecto', 'k': 'kilo', 'm': 'milli', 'n': 'nano',
-#                 'p': 'pico', 'y': 'yocto', 'z': 'zepto', 'µ': 'micro'}
-#    _sym2fac = {'Y': 1E24, 'Z': 1E21, 'E': 1E18, 'P': 1E15, 'T': 1E12, 'G': 1E9,
-#                'M': 1E6, 'k': 1E3, 'h': 1E2, 'da': 1E1, 'd': 1E-1, 'c': 1E-2,
-#                'm': 1E-3, 'µ': 1E-6, 'n': 1E-9, 'p': 1E-12, 'f': 1E-15, 'a': 1E-18,
-#                'z': 1E-21, 'y': 1E-24}
-#
+from . import dimensions
+from .dimensions import Dimensions, fundamentals
+from exa import Typed, TypedClass
+
+
+
+prefix2sym = {'yotta': "Y", 'zetta': "Z", 'exa': "E", 'tera': "T",
+              'giga': "G", 'mega': "M", 'kilo': "k", 'hecto': "h",
+              'deka': "da", 'deci': "d", 'centi': "c", 'milli': "m",
+              'micro': "µ", 'nano': "n", 'pico': "p", 'femto': "f",
+              'atto': "a", 'zepto': "z", 'yocto': "y"}
+sym2fac = {'Y': 1E24, 'Z': 1E21, 'E': 1E18, 'P': 1E15, 'T': 1E12, 'G': 1E9,
+           'M': 1E6, 'k': 1E3, 'h': 1E2, 'da': 1E1, 'd': 1E-1, 'c': 1E-2,
+           'm': 1E-3, 'µ': 1E-6, 'n': 1E-9, 'p': 1E-12, 'f': 1E-15, 'a': 1E-18,
+           'z': 1E-21, 'y': 1E-24}
+sym2prefix = {v: k for k, v in prefix2sym.items()}
+fac2sym = {v: k for k, v in sym2fac.items()}
+
+
+class UnitError(Exception):
+    """Raised when unit math operations fail."""
+    pass
+
+
+class Unit(Dimensions):
+    """A unit is a named dimension object."""
+    @property
+    def name(self):
+        """Falls back to dimensions."""
+        if self._suffix is None:
+            return super(Unit, self).__repr__()
+        return self._prefix + self._suffix
+
+    @property
+    def symbol(self):
+        """Falls back to full name."""
+        if self._symbol is None:
+            return self.name
+        return prefix2sym.get(self._prefix, "") + self._symbol
+
+    @property
+    def _constructor(self):
+        return Unit
+
+    def __init__(self, fullname=None, symbol=None, prefix=None, **dimensions):
+        super(Unit, self).__init__(**dimensions)
+        # Determine "base" name and prefix
+        self._suffix = None    # Full by default
+        self._prefix = None    # Full by default
+        self._symbol = symbol
+        # Figure out the suffix and prefix
+        if fullname is None:
+            self._suffix = fullname
+        else:
+            for pref in prefix2sym.keys():
+                if fullname.startswith(pref):
+                    self._suffix = fullname.replace(pref, "", 1)
+                    self._prefix = pref
+                    if symbol is not None:
+                        prf = prefix2sym[pref]
+                        if symbol.startswith(prf):
+                            self._symbol = symbol.replace(prf, "", 1)
+                        else:
+                            self._symbol = symbol
+                    break
+            else:
+                if prefix is None:    # Understand the fullname to be the suffix
+                    self._prefix = ""
+                elif prefix in prefix2sym:
+                    self._prefix = prefix
+                elif prefix in sym2prefix:
+                    self._prefix = sym2prefix[prefix]
+                else:
+                    raise UnitError("Invalid prefix {}".format(prefix))
+                self._suffix = fullname
+
+    def __repr__(self):
+        return self.symbol
+
+
+def Quantity(TypedClass):
+    """
+    A number with units.
+    """
+    value = Typed(float)
+    unit = Typed(Unit)
+
+    def __add__(self, other):
+        if isinstance(other, Quantity) and self.unit == other.unit:
+            pass
+
+
+    def __init__(self, value, unit):
+        self.value = value
+        self.unit = unit
+
+
+class UnitSystem(TypedClass):
+    """A system of unit objects from which all other units can be derived."""
+    length = Typed(Unit)
+    mass = Typed(Unit)
+    time = Typed(Unit)
+    current = Typed(Unit)
+    temperature = Typed(Unit)
+    amount = Typed(Unit)
+    luminosity = Typed(Unit)
+
+    def base(self, full=False):
+        """Return base units."""
+        base = {'length': self.length, 'mass': self.mass, 'time': self.time,
+                'temperature': self.temperature, 'current': self.current,
+                'amount': self.amount, 'luminosity': self.luminosity}
+        if full == True:
+            return base
+        return {k: v for k, v in base.items() if v is not None}
+
+    def _derived_units(self):
+        """Generate derived units."""
+        base = self.base()
+        for k, v in vars(dimensions).items():
+            if isinstance(v, Dimensions) and k not in fundamentals:
+                derived = None
+                symbol = []
+                for dim, exp in v.array.items():
+                    if exp == 0:
+                        continue
+                    if dim not in base:
+                        derived = None
+                        break
+                    else:
+                        unit = base[dim]
+                        if derived is None:
+                            derived = unit**exp
+                        else:
+                            derived *= unit**exp
+                        if exp != 0:
+                            symbol.append(str(unit.symbol) + "^" + str(exp))
+                if derived is not None:
+                    symbol = " ".join(sorted(symbol))
+                    derived = Unit(symbol=symbol, **derived.array.to_dict())
+                    setattr(self, k, derived)
+
+    def __init__(self, name=None, length=None, mass=None, time=None, current=None,
+                 temperature=None, amount=None, luminosity=None):
+        self.length = length
+        self.mass = mass
+        self.time = time
+        self.current = current
+        self.temperature = temperature
+        self.amount = amount
+        self.luminosity = luminosity
+        self.name = name
+        self._derived_units()
+
+    def __repr__(self):
+        baserepr = ", ".join([str(k)+": "+str(v) for k, v in self.base().items()])
+        if self.name:
+            return "{}({})".format(self.name, baserepr)
+        return "UnitSystem({})".format(baserepr)
+
+
+
+
+
+
 #    @property
 #    def name(self):
 #        if self._suffix is None:
@@ -92,39 +236,6 @@ that has a name.
 #        dims = self._dimensions**other
 #        return Unit(fullname="derived", **dims.to_dict())
 #
-#    def __init__(self, fullname, symbol=None, prefix=None, **dimensions):
-#        self._dimensions = Dimensions(**dimensions)
-#        # Determine "base" name and prefix
-#        self._suffix = None    # Full by default
-#        self._prefix = None    # Full by default
-#        self._symbol = symbol
-#        # Figure out the suffix and prefix
-#        for pref in self._name2sym.keys():
-#            if fullname.startswith(pref):
-#                self._suffix = fullname.replace(pref, "", 1)
-#                self._prefix = pref
-#                if symbol is not None:
-#                    prf = self._name2sym[pref]
-#                    if symbol.startswith(prf):
-#                        self._symbol = symbol.replace(prf, "", 1)
-#                    else:
-#                        self._symbol = symbol
-#                break
-#        else:
-#            if prefix is None:    # Understand the fullname to be the suffix
-#                self._prefix = ""
-#            elif prefix in self._name2sym:
-#                self._prefix = prefix
-#            elif prefix in self._sym2name:
-#                self._prefix = self._sym2name[prefix]
-#            else:
-#                raise UnitError("Invalid prefix {}".format(prefix))
-#            self._suffix = fullname
-#
-#    def __repr__(self):
-#        if self.name == "derived":
-#            return repr(self._dimensions)
-#        return self.symbol
 #
 #
 #class Quantity(TypedClass):
@@ -151,38 +262,6 @@ that has a name.
 #
 #
 #TextTestRunner().run(TestLoader().loadTestsFromModule(TestUnit()))
-#class UnitSystem(TypedClass):
-#    """A system of unit objects from which all other units can be derived."""
-#    length = Typed(Unit)
-#    mass = Typed(Unit)
-#    time = Typed(Unit)
-#    current = Typed(Unit)
-#    temperature = Typed(Unit)
-#    amount = Typed(Unit)
-#    luminosity = Typed(Unit)
-#
-#    def base_units(self, full=False):
-#        base = {'length': self.length, 'mass': self.mass, 'time': self.time,
-#                'temperature': self.temperature, 'current': self.current,
-#                'amount': self.amount, 'luminosity': self.luminosity}
-#        if full == True:
-#            return base
-#        return {k: v for k, v in base.items() if v is not None}
-#
-#    def _derive_units(self):
-#        pass
-#
-#    def __init__(self, name=None, length=None, mass=None, time=None, current=None,
-#                 temperature=None, amount=None, luminosity=None):
-#        self.length = length
-#        self.mass = mass
-#        self.time = time
-#        self.current = current
-#        self.temperature = temperature
-#        self.amount = amount
-#        self.luminosity = luminosity
-#        self.name = name
-#        self._derive_units()
 #
 #    def __repr__(self):
 #        base = ", ".join([k+": "+str(v) for k, v in self.base_units().items()]).strip()

@@ -5,10 +5,10 @@
 Tests for :mod:`~exa.units`
 #############################################
 """
-#from unittest import TestCase
-#from exa import units
-#
-#
+from unittest import TestCase
+from exa import units
+
+
 #class TestUnits(TestCase):
 #    """Basic checks that units have been created."""
 #    def test_count(self):
