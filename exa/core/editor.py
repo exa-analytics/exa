@@ -9,6 +9,7 @@ and output data and converting this data into container objects. This class
 does not behave like a fully fledged text editor but does have some basic find,
 replace, insert, etc. functionality.
 """
+from __future__ import print_function
 import os, re, sys, six
 import pandas as pd
 import warnings

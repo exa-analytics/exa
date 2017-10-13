@@ -4,4 +4,4 @@
 from .indexing import starts_count, starts_counts
 from .repeat import repeat_count, repeat_counts_f8_1d, repeat_counts_f8_2d
 from .summation import (sum_product_pair, sum_product_pair_f8,
-                                     sum_product_pair_obj)
+                        sum_product_pair_obj)
