@@ -18,14 +18,15 @@ types3 = ['int32(int32, int32, int32)', 'int64(int64, int64, int64)',
           'float32(float32, float32, float32)', 'float64(float64, float64, float64)']
 
 
-@jit(nopython=True, nogil=True, cache=True)
-def magnitude(v):
+@vectorize(types3, nopython=True)
+def magnitude_xyz_squared(x, y, z):
     """
     .. math:
 
-        \\left(x^2 + y^2 + z^2\\right)^{(1/2)}
+        \\left(x^2 + y^2 + z^2\\right)
     """
-    return vector_magnitude_c(v[:, 0], v[:, 1], v[:, 2])
+    return x**2 + y**2 + z**2
+
 
 @vectorize(types3, nopython=True)
 def magnitude_xyz(x, y, z):
@@ -35,26 +36,6 @@ def magnitude_xyz(x, y, z):
         \\left(x^2 + y^2 + z^2\\right)^{(1/2)}
     """
     return (x**2 + y**2 + z**2)**0.5
-
-
-@jit(nopython=True, nogil=True, cache=True)
-def magnitude_squared(v):
-    """
-    .. math:
-
-        x^2 + y^2 + z^2
-    """
-    return vector_magnitude_squared_c(v[:, 0], v[:, 1], v[:, 2])
-
-
-@vectorize(types3, nopython=True)
-def magnitude_squared_xyz(x, y, z):
-    """
-    .. math:
-
-        x^2 + y^2 + z^2
-    """
-    return x**2 + y**2 + z**2
 
 
 @jit(nopython=True, nogil=True, cache=True)
