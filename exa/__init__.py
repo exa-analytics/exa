@@ -1,39 +1,31 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Exa
-#########
-This package creates a systematic infrastructure for an ecosystem of packages,
-tailored to specific industry or academic displines, for organizing, processing,
-analyzing, and visualizing data. It is built with minimal dependencies, leverages
-established open-source packages, is itself extensible, and is targeted at both
-industry and academic applications.
+Exa provides a framework for building data specific containers. Containers are
+storage objects which house a collection of data objects (scalars, lists,
+arrays, dataframes, images, etc.) and provide a unified API for processing,
+analysis, and visualization. The generic container has methods for inspecting
+the collection of data it holds and for saving/loading that data to common
+formats such as HDF.
 
-At a high level, data objects such as series or dataframes (i.e. `pandas`_
-like objects) are organized into containers which track relationships between
-these objects and provide methods for computation, conversion to other formats,
-analysis, and visualization within the `Jupyter notebook`_ environment.
+Containers can be constructed from well organized data (such as HDF or CSV data
+on disk) or from irregular or semi-regular text files (for example output from
+another software). In order to facilitate the latter, exa provides editors,
+parsers, and composers, which are used to programmatically manipulate text
+data on disk.
 
-.. _pandas: http://pandas.pydata.org/pandas-docs/stable/index.html
-.. _Jupyter notebook: http://jupyter.org/
+Note:
+    Exa can take advantage of Python's extensive suite of tools for data science,
+    including the `Jupyter notebook`_, `ipywidgets`_ framework, and `JIT`_
+    compilation provided by `numba`_, among others.
+
+.. _Jupyter notebook: https://jupyter.org
+.. _ipywidgets: https://ipywidgets.readthedocs.io
+.. _JIT: https://en.wikipedia.org/wiki/Just-in-time_compilation
+.. _numba: https://numba.pydata.org
 """
-__exa_version__ = (0, 3, 0)
-__version__ = '.'.join((str(v) for v in __exa_version__))
-
-
-from exa import _config
-from exa import log
-from exa import test
-from exa import relational
-from exa import widget
-from exa import math
-from exa import distributed
-from exa import mpl, tex
-from exa import error
-
-# User API
-from exa.numerical import Series, DataFrame, Field3D, SparseSeries, SparseDataFrame
-from exa.container import Container
-from exa.editor import Editor
-from exa.filetypes import CSV
+from ._version import __version__
+from .typed import Typed, TypedClass, typed
+from .core import (DataFrame, DataSeries, SparseDataSeries, SparseDataFrame,
+                   Editor, Parser, Composer, Container, Matches, Match, Found)
