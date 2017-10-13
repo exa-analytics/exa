@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Repeat
@@ -7,9 +7,10 @@ Repeat
 Functions for repeating arrays of varying dimensions.
 """
 import numpy as np
-from exa._config import config
+from numba import jit
 
 
+@jit(nopython=True, nogil=True, cache=True)
 def repeat_count(array, n):
     """
     Repeat each element of an array n times.
@@ -17,6 +18,7 @@ def repeat_count(array, n):
     pass
 
 
+@jit(nopython=True, nogil=True, cache=True)
 def repeat_counts_f8_1d(array, counts):
     """
     Repeat each element of an array n times (with variable n).
@@ -34,6 +36,7 @@ def repeat_counts_f8_1d(array, counts):
     return repeated
 
 
+@jit(nopython=True, nogil=True, cache=True)
 def repeat_counts_f8_2d(array, counts):
     """
     Repeat each element of an array n times (with variable n).
@@ -49,9 +52,3 @@ def repeat_counts_f8_2d(array, counts):
             repeated[h] = record
             h += 1
     return repeated
-
-
-if config['dynamic']['numba'] == 'true':
-    from numba import jit
-    repeat_counts_f8_1d = jit(nopython=True, cache=True, nogil=True)(repeat_counts_f8_1d)
-    repeat_counts_f8_2d = jit(nopython=True, cache=True, nogil=True)(repeat_counts_f8_2d)

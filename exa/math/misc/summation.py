@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Summations
@@ -7,15 +7,29 @@ Summations
 Fast algorithms for various types of (commonly used) summations.
 """
 import numpy as np
+from numba import jit
 from itertools import product
-from exa._config import config
 
 
-def sum_product_pair(x, y):
-    """Sum each pair of elements coming from :func:`~itertools.product`."""
+def sum_product_pair_obj(x, y):
     return [xx + yy for xx, yy in product(x, y)]
 
 
+@jit(nopython=True, nogil=True, cache=True)
+def sum_product_pair(x, y):
+    """Sum each pair of elements coming from :func:`~itertools.product`."""
+    n = len(x)
+    m = len(y)
+    values = np.empty((n*m, ), dtype=np.float64)
+    i = 0
+    for xx in x:
+        for yy in y:
+            values[i] = xx + yy
+            i += 1
+    return values
+
+
+@jit(nopython=True, nogil=True, cache=True)
 def sum_product_pair_f8(x, y):
     """
     Sum each pair of elements from two 1 dimensional arrays.
@@ -35,8 +49,3 @@ def sum_product_pair_f8(x, y):
             values[i] = xx + yy
             i += 1
     return values
-
-
-if config['dynamic']['numba'] == 'true':
-    from numba import jit
-    sum_product_pair_f8 = jit(nopython=True, nogil=True, cache=True)(sum_product_pair_f8)
