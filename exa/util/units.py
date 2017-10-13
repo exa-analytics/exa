@@ -5,8 +5,14 @@
 Unit Conversions
 ########################################
 """
-import six
-import pandas as pd
+import bz2 as _bz2
+import json as _json
+import os as _os
+import sys as _sys
+import six as _six
+import pandas as _pd
+if not hasattr(_bz2, "open"):
+    _bz2.open = _bz2.BZ2File
 
 
 class Unit(object):
@@ -14,11 +20,30 @@ class Unit(object):
         self._values[key] = value
 
     def __getitem__(self, key):
-        if isinstance(key, six.string_types):
+        if isinstance(key, _six.string_types):
             return self._values[key]
         elif isinstance(key, (list, tuple)):
             return self._values[key[1]]/self._values[key[0]]
 
     def __init__(self, values, name):
-        self._values = pd.Series(values)
+        self._values = _pd.Series(values)
         self._name = name
+
+
+def _create():
+    def creator(name, data):
+        dims = data.pop("dimensions", None)
+        aliases = data.pop("aliases", None)
+        return Unit(data, name)
+
+    with _bz2.open(_path) as f:
+        dct = _json.load(f)
+    for name, data in dct.items():
+        setattr(_this, name.title(), creator(name, data))
+
+
+_resource = "../../static/units.json.bz2"    # HARDCODED
+_this = _sys.modules[__name__]         # Reference to this module
+_path = _os.path.abspath(_os.path.join(_os.path.abspath(__file__), _resource))
+if not hasattr(_this, "Energy"):
+    _create()
