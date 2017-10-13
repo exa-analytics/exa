@@ -29,7 +29,6 @@ enable visualization within the `Jupyter notebook`_.
     api/data.rst
     api/editor.rst
     api/container.rst
-    api/mpl.rst
     api/util.rst
     api/math.rst
 

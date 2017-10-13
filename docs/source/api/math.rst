@@ -2,16 +2,16 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ##################
-Utilities
+Math Functions
 ##################
-.. automodule:: exa.util.utility
+.. automodule:: exa.math.vector.cartesian
     :members:
 
-.. automodule:: exa.util.isotopes
+.. automodule:: exa.math.misc.indexing
     :members:
 
-.. automodule:: exa.util.units
+.. automodule:: exa.math.misc.repeat
     :members:
 
-.. automodule:: exa.util.mpl
+.. automodule:: exa.math.misc.summation
     :members:

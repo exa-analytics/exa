@@ -4,12 +4,23 @@
 """
 Unit Conversions
 ########################################
+Values are reported with respect to the base SI unit for a given quantity
+(e.g. energy).
+
+.. code-block:: python
+
+    from exa.util.units import Energy
+    Energy["eV"]         # Value of eV in SI units
+    Energy["eV", "J"]    # Same as above
+    Energy["eV", "Ha"]   # Conversion factor between eV and Ha (Hartree atomic unit)
+
 """
 import bz2 as _bz2
 import json as _json
 import os as _os
 import sys as _sys
 import six as _six
+import numpy as _np
 import pandas as _pd
 if not hasattr(_bz2, "open"):
     _bz2.open = _bz2.BZ2File
@@ -21,7 +32,8 @@ class Unit(object):
 
     def __getitem__(self, key):
         if isinstance(key, _six.string_types):
-            return self._values[key]
+            k = self._values[_np.isclose(self._values, 1.0)].index[0]
+            return self._values[k]/self._values[key]
         elif isinstance(key, (list, tuple)):
             return self._values[key[1]]/self._values[key[0]]
 
@@ -36,8 +48,8 @@ def _create():
         aliases = data.pop("aliases", None)
         return Unit(data, name)
 
-    with _bz2.open(_path) as f:
-        dct = _json.load(f)
+    with _bz2.open(_path, "rb") as f:
+        dct = _json.loads(f.read().decode("utf-8"))
     for name, data in dct.items():
         setattr(_this, name.title(), creator(name, data))
 
