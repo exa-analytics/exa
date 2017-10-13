@@ -5,7 +5,7 @@
 Tests for :mod:`~exa.core.editor`
 #################################
 """
-import os
+import os, six
 from unittest import TestCase
 from exa import Editor
 
@@ -42,12 +42,12 @@ class TestEditor(TestCase):
         self.assertTrue(self.fl.cursor == 0)
         n0, line0 = self.fl.find_next('Args:')
         self.assertIsInstance(n0, int)
-        self.assertIsInstance(line0, str)
+        self.assertIsInstance(line0, six.string_types)
         self.assertIn(n0, od[0])
         self.assertTrue(self.fl.cursor > 0)
         n1, line1 = self.fl.find_next('Args:')
         self.assertTrue(n1 > n0)
-        self.assertIsInstance(line1, str)
+        self.assertIsInstance(line1, six.string_types)
         self.assertIn(n1, od[1])
         od1 = self.fl.regex('Args:')
         self.assertTrue(od == od1)    # True in this case; depends on regex used
