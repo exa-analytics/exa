@@ -9,10 +9,9 @@ and output data and converting this data into container objects. This class
 does not behave like a fully fledged text editor but does have some basic find,
 replace, insert, etc. functionality.
 """
-import os
-import re
-import sys
+import os, re, sys, six
 import pandas as pd
+import warnings
 from io import StringIO, TextIOWrapper
 
 
@@ -74,13 +73,14 @@ class Editor(object):
             with open(path, 'w', newline="") as f:
                 f.write(self.format(*args, **kwargs))
 
-    def format(self, *args, inplace=False, **kwargs):
+    def format(self, *args, **kwargs):
         """
         Format the string representation of the editor.
 
         Args:
             inplace (bool): If True, overwrite editor's contents with formatted contents
         """
+        inplace = kwargs.pop("inplace", False)
         if not inplace:
             return str(self).format(*args, **kwargs)
         self._lines = str(self).format(*args, **kwargs).splitlines()
@@ -180,7 +180,7 @@ class Editor(object):
         for k, i in enumerate(lines):
             del self[i-k]    # Accounts for the fact that len(self) decrease upon deletion
 
-    def find(self, *strings, start=0, stop=None, keys_only=False):
+    def find(self, *strings, **kwargs):
         """
         Search the entire editor for lines that match the string.
 
@@ -194,7 +194,7 @@ class Editor(object):
             ed.find('word', 'three') # {'word': [...], 'three': [(2, "three")]}
 
         Args:
-            \*strings (str): Any number of strings to search for
+            strings (str): Any number of strings to search for
             keys_only (bool): Only return keys
             start (int): Optional line to start searching on
             stop (int): Optional line to stop searching on
@@ -202,6 +202,9 @@ class Editor(object):
         Returns:
             results: If multiple strings searched a dictionary of string key, (line number, line) values (else just values)
         """
+        start = kwargs.pop("start", 0)
+        stop = kwargs.pop("stop", None)
+        keys_only = kwargs.pop("keys_only", False)
         results = {string: [] for string in strings}
         stop = len(self) if stop is None else stop
         for i, line in enumerate(self[start:stop]):
@@ -215,14 +218,13 @@ class Editor(object):
             return results[strings[0]]
         return results
 
-    def find_next(self, *strings, start=None, keys_only=False):
+    def find_next(self, *strings, **kwargs):
         """
         From the editor's current cursor position find the next instance of the
         given string.
 
         Args:
-            string (str): String to search for from the current cursor position.
-            reverse (bool): Search in reverse (default false)
+            strings (iterable): String or strings to search for
 
         Returns:
             tup (tuple): Tuple of cursor position and line or None if not found
@@ -231,6 +233,8 @@ class Editor(object):
             This function cycles the entire editor (i.e. cursor to length of
             editor to zero and back to cursor position).
         """
+        start = kwargs.pop("start", None)
+        keys_only = kwargs.pop("keys_only", False)
         staht = start if start is not None else self.cursor
         for start, stop in [(staht, len(self)), (0, staht)]:
             for i in range(start, stop):
@@ -241,7 +245,7 @@ class Editor(object):
                         if keys_only: return i
                         return tup
 
-    def regex(self, *patterns, start=0, stop=None, keys_only=False, flags=0):
+    def regex(self, *patterns, **kwargs):
         """
         Search the editor for lines matching the regular expression.
         re.MULTILINE is not currently supported.
@@ -254,6 +258,10 @@ class Editor(object):
         Returns:
             results (dict): Dictionary of pattern keys, line values (or groups - default)
         """
+        start = kwargs.pop("start", 0)
+        stop = kwargs.pop("stop", None)
+        keys_only = kwargs.pop("keys_only", False)
+        flags = kwargs.pop("flags", 0)
         results = {pattern: [] for pattern in patterns}
         stop = stop if stop is not None else -1
         for i, line in enumerate(self[start:stop]):
@@ -355,7 +363,13 @@ class Editor(object):
         return cls(lines_from_string(string), **kwargs)
 
     def __init__(self, path_stream_or_string, as_interned=False, nprint=30,
-                 name=None, description=None, meta=None, encoding=None):
+                 name=None, description=None, meta=None, encoding=None, ignore=False):
+        # Backporting file check
+        textobj = path_stream_or_string
+        if (isinstance(textobj, six.string_types) and len(textobj.split("\n")) == 1
+            and ignore == False and not os.path.exists(textobj)):
+            warnings.warn("Possibly incorrect file path! {}".format(textobj))
+        #
         if len(path_stream_or_string) < 256 and os.path.exists(path_stream_or_string):
             self._lines = lines_from_file(path_stream_or_string, as_interned, encoding)
         elif isinstance(path_stream_or_string, list):
