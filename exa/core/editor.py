@@ -10,10 +10,9 @@ does not behave like a fully fledged text editor but does have some basic find,
 replace, insert, etc. functionality.
 """
 from __future__ import print_function
-import os, re, sys, six
+import io, os, re, sys, six
 import pandas as pd
 import warnings
-from io import StringIO, TextIOWrapper
 
 
 class Editor(object):
@@ -71,7 +70,7 @@ class Editor(object):
         if path is None:
             print(self.format(*args, **kwargs))
         else:
-            with open(path, 'w', newline="") as f:
+            with io.open(path, 'w', newline="") as f:
                 f.write(self.format(*args, **kwargs))
 
     def format(self, *args, **kwargs):
@@ -314,11 +313,11 @@ class Editor(object):
             print('start and stop must be ints')
         try:
             ncol = int(ncol)
-            return pd.read_csv(StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=range(ncol), **kwargs)
+            return pd.read_csv(io.StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=range(ncol), **kwargs)
         except TypeError:
             try:
                 ncol = list(ncol)
-                return pd.read_csv(StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=ncol, **kwargs)
+                return pd.read_csv(io.StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=ncol, **kwargs)
             except TypeError:
                 print('Cannot pandas_dataframe if ncol is {}, must be int or list'.format(type(ncol)))
 
@@ -375,7 +374,7 @@ class Editor(object):
             self._lines = lines_from_file(path_stream_or_string, as_interned, encoding)
         elif isinstance(path_stream_or_string, list):
             self._lines = path_stream_or_string
-        elif isinstance(path_stream_or_string, (TextIOWrapper, StringIO)):
+        elif isinstance(path_stream_or_string, (io.TextIOWrapper, io.StringIO)):
             self._lines = lines_from_stream(path_stream_or_string, as_interned)
         elif isinstance(path_stream_or_string, str):
             self._lines = lines_from_string(path_stream_or_string, as_interned)
@@ -444,7 +443,7 @@ def lines_from_file(path, as_interned=False, encoding=None):
         strings (list): File line list
     """
     lines = None
-    with open(path, **{'encoding': encoding}) as f:
+    with io.open(path, encoding=encoding) as f:
         if as_interned:
             lines = [sys.intern(line) for line in f.read().splitlines()]
         else:
