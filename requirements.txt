@@ -11,3 +11,4 @@ pandoc
 nbsphinx
 six
 nose
+ipython
