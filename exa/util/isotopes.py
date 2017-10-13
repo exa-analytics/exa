@@ -121,7 +121,7 @@ def _create():
             setattr(ele, "_"+str(tope.A), tope)
         return ele
 
-    with _bz2.open(_path) as f:
+    with _bz2.open(_path, "rb") as f:
         iso = _DF(_json.load(f), columns=_columns)
     #iso = _rj(_E(_path).to_stream())
     #iso.columns = _columns

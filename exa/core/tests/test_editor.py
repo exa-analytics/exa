@@ -8,7 +8,6 @@ Tests for :mod:`~exa.core.editor`
 import os
 from unittest import TestCase
 from exa import Editor
-from exa.utility import mkp
 
 
 class TestEditor(TestCase):

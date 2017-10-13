@@ -3,7 +3,7 @@
 # Distributed under the terms of the Apache License 2.0
 import numpy as np
 from unittest import TestCase
-from exa.mpl import _gen_figure
+from exa.util.mpl import _gen_figure
 
 
 class TestGenFigure(TestCase):

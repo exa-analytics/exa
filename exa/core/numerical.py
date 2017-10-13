@@ -269,7 +269,7 @@ class Field(DataFrame):
         cls = self.__class__
         grpby = self.cardinal_groupby()
 
-    def __init__(self, *args, field_values=None, **kwargs):
+    def __init__(self, field_values=None, *args, **kwargs):
         # The following check allows creation of a single field (whose field data
         # comes from a series object and field values from another series object).
         if isinstance(args[0], pd.Series):
