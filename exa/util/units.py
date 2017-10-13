@@ -4,8 +4,9 @@
 """
 Unit Conversions
 ########################################
-Values are reported with respect to the base SI unit for a given quantity
-(e.g. energy).
+Values are reported with respect to the base SI unit for a given quantity.
+Conversion factors can be generated using the syntax, Quantity[from, to];
+see the example below.
 
 .. code-block:: python
 
@@ -13,7 +14,6 @@ Values are reported with respect to the base SI unit for a given quantity
     Energy["eV"]         # Value of eV in SI units
     Energy["eV", "J"]    # Same as above
     Energy["eV", "Ha"]   # Conversion factor between eV and Ha (Hartree atomic unit)
-
 """
 import bz2 as _bz2
 import json as _json
