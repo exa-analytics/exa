@@ -51,9 +51,11 @@ class Unit(Dimensions):
     def _constructor(self):
         return Unit
 
-    def __init__(self, fullname=None, symbol=None, prefix=None, **dimensions):
+    def __init__(self, fullname=None, symbol=None, prefix=None,
+                 unitsystem=None, **dimensions):
         super(Unit, self).__init__(**dimensions)
         # Determine "base" name and prefix
+        self._unitsystem = unitsystem
         self._suffix = None    # Full by default
         self._prefix = None    # Full by default
         self._symbol = symbol
@@ -123,9 +125,10 @@ class UnitSystem(TypedClass):
             return base
         return {k: v for k, v in base.items() if v is not None}
 
-    def _derived_units(self):
+    def _derive_units(self):
         """Generate derived units."""
         base = self.base()
+        aliases = {} if self.aliases is None else self.aliases
         for k, v in vars(dimensions).items():
             if isinstance(v, Dimensions) and k not in fundamentals:
                 derived = None
@@ -145,27 +148,60 @@ class UnitSystem(TypedClass):
                         if exp != 0:
                             symbol.append(str(unit.symbol) + "^" + str(exp))
                 if derived is not None:
-                    symbol = " ".join(sorted(symbol))
-                    derived = Unit(symbol=symbol, **derived.array.to_dict())
+                    if k in aliases:
+                        fullname, symbol = aliases[k]
+                    else:
+                        fullname = None
+                        symbol = " ".join(sorted(symbol))
+                    derived = Unit(fullname=fullname, symbol=symbol,
+                                   **derived.array.to_dict())
                     setattr(self, k, derived)
 
-    def __init__(self, name=None, length=None, mass=None, time=None, current=None,
-                 temperature=None, amount=None, luminosity=None):
-        self.length = length
+    def __init__(self, name=None, length=None, mass=None, time=None,
+                 current=None, temperature=None, amount=None,
+                 luminosity=None, doc=None, aliases=None):
         self.mass = mass
         self.time = time
         self.current = current
         self.temperature = temperature
         self.amount = amount
         self.luminosity = luminosity
+        self.length = length
+        self.aliases = aliases
         self.name = name
-        self._derived_units()
+        self.__doc__ = doc
+        for key in fundamentals.keys():
+            obj = getattr(self, key)
+            if obj is not None:
+                setattr(obj, "_unitsystem", self)
+        self._derive_units()
 
     def __repr__(self):
         baserepr = ", ".join([str(k)+": "+str(v) for k, v in self.base().items()])
         if self.name:
             return "{}({})".format(self.name, baserepr)
         return "UnitSystem({})".format(baserepr)
+
+
+# International System of Units
+meter = Unit("meter", "m", length=1)
+kilogram = Unit("kilogram", "kg", mass=1)
+second = Unit("second", "s", time=1)
+ampere = Unit("ampere", "A", current=1)
+kelvin = Unit("kelvin", "K", temperature=1)
+candela = Unit("candela", "cd", luminosity=1)
+mole = Unit("mole", "mol", amount=1)
+si_aliases = {'energy': ("joule", "J"), 'force': ("newton", "N"), 'angle': ("radian", "rad"),
+        'frequency': ("hertz", "Hz"), 'power': ("watt", "W"), 'electric_charge': ("coulomb", "c"),
+        'electric_potential': ("volt", "V"), 'capacitance': ("farad", "F"),
+        'impedance': ("ohm", "Ω"), 'electric_conductance': ("siemens", "S"),
+        'magnetic_flux': ("weber", "Wb"), 'magnetic_flux_density': ("tesla", "T"),
+        'inductance': ("henry", "H"), 'luminance': ("lux", "lx"), 'dose': ("sievert", "Sv"),
+        'catalytic_activity': ("katal", "kat")}
+si = UnitSystem(name="SI", length=meter, time=second, current=ampere, amount=mole,
+                mass=kilogram, temperature=kelvin, luminosity=candela,
+                aliases=si_aliases, doc="International system of units")
+
 
 
 

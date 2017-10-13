@@ -6,7 +6,7 @@ Tests for :mod:`~exa.units`
 #############################################
 """
 from unittest import TestCase
-from exa import units
+from exa.util.units import Unit UnitSystems
 
 
 #class TestUnits(TestCase):
