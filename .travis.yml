@@ -19,7 +19,7 @@ before_install:
   - export PATH="$HOME/miniconda/bin:$PATH"
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
-  - conda install -q 'icu=56.*'
+  - conda install -q -c conda-forge 'icu=56.*'
 
 install:
   - conda install -q python=$TRAVIS_PYTHON_VERSION

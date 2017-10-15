@@ -18,11 +18,8 @@ or [pypi](https://pypi.python.org/pypi).
 [![docs](https://readthedocs.org/projects/exa/badge/?version=latest)](https://exa-analytics.github.io/exa/)  
 [![gitter](https://badges.gitter.im/exa-analytics/exa.svg)](https://gitter.im/exa-analytics/exa)  
 Building the docs requires [sphinx](http://www.sphinx-doc.org/en/stable).
-On Linux or Mac OS:
 
-    $ cd js
-    $ ./makedocs.sh       # .\makedocs.bat
-    $ cd ../docs
+    $ cd docs
     $ make html           # .\make.bat html
 
 
