@@ -7,4 +7,4 @@ Exa
 """
 from ._version import __version__
 from .core import (DataFrame, Series, Field3D, Field, Editor, Container,
-                   TypedMeta)
+                   TypedMeta, SparseDataFrame)

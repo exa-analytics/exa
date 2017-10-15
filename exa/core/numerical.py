@@ -361,3 +361,7 @@ def check_key(data_object, key, cardinal=False):
     elif isinstance(key, (tuple, list, pd.Index)) and not np.all(k in keys for k in key):
         key = list(sorted(data_object.index.values[key]))
     return key
+
+
+class SparseDataFrame(BaseDataFrame, pd.SparseDataFrame):
+    pass
