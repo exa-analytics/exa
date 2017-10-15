@@ -54,7 +54,7 @@ install:
   - cmd: conda config --set always_yes yes --set changeps1 no
   - cmd: conda update -q -y --all
   - cmd: conda install -q -y -c conda-forge numpy scipy matplotlib seaborn networkx pandas nose numba pytables six
-  - cmd: pip install -e .
+  - cmd: pip install .
 
 build: false
 
