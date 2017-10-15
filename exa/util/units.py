@@ -27,6 +27,10 @@ if not hasattr(_bz2, "open"):
 
 
 class Unit(object):
+    @property
+    def values(self):
+        return self._values
+
     def __setitem__(self, key, value):
         self._values[key] = value
 
