@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Indexing
@@ -7,9 +7,10 @@ Indexing
 Algorithms for generating indices.
 """
 import numpy as np
-from exa._config import config
+from numba import jit
 
 
+@jit(nopython=True, nogil=True, cache=True)
 def starts_count(starts, count):
     """
     Generate sequential indices (for 2 dimensions) from starting values and
@@ -39,6 +40,7 @@ def starts_count(starts, count):
     return (outer, inner, index)
 
 
+@jit(nopython=True, nogil=True, cache=True)
 def starts_counts(starts, counts):
     """
     Generate a pseudo-sequential array from initial values and counts.
@@ -63,9 +65,3 @@ def starts_counts(starts, counts):
             values[h] = value
             h += 1
     return (i_idx, j_idx, values)
-
-
-if config['dynamic']['numba'] == 'true':
-    from numba import jit
-    starts_count = jit(nopython=True, cache=True, nogil=True)(starts_count)
-    starts_counts = jit(nopython=True, cache=True, nogil=True)(starts_counts)

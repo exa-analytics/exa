@@ -1,55 +1,48 @@
-package:
-    name: exa
-    version: "0.3.0"
+{% set name = "exa" %}
+{% set version = "0.3.9" %}
+{% set build = 0 %}
 
-app:
-    entry: exa
+package:
+  name: {{ name }}
+  version: {{ version }}
 
 source:
-    git_rev: v0.3.0
-    git_url: https://github.com/exa-analytics/exa.git
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+
+build:
+  number: {{ build }}
+  script: python setup.py install --single-version-externally-managed --record record.txt
 
 requirements:
-    build:
-        - python x.x
-        - numpy
-        - numba
-        - scipy
-        - matplotlib
-        - sqlalchemy
-        - pandas
-        - networkx
-        - sympy
-        - seaborn
-        - jupyter
-        - notebook
-        - ipywidgets
-        - ipyparallel
-        - sphinx
-        - pytables
-        - nose
+  build:
+    - python
+    - setuptools
 
-    run:
-        - python
-        - numpy
-        - numba
-        - scipy
-        - matplotlib
-        - sqlalchemy
-        - pandas
-        - networkx
-        - sympy
-        - seaborn
-        - jupyter
-        - notebook
-        - ipywidgets
-        - ipyparallel
-        - sphinx
-        - pytables
-        - nose
+  run:
+    - python
+    - numpy
+    - scipy
+    - matplotlib
+    - seaborn
+    - networkx
+    - pandas
+    - notebook
+    - nose
+    - numba
+    - six
+    - pytables
+    - sphinx
+    - sphinx_rtd_theme
+    - pandoc
+    - nbsphinx
+
+test:
+  imports:
+    - exa
 
 about:
-    home: https://exa-analytics.github.io
-    license: Apache 2.0
+    home: https://exa-analytics.github.io/{{ name }}
+    license: Apache-2.0
     license_file: LICENSE
-    summary: A framework for data processing, analytics, and visualization.
+    summary: A framework for data processing, computation, and visualization.

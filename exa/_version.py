@@ -2,8 +2,8 @@
 # Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Math
-###################
+Version Number
+######################
 """
-from . import misc
-from . import vector
+version_info = (0, 3, 9)
+__version__ = ".".join(map(str, version_info))

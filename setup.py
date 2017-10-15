@@ -1,45 +1,59 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2016, Exa Analytics Development Team
-# Distributed under the terms of the Apache License 2.0
+import os
+from distutils import log
 from setuptools import setup, find_packages
-from exa import __version__
 
-with open('README.rst') as f:
-    description = f.read()
-with open('requirements.txt') as f:
-    dependencies = f.readlines()
 
-setup(
-    name='exa',
-    version=__version__,
-    description="A framework for data processing, analytics, and visualization.",
-    long_description=description,
-    author="Tom Duignan, Alex Marchenko",
-    author_email="exa.data.analytics@gmail.com",
-    maintainer_email="exa.data.analytics@gmail.com",
-    url="https://exa-analytics.github.io",
-    download_url="https://github.com/exa-analytics/exa/tarball/v{}".format(__version__),
-    packages=find_packages(),
-    package_data={'exa': ["_static/*.json", "_nbextension/*.js", "_nbextensions/lib/*.js"]},
-    entry_points={'console_scripts': ['exa=exa.__main__:main']},
-    include_package_data=True,
-    install_requires=dependencies,
-    license="Apache License Version 2.0",
-    keywords="big data analytics visualization",
-    classifiers=[
+name = "exa"
+description = "A framework for data processing, computation, and visualization."
+staticdir = "static"
+readme = "README.md"
+requirements = "requirements.txt"
+verfile = "_version.py"
+root = os.path.dirname(os.path.abspath(__file__))
+log.set_verbosity(log.DEBUG)
+try:
+    import pypandoc
+    long_description = pypandoc.convert(readme, "rst")
+except ImportError:
+    with open(readme) as f:
+        long_description = f.read()
+with open(requirements) as f:
+    dependencies = f.read().splitlines()
+with open(os.path.join(root, name, verfile)) as f:
+    v = f.readlines()[-2]
+    v = v.split('=')[1].strip()[1:-1]
+    version = '.'.join(v.replace(" ", "").split(","))
+
+
+setup_args = {
+    'name': name,
+    'version': version,
+    'description': description,
+    'long_description': long_description,
+    'package_data': {name: [staticdir + "/*"]},
+    'include_package_data': True,
+    'install_requires': dependencies,
+    'packages': find_packages(),
+    'zip_safe': False,
+    'license': "Apache License Version 2.0",
+    'author': "Thomas J. Duignan and Alex Marchenko",
+    'author_email': "exa.data.analytics@gmail.com",
+    'maintainer_email': "exa.data.analytics@gmail.com",
+    'url': "https://exa-analytics.github.io/" + name,
+    'download_url': "https://github.com/exa-analytics/{}/archive/{}.tar.gz".format(name, version),
+    'keywords': ["data", "analytics", "hpc", "jupyter", "notebook", "visualization"],
+    'classifiers': [
         "Development Status :: 3 - Alpha",
         "Environment :: Web Environment",
-        "Framework :: IPython",
+        "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
-        "Intended Audience :: Financial and Insurance Industry",
-        "Intended Audience :: Healthcare Industry",
-        "Intended Audience :: Information Technology",
-        "Intended Audience :: Legal Industry",
         "License :: OSI Approved :: Apache Software License",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
-        "Natural Language :: English",
-        "Topic :: Scientific/Engineering"
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 3",
+        "Natural Language :: English"
     ]
-)
+}
+
+setup(**setup_args)

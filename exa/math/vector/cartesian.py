@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2016, Exa Analytics Development Team
+# Copyright (c) 2015-2017, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Cartesian Vector Operations
@@ -11,18 +11,24 @@ This module provides common operations for vectors in cartesian space:
     \\vec{r} = (x, y, z)
 """
 import numpy as np
-from exa._config import config
+from numba import jit, vectorize
 
 
-def magnitude(v):
+types3 = ['int32(int32, int32, int32)', 'int64(int64, int64, int64)',
+          'float32(float32, float32, float32)', 'float64(float64, float64, float64)']
+
+
+@vectorize(types3, nopython=True)
+def magnitude_xyz_squared(x, y, z):
     """
     .. math:
 
-        \\left(x^2 + y^2 + z^2\\right)^{(1/2)}
+        \\left(x^2 + y^2 + z^2\\right)
     """
-    return vector_magnitude_c(v[:, 0], v[:, 1], v[:, 2])
+    return x**2 + y**2 + z**2
 
 
+@vectorize(types3, nopython=True)
 def magnitude_xyz(x, y, z):
     """
     .. math:
@@ -32,24 +38,7 @@ def magnitude_xyz(x, y, z):
     return (x**2 + y**2 + z**2)**0.5
 
 
-def magnitude_squared(v):
-    """
-    .. math:
-
-        x^2 + y^2 + z^2
-    """
-    return vector_magnitude_squared_c(v[:, 0], v[:, 1], v[:, 2])
-
-
-def magnitude_squared_xyz(x, y, z):
-    """
-    .. math:
-
-        x^2 + y^2 + z^2
-    """
-    return x**2 + y**2 + z**2
-
-
+@jit(nopython=True, nogil=True, cache=True)
 def pdist_euclidean(x, y, z):
     """
     Pairwise Euclidean distance computation
@@ -68,6 +57,7 @@ def pdist_euclidean(x, y, z):
     return r
 
 
+@jit(nopython=True, nogil=True, cache=True)
 def pdist_euclidean_dr(x, y, z):
     """
     Pairwise Euclidean distance computation returning distance vectors as well
@@ -96,6 +86,7 @@ def pdist_euclidean_dr(x, y, z):
     return dx, dy, dz, r
 
 
+@jit(nopython=True, nogil=True, cache=True)
 def pdist_euc_dxyz_idx(x, y, z, indexes):
     """
     Pairwise Euclidean distance computation returning distance vectors as well
@@ -129,6 +120,7 @@ def pdist_euc_dxyz_idx(x, y, z, indexes):
     return dx, dy, dz, dr, idxi, idxj
 
 
+@jit(nopython=True, nogil=True, cache=True)
 def periodic_pdist_euc_dxyz_idx(ux, uy, uz, rx, ry, rz, indexes):
     """
     Pairwise Euclidean distance computation for periodic systems returning
@@ -177,28 +169,3 @@ def periodic_pdist_euc_dxyz_idx(ux, uy, uz, rx, ry, rz, indexes):
                         idxj[h] = indexj
                         h += 1
     return dx, dy, dz, dr, idxi, idxj, px, py, pz
-
-
-if config['dynamic']['numba'] == 'true':
-    from numba import vectorize, jit
-    types3 = ['int32(int32, int32, int32)', 'int64(int64, int64, int64)',
-             'float32(float32, float32, float32)', 'float64(float64, float64, float64)']
-    _magnitude = magnitude
-    magnitude = jit(nopython=True, cache=True, nogil=True)(magnitude)
-    _magnitude_xyz = magnitude_xyz
-    magnitude_xyz = vectorize(types3, nopython=True)(magnitude_xyz)
-    _magnitude_squared = magnitude_squared
-    magnitude_squared = jit(nopython=True, cache=True, nogil=True)(magnitude_squared)
-    _magnitude_squared_xyz = magnitude_squared_xyz
-    magnitude_squared_xyz = vectorize(types3, nopython=True)(magnitude_squared_xyz)
-    _pdist_euclidean = pdist_euclidean
-    pdist_euclidean = jit(nopython=True, cache=True, nogil=True)(pdist_euclidean)
-    _pdist_euclidean_dr = pdist_euclidean_dr
-    pdist_euclidean_dr = jit(nopython=True, cache=True, nogil=True)(pdist_euclidean_dr)
-    _pdist_euc_dxyz_dr = pdist_euc_dxyz_idx
-    pdist_euc_dxyz_idx = jit(nopython=True, cache=True, nogil=True)(pdist_euc_dxyz_idx)
-    _periodic_pdist_euc_dxyz_idx = periodic_pdist_euc_dxyz_idx
-    periodic_pdist_euc_dxyz_idx = jit(nopython=True, cache=True, nogil=True)(periodic_pdist_euc_dxyz_idx)
-    if config['dynamic']['cuda'] == 'true':
-        magnitude_xyz_cuda = vectorize(types3, target='cuda')(_magnitude_xyz)
-        magnitude_squared_xyz_cuda = vectorize(types3, target='cuda')(_magnitude_squared_xyz)
