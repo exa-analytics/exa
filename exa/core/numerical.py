@@ -15,7 +15,6 @@ module may be extended.
 import warnings
 import numpy as np
 import pandas as pd
-from numbers import Integral, Real
 from exa.core.error import RequiredColumnError
 
 
@@ -265,13 +264,14 @@ class Field(DataFrame):
         data = self.loc[key]
         return cls(data, field_values=values)
 
-    def slice_cardinal(self, key):
-        cls = self.__class__
-        grpby = self.cardinal_groupby()
+    #def slice_cardinal(self, key):
+    #    cls = self.__class__
+    #    grpby = self.cardinal_groupby()
 
-    def __init__(self, field_values=None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         # The following check allows creation of a single field (whose field data
         # comes from a series object and field values from another series object).
+        field_values = kwargs.pop("field_values", None)
         if isinstance(args[0], pd.Series):
             args = (args[0].to_frame().T, )
         super(Field, self).__init__(*args, **kwargs)
