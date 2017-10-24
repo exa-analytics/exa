@@ -28,4 +28,4 @@ Note:
 from ._version import __version__
 from .typed import Typed, TypedClass, TypedMeta, typed
 from .core import (DataFrame, DataSeries, SparseDataSeries, SparseDataFrame,
-                   Editor, Parser, Composer, Container)
+                   Editor, Parser, Composer, Container, Column, Index)

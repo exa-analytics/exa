@@ -283,6 +283,25 @@ class Parser(Editor):
         start, stop, cls = self.sections.loc[key, ["startline", "endline", "parser"]]
         return cls(self.lines[start:stop])
 
+    def get_sections(self, cls):
+        """
+        Iterate (sequentially) overall sections with a given class type
+        (or name - if names are unique).
+
+        Args:
+            cls: String class name or class object
+
+        Returns:
+            iterator: Iterator over each section that matches the criteria
+        """
+        if isinstance(cls, six.string_types):
+            self.sections['name'] = self.sections['parser'].apply(lambda cls: cls.__name__)
+            if self.sections.drop_duplicates("name").shape != self.sections.shape:
+                raise NameError("Duplicate parser names, ambiguous parser requested.")
+            cls = self.sections.set_index("name")['parser'].to_dict()[cls]
+        for key in self.sections[self.sections['parser'] == cls].index.values:
+            yield self.get_section(key)
+
     def _parse_1(self, parser, stops):
         """
         Wrapper for calling custom start parsing. The function
