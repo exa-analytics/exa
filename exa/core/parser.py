@@ -297,15 +297,42 @@ class Parser(Editor):
         return parser(self)._parse_both()          # Ditto
 
     def _parse_start(self, stops):
-        """To be overwritten."""
+        """
+        Custom start parsing if needed (i.e. to be overwritten).
+
+        Should return a list of 2-tuples of line number, line text pairs.
+
+        .. code-block:: python
+
+            [(i, self.lines[i]), (j, self.lines[j]), ...]
+        """
         warnings.warn("No implementation of _parse_start for {}".format(self.__class__))
 
     def _parse_end(self, starts):
-        """To be overwritten."""
+        """
+        Custom end parsing, if needed.
+
+        Should return a list of 2-tuples of line number, line text pairs.
+
+        .. code-block:: python
+
+            [(i, self.lines[i]), (j, self.lines[j]), ...]
+        """
         warnings.warn("No implementation of _parse_end for {}".format(self.__class__))
 
     def _parse_both(self):
-        """To be overwritten."""
+        """
+        Custom start and end parsing, if needed.
+
+        Should return two lists. Each list is a list of 2-tuples of line number,
+        line text pairs. The first list is interpreted as start and the second
+        as end points.
+
+        .. code-block:: python
+
+            ([(i, self.lines[i]), (j, self.lines[j]), ...],
+             [(i, self.lines[i]), (j, self.lines[j]), ...])
+        """
         warnings.warn("No implementation of _parse_both for {}".format(self.__class__))
 
     @classmethod
