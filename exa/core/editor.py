@@ -12,10 +12,9 @@ for reading and writing text.
 """
 import io, os, re, bz2, six, gzip
 import warnings
-import numpy as np
-from numba import jit
 from io import StringIO, TextIOWrapper
-from exa.typed import Typed, typed, TypedClass
+from collections import OrderedDict
+from exa.typed import Typed, TypedClass
 # Python 2 compatibility
 if not hasattr(bz2, "open"):
     bz2.open = bz2.BZ2File
@@ -65,21 +64,6 @@ def write_file(text, path, encoding="utf-8", newline=""):
     """
     with io.open(path, "w", newline=newline, encoding=encoding) as f:
         f.write(six.u(text))
-
-
-@jit(nopython=True, nogil=True)
-def _regex_index(char_cum_sum, spans):
-    """
-    For an array of sequentially increasing numbers and another array of
-    numbers, for each of the numbers in the second array, identify the
-    indices in the first array that correspond to the location in the
-    first sequential array.
-    """
-    n = len(spans)
-    idx = np.empty((n, ), dtype=np.int64)
-    for i, span in enumerate(spans):
-        idx[i] = np.argmax(char_cum_sum > span) - 1
-    return idx
 
 
 class Editor(TypedClass):
@@ -180,11 +164,12 @@ class Editor(TypedClass):
         else:
             patterns = [pattern.lower() for pattern in patterns]
             check = lambda pat, lin: pat in lin.lower()
-        matches = Found(*[Matches(pattern) for pattern in set(patterns)])
+        patterns = set(patterns)
+        matches = OrderedDict([(pattern, []) for pattern in patterns])
         for i, line in enumerate(self):
             for pattern in patterns:
                 if check(pattern, line):
-                    matches[pattern].append(Match(i, line))
+                    matches[pattern].append((i, line))
         return matches
 
     def replace(self, pattern, replacement, inplace=False):
@@ -205,11 +190,12 @@ class Editor(TypedClass):
                 lines.append(line.replace(pattern, replacement))
             return self.__class__(lines)
 
-    def find_next(self, pattern, case=True, reverse=False, wrap=False, cursor=None):
+    def find_next(self, *patterns, case=True, reverse=False, wrap=False, cursor=None):
         """
         Find the next line with the given text pattern.
 
-        If no match is found, none is returned.
+        If no match is found, none is returned. If a match is found, the cursor
+        position is updated and a tuple of line number and text is returned.
 
         Args:
             pattern (str): String pattern to search for
@@ -219,15 +205,16 @@ class Editor(TypedClass):
         """
         positions = self._next_positions(wrap, reverse, cursor)
         if case:
-            check = lambda lin: pattern in lin
+            check = lambda lin: any(pattern in lin for pattern in patterns)
         else:
-            pattern = pattern.lower()
-            check = lambda lin: pattern in lin.lower()
+            patterns = [p.lower() for p in patterns]
+            check = lambda lin: any(pattern in lin.lower() for pattern in patterns)
+        patterns = set(patterns)
         for start, stop, inc in positions:
             for i in range(start, stop, inc):
                 if check(self.lines[i]):
                     self.cursor = i
-                    return Match(i, self.lines[i])
+                    return i, self.lines[i]
 
     def regex(self, *patterns, **kwargs):
         """
@@ -254,15 +241,16 @@ class Editor(TypedClass):
                     regexes.append(reg)
             elif p.pattern not in [r.pattern for r in regexes]:
                 regexes.append(p)
-        matches = Found(*[Matches(regex.pattern) for regex in regexes])
+        regexes = set(regexes)
+        matches = OrderedDict([(r.pattern, []) for r in regexes])
         #char_cum_sum = np.cumsum(list(map(len, self.lines)))
         for i, line in enumerate(self):
             for regex in regexes:
                 if regex.search(line):
-                    matches[regex.pattern].append(Match(i, line))
+                    matches[regex.pattern].append((i, line))
         return matches
 
-    def regex_next(self, pattern, flags=0, reverse=False, wrap=False, cursor=None):
+    def regex_next(self, *patterns, flags=0, reverse=False, wrap=False, cursor=None):
         """
         Find the next line with a given regular expression pattern.
 
@@ -277,13 +265,21 @@ class Editor(TypedClass):
             cursor (int): Set the cursor prior to searching
         """
         positions = self._next_positions(wrap, reverse, cursor)
-        if not type(pattern).__name__ == "SRE_Pattern":    # Compiled regex type check
-            pattern = re.compile(pattern, flags)
+        regexes = []
+        for p in patterns:
+            if type(p).__name__ != "SRE_Pattern":    # Compiled regex type check
+                reg = re.compile(p, flags)
+                if p not in [r.pattern for r in regexes]:
+                    regexes.append(reg)
+            elif p.pattern not in [r.pattern for r in regexes]:
+                regexes.append(p)
+        regexes = set(regexes)
         for start, stop, inc in positions:
             for i in range(start, stop, inc):
-                if pattern.search(self.lines[i]):
-                    self.cursor = i
-                    return Match(i, self.lines[i])
+                for regex in regexes:
+                    if regex.search(self.lines[i]):
+                        self.cursor = i
+                        return i, self.lines[i]
 
     def _next_positions(self, wrap=False, reverse=False, cursor=None):
         """

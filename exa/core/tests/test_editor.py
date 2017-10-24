@@ -10,50 +10,14 @@ import os
 import bz2
 import gzip
 import shutil
-import numpy as np
 from uuid import uuid4
 from io import StringIO
 from unittest import TestCase
 from tempfile import mkdtemp
-from exa.core.editor import Match, Matches, Found, Editor, _regex_index
+from exa.core.editor import Editor
 # Python 2 compatibility
 if not hasattr(bz2, "open"):
     bz2.open = bz2.BZ2File
-
-
-class TestAuxiliary(TestCase):
-    """
-    Tests for :class:`~exa.core.editor.Match`, :class:`~exa.core.editor.Matches`,
-    and :class:`~exa.core.editor.Found`.
-    """
-    def test_match(self):
-        match = Match(0, "text")
-        self.assertEqual(match.num, 0)
-        self.assertEqual(match.text, "text")
-        self.assertIn(str(match.num), repr(match))
-
-    def test_matches(self):
-        matches = Matches("pattern", *[Match(i, "text") for i in range(4)])
-        self.assertEqual(len(matches), 4)
-        self.assertIsInstance(matches[0], Match)
-        self.assertListEqual(list(matches.seqpairs()), [(0, 1), (2, 3)])
-        self.assertIn("4", repr(matches))
-
-    def test_found(self):
-        found = Found(Matches("pattern0", *[Match(i, "text") for i in range(4)]),
-                      Matches("pattern1", *[Match(i, "text") for i in range(4)]))
-        self.assertIsInstance(found[0], Matches)
-        self.assertEqual(len(found), 2)
-        self.assertEqual(len(found[0]), 4)
-        self.assertEqual(len(found.as_matches()), 8)
-        self.assertEqual(len([m for m in found]), 2)    # Number of Matches objects
-        self.assertIn("2", repr(found))
-
-    def test_regex_index(self):
-        char_cum_sum = np.cumsum(np.random.randint(0, 100, size=(10, )))
-        spans = np.random.randint(0, char_cum_sum.max(), size=(1, ))
-        check = np.argmax(char_cum_sum > spans[0]) - 1
-        self.assertEqual(check, _regex_index(char_cum_sum, spans))
 
 
 class TestEditor(TestCase):
@@ -185,17 +149,17 @@ class TestEditor(TestCase):
         """Test line by line searching."""
         found = self.from_file_iso.format(tmp="test").find("test")
         self.assertEqual(len(found), 1)
-        self.assertEqual(len(found[0]), 2)
-        self.assertEqual(found[0][0].num, 0)
-        self.assertEqual(found[0][1].num, 1)
+        self.assertEqual(len(found['test']), 2)
+        self.assertEqual(found['test'][0][0], 0)
+        self.assertEqual(found['test'][1][0], 1)
 
     def test_regex(self):
         """Test regex searching."""
         found = self.from_file_iso.format(tmp="test").regex("test")
         self.assertEqual(len(found), 1)
-        self.assertEqual(len(found[0]), 2)
-        self.assertEqual(found[0][0].num, 0)
-        self.assertEqual(found[0][1].num, 1)
+        self.assertEqual(len(found['test']), 2)
+        self.assertEqual(found['test'][0][0], 0)
+        self.assertEqual(found['test'][1][0], 1)
 
     def test_copy_vs_view(self):
         """Check if soft copy copies line data."""

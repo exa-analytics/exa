@@ -9,13 +9,19 @@ Parsing is tested on static data provided in the included data directory.
 import six, re
 import pandas as pd
 from unittest import TestCase
-from exa.core.parser import Parser, Sections
+from exa import Typed
 from exa.static import resource
+from exa.core.parser import Parser, Sections
 
 
 # Simple test parsers
 class SCF(Parser):
-    """Test find and regex section searches."""
+    """
+    Test find and regex section searches.
+
+    Because no **_parse** method is implemented, this parser doesn't
+    actually transform and text to data objects.
+    """
     _start = "Self-consistent Calculation"
     _end = re.compile("^\s*End of self-consistent calculation$", re.MULTILINE)
 
@@ -24,14 +30,19 @@ class XYZ(Parser):
     """Test regex and custom section searches."""
     _start = re.compile("^ATOMIC_POSITIONS", re.MULTILINE)
     _endregex = re.compile("^\s*$")
+    atom = Typed(pd.DataFrame, doc="XYZ-like table of nuclear coordinates")
 
     def _parse_end(self, starts):
         # Special parser for ends
         r = self._endregex
-        return [self.regex_next(r, cursor=match.num) for match in starts]
+        return [self.regex_next(r, cursor=match[0]) for match in starts]
 
     def _parse(self):
-        self.atom = pd.read_csv(self[1:].to_stream(),
+        self._parse_atom()
+        # possibly other data objects to parse
+
+    def _parse_atom(self):
+        self.atom = pd.read_csv(self[1:-2].to_stream(),
                                 names=("symbol", "x", "y", "z"),
                                 delim_whitespace=True)
 
@@ -48,13 +59,12 @@ Output.add_parsers(SCF, XYZ)
 class TestSections(TestCase):
     """Test the sections dataframe works correctly."""
     def test_create(self):
-        sec = Sections.from_lists([0], [0], [None], None)
+        sec = Sections.from_lists([0], [0], [None])
         self.assertIsInstance(sec['startline'].tolist()[0], six.integer_types)
-        self.assertIsNone(sec._ed)
         self.assertEqual(len(sec), 1)
 
     def test_empty_get(self):
-        sec = Sections.from_lists([0], [0], [None], None)
+        sec = Sections.from_lists([0], [0], [None])
         with self.assertRaises(AttributeError):
             sec.get_section(0)
 
@@ -72,10 +82,13 @@ class TestParser(TestCase):
         self.assertEqual(len(sec), 10)
 
     def test_get_section(self):
-        i = self.ed.sections[self.ed.sections['parser'] == XYZ].index[0]
-        ed = self.ed.sections.get_section(i)
-        self.assertIsInstance(ed, Parser)
-        self.assertFalse(hasattr(ed, "atom"))
+        """Test section getting and alternate getitem lookup."""
+        ed = self.ed.get_section(-1)
+        self.assertIsInstance(ed, XYZ)
         ed.parse()
-        self.assertTrue(hasattr(ed, "atom"))
         self.assertEqual(len(ed.atom), 3)
+
+    def test_info(self):
+        df = self.ed.info()
+        self.assertEqual(len(df), 1)
+        self.assertIn("atom", df['name'].values)

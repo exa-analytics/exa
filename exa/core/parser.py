@@ -65,7 +65,7 @@ import six
 import warnings
 from .editor import Editor
 from .data import DataFrame, Column, Index
-from exa.typed import Typed
+from exa.typed import Typed, yield_typed
 
 
 class SectionsParsingFailure(Exception):
@@ -100,11 +100,10 @@ class Sections(DataFrame):
     section = Index(int)
     startline = Column(int)
     endline = Column(int)
-    parser = Column()
-    _ed = Typed(Editor, doc="Editor to which the sections dataframe corresponds.")
+    parser = Column(str)
 
     @classmethod
-    def from_lists(cls, startlines, endlines, parsers, ed):
+    def from_lists(cls, startlines, endlines, parsers):
         """
         Create a dataframe corresponding to sections of an editor.
 
@@ -118,27 +117,12 @@ class Sections(DataFrame):
                                   'endline': endlines,
                                   'parser': parsers})
         df = df[["startline", "endline", "parser"]]
-        return cls(df, ed=ed)
-
-    def get_section(self, key):
-        """
-        Generate an editor corresponding to an identified section.
-
-        Args:
-            key (int): Integer corresponding to section
-
-        Returns:
-            ed (Editor): A correct editor/parser corresponding to the section
-        """
-        start, stop, cls = self.loc[key, ["startline", "endline", "parser"]]
-        return cls(self._ed.lines[start:stop])
+        return cls(df)
 
     def __init__(self, *args, **kwargs):
-        ed = kwargs.pop("ed", None)
         super(Sections, self).__init__(*args, **kwargs)
         self.sort_values('startline', inplace=True)
         self.reset_index(drop=True, inplace=True)
-        self._ed = ed
 
 
 class Parser(Editor):
@@ -146,16 +130,52 @@ class Parser(Editor):
     An Editor-like object built for parsing small/medium files that are
     semi-structured.
 
-    See Also:
-        The :class:`~exa.core.parser.Sections` table is used organize multiple
-        section within a single file that each have their own data object or
-        objects.
+    Parsers are written for a specific block of text that corresponds to one or
+    more data objects. The are atomistic and expect no outside information to
+    perform their parsing function. For parsing functions that cannot fit into
+    this paradigm, 'wrapping' parser classes can be written which handle the
+    special cases.
+
+    .. code-block:: python
+
+        class BlockParser(Parser):
+            _start = regex_or_string    # Identifier that denotes start of block
+            _end = regex_or_string      # Identifier that denotes end of block
+
+            def _parse(self):
+                pass                    # Function that transforms block text to python object
+
+        class Wrapper(Parser):
+            def _parse(self):
+                pass                    # Function that handles 'special' parsing (see above)
+
+        Wrapper.add_parsers(BlockParser)
     """
     _setters = ("parse", "_parse")
     _parsers = []
     _start = None
     _end = None
     sections = Typed(Sections, doc="Schematic representation of text/file.")
+
+    def info(self):
+        """
+        Display information about data objects and attached parsers.
+        """
+        basenames = list(yield_typed(Parser))
+        names = []
+        classes = []
+        descriptions = []
+        for parser in self._parsers:
+            current = list(yield_typed(parser))
+            ns = list(set(current).difference(basenames))
+            ds = [getattr(parser, n).__doc__.replace("\n\n__typed__", "") for n in ns]
+            cs = [parser]*len(ns)
+            names += ns
+            classes += cs
+            descriptions += ds
+        df = DataFrame.from_dict({'name': names, 'class': classes,
+                                  'description': descriptions})
+        return df.set_index("class").sort_index()[["name", "description"]].sort_values("name")
 
     def parse(self, *args, **kwargs):
         """
@@ -169,7 +189,13 @@ class Parser(Editor):
         self._parse(*args, **kwargs)
 
     def parse_sections(self):
-        """Identify sections of the current editor's text/file text."""
+        """
+        Identify sections of the current editor's text/file text.
+
+        For all 'added parsers' (see :func:`~exa.core.parser.Parser.add_parsers`)
+        currently attached to this class object, search to text contents of the
+        current object's instance and identify all sections, sub-sections, etc.
+        """
         def selector(parser):
             # Helper function that adds all search strings to our lists
             # so that we iterate over the file as few times as possible.
@@ -182,7 +208,7 @@ class Parser(Editor):
                 elif isinstance(attr, str):
                     find.append(attr)
 
-        # Start processing
+        # Bin all of search strings/regex
         regex = []    # for .regex()
         find = []     # for .find
         for parser in self._parsers:
@@ -190,7 +216,9 @@ class Parser(Editor):
         # Perform file searching
         rfound = self.regex(*regex)
         ffound = self.find(*find)
-        # Construct the sections dataframe
+        # Now construct the sections dataframe by selecting, for each
+        # parser (including self) the start/end string/regex and
+        # adding it to the sections dataframe.
         starts = []
         ends = []
         parsers = []
@@ -202,14 +230,14 @@ class Parser(Editor):
             elif isinstance(parser._start, six.string_types):
                 start = ffound[parser._start]
             else:
-                start = rfound[parser._start]
+                start = rfound[parser._start.pattern]
             # End lines
             if parser._end is None:
                 delayed = 2 if delayed == 0 else 3
             elif isinstance(parser._end, six.string_types):
                 end = ffound[parser._end]
             else:
-                end = rfound[parser._end]
+                end = rfound[parser._end.pattern]
             # Special or both
             if delayed == 1:    # _parse_start custom starting points
                 start = self._parse_1(parser, end)
@@ -223,14 +251,25 @@ class Parser(Editor):
             # Sanity check
             if len(start) != len(end):
                 raise SectionsParsingFailure(parser, starts, ends)
-            starts += [s.num for s in start]
-            ends += [e.num+1 for e in end]
+            starts += [s[0] for s in start]
+            ends += [e[0]+1 for e in end]
             parsers += [parser]*len(start)
-        self.sections = Sections.from_lists(starts, ends, parsers, self)
+        self.sections = Sections.from_lists(starts, ends, parsers)
 
     def get_section(self, key):
-        """Get an editor representation of a given section."""
-        return self.sections.get_section(key)
+        """
+        Generate an editor corresponding to an identified section.
+
+        Args:
+            key (int): Integer corresponding to section
+
+        Returns:
+            ed (Editor): A correct editor/parser corresponding to the section
+        """
+        if key not in self.sections.index:
+            key = self.sections.index[key]
+        start, stop, cls = self.sections.loc[key, ["startline", "endline", "parser"]]
+        return cls(self.lines[start:stop])
 
     def _parse(self, *args, **kwargs):
         """To be overwritten - parses file/section specific data."""
