@@ -86,8 +86,8 @@ class Composer(Editor):
         # Format string arguments (for the modified template)
         fkwargs = {}    # Format string keyword arguments
         modtmpl = []    # The modified template lines
-        curpos = 0      # Positional argument counter
-        i = 0
+        #curpos = 0      # Positional argument counter
+        #i = 0
         for line in self:
             cline = copy(line)
             # If any special formatters exist, handle them
