@@ -181,7 +181,7 @@ class Parser(Editor):
             descriptions += ds
         df = DataFrame.from_dict({'name': names, 'class': classes,
                                   'description': descriptions})
-        df = df[["name", "class", "description"]].sort_values("name")
+        df = df[["name", "class", "description"]].sort_values("name").reset_index(drop=True)
         return df
 
     def parse(self):
