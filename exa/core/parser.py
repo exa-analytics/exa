@@ -168,16 +168,21 @@ class Parser(Editor):
         classes = []
         descriptions = []
         for parser in self._parsers:
+            if hasattr(parser, "__module__"):
+                nam = ".".join((parser.__module__, parser.__name__))
+            else:
+                nam = parser.__name__
             current = list(yield_typed(parser))
             ns = list(set(current).difference(basenames))
             ds = [getattr(parser, n).__doc__.replace("\n\n__typed__", "") for n in ns]
-            cs = [parser]*len(ns)
+            cs = [nam]*len(ns)
             names += ns
             classes += cs
             descriptions += ds
         df = DataFrame.from_dict({'name': names, 'class': classes,
                                   'description': descriptions})
-        return df.set_index("class").sort_index()[["name", "description"]].sort_values("name")
+        df = df[["name", "class", "description"]].sort_values("name")
+        return df
 
     def parse(self):
         """
