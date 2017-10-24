@@ -37,6 +37,10 @@ repetitive, section of text.
             # this is specific to this particular file
             pass
 
+        def _parse_data(self):
+            # Parsing logic for constructing the data object
+            pass
+
     class OBlock(Parser):
         _start = re.compile("otherblock")    # To use regex searching, set compiled regex
         _end = None                          # Again custom end line searching
@@ -62,7 +66,6 @@ See Also:
     :class:`~exa.core.editor.Matches`, and :class:`~exa.core.editor.Found`.
 """
 import six
-import warnings
 from .editor import Editor
 from .data import DataFrame, Column, Index
 from exa.typed import Typed, yield_typed
@@ -152,7 +155,6 @@ class Parser(Editor):
         Wrapper.add_parsers(BlockParser)
     """
     _setters = ("parse", "_parse")
-    _parsers = []
     _start = None
     _end = None
     sections = Typed(Sections, doc="Schematic representation of text/file.")
@@ -177,16 +179,26 @@ class Parser(Editor):
                                   'description': descriptions})
         return df.set_index("class").sort_index()[["name", "description"]].sort_values("name")
 
-    def parse(self, *args, **kwargs):
+    def parse(self):
         """
         Recursively parse all data objects from the file's sections/parsers/text.
 
         See Also:
             :func:`~exa.core.parser.Parser.info`
         """
+        # First parse the sections
         if not hasattr(self, "_sections"):
             self.parse_sections()
-        self._parse(*args, **kwargs)
+        # Second parse the data objects (if applicable)
+        check = lambda n: any(n.startswith(setter) for setter in self._setters)
+        base = [n for n in dir(Parser) if check(n)]
+        live = [n for n in dir(self) if check(n)]
+        names = set(live).difference(base)
+        for name in names:
+            getattr(self, name)()
+        # Last perform any auxiliary parsing
+        if hasattr(self, "_parse"):
+            self._parse()
 
     def parse_sections(self):
         """
@@ -244,10 +256,10 @@ class Parser(Editor):
             elif delayed == 2:  # _parse_end custom ending points
                 end = self._parse_2(parser, start)
             elif delayed == 3:
-                if parser._start is parser._end is None:
-                    start, end = [], []
-                else:
+                try:
                     start, end = self._parse_3(parser)
+                except NotImplementedError:
+                    start, end = [], []
             # Sanity check
             if len(start) != len(end):
                 raise SectionsParsingFailure(parser, starts, ends)
@@ -270,10 +282,6 @@ class Parser(Editor):
             key = self.sections.index[key]
         start, stop, cls = self.sections.loc[key, ["startline", "endline", "parser"]]
         return cls(self.lines[start:stop])
-
-    def _parse(self, *args, **kwargs):
-        """To be overwritten - parses file/section specific data."""
-        pass
 
     def _parse_1(self, parser, stops):
         """
@@ -306,7 +314,7 @@ class Parser(Editor):
 
             [(i, self.lines[i]), (j, self.lines[j]), ...]
         """
-        warnings.warn("No implementation of _parse_start for {}".format(self.__class__))
+        raise NotImplementedError("No implementation of _parse_start for {}".format(self.__class__))
 
     def _parse_end(self, starts):
         """
@@ -318,7 +326,7 @@ class Parser(Editor):
 
             [(i, self.lines[i]), (j, self.lines[j]), ...]
         """
-        warnings.warn("No implementation of _parse_end for {}".format(self.__class__))
+        raise NotImplementedError("No implementation of _parse_end for {}".format(self.__class__))
 
     def _parse_both(self):
         """
@@ -333,7 +341,7 @@ class Parser(Editor):
             ([(i, self.lines[i]), (j, self.lines[j]), ...],
              [(i, self.lines[i]), (j, self.lines[j]), ...])
         """
-        warnings.warn("No implementation of _parse_both for {}".format(self.__class__))
+        raise NotImplementedError("No implementation of _parse_both for {}".format(self.__class__))
 
     @classmethod
     def add_parsers(cls, *parsers):
@@ -354,7 +362,23 @@ class Parser(Editor):
             Wrapper.add_parsers(P0, P1)    # Needs to be performed only once
             parser = Wrapper(myfile)
         """
-        cls._parsers = list(set(cls._parsers + list(parsers)))
+        # A bit of deduplication is necessary
+        def get(*parsers):
+            dct = {}
+            for p in parsers:
+                if hasattr(p, "__module__"):
+                    n = ".".join((p.__module__, p.__name__))
+                else:
+                    n = p.__name__
+                dct[n] = p
+            return dct
+
+        if not hasattr(cls, "_parsers"):
+            setattr(cls, "_parsers", [])
+        current = get(*cls._parsers)
+        new = get(*parsers)
+        current.update(new)
+        cls._parsers = list(current.values())
 
     def __init__(self, *args, **kwargs):
         super(Parser, self).__init__(*args, **kwargs)
