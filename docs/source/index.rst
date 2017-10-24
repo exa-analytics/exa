@@ -26,7 +26,15 @@ enable visualization within the `Jupyter notebook`_.
     :maxdepth: 2
     :caption: API
 
+<<<<<<< HEAD
     api.rst
+=======
+    api/data.rst
+    api/editor.rst
+    api/container.rst
+    api/util.rst
+    api/math.rst
+>>>>>>> 0.3.9
 
 .. toctree::
     :maxdepth: 1

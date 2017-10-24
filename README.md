@@ -18,17 +18,18 @@ or [pypi](https://pypi.python.org/pypi).
 [![docs](https://readthedocs.org/projects/exa/badge/?version=latest)](https://exa-analytics.github.io/exa/)  
 [![gitter](https://badges.gitter.im/exa-analytics/exa.svg)](https://gitter.im/exa-analytics/exa)  
 Building the docs requires [sphinx](http://www.sphinx-doc.org/en/stable).
-On Linux or Mac OS:
 
-    $ cd js
-    $ ./makedocs.sh       # .\makedocs.bat
-    $ cd ../docs
+    $ cd docs
     $ make html           # .\make.bat html
 
 
 # Development
 [![Travis-CI](https://travis-ci.org/exa-analytics/exa.svg?branch=master)](https://travis-ci.org/exa-analytics/exa)
+<<<<<<< HEAD
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/j6h8pb23xduq5vqs/branch/master?svg=true)](https://ci.appveyor.com/project/avmarchenko/exa/branch/master)
+=======
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/x5oaxitn9hc6kwws/branch/master?svg=true)](https://ci.appveyor.com/project/avmarchenko/exa-3l692/branch/master)
+>>>>>>> 0.3.9
 [![Coveralls](https://coveralls.io/repos/github/exa-analytics/exa/badge.svg)](https://coveralls.io/github/exa-analytics/exa)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d7f1c1b3e8f14153b67d54f7f7ccdd05)](https://www.codacy.com/app/exa-analytics/exa-org?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=exa-analytics/exa&amp;utm_campaign=Badge_Grade)
 

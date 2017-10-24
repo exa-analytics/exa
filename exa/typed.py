@@ -40,6 +40,7 @@ automatic conversion (as shown above) for all types supported for a given
 attribute.
 """
 import six
+import warnings
 
 
 def _typed_from_items(items):

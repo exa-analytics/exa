@@ -34,12 +34,11 @@ Warning:
 
 .. _NIST: https://www.nist.gov/
 """
-import six as _six
-import os as _os
 import sys as _sys
 from pandas import read_json as _rj
-from exa import Editor as _E
+from exa import Editor as _Editor
 from exa import DataFrame as _DF
+from exa.static import resource as _resource
 
 
 class Element(object):
@@ -82,8 +81,25 @@ class Isotope(object):
 
         from exa.util import isotopes
         isotopes.U['235'].mass    # Mass of 235-U
+
+    Attributes:
+        A (int): Mass number
+        Z (int): Proton number
+        af (float): Abundance fraction
+        afu (float): Abundance fraction uncertainty
+        radius (float): Colvalent radius (approximate)
+        g (float): Nuclear g-factor
+        mass (float): Atomic mass (in g/mol)
+        massu (float): Atom mass uncertainty
+        name (str): Full name
+        eneg (float): Electronegativity (Pauling scale
+        quad (float): Nuclear quadrupole moment (electron-barn units)
+        spin (float): Nuclear spin
+        symbol (str): Element symbol
+        color (str): Color as hexidecimal string
     """
-    def __init__(self, anum, znum, af, afu, radius, g, mass, massu, name, eneg, quad, spin, symbol, color):
+    def __init__(self, anum, znum, af, afu, radius, g, mass, massu, name,
+                 eneg, quad, spin, symbol, color):
         self.A = anum
         self.Z = znum
         self.af = af
@@ -125,7 +141,7 @@ def _create():
             setattr(ele, "_"+str(tope.A), tope)
         return ele
 
-    iso = _rj(_E(_path).to_stream())
+    iso = _rj(_Editor(_path).to_stream())
     iso.columns = _columns
     for element in iso.groupby("symbol").apply(creator):
         setattr(_this, element.symbol, element)
@@ -143,10 +159,9 @@ def as_df():
 
 
 # Data order of isotopic (nuclear) properties:
-_resource = "../../static/isotopes.json.bz2"    # HARDCODED
 _columns = ("A", "Z", "af", "afu", "radius", "g", "mass", "massu", "name",
             "eneg", "quad", "spin", "symbol", "color")
 _this = _sys.modules[__name__]         # Reference to this module
-_path = _os.path.abspath(_os.path.join(_os.path.abspath(__file__), _resource))
+_path = _resource("isotopes.json.bz2")
 if not hasattr(_this, "H"):
     _create()

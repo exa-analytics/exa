@@ -45,4 +45,4 @@ about:
     home: https://exa-analytics.github.io/{{ name }}
     license: Apache-2.0
     license_file: LICENSE
-    summary: A framework for data processing, analytics, and visualization.
+    summary: A framework for data processing, computation, and visualization.

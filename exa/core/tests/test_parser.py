@@ -6,15 +6,11 @@ Tests for :mod:`~exa.core.parser`
 #############################################
 Parsing is tested on static data provided in the included data directory.
 """
-import six, os, re
+import six, re
 import pandas as pd
 from unittest import TestCase
 from exa.core.parser import Parser, Sections
-from exa.typed import Typed
-from exa.static import datadir
-
-
-name = "parser.bz2"
+from exa.static import resource
 
 
 # Simple test parsers
@@ -66,7 +62,7 @@ class TestSections(TestCase):
 class TestParser(TestCase):
     """Check basic parsing functionality on a test file."""
     def setUp(self):
-        self.ed = Output(os.path.join(datadir(), name))
+        self.ed = Output(resource("parser.bz2"))
 
     def test_basic(self):
         self.assertEqual(len(self.ed), 2002)

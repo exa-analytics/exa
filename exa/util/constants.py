@@ -4,18 +4,54 @@
 """
 Physical Constants
 #######################################
+Tabulated physical constants from `NIST`_. Note that all constants are float
+objects (with a slightly modified repr). This means that math operations can
+be performed with them directly. Note that units and uncertainty are included
+for each value.
+
+.. code-block:: python
+
+    constants.Planck_constant         # Planck_constant(6.62607004e-34 ±8.1e-42)
+    constants.Planck_constant.unit    # J s
+    constants.Planck_constant.error   # 9.1e-42
+
+.. _NIST: https://www.nist.gov/
 """
-from .quantity import FloatQuantity
-from .units import si
+import sys as _sys
+import json as _json
+from exa import Editor as _Editor
+from exa.static import resource as _resource
 
 
-class Constant(FloatQuantity):
+class Constant(float):
     """
+    Physical constant with value, units, and uncertainty.
+
+    .. code-block:: python
+
+        constants.Planck_constant         # Planck_constant(6.62607004e-34 ±8.1e-42)
+        constants.Planck_constant.unit    # J s
+        constants.Planck_constant.error   # 9.1e-42
     """
-    pass
+    def __new__(cls, name, units, value, error):
+        return super(Constant, cls).__new__(cls, value)
+
+    def __init__(self, name, units, value, error):
+        float.__init__(value)
+        self.name = name
+        self.units = units
+        self.error = error
+        self.value = value
+
+    def __repr__(self):
+        return "{}({} ±{})".format(self.name, self.value, self.error)
 
 
-c = Constant(299792458, si.velocity, "speed of light", "speed of light in vacuum")
-G = Constant(6.67408E-11, si.force*si.velocity**2, "gravitational constant", "Newtonian constant of gravitation")
-h = Constant(6.626070040E-34, si.energy*si.time, "Planck constant")
-hbar = Constant(1.054571800E-34, si.energy*si.time, "reduced Planck constant")
+def _create():
+    for kwargs in _json.load(_Editor(_path).to_stream()):
+        setattr(_this, kwargs['name'], Constant(**kwargs))
+
+_this = _sys.modules[__name__]
+_path = _resource("constants.json.bz2")
+if not hasattr(_this, "Planck_constant"):
+    _create()
