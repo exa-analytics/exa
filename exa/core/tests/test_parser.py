@@ -37,11 +37,7 @@ class XYZ(Parser):
         r = self._endregex
         return [self.regex_next(r, cursor=match[0]) for match in starts]
 
-    def _parse(self):
-        self._parse_atom()
-        # possibly other data objects to parse
-
-    def _parse_atom(self):
+    def parse_atom(self):
         self.atom = pd.read_csv(self[1:-2].to_stream(),
                                 names=("symbol", "x", "y", "z"),
                                 delim_whitespace=True)
@@ -85,7 +81,6 @@ class TestParser(TestCase):
         """Test section getting and alternate getitem lookup."""
         ed = self.ed.get_section(-1)
         self.assertIsInstance(ed, XYZ)
-        ed.parse()
         self.assertEqual(len(ed.atom), 3)
 
     def test_info(self):

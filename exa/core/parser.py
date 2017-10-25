@@ -157,6 +157,7 @@ class Parser(Editor):
     _setters = ("parse", "_parse")
     _start = None
     _end = None
+    _f = ("_parsers", )    # Forbidden names
     sections = Typed(Sections, doc="Schematic representation of text/file.")
 
     def info(self):
@@ -191,11 +192,14 @@ class Parser(Editor):
         See Also:
             :func:`~exa.core.parser.Parser.info`
         """
+        def check(n):
+            if any(n.startswith(s) for s in self._setters) and n not in self._f:
+                return True
+            return False
         # First parse the sections
         if not hasattr(self, "_sections"):
             self.parse_sections()
         # Second parse the data objects (if applicable)
-        check = lambda n: any(n.startswith(setter) for setter in self._setters)
         base = [n for n in dir(Parser) if check(n)]
         live = [n for n in dir(self) if check(n)]
         names = set(live).difference(base)
