@@ -131,7 +131,7 @@ class Editor(TypedClass):
             cp.lines = str(cp).format(*args, **kwargs).splitlines()
             return cp
 
-    def write(self, path, encoding="utf-8", newline="", *args, **kwargs):
+    def write(self, path, *args, **kwargs):
         """
         Write editor contents to file.
 
@@ -141,6 +141,8 @@ class Editor(TypedClass):
             kwargs: Keyword arguments for formatting
 
         """
+        encoding = kwargs.pop("encoding", "utf-8")
+        newline = kwargs.pop("newline", "")
         if len(args) > 0 or len(kwargs) > 0:
             text = str(self.format(*args, **kwargs))
         else:
@@ -190,7 +192,7 @@ class Editor(TypedClass):
                 lines.append(line.replace(pattern, replacement))
             return self.__class__(lines)
 
-    def find_next(self, *patterns, case=True, reverse=False, wrap=False, cursor=None):
+    def find_next(self, *patterns, **kwargs):
         """
         Find the next line with the given text pattern.
 
@@ -198,11 +200,16 @@ class Editor(TypedClass):
         position is updated and a tuple of line number and text is returned.
 
         Args:
-            pattern (str): String pattern to search for
+            patterns: String pattern(s) to search for
             case (bool): Respect case
             reverse (bool): Search in reverse
+            wrap (bool): At end, continue search at beginning (and vice versa)
             cursor (int): Set the line cursor prior to search (optional)
         """
+        case = kwargs.pop("case", True)
+        reverse = kwargs.pop("reverse", False)
+        wrap = kwargs.pop("wrap", False)
+        cursor = kwargs.pop("cursor", None)
         positions = self._next_positions(wrap, reverse, cursor)
         if case:
             check = lambda lin: any(pattern in lin for pattern in patterns)
@@ -243,14 +250,13 @@ class Editor(TypedClass):
                 regexes.append(p)
         regexes = set(regexes)
         matches = OrderedDict([(r.pattern, []) for r in regexes])
-        #char_cum_sum = np.cumsum(list(map(len, self.lines)))
         for i, line in enumerate(self):
             for regex in regexes:
                 if regex.search(line):
                     matches[regex.pattern].append((i, line))
         return matches
 
-    def regex_next(self, *patterns, flags=0, reverse=False, wrap=False, cursor=None):
+    def regex_next(self, *patterns, **kwargs):
         """
         Find the next line with a given regular expression pattern.
 
@@ -264,6 +270,10 @@ class Editor(TypedClass):
             wrap (bool): Continue search from beginning/end of file (wraparound end of file)
             cursor (int): Set the cursor prior to searching
         """
+        flags = kwargs.pop("flags", 0)
+        reverse = kwargs.pop("reverse", False)
+        wrap = kwargs.pop("wrap", False)
+        cursor = kwargs.pop("cursor", None)
         positions = self._next_positions(wrap, reverse, cursor)
         regexes = []
         for p in patterns:
