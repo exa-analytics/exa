@@ -12,7 +12,7 @@ for reading and writing text.
 """
 import io, os, re, bz2, six, gzip
 import warnings
-from io import StringIO, TextIOWrapper
+from io import StringIO, TextIOWrapper, BufferedReader
 from collections import OrderedDict
 from exa.typed import Typed, TypedClass
 # Python 2 compatibility
@@ -20,7 +20,7 @@ if not hasattr(bz2, "open"):
     bz2.open = bz2.BZ2File
 
 
-def read_file(path, encoding=None):
+def read_file(path, encoding="utf-8"):
     """
     Read in a text file (including compressed text files) to a list of lines.
 
@@ -373,7 +373,7 @@ class Editor(TypedClass):
     def __len__(self):
         return len(self.lines)
 
-    def __init__(self, textobj, encoding=None, nprint=15, ignore=False):
+    def __init__(self, textobj, encoding="utf-8", nprint=15, ignore=False, **meta):
         """
         Check if accidental filepath but missing file or wrong directory.
         Warn the user unless ignore is true.
@@ -383,6 +383,7 @@ class Editor(TypedClass):
             and ignore == False and not os.path.exists(textobj)):
             warnings.warn("Possibly incorrect file path! {}".format(textobj))
         if isinstance(textobj, str) and os.path.exists(textobj):
+            meta['filepath'] = textobj
             lines = read_file(textobj, encoding=encoding)
         elif isinstance(textobj, six.string_types):
             lines = str(textobj).splitlines()
@@ -390,6 +391,10 @@ class Editor(TypedClass):
             lines = textobj
         elif isinstance(textobj, (TextIOWrapper, StringIO)):
             lines = textobj.read().splitlines()
+        elif isinstance(textobj, BufferedReader):
+            if textobj.name is not None:
+                meta['filepath'] = textobj.name
+            lines = textobj.read().decode(encoding).splitlines()
         elif isinstance(textobj, Editor):
             lines = textobj.lines
         else:
@@ -397,6 +402,7 @@ class Editor(TypedClass):
         self.lines = lines
         self.cursor = 0
         self.nprint = nprint
+        self.meta = meta
 
     def __repr__(self):
         r = ""
