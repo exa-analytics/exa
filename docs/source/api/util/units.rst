@@ -2,7 +2,7 @@
 .. Distributed under the terms of the Apache License 2.0
 
 ###########################
-Structured DataFrames
+Units
 ###########################
-.. automodule:: exa.core.data
+.. automodule:: exa.util.units
     :members:

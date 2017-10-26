@@ -4,5 +4,11 @@
 ########################################
 Tests for Utilities
 ########################################
+.. automodule:: exa.util.tests.test_units
+    :members:
+
 .. automodule:: exa.util.tests.test_isotopes
+    :members:
+
+.. automodule:: exa.util.tests.test_constants
     :members:

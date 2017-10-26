@@ -18,4 +18,3 @@ Tests for Containers, Editors, Data Objects
 
 .. automodule:: exa.core.tests.test_container
     :members:
-

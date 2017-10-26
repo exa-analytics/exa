@@ -7,10 +7,10 @@
 *A framework for data processing, computation, and visualization.*
 
 This package provides a framework for programmatic file manipulation and data
-organization and processing. :ref:`editors-label` and :ref:`parsing-label` 
-objects allow creation of modular and efficient parsing systems. Data objects
-extracted can be collected into :ref:`container-label` objects. Containers 
-enable visualization within the `Jupyter notebook`_.
+organization and processing. Text editor like objects (see :ref:`editors-label`)
+allow creation of modular and efficient parsing systems. Parsed data objects
+can be aggregated into containers (see :ref:`container-label`. Containers 
+facilitate visualization within the `Jupyter notebook`_ and data processing.
 
 .. flashy example (todo)
 
@@ -21,26 +21,13 @@ enable visualization within the `Jupyter notebook`_.
     install.rst
     started.rst
     examples.rst
+    contrib.rst
 
 .. toctree::
     :maxdepth: 2
     :caption: API
 
-<<<<<<< HEAD
-    api.rst
-=======
-    api/data.rst
-    api/editor.rst
-    api/container.rst
-    api/util.rst
-    api/math.rst
->>>>>>> 0.3.9
-
-.. toctree::
-    :maxdepth: 1
-    :caption: Contributors
-
-    contrib.rst
+    api/index.rst
 
 
 ##################
