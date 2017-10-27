@@ -135,6 +135,15 @@ class Typed(object):
         pre_get (callable, str): Callable or class method name called before getter
         pre_del (callable, str): Callable or class method name called before setter
         post_del (callable, str): Callabel or class method name called after setter
+
+    Warning:
+        Automatic type conversion (autoconv = true) is not guaranteed to work in
+        all cases and is known to fail for non-Python objects such as numpy
+        ndarray types: Setting **autoconv** to false is recommened for these cases.
+
+        .. code-block:: python
+
+            Typed(np.ndarray, autoconv=False)    # Do not attempt auto conversion
     """
     def __call__(self, name):
         """
@@ -189,7 +198,7 @@ class Typed(object):
             # that is allowed, raise an error.
             elif ((value is None and self.allow_none == False) or
                   (not isinstance(value, self.types) and value is not None)):
-                raise TypeError("Object is the wrong type ({}) or None isn't allowed.".format(type(value)))
+                raise TypeError("Object '{}' cannot have type {}, must be of type(s) {}.".format(name, type(value), self.types))
             # Perform pre-set actions (if any)
             if isinstance(self.pre_set, str):
                 getattr(this, self.pre_set)()

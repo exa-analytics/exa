@@ -329,8 +329,51 @@ class SparseDataFrame(_Base, pd.SparseDataFrame):
         return SparseDataFrame
 
 
-def concat(*data, **kwargs):
-    raise NotImplementedError()
+class Field(TypedClass):
+    """
+    A field is a collection of values that correspond to a (possibly
+    n-dimensional) spatial grid.
+
+    This object requires the user provide explict dimensions as an iterable
+    (list, tuple) or provide a function that can be called to generate the
+    grid on the fly.
+
+    See Also:
+        The `xarray`_ package provides n-dimensional arrays which have similar
+        functionality to this object, and which is fully compatible with
+        :class:`~exa.core.container.Container` objects.
+
+    .. _xarray: http://xarray.pydata.org/en/stable/
+    """
+    values = Typed(np.ndarray, doc="Field values (n-dimensional)", autoconv=False)
+    dimensions = Typed((np.ndarray, FunctionType), autoconv=False,
+                       doc="Grid on which the field belongs")
+
+    @property
+    def grid(self):
+        """
+        Generate the spatial grid from a function or return it from the explicitly
+        defined values.
+        """
+        if callable(self.dimensions):
+            grid = self.dimensions()
+        else:
+            grid = self.dimensions
+        return grid
+
+    def _check(self):
+        """Check that the shape of the values matches the shape of the grid."""
+        m = self.values.shape
+        n = self.grid.shape
+        if m != n:
+            raise ValueError("Shape of the values {} does not match the grid {}".format(m, n))
+
+    def __init__(self, values, dimensions):
+        if isinstance(values, (pd.Series, pd.DataFrame, pd.SparseDataFrame, pd.SparseSeries)):
+            values = values.values
+        self.values = values
+        self.dimensions = dimensions
+        self._check()
 
 
 # Required exa data objects' HDF compatibility
