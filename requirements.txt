@@ -7,6 +7,8 @@ seaborn
 sphinx
 sphinx_rtd_theme
 numba
+sympy
+symengine
 pandoc
 nbsphinx
 six

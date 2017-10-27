@@ -2,6 +2,7 @@ language: python
 
 os:
   - linux
+  - osx
 
 python:
   - "2.7"
@@ -24,6 +25,7 @@ install:
   - conda install -q python=$TRAVIS_PYTHON_VERSION
   - conda install -q -c conda-forge `cat requirements.txt`
   - conda install -q -c conda-forge pytables python-coveralls ply pandoc pypandoc nbsphinx
+  - conda install -q -c conda-forge python-symengine
   - pip install travis-sphinx codacy-coverage coverage
   - pip install .
 

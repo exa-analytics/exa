@@ -330,7 +330,7 @@ class SparseDataFrame(_Base, pd.SparseDataFrame):
         return SparseDataFrame
 
 
-class Field(_Base):
+class Field(TypedClass):
     """
     A field is a collection of values that correspond to a (possibly
     n-dimensional) spatial grid.
@@ -367,19 +367,15 @@ class Field(_Base):
             grid = self.dimensions
         return grid
 
-    def _check(self):
-        """Check that the shape of the values matches the shape of the grid."""
-        m = self.values.shape
-        n = self.grid.shape
-        if m != n:
-            raise ValueError("Shape of the values {} does not match the grid {}".format(m, n))
-
     def __init__(self, values, dimensions, **meta):
         if isinstance(values, (pd.Series, pd.DataFrame, pd.SparseDataFrame, pd.SparseSeries)):
             values = values.values
         self.values = values
         self.dimensions = dimensions
-        self._check()
+        m = self.values.shape
+        n = self.grid.shape
+        if m != n:
+            raise ValueError("Shape of the values {} does not match the grid {}".format(m, n))
 
 
 # Required exa data objects' HDF compatibility
