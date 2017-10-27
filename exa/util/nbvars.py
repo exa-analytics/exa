@@ -78,7 +78,7 @@ def numbafy(fn, args, compiler="jit", **nbkws):
     lamstr = "lambda " + ", ".join([str(a) for a in args]) + ": " + str(fn)
     # Python eval and docs
     func = eval(lamstr, npvars)
-    func.__doc__ = "Compiled function\n\n{}".format(lamstr)
+    func.__doc__ = "Dynamically compiled function:\n\n{}\n".format(lamstr)
     # Machine code compilation
     try:
         func = compiler(**kwargs)(func)
@@ -86,4 +86,6 @@ def numbafy(fn, args, compiler="jit", **nbkws):
         kwargs.pop("cache")
         func = compiler(**kwargs)(func)
     # Add documentation/signature
+    import warnings
+    warnings.warn(lamstr)
     return func
