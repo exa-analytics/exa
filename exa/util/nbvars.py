@@ -86,6 +86,4 @@ def numbafy(fn, args, compiler="jit", **nbkws):
         kwargs.pop("cache")
         func = compiler(**kwargs)(func)
     # Add documentation/signature
-    import warnings
-    warnings.warn(lamstr)
     return func
