@@ -20,8 +20,9 @@ import numpy as np
 import pandas as pd
 from uuid import uuid4
 from sys import getsizeof
+from collections import defaultdict
 from exa.typed import TypedClass, Typed
-from .data import _spec_name, _forbidden
+from .data import _spec_name, _forbidden, Field
 if not hasattr(pd.Series, "items"):
     pd.Series.items = pd.Series.iteritems
 
@@ -122,7 +123,7 @@ class Container(TypedClass):
         pandas_save = {}
         special_save = {}
         for name, data in self._items():
-            if isinstance(data, np.ndarray):
+            if isinstance(data, (np.ndarray, Field)):
                 numpy_save[name] = data
             elif isinstance(data, (pd.Series, pd.DataFrame, pd.SparseSeries,
                                    pd.SparseDataFrame)):
@@ -136,7 +137,11 @@ class Container(TypedClass):
             filters = tables.Filters(complib=complib, complevel=complevel)
             store = tables.open_file(path, mode=mode, filters=filters)
             for name, data in numpy_save.items():
-                store.create_carray("/", name, obj=data)
+                if isinstance(data, Field):
+                    store.create_carray("/", name+"__VALUES__", obj=data.values)
+                    store.create_carray("/", name+"__DIMENSIONS__", obj=data.grid)
+                else:
+                    store.create_carray("/", name, obj=data)
             store.close()
         # Save remaining objects
         store = pd.HDFStore(path, mode=mode, complevel=complevel,
@@ -161,16 +166,31 @@ class Container(TypedClass):
 
         Args:
             path (str): Path to HDF file
+
+        Returns:
+            container: Container object with data attributes
+
+        Warning:
+            Any saved :class:`~exa.core.data.Field` objects will be returned
+            as the default (aforementioned) type (instead of a possibly derived
+            type).
         """
         kwargs = {}
         # First load pandas-like and special objects
         store = pd.HDFStore(path, mode="r", complib=complib,
                             complevel=complevel, fletcher32=fletcher32)
+        fields = defaultdict(dict)
         if _spec_name in store:
             for name, data in vars(store.get_storer(_spec_name).attrs).items():
-                if name in _forbidden:
-                    continue
-                kwargs[name] = data
+                if "__VALUES__" in name:
+                    n = name.replace("__VALUES__", "")
+                    fields[n]['values'] = data
+                elif "__DIMENSIONS__" in name:
+                    n = name.replace("__DIMENSIONS__")
+                    fields[n]['dimensions'] = data
+                elif name not in _forbidden:
+                    kwargs[name] = data
+        kwargs.update({name: Field(**fields[name]) for name in fields})
         for name, data in store.items():
             kwargs[name] = data
         store.close()
@@ -181,6 +201,7 @@ class Container(TypedClass):
             if hasattr(data, "name") and data.name not in kwargs:
                 kwargs[data.name] = data.read()
         store.close()
+        # Finally combine Field objects (values and dimensions)
         return cls(**kwargs)
 
     def _network(self):

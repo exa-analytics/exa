@@ -11,6 +11,7 @@ import six
 import warnings
 import numpy as np
 import pandas as pd
+from types import FunctionType
 from pandas.io import pytables
 from pandas.core.dtypes.dtypes import CategoricalDtypeType
 from exa.typed import Typed, TypedMeta, yield_typed, TypedClass
@@ -329,7 +330,7 @@ class SparseDataFrame(_Base, pd.SparseDataFrame):
         return SparseDataFrame
 
 
-class Field(TypedClass):
+class Field(_Base):
     """
     A field is a collection of values that correspond to a (possibly
     n-dimensional) spatial grid.
@@ -337,6 +338,11 @@ class Field(TypedClass):
     This object requires the user provide explict dimensions as an iterable
     (list, tuple) or provide a function that can be called to generate the
     grid on the fly.
+
+    Note:
+        The :class:`~exa.core.container.Container` handles saving these
+        objects with ease: both the values and explicit dimensions (grid)
+        are saved.
 
     See Also:
         The `xarray`_ package provides n-dimensional arrays which have similar
@@ -368,7 +374,7 @@ class Field(TypedClass):
         if m != n:
             raise ValueError("Shape of the values {} does not match the grid {}".format(m, n))
 
-    def __init__(self, values, dimensions):
+    def __init__(self, values, dimensions, **meta):
         if isinstance(values, (pd.Series, pd.DataFrame, pd.SparseDataFrame, pd.SparseSeries)):
             values = values.values
         self.values = values
