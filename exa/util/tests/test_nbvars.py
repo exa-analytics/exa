@@ -36,7 +36,7 @@ class TestNumbafy(TestCase):
         """Test failure on untyped name."""
         fn = "Sin(x)/x"
         func = numbafy(fn, "x")
-        with self.assertRaises(TypingError):
+        with self.assertRaises((TypingError, NameError)):
             func(self.sca)
 
     def test_complex_strings(self):

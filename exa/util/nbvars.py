@@ -76,12 +76,14 @@ def numbafy(fn, args, compiler="jit", **nbkws):
     if isinstance(fn, sy.Expr):
         fn = sy.expand_func(fn)
     lamstr = "lambda " + ", ".join([str(a) for a in args]) + ": " + str(fn)
-    # Compile
+    # Python eval and docs
+    func = eval(lamstr, npvars)
+    func.__doc__ = "Compiled function\n\n{}".format(lamstr)
+    # Machine code compilation
     try:
-        func = compiler(**kwargs)(eval(lamstr, npvars))
+        func = compiler(**kwargs)(func)
     except RuntimeError:
         kwargs.pop("cache")
-        func = compiler(**kwargs)(eval(lamstr, npvars))
+        func = compiler(**kwargs)(func)
     # Add documentation/signature
-    func.__doc__ = "Compiled function\n\n{}".format(lamstr)
     return func
