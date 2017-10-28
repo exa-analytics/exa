@@ -21,7 +21,7 @@ class TestNumbafy(TestCase):
     def setUp(self):
         self.sca = 0.1
         self.arr = np.random.rand(10).astype("float32")
-        self.sig = ["float32(float32)"]
+        self.sig = ["float32(float32, float32, float32)"]
 
     def test_simple_strings(self):
         """Test string functions."""
