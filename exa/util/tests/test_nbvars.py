@@ -21,12 +21,13 @@ class TestNumbafy(TestCase):
     def setUp(self):
         self.sca = 0.1
         self.arr = np.random.rand(10).astype("float32")
-        self.sig = ["float32(float32, float32, float32)"]
+        self.sig1 = ["float32(float32)"]
+        self.sig3 = ["float32(float32, float32, float32)"]
 
     def test_simple_strings(self):
         """Test string functions."""
         fn = "sin(x)/x"
-        func = numbafy(fn, "x", compiler="vectorize", signatures=self.sig)
+        func = numbafy(fn, "x", compiler="vectorize", signatures=self.sig1)
         self.assertTrue(np.allclose(func(self.arr),
                                     np.sin(self.arr)/self.arr))
         func = numbafy(fn, "x", compiler="jit")
@@ -43,7 +44,7 @@ class TestNumbafy(TestCase):
     def test_complex_strings(self):
         """Test more complicated string functions."""
         fn = "arccos(x)/y + exp(-y) + mod(z, 2)"
-        func = numbafy(fn, ("x", "y", "z"), compiler="vectorize", signatures=self.sig)
+        func = numbafy(fn, ("x", "y", "z"), compiler="vectorize", signatures=self.sig3)
         result = func(self.arr, self.arr, self.arr)
         check = np.arccos(self.arr)/self.arr + np.exp(-self.arr) + np.mod(self.arr, 2)
         self.assertTrue(np.allclose(result, check))
@@ -56,7 +57,7 @@ class TestNumbafy(TestCase):
         """Test sympy expressions."""
         x, y, z = sy.symbols("x y z")
         fn = sy.acos(x)/y + sy.exp(-y) + sy.Mod(z, 2)
-        func = numbafy(fn, (x, y, z), compiler="vectorize", signatures=self.sig)
+        func = numbafy(fn, (x, y, z), compiler="vectorize", signatures=self.sig3)
         result = func(self.arr, self.arr, self.arr)
         check = np.arccos(self.arr)/self.arr + np.exp(-self.arr) + np.mod(self.arr, 2)
         self.assertTrue(np.allclose(result, check))
@@ -65,7 +66,7 @@ class TestNumbafy(TestCase):
         """Test symengine."""
         x, y, z = sge.var("x y z")
         fn = sge.acos(x)/y + sge.exp(-z)
-        func = numbafy(fn, (x, y, z), compiler="vectorize", signatures=self.sig)
+        func = numbafy(fn, (x, y, z), compiler="vectorize", signatures=self.sig3)
         result = func(self.arr, self.arr, self.arr)
         check = np.arccos(self.arr)/self.arr + np.exp(-self.arr)
         self.assertTrue(np.allclose(result, check))
