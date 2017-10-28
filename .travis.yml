@@ -43,12 +43,13 @@ before_install:
 
 # There are a lot of requirements here because we do coverage, testing, reporting, doc building
 install:
-  - conda install python=$TRAVIS_PYTHON_VERSION
-  - conda install -c conda-forge six numpy pandas pytables numba sympy
-  - conda install symengine -c symengine -c conda-forge
-  - conda install python-symengine -c symengine -c conda-forge
-  - conda install -c conda-forge sphinx sphinx_rtd_theme ply pandoc pypandoc nbsphinx
-  - conda install -c conda-forge python-coveralls nose ipython
+  - conda install -q python=$TRAVIS_PYTHON_VERSION
+  - conda install -q -c conda-forge six numpy pandas pytables numba sympy
+  - conda install -q symengine -c symengine -c conda-forge
+  - conda install -q python-symengine -c symengine -c conda-forge
+  - conda install -q -c conda-forge sphinx sphinx_rtd_theme ply 
+  - conda install -c conda-forge pandoc pypandoc nbsphinx
+  - conda install -q -c conda-forge python-coveralls nose ipython
   - pip install travis-sphinx codacy-coverage coverage
   - pip install .
 
