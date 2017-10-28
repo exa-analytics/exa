@@ -1,14 +1,15 @@
-language: python
-
 matrix:
     include:
         - os: linux
+          language: python
           python: 2.7
           env: TOXENV=py2.7
         - os: linux
+          language: python
           python: 3.5
           env: TOXENV=py3.5
         - os: linux
+          language: python
           python: 3.6
           env: TOXENV=py3.7
         - os: osx
@@ -34,20 +35,20 @@ before_install:
       sh -e /etc/init.d/xvfb start;
       sleep 3;
     fi
-  - sh miniconda.sh -b -p ~/miniconda
+  - sh miniconda.sh -b -p $HOME/miniconda
   - export NUMBA_DISABLE_JIT=1    # For coverage report
-  - export PATH="~/miniconda/bin:$PATH"
+  - export PATH="$HOME/miniconda/bin:$PATH"
   - conda config --set always_yes yes --set changeps1 no
-  - conda update -q --all
+  - conda update -y --all
 
 # There are a lot of requirements here because we do coverage, testing, reporting, doc building
 install:
-  - conda install -q python=$TRAVIS_PYTHON_VERSION
-  - conda install -q -c conda-forge six numpy pandas pytables numba sympy
-  - conda install -q -c symengine symengine
-  - conda install -q -c symengine python-symengine
-  - conda install -q -c conda-forge sphinx sphinx_rtd_theme ply pandoc pypandoc nbsphinx
-  - conda install -q -c conda-forge python-coveralls nose ipython
+  - conda install python=$TRAVIS_PYTHON_VERSION
+  - conda install -c conda-forge six numpy pandas pytables numba sympy
+  - conda install symengine -c symengine -c conda-forge
+  - conda install python-symengine -c symengine -c conda-forge
+  - conda install -c conda-forge sphinx sphinx_rtd_theme ply pandoc pypandoc nbsphinx
+  - conda install -c conda-forge python-coveralls nose ipython
   - pip install travis-sphinx codacy-coverage coverage
   - pip install .
 
