@@ -34,6 +34,7 @@ Warning:
 
 .. _NIST: https://www.nist.gov/
 """
+import six as _six
 import sys as _sys
 from pandas import read_json as _rj
 from exa import Editor as _Editor
@@ -147,7 +148,7 @@ def _create():
         setattr(_this, element.symbol, element)
 
 
-def as_df():
+def _df():
     """Return a dataframe of isotopes."""
     records = []
     for sym, ele in vars(_this).items():
@@ -158,6 +159,20 @@ def as_df():
     return _DF.from_records(records)
 
 
+def get(key):
+    """
+    Retrieve an element by symbol or by proton number (Z).
+
+    .. code-block:: python
+
+        isotopes.get(92)
+        isotopes.get("U")
+    """
+    if isinstance(key, _six.integer_types):
+        key = df.loc[df['Z'] == key, 'symbol'].values[0]
+    return getattr(_this, key)
+
+
 # Data order of isotopic (nuclear) properties:
 _columns = ("A", "Z", "af", "afu", "radius", "g", "mass", "massu", "name",
             "eneg", "quad", "spin", "symbol", "color")
@@ -165,3 +180,4 @@ _this = _sys.modules[__name__]         # Reference to this module
 _path = _resource("isotopes.json.bz2")
 if not hasattr(_this, "H"):
     _create()
+    df = _df()
