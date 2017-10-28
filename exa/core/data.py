@@ -6,6 +6,8 @@ Data Objects
 ########################
 Exa provides a `pandas`_ like Series and DataFrame object which support saving
 and loading metadata when using the HDF format.
+
+.. _pandas: http://pandas.pydata.org/
 """
 import six
 import warnings

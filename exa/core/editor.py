@@ -158,7 +158,7 @@ class Editor(TypedClass):
             case (bool): Consider character case (default true)
 
         Returns:
-            found (:class:`~exa.core.editor.Found`): Enumerated results
+            found (OrderedDict): Dictionary of results
         """
         case = kwargs.pop("case", True)
         if case:
@@ -205,6 +205,9 @@ class Editor(TypedClass):
             reverse (bool): Search in reverse
             wrap (bool): At end, continue search at beginning (and vice versa)
             cursor (int): Set the line cursor prior to search (optional)
+
+        Returns:
+            tup (tuple): Tuple of line number and text for first match
         """
         case = kwargs.pop("case", True)
         reverse = kwargs.pop("reverse", False)
@@ -230,14 +233,14 @@ class Editor(TypedClass):
         .. code-block:: python
 
             ed = Editor(text)
-            found = ed.regex("[a-z0-9]", re.compile("text\nother", re.MULTILINE))
+            found = ed.regex("expr")
 
         Args:
             patterns: Regular expressions
             flags: Python regular expression flags
 
         Returns:
-            found (:class:`~exa.core.editor.Found`): Enumerated results
+            found (OrderedDict): Dictionary of results
         """
         flags = kwargs.pop("flags", re.DOTALL)
         regexes = []
@@ -264,11 +267,14 @@ class Editor(TypedClass):
         multiline) are not supported by this function.
 
         Args:
-            pattern (regex): Regular expression to search for
+            patterns (regex): Regular expression to search for
             flags (int): Regularexpression compilation flags
             reverse (bool): Search backwards
             wrap (bool): Continue search from beginning/end of file (wraparound end of file)
             cursor (int): Set the cursor prior to searching
+
+        Returns:
+            tup (tuple): Tuple of line number and text for first match
         """
         flags = kwargs.pop("flags", 0)
         reverse = kwargs.pop("reverse", False)
@@ -298,7 +304,7 @@ class Editor(TypedClass):
         are arguments for ``range``.
 
         See Also:
-            :func:`~exa.core.editor.find_next`,
+            :func:`~exa.core.editor.find_next` and/or
             :func:`~exa.core.editor.regex_next`
         """
         n = len(self)
