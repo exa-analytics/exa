@@ -55,10 +55,9 @@ install:
   - cmd: conda update -q --all
   - cmd: conda install -q -c conda-forge six numpy pandas pytables numba
   - cmd: conda install -q -c conda-forge cmake cython sympy
-  - cmd: conda install -q symengine -c symengine -c conda-forge
+  - cmd: conda install symengine -c symengine -c conda-forge
   - cmd: conda install -q python-symengine -c symengine -c conda-forge
-  - cmd: conda install -q -c conda-forge sphinx sphinx_rtd_theme ply pandoc pypandoc nbsphinx
-  - cmd: conda install -q -c conda-forge python-coveralls nose
+  - cmd: conda install -q -c conda-forge nose
   - cmd: pip install .
 
 build: false
