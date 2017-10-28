@@ -50,14 +50,12 @@ install:
           {$root = "C:\Miniconda-x64"}
         $env:path="$root;$root\Scripts;$root\Library\bin;$($env:path)"
 
-  - cmd: set NUMBA_DISABLE_JIT 1
   - cmd: conda config --set show_channel_urls true
   - cmd: conda config --set always_yes yes --set changeps1 no
   - cmd: conda update -q --all
-  - cmd: conda install -q -c conda-forge numpy scipy matplotlib seaborn networkx pandas nose numba pytables six
+  - cmd: conda install -q -c conda-forge six numpy pandas pytables numba
   - cmd: conda install -q -c conda-forge cmake cython sympy
-  - cmd: conda install -q -c conda-forge symengine
-  - cmd: conda install -q -c conda-forge python-symengine
+  - cmd: conda install -q -c conda-forge symengine python-symengine
   - cmd: pip install .
 
 build: false

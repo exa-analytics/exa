@@ -14,8 +14,7 @@ from sys import getsizeof
 from uuid import uuid4
 from tempfile import mkdtemp
 from unittest import TestCase
-from exa.core.container import Container
-from exa.core.data import Field
+from exa import Container, Field
 
 
 class TestContainer(TestCase):

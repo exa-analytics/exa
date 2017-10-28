@@ -22,20 +22,8 @@ requirements:
   run:
     - python
     - numpy
-    - scipy
-    - matplotlib
-    - seaborn
-    - networkx
     - pandas
-    - notebook
-    - nose
-    - numba
-    - six
-    - pytables
-    - sphinx
-    - sphinx_rtd_theme
-    - pandoc
-    - nbsphinx
+    - tables
 
 test:
   imports:

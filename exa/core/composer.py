@@ -10,11 +10,9 @@ small to medium sized text files are used as inputs, parameter files, or config
 files. The :class:`~exa.core.composer.Composer` is used to build such files.
 """
 import re
-import string
 from copy import copy
-from .editor import Editor
 from exa.typed import Typed
-_fmttr = string.Formatter()
+from .editor import Editor
 
 
 class Composer(Editor):
