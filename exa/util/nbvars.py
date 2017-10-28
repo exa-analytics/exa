@@ -68,11 +68,11 @@ def numbafy(fn, args, compiler="jit", **nbkws):
         compiler = compiler_
     if compiler in (nb.jit, nb.njit, nb.autojit):
         kwargs.update(jitkwargs)
-        sig = nbkws.pop("signature", [])
+        sig = nbkws.pop("signature", None)
     else:
         kwargs.update(veckwargs)
-        sig = nbkws.pop("signatures", [])
-        if sig == []:
+        sig = nbkws.pop("signatures", None)
+        if sig is None:
             warn("Vectorization without 'signatures' can lead to wrong results!")
     kwargs.update(nbkws)
     # Expand sympy expressions and create string for eval
@@ -83,10 +83,16 @@ def numbafy(fn, args, compiler="jit", **nbkws):
     func = eval(lamstr, npvars)
     func.__doc__ = "Dynamically compiled function:\n\n{}\n".format(lamstr)
     # Machine code compilation
-    try:
-        func = compiler(sig, **kwargs)(func)
-    except RuntimeError:
-        kwargs.pop("cache")
-        func = compiler(sig, **kwargs)(func)
-    # Add documentation/signature
+    if sig is None:
+        try:
+            func = compiler(**kwargs)(func)
+        except RuntimeError:
+            kwargs['cache'] = False
+            func = compiler(**kwargs)(func)
+    else:
+        try:
+            func = compiler(sig, **kwargs)(func)
+        except RuntimeError:
+            kwargs['cache'] = False
+            func = compiler(sig, **kwargs)(func)
     return func
