@@ -26,7 +26,7 @@ class TestIsotopes(TestCase):
 
     def test_isotope(self):
         """Test isotope attributes."""
-        self.assertEqual(isotopes.H['1'].Z, 1)
-        self.assertEqual(isotopes.H['1'].A, 1)
-        self.assertGreater(isotopes.H['1'].mass, 1.007)
-        self.assertGreater(isotopes.H['1'].radius, 0.6)
+        self.assertEqual(isotopes.H[1].Z, 1)
+        self.assertEqual(isotopes.H[1].A, 1)
+        self.assertGreater(isotopes.H[1].mass, 1.007)
+        self.assertGreater(isotopes.H[1].radius, 0.6)
