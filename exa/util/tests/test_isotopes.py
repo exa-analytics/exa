@@ -14,7 +14,7 @@ class TestIsotopes(TestCase):
     """Tests for isotope and element generation."""
     def test_created(self):
         """Check that elements and isotope objects were created."""
-        iso = isotopes.as_df()
+        iso = isotopes.df
         for sym in iso['symbol'].unique():
             self.assertTrue(hasattr(isotopes, sym))
 
