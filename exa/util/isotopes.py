@@ -71,7 +71,7 @@ class Element(object):
         return getattr(self, key)
 
     def __repr__(self):
-        return self.symbol
+        return "{}({}, {})".format(self.symbol, self.Z, self.mass)
 
 
 class Isotope(object):
@@ -117,7 +117,7 @@ class Isotope(object):
         self.color = color
 
     def __repr__(self):
-        return str(self.A) + self.symbol
+        return "{}({}, {})".format(self.symbol, self.A, self.Z)
 
 
 def _create():
