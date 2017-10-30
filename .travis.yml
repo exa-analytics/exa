@@ -23,7 +23,7 @@ matrix:
           env: PYTHONVER=3.6
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
       wget http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
       #sudo Xvfb :99 -ac -screen 0 1024x768x8; echo ok;
     else
