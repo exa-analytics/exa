@@ -50,7 +50,7 @@ class Element(object):
 
         from exa.util import isotopes
         H = isotopes.H         # Hydrogen element (isotope averaged)
-        D = isotopes.H['2']    # Deuterium (2H, a specific isotope)
+        D = isotopes.H[2]      # Deuterium (2H, a specific isotope)
         isotopes.H.isotopes    # List of available isotopes
     """
     @property
@@ -66,8 +66,8 @@ class Element(object):
         self.color = color
 
     def __getitem__(self, key):
-        if isinstance(key, str):
-            return getattr(self, "_"+key)
+        if isinstance(key, _six.integer_types):
+            return getattr(self, "_"+str(key))
         return getattr(self, key)
 
     def __repr__(self):
@@ -81,7 +81,8 @@ class Isotope(object):
     .. code-block:: python
 
         from exa.util import isotopes
-        isotopes.U['235'].mass    # Mass of 235-U
+        u235 = isotopes.U[235]    # Specific isotope of Uranium
+        u235.mass                 # Mass of 235 U isotope
 
     Attributes:
         A (int): Mass number
