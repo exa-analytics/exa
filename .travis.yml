@@ -3,48 +3,45 @@ matrix:
         - os: linux
           language: python
           python: 2.7
-          env: TOXENV=py2.7
+          env: PYTHONVER=2.7
         - os: linux
           language: python
           python: 3.5
-          env: TOXENV=py3.5
+          env: PYTHONVER=3.5
         - os: linux
           language: python
           python: 3.6
-          env: TOXENV=py3.7
+          env: PYTHONVER=3.7
         - os: osx
           language: generic
-          sudo: required
-          env: TOXENV=py2.7
+          env: PYTHONVER=2.7
         - os: osx
           language: generic
-          sudo: required
-          env: TOXENV=py3.5
+          env: PYTHONVER=3.5
         - os: osx
           language: generic
-          sudo: required
-          env: TOXENV=py3.6
+          env: PYTHONVER=3.6
 
 before_install:
-  - if [ $TRAVIS_OS_NAME == "osx" ]; then
-      sudo brew install wget --with-libressl;
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       wget http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
-      sudo Xvfb :99 -ac -screen 0 1024x768x8; echo ok;
+      #sudo Xvfb :99 -ac -screen 0 1024x768x8; echo ok;
     else
       wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-      export DISPLAY=:99.0;
-      sh -e /etc/init.d/xvfb start;
-      sleep 3;
+      #export DISPLAY=:99.0;
+      #sh -e /etc/init.d/xvfb start;
+      #sleep 3;
     fi
   - sh miniconda.sh -b -p $HOME/miniconda
   - export NUMBA_DISABLE_JIT=1    # For coverage report
   - export PATH="$HOME/miniconda/bin:$PATH"
   - conda config --set always_yes yes --set changeps1 no
-  - conda update -y --all
+  - conda update --all
 
 # There are a lot of requirements here because we do coverage, testing, reporting, doc building
 install:
-  - conda install -q python=$TRAVIS_PYTHON_VERSION
+  - conda create -n test python=$PYTHONVER
+  - source activate test
   - conda install -q -c conda-forge six numpy pandas pytables numba sympy
   - conda install -q symengine -c symengine -c conda-forge
   - conda install -q python-symengine -c symengine -c conda-forge
