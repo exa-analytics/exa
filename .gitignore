@@ -37,7 +37,8 @@ target/
 *.manifest
 *.spec
 pip-log.txt
-pip-delete-this-directory.txt
+pip-delgeete-this-directory.txt
+.coverage
 .coverage.*
 nosetests.xml
 coverage.xml

@@ -12,26 +12,26 @@ matrix:
       language: python
       python: 3.6
       env: PYTHONVER=3.6
-    - os: osx
-      language: generic
-      sudo: required
-      env: PYTHONVER=2.7
+
+#    - os: osx
+#      language: generic
+#      sudo: required
+#      env: PYTHONVER=2.7
 
 #     brew update;
 #     brew upgrade wget;
 #     wget http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
+#sudo Xvfb :99 -ac -screen 0 1024x768x8; 
+#      echo ok;
+#export DISPLAY=:99.0;
+#      sh -e /etc/init.d/xvfb start;
+#      sleep 3;
 
 before_install:
-  - echo $TRAVIS_OS_NAME
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+  - if [ $TRAVIS_OS_NAME == "osx" ]; then
       curl http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -o miniconda.sh;
-      sudo Xvfb :99 -ac -screen 0 1024x768x8; 
-      echo ok;
     else
       wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-      export DISPLAY=:99.0;
-      sh -e /etc/init.d/xvfb start;
-      sleep 3;
     fi;
   - sh miniconda.sh -b -p $HOME/miniconda
   - export NUMBA_DISABLE_JIT=1    # For coverage report
@@ -48,12 +48,13 @@ install:
   - conda install -q python-symengine -c symengine -c conda-forge
   - conda install -q -c conda-forge sphinx sphinx_rtd_theme ply 
   - conda install -c conda-forge pandoc pypandoc nbsphinx
-  - conda install -q -c conda-forge python-coveralls pytest pytest-cov python-coveralls ipython
+  - conda install -q -c conda-forge python-coveralls pytest pytest-cov python-coveralls coverage ipython
   - pip install travis-sphinx codacy-coverage
   - pip install .
 
 script:
-  - pytest
+  - pytest --cov-report xml:.coverage
+  - coverage xml
   - travis-sphinx -n build
 
 after_success:
