@@ -28,12 +28,13 @@ matrix:
 #      sleep 3;
 
 before_install:
-  - if [ ${TRAVIS_OS_NAME} == "osx" ]; then
-      time wget http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh || exit 1
+  - if [ $TRAVIS_OS_NAME == "osx" ]
+    then
+      wget http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh 
     else
-      time wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh || exit 1
+      wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh 
     fi
-  - time bash miniconda.sh -b -p $HOME/miniconda || exit 1
+  - bash miniconda.sh -b -p $HOME/miniconda
   - export NUMBA_DISABLE_JIT=1    # For coverage report
   - export PATH="$HOME/miniconda/bin:$PATH"
   - conda config --set always_yes yes --set changeps1 no
@@ -47,14 +48,13 @@ install:
   - conda install -q symengine -c symengine -c conda-forge
   - conda install -q python-symengine -c symengine -c conda-forge
   - conda install -q -c conda-forge sphinx sphinx_rtd_theme ply 
-  - conda install -c conda-forge pandoc pypandoc nbsphinx
-  - conda install -q -c conda-forge python-coveralls pytest pytest-cov python-coveralls coverage ipython
+  - conda install -c conda-forge pandoc pypandoc nbsphinx ipython
+  - conda install -q -c conda-forge python-coveralls coverage pytest pytest-cov
   - pip install travis-sphinx codacy-coverage
   - pip install .
 
 script:
   - pytest --cov
-  - ls -lisah
   - coverage xml
   - travis-sphinx -n build
 

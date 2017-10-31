@@ -1,47 +1,45 @@
+# SDK v7.0 MSVC Express 2008's SetEnv.cmd script will fail if the
+# /E:ON and /V:ON options are not enabled in the batch script interpreter
+# See: http://stackoverflow.com/a/13751649/163740
 environment:
-  # SDK v7.0 MSVC Express 2008's SetEnv.cmd script will fail if the
-  # /E:ON and /V:ON options are not enabled in the batch script interpreter
-  # See: http://stackoverflow.com/a/13751649/163740
-  CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\misc\\appveyor\\run_with_env.cmd"
+    CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\misc\\appveyor\\run_with_env.cmd"
 
-  matrix:
     # Pre-installed Python versions, which Appveyor may upgrade to
     # a later point release.
     # See: http://www.appveyor.com/docs/installed-software#python
+    matrix:
+        - MINICONDA: C:\Miniconda-x64
+          PYTHON_VERSION: 2.7
 
-#   - MINICONDA: C:\Miniconda-x64
-#     PYTHON_VERSION: 2.7
-#
-#   - MINICONDA: C:\Miniconda
-#     PYTHON_VERSION: 2.7
+        - MINICONDA: C:\Miniconda
+          PYTHON_VERSION: 2.7
 
-    - MINICONDA: C:\Miniconda35-x64
-      PYTHON_VERSION: 3.5
+        - MINICONDA: C:\Miniconda35-x64
+          PYTHON_VERSION: 3.5
 
-    - MINICONDA: C:\Miniconda35
-      PYTHON_VERSION: 3.5
+        - MINICONDA: C:\Miniconda35
+          PYTHON_VERSION: 3.5
 
-    - MINICONDA: C:\Miniconda36-x64
-      PYTHON_VERSION: 3.6
+        - MINICONDA: C:\Miniconda36-x64
+          PYTHON_VERSION: 3.6
 
-    - MINICONDA: C:\Miniconda36
-      PYTHON_VERSION: 3.6
+        - MINICONDA: C:\Miniconda36
+          PYTHON_VERSION: 3.6
 
 install:
-  # Use the pre-installed Miniconda for the desired arch
-  - "SET PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%"
-
-  # Install dependencies
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q --all
-  - conda install -q -c conda-forge six numpy pandas pytables numba
-  - conda install -q -c conda-forge cmake cython sympy
-  - conda install symengine -c symengine -c conda-forge
-  - conda install -q python-symengine -c symengine -c conda-forge
-  - conda install -q -c conda-forge nose
-  - pip install .
+    # Use the pre-installed Miniconda for the desired arch
+    - "SET PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%"
+    # Install dependencies
+    - conda config --set always_yes yes --set changeps1 no
+    - conda update -q --all
+    - conda install -q -c conda-forge six numpy pandas pytables numba
+    - conda install -q -c conda-forge cmake cython sympy
+    - conda install -q symengine -c symengine -c conda-forge
+    - conda install -q python-symengine -c symengine -c conda-forge
+    - conda install -q -c conda-forge pytest
+    - pip install .
 
 build: false
 
 test_script:
-  - cmd: nosetests
+    - cmd: pytest
