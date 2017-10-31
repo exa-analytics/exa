@@ -17,11 +17,12 @@ matrix:
       sudo: required
       env: PYTHONVER=2.7
 
-before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
 #     brew update;
 #     brew upgrade wget;
 #     wget http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       curl http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -o miniconda.sh;
       sudo Xvfb :99 -ac -screen 0 1024x768x8; 
       echo ok;
