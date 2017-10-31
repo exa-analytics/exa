@@ -54,7 +54,6 @@ install:
 
 script:
   - pytest
-  - coverage xml
   - travis-sphinx -n build
 
 after_success:
