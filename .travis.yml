@@ -28,12 +28,12 @@ matrix:
 #      sleep 3;
 
 before_install:
-  - if [ $TRAVIS_OS_NAME == "osx" ]; then
-      curl http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -o miniconda.sh;
+  - if [ ${TRAVIS_OS_NAME} == "osx" ]; then
+      time wget http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh || exit 1
     else
-      wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi;
-  - sh miniconda.sh -b -p $HOME/miniconda
+      time wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh || exit 1
+    fi
+  - time bash miniconda.sh -b -p $HOME/miniconda || exit 1
   - export NUMBA_DISABLE_JIT=1    # For coverage report
   - export PATH="$HOME/miniconda/bin:$PATH"
   - conda config --set always_yes yes --set changeps1 no
