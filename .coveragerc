@@ -1,0 +1,12 @@
+[paths]
+source = exa
+
+[run]
+branch = True
+source = exa
+parallel = true
+
+[report]
+show_missing = true
+precision = 2
+omit = *migrations*

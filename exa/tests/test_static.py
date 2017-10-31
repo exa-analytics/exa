@@ -6,14 +6,13 @@ Tests for :mod:`~exa.static`
 #############################################
 """
 import os
-from unittest import TestCase
 from exa import static
 
 
-class TestDataDir(TestCase):
-    """Test that the static data directory is correctly found."""
-    def test_staticdir(self):
-        self.assertTrue(os.path.isdir(static.staticdir()))
+def test_static_dir():
+    """Test :func:`~exa.static.staticdir`."""
+    assert os.path.isdir(static.staticdir())
 
-    def test_resource(self):
-        self.assertTrue(os.path.exists(static.resource("units.json.bz2")))
+
+def test_resource():
+    assert os.path.exists(static.resource("units.json.bz2"))
