@@ -20,6 +20,9 @@ if not hasattr(bz2, "open"):
     bz2.open = bz2.BZ2File
 
 
+_blank = re.compile("^\s*$")
+
+
 def read_file(path, encoding="utf-8"):
     """
     Read in a text file (including compressed text files) to a list of lines.
@@ -340,6 +343,29 @@ class Editor(TypedClass):
             self.cursor = n1 if self.cursor == 0 else self.cursor - 1
             positions = ((self.cursor, 0, -1), (n1, self.cursor, -1))
         return positions
+
+    def next_blank_line(self, n=1, cursor=None, wrap=False, reverse=False):
+        """
+        Find the position of the next n blank lines (containing no characters
+        but whitespace).
+
+        Args:
+            n (int): Number of consecutive blank lines to search for
+            cursor (int): Cursor position to start from
+
+        Returns:
+            tup (tuple): Tuple of line number and text (whitespace)
+        """
+        consecutive = 0
+        positions = self._next_positions(wrap, reverse, cursor)
+        for start, stop, inc in positions:
+            for i in range(start, stop, inc):
+                if _blank.search(self.lines[i]):
+                    consecutive += 1
+                else:
+                    consecutive = 0
+                if consecutive == n:
+                    return i, self.lines[i]
 
     def to_stream(self):
         """Return a stream object of the current editor."""

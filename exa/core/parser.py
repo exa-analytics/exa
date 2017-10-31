@@ -76,8 +76,15 @@ class SectionsParsingFailure(Exception):
     def __init__(self, parser, startlines, endlines):
         m = len(startlines)
         n = len(endlines)
-        msg = "Found {}, {} start, end lines for parser {}".format(m, n, parser)
+        msg = "Found {} starting and {} ending lines for parser {}".format(m, n, parser)
         super(SectionsParsingFailure, self).__init__(msg)
+
+
+class ParsingError(Exception):
+    """Raised when parsing failure (on sections or otherwise) occurs."""
+    def __init__(self, parser, info):
+        msg = "Parsing failure for parser {} when searching {}".format(parser, info)
+        super(ParsingError, self).__init__(msg)
 
 
 class Sections(DataFrame):
@@ -271,7 +278,11 @@ class Parser(Editor):
                     start, end = [], []
             # Sanity check
             if len(start) != len(end):
-                raise SectionsParsingFailure(parser, starts, ends)
+                raise SectionsParsingFailure(parser, start, end)
+            elif any(s is None for s in start):
+                raise ParsingError(parser, "start lines.")
+            elif any(e is None for e in end):
+                raise ParsingError(parser, "end lines.")
             starts += [s[0] for s in start]
             ends += [e[0]+1 for e in end]
             parsers += [parser]*len(start)
