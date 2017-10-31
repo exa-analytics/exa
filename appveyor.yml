@@ -9,52 +9,37 @@ environment:
     # a later point release.
     # See: http://www.appveyor.com/docs/installed-software#python
 
-    - PYTHON: "C:\\Miniconda-x64"
-      PYTHON_ARCH: "64"
-      CONDA_PLATFORM: "win-64"
-      CONDA_PYSUFFIX: "py27"
+    - MINICONDA: C:\Miniconda-x64
+      PYTHON_VERSION: 2.7
 
-    - PYTHON: "C:\\Miniconda"
-      PYTHON_ARCH: "32"
-      CONDA_PLATFORM: "win-32"
-      CONDA_PYSUFFIX: "py27"
+    - MINICONDA: C:\Miniconda
+      PYTHON_VERSION: 2.7
 
-    - PYTHON: "C:\\Miniconda35-x64"
-      PYTHON_ARCH: "64"
-      CONDA_PLATFORM: "win-64"
-      CONDA_PYSUFFIX: "py35"
+    - MINICONDA: C:\Miniconda35-x64
+      PYTHON_VERSION: 3.5
 
-    - PYTHON: "C:\\Miniconda35"
-      PYTHON_ARCH: "32"
-      CONDA_PLATFORM: "win-32"
-      CONDA_PYSUFFIX: "py35"
+    - MINICONDA: C:\\Miniconda35
+      PYTHON_VERSION: 3.5
 
-    - PYTHON: "C:\\Miniconda36-x64"
-      PYTHON_ARCH: "64"
-      CONDA_PLATFORM: "win-64"
-      CONDA_PYSUFFIX: "py36"
+    - MINICONDA: C:\Miniconda36-x64
+      PYTHON_VERSION: 3.6
 
-    - PYTHON: "C:\\Miniconda36"
-      PYTHON_ARCH: "32"
-      CONDA_PLATFORM: "win-32"
-      CONDA_PYSUFFIX: "py36"
-
-platform:
-  - x64
+    - PYTHON: C:\\Miniconda36
+      PYTHON_VERSION: 3.6
 
 install:
   # Use the pre-installed Miniconda for the desired arch
-  - cmd: "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+  - "SET PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%"
 
   # Install dependencies
-  - cmd: conda config --set always_yes yes --set changeps1 no
-  - cmd: conda update -q --all
-  - cmd: conda install -q -c conda-forge six numpy pandas pytables numba
-  - cmd: conda install -q -c conda-forge cmake cython sympy
-  - cmd: conda install symengine -c symengine -c conda-forge
-  - cmd: conda install -q python-symengine -c symengine -c conda-forge
-  - cmd: conda install -q -c conda-forge nose
-  - cmd: pip install .
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q --all
+  - conda install -q -c conda-forge six numpy pandas pytables numba
+  - conda install -q -c conda-forge cmake cython sympy
+  - conda install symengine -c symengine -c conda-forge
+  - conda install -q python-symengine -c symengine -c conda-forge
+  - conda install -q -c conda-forge nose
+  - pip install .
 
 build: false
 
