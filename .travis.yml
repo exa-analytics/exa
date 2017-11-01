@@ -44,11 +44,19 @@ install:
     - pip install .
 
 script:
-    - pytest --cov
-    - coverage xml
-    - travis-sphinx -n build
+    - if [[ $TRAVIS_OS_NAME == "linux" ]]; then
+          pytest --cov;
+          coverage xml;
+      fi
+    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.6 ]]; then
+          travis-sphinx -n build;
+      fi
 
 after_success:
-    - coveralls
-    - python-codacy-coverage -r coverage.xml
-    - travis-sphinx -n deploy
+    - if [[ $TRAVIS_OS_NAME == "linux" ]]; then
+          coveralls;
+          python-codacy-coverage -r coverage.xml;
+      fi
+    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.6 ]]; then
+          travis-sphinx -n deploy;
+      fi
