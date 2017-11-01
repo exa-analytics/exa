@@ -6,53 +6,57 @@ Tests for :mod:`~exa.core.data`
 #############################################
 Test data objects' behavior.
 """
-#import os
-#import numpy as np
-#import pandas as pd
-#from uuid import uuid4
-#from tempfile import mkdtemp
-#from unittest import TestCase
-#from exa.core.data import (DataSeries, DataFrame, SparseDataSeries,
-#                           SparseDataFrame, Index, Column, _Param)
-#
-#
-## Some simple Param tests
-#class FooSeries(DataSeries):
-#    idx = Index()
-#
-#
-#class FooMSeries(DataSeries):
-#    idx0 = Index(level=0)
-#    idx1 = Index(level=1)
-#
-#
-#class FooFrame(DataFrame):
-#    idx = Index()
-#    a0 = Column(int, required=True, verbose=False)
-#    b1 = Column((float, str))
-#
-#    @property
-#    def _constructor(self):
-#        return FooFrame
-#
-#
-#class BarFrame(DataFrame):
-#    idx0 = Index(int, level=0, verbose=False)
-#    idx1 = Index(str, level=1, verbose=False)
-#    a0 = Column(int, required=True, verbose=False)
-#    b1 = Column((float, str))
-#
-#
-## Testers (_Tester is a mixin with some 'universal' tests)
-#class _Tester(TestCase):
-#    """This is a mixin tester - see below for usage."""
-#    def test_meta(self):
-#        """Check that meta exists."""
-#        self.assertIsInstance(self.d1.meta, dict)
-#        self.assertDictEqual(self.d1.meta, {'uni': 42})
-#        with self.assertRaises(TypeError):
-#            self.d0.meta = ["universe", 42]
-#
+import os
+import pytest
+import numpy as np
+import pandas as pd
+from uuid import uuid4
+from tempfile import mkdtemp
+from exa.core.data import (DataSeries, DataFrame, SparseDataSeries,
+                           SparseDataFrame, Index, Column, _Param)
+
+
+# Some simple Param tests
+class FooSeries(DataSeries):
+    idx = Index()
+
+
+class FooMSeries(DataSeries):
+    idx0 = Index(level=0)
+    idx1 = Index(level=1)
+
+
+class FooFrame(DataFrame):
+    idx = Index()
+    a0 = Column(int, required=True, verbose=False)
+    b1 = Column((float, str))
+
+    @property
+    def _constructor(self):
+        return FooFrame
+
+
+class BarFrame(DataFrame):
+    idx0 = Index(int, level=0, verbose=False)
+    idx1 = Index(str, level=1, verbose=False)
+    a0 = Column(int, required=True, verbose=False)
+    b1 = Column((float, str))
+
+
+params = [DataSeries, DataFrame, FooSeries]
+
+@pytest.fixture(scope="session", params=params)
+def data(request):
+    return request.param(np.random.rand(10), meta={'ans': 42})
+
+
+def test_meta(data):
+    """Check that meta exists."""
+    assert isinstance(data.meta, dict)
+    assert data.meta['ans'] == 42
+    with pytest.raises(TypeError):
+        data.meta = [42]
+
 #    def test_pdcons(self):
 #        """Test that the pandas constructor is correct."""
 #        self.assertIsInstance(self.d0, self.d0._constructor_pandas)
