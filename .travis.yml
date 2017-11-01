@@ -1,50 +1,51 @@
 matrix:
-  include:
-    - os: linux
-      language: python
-      python: 2.7
-      env: PYTHONVER=2.7
-    - os: linux
-      language: python
-      python: 3.5
-      env: PYTHONVER=3.5
-    - os: linux
-      language: python
-      python: 3.6
-      env: PYTHONVER=3.6
+    include:
+        - os: linux
+          language: python
+          python: 2.7
+          env: PYTHONVER=2.7
+
+        - os: linux
+          language: python
+          python: 3.5
+          env: PYTHONVER=3.5
+
+        - os: linux
+          language: python
+          python: 3.6
+          env: PYTHONVER=3.6
 
 before_install:
-  - if [ $TRAVIS_OS_NAME == "osx" ]; then
-      wget http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh 
-    fi
-  - if [ $TRAVIS_OS_NAME == "linux" ]; then
-      wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh 
-    fi
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export NUMBA_DISABLE_JIT=1    # For coverage report
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q --all
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+          wget http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
+      else
+          wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh; 
+      fi
+    - bash miniconda.sh -b -p $HOME/miniconda
+    - export NUMBA_DISABLE_JIT=1    # For coverage report
+    - export PATH="$HOME/miniconda/bin:$PATH"
+    - conda config --set always_yes yes --set changeps1 no
+    - conda update -q --all
 
 # There are a lot of requirements here because we do coverage, testing, reporting, doc building
 install:
-  - conda create -n test python=$PYTHONVER
-  - source activate test
-  - conda install -q -c conda-forge six numpy pandas pytables numba sympy
-  - conda install -q symengine -c symengine -c conda-forge
-  - conda install -q python-symengine -c symengine -c conda-forge
-  - conda install -q -c conda-forge sphinx sphinx_rtd_theme ply 
-  - conda install -c conda-forge pandoc pypandoc nbsphinx ipython
-  - conda install -q -c conda-forge python-coveralls coverage pytest pytest-cov
-  - pip install travis-sphinx codacy-coverage
-  - pip install .
+    - conda create -n test python=$PYTHONVER
+    - source activate test
+    - conda install -q -c conda-forge six numpy pandas pytables numba sympy
+    - conda install -q symengine -c symengine -c conda-forge
+    - conda install -q python-symengine -c symengine -c conda-forge
+    - conda install -q -c conda-forge sphinx sphinx_rtd_theme ply 
+    - conda install -c conda-forge pandoc pypandoc nbsphinx ipython
+    - conda install -q -c conda-forge python-coveralls coverage pytest pytest-cov
+    - pip install travis-sphinx codacy-coverage
+    - pip install .
 
 script:
-  - pytest --cov
-  - coverage xml
-  - travis-sphinx -n build
+    - pytest --cov
+    - coverage xml
+    - travis-sphinx -n build
 
 after_success:
-  - coveralls
-  - python-codacy-coverage -r coverage.xml
-  - travis-sphinx -n deploy
+    - coveralls
+    - python-codacy-coverage -r coverage.xml
+    - travis-sphinx -n deploy
