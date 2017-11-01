@@ -44,7 +44,6 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
-    'IPython.sphinxext.ipython_console_highlighting',    # see https://github.com/spatialaudio/nbsphinx/issues/24
     "nbsphinx"                                           # ipynb autodocs
 ]
 
