@@ -15,12 +15,17 @@ matrix:
           python: 3.6
           env: PYTHONVER=3.6
 
+        - os: osx
+          language: generic
+          env: PYTHONVER=3.6
+
 before_install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-          wget http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
+          MINCONDA=Miniconda3-latest-MacOSX;
       else
-          wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh; 
+          MINCONDA=Miniconda3-latest-Linux;
       fi
+    - wget http://repo.continuum.io/miniconda/$MINICONDA-x86_64.sh -O miniconda.sh
     - bash miniconda.sh -b -p $HOME/miniconda
     - export NUMBA_DISABLE_JIT=1    # For coverage report
     - export PATH="$HOME/miniconda/bin:$PATH"
