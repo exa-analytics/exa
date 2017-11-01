@@ -21,11 +21,11 @@ matrix:
 
 before_install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-          MINCONDA=Miniconda3-latest-MacOSX;
+          MINCONDA_OS=MacOSX;
       else
-          MINCONDA=Miniconda3-latest-Linux;
+          MINCONDA_OS=Linux;
       fi
-    - wget http://repo.continuum.io/miniconda/$MINICONDA-x86_64.sh -O miniconda.sh
+    - wget https://repo.continuum.io/miniconda/Miniconda3-latest-$MINICONDA_OS-x86_64.sh -O miniconda.sh
     - bash miniconda.sh -b -p $HOME/miniconda
     - export NUMBA_DISABLE_JIT=1    # For coverage report
     - export PATH="$HOME/miniconda/bin:$PATH"
