@@ -13,24 +13,11 @@ matrix:
       python: 3.6
       env: PYTHONVER=3.6
 
-#    - os: osx
-#      language: generic
-#      sudo: required
-#      env: PYTHONVER=2.7
-
-#     brew update;
-#     brew upgrade wget;
-#     wget http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
-#sudo Xvfb :99 -ac -screen 0 1024x768x8; 
-#      echo ok;
-#export DISPLAY=:99.0;
-#      sh -e /etc/init.d/xvfb start;
-#      sleep 3;
-
 before_install:
   - if [ $TRAVIS_OS_NAME == "osx" ]; then
       wget http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh 
-    else
+    fi
+  - if [ $TRAVIS_OS_NAME == "linux" ]; then
       wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh 
     fi
   - bash miniconda.sh -b -p $HOME/miniconda
