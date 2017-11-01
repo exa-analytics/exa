@@ -34,8 +34,8 @@ install:
     - conda update -q --all
     - conda install -q -c conda-forge six numpy pandas pytables numba
     - conda install -q -c conda-forge cmake cython sympy
-    - conda install -q symengine -c symengine -c conda-forge
-    - conda install -q python-symengine -c symengine -c conda-forge
+    - conda install -q symengine -c symengine
+    - conda install -q python-symengine -c symengine
     - conda install -q -c conda-forge pytest
     - pip install .
 
