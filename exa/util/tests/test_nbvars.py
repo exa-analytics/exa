@@ -4,69 +4,79 @@
 """
 Tests for :mod:`~exa.util.nbvars`
 ##################################
+Test that :func:`~exa.util.nbvars.numbafy` supports strings, and sympy
+and symengine expressions.
 """
+import pytest
 import numpy as np
 import sympy as sy
 import symengine as sge
 from numba.errors import TypingError
-from unittest import TestCase
 from exa.util.nbvars import numbafy
 
 
-class TestNumbafy(TestCase):
-    """
-    Test that :func:`~exa.util.nbvars.numbafy` supports strings, and sympy
-    and symengine expressions.
-    """
-    def setUp(self):
-        self.sca = 0.1
-        self.arr = np.random.rand(10).astype("float32")
-        self.sig1 = ["float32(float32)"]
-        self.sig3 = ["float32(float32, float32, float32)"]
+@pytest.fixture
+def sca():
+    return 0.1
 
-    def test_simple_strings(self):
-        """Test string functions."""
-        fn = "sin(x)/x"
-        func = numbafy(fn, "x", compiler="vectorize", signatures=self.sig1)
-        self.assertTrue(np.allclose(func(self.arr),
-                                    np.sin(self.arr)/self.arr))
-        func = numbafy(fn, "x", compiler="jit")
-        self.assertTrue(np.isclose(func(self.sca),
-                                   np.sin(self.sca)/self.sca))
+@pytest.fixture
+def arr():
+    return np.random.rand(10).astype("float32")
 
-    def test_fail_string(self):
-        """Test failure on untyped name."""
-        fn = "Sin(x)/x"
-        func = numbafy(fn, "x")
-        with self.assertRaises((TypingError, NameError)):
-            func(self.sca)
+@pytest.fixture
+def sig1():
+    return ["float32(float32)"]
 
-    def test_complex_strings(self):
-        """Test more complicated string functions."""
-        fn = "arccos(x)/y + exp(-y) + mod(z, 2)"
-        func = numbafy(fn, ("x", "y", "z"), compiler="vectorize", signatures=self.sig3)
-        result = func(self.arr, self.arr, self.arr)
-        check = np.arccos(self.arr)/self.arr + np.exp(-self.arr) + np.mod(self.arr, 2)
-        self.assertTrue(np.allclose(result, check))
-        func = numbafy(fn, ("x", "y", "z"))
-        result = func(self.sca, self.sca, self.sca)
-        check = np.arccos(self.sca)/self.sca + np.exp(-self.sca) + np.mod(self.sca, 2)
-        self.assertTrue(np.isclose(result, check))
+@pytest.fixture
+def sig3():
+    return ["float32(float32, float32, float32)"]
 
-    def test_sympy(self):
-        """Test sympy expressions."""
-        x, y, z = sy.symbols("x y z")
-        fn = sy.acos(x)/y + sy.exp(-y) + sy.Mod(z, 2)
-        func = numbafy(fn, (x, y, z), compiler="vectorize", signatures=self.sig3)
-        result = func(self.arr, self.arr, self.arr)
-        check = np.arccos(self.arr)/self.arr + np.exp(-self.arr) + np.mod(self.arr, 2)
-        self.assertTrue(np.allclose(result, check))
 
-    def test_symengine(self):
-        """Test symengine."""
-        x, y, z = sge.var("x y z")
-        fn = sge.acos(x)/y + sge.exp(-z)
-        func = numbafy(fn, (x, y, z), compiler="vectorize", signatures=self.sig3)
-        result = func(self.arr, self.arr, self.arr)
-        check = np.arccos(self.arr)/self.arr + np.exp(-self.arr)
-        self.assertTrue(np.allclose(result, check))
+# Tests start here!
+def test_simple_strings(arr, sig1, sca):
+    """Test string functions."""
+    fn = "sin(x)/x"
+    func = numbafy(fn, "x", compiler="vectorize", signatures=sig1)
+    assert np.allclose(func(arr), np.sin(arr)/arr) == True
+    func = numbafy(fn, "x", compiler="jit")
+    assert np.isclose(func(sca), np.sin(sca)/sca) == True
+
+
+def test_fail_string(sca):
+    """Test failure on untyped name."""
+    fn = "Sin(x)/x"
+    func = numbafy(fn, "x")
+    with pytest.raises((TypingError, NameError)):
+        func(sca)
+
+
+def test_complex_strings(arr, sig3, sca):
+    """Test more complicated string functions."""
+    fn = "arccos(x)/y + exp(-y) + mod(z, 2)"
+    func = numbafy(fn, ("x", "y", "z"), compiler="vectorize", signatures=sig3)
+    result = func(arr, arr, arr)
+    check = np.arccos(arr)/arr + np.exp(-arr) + np.mod(arr, 2)
+    assert np.allclose(result, check) == True
+    func = numbafy(fn, ("x", "y", "z"))
+    result = func(sca, sca, sca)
+    check = np.arccos(sca)/sca + np.exp(-sca) + np.mod(sca, 2)
+    assert np.isclose(result, check) == True
+
+
+def test_sympy(arr, sig3):
+    """Test sympy expressions."""
+    x, y, z = sy.symbols("x y z")
+    fn = sy.acos(x)/y + sy.exp(-y) + sy.Mod(z, 2)
+    func = numbafy(fn, (x, y, z), compiler="vectorize", signatures=sig3)
+    result = func(arr, arr, arr)
+    check = np.arccos(arr)/arr + np.exp(-arr) + np.mod(arr, 2)
+    assert np.allclose(result, check) == True
+
+def test_symengine(arr, sig3):
+    """Test symengine."""
+    x, y, z = sge.var("x y z")
+    fn = sge.acos(x)/y + sge.exp(-z)
+    func = numbafy(fn, (x, y, z), compiler="vectorize", signatures=sig3)
+    result = func(arr, arr, arr)
+    check = np.arccos(arr)/arr + np.exp(-arr)
+    assert np.allclose(result, check) == True

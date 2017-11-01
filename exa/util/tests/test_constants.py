@@ -6,20 +6,18 @@ Tests for Physical Constants
 #############################################
 Physical constants are created by a singleton factory paradigm.
 """
-#from unittest import TestCase
-#from exa import constants
-#
-#
-#class TestConstants(TestCase):
-#    """Basic checks that constants have been created."""
-#    def test_singleness(self):
-#        """Test that constants have been created."""
-#        obj0 = constants.Hartree_energy()
-#        obj1 = constants.Hartree_energy()
-#        self.assertIs(obj0, obj1)
-#        self.assertEqual(id(obj0), id(obj1))
-#        self.assertIs(obj0.__dict__, obj1.__dict__)
-#
-#    def test_correct_values(self):
-#        """Test that values have been correctly created."""
-#        self.assertAlmostEqual(constants.standard_state_pressure.value, 100000)
+from exa.util import constants
+
+
+def test_created():
+    """Check that constants were created."""
+    assert len(dir(constants)) > 300
+    assert hasattr(constants, "Planck_constant") == True
+
+
+def test_attrs():
+    """Check attributes of constants."""
+    assert hasattr(constants.Planck_constant, "value")
+    assert hasattr(constants.Planck_constant, "units")
+    assert hasattr(constants.Planck_constant, "name")
+    assert hasattr(constants.Planck_constant, "error")

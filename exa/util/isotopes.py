@@ -34,9 +34,10 @@ Warning:
 
 .. _NIST: https://www.nist.gov/
 """
+import bz2 as _bz2
+import json as _json
 import six as _six
 import sys as _sys
-from pandas import read_json as _rj
 from exa import Editor as _Editor
 from exa import DataFrame as _DF
 from exa.static import resource as _resource
@@ -143,8 +144,8 @@ def _create():
             setattr(ele, "_"+str(tope.A), tope)
         return ele
 
-    iso = _rj(_Editor(_path).to_stream())
-    iso.columns = _columns
+    with _bz2.open(_path) as f:
+        iso = _DF(_json.load(f), columns=_columns)
     for element in iso.groupby("symbol").apply(creator):
         setattr(_this, element.symbol, element)
 

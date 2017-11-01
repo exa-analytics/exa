@@ -4,7 +4,7 @@
 """
 Editor
 ####################################
-This module provides the :class:`~exa.editor.Editor`, a text manipulation
+This module provides the :class:`~exa.core.editor.Editor`, a text manipulation
 engine for small/medium sized text files. This class is not a fully fledged
 text editor. It provides basic features for searching text (including
 regular expressions). This module additionally provides convenience methods

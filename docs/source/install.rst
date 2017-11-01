@@ -17,7 +17,7 @@ Pypi
 #######################
 Using pip::
 
-    sudo pip install exa
+    pip install exa
 
 
 Repository
@@ -26,7 +26,7 @@ Manually (or for a development installation)::
 
     git clone https://github.com/exa-analytics/exa
     cd exa
-    pip install .
+    pip install -e .
 
 
 What's Next?

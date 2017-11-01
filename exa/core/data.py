@@ -4,8 +4,11 @@
 """
 Data Objects
 ########################
-Exa provides a `pandas`_ like Series and DataFrame object which support saving
-and loading metadata when using the HDF format.
+This module provides `pandas`_ like objects that support type enforcement for
+columns and indexes. This module also provides a custom data object for
+storing (scalar or vector) field data. This object has flexibility to support
+a dynamically or statically generated grid (for the field values) and has a
+similar API to `pandas`_ objects for saving data to and from HDF.
 
 .. _pandas: http://pandas.pydata.org/
 """

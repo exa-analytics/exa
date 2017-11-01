@@ -4,18 +4,23 @@
 """
 Tests for :mod:`~exa.units`
 #############################################
+Basic checks that units have been created.
 """
-from unittest import TestCase
+import numpy as np
 from exa.util import units
 
 
-class TestUnits(TestCase):
-    """Basic checks that units have been created."""
-    def test_count(self):
-        """Check that all constants have been created."""
-        self.assertTrue(hasattr(units, "Acceleration"))
-        self.assertTrue(hasattr(units, "Energy"))
+def test_count():
+    """Check that all unit types have been created."""
+    assert hasattr(units, "Acceleration") == True
+    assert hasattr(units, "Energy") == True
+    assert hasattr(units, "Length") == True
+    assert hasattr(units, "Time") == True
+    assert hasattr(units, "Mass") == True
 
-    def test_units(self):
-        """Check attribute values."""
-        self.assertEqual(units.Energy['J'], 1.0)
+
+def test_units():
+    """Check attribute values."""
+    assert np.isclose(units.Energy['J'], 1.0)
+    assert np.isclose(units.Length['au', 'Angstrom'], 0.52918)
+    assert np.isclose(units.Length['Angstrom'], 1E-10)
