@@ -38,6 +38,7 @@ import bz2 as _bz2
 import json as _json
 import six as _six
 import sys as _sys
+from exa import Editor as _E
 from exa import DataFrame as _DF
 from exa.static import resource as _resource
 
@@ -143,8 +144,7 @@ def _create():
             setattr(ele, "_"+str(tope.A), tope)
         return ele
 
-    with _bz2.open(_path, "rb") as f:
-        iso = _DF(_json.load(f), columns=_columns)
+    iso = _DF(_json.loads(str(_E(_path))), columns=_columns)
     for element in iso.groupby("symbol").apply(creator):
         setattr(_this, element.symbol, element)
 
