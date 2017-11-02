@@ -55,10 +55,8 @@ script:
       fi
 
 after_success:
-    - if [[ $TRAVIS_OS_NAME == "linux" ]]; then
+    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.6 ]]; then
           coveralls;
           python-codacy-coverage -r coverage.xml;
-      fi
-    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.6 ]]; then
           travis-sphinx -n deploy;
       fi
