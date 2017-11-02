@@ -16,6 +16,8 @@ import six
 import warnings
 import numpy as np
 import pandas as pd
+from sympy import Expr
+from symengine.lib.symengine_wrapper import Basic
 from types import FunctionType
 from pandas.io import pytables
 from pandas.core.dtypes.dtypes import CategoricalDtypeType
@@ -356,31 +358,29 @@ class Field(TypedClass):
 
     .. _xarray: http://xarray.pydata.org/en/stable/
     """
+    func = Typed((Expr, Basic), doc="Analytic function representing the field")
     values = Typed(np.ndarray, doc="Field values (n-dimensional)", autoconv=False)
-    dimensions = Typed((np.ndarray, FunctionType), autoconv=False,
-                       doc="Grid on which the field belongs")
+    coords = Typed((np.ndarray, FunctionType), autoconv=False,
+                   doc="Grid on which the field belongs")
 
     @property
-    def grid(self):
-        """
-        Generate the spatial grid from a function or return it from the explicitly
-        defined values.
-        """
-        if callable(self.dimensions):
-            grid = self.dimensions()
-        else:
-            grid = self.dimensions
-        return grid
+    def coords(self):
+        """If needed, dynamically generate the coordinate grid."""
+        if callable(self._coords):
+            return self._coords()
+        return self._coords
 
-    def __init__(self, values, dimensions, **meta):
-        if isinstance(values, (pd.Series, pd.DataFrame, pd.SparseDataFrame, pd.SparseSeries)):
+    def __init__(self, values=None, coords=None, func=None, **meta):
+        if values is coords is func is None:
+            raise ValueError("One of values/coords or function required")
+        elif values is not None and coords is None:
+            raise ValueError("Field values must have coordinates")
+        if isinstance(values, (pd.Series, pd.DataFrame, pd.SparseDataFrame,
+                               pd.SparseSeries)):
             values = values.values
         self.values = values
-        self.dimensions = dimensions
-        m = self.values.shape
-        n = self.grid.shape
-        if m != n:
-            raise ValueError("Shape of the values {} does not match the grid {}".format(m, n))
+        self.coords = coords
+        self.func = func
 
 
 # Required exa data objects' HDF compatibility
