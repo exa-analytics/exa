@@ -47,6 +47,8 @@ script:
     - if [[ $TRAVIS_OS_NAME == "linux" ]]; then
           pytest --cov;
           coverage xml;
+      else
+          pytest;
       fi
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.6 ]]; then
           travis-sphinx -n build;
