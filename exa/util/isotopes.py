@@ -34,7 +34,6 @@ Warning:
 
 .. _NIST: https://www.nist.gov/
 """
-import bz2 as _bz2
 import json as _json
 import six as _six
 import sys as _sys
@@ -168,10 +167,11 @@ def get(key):
 
         isotopes.get(92)
         isotopes.get("U")
+        isotopes.get("h")    # Corrects lowercase
     """
     if isinstance(key, _six.integer_types):
         key = df.loc[df['Z'] == key, 'symbol'].values[0]
-    return getattr(_this, key)
+    return getattr(_this, key.title())
 
 
 # Data order of isotopic (nuclear) properties:
