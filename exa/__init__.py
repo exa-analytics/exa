@@ -25,6 +25,16 @@ Note:
 .. _JIT: https://en.wikipedia.org/wiki/Just-in-time_compilation
 .. _numba: https://numba.pydata.org
 """
+def _jupyter_nbextension_paths():
+    """Jupyter notebook extension directory paths."""
+    return [{
+        'section': "notebook",
+        'src': "static/nbextension",
+        'dest': "jupyter-exa",
+        'require': "jupyter-exa/extension"
+    }]
+
+
 from ._version import __version__
 from .typed import Typed, TypedClass, TypedMeta, typed
 from .core import (DataFrame, DataSeries, SparseDataSeries, SparseDataFrame,
