@@ -316,9 +316,10 @@ class Parser(Editor):
         """
         if isinstance(cls, six.string_types):
             self.sections['name'] = self.sections['parser'].apply(lambda cls: cls.__name__)
-            if self.sections.drop_duplicates("name").shape != self.sections.shape:
+            if len(self.sections.loc[self.sections['name'] == cls, 'parser'].unique()) != 1:
                 raise NameError("Duplicate parser names, ambiguous parser requested.")
-            cls = self.sections.set_index("name")['parser'].to_dict()[cls]
+            cls = self.sections.loc[self.sections['name'] == cls, 'parser'].values[0]
+            del self.sections['name']
         for key in self.sections[self.sections['parser'] == cls].index.values:
             yield self.get_section(key)
 
