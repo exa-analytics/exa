@@ -13,26 +13,87 @@
  * See the style comment in base.js for technical information about syntax and
  * style.
  */
+declare function require(name: string);
+
+var ipywidgets = require("@jupyter-widgets/base");
+var pkgdata = {};
+
+
 function onmessage(e) {
     console.log("onmessage");
     build(e.mod);
 }
 
-function build_mv(name, obj) {
-    console.log("building: " + name);
+
+function _proto_helper(obj) {
+    if (obj == null) return;
+    _proto_helper(Object.getPrototypeOf(obj));
+}
+
+
+function get_proto_names(obj) {
+    var names = [];
+    for (; obj != null; obj = Object.getPrototypeOf(obj)) {
+        var op = Object.getOwnPropertyNames(obj);
+        for (var i=0; i<op.length; i++) {
+            if (names.indexOf(op[i]) == -1) {
+                names.push(op[i]);
+            }
+        }
+    }
+    return names;
+}
+
+
+function build_mv(viewname, modelname, obj) {
+
+    var attrnames = get_proto_names(obj);
+
+    class Model extends ipywidgets.DOMWidgetModel {
+        defaults(): any {
+            return {...super.defaults(), ...{
+                '_view_name': viewname,
+                '_view_module': "jupyter-exa",
+                '_view_module_version': "^0.4.0",
+                '_model_name': modelname,
+                '_model_module': "jupyter-exa",
+                '_model_module_version': "^0.4.0",
+            }};
+        }
+    }
+
+    class View extends ipywidgets.DOMWidgetView {
+        render(): any {
+            console.log("Dynamic rendering.");
+        }
+    }
+    
+    return {'model': Model, 'view': View, 'attrnames': attrnames};
 }
 
 
 export function build(mod) {
     console.log("In build...");
     console.log(mod);
+    var pydata = {};
     for (var name of Object.getOwnPropertyNames(mod)) {
-        console.log("getting obj");
+        console.log("building: ".concat(name));
+        let viewname = name.concat("View");
+        let modelname = name.concat("Model");
         var obj = mod[name];
-        console.log(obj);
-        var mv = build_mv(name, obj);
-        break
+        var mv = build_mv(viewname, modelname, obj);
+
+        pkgdata[viewname] = mv.view;
+        pkgdata[modelname] = mv.model;
+        pydata[name] = mv.attrnames;
+
+        console.log("done with: ".concat(name));
     };
+    return pydata;
+
 }
 
 
+for (var name of pkgdata) {
+    export.name = pkgdata[name];
+}

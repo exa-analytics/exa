@@ -20,22 +20,24 @@ var builder = require("./builder.js");
 var three = require("three");
 
 
-if (typeof(Worker) === "undefined") {
-    console.log("Building API using workers");
-    worker = new Worker("./builder.js");
-    worker.postMessage({'mod': three});
-} else {
-    console.log("Building API slowly");
-    builder.build(three);
-}
-
-
-
 export class TestWidgetView extends ipywidgets.DOMWidgetView {
     render(): any {
         console.log("hereererere! ");
         console.log(this.model.get("value"));
         this.el.textContent = this.model.get("value");
+        var pkgs = {};
+
+        if (typeof(Worker) === "undefined") {
+            console.log("Building API using workers");
+            var worker = new Worker("./builder.js");
+            worker.postMessage({'mod': three});
+        } else {
+            console.log("Building API slowly");
+            pkgs['three'] = builder.build(three);
+        }
+        console.log("Created JS API, sending pyapi");
+        console.log(pkgs);
+        this.send({'method': "build", 'content': pkgs});
     }
 }
 
