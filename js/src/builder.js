@@ -18,22 +18,20 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
     return t;
 };
 exports.__esModule = true;
+// Copyright (c) 2015-2017, Exa Analytics Development Team
+// Distributed under the terms of the Apache License 2.0
 var ipywidgets = require("@jupyter-widgets/base");
 var pkgdata = {};
 function onmessage(e) {
     console.log("onmessage");
     build(e.mod);
 }
-function _proto_helper(obj) {
-    if (obj == null)
-        return;
-    _proto_helper(Object.getPrototypeOf(obj));
-}
-function get_proto_names(obj) {
+function getProtoNames(obj) {
     var names = [];
     for (; obj != null; obj = Object.getPrototypeOf(obj)) {
         var op = Object.getOwnPropertyNames(obj);
         for (var i = 0; i < op.length; i++) {
+            // If not already added to the list
             if (names.indexOf(op[i]) == -1) {
                 names.push(op[i]);
             }
@@ -41,8 +39,8 @@ function get_proto_names(obj) {
     }
     return names;
 }
-function build_mv(viewname, modelname, obj) {
-    var attrnames = get_proto_names(obj);
+function buildModelView(viewName, modelName, obj) {
+    var attrNames = getProtoNames(obj);
     var Model = /** @class */ (function (_super) {
         __extends(Model, _super);
         function Model() {
@@ -50,10 +48,10 @@ function build_mv(viewname, modelname, obj) {
         }
         Model.prototype.defaults = function () {
             return __assign({}, _super.prototype.defaults.call(this), {
-                '_view_name': viewname,
+                '_view_name': viewName,
                 '_view_module': "jupyter-exa",
                 '_view_module_version': "^0.4.0",
-                '_model_name': modelname,
+                '_model_name': modelName,
                 '_model_module': "jupyter-exa",
                 '_model_module_version': "^0.4.0"
             });
@@ -70,29 +68,30 @@ function build_mv(viewname, modelname, obj) {
         };
         return View;
     }(ipywidgets.DOMWidgetView));
-    return { 'model': Model, 'view': View, 'attrnames': attrnames };
+    return { 'model': Model, 'view': View, 'attrNames': attrNames };
 }
 function build(mod) {
     console.log("In build...");
-    console.log(mod);
+    //console.log(mod);
     var pydata = {};
     for (var _i = 0, _a = Object.getOwnPropertyNames(mod); _i < _a.length; _i++) {
         var name = _a[_i];
-        console.log("building: ".concat(name));
-        var viewname = name.concat("View");
-        var modelname = name.concat("Model");
+        //console.log("building: ".concat(name));
+        var viewName = name.concat("View");
+        var modelName = name.concat("Model");
         var obj = mod[name];
-        var mv = build_mv(viewname, modelname, obj);
-        pkgdata[viewname] = mv.view;
-        pkgdata[modelname] = mv.model;
-        pydata[name] = mv.attrnames;
-        console.log("done with: ".concat(name));
+        var mv = buildModelView(viewName, modelName, obj);
+        pkgdata[viewName] = mv.view;
+        pkgdata[modelName] = mv.model;
+        pydata[name] = mv.attrNames;
+        //console.log("done with: ".concat(name));
     }
     ;
+    for (var _b = 0, pkgdata_1 = pkgdata; _b < pkgdata_1.length; _b++) {
+        var name = pkgdata_1[_b];
+        console.log(name);
+        name = pkgdata[name];
+    }
     return pydata;
 }
 exports.build = build;
-for (var _i = 0, pkgdata_1 = pkgdata; _i < pkgdata_1.length; _i++) {
-    var name = pkgdata_1[_i];
-    name = pkgdata[name];
-}

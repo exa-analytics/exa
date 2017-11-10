@@ -1,7 +1,7 @@
 // Copyright (c) 2015-2017, Exa Analytics Development Team
 // Distributed under the terms of the Apache License 2.0
 /*
- *
+ * 
 var module_version = "^0.4.0";
 var module_name = "jupyter-exa";
 
@@ -20,4 +20,3 @@ module.exports = {
         //d3: d3
     }
 };
- 

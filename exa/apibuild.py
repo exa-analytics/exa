@@ -3,7 +3,7 @@
 # Distributed under the terms of the Apache License 2.0
 import sys
 from traitlets import Unicode, Any
-from ipywidgets import DOMWidget, widget_serialization
+from ipywidgets import DOMWidget, widget_serialization, Widget
 
 
 tmp = None
@@ -46,12 +46,11 @@ def build_api(pkgs):
         clses = {}     # Python classes to be created
         print(pkgname)
         for name, obj in api.items():
-            print(name, obj)
             clses[name] = build_class(name, obj)
         setattr(sys.modules['exa.apibuild'], pkgname, type(pkgname, (object, ), clses))
 
 
-class TestWidget(DOMWidget):
+class TestWidget(Widget):
     _view_name = Unicode("TestWidgetView").tag(sync=True)
     _view_module = Unicode(jsmod).tag(sync=True)
     _view_module_version = Unicode(jsver).tag(sync=True)
@@ -65,7 +64,7 @@ class TestWidget(DOMWidget):
         """
         """
         if content['method'] == "build":
-            tmp = content['content']
+            #tmp = content['content']
             build_api(content['content'])
         else:
-            super(APIBuilder, self)._handle_custom_msg(content, buffers)
+            super(TestWidget, self)._handle_custom_msg(content, buffers)

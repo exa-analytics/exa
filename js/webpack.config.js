@@ -42,7 +42,7 @@ module.exports = [
         },
         externals: ["@jupyter-widgets/base", "@jupyter-widgets/controls"]
     },
-    {// Embeddable jupyter-exatomic bundle
+    {// Embeddable exa bundle
      //
      // This bundle is generally almost identical to the notebook bundle
      // containing the custom widget views and models.
@@ -61,7 +61,7 @@ module.exports = [
             filename: "index.js",
             path: "./dist/",
             libraryTarget: "amd",
-            publicPath: "https://unpkg.com/jupyter-exa@" + version + "/dist/"
+            publicPath: "https://unpkg.com/exa@" + version + "/dist/"
         },
         devtool: "source-map",
         module: {

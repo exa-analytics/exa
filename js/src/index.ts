@@ -1,5 +1,10 @@
-"use strict";
-exports.__esModule = true;
+//
+//
+/* Extension Bundler
+ * @desc Entry point for the notebook bundle ocntaining the custom widget.
+ *
+ */
+export * from "./app";
 //import * as util from "./util";
 //import * as app from "./app";
 //var pkgjson = require("../package.json");
