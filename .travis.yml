@@ -31,9 +31,9 @@ install:
 script:
   - nosetests --with-coverage
   - coverage xml
-  - travis-sphinx -n build
+  - travis-sphinx build
 
 after_success:
   - coveralls
   - python-codacy-coverage -r coverage.xml
-  - travis-sphinx -n deploy
+  - travis-sphinx deploy
