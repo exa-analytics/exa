@@ -272,7 +272,7 @@ class Field(DataFrame):
         # The following check allows creation of a single field (whose field data
         # comes from a series object and field values from another series object).
         field_values = kwargs.pop("field_values", None)
-        if isinstance(args[0], pd.Series):
+        if args and isinstance(args[0], pd.Series):
             args = (args[0].to_frame().T, )
         super(Field, self).__init__(*args, **kwargs)
         if isinstance(field_values, (list, tuple, np.ndarray)):
