@@ -275,6 +275,7 @@ class Field(DataFrame):
         if args and isinstance(args[0], pd.Series):
             args = (args[0].to_frame().T, )
         super(Field, self).__init__(*args, **kwargs)
+        self._metadata = ['field_values']
         if isinstance(field_values, (list, tuple, np.ndarray)):
             self.field_values = [Series(v) for v in field_values]    # Convert type for nice repr
         elif field_values is None:

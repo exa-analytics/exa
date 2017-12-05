@@ -11,7 +11,7 @@ from unittest import TestCase
 from exa.core.numerical import Numerical, Series, DataFrame
 
 
-class TestingSeries(Series):
+class TSeries(Series):
     _sname = 'testing'
     _iname = 'index'
     _stype = np.float64
@@ -19,26 +19,26 @@ class TestingSeries(Series):
     _precision = 2
 
 
-class TestingDF0(DataFrame):
+class TDF0(DataFrame):
     _index = 'index'
     _columns = ['column']
 
 
-class TestingDF1(DataFrame):
+class TDF1(DataFrame):
     _cardinal = ('group', np.int64)
     _index = 'index'
     _columns = ['column', 'type']
     _categories = {'type': str}
 
 
-class TestingDF2(DataFrame):
+class TDF2(DataFrame):
     _cardinal = ('group', str)
     _index = 'index'
     _columns = ['x', 'y', 'z', 'type']
     _categories = {'type': np.int64}
 
 
-class TestNumerical(TestCase):
+class NumericalTest(TestCase):
     def setUp(self):
         self.numerical = Numerical()
 
@@ -47,17 +47,17 @@ class TestNumerical(TestCase):
             self.numerical.slice_naive(0)
 
 
-class TestTestingSeries(TestCase):
+class SeriesTest(TestCase):
     def setUp(self):
-        self.series = TestingSeries(np.random.rand(10))
+        self.series = TSeries(np.random.rand(10))
 
     def test_underattr(self):
         """
         Test to ensure the (class level) underscore attributes (of
         :class:`~exa.core.tests.test_numerical.TestingSeries`) are respected.
         """
-        self.assertTrue(self.series.name == TestingSeries._sname)
-        self.assertTrue(self.series.index.name == TestingSeries._iname)
+        self.assertTrue(self.series.name == TSeries._sname)
+        self.assertTrue(self.series.index.name == TSeries._iname)
 
     def test_copy(self):
         """Test :func:`~exa.core.numerical.Series.copy`."""
@@ -66,13 +66,13 @@ class TestTestingSeries(TestCase):
         self.assertIsInstance(cp, self.series.__class__)
 
 
-class TestTestingDF0(TestCase):
+class DF0Test(TestCase):
     """
     Test a basic example of an instance of :class:`~exa.core.numerical.DataFrame`.
     """
     def setUp(self):
         column = np.random.rand(10)
-        self.df = TestingDF0.from_dict({'column': column})
+        self.df = TDF0.from_dict({'column': column})
 
     def test_copy(self):
         """Test :func:`~exa.core.numerical.DataFrame.copy`."""
@@ -81,7 +81,7 @@ class TestTestingDF0(TestCase):
         self.assertIsInstance(cp, self.df.__class__)
 
 
-class TestTestingDF1(TestCase):
+class DF1Test(TestCase):
     """
     Test an example instance of :class:`~exa.core.numerical.DataFrame` with groupby.
     """
@@ -89,7 +89,7 @@ class TestTestingDF1(TestCase):
         column = np.random.rand(10)
         group = [0, 0, 0, 0, 1, 1, 1, 2, 2, 3]
         typ = ['A']*5 + ['B']*5
-        self.df = TestingDF1.from_dict({'column': column, 'type': typ, 'group': group})
+        self.df = TDF1.from_dict({'column': column, 'type': typ, 'group': group})
 
     def test_copy(self):
         """Test :func:`~exa.core.numerical.DataFrame.copy`."""
@@ -102,7 +102,7 @@ class TestTestingDF1(TestCase):
         self.assertIsInstance(self.df['type'].dtype, pd.api.types.CategoricalDtype)
 
 
-class TestTestingDF2(TestCase):
+class DF2Test(TestCase):
     """
     Test an example instance of :class:`~exa.core.numerical.DataFrame` with groupby.
     """
@@ -113,8 +113,8 @@ class TestTestingDF2(TestCase):
         z = np.random.rand(10)
         typ = [0, 0, 0, 0, 1, 1, 1, 2, 2, 3]
         group = ['A']*5 + ['B']*5
-        self.df = TestingDF2.from_dict({'x': x, 'y': y, 'z': z, 'type': typ,
-                                        'group': group})
+        self.df = TDF2.from_dict({'x': x, 'y': y, 'z': z, 'type': typ,
+                                  'group': group})
 
     def test_copy(self):
         """Test :func:`~exa.core.numerical.DataFrame.copy`."""
