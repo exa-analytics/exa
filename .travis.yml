@@ -11,9 +11,9 @@ python:
 before_install:
   - deactivate
   - wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export NUMBA_DISABLE_JIT=1
-  - export DISPLAY=:99.0
+# - bash miniconda.sh -b -p $HOME/miniconda
+# - export NUMBA_DISABLE_JIT=1
+# - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
   - sleep 3
   - export PATH="$HOME/miniconda/bin:$PATH"
