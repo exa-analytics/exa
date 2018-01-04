@@ -30,8 +30,8 @@ def _jupyter_nbextension_paths():
     return [{
         'section': "notebook",
         'src': "static/nbextension",
-        'dest': "jupyter-exa",
-        'require': "jupyter-exa/extension"
+        'dest': "exa",
+        'require': "exa/extension"
     }]
 
 

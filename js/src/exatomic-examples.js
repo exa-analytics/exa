@@ -2,16 +2,16 @@
 // Distributed under the terms of the Apache License 2.0
 /*"""
 =============
-jupyter-exatomic-examples.js
+exatomic-examples.js
 =============
 Example applications called when an empty container widget is rendered in a
 Jupyter notebook environment.
 */
 
 "use strict";
-var base = require("./jupyter-exatomic-base.js");
-var utils = require("./jupyter-exatomic-utils.js");
-var App3D = require("./jupyter-exatomic-three.js").App3D;
+var base = require("./exatomic-base.js");
+var utils = require("./exatomic-utils.js");
+var App3D = require("./exatomic-three.js").App3D;
 
 
 var TestSceneModel = base.ExatomicSceneModel.extend({

@@ -79,10 +79,10 @@
 //    get defaults() {
 //        return _.extend({}, base.DOMWidgetModel.prototype.defaults, {
 //            _view_name: "BuilderView",
-//            _view_module: "jupyter-exa",
+//            _view_module: "exa",
 //            _view_module_version: "^0.4.0",
 //            _model_name: "BuilderModel",
-//            _model_module: "jupyter-exa",
+//            _model_module: "exa",
 //            _model_module_version: "^0.4.0",
 //
 //            js_api: null,

@@ -3,7 +3,7 @@
 /*
  * 
 var module_version = "^0.4.0";
-var module_name = "jupyter-exa";
+var module_name = "exa";
 
 
 module.exports = {

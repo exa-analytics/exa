@@ -8,7 +8,7 @@ from ipywidgets import DOMWidget, widget_serialization, Widget
 
 tmp = None
 jsver = "^0.4.0"
-jsmod = "jupyter-exa"
+jsmod = "exa"
 
 
 

@@ -49,10 +49,10 @@ function buildModelView(viewName, modelName, obj) {
         Model.prototype.defaults = function () {
             return __assign({}, _super.prototype.defaults.call(this), {
                 '_view_name': viewName,
-                '_view_module': "jupyter-exa",
+                '_view_module': "exa",
                 '_view_module_version': "^0.4.0",
                 '_model_name': modelName,
-                '_model_module': "jupyter-exa",
+                '_model_module': "exa",
                 '_model_module_version': "^0.4.0"
             });
         };

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Apache License 2.0
 /*"""
 =================
-jupyter-exatomic-base.js
+exatomic-base.js
 =================
 JavaScript "frontend" complement of exatomic's Universe
 for use within the Jupyter notebook interface.
@@ -11,7 +11,7 @@ for use within the Jupyter notebook interface.
 "use strict";
 var widgets = require("@jupyter-widgets/base");
 var control = require("@jupyter-widgets/controls");
-var App3D = require("./jupyter-exatomic-three.js").App3D;
+var App3D = require("./exatomic-three.js").App3D;
 var version = "~" + require("../package.json").version;
 
 
@@ -20,8 +20,8 @@ var ExatomicBoxModel = control.BoxModel.extend({
     defaults: _.extend({}, control.BoxModel.prototype.defaults, {
             _model_module_version: version,
             _view_module_version: version,
-            _model_module: "jupyter-exatomic",
-            _view_module: "jupyter-exatomic",
+            _model_module: "exatomic",
+            _view_module: "exatomic",
             _model_name: "ExatomicBoxModel",
             _view_name: "ExatomicBoxView",
     })
@@ -39,8 +39,8 @@ var ExatomicSceneModel = widgets.DOMWidgetModel.extend({
     defaults: _.extend({}, widgets.DOMWidgetModel.prototype.defaults, {
             _model_module_version: version,
             _view_module_version: version,
-            _model_module: "jupyter-exatomic",
-            _view_module: "jupyter-exatomic",
+            _model_module: "exatomic",
+            _view_module: "exatomic",
             _model_name: "ExatomicSceneModel",
             _view_name: "ExatomicSceneView"
     })
@@ -55,8 +55,8 @@ var ExatomicSceneModel = widgets.DOMWidgetModel.extend({
         return _.extend({}, widgets.DOMWidgetModel.prototype.defaults, {
             _model_module_version: version,
             _view_module_version: version,
-            _model_module: "jupyter-exatomic",
-            _view_module: "jupyter-exatomic",
+            _model_module: "exatomic",
+            _view_module: "exatomic",
             _model_name: "ExatomicSceneModel",
             _view_name: "ExatomicSceneView",
 
