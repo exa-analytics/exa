@@ -37,5 +37,6 @@ def _jupyter_nbextension_paths():
 
 from ._version import __version__
 from .typed import Typed, TypedClass, TypedMeta, typed
-from .core import (DataFrame, DataSeries, SparseDataSeries, SparseDataFrame,
-                   Editor, Parser, Composer, Container, Column, Index, Field)
+#from .core import (DataFrame, DataSeries, SparseDataSeries, SparseDataFrame,
+#                   Editor, Parser, Composer, Container, Column, Index, Field)
+from .core.numerical import Series, DataFrame, Field, Field3D, SparseDataFrame 
