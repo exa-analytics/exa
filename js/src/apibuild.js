@@ -48,10 +48,10 @@ var TestWidgetModel = /** @class */ (function (_super) {
     TestWidgetModel.prototype.defaults = function () {
         return __assign({}, _super.prototype.defaults.call(this), {
             '_view_name': "TestWidgetView",
-            '_view_module': "jupyter-exa",
+            '_view_module': "exa",
             '_view_module_version': "^0.4.0",
             '_model_name': "TestWidgetModel",
-            '_model_module': "jupyter-exa",
+            '_model_module': "exa",
             '_model_module_version': "^0.4.0"
             //'value': "Hello World",
         });
