@@ -1,10 +1,26 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2017, Exa Analytics Development Team
+# Copyright (c) 2015-2018, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Containers
 ########################
 This module provides the generic :class:`~exa.container.Container` object.
+Containers store data objects (ints, floats, lists, `numpy` arrays, `pandas`
+objects, etc.) that can be saved to `HDF` files for permanent storage.
+Containers can be iterated over and support other basic collections-like
+features such as length checks and element deletion. Containers can estimate
+the total size (in memory) of their data objects. They do not make a copy
+of their data by default.
+
+
+Containers can be used to
+Containers 
+Developers 
+Containers facilitate systematic data architecture by allowing developers to
+build data specific :class:`~exa
+Containers 
+Containers allo
+
 Containers are used to store a collection of data objects (such as scalars,
 lists, arrays, dataframes, etc.). By default the :class:`~exa.container.Container`
 enables investigation of the metadata of the data objects it holds. The object
@@ -18,7 +34,7 @@ import tables
 import warnings
 import numpy as np
 import pandas as pd
-from uuid import uuid4
+from copy import deepcopy
 from sys import getsizeof
 from collections import defaultdict
 from exa.typed import TypedClass, Typed
@@ -29,21 +45,36 @@ if not hasattr(pd.Series, "items"):
 
 class Container(TypedClass):
     """
+    Wrapper for data processing, analysis, and storage.
+
+    Containers accept most data formats, scalars (ints, floats, etc.), arrays (lists,
+    tuples, numpy arrays), and structured data (pandas series and dataframes).
+    Any number of objects may be stored as part of a Container. They can all
+    be saved to disk at once using the :func:`~exa.core.container.Container.to_hdf`
+    method..
+
+    .. code-block:: python
+
+        c = Conatiner(array=np.random.rand(10), a=[1, 2, 3])
+        c.to_hdf("my.hdf")
+        d = Container.from_hdf("my.hdf")
+
+    Containers support type enforcement for their attributes.
+
+    .. code-block:: python
+
     A storage object for data such as scalars (ints, floats, strs), arrays
     (lists, numpy objects), and structured data (pandas series and dataframe
     objects).
 
     TODO
     """
-    default_prefix = Typed(str, doc="Default prefix for container args.")
     meta = Typed(dict, doc="Document metadata")
 
     def info(self):
-        """
-        Display information about the data objects.
-        """
+        """Displays metadata on the Container's data objects."""
         df = []
-        for name, item in self._items():
+        for name, item in self.items():
             typ = item.__class__.__name__
             size = float(getsizeof(item))/(1024.0**2)
             if hasattr(item, "shape"):
@@ -122,7 +153,7 @@ class Container(TypedClass):
         numpy_save = {}
         pandas_save = {}
         special_save = {}
-        for name, data in self._items():
+        for name, data in self.items():
             if isinstance(data, (np.ndarray, Field)):
                 numpy_save[name] = data
             elif isinstance(data, (pd.Series, pd.DataFrame, pd.SparseSeries,
@@ -208,7 +239,7 @@ class Container(TypedClass):
         """Helper function to generate the nodes and edges of the network."""
         nodes = {}
         edges = []
-        for name, item in self._items():
+        for name, item in self.items():
             if isinstance(item, pd.DataFrame):
                 nodes[name] = (item.index.name, item.columns.values)
         for key0, (index_name0, column_names0) in nodes.items():
@@ -222,23 +253,13 @@ class Container(TypedClass):
                         edges.append(pair)
         return sorted(nodes.keys()), sorted(edges)
 
-    def _items(self, dct=None, include_keys=False):
-        """
-        Iterator for looping over data objects in the current container.
-        """
-        if dct is None:
-            dct = vars(self)
-        for key, data in dct.items():
-            # Determine the correct name to use
-            if (key.startswith("_") and hasattr(self.__class__, key[1:]) and
-                isinstance(getattr(self.__class__, key[1:]), property)):
-                name = key[1:]
-            else:
-                name = key
-            if include_keys == True:
-                yield key, name, data
-            else:
-                yield name, data
+    def items(self):
+        """Generator of data object name, data object pairs for iteration over."""
+        for name, data in vars(self).items():
+            # For properties, yield modified name without leading underscore
+            if hasattr(self.__class__, name) and isinstance(getattr(self.__class__, name), property) and name.startswith("_"):
+                yield name[1:], data
+            yield name, data 
 
     def __contains__(self, key):
         if hasattr(self, key):
@@ -262,24 +283,25 @@ class Container(TypedClass):
         return int(np.ceil(self.memory_usage()*1024**2))
 
     def __init__(self, *args, **kwargs):
-        self.default_prefix = kwargs.pop("default_prefix", "obj_")
+        """
+        Create a new container.
+
+        Args:
+            meta (dict): Dictionary of metadata about the container (default none)
+            copy (bool): Make a (deep) copy of the data (default false)
+            kwargs: Named data objects (str, int, list, tuple, numpy, pandas, etc.)
+        """
+        cp = kwargs.pop("copy", False)
         self.meta = kwargs.pop("meta", None)
-        for arg in args:
-            do = True
-            # The while check is used to make sure names do not overlap...
-            # ... chances of that are incredibly small so I am not sure it
-            # is necessary but it doesn't really affect performance???
-            while do:
-                name = self.default_prefix + uuid4().hex
-                if not hasattr(self, name):
-                    setattr(self, name, arg)
-                    do = False
         for name, data in kwargs.items():
-            setattr(self, name, data)
+            if cp:
+                setattr(self, name, deepcopy(data))
+            else:
+                setattr(self, name, data)
 
     def __repr__(self):
         n = self.__class__.__name__
-        size = np.round(self.memory_usage(), 3)
+        size = getsizeof(self)
         return "{}(data={}, size (MiB)={})".format(n, len(self), size)
 
 
