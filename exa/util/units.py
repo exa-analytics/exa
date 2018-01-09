@@ -11,31 +11,22 @@ see the example below.
 .. code-block:: python
 
     from exa.util.units import Energy
-    Energy.values        # Check available symbols
     Energy["eV"]         # Value of eV in SI units
     Energy["eV", "J"]    # Same as above
     Energy["eV", "Ha"]   # Conversion factor between eV and Ha (Hartree atomic unit)
 """
+import bz2 as _bz2
+import json as _json
+import os as _os
 import sys as _sys
 import six as _six
 import numpy as _np
 import pandas as _pd
-import json as _json
-from exa import Editor as _Editor
-from exa.static import resource as _resource
+if not hasattr(_bz2, "open"):
+    _bz2.open = _bz2.BZ2File
 
 
 class Unit(object):
-    """
-    A quantity with given (named) dimensions whose value is presented relative
-    to the corresponding SI value.
-
-    .. code-block:: python
-
-        Unit.values         # Check available symbols
-        Unit[key]           # Return value of key relative to SI
-        Unit[key0, key1]    # Return conversion from key0 to key1
-    """
     @property
     def values(self):
         return self._values
@@ -57,16 +48,18 @@ class Unit(object):
 
 def _create():
     def creator(name, data):
-        data.pop("dimensions", None)
-        data.pop("aliases", None)
+        dims = data.pop("dimensions", None)
+        aliases = data.pop("aliases", None)
         return Unit(data, name)
 
-    dct = _json.load(_Editor(_path).to_stream())
+    with _bz2.open(_path, "rb") as f:
+        dct = _json.loads(f.read().decode("utf-8"))
     for name, data in dct.items():
         setattr(_this, name.title(), creator(name, data))
 
 
+_resource = "../../static/units.json.bz2"    # HARDCODED
 _this = _sys.modules[__name__]         # Reference to this module
-_path = _resource("units.json.bz2")
+_path = _os.path.abspath(_os.path.join(_os.path.abspath(__file__), _resource))
 if not hasattr(_this, "Energy"):
     _create()

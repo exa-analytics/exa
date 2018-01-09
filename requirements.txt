@@ -1,4 +1,14 @@
-six
-tables
 numpy
+scipy
+matplotlib
 pandas
+networkx
+seaborn
+sphinx
+sphinx_rtd_theme
+numba
+pandoc
+nbsphinx
+six
+nose
+ipython

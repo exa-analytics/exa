@@ -9,9 +9,7 @@ Visualization parameters are also provided. Data is provided and maintained
 by `NIST`_. The full api is given in the code example below. Note that not
 all attributes that are present on isotopes are present on elements (and vice
 versa).
-
 .. code-block:: python
-
     from exa.util import isotopes
     isotopes.H            # Hydrogen element
     isotopes.H[2]         # Hydrogen isotopes 2 (deuterium)
@@ -28,29 +26,29 @@ versa).
     isotopes.H[2].spin    # Nuclear spin
     isotopes.H.color      # Traditional atomic color (HTML)
     isotopes.H.name       # Full element name
-
 Warning:
     Isotopes are provided as part of the static data directory.
-
 .. _NIST: https://www.nist.gov/
 """
-import json as _json
 import six as _six
+import os as _os
 import sys as _sys
+import bz2 as _bz2
+import json as _json
+from pandas import read_json as _rj
 from exa import Editor as _E
 from exa import DataFrame as _DF
-from exa.static import resource as _resource
+if not hasattr(_bz2, "open"):
+    _bz2.open = _bz2.BZ2File
 
 
 class Element(object):
     """
     An element from Mendeleev's periodic table.
-
     .. code-block:: python
-
         from exa.util import isotopes
         H = isotopes.H         # Hydrogen element (isotope averaged)
-        D = isotopes.H[2]      # Deuterium (2H, a specific isotope)
+        D = isotopes.H['2']    # Deuterium (2H, a specific isotope)
         isotopes.H.isotopes    # List of available isotopes
     """
     @property
@@ -66,42 +64,22 @@ class Element(object):
         self.color = color
 
     def __getitem__(self, key):
-        if isinstance(key, _six.integer_types):
-            return getattr(self, "_"+str(key))
+        if isinstance(key, str):
+            return getattr(self, "_"+key)
         return getattr(self, key)
 
     def __repr__(self):
-        return "{}({}, {})".format(self.symbol, self.Z, self.mass)
+        return self.symbol
 
 
 class Isotope(object):
     """
     A specific atomic isotope (the physical manifestation of an element).
-
     .. code-block:: python
-
         from exa.util import isotopes
-        u235 = isotopes.U[235]    # Specific isotope of Uranium
-        u235.mass                 # Mass of 235 U isotope
-
-    Attributes:
-        A (int): Mass number
-        Z (int): Proton number
-        af (float): Abundance fraction
-        afu (float): Abundance fraction uncertainty
-        radius (float): Colvalent radius (approximate)
-        g (float): Nuclear g-factor
-        mass (float): Atomic mass (in g/mol)
-        massu (float): Atom mass uncertainty
-        name (str): Full name
-        eneg (float): Electronegativity (Pauling scale
-        quad (float): Nuclear quadrupole moment (electron-barn units)
-        spin (float): Nuclear spin
-        symbol (str): Element symbol
-        color (str): Color as hexidecimal string
+        isotopes.U['235'].mass    # Mass of 235-U
     """
-    def __init__(self, anum, znum, af, afu, radius, g, mass, massu, name,
-                 eneg, quad, spin, symbol, color):
+    def __init__(self, anum, znum, af, afu, radius, g, mass, massu, name, eneg, quad, spin, symbol, color):
         self.A = anum
         self.Z = znum
         self.af = af
@@ -118,7 +96,7 @@ class Isotope(object):
         self.color = color
 
     def __repr__(self):
-        return "{}({}, {})".format(self.symbol, self.A, self.Z)
+        return str(self.A) + self.symbol
 
 
 def _create():
@@ -143,12 +121,15 @@ def _create():
             setattr(ele, "_"+str(tope.A), tope)
         return ele
 
-    iso = _DF(_json.loads(str(_E(_path))), columns=_columns)
+    with _bz2.open(_path, "rb") as f:
+        iso = _DF(_json.loads(f.read().decode("utf-8")), columns=_columns)
+    #iso = _rj(_E(_path).to_stream())
+    #iso.columns = _columns
     for element in iso.groupby("symbol").apply(creator):
         setattr(_this, element.symbol, element)
 
 
-def _df():
+def as_df():
     """Return a dataframe of isotopes."""
     records = []
     for sym, ele in vars(_this).items():
@@ -159,26 +140,11 @@ def _df():
     return _DF.from_records(records)
 
 
-def get(key):
-    """
-    Retrieve an element by symbol or by proton number (Z).
-
-    .. code-block:: python
-
-        isotopes.get(92)
-        isotopes.get("U")
-        isotopes.get("h")    # Corrects lowercase
-    """
-    if isinstance(key, _six.integer_types):
-        key = df.loc[df['Z'] == key, 'symbol'].values[0]
-    return getattr(_this, key.title())
-
-
 # Data order of isotopic (nuclear) properties:
+_resource = "../../static/isotopes.json.bz2"    # HARDCODED
 _columns = ("A", "Z", "af", "afu", "radius", "g", "mass", "massu", "name",
             "eneg", "quad", "spin", "symbol", "color")
 _this = _sys.modules[__name__]         # Reference to this module
-_path = _resource("isotopes.json.bz2")
+_path = _os.path.abspath(_os.path.join(_os.path.abspath(__file__), _resource))
 if not hasattr(_this, "H"):
     _create()
-    df = _df()

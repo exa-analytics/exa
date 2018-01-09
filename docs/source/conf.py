@@ -44,6 +44,7 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
+    'IPython.sphinxext.ipython_console_highlighting',    # see https://github.com/spatialaudio/nbsphinx/issues/24
     "nbsphinx"                                           # ipynb autodocs
 ]
 
@@ -79,7 +80,7 @@ project = "exa"
 copyrite = "Copyright (c) 2015-2017, Exa Analytics Development Team"
 author = "Thomas J. Duignan and Alex Marchenko"
 
-# The version info for the project you"re documenting, acts as replacement for
+# The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
@@ -180,7 +181,7 @@ html_last_updated_fmt = "%b %d, %Y"
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
-#html_use_smartypants = True
+html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
 #html_sidebars = {}
@@ -318,7 +319,7 @@ texinfo_show_urls = "footnote"
 epub_title = project
 epub_author = author
 epub_publisher = author
-epub_copyright = copyrite
+epub_copyright = copyright
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = project

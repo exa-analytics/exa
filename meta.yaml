@@ -1,5 +1,5 @@
 {% set name = "exa" %}
-{% set version = "0.4.0" %}
+{% set version = "0.3.9" %}
 {% set build = 0 %}
 
 package:
@@ -22,8 +22,20 @@ requirements:
   run:
     - python
     - numpy
+    - scipy
+    - matplotlib
+    - seaborn
+    - networkx
     - pandas
-    - tables
+    - notebook
+    - nose
+    - numba
+    - six
+    - pytables
+    - sphinx
+    - sphinx_rtd_theme
+    - pandoc
+    - nbsphinx
 
 test:
   imports:
