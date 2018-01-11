@@ -121,10 +121,10 @@ def _create():
             setattr(ele, "_"+str(tope.A), tope)
         return ele
 
-    with _bz2.open(_path, "rb") as f:
-        iso = _DF(_json.loads(f.read().decode("utf-8")), columns=_columns)
-    #iso = _rj(_E(_path).to_stream())
-    #iso.columns = _columns
+    #with _bz2.open(_path, "rb") as f:
+    #    iso = _DF(_json.loads(f.read().decode("utf-8")), columns=_columns)
+    iso = _rj(_E(_path).to_stream())
+    iso.columns = _columns
     for element in iso.groupby("symbol").apply(creator):
         setattr(_this, element.symbol, element)
 
