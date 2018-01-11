@@ -11,6 +11,7 @@ all attributes that are present on isotopes are present on elements (and vice
 versa).
 
 .. code-block:: python
+
     from exa.util import isotopes
     isotopes.H            # Hydrogen element
     isotopes.H[2]         # Hydrogen isotopes 2 (deuterium)
