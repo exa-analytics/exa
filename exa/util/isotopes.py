@@ -9,6 +9,7 @@ Visualization parameters are also provided. Data is provided and maintained
 by `NIST`_. The full api is given in the code example below. Note that not
 all attributes that are present on isotopes are present on elements (and vice
 versa).
+
 .. code-block:: python
     from exa.util import isotopes
     isotopes.H            # Hydrogen element
@@ -26,8 +27,10 @@ versa).
     isotopes.H[2].spin    # Nuclear spin
     isotopes.H.color      # Traditional atomic color (HTML)
     isotopes.H.name       # Full element name
+
 Warning:
     Isotopes are provided as part of the static data directory.
+
 .. _NIST: https://www.nist.gov/
 """
 import six as _six

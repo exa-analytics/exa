@@ -3,7 +3,7 @@
 # Distributed under the terms of the Apache License 2.0
 """
 Tests for :mod:`~exa.core.container`
-##################################
+#######################################
 """
 import six
 import pandas as pd
