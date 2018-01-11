@@ -105,7 +105,10 @@ def _create():
         """Helper function applied to each symbol group of the raw isotope table."""
         symbol = group['symbol'].values[0]
         try:    # Ghosts and custom atoms don't necessarily have an abundance fraction
-            mass = (group['mass']*group['af']).sum()/group['af'].sum()
+            mass = (group['mass']*group['af']).sum()
+            afm = group['af'].sum()
+            if afm > 0.0:
+                mass /= afm 
         except ZeroDivisionError:
             mass = group['mass'].mean()
         znum = group['Z'].max()
@@ -125,6 +128,7 @@ def _create():
     #    iso = _DF(_json.loads(f.read().decode("utf-8")), columns=_columns)
     iso = _rj(_E(_path).to_stream())
     iso.columns = _columns
+    setattr(_this, "iso", iso)
     for element in iso.groupby("symbol").apply(creator):
         setattr(_this, element.symbol, element)
 
