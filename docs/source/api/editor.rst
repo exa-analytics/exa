@@ -9,7 +9,5 @@ Editors
 .. automodule:: exa.core.editor
     :members:
 
-.. _parsing-label:
-
 .. automodule:: exa.core.parser
     :members:

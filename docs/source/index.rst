@@ -7,8 +7,8 @@
 *A framework for building data processing and visualization applications*
 
 This package provides a framework for programmatic file manipulation and data
-organization and processing. :ref:`editors-label` and :ref:`parsing-label` 
-objects allow creation of modular and efficient parsing systems. Data objects
+organization and processing. :ref:`editors-label`
+allow creation of modular and efficient text parsing systems. Data objects
 extracted can be collected into :ref:`container-label` objects. Containers 
 enable visualization within the `Jupyter notebook`_.
 
