@@ -52,6 +52,6 @@ def _create():
         setattr(_this, kwargs['name'], Constant(**kwargs))
 
 _this = _sys.modules[__name__]
-_path = _resource("constants.json.bz2")
+_path = _resource("constants.json")
 if not hasattr(_this, "Planck_constant"):
     _create()

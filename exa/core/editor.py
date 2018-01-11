@@ -321,6 +321,9 @@ class Editor(object):
             except TypeError:
                 print('Cannot pandas_dataframe if ncol is {}, must be int or list'.format(type(ncol)))
 
+    def to_stream(self):
+        """Create an io.StringIO object from the current editor text."""
+        return io.StringIO(str(self))
 
     @property
     def variables(self):
