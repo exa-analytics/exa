@@ -10,17 +10,10 @@ matrix:
           python: 3.5
           env: PYTHONVER=3.5
 
-<<<<<<< HEAD
         - os: linux
           language: python
           python: 3.6
           env: PYTHONVER=3.6
-=======
-python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
->>>>>>> org/0.3.9
 
         - os: osx
           language: generic
@@ -51,7 +44,6 @@ install:
     - pip install .
 
 script:
-<<<<<<< HEAD
     - if [[ $TRAVIS_OS_NAME == "linux" ]]; then
           pytest --cov;
           coverage xml;
@@ -68,13 +60,3 @@ after_success:
           python-codacy-coverage -r coverage.xml;
           travis-sphinx deploy;
       fi
-=======
-  - nosetests --with-coverage
-  - coverage xml
-  - travis-sphinx build
-
-after_success:
-  - coveralls
-  - python-codacy-coverage -r coverage.xml
-  - travis-sphinx deploy
->>>>>>> org/0.3.9
