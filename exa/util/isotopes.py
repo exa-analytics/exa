@@ -141,7 +141,7 @@ def as_df():
 
 
 # Data order of isotopic (nuclear) properties:
-_resource = "../../static/isotopes.json.bz2"    # HARDCODED
+_resource = "../../static/isotopes.json"    # HARDCODED
 _columns = ("A", "Z", "af", "afu", "radius", "g", "mass", "massu", "name",
             "eneg", "quad", "spin", "symbol", "color")
 _this = _sys.modules[__name__]         # Reference to this module
