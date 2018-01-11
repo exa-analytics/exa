@@ -1,10 +1,10 @@
-.. Copyright (c) 2015-2017, Exa Analytics Development Team
+.. Copright (c) 2015-2018, Exa Analytics Development Team
 .. Distributed under the terms of the Apache License 2.0
 
 #############################
 `Exa`_
 #############################
-*A framework for data processing, computation, and visualization.*
+*A framework for building data processing and visualization applications*
 
 This package provides a framework for programmatic file manipulation and data
 organization and processing. :ref:`editors-label` and :ref:`parsing-label` 
