@@ -49,7 +49,9 @@ if not hasattr(_bz2, "open"):
 class Element(object):
     """
     An element from Mendeleev's periodic table.
+
     .. code-block:: python
+
         from exa.util import isotopes
         H = isotopes.H         # Hydrogen element (isotope averaged)
         D = isotopes.H['2']    # Deuterium (2H, a specific isotope)
@@ -79,7 +81,9 @@ class Element(object):
 class Isotope(object):
     """
     A specific atomic isotope (the physical manifestation of an element).
+
     .. code-block:: python
+
         from exa.util import isotopes
         isotopes.U['235'].mass    # Mass of 235-U
     """
