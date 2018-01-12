@@ -6,5 +6,6 @@ Exa
 #########
 """
 from ._version import __version__
+from .typed import Typed, TypedMeta, TypedClass
 from .core import (DataFrame, Series, Field3D, Field, Editor, Container,
                    TypedMeta, SparseDataFrame, Parser)
