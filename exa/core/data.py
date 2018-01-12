@@ -16,8 +16,6 @@ import six
 import warnings
 import numpy as np
 import pandas as pd
-from sympy import Expr
-from symengine.lib.symengine_wrapper import Basic
 from types import FunctionType
 from pandas.io import pytables
 from pandas.core.dtypes.dtypes import CategoricalDtypeType
@@ -335,52 +333,6 @@ class SparseDataFrame(_Base, pd.SparseDataFrame):
     @property
     def _constructor(self):
         return SparseDataFrame
-
-
-class Field(TypedClass):
-    """
-    A field is a collection of values that correspond to a (possibly
-    n-dimensional) spatial grid.
-
-    This object requires the user provide explict dimensions as an iterable
-    (list, tuple) or provide a function that can be called to generate the
-    grid on the fly.
-
-    Note:
-        The :class:`~exa.core.container.Container` handles saving these
-        objects with ease: both the values and explicit dimensions (grid)
-        are saved.
-
-    See Also:
-        The `xarray`_ package provides n-dimensional arrays which have similar
-        functionality to this object, and which is fully compatible with
-        :class:`~exa.core.container.Container` objects.
-
-    .. _xarray: http://xarray.pydata.org/en/stable/
-    """
-    func = Typed((Expr, Basic), doc="Analytic function representing the field")
-    values = Typed(np.ndarray, doc="Field values (n-dimensional)", autoconv=False)
-    coords = Typed((np.ndarray, FunctionType), autoconv=False,
-                   doc="Grid on which the field belongs")
-
-    @property
-    def coords(self):
-        """If needed, dynamically generate the coordinate grid."""
-        if callable(self._coords):
-            return self._coords()
-        return self._coords
-
-    def __init__(self, values=None, coords=None, func=None, **meta):
-        if values is coords is func is None:
-            raise ValueError("One of values/coords or function required")
-        elif values is not None and coords is None:
-            raise ValueError("Field values must have coordinates")
-        if isinstance(values, (pd.Series, pd.DataFrame, pd.SparseDataFrame,
-                               pd.SparseSeries)):
-            values = values.values
-        self.values = values
-        self.coords = coords
-        self.func = func
 
 
 # Required exa data objects' HDF compatibility

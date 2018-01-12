@@ -1,1 +1,2 @@
 recursive-include exa/static *
+include requirements.txt
