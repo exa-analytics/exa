@@ -1,5 +1,5 @@
 {% set name = "exa" %}
-{% set version = "0.3.9" %}
+{% set version = "0.3.10" %}
 {% set build = 0 %}
 
 package:
@@ -45,4 +45,4 @@ about:
     home: https://exa-analytics.github.io/{{ name }}
     license: Apache-2.0
     license_file: LICENSE
-    summary: A framework for data processing, computation, and visualization.
+    summary: A framework for building data processing and visualization applications
