@@ -35,7 +35,7 @@ class DummyContainer(six.with_metaclass(DummyMeta, Container)):
 
 class TestContainer(TestCase):
     def setUp(self):
-        w = [0, 1, 2, 3, 4]
+        #w = [0, 1, 2, 3, 4]
         x = [0, 0, 0, 0, 0]
         y = [1.1, 2.2, 3.3, 4.4, 5.5]
         z = [0.5, 1.5, 2.5, 3.5, 4.5]

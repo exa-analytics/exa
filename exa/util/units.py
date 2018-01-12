@@ -48,8 +48,8 @@ class Unit(object):
 
 def _create():
     def creator(name, data):
-        dims = data.pop("dimensions", None)
-        aliases = data.pop("aliases", None)
+        _ = data.pop("dimensions", None)
+        _ = data.pop("aliases", None)
         return Unit(data, name)
 
     with _bz2.open(_path, "rb") as f:

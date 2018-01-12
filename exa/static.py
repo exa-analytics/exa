@@ -28,6 +28,6 @@ def resource(name):
         resource("test01/test.txt")
         resource("test02/test.txt")
     """
-    for path, dirs, files in os.walk(staticdir()):
+    for path, _, files in os.walk(staticdir()):
         if name in files:
             return os.path.abspath(os.path.join(path, name))

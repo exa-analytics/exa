@@ -7,7 +7,7 @@ Matplotlib Utilities
 """
 import seaborn as sns
 import numpy as np
-from mpl_toolkits.mplot3d import Axes3D
+#from mpl_toolkits.mplot3d import Axes3D
 
 
 legend = {'legend.frameon': True, 'legend.facecolor': 'white',

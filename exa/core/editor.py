@@ -286,8 +286,9 @@ class Editor(object):
             pattern (str): Pattern to replace
             replacement (str): Text to insert
         """
-        for i in range(len(self)):
-            line = self[i]
+        #for i in range(len(self)):
+        #    line = self[i]
+        for line in self:
             while pattern in line:
                 line = line.replace(pattern, replacement)
             self[i] = line
@@ -309,7 +310,7 @@ class Editor(object):
         try:
             int(start)
             int(stop)
-        except:
+        except TypeError:
             print('start and stop must be ints')
         try:
             ncol = int(ncol)

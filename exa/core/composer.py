@@ -91,7 +91,7 @@ class Composer(Editor):
             # If any special formatters exist, handle them
             for match in self._regex.findall(line):
                 search = "[{}]".format("|".join(match))
-                name, indent, delim, qual, ending = match
+                name, indent, delim, qual, _ = match
                 if indent != "":
                     indent = " "*int(indent)
                 delim = delim.replace("\\|", "|")

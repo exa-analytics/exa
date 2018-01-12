@@ -17,6 +17,7 @@ See Also:
 .. _numba: http://numba.pydata.org/
 """
 import six
+#import ast
 import numpy as np
 import sympy as sy
 import numba as nb
@@ -80,6 +81,7 @@ def numbafy(fn, args, compiler="jit", **nbkws):
         fn = sy.expand_func(fn)
     lamstr = "lambda " + ", ".join([str(a) for a in args]) + ": " + str(fn)
     # Python eval and docs
+    #func = ast.literal_eval(lamstr)
     func = eval(lamstr, npvars)
     func.__doc__ = "Dynamically compiled function:\n\n{}\n".format(lamstr)
     # Machine code compilation

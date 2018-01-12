@@ -34,11 +34,11 @@ Warning:
 
 .. _NIST: https://www.nist.gov/
 """
-import six as _six
+#import six as _six
 import os as _os
 import sys as _sys
 import bz2 as _bz2
-import json as _json
+#import json as _json
 from pandas import read_json as _rj
 from exa import Editor as _E
 from exa import DataFrame as _DF
@@ -116,7 +116,7 @@ def _create():
             mass = (group['mass']*group['af']).sum()
             afm = group['af'].sum()
             if afm > 0.0:
-                mass /= afm 
+                mass /= afm
         except ZeroDivisionError:
             mass = group['mass'].mean()
         znum = group['Z'].max()
