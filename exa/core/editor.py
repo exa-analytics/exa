@@ -314,17 +314,17 @@ class Editor(object):
             print('start and stop must be ints')
         try:
             ncol = int(ncol)
-            return pd.read_csv(io.StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=range(ncol), **kwargs)
+            return pd.read_csv(six.StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=range(ncol), **kwargs)
         except TypeError:
             try:
                 ncol = list(ncol)
-                return pd.read_csv(io.StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=ncol, **kwargs)
+                return pd.read_csv(six.StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=ncol, **kwargs)
             except TypeError:
                 print('Cannot pandas_dataframe if ncol is {}, must be int or list'.format(type(ncol)))
 
     def to_stream(self):
-        """Create an io.StringIO object from the current editor text."""
-        return io.StringIO(six.u(self))
+        """Create an StringIO object from the current editor text."""
+        return six.StringIO(six.u(self))
 
     @property
     def variables(self):
@@ -378,7 +378,7 @@ class Editor(object):
             self._lines = lines_from_file(path_stream_or_string, as_interned, encoding)
         elif isinstance(path_stream_or_string, list):
             self._lines = path_stream_or_string
-        elif isinstance(path_stream_or_string, (io.TextIOWrapper, io.StringIO)):
+        elif isinstance(path_stream_or_string, (io.TextIOWrapper, six.StringIO)):
             self._lines = lines_from_stream(path_stream_or_string, as_interned)
         elif isinstance(path_stream_or_string, str):
             self._lines = lines_from_string(path_stream_or_string, as_interned)
