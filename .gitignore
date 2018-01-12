@@ -18,11 +18,9 @@ cache/
 .tox/
 .coverage/
 parts/
-win-32/
-win-64/
-linux-32/
-linux-64/
-osx-64/
+linux-*/
+osx-*/
+win-*/
 doc/build/
 target/
 .settings/
