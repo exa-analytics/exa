@@ -324,7 +324,7 @@ class Editor(object):
 
     def to_stream(self):
         """Create an io.StringIO object from the current editor text."""
-        return io.StringIO(str(self))
+        return io.StringIO(six.u(self))
 
     @property
     def variables(self):
