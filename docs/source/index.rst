@@ -1,14 +1,14 @@
-.. Copyright (c) 2015-2017, Exa Analytics Development Team
+.. Copright (c) 2015-2018, Exa Analytics Development Team
 .. Distributed under the terms of the Apache License 2.0
 
 #############################
 `Exa`_
 #############################
-*A framework for data processing, computation, and visualization.*
+*A framework for building data processing and visualization applications*
 
 This package provides a framework for programmatic file manipulation and data
-organization and processing. :ref:`editors-label` and :ref:`parsing-label` 
-objects allow creation of modular and efficient parsing systems. Data objects
+organization and processing. :ref:`editors-label`
+allow creation of modular and efficient text parsing systems. Data objects
 extracted can be collected into :ref:`container-label` objects. Containers 
 enable visualization within the `Jupyter notebook`_.
 
@@ -26,11 +26,7 @@ enable visualization within the `Jupyter notebook`_.
     :maxdepth: 2
     :caption: API
 
-    api/data.rst
-    api/editor.rst
-    api/container.rst
-    api/util.rst
-    api/math.rst
+    api/index.rst
 
 .. toctree::
     :maxdepth: 1

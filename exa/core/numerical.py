@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2017, Exa Analytics Development Team
+# Copyright (c) 2015-2018, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Data Objects
@@ -171,7 +171,7 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
         """
         Inplace conversion to categories.
         """
-        for column, dtype in self._categories.items():
+        for column, _ in self._categories.items():
             if column in self.columns:
                 self[column] = self[column].astype(dtype)
 
