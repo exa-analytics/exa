@@ -6,8 +6,8 @@ package:
   version: {{ version }}
 
 source:
-  git_rev:
-  git_url: ./
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}-{{ version }}.tar.gz
 
 requirements:
   build:
