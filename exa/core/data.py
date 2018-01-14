@@ -16,7 +16,6 @@ import six
 import warnings
 import numpy as np
 import pandas as pd
-from types import FunctionType
 from pandas.io import pytables
 from pandas.core.dtypes.dtypes import CategoricalDtypeType
 from exa.typed import Typed, TypedMeta, yield_typed, TypedClass

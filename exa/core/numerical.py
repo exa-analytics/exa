@@ -179,7 +179,7 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
         """
         Inplace conversion from categories.
         """
-        for column, dtype in self._categories.items():
+        for column, _ in self._categories.items():
             if column in self.columns:
                 self[column] = self[column].astype('category')
 
