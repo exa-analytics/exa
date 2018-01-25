@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2017, Exa Analytics Development Team
+# Copyright (c) 2015-2018, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Matplotlib Utilities
@@ -7,7 +7,7 @@ Matplotlib Utilities
 """
 import seaborn as sns
 import numpy as np
-from mpl_toolkits.mplot3d import Axes3D
+#from mpl_toolkits.mplot3d import Axes3D
 
 
 legend = {'legend.frameon': True, 'legend.facecolor': 'white',

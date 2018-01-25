@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2017, Exa Analytics Development Team
+# Copyright (c) 2015-2018, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Container
@@ -19,8 +19,9 @@ import networkx as nx
 from sys import getsizeof
 from copy import deepcopy
 from .numerical import check_key
-from exa.util import mpl
 from exa.util.utility import convert_bytes
+from exa.util import mpl
+import matplotlib.pyplot as plt
 
 
 class Container(object):
@@ -250,9 +251,10 @@ class Container(object):
 
         def get_node_type_color(obj):
             """Gets the color of a node based on the node's (sub)type."""
-            cols = mpl.sns.color_palette('viridis', len(typs))
+            cols = mpl.sns.color_palette('viridis', len(conn_types))
             for col in cols:
                 if isinstance(obj, (pd.DataFrame, pd.Series, pd.SparseSeries, pd.SparseDataFrame)):
+                    typ = type(obj)
                     return '.'.join((typ.__module__, typ.__name__)), col
             return 'other', 'gray'
 
@@ -313,16 +315,16 @@ class Container(object):
         edge_colors = [node_conn_dict[edge][1] for edge in g.edges()]
         # Build the figure and legends
         if fig:
-            fig, ax = mpl.sns.plt.subplots(1, figsize=figsize)
+            fig, ax = plt.subplots(1, figsize=figsize)
             ax.axis('off')
             pos = nx.spring_layout(g)
-            f0 = nx.draw_networkx_nodes(g, pos=pos, ax=ax, alpha=0.7, node_size=node_sizes,
+            nx.draw_networkx_nodes(g, pos=pos, ax=ax, alpha=0.7, node_size=node_sizes,
                                         node_color=node_colors)
-            f1 = nx.draw_networkx_labels(g, pos=pos, labels=node_labels, font_size=17,
+            nx.draw_networkx_labels(g, pos=pos, labels=node_labels, font_size=17,
                                          font_weight='bold', ax=ax)
-            f2 = nx.draw_networkx_edges(g, pos=pos, edge_color=edge_colors, width=2, ax=ax)
+            nx.draw_networkx_edges(g, pos=pos, edge_color=edge_colors, width=2, ax=ax)
             l1, ax = legend(set(node_conn_dict.values()), 'Connection', (1, 0), ax)
-            l2, ax = legend(set(node_type_dict.values()), 'Data Type', (1, 0.3), ax)
+            _, ax = legend(set(node_type_dict.values()), 'Data Type', (1, 0.3), ax)
             fig.gca().add_artist(l1)
         g.edge_types = {node: value[0] for node, value in node_conn_dict.items()}  # Attached connection information to network graph
         return g
@@ -580,14 +582,14 @@ class TypedMeta(type):
 
         return property(getter, setter, deleter)
 
-    def __new__(metacls, name, bases, clsdict):
+    def __new__(mcs, name, bases, clsdict):
         """
         Modification of the class definition occurs here; we iterate over all
         statically typed attributes and attach their property (see
         :func:`~exa.container.TypedMeta.create_property`) definition, returning
         the new class definition.
         """
-        for k, v in vars(metacls).items():
+        for k, v in vars(mcs).items():
             if isinstance(v, type) and not k.startswith('_'):
-                clsdict[k] = metacls.create_property(k, v)
-        return super(TypedMeta, metacls).__new__(metacls, name, bases, clsdict)
+                clsdict[k] = mcs.create_property(k, v)
+        return super(TypedMeta, mcs).__new__(mcs, name, bases, clsdict)

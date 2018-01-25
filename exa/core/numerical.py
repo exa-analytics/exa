@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2017, Exa Analytics Development Team
+# Copyright (c) 2015-2018, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Data Objects
@@ -15,7 +15,6 @@ module may be extended.
 import warnings
 import numpy as np
 import pandas as pd
-from numbers import Integral, Real
 from exa.core.error import RequiredColumnError
 
 
@@ -180,7 +179,7 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
         """
         Inplace conversion from categories.
         """
-        for column, dtype in self._categories.items():
+        for column, _ in self._categories.items():
             if column in self.columns:
                 self[column] = self[column].astype('category')
 
@@ -265,16 +264,18 @@ class Field(DataFrame):
         data = self.loc[key]
         return cls(data, field_values=values)
 
-    def slice_cardinal(self, key):
-        cls = self.__class__
-        grpby = self.cardinal_groupby()
+    #def slice_cardinal(self, key):
+    #    cls = self.__class__
+    #    grpby = self.cardinal_groupby()
 
-    def __init__(self, field_values=None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         # The following check allows creation of a single field (whose field data
         # comes from a series object and field values from another series object).
-        if isinstance(args[0], pd.Series):
+        field_values = kwargs.pop("field_values", None)
+        if args and isinstance(args[0], pd.Series):
             args = (args[0].to_frame().T, )
         super(Field, self).__init__(*args, **kwargs)
+        self._metadata = ['field_values']
         if isinstance(field_values, (list, tuple, np.ndarray)):
             self.field_values = [Series(v) for v in field_values]    # Convert type for nice repr
         elif field_values is None:

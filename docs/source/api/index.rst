@@ -1,4 +1,4 @@
-.. Copyright (c) 2015-2017, Exa Analytics Development Team
+.. Copright (c) 2015-2018, Exa Analytics Development Team
 .. Distributed under the terms of the Apache License 2.0
 
 .. _api-label:
@@ -28,17 +28,19 @@ can be found at :ref:`examples-label` or via help::
     :maxdepth: 2
     :caption: Core API
 
-    api/editor.rst
-    api/data.rst
-    api/container.rst
+    editor.rst
+    data.rst
+    container.rst
 
 .. toctree::
     :maxdepth: 2
     :caption: Util
 
-    api/util/isotopes.rst
-    api/typed.rst
-    api/static.rst
+    util/units.rst
+    util/isotopes.rst
+    util/constants.rst
+    typed.rst
+    static.rst
 
 
 ########################
@@ -51,6 +53,6 @@ and users.
     :maxdepth: 2
     :caption: Tests
 
-    api/tests1.rst
-    api/tests2.rst
-    api/tests3.rst
+    tests1.rst
+    tests2.rst
+    tests3.rst

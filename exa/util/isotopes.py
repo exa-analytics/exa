@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2017, Exa Analytics Development Team
+# Copyright (c) 2015-2018, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Periodic Table of Elements and Isotopes
@@ -9,7 +9,9 @@ Visualization parameters are also provided. Data is provided and maintained
 by `NIST`_. The full api is given in the code example below. Note that not
 all attributes that are present on isotopes are present on elements (and vice
 versa).
+
 .. code-block:: python
+
     from exa.util import isotopes
     isotopes.H            # Hydrogen element
     isotopes.H[2]         # Hydrogen isotopes 2 (deuterium)
@@ -26,15 +28,17 @@ versa).
     isotopes.H[2].spin    # Nuclear spin
     isotopes.H.color      # Traditional atomic color (HTML)
     isotopes.H.name       # Full element name
+
 Warning:
     Isotopes are provided as part of the static data directory.
+
 .. _NIST: https://www.nist.gov/
 """
-import six as _six
+#import six as _six
 import os as _os
 import sys as _sys
 import bz2 as _bz2
-import json as _json
+#import json as _json
 from pandas import read_json as _rj
 from exa import Editor as _E
 from exa import DataFrame as _DF
@@ -45,7 +49,9 @@ if not hasattr(_bz2, "open"):
 class Element(object):
     """
     An element from Mendeleev's periodic table.
+
     .. code-block:: python
+
         from exa.util import isotopes
         H = isotopes.H         # Hydrogen element (isotope averaged)
         D = isotopes.H['2']    # Deuterium (2H, a specific isotope)
@@ -75,7 +81,9 @@ class Element(object):
 class Isotope(object):
     """
     A specific atomic isotope (the physical manifestation of an element).
+
     .. code-block:: python
+
         from exa.util import isotopes
         isotopes.U['235'].mass    # Mass of 235-U
     """
@@ -105,7 +113,10 @@ def _create():
         """Helper function applied to each symbol group of the raw isotope table."""
         symbol = group['symbol'].values[0]
         try:    # Ghosts and custom atoms don't necessarily have an abundance fraction
-            mass = (group['mass']*group['af']).sum()/group['af'].sum()
+            mass = (group['mass']*group['af']).sum()
+            afm = group['af'].sum()
+            if afm > 0.0:
+                mass /= afm
         except ZeroDivisionError:
             mass = group['mass'].mean()
         znum = group['Z'].max()
@@ -121,10 +132,11 @@ def _create():
             setattr(ele, "_"+str(tope.A), tope)
         return ele
 
-    with _bz2.open(_path, "rb") as f:
-        iso = _DF(_json.loads(f.read().decode("utf-8")), columns=_columns)
-    #iso = _rj(_E(_path).to_stream())
-    #iso.columns = _columns
+    #with _bz2.open(_path, "rb") as f:
+    #    iso = _DF(_json.loads(f.read().decode("utf-8")), columns=_columns)
+    iso = _rj(_E(_path).to_stream())
+    iso.columns = _columns
+    setattr(_this, "iso", iso)
     for element in iso.groupby("symbol").apply(creator):
         setattr(_this, element.symbol, element)
 
@@ -141,7 +153,7 @@ def as_df():
 
 
 # Data order of isotopic (nuclear) properties:
-_resource = "../../static/isotopes.json.bz2"    # HARDCODED
+_resource = "../../static/isotopes.json"    # HARDCODED
 _columns = ("A", "Z", "af", "afu", "radius", "g", "mass", "massu", "name",
             "eneg", "quad", "spin", "symbol", "color")
 _this = _sys.modules[__name__]         # Reference to this module

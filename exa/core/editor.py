@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2017, Exa Analytics Development Team
+# Copyright (c) 2015-2018, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Editor
@@ -286,8 +286,9 @@ class Editor(object):
             pattern (str): Pattern to replace
             replacement (str): Text to insert
         """
-        for i in range(len(self)):
-            line = self[i]
+        #for i in range(len(self)):
+        #    line = self[i]
+        for line in self:
             while pattern in line:
                 line = line.replace(pattern, replacement)
             self[i] = line
@@ -309,18 +310,21 @@ class Editor(object):
         try:
             int(start)
             int(stop)
-        except:
+        except TypeError:
             print('start and stop must be ints')
         try:
             ncol = int(ncol)
-            return pd.read_csv(io.StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=range(ncol), **kwargs)
+            return pd.read_csv(six.StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=range(ncol), **kwargs)
         except TypeError:
             try:
                 ncol = list(ncol)
-                return pd.read_csv(io.StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=ncol, **kwargs)
+                return pd.read_csv(six.StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=ncol, **kwargs)
             except TypeError:
                 print('Cannot pandas_dataframe if ncol is {}, must be int or list'.format(type(ncol)))
 
+    def to_stream(self):
+        """Create an StringIO object from the current editor text."""
+        return six.StringIO(str(self))
 
     @property
     def variables(self):
@@ -374,7 +378,7 @@ class Editor(object):
             self._lines = lines_from_file(path_stream_or_string, as_interned, encoding)
         elif isinstance(path_stream_or_string, list):
             self._lines = path_stream_or_string
-        elif isinstance(path_stream_or_string, (io.TextIOWrapper, io.StringIO)):
+        elif isinstance(path_stream_or_string, (io.TextIOWrapper, six.StringIO)):
             self._lines = lines_from_stream(path_stream_or_string, as_interned)
         elif isinstance(path_stream_or_string, str):
             self._lines = lines_from_string(path_stream_or_string, as_interned)
@@ -456,7 +460,7 @@ def lines_from_stream(f, as_interned=False):
     Create a list of file lines from a given file stream.
 
     Args:
-        f (:class:`~io.TextIOWrapper): File stream
+        f (io.TextIOWrapper): File stream
         as_interned (bool): List of "interned" strings (default False)
 
     Returns:
