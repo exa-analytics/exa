@@ -286,9 +286,7 @@ class Editor(object):
             pattern (str): Pattern to replace
             replacement (str): Text to insert
         """
-        #for i in range(len(self)):
-        #    line = self[i]
-        for line in self:
+        for i, line in enumerate(self):
             while pattern in line:
                 line = line.replace(pattern, replacement)
             self[i] = line
