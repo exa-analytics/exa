@@ -287,9 +287,8 @@ class Editor(object):
             replacement (str): Text to insert
         """
         for i, line in enumerate(self):
-            while pattern in line:
-                line = line.replace(pattern, replacement)
-            self[i] = line
+            if pattern in line:
+                self[i] = line.replace(pattern, replacement)
 
     def pandas_dataframe(self, start, stop, ncol, **kwargs):
         """
