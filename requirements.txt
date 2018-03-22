@@ -1,11 +1,14 @@
 numpy
-numba
 scipy
 matplotlib
-sqlalchemy
 pandas
 networkx
-sympy
 seaborn
 sphinx
+sphinx_rtd_theme
+numba
+pandoc
+nbsphinx
+six
 nose
+ipython

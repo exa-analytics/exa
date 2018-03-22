@@ -1,5 +1,2 @@
-# The package including static
-recursive-include exa *
-
-# root text files
+recursive-include exa/static *
 include requirements.txt
