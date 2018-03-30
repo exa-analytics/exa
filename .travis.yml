@@ -35,7 +35,7 @@ install:
     - conda create -n test python=$PYTHONVER
     - source activate test
     - conda install -q -c conda-forge six numpy pandas pytables numba
-    - conda install -q -c conda-forge sphinx sphinx_rtd_theme ply 
+    - conda install -q -c conda-forge sphinx sphinx_rtd_theme ply sympy
     - conda install -c conda-forge pandoc pypandoc nbsphinx ipython
     - conda install -q -c conda-forge python-coveralls coverage pytest pytest-cov
     - pip install travis-sphinx codacy-coverage
