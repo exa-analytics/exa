@@ -58,7 +58,7 @@ install:
   - cmd: conda update -q -y --all
   - cmd: conda install -q -y -c conda-forge numpy scipy matplotlib seaborn networkx pandas
   - cmd: conda install -q -y -c conda-forge pytest pytables six numba sympy symengine python-symengine
-  - cmd: pip install .
+  - cmd: pip install -e .
 
 build: false
 

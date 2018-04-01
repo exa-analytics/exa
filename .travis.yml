@@ -40,7 +40,7 @@ install:
     - conda install -q -c conda-forge python-coveralls coverage pytest pytest-cov
     - conda install -q -c conda-forge symengine python-symengine
     - pip install travis-sphinx codacy-coverage
-    - pip install .
+    - pip install -e .
 
 script:
     - if [[ $TRAVIS_OS_NAME == "linux" ]]; then
