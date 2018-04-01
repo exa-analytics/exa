@@ -38,7 +38,6 @@ install:
     - conda install -q -c conda-forge sphinx sphinx_rtd_theme ply sympy
     - conda install -c conda-forge pandoc pypandoc nbsphinx ipython
     - conda install -q -c conda-forge python-coveralls coverage pytest pytest-cov
-    - conda install -q -c conda-forge symengine python-symengine
     - pip install travis-sphinx codacy-coverage
     - pip install -e .
 

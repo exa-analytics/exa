@@ -1,14 +1,8 @@
 numpy
 scipy
-matplotlib
 pandas
+sympy
 networkx
-seaborn
-sphinx
-sphinx_rtd_theme
 numba
-pandoc
-nbsphinx
 six
-nose
 ipython
