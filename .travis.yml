@@ -42,13 +42,9 @@ install:
     - pip install -e .
 
 script:
-    - if [[ $TRAVIS_OS_NAME == "linux" ]]; then
-          pytest --cov;
-          coverage xml;
-      else
-          pytest;
-      fi
+    - pytest --cov;
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.6 ]]; then
+          coverage xml;
           travis-sphinx build;
       fi
 
