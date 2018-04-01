@@ -31,9 +31,9 @@ install:
     - export NUMBA_DISABLE_JIT=1    # For coverage report
     - export PATH="$HOME/miniconda/bin:$PATH"
     - conda config --set always_yes yes --set changeps1 no
-    - conda update -q --all
     - conda create -n test python=$PYTHONVER
     - source activate test
+    - conda update -q --all
     - conda install -q -c conda-forge six numpy pandas pytables numba
     - conda install -q -c conda-forge sphinx sphinx_rtd_theme ply sympy
     - conda install -c conda-forge pandoc pypandoc nbsphinx ipython
