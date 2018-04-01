@@ -28,19 +28,20 @@ can be found at :ref:`examples-label` or via help::
     :maxdepth: 2
     :caption: Core API
 
+    container.rst
     editor.rst
     data.rst
-    container.rst
 
 .. toctree::
     :maxdepth: 2
     :caption: Util
 
+    typed.rst
+    static.rst
     util/units.rst
     util/isotopes.rst
     util/constants.rst
-    typed.rst
-    static.rst
+    util/misc.rst
 
 
 ########################

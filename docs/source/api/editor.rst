@@ -11,3 +11,6 @@ Editors
 
 .. automodule:: exa.core.parser
     :members:
+
+.. automodule:: exa.core.composer
+    :members:
