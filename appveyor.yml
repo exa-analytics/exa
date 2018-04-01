@@ -53,8 +53,8 @@ install:
   - cmd: conda config --set show_channel_urls true
   - cmd: conda config --set always_yes yes --set changeps1 no
   - cmd: conda update -n base conda
-  - cmd: conda create -n test python=$env:CONDA_PY
-  - cmd: source activate test
+  - cmd: conda create -n test python=%CONDA_PY%
+  - cmd: activate test
   - cmd: conda update -q -y --all
   - cmd: conda install -q -y -c conda-forge numpy scipy matplotlib seaborn networkx pandas
   - cmd: conda install -q -y -c conda-forge pytest pytables six numba sympy symengine python-symengine
