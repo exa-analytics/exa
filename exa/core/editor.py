@@ -377,7 +377,7 @@ class Editor(object):
             self._lines = path_stream_or_string
         elif isinstance(path_stream_or_string, (io.TextIOWrapper, six.StringIO)):
             self._lines = lines_from_stream(path_stream_or_string, as_interned)
-        elif isinstance(path_stream_or_string, str):
+        elif isinstance(path_stream_or_string, six.string_types):
             self._lines = lines_from_string(path_stream_or_string, as_interned)
         else:
             raise TypeError('Unknown type for arg data: {}'.format(type(path_stream_or_string)))
@@ -391,7 +391,7 @@ class Editor(object):
         del self._lines[line]     # "line" is the line number minus one
 
     def __getitem__(self, key):
-        if isinstance(key, str):
+        if isinstance(key, six.string_types):
             return getattr(self, key)
         return self._lines[key]
 
