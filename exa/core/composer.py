@@ -2,7 +2,7 @@
 # Copyright (c) 2015-2018, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Composers
+Composers - ALPHA
 ####################################
 This module provides an editor-like (:class:`~exa.core.editor.Editor`) class
 that can be used to programmatically compose files. For many applications,

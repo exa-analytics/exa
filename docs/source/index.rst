@@ -4,7 +4,8 @@
 #############################
 `Exa`_
 #############################
-*A framework for building data processing and visualization applications*
+
+*A framework for data science*
 
 This package provides a framework for programmatic file manipulation and data
 organization and processing. :ref:`editors-label`

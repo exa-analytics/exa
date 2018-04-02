@@ -10,7 +10,6 @@ and symengine expressions.
 import pytest
 import numpy as np
 import sympy as sy
-import symengine as sge
 from numba.errors import TypingError
 from exa.util.nbvars import numbafy
 
@@ -74,9 +73,13 @@ def test_sympy(arr, sig3):
 
 def test_symengine(arr, sig3):
     """Test symengine."""
-    x, y, z = sge.var("x y z")
-    fn = sge.acos(x)/y + sge.exp(-z)
-    func = numbafy(fn, (x, y, z), compiler="vectorize", signatures=sig3)
-    result = func(arr, arr, arr)
-    check = np.arccos(arr)/arr + np.exp(-arr)
-    assert np.allclose(result, check) == True
+    try:
+        import symengine as sge
+        x, y, z = sge.var("x y z")
+        fn = sge.acos(x)/y + sge.exp(-z)
+        func = numbafy(fn, (x, y, z), compiler="vectorize", signatures=sig3)
+        result = func(arr, arr, arr)
+        check = np.arccos(arr)/arr + np.exp(-arr)
+        assert np.allclose(result, check) == True
+    except ImportError:
+        pass

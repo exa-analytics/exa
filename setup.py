@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 
 name = "exa"
-description = "A framework for building data processing and visualization applications"
+description = "A framework for data science"
 staticdir = "static"
 readme = "README.md"
 requirements = "requirements.txt"
