@@ -1,5 +1,6 @@
 [![exa logo](docs/source/static/logo.png)](https://exa-analytics.github.io) 
-*A framework for data processing, computation, and visualization*
+
+*A framework for data science*
 
 
 # Installation
