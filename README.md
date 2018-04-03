@@ -16,18 +16,28 @@ or [pypi](https://pypi.python.org/pypi).
 
 
 # Getting Started
-[![docs](https://readthedocs.org/projects/exa/badge/?version=latest)](https://exa-analytics.github.io/exa/)  
 [![gitter](https://badges.gitter.im/exa-analytics/exa.svg)](https://gitter.im/exa-analytics/exa)  
-Building the docs requires [sphinx](http://www.sphinx-doc.org/en/stable).
+
+See [docs](https://exa-analytics.github.io/exatomic/) for usage. 
+
+Building the docs requires [sphinx](http://www.sphinx-doc.org/en/stable). On Linux or Mac:
 
     $ cd docs
-    $ make html           # .\make.bat html
+    $ make html
+
+On Windows:
+
+    $ cd docs
+    $ ./make.bat html
 
 
 # Development
 [![Travis-CI](https://travis-ci.org/exa-analytics/exa.svg?branch=master)](https://travis-ci.org/exa-analytics/exa)
+
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/j6h8pb23xduq5vqs?svg=true)](https://ci.appveyor.com/project/avmarchenko/exa)
+
 [![Coveralls](https://coveralls.io/repos/github/exa-analytics/exa/badge.svg)](https://coveralls.io/github/exa-analytics/exa)
+
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d7f1c1b3e8f14153b67d54f7f7ccdd05)](https://www.codacy.com/app/exa-analytics/exa-org?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=exa-analytics/exa&amp;utm_campaign=Badge_Grade)
 
 For a development ready installation:
