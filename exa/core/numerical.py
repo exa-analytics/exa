@@ -130,6 +130,10 @@ class Series(BaseSeries, pd.Series):
 
         seri = MySeries(np.random.rand(10**5))
     """
+    @property
+    def _constructor(self):
+        return Series
+
     def copy(self, *args, **kwargs):
         """
         Make a copy of this object.
@@ -155,6 +159,14 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
             _columns = ['x', 'y', 'z', 'symbol']
             _categories = {'symbol': str}
     """
+    @property
+    def _constructor(self):
+        return DataFrame
+
+    @property
+    def _constructor_sliced(self):
+        return Series
+
     def copy(self, *args, **kwargs):
         """
         Make a copy of this object.
@@ -218,6 +230,10 @@ class Field(DataFrame):
     In addition to the :class:`~exa.core.numerical.DataFrame` attributes, this object
     has the following:
     """
+    @property
+    def _constructor(self):
+        return Field
+
     def copy(self, *args, **kwargs):
         """
         Make a copy of this object.
@@ -340,6 +356,10 @@ class Field3D(Field):
     _columns = ['nx', 'ny', 'nz', 'ox', 'oy', 'oz', 'xi', 'xj', 'xk',
                 'yi', 'yj', 'yk', 'zi', 'zj', 'zk']
 
+    @property
+    def _constructor(self):
+        return Field3D
+
 
 def check_key(data_object, key, cardinal=False):
     """
@@ -365,4 +385,6 @@ def check_key(data_object, key, cardinal=False):
 
 
 class SparseDataFrame(BaseDataFrame, pd.SparseDataFrame):
-    pass
+    @property
+    def _constructor(self):
+        return SparseDataFrame

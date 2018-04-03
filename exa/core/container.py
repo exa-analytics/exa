@@ -18,7 +18,7 @@ import pandas as pd
 import networkx as nx
 from sys import getsizeof
 from copy import deepcopy
-from .numerical import check_key
+from .numerical import check_key, Field, Series, DataFrame
 from exa.util.utility import convert_bytes
 from exa.util import mpl
 import matplotlib.pyplot as plt
@@ -329,19 +329,13 @@ class Container(object):
         g.edge_types = {node: value[0] for node, value in node_conn_dict.items()}  # Attached connection information to network graph
         return g
 
-    def save(self, path):
+    def save(self, path=None):
         """
         Save the container as an HDF5 archive.
 
         Args:
             path (str): Path where to save the container
         """
-        # First save the file record
-        with scoped_session() as session:
-            cfile = ContainerFile(name=self.name, description=self.description,
-                                  size=getsizeof(self))
-            session.add(cfile)
-        # Second save the data
         if path is None:
             path = self.hexuid + '.hdf5'
         elif os.path.isdir(path):
