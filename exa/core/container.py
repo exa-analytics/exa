@@ -385,6 +385,10 @@ class Container(object):
                 if hasattr(data, '_set_categories'):
                     data._set_categories()
 
+    def to_hdf(self, *args, **kwargs):
+        """Alias of :func:`~exa.core.container.Container`."""
+        self.save(*args, **kwargs)
+
     @classmethod
     def load(cls, pkid_or_path=None):
         """
@@ -430,6 +434,11 @@ class Container(object):
             for name in to_del:
                 del kwargs[name]
         return cls(**kwargs)
+
+    @classmethod
+    def from_hdf(cls, *args, **kwargs):
+        """Alias for :func:`~exa.core.container.Container`."""
+        return cls.load(*args, **kwargs)
 
     def _rel(self, copy=False):
         """
