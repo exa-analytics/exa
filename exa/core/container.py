@@ -18,6 +18,7 @@ import pandas as pd
 import networkx as nx
 from sys import getsizeof
 from copy import deepcopy
+from collections import defaultdict
 from .numerical import check_key, Field, Series, DataFrame
 from exa.util.utility import convert_bytes
 from exa.util import mpl
@@ -406,33 +407,20 @@ class Container(object):
         elif not os.path.isfile(path):
             raise FileNotFoundError('File {} not found.'.format(path))
         kwargs = {}
+        fields = defaultdict(dict)
         with pd.HDFStore(path) as store:
             for key in store.keys():
                 if 'kwargs' in key:
                     kwargs.update(store.get_storer(key).attrs.metadata)
+                elif "FIELD" in key:
+                    name, dname = "_".join(key.split("_")[1:]).split("/")
+                    fields[name][dname] = store[key]
                 else:
                     name = str(key[1:])
                     kwargs[name] = store[key]
-        # Process any fields
-        n = [int(key.split('_')[0].replace('FIELD', '')) for key in kwargs.keys() if 'FIELD' in key]
-        if len(n) != 0:
-            n = max(n)
-            to_del = []
-            for i in range(n + 1):
-                search = 'FIELD' + str(i)
-                names = [key for key in kwargs.keys() if search in key]
-                to_del += names
-                arg = names[0].replace(search + '_', '').split('/')[0]
-                field_values = [kwargs[key] for key in names if 'values' in key]
-                dkey = None
-                for name in names:
-                    if 'data' in name:
-                        dkey = name
-                field_data = kwargs[dkey]
-                kwargs[arg] = field_data
-                kwargs[arg + '_values'] = field_values
-            for name in to_del:
-                del kwargs[name]
+        for name, field_data in fields.items():
+            field_values = [field_data[v] for v in field_data.keys() if "values" in v]
+            kwargs[name] = Field(field_data['data'], field_values=field_values)
         return cls(**kwargs)
 
     @classmethod
