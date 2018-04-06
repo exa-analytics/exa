@@ -414,13 +414,17 @@ class Container(object):
                     kwargs.update(store.get_storer(key).attrs.metadata)
                 elif "FIELD" in key:
                     name, dname = "_".join(key.split("_")[1:]).split("/")
+                    dname = dname.replace('values', '')
                     fields[name][dname] = store[key]
                 else:
                     name = str(key[1:])
                     kwargs[name] = store[key]
+        if len(fields) > 1:
+            print("Warning: some fields in HDF store are not loaded.")
         for name, field_data in fields.items():
-            field_values = [field_data[v] for v in field_data.keys() if "values" in v]
-            kwargs[name] = Field(field_data['data'], field_values=field_values)
+            kwargs['field'] = field_data.pop('data')
+            kwargs['field_values'] = [field_data[str(arr)] for arr in
+                                      sorted(map(int, field_data.keys()))]
         return cls(**kwargs)
 
     @classmethod
@@ -472,6 +476,10 @@ class Container(object):
         raise KeyError()
 
     def __init__(self, name=None, description=None, meta=None, **kwargs):
+        if 'field' in kwargs:
+            setattr(self, 'field', kwargs.pop('field'))
+            if 'field_values' in kwargs:
+                setattr(self.field, 'field_values', kwargs.pop('field_values'))
         for key, value in kwargs.items():
             setattr(self, key, value)
         self.name = name
