@@ -297,14 +297,11 @@ class DataFrame(_Base, pd.DataFrame):
     Labeled, structured, n-dimensional, multiply featured array.
     """
     _constructor_pandas = pd.DataFrame
+    _constructor_sliced = DataSeries
 
     @property
     def _constructor(self):
         return DataFrame
-
-    @property
-    def _constructor_sliced(self):
-        return DataSeries
 
 
 class SparseDataSeries(_Base, pd.SparseSeries):
