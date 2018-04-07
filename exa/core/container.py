@@ -330,7 +330,7 @@ class Container(object):
         g.edge_types = {node: value[0] for node, value in node_conn_dict.items()}  # Attached connection information to network graph
         return g
 
-    def save(self, path=None):
+    def save(self, path=None, complevel=1, complib='zlib'):
         """
         Save the container as an HDF5 archive.
 
@@ -343,7 +343,7 @@ class Container(object):
             path += os.sep + self.hexuid + '.hdf5'
         elif not (path.endswith('.hdf5') or path.endswith('.hdf')):
             raise ValueError('File path must have a ".hdf5" or ".hdf" extension.')
-        with pd.HDFStore(path, 'w') as store:
+        with pd.HDFStore(path, 'w', complevel=complevel, complib=complib) as store:
             store['kwargs'] = pd.Series()
             store.get_storer('kwargs').attrs.metadata = self._rel()
             fc = 0    # Field counter (see special handling of fields below)
@@ -414,13 +414,15 @@ class Container(object):
                     kwargs.update(store.get_storer(key).attrs.metadata)
                 elif "FIELD" in key:
                     name, dname = "_".join(key.split("_")[1:]).split("/")
+                    dname = dname.replace('values', '')
                     fields[name][dname] = store[key]
                 else:
                     name = str(key[1:])
                     kwargs[name] = store[key]
         for name, field_data in fields.items():
-            field_values = [field_data[v] for v in field_data.keys() if "values" in v]
-            kwargs[name] = Field(field_data['data'], field_values=field_values)
+            fps = field_data.pop('data')
+            kwargs[name] = Field(fps, field_values=[field_data[str(arr)] for arr in
+                                                    sorted(map(int, field_data.keys()))])
         return cls(**kwargs)
 
     @classmethod
