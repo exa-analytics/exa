@@ -474,10 +474,6 @@ class Container(object):
         raise KeyError()
 
     def __init__(self, name=None, description=None, meta=None, **kwargs):
-        if 'field' in kwargs:
-            setattr(self, 'field', kwargs.pop('field'))
-            if 'field_values' in kwargs:
-                setattr(self.field, 'field_values', kwargs.pop('field_values'))
         for key, value in kwargs.items():
             setattr(self, key, value)
         self.name = name
