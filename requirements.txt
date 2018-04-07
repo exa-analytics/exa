@@ -3,6 +3,7 @@ scipy
 pandas
 sympy
 networkx>=2.0
+pytables
 numba
 six
 ipython
