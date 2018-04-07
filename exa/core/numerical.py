@@ -159,13 +159,11 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
             _columns = ['x', 'y', 'z', 'symbol']
             _categories = {'symbol': str}
     """
+    _constructor_sliced = Series
+
     @property
     def _constructor(self):
         return DataFrame
-
-    @property
-    def _constructor_sliced(self):
-        return Series
 
     def copy(self, *args, **kwargs):
         """
