@@ -208,7 +208,7 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
                 if missing:
                     raise RequiredColumnError(missing, name)
             if self.index.name != self._index and self._index is not None:
-                if self.index.name is not None:
+                if self.index.name is not None and self.index.name.decode('utf-8') != self._index:
                     warnings.warn("Object's index name changed from {} to {}".format(self.index.name, self._index))
                 self.index.name = self._index
 
