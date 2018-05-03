@@ -23,6 +23,8 @@ requirements:
     - numba
     - six
     - ipython
+    - matplotlib
+    - seaborn
 
 test:
   imports:

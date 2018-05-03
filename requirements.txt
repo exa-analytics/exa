@@ -7,3 +7,5 @@ tables
 numba
 six
 ipython
+matplotlib
+seaborn
