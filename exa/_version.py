@@ -5,5 +5,5 @@
 Version Number
 ######################
 """
-version_info = (0, 3, 15)
+version_info = (0, 4, 0)
 __version__ = ".".join(map(str, version_info))
