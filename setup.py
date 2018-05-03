@@ -47,7 +47,6 @@ setup_args = {
     'classifiers': [
         "Development Status :: 4 - Beta",
         "Environment :: Web Environment",
-        "Intended Audience :: Data Science",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: Apache Software License",
