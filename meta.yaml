@@ -14,22 +14,15 @@ requirements:
     - setuptools
 
   run:
-    - python
     - numpy
     - scipy
-    - matplotlib
-    - seaborn
-    - networkx
     - pandas
-    - notebook
-    - nose
+    - sympy
+    - networkx
+    - pytables
     - numba
     - six
-    - pytables
-    - sphinx
-    - sphinx_rtd_theme
-    - pandoc
-    - nbsphinx
+    - ipython
 
 test:
   imports:
@@ -39,4 +32,4 @@ about:
     home: https://exa-analytics.github.io/{{ name }}
     license: Apache-2.0
     license_file: LICENSE
-    summary: A framework for building data processing and visualization applications
+    summary: A framework for data science
