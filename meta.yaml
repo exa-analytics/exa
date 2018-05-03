@@ -1,13 +1,12 @@
 {% set name = "exa" %}
-{% set version = "0.3.15" %}
+{% set version = "0.4.1" %}
 
 package:
   name: {{ name }}
   version: {{ version }}
 
 source:
-  fn: {{ name }}-{{ version }}.tar.gz
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}-{{ version }}.tar.gz
+  url: https://github.com/exa-analytics/{{ name }}/archive/v{{ version }}.tar.gz
 
 requirements:
   build:
@@ -15,22 +14,15 @@ requirements:
     - setuptools
 
   run:
-    - python
     - numpy
     - scipy
-    - matplotlib
-    - seaborn
-    - networkx
     - pandas
-    - notebook
-    - nose
+    - sympy
+    - networkx
+    - pytables
     - numba
     - six
-    - pytables
-    - sphinx
-    - sphinx_rtd_theme
-    - pandoc
-    - nbsphinx
+    - ipython
 
 test:
   imports:
@@ -40,4 +32,4 @@ about:
     home: https://exa-analytics.github.io/{{ name }}
     license: Apache-2.0
     license_file: LICENSE
-    summary: A framework for building data processing and visualization applications
+    summary: A framework for data science
