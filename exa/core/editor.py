@@ -444,7 +444,7 @@ def lines_from_file(path, as_interned=False, encoding=None):
         strings (list): File line list
     """
     lines = None
-    with open(path, encoding=encoding) as f:
+    with io.open(path, encoding=encoding) as f:
         if as_interned:
             lines = [sys.intern(line) for line in f.read().splitlines()]
         else:
