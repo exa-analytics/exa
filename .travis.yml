@@ -37,14 +37,15 @@ install:
     - conda install -q -c conda-forge six numpy pandas pytables numba
     - conda install -q -c conda-forge sphinx sphinx_rtd_theme ply sympy
     - conda install -c conda-forge pandoc pypandoc nbsphinx ipython seaborn
-    - conda install -q -c conda-forge python-coveralls coverage pytest pytest-cov
+    - conda install -q -c conda-forge coveralls coverage pytest pytest-cov
     - pip install travis-sphinx codacy-coverage
     - pip install -e .
 
 script:
     - pytest --cov;
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.6 ]]; then
-          coverage xml;
+#         coverage xml;
+          coverage run --source=exa setup.py test;
           travis-sphinx build;
       fi
 

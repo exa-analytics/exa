@@ -40,6 +40,7 @@ automatic conversion (as shown above) for all types supported for a given
 attribute.
 """
 import six
+import pandas as pd
 import warnings
 
 
@@ -204,7 +205,10 @@ class Typed(object):
                 getattr(this, self.pre_set)()
             elif callable(self.pre_set):
                 self.pre_set(this)
-            setattr(this, priv, value)    # Set the property value
+            if isinstance(this, (pd.DataFrame, pd.SparseDataFrame)):
+                this[priv] = value
+            else:
+                setattr(this, priv, value)    # Set the property value
             # Perform post-set actions (if any)
             if isinstance(self.post_set, str):
                 getattr(this, self.post_set)()

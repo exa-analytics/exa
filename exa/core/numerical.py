@@ -58,6 +58,7 @@ class BaseSeries(Numerical):
         _stype (type): May have a required value type
         _itype (type): May have a required index type
     """
+    _metadata = ['name', 'meta']
     # These attributes may be set when subclassing Series
     _sname = None           # Series may have a required name
     _iname = None           # Series may have a required index name
@@ -65,6 +66,7 @@ class BaseSeries(Numerical):
     _itype = None           # Series may have a required index type
 
     def __init__(self, *args, **kwargs):
+        meta = kwargs.pop('meta', None)
         super(BaseSeries, self).__init__(*args, **kwargs)
         if self._sname is not None and self.name != self._sname:
             if self.name is not None:
@@ -74,6 +76,7 @@ class BaseSeries(Numerical):
             if self.index.name is not None:
                 warnings.warn("Object's index name changed")
             self.index.name = self._iname
+        self.meta = meta
 
 
 class BaseDataFrame(Numerical):
@@ -90,6 +93,7 @@ class BaseDataFrame(Numerical):
         _columns (list): Required columns
         _categories (dict): Dict of column names, raw types that if present will be converted to and from categoricals automatically
     """
+    _metadata = ['name', 'meta']
     _cardinal = None     # Tuple of column name and raw type that acts as foreign key to index of another table
     _index = None      # Name of index (may be used as foreign key in another table)
     _columns = []      # Required columns
@@ -116,6 +120,11 @@ class BaseDataFrame(Numerical):
         cls = self.__class__
         key = check_key(self, key, cardinal=True)
         return cls(self[self[self._cardinal[0]].isin(key)])
+
+    def __init__(self, *args, **kwargs):
+        meta = kwargs.pop('meta', None)
+        super(BaseDataFrame, self).__init__(*args, **kwargs)
+        self.meta = meta
 
 
 class Series(BaseSeries, pd.Series):
