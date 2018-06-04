@@ -61,12 +61,15 @@ class Element(object):
     def isotopes(self):
         return [v for k, v in vars(self).items() if k.startswith("_")]
 
-    def __init__(self, symbol, name, mass, znum, radius, color):
+#    def __init__(self, symbol, name, mass, znum, radius, color):
+    def __init__(self, symbol, name, mass, znum, cov_radius, van_radius, color):
         self.symbol = symbol
         self.name = name
         self.mass = mass
         self.Z = znum
-        self.radius = radius
+#        self.radius = radius
+        self.cov_radius = cov_radius
+        self.van_radius = van_radius
         self.color = color
 
     def __getitem__(self, key):
@@ -87,12 +90,15 @@ class Isotope(object):
         from exa.util import isotopes
         isotopes.U['235'].mass    # Mass of 235-U
     """
-    def __init__(self, anum, znum, af, afu, radius, g, mass, massu, name, eneg, quad, spin, symbol, color):
+#    def __init__(self, anum, znum, af, afu, radius, g, mass, massu, name, eneg, quad, spin, symbol, color):
+    def __init__(self, anum, znum, af, afu, cov_radius, van_radius, g, mass, massu, name, eneg, quad, spin, symbol, color):
         self.A = anum
         self.Z = znum
         self.af = af
         self.afu = afu
-        self.radius = radius
+        self.cov_radius = cov_radius
+        self.van_radius = van_radius
+#        self.radius = radius
         self.g = g
         self.mass = mass
         self.massu = massu
@@ -120,13 +126,16 @@ def _create():
         except ZeroDivisionError:
             mass = group['mass'].mean()
         znum = group['Z'].max()
-        radius = group['radius'].mean()
+#        radius = group['radius'].mean()
+        cov_radius = group['cov_radius'].mean()
+        van_radius = group['van_radius'].mean()
         try:
             color = group.loc[group['af'].idxmax(), 'color']
         except TypeError:
             color = group['color'].values[0]
         name = group['name'].values[0]
-        ele = Element(symbol, name, mass, znum, radius, color)
+#        ele = Element(symbol, name, mass, znum, radius, color)
+        ele = Element(symbol, name, mass, znum, cov_radius, van_radius, color)
         # Attached isotopes
         for tope in group.apply(lambda s: Isotope(*s.tolist()), axis=1):
             setattr(ele, "_"+str(tope.A), tope)
@@ -154,7 +163,9 @@ def as_df():
 
 # Data order of isotopic (nuclear) properties:
 _resource = "../../static/isotopes.json"    # HARDCODED
-_columns = ("A", "Z", "af", "afu", "radius", "g", "mass", "massu", "name",
+#_columns = ("A", "Z", "af", "afu", "radius", "g", "mass", "massu", "name",
+#            "eneg", "quad", "spin", "symbol", "color")
+_columns = ("A", "Z", "af", "afu", "cov_radius", "van_radius", "g", "mass", "massu", "name",
             "eneg", "quad", "spin", "symbol", "color")
 _this = _sys.modules[__name__]         # Reference to this module
 _path = _os.path.abspath(_os.path.join(_os.path.abspath(__file__), _resource))
