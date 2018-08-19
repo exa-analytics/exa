@@ -15,11 +15,6 @@ matrix:
           python: 3.6
           env: PYTHONVER=3.6
 
-#       - os: osx
-#         language: generic
-#         env: PYTHONVER=3.6
-
-# There are a lot of requirements here because we do coverage, testing, reporting, doc building
 install:
     - if [[ $TRAVIS_OS_NAME == "osx" ]]; then
           wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
@@ -28,7 +23,7 @@ install:
       fi;
       echo "DONE"
     - bash miniconda.sh -b -p $HOME/miniconda
-    - export NUMBA_DISABLE_JIT=1    # For coverage report
+    - export NUMBA_DISABLE_JIT=1
     - export PATH="$HOME/miniconda/bin:$PATH"
     - conda config --set always_yes yes --set changeps1 no
     - conda create -n test python=$PYTHONVER
@@ -44,7 +39,6 @@ install:
 script:
     - pytest --cov;
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.6 ]]; then
-#         coverage xml;
           coverage run --source=exa setup.py test;
           travis-sphinx build;
       fi
