@@ -15,7 +15,8 @@ versa).
     from exa.util import isotopes
     isotopes.H            # Hydrogen element
     isotopes.H[2]         # Hydrogen isotopes 2 (deuterium)
-    isotopes.H.radius     # Empirical covalent radius (a.u. - Bohr)
+    isotopes.H.cov_radius # Empirical covalent radius (a.u. - Bohr)
+    isotopes.H.van_radius # Empirical Van der Waals radius (a.u. - Bohr)
     isotopes.H.af         # Abundance fraction
     isotopes.H.afu        # Abundance fraction uncertainty
     isotopes.H.mass       # Atomic mass (g/mol)
@@ -60,6 +61,10 @@ class Element(object):
     @property
     def isotopes(self):
         return [v for k, v in vars(self).items() if k.startswith("_")]
+
+    @property
+    def radius(self):
+        return self.cov_radius
 
 #    def __init__(self, symbol, name, mass, znum, radius, color):
     def __init__(self, symbol, name, mass, znum, cov_radius, van_radius, color):
