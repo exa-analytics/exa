@@ -93,6 +93,10 @@ class Isotope(object):
         from exa.util import isotopes
         isotopes.U['235'].mass    # Mass of 235-U
     """
+    @property
+    def radius(self):
+        return self.cov_radius
+
     def __init__(self, anum, znum, af, afu, cov_radius, van_radius, g, mass, massu, name, eneg, quad, spin, symbol, color):
         self.A = anum
         self.Z = znum
