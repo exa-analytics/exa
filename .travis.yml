@@ -44,7 +44,6 @@ install:
 script:
     - pytest --cov;
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.6 ]]; then
-#         coverage xml;
           coverage run --source=exa setup.py test;
           travis-sphinx build;
       fi
