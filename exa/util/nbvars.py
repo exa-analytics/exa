@@ -79,11 +79,12 @@ def numbafy(fn, args, compiler="jit", **nbkws):
     # Expand sympy expressions and create string for eval
     if isinstance(fn, sy.Expr):
         fn = sy.expand_func(fn)
-    lamstr = "lambda " + ", ".join([str(a) for a in args]) + ": " + str(fn)
-    # Python eval and docs
-    #func = ast.literal_eval(lamstr)
-    func = eval(lamstr, npvars)
-    func.__doc__ = "Dynamically compiled function:\n\n{}\n".format(lamstr)
+    #lamstr = "lambda " + ", ".join([str(a) for a in args]) + ": " + str(fn)
+    ## Python eval and docs
+    ##func = ast.literal_eval(lamstr)
+    #func = eval(lamstr, npvars)
+    #func.__doc__ = "Dynamically compiled function:\n\n{}\n".format(lamstr)
+    func = sy.lambdify(args, fn, modules='numpy')
     # Machine code compilation
     if sig is None:
         try:
