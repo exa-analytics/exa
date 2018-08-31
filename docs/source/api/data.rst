@@ -10,5 +10,3 @@ Data Objects
 ###########################
 Auxiallary Data Objects
 ###########################
-.. automodule:: exa.core.data
-    :members:
