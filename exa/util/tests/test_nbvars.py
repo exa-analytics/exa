@@ -9,13 +9,14 @@ and symengine expressions.
 """
 import os
 import pytest
+import platform
 import numpy as np
 import sympy as sy
 from numba.errors import TypingError
 from exa.util.nbvars import numbafy
 
 
-NUMBA_DISABLE_JIT = os.environ.get("NUMBA_DISABLE_JIT", 0) == 1
+NUMBA_DISABLE_JIT = os.environ.get("NUMBA_DISABLE_JIT", 0) == 1 or platform.system() == "Windows"
 
 
 @pytest.fixture
