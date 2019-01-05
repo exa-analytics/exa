@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2018, Exa Analytics Development Team
+# Copyright (c) 2015-2019, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Parsing Editors
@@ -11,6 +11,9 @@ responsible for transforming a small section of text into an appropriate Python
 data object. Parsing units can be connected under a single API call for ease,
 but each unit should only ever be responsible for a parsing a single, typically
 repetitive, section of text.
+
+Warning:
+    This module is currently disabled.
 
 .. code-block:: python
 

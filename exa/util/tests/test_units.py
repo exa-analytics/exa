@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2018, Exa Analytics Development Team
+# Copyright (c) 2015-2019, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Tests for :mod:`~exa.units`
@@ -24,3 +24,4 @@ def test_units():
     assert np.isclose(units.Energy['J'], 1.0)
     assert np.isclose(units.Length['au', 'Angstrom'], 0.52918)
     assert np.isclose(units.Length['Angstrom'], 1E-10)
+

@@ -40,6 +40,8 @@ script:
     - pytest --cov;
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.6 ]]; then
           coverage run --source=exa setup.py test;
+          rm docs/source/*.txt;
+          sphinx-apidoc -eM -s txt -o docs/source/ exa/;
           travis-sphinx build;
       fi
 
@@ -49,3 +51,4 @@ after_success:
           python-codacy-coverage -r coverage.xml;
           travis-sphinx deploy;
       fi
+

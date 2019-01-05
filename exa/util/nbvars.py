@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2018, Exa Analytics Development Team
+# Copyright (c) 2015-2019, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Numba Extensions
@@ -17,7 +17,6 @@ See Also:
 .. _numba: http://numba.pydata.org/
 """
 import six
-#import ast
 import numpy as np
 import sympy as sy
 import numba as nb
@@ -79,11 +78,6 @@ def numbafy(fn, args, compiler="jit", **nbkws):
     # Expand sympy expressions and create string for eval
     if isinstance(fn, sy.Expr):
         fn = sy.expand_func(fn)
-    #lamstr = "lambda " + ", ".join([str(a) for a in args]) + ": " + str(fn)
-    # Python eval and docs
-    #func = ast.literal_eval(lamstr)
-    #func = eval(lamstr, npvars)
-    #func.__doc__ = "Dynamically compiled function:\n\n{}\n".format(lamstr)
     func = sy.lambdify(args, fn, modules='numpy')
     # Machine code compilation
     if sig is None:
@@ -99,3 +93,4 @@ def numbafy(fn, args, compiler="jit", **nbkws):
             kwargs['cache'] = False
             func = compiler(sig, **kwargs)(func)
     return func
+

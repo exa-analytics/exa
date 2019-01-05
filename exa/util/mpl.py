@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2018, Exa Analytics Development Team
+# Copyright (c) 2015-2019, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Matplotlib Utilities
@@ -10,21 +10,31 @@ import numpy as np
 #from mpl_toolkits.mplot3d import Axes3D
 
 
-legend = {'legend.frameon': True, 'legend.facecolor': 'white',
-          'legend.fancybox': True, 'patch.facecolor': 'white',
-          'patch.edgecolor': 'black'}
+legend = {'legend.frameon': True, 'legend.facecolor': "white",
+          'legend.fancybox': True, 'patch.facecolor': "white",
+          'patch.edgecolor': "black"}
 axis = {'axes.formatter.useoffset': False}
-mpl_legend = {'legend.frameon': True, 'legend.facecolor': 'white',
-           'legend.edgecolor': 'black'}
-mpl_mathtext = {'mathtext.default': 'rm'}
-mpl_save = {'savefig.format': 'pdf', 'savefig.bbox': 'tight',
+mpl_legend = {'legend.frameon': True, 'legend.facecolor': "white",
+           'legend.edgecolor': "black"}
+mpl_mathtext = {'mathtext.default': "rm"}
+mpl_save = {'savefig.format': "pdf", 'savefig.bbox': "tight",
          'savefig.transparent': True, 'savefig.pad_inches': 0.1,
          'pdf.compression': 9}
 mpl_rc = mpl_legend
 mpl_rc.update(mpl_mathtext)
 mpl_rc.update(mpl_save)
-sns.set(context='poster', style='white', palette='colorblind', font_scale=1.3,
-        font='serif', rc=mpl_rc)
+
+
+def seaborn_set(context='poster', style='white', palette='colorblind',
+                font_scale=1.3, font='serif', rc=mpl_rc):
+    """
+    Perform `seaborn.set(**kwargs)`.
+
+    Additional keyword arguments are passed in using this module's
+    `attr:mpl_rc` attribute.
+    """
+    sns.set(context="poster", style="white", palette="colorblind",
+            font_scale=1.3, font="serif", rc=mpl_rc)
 
 
 def _gen_projected(nxplot, nyplot, projection, figargs):
@@ -140,9 +150,9 @@ def _plot_contour(x, y, z, vmin, vmax, cbarlabel, ncbarlabel, ncbardecimal,
     fig = _gen_figure(x=x, y=y, nxlabel=nxlabel, nylabel=nylabel, figargs=figargs)
     ax = fig.get_axes()[0]
     convenience = {'contour': ax.contour,
-                  'contourf': ax.contourf,
-                'pcolormesh': ax.pcolormesh,
-                    'pcolor': ax.pcolor}
+                   'contourf': ax.contourf,
+                   'pcolormesh': ax.pcolormesh,
+                   'pcolor': ax.pcolor}
     if method not in convenience.keys():
         raise Exception('method must be in {}'.format(convenience.keys()))
     t = convenience[method](x, y, z, **axargs)
@@ -156,3 +166,4 @@ def _plot_contour(x, y, z, vmin, vmax, cbarlabel, ncbarlabel, ncbardecimal,
             fmt = '{{:.{}f}}'.format(ncbardecimal).format
             cbar.set_ticklabels([fmt(i) for i in newticks])
     return fig, cbar
+
