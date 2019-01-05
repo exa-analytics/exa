@@ -36,7 +36,7 @@ def sig3():
 
 
 # Tests start here!
-@pytest.skip(NUMBA_DISABLE_JIT)
+@pytest.mark.skipif(NUMBA_DISABLE_JIT, reason="Numba compilation disabled")
 def test_simple_strings(arr, sig1, sca):
     """Test string functions."""
     fn = "sin(x)/x"
@@ -46,7 +46,7 @@ def test_simple_strings(arr, sig1, sca):
     assert np.isclose(func(sca), np.sin(sca)/sca) == True
 
 
-@pytest.skip(NUMBA_DISABLE_JIT)
+@pytest.mark.skipif(NUMBA_DISABLE_JIT, reason="Numba compilation disabled")
 def test_fail_string(sca):
     """Test failure on untyped name."""
     fn = "Sin(x)/x"
@@ -55,7 +55,7 @@ def test_fail_string(sca):
         func(sca)
 
 
-@pytest.skip(NUMBA_DISABLE_JIT)
+@pytest.mark.skipif(NUMBA_DISABLE_JIT, reason="Numba compilation disabled")
 def test_complex_strings(arr, sig3, sca):
     """Test more complicated string functions."""
     fn = "arccos(x)/y + exp(-y) + mod(z, 2)"
@@ -69,7 +69,7 @@ def test_complex_strings(arr, sig3, sca):
     assert np.isclose(result, check) == True
 
 
-@pytest.skip(NUMBA_DISABLE_JIT)
+@pytest.mark.skipif(NUMBA_DISABLE_JIT, reason="Numba compilation disabled")
 def test_sympy(arr, sig3):
     """Test sympy expressions."""
     x, y, z = sy.symbols("x y z")
@@ -80,7 +80,7 @@ def test_sympy(arr, sig3):
     assert np.allclose(result, check) == True
 
 
-@pytest.skip(NUMBA_DISABLE_JIT)
+@pytest.mark.skipif(NUMBA_DISABLE_JIT, reason="Numba compilation disabled")
 def test_symengine(arr, sig3):
     """Test symengine."""
     try:
