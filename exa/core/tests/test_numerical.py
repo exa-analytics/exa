@@ -62,7 +62,7 @@ class SeriesTest(TestCase):
     def test_copy(self):
         """Test :func:`~exa.core.numerical.Series.copy`."""
         cp = self.series.copy()
-        self.assertTrue(np.all(cp == self.series))
+        self.assertTrue(cp.eq(self.series).all())
         self.assertIsInstance(cp, self.series.__class__)
 
 
@@ -77,7 +77,7 @@ class DF0Test(TestCase):
     def test_copy(self):
         """Test :func:`~exa.core.numerical.DataFrame.copy`."""
         cp = self.df.copy()
-        self.assertTrue(np.all(cp == self.df))
+        self.assertTrue(cp.eq(self.df).all().all())    # All columns are equal
         self.assertIsInstance(cp, self.df.__class__)
 
 
@@ -94,7 +94,7 @@ class DF1Test(TestCase):
     def test_copy(self):
         """Test :func:`~exa.core.numerical.DataFrame.copy`."""
         cp = self.df.copy()
-        self.assertTrue(np.all(cp == self.df))
+        self.assertTrue(cp.eq(self.df).all().all())    # All columns are equal
         self.assertIsInstance(cp, self.df.__class__)
 
     def test_categories(self):
@@ -119,7 +119,7 @@ class DF2Test(TestCase):
     def test_copy(self):
         """Test :func:`~exa.core.numerical.DataFrame.copy`."""
         cp = self.df.copy()
-        self.assertTrue(np.all(cp == self.df))
+        self.assertTrue(cp.eq(self.df).all().all())    # All columns are equal
         self.assertIsInstance(cp, self.df.__class__)
 
     def test_categories(self):
