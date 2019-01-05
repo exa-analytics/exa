@@ -25,11 +25,11 @@ See :ref:`api-label` for more information.
     contrib.rst
 
 
-.. api-label:
+.. _api-label:
 
-###################
+###########
 API
-###################
+###########
 
 .. include:: modules.txt
 

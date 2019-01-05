@@ -4,7 +4,7 @@
 """
 Tests for Physical Constants
 #############################################
-Physical constants are created by a singleton factory paradigm.
+Physical constants are created using the factory paradigm.
 """
 from exa.util import constants
 
