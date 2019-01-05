@@ -80,13 +80,8 @@ def numbafy(fn, args, compiler="jit", **nbkws):
     if isinstance(fn, sy.Expr):
         fn = sy.expand_func(fn)
     #lamstr = "lambda " + ", ".join([str(a) for a in args]) + ": " + str(fn)
-<<<<<<< HEAD
     # Python eval and docs
     #func = ast.literal_eval(lamstr)
-=======
-    ## Python eval and docs
-    ##func = ast.literal_eval(lamstr)
->>>>>>> org-master
     #func = eval(lamstr, npvars)
     #func.__doc__ = "Dynamically compiled function:\n\n{}\n".format(lamstr)
     func = sy.lambdify(args, fn, modules='numpy')
