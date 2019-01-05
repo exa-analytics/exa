@@ -126,8 +126,4 @@ class DF2Test(TestCase):
         """Test that categoricals are being handled correctly."""
         self.assertIsInstance(self.df['type'].dtype, pd.api.types.CategoricalDtype)
         self.assertIsInstance(self.df['group'].dtype, pd.api.types.CategoricalDtype)
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> 645b95ffad6b53151b5fc18920dc2f6e24eca727
