@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2015-2018, Exa Analytics Development Team
+# Copyright (c) 2015-2019, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Disk I/O Utilities
@@ -47,3 +46,4 @@ def read_tarball(path, shortkey=False, classes=Editor):
                 raise TypeError("Wrong type for classes argument (with type {})".format(type(classes)))
             editors[name] = cls(f, name=name)
     return editors
+

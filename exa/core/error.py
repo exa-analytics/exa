@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2015-2018, Exa Analytics Development Team
+# Copyright (c) 2015-2019, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Exceptions
@@ -27,3 +26,4 @@ class RequiredColumnError(ExaException):
     def __init__(self, missing, clsname):
         msg = self._msg.format(missing, clsname)
         super().__init__(msg)
+

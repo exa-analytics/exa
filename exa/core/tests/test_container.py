@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2015-2018, Exa Analytics Development Team
+# Copyright (c) 2015-2019, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Tests for :mod:`~exa.core.container`
@@ -35,7 +34,6 @@ class DummyContainer(six.with_metaclass(DummyMeta, Container)):
 
 class TestContainer(TestCase):
     def setUp(self):
-        #w = [0, 1, 2, 3, 4]
         x = [0, 0, 0, 0, 0]
         y = [1.1, 2.2, 3.3, 4.4, 5.5]
         z = [0.5, 1.5, 2.5, 3.5, 4.5]
@@ -51,3 +49,4 @@ class TestContainer(TestCase):
         self.assertIsInstance(self.container.s0, DummySeries)
         self.assertIsInstance(self.container.s1.dtype, pd.api.types.CategoricalDtype)
         self.assertIsInstance(self.container.df, DummyDataFrame)
+

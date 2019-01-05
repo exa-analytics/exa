@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2015-2018, Exa Analytics Development Team
+# Copyright (c) 2015-2019, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Tests for :mod:`~exa.util.nbvars`
@@ -83,3 +82,4 @@ def test_symengine(arr, sig3):
         assert np.allclose(result, check) == True
     except ImportError:
         pass
+

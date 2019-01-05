@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2015-2018, Exa Analytics Development Team
+# Copyright (c) 2015-2019, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Static Data Directory
@@ -31,3 +30,4 @@ def resource(name):
     for path, _, files in os.walk(staticdir()):
         if name in files:
             return os.path.abspath(os.path.join(path, name))
+

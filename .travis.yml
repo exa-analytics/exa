@@ -40,6 +40,8 @@ script:
     - pytest --cov;
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.6 ]]; then
           coverage run --source=exa setup.py test;
+          rm -rf docs/source/*.txt;
+          sphinx-apidoc -eM -s txt -o docs/source/ exa/;
           travis-sphinx build;
       fi
 
