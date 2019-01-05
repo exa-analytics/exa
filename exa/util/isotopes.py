@@ -114,6 +114,10 @@ class Isotope(object):
         self.symbol = symbol
         self.color = color
 
+    @property
+    def radius(self):
+        return self.cov_radius
+
     def __repr__(self):
         return str(self.A) + self.symbol
 
