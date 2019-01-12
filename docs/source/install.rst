@@ -34,9 +34,8 @@ Manually (or for a development installation)::
 
 What's Next?
 ------------
-- Users should check out the :ref:`started-label`
-- Contributors should check out the :ref:`dev-label`
 - The :ref:`api-label` contains usage and extension examples, and developer notes
+- Contributors should check out the :ref:`dev-label`
 
 
 .. _pypi: https://pypi.python.org/pypi
