@@ -1,4 +1,4 @@
-.. Copright (c) 2015-2019, Exa Analytics Development Team
+.. Copyright (c) 2015-2019, Exa Analytics Development Team
 .. Distributed under the terms of the Apache License 2.0
 
 #############################
@@ -17,19 +17,13 @@ See :ref:`api-label` for more information.
 
 .. toctree::
     :maxdepth: 1
-    :caption: Getting Started
+    :caption: Sitemap
 
     install.rst
-    started.rst
     examples.rst
     contrib.rst
 
-
 .. _api-label:
-
-###########
-API
-###########
 
 .. include:: modules.txt
 
