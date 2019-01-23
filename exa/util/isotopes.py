@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2018, Exa Analytics Development Team
+# Copyright (c) 2015-2019, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Periodic Table of Elements and Isotopes
@@ -39,7 +39,6 @@ Warning:
 import os as _os
 import sys as _sys
 import bz2 as _bz2
-#import json as _json
 from pandas import read_json as _rj
 from exa import Editor as _E
 from exa import DataFrame as _DF
@@ -93,6 +92,10 @@ class Isotope(object):
         from exa.util import isotopes
         isotopes.U['235'].mass    # Mass of 235-U
     """
+    @property
+    def radius(self):
+        return self.cov_radius
+
     def __init__(self, anum, znum, af, afu, cov_radius, van_radius, g, mass, massu, name, eneg, quad, spin, symbol, color):
         self.A = anum
         self.Z = znum
@@ -144,8 +147,6 @@ def _create():
             setattr(ele, "_"+str(tope.A), tope)
         return ele
 
-    #with _bz2.open(_path, "rb") as f:
-    #    iso = _DF(_json.loads(f.read().decode("utf-8")), columns=_columns)
     iso = _rj(_E(_path).to_stream())
     iso.columns = _columns
     setattr(_this, "iso", iso)
@@ -172,3 +173,4 @@ _this = _sys.modules[__name__]         # Reference to this module
 _path = _os.path.abspath(_os.path.join(_os.path.abspath(__file__), _resource))
 if not hasattr(_this, "H"):
     _create()
+

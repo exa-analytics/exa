@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2018, Exa Analytics Development Team
+# Copyright (c) 2015-2019, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Tests for Strong Typing
@@ -154,3 +154,4 @@ def test_complex(cmplx):
     assert cmplx.pre_del_called == True
     assert cmplx.post_del_called == True
     assert "Test documentation" in cmplx.__class__.foo.__doc__
+

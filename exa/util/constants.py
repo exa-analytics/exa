@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2018, Exa Analytics Development Team
+# Copyright (c) 2015-2019, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Physical Constants
@@ -11,7 +11,7 @@ for each value.
 
 .. code-block:: python
 
-    constants.Planck_constant         # Planck_constant(6.62607004e-34 ±8.1e-42)
+    constants.Planck_constant         # Planck_constant(6.62607004e-34 +/-8.1e-42)
     constants.Planck_constant.unit    # J s
     constants.Planck_constant.error   # 9.1e-42
 
@@ -55,3 +55,4 @@ _this = _sys.modules[__name__]
 _path = _resource("constants.json")
 if not hasattr(_this, "Planck_constant"):
     _create()
+

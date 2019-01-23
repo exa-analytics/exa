@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2018, Exa Analytics Development Team
+# Copyright (c) 2015-2019, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Container
@@ -586,3 +586,4 @@ class TypedMeta(type):
             if isinstance(v, type) and not k.startswith('_'):
                 clsdict[k] = mcs.create_property(k, v)
         return super(TypedMeta, mcs).__new__(mcs, name, bases, clsdict)
+
