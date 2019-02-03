@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import os
 from distutils import log
 from setuptools import setup, find_packages
@@ -57,3 +56,4 @@ setup_args = {
 }
 
 setup(**setup_args)
+
