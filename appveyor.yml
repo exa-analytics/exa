@@ -52,8 +52,8 @@ install:
 
   - cmd: conda config --set show_channel_urls true
   - cmd: conda config --set always_yes yes --set changeps1 no
-  - cmd: conda update -n base conda
-  - cmd: conda create -n test python=%CONDA_PY%
+  - cmd: conda update -y -n base conda
+  - cmd: conda create -y -n test python=%CONDA_PY%
   - cmd: activate test
   - cmd: conda update -q -y --all
   - cmd: conda install -q -y -c conda-forge numpy scipy seaborn networkx pandas
@@ -64,3 +64,4 @@ build: false
 
 test_script:
   - cmd: pytest
+

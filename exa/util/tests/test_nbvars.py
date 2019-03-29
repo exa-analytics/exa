@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2018, Exa Analytics Development Team
+# Copyright (c) 2015-2019, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Tests for :mod:`~exa.util.nbvars`
@@ -7,11 +7,16 @@ Tests for :mod:`~exa.util.nbvars`
 Test that :func:`~exa.util.nbvars.numbafy` supports strings, and sympy
 and symengine expressions.
 """
+import os
 import pytest
+import platform
 import numpy as np
 import sympy as sy
 from numba.errors import TypingError
 from exa.util.nbvars import numbafy
+
+
+NUMBA_DISABLE_JIT = os.environ.get("NUMBA_DISABLE_JIT", 0) == 1 or platform.system() == "Windows"
 
 
 @pytest.fixture
@@ -32,6 +37,7 @@ def sig3():
 
 
 # Tests start here!
+@pytest.mark.skipif(NUMBA_DISABLE_JIT, reason="Numba compilation disabled")
 def test_simple_strings(arr, sig1, sca):
     """Test string functions."""
     fn = "sin(x)/x"
@@ -41,6 +47,7 @@ def test_simple_strings(arr, sig1, sca):
     assert np.isclose(func(sca), np.sin(sca)/sca) == True
 
 
+@pytest.mark.skipif(NUMBA_DISABLE_JIT, reason="Numba compilation disabled")
 def test_fail_string(sca):
     """Test failure on untyped name."""
     fn = "Sin(x)/x"
@@ -49,6 +56,7 @@ def test_fail_string(sca):
         func(sca)
 
 
+@pytest.mark.skipif(NUMBA_DISABLE_JIT, reason="Numba compilation disabled")
 def test_complex_strings(arr, sig3, sca):
     """Test more complicated string functions."""
     fn = "arccos(x)/y + exp(-y) + mod(z, 2)"
@@ -62,6 +70,7 @@ def test_complex_strings(arr, sig3, sca):
     assert np.isclose(result, check) == True
 
 
+@pytest.mark.skipif(NUMBA_DISABLE_JIT, reason="Numba compilation disabled")
 def test_sympy(arr, sig3):
     """Test sympy expressions."""
     x, y, z = sy.symbols("x y z")
@@ -71,6 +80,8 @@ def test_sympy(arr, sig3):
     check = np.arccos(arr)/arr + np.exp(-arr) + np.mod(arr, 2)
     assert np.allclose(result, check) == True
 
+
+@pytest.mark.skipif(NUMBA_DISABLE_JIT, reason="Numba compilation disabled")
 def test_symengine(arr, sig3):
     """Test symengine."""
     try:
@@ -83,3 +94,4 @@ def test_symengine(arr, sig3):
         assert np.allclose(result, check) == True
     except ImportError:
         pass
+

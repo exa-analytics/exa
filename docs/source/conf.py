@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2018, Exa Analytics Development Team
+# Copyright (c) 2015-2019, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 #
 # exa documentation build configuration file, created by
@@ -67,7 +67,7 @@ templates_path = ["_templates"]
 # You can specify multiple suffix as a list of string:
 #source_parsers = {".md": CommonMarkParser}
 #source_suffix = [".rst", ".md"]
-source_suffix = [".rst"]
+source_suffix = [".rst", ".txt"]
 
 # The encoding of source files.
 #source_encoding = "utf-8-sig"

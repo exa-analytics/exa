@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2018, Exa Analytics Development Team
+# Copyright (c) 2015-2019, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
-Tests for :mod:`~exa.core.umerical`
-#################################
+Tests for :mod:`~exa.core.numerical`
+#####################################
 """
 import numpy as np
 import pandas as pd
@@ -62,7 +62,7 @@ class SeriesTest(TestCase):
     def test_copy(self):
         """Test :func:`~exa.core.numerical.Series.copy`."""
         cp = self.series.copy()
-        self.assertTrue(np.all(cp == self.series))
+        self.assertTrue(cp.eq(self.series).all())
         self.assertIsInstance(cp, self.series.__class__)
 
 
@@ -77,7 +77,7 @@ class DF0Test(TestCase):
     def test_copy(self):
         """Test :func:`~exa.core.numerical.DataFrame.copy`."""
         cp = self.df.copy()
-        self.assertTrue(np.all(cp == self.df))
+        self.assertTrue(cp.eq(self.df).all().all())    # All columns are equal
         self.assertIsInstance(cp, self.df.__class__)
 
 
@@ -94,7 +94,7 @@ class DF1Test(TestCase):
     def test_copy(self):
         """Test :func:`~exa.core.numerical.DataFrame.copy`."""
         cp = self.df.copy()
-        self.assertTrue(np.all(cp == self.df))
+        self.assertTrue(cp.eq(self.df).all().all())    # All columns are equal
         self.assertIsInstance(cp, self.df.__class__)
 
     def test_categories(self):
@@ -119,10 +119,11 @@ class DF2Test(TestCase):
     def test_copy(self):
         """Test :func:`~exa.core.numerical.DataFrame.copy`."""
         cp = self.df.copy()
-        self.assertTrue(np.all(cp == self.df))
+        self.assertTrue(cp.eq(self.df).all().all())    # All columns are equal
         self.assertIsInstance(cp, self.df.__class__)
 
     def test_categories(self):
         """Test that categoricals are being handled correctly."""
         self.assertIsInstance(self.df['type'].dtype, pd.api.types.CategoricalDtype)
         self.assertIsInstance(self.df['group'].dtype, pd.api.types.CategoricalDtype)
+

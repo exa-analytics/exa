@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2018, Exa Analytics Development Team
+# Copyright (c) 2015-2019, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Tests for :mod:`~exa.core.editor`
-#################################
+##################################
 """
 import os, six
 from unittest import TestCase
@@ -65,3 +65,4 @@ class TestEditor(TestCase):
         self.assertTrue(formatted[0] == 'replaced')
         del self.fl[0]
         self.assertTrue(len(self.fl) == 4)
+
