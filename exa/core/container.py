@@ -13,6 +13,7 @@ See Also:
     For a description of data objects see :mod:`~exa.core.numerical`.
 """
 import os
+import logging
 import numpy as np
 import pandas as pd
 import networkx as nx
@@ -31,6 +32,12 @@ class Container(object):
     """
     _getter_prefix = 'compute'
     _cardinal = None    # Name of the cardinal data table
+
+    @property
+    def log(self):
+        name = '.'.join([self.__module__,
+                         self.__class__.__name__])
+        return logging.getLogger(name)
 
     def copy(self, name=None, description=None, meta=None):
         """
@@ -474,6 +481,7 @@ class Container(object):
         raise KeyError()
 
     def __init__(self, name=None, description=None, meta=None, **kwargs):
+        self.log.info(f'adding {len(kwargs)} attrs')
         for key, value in kwargs.items():
             setattr(self, key, value)
         self.name = name

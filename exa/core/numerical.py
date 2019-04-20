@@ -12,6 +12,7 @@ conversion of data into "traits" used in visualization and enforce relationships
 between data objects in a given container. Any of the objects provided by this
 module may be extended.
 """
+import logging
 import warnings
 import numpy as np
 import pandas as pd
@@ -25,6 +26,13 @@ class Numerical(object):
     objects, providing default trait functionality and clean representations
     when present as part of containers.
     """
+    @property
+    def log(self):
+        name = '.'.join([self.__module__,
+                         self.__class__.__name__])
+        return logging.getLogger(name)
+
+
     def slice_naive(self, key):
         """
         Slice a data object based on its index, either by value (.loc) or
@@ -204,6 +212,7 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
 
     def __init__(self, *args, **kwargs):
         super(DataFrame, self).__init__(*args, **kwargs)
+        self.log.debug(f'shape: {self.shape}')
         if self._cardinal is not None:
             self._categories[self._cardinal[0]] = self._cardinal[1]
             self._columns.append(self._cardinal[0])
@@ -309,6 +318,7 @@ class Field(DataFrame):
             raise TypeError("Wrong type for field_values with type {}".format(type(field_values)))
         for i in range(len(self.field_values)):
             self.field_values[i].name = i
+        self.log.info(f'contains {len(self.field_values)} fields')
 
 
 class Field3D(Field):

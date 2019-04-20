@@ -10,6 +10,7 @@ does not behave like a fully fledged text editor but does have some basic find,
 replace, insert, etc. functionality.
 """
 from __future__ import print_function
+import logging
 import io, os, re, sys, six
 import pandas as pd
 import warnings
@@ -54,6 +55,12 @@ class Editor(object):
     """
     _getter_prefix = 'parse'
     _fmt = '{0}: {1}\n'.format   # Format for printing lines (see __repr__)
+
+    @property
+    def log(self):
+        name = '.'.join([self.__module__,
+                         self.__class__.__name__])
+        return logging.getLogger(name)
 
     def write(self, path=None, *args, **kwargs):
         """
@@ -386,6 +393,7 @@ class Editor(object):
         self.meta = meta
         self.nprint = 30
         self.cursor = 0
+        self.log.debug(f'contains {len(self._lines)} lines')
 
     def __delitem__(self, line):
         del self._lines[line]     # "line" is the line number minus one
