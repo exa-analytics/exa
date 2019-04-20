@@ -212,7 +212,7 @@ class DataFrame(BaseDataFrame, pd.DataFrame):
 
     def __init__(self, *args, **kwargs):
         super(DataFrame, self).__init__(*args, **kwargs)
-        self.log.debug(f'shape: {self.shape}')
+        self.log.debug('shape: {}'.format(self.shape))
         if self._cardinal is not None:
             self._categories[self._cardinal[0]] = self._cardinal[1]
             self._columns.append(self._cardinal[0])
@@ -318,7 +318,7 @@ class Field(DataFrame):
             raise TypeError("Wrong type for field_values with type {}".format(type(field_values)))
         for i in range(len(self.field_values)):
             self.field_values[i].name = i
-        self.log.info(f'contains {len(self.field_values)} fields')
+        self.log.info('contains {} fields'.format(len(self.field_values)))
 
 
 class Field3D(Field):

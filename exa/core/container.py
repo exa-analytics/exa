@@ -481,7 +481,7 @@ class Container(object):
         raise KeyError()
 
     def __init__(self, name=None, description=None, meta=None, **kwargs):
-        self.log.info(f'adding {len(kwargs)} attrs')
+        self.log.info('adding {} attrs'.format(len(kwargs)))
         for key, value in kwargs.items():
             setattr(self, key, value)
         self.name = name

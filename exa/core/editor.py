@@ -393,7 +393,7 @@ class Editor(object):
         self.meta = meta
         self.nprint = 30
         self.cursor = 0
-        self.log.debug(f'contains {len(self._lines)} lines')
+        self.log.debug('contains {} lines'.format(len(self._lines)))
 
     def __delitem__(self, line):
         del self._lines[line]     # "line" is the line number minus one
