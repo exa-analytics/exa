@@ -101,19 +101,19 @@ class Complete2(TypedClass):
 # params makes it so we test all the classes listed
 params = list(product([Simple1, Simple2, Simple3],
                       [42, 42.0]))
-@pytest.fixture(scope="session", params=params)
+@pytest.fixture(scope="function", params=params)
 def simple(request):
     cls = request.param[0]
     arg = request.param[1]
     return cls(arg)
 
 
-@pytest.fixture(scope="session", params=[Complete1, Complete2])
+@pytest.fixture(scope="function", params=[Complete1, Complete2])
 def cmplx(request):
     return request.param()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def auto():
     return Simple4()
 
