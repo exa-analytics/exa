@@ -66,7 +66,7 @@ def numbafy(fn, args, compiler="jit", **nbkws):
         if compiler is None:
             raise AttributeError("No numba function with name {}.".format(compiler))
         compiler = compiler_
-    if compiler in (nb.jit, nb.njit, nb.autojit):
+    if compiler in (nb.jit, nb.njit):
         kwargs.update(jitkwargs)
         sig = nbkws.pop("signature", None)
     else:
