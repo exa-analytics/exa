@@ -25,6 +25,7 @@ requirements:
     - ipython
     - matplotlib
     - seaborn
+    - pyyaml
 
 test:
   imports:

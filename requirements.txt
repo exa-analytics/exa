@@ -9,4 +9,4 @@ six
 ipython
 matplotlib
 seaborn
-
+pyyaml
