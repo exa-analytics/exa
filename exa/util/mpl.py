@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2015-2019, Exa Analytics Development Team
+# Copyright (c) 2015-2020, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Matplotlib Utilities
@@ -166,4 +165,3 @@ def _plot_contour(x, y, z, vmin, vmax, cbarlabel, ncbarlabel, ncbardecimal,
             fmt = '{{:.{}f}}'.format(ncbardecimal).format
             cbar.set_ticklabels([fmt(i) for i in newticks])
     return fig, cbar
-

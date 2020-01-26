@@ -13,16 +13,13 @@ install:
   - conda create -n test python=$PYTHONVER
   - source activate test
   - conda update -q -y --all
-  - conda install -q -y -c conda-forge six numpy pandas pytables numba pyyaml
-  - conda install -q -y -c conda-forge sphinx sphinx_rtd_theme ply sympy
-  - conda install -q -y -c conda-forge pandoc pypandoc nbsphinx ipython seaborn
-  - conda install -q -y -c conda-forge coveralls coverage pytest pytest-cov
+  - conda install -q -y networkx matplotlib seaborn traitlets numpy pandas numba sympy pyyaml six
   - pip install travis-sphinx codacy-coverage
-  - pip install -e .
+  - python setup.py install
 
 script:
   - export PYTHONDONTWRITEBYTECODE=1
-  - pytest test --cov
+  - pytest --cov test
   - if [[ $PYTHONVER == 3.8 ]]; then
         coverage run --source=exa setup.py test;
         rm -rf docs/source/*.txt;
