@@ -37,20 +37,20 @@ install:
     - pip install travis-sphinx codacy-coverage
     - pip install -e .
 
-script:
-    - export PYTHONDONTWRITEBYTECODE=1
-    - pytest --cov
-    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.6 ]]; then
-          coverage run --source=exa setup.py test;
-          rm -rf docs/source/*.txt;
-          SPHINX_APIDOC_OPTIONS=members,undoc-members,show-inheritance sphinx-apidoc -eM -s txt -o docs/source/ exa *test*;
-          travis-sphinx build;
-      fi
-
-after_success:
-    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.6 ]]; then
-          coveralls;
-          python-codacy-coverage -r coverage.xml;
-          travis-sphinx deploy;
-      fi
-
+#script:
+#    - export PYTHONDONTWRITEBYTECODE=1
+#    - pytest --cov
+#    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.6 ]]; then
+#          coverage run --source=exa setup.py test;
+#          rm -rf docs/source/*.txt;
+#          SPHINX_APIDOC_OPTIONS=members,undoc-members,show-inheritance sphinx-apidoc -eM -s txt -o docs/source/ exa *test*;
+#          travis-sphinx build;
+#      fi
+#
+#after_success:
+#    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.6 ]]; then
+#          coveralls;
+#          python-codacy-coverage -r coverage.xml;
+#          travis-sphinx deploy;
+#      fi
+#
