@@ -19,7 +19,7 @@ try:
     _app.parse_command_line(sys.argv)
 except SystemExit:
     pass
-_base = os.path.dirname(__file__)
+_base = os.path.abspath(os.path.dirname(__file__))
 _path = os.path.join(_base, 'conf', 'config.py')
 _app.load_config_file(_path)
 
@@ -49,6 +49,7 @@ class Base:
 class Cfg(Base, Configurable):
     logdir = Unicode().tag(config=True)
     logname = Unicode().tag(config=True)
+    staticdir = Unicode()
 
     @validate('logdir')
     def _validate_logdir(self, prop):
@@ -61,6 +62,29 @@ class Cfg(Base, Configurable):
         base = os.path.expanduser('~')
         return os.path.join(base, '.exa')
 
+    @default('staticdir')
+    def _default_staticdir(self):
+        return os.path.join(_base, "static")
+
+    def resource(self, name):
+        """Return the full path of a named resource
+        in the static directory.
+
+        If multiple files with the same name exist,
+        **name** should contain the first directory
+        as well.
+
+        .. code-block:: python
+
+            import exa
+            exa.cfg.resource("myfile")
+            exa.cfg.resource("test01/test.txt")
+            exa.cfg.resource("test02/test.txt")
+        """
+        for path, _, files in os.walk(self.staticdir):
+            if name in files:
+                return os.path.abspath(os.path.join(path, name))
+
 
 cfg = Cfg()
 _path = os.path.join(_base, 'conf', 'logging.yml')
@@ -72,7 +96,7 @@ logging.config.dictConfig(_log)
 
 from .core import Data
 
-#from ._version import __version__
-#from .core import (DataFrame, Series, Field3D, Field, Editor, Container,
-#                   TypedMeta, SparseDataFrame)
+from ._version import __version__
+from .core import (DataFrame, Series, Field3D, Field, Editor, Container,
+                   TypedMeta, SparseDataFrame)
 #
