@@ -15,7 +15,10 @@ from traitlets.config import Configurable, Application
 
 
 _app = Application()
-_app.parse_command_line(sys.argv)
+try:
+    _app.parse_command_line(sys.argv)
+except SystemExit:
+    pass
 _base = os.path.dirname(__file__)
 _path = os.path.join(_base, 'conf', 'config.py')
 _app.load_config_file(_path)
