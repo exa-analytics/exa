@@ -16,3 +16,9 @@ def isotopes():
     iso = exa.Isotopes()
     iso.data()
     return iso
+
+@pytest.fixture(scope='session')
+def constants():
+    con = exa.Constants()
+    con.data()
+    return con

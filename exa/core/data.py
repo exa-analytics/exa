@@ -108,3 +108,20 @@ class Isotopes(Data):
     def __init__(self, *args, **kws):
         source = kws.pop('source', load_isotopes)
         super().__init__(*args, source=source, **kws)
+
+
+def load_constants():
+    """Following suite until more is decided on
+    Editor updates.
+    """
+    path = exa.cfg.resource('constants.json')
+    df = pd.read_json(path, orient='values')
+    return df
+
+
+class Constants(Data):
+
+    def __init__(self, *args, **kws):
+        source = kws.pop('source', load_constants)
+        super().__init__(*args, source=source, **kws)
+

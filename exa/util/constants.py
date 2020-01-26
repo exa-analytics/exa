@@ -19,8 +19,10 @@ for each value.
 """
 import sys as _sys
 import json as _json
+import types as _types
 from exa import Editor as _Editor
 from exa.static import resource as _resource
+from exa import DataFrame as _DF
 
 
 class Constant(float):
@@ -50,6 +52,15 @@ class Constant(float):
 def _create():
     for kwargs in _json.load(_Editor(_path).to_stream()):
         setattr(_this, kwargs['name'], Constant(**kwargs))
+
+def as_df():
+    """Return a dataframe of constants."""
+    records = []
+    for con, attrs in vars(_this).items():
+        if con not in ['Constant', 'as_df'] and not con.startswith('_'):
+            records.append({k: v for k, v in vars(attrs).items()
+                            if not k.startswith('_') and vars(attrs)})
+    return _DF.from_records(records)
 
 _this = _sys.modules[__name__]
 _path = _resource("constants.json")
