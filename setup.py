@@ -43,6 +43,8 @@ setup_args = {
     'url': "https://exa-analytics.github.io/" + name,
     'download_url': "https://github.com/exa-analytics/{}/archive/v{}.tar.gz".format(name, version),
     'keywords': ["data science", "framework", "jupyter notebook"],
+    'setup_requires': ['pytest-runner'],
+    'tests_require': ['pytest'],
     'classifiers': [
         "Development Status :: 4 - Beta",
         "Environment :: Web Environment",
@@ -56,4 +58,3 @@ setup_args = {
 }
 
 setup(**setup_args)
-
