@@ -33,7 +33,7 @@ script:
   - export PYTHONDONTWRITEBYTECODE=1
   - pytest test --cov
   - if [[ $PYTHONVER == 3.8 ]]; then
-        coverage run -m pytest test
+        coverage run -m pytest test;
         rm -rf docs/source/*.txt;
         SPHINX_APIDOC_OPTIONS=members,undoc-members,show-inheritance sphinx-apidoc -eM -s txt -o docs/source/ exa *test*;
         travis-sphinx build;
