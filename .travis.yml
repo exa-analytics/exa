@@ -31,7 +31,7 @@ install:
 
 script:
   - export PYTHONDONTWRITEBYTECODE=1
-  - pytest --cov test
+  - pytest test --cov
   - if [[ $PYTHONVER == 3.8 ]]; then
         coverage run --source=exa setup.py test;
         rm -rf docs/source/*.txt;
