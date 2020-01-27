@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2015-2019, Exa Analytics Development Team
+# Copyright (c) 2015-2020, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Periodic Table of Elements and Isotopes
@@ -173,4 +172,3 @@ _this = _sys.modules[__name__]         # Reference to this module
 _path = _os.path.abspath(_os.path.join(_os.path.abspath(__file__), _resource))
 if not hasattr(_this, "H"):
     _create()
-

@@ -1,5 +1,5 @@
 {% set name = "exa" %}
-{% set version = "0.4.3" %}
+{% set version = "1.0.0" %}
 
 package:
   name: {{ name }}
@@ -14,18 +14,14 @@ requirements:
     - setuptools
 
   run:
-    - numpy
-    - scipy
-    - pandas
-    - sympy
     - networkx
-    - pytables
+    - traitlets
+    - numpy
+    - pandas
     - numba
-    - six
-    - ipython
-    - matplotlib
-    - seaborn
+    - sympy
     - pyyaml
+    - six
 
 test:
   imports:
