@@ -25,7 +25,7 @@ install:
   - conda create -n test python=$PYTHONVER
   - source activate test
   - conda update -q -y --all
-  - conda install -q -y networkx matplotlib seaborn traitlets numpy pandas numba sympy pyyaml six
+  - conda install -q -y networkx matplotlib seaborn traitlets numpy pandas numba sympy pyyaml six pytest pytest-cov
   - pip install travis-sphinx codacy-coverage
   - python setup.py install
 
