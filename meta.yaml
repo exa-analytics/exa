@@ -15,8 +15,6 @@ requirements:
 
   run:
     - networkx
-    - matplotlib
-    - seaborn
     - traitlets
     - numpy
     - pandas

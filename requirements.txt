@@ -1,6 +1,4 @@
 networkx
-matplotlib
-seaborn
 traitlets
 numpy
 pandas
