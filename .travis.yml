@@ -25,7 +25,9 @@ install:
   - conda create -n test python=$PYTHONVER
   - source activate test
   - conda update -q -y --all
-  - conda install -q -y networkx traitlets numpy pandas numba sympy pyyaml six pytest pytest-cov
+  - conda install -q -y networkx traitlets numpy pandas numba sympy pyyaml six
+  - conda install -q -y pytest pytest-cov 
+  - conda install -q -y -c conda-forge ipython sphinx nbsphinx sphinx_rtd_theme sphinxcontrib-napoleon
   - pip install travis-sphinx codacy-coverage
   - python setup.py install
 
