@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2015-2019, Exa Analytics Development Team
+# Copyright (c) 2015-2020, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Physical Constants
@@ -19,10 +18,9 @@ for each value.
 """
 import sys as _sys
 import json as _json
-import types as _types
 from exa import Editor as _Editor
-from exa.static import resource as _resource
 from exa import DataFrame as _DF
+from exa.static import resource as _resource
 
 
 class Constant(float):
@@ -66,4 +64,3 @@ _this = _sys.modules[__name__]
 _path = _resource("constants.json")
 if not hasattr(_this, "Planck_constant"):
     _create()
-

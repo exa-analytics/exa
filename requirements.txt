@@ -1,12 +1,8 @@
+networkx
+traitlets
 numpy
-scipy
 pandas
-sympy
-networkx>=2.0
-tables
 numba
-six
-ipython
-matplotlib
-seaborn
+sympy
 pyyaml
+six
