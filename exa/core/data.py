@@ -63,6 +63,12 @@ class Data(exa.Base, Configurable):
 
     @classmethod
     def from_yml(cls, path):
+        """Load a Data object from a configuration
+        file. The intent is not to store the actual
+        data in the config, rather all the required
+        metadata to source and validate the data for
+        itself.
+        """
         with open(path, 'r') as f:
             cfg = yaml.safe_load(f.read())
         ver = cfg.pop('version', None)
@@ -82,7 +88,7 @@ class Data(exa.Base, Configurable):
                 else: # assume this is a function
                     source = getattr(mod, obj)
             except Exception as e:
-                print("attempt to import source failed")
+                self.log.error(f"attempt to import source failed: {e}")
                 source = None
         return cls(source=source, **cfg)
 
@@ -115,12 +121,9 @@ class Data(exa.Base, Configurable):
         if not isinstance(df, pd.DataFrame):
             self.log.warning("data not a dataframe, skipping validation")
             return df
-        # set index name, support set index?
-        # or a (multi-col) uniqueness constraint?
         if self.index and df.index.name != self.index:
             self.log.debug("setting index name {}".format(self.index))
             df.index.name = self.index
-        # guarantee existence
         missing = set(self.columns).difference(df.columns)
         if missing:
             raise RequiredColumnError(missing, self.name)
@@ -134,8 +137,8 @@ class Data(exa.Base, Configurable):
             If reverse is True, revert categories
         """
         for col, typ in self.categories.items():
+            conv = {True: typ, False: 'category'}[reverse]
             if col in df.columns:
-                conv = {True: typ, False: 'category'}[reverse]
                 df[col] = df[col].astype(conv)
             else:
                 self.log.debug(
@@ -155,6 +158,8 @@ def load_isotopes():
                   'cov_radius', 'van_radius', 'g',
                   'mass', 'massu', 'name', 'eneg',
                   'quad', 'spin', 'symbol', 'color')
+    # this sorting is to facilitate comparison
+    # with the original implementation.
     return df.sort_values(by=['symbol', 'A']).reset_index(drop=True)
 
 def load_constants():
