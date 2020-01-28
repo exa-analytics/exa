@@ -94,6 +94,9 @@ class Data(exa.Base, Configurable):
         the data, store it and return it.
 
         Note:
+            behaves like a setter if df is provided
+
+        Note:
             force re-evaluation of source if cache is False
         """
         _data = getattr(self, '_data', None)
@@ -154,20 +157,6 @@ def load_isotopes():
                   'quad', 'spin', 'symbol', 'color')
     return df.sort_values(by=['symbol', 'A']).reset_index(drop=True)
 
-class Isotopes(Data):
-    """An isotopes database data object.
-
-    .. code-block:: python
-
-        import exa
-        df = exa.Isotopes().data()
-    """
-
-    def __init__(self, *args, **kws):
-        source = kws.pop('source', load_isotopes)
-        super().__init__(*args, source=source, **kws)
-
-
 def load_constants():
     """Following suit until more is decided on
     Editor updates.
@@ -176,10 +165,5 @@ def load_constants():
     df = pd.read_json(path, orient='values')
     return df
 
-
-class Constants(Data):
-
-    def __init__(self, *args, **kws):
-        source = kws.pop('source', load_constants)
-        super().__init__(*args, source=source, **kws)
-
+Isotopes = Data(source=load_isotopes, name='isotopes')
+Constants = Data(source=load_constants, name='constants')

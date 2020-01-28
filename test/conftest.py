@@ -13,12 +13,12 @@ import exa
 
 @pytest.fixture(scope='session')
 def isotopes():
-    iso = exa.Isotopes()
+    iso = exa.Isotopes
     iso.data()
     return iso
 
 @pytest.fixture(scope='session')
 def constants():
-    con = exa.Constants()
+    con = exa.Constants
     con.data()
     return con

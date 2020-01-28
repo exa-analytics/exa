@@ -70,10 +70,10 @@ def test_from_yml(isotopes):
     assert df.shape == isotopes.data().shape
 
 def test_isotopes():
-    assert not exa.Isotopes().data().empty
+    assert not exa.Isotopes.data().empty
 
 def test_constants():
-    assert not exa.Constants().data().empty
+    assert not exa.Constants.data().empty
 
 def test_compare_isotopes(isotopes):
     from exa.util import isotopes as orig
