@@ -41,18 +41,18 @@ def test_isotope():
     assert exa.util.isotopes.H['1'].mass > 1.007
     assert exa.util.isotopes.H['1'].radius > 0.6
 
-def test_count():
-    """Check that all unit types have been created."""
-    assert hasattr(exa.util.units, "Acceleration") == True
-    assert hasattr(exa.util.units, "Energy") == True
-    assert hasattr(exa.util.units, "Length") == True
-    assert hasattr(exa.util.units, "Time") == True
-    assert hasattr(exa.util.units, "Mass") == True
-
-def test_units():
-    """Check attribute values."""
-    assert np.isclose(exa.util.units.Energy['J'], 1.0)
-    assert np.isclose(exa.util.units.Length['au', 'Angstrom'], 0.52918)
-    assert np.isclose(exa.util.units.Length['Angstrom'], 1E-10)
+#def test_count():
+#    """Check that all unit types have been created."""
+#    assert hasattr(exa.util.units, "Acceleration") == True
+#    assert hasattr(exa.util.units, "Energy") == True
+#    assert hasattr(exa.util.units, "Length") == True
+#    assert hasattr(exa.util.units, "Time") == True
+#    assert hasattr(exa.util.units, "Mass") == True
+#
+#def test_units():
+#    """Check attribute values."""
+#    assert np.isclose(exa.util.units.Energy['J'], 1.0)
+#    assert np.isclose(exa.util.units.Length['au', 'Angstrom'], 0.52918)
+#    assert np.isclose(exa.util.units.Length['Angstrom'], 1E-10)
 
 

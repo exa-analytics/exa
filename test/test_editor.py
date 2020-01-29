@@ -7,6 +7,7 @@ Tests for :mod:`~exa.core.editor`
 """
 import os, six
 from unittest import TestCase
+import exa
 from exa import Editor
 
 
@@ -16,7 +17,8 @@ class TestEditor(TestCase):
         Generate the file path to the exa.core.editor module (which will be used as
         the test for the :class:`~exa.core.editor.Editor` class that it provides).
         """
-        self.path = os.path.abspath(os.path.join(os.path.abspath(__file__), "../../editor.py"))
+        adir = os.path.dirname(exa.cfg.staticdir)
+        self.path = os.path.join(adir, 'core', 'editor.py')
         with open(self.path) as f:
             self.lines = f.readlines()
         self.fl = Editor.from_file(self.path)
