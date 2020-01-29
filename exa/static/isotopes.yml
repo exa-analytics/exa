@@ -1,0 +1,23 @@
+version: 1
+name: isotopes
+index: isotope
+source: exa.core.data.load_isotopes
+categories:
+  symbol: str
+  Z: int
+columns:
+  - A
+  - Z
+  - af
+  - afu
+  - cov_radius
+  - van_radius
+  - g
+  - mass
+  - massu
+  - name
+  - eneg
+  - quad
+  - spin
+  - symbol
+  - color

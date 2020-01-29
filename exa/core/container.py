@@ -21,8 +21,8 @@ from copy import deepcopy
 from collections import defaultdict
 from .numerical import check_key, Field, Series, DataFrame
 from exa.util.utility import convert_bytes
-from exa.util import mpl
-import matplotlib.pyplot as plt
+#from exa.util import mpl
+# import matplotlib.pyplot as plt
 
 
 class Container(object):
