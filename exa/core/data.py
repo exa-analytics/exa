@@ -167,8 +167,13 @@ def load_constants():
     Editor updates.
     """
     path = exa.cfg.resource('constants.json')
-    df = pd.read_json(path, orient='values')
-    return df
+    return pd.read_json(path, orient='values')
+
+def load_units():
+    """Same. Move these loaders somewhere else."""
+    path = exa.cfg.resource('units.json')
+    return pd.read_json(path, orient='values')
 
 Isotopes = Data(source=load_isotopes, name='isotopes')
 Constants = Data(source=load_constants, name='constants')
+Units = Data(source=load_units, name='units')
