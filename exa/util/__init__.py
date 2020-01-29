@@ -1,5 +1,10 @@
 # Copyright (c) 2015-2020, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
+import os
+import sys
+from types import ModuleType
+
+from exa.core.data import Constants, Isotopes
 
 
 class Element(object):
@@ -102,8 +107,8 @@ def creator(group):
     return ele
 
 
-
-"""
+isotopes = ModuleType('exa.util.isotopes')
+isotopes.__doc__ = """
 Periodic Table of Elements and Isotopes
 ########################################
 This module provides a database of the atomic elements and their isotopes.
@@ -137,6 +142,8 @@ Warning:
 
 .. _NIST: https://www.nist.gov/
 """
+for ele in Isotopes.data().groupby('symbol').apply(creator):
+    setattr(isotopes, ele.symbol, ele)
 
 
 class Constant(float):
@@ -163,7 +170,8 @@ class Constant(float):
         return "{}({} ±{})".format(self.name, self.value, self.error)
 
 
-"""
+constants = ModuleType('exa.util.constants')
+constants.__doc__ = """
 Physical Constants
 #######################################
 Tabulated physical constants from `NIST`_. Note that all constants are float
@@ -179,3 +187,5 @@ for each value.
 
 .. _NIST: https://www.nist.gov/
 """
+for kws in Constants.data().to_dict(orient='records'):
+    setattr(constants, kws['name'], Constant(**kws))
