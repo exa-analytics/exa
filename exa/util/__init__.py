@@ -1,10 +1,19 @@
 # Copyright (c) 2015-2020, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
+"""
+Pythonic utility APIs.
+########################################
+Dynamically generates modules derived from static data assets
+which can be used to write clear, verbose mathematical operations.
+"""
 import os
 import sys
 from types import ModuleType
 
-from exa.core.data import Constants, Isotopes
+import numpy as np
+import pandas as pd
+
+from exa.core.data import Constants, Isotopes, Units
 
 
 class Element(object):
@@ -57,7 +66,8 @@ class Isotope(object):
     def radius(self):
         return self.cov_radius
 
-    def __init__(self, anum, znum, af, afu, cov_radius, van_radius, g, mass, massu, name, eneg, quad, spin, symbol, color):
+    def __init__(self, anum, znum, af, afu, cov_radius, van_radius,
+                 g, mass, massu, name, eneg, quad, spin, symbol, color):
         self.A = anum
         self.Z = znum
         self.af = af
@@ -82,7 +92,7 @@ class Isotope(object):
         return str(self.A) + self.symbol
 
 
-def creator(group):
+def _creator(group):
     """Helper function applied to each symbol group of the raw isotope table."""
     symbol = group['symbol'].values[0]
     try:    # Ghosts and custom atoms don't necessarily have an abundance fraction
@@ -142,8 +152,8 @@ Warning:
 
 .. _NIST: https://www.nist.gov/
 """
-for ele in Isotopes.data().groupby('symbol').apply(creator):
-    setattr(isotopes, ele.symbol, ele)
+for _ele in Isotopes.data().groupby('symbol').apply(_creator):
+    setattr(isotopes, _ele.symbol, _ele)
 
 
 class Constant(float):
@@ -187,5 +197,63 @@ for each value.
 
 .. _NIST: https://www.nist.gov/
 """
-for kws in Constants.data().to_dict(orient='records'):
-    setattr(constants, kws['name'], Constant(**kws))
+for _kws in Constants.data().to_dict(orient='records'):
+    setattr(constants, _kws['name'], Constant(**_kws))
+
+
+class Unit(object):
+    """
+    Unit of measurement that provides a conversion getitem API. 
+
+    .. code-block:: python
+
+        # Conversion factor between meters and angstroms
+        import exa
+        exa.util.units.Length['m', 'Angstrom']
+    """
+
+    @property
+    def values(self):
+        return self._values
+
+    @property
+    def base_unit(self):
+        # curiously Energy returns watt seconds :D
+        return self._values[np.isclose(self._values, 1.0)].index[0]
+
+
+    def __setitem__(self, key, value):
+        self._values[key] = value
+
+    def __getitem__(self, key):
+        if isinstance(key, str):
+            return self._values[self.base_unit] / self._values[key]
+        if isinstance(key, (list, tuple)):
+            return self._values[key[1]] / self._values[key[0]]
+        raise NotImplementedError('item access not understood')
+
+    def __init__(self, name, values):
+        self._values = pd.Series(values)
+        self._name = name
+
+
+units = ModuleType('exa.util.units')
+units.__doc__ = """
+Unit Conversions
+########################################
+Values are reported with respect to the base SI unit for a given quantity.
+Conversion factors can be generated using the syntax, Quantity[from, to];
+see the example below.
+
+.. code-block:: python
+
+    from exa.util.units import Energy
+    Energy["eV"]         # Value of eV in SI units
+    Energy["eV", "J"]    # Same as above
+    Energy["eV", "Ha"]   # Conversion factor between eV and Ha (Hartree atomic unit)
+"""
+for _col, _s in Units.data().iteritems():
+    _attrs = _s[_s.notnull()].to_dict()
+    _attrs.pop('dimensions', None)
+    _attrs.pop('aliases', None)
+    setattr(units, _col.title(), Unit(_col, _attrs))

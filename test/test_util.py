@@ -10,10 +10,10 @@ import numpy as np
 
 import exa
 
-def test_created():
+def test_constants_created():
     """Check that constants were created."""
     assert len(dir(exa.util.constants)) > 300
-    assert hasattr(exa.util.constants, "Planck_constant") == True
+    assert hasattr(exa.util.constants, "Planck_constant")
 
 def test_attrs():
     """Check attributes of constants."""
@@ -22,7 +22,7 @@ def test_attrs():
     assert hasattr(exa.util.constants.Planck_constant, "name")
     assert hasattr(exa.util.constants.Planck_constant, "error")
 
-def test_created():
+def test_isotopes_created():
     """Check that elements and isotope objects were created."""
     iso = exa.Isotopes.data()
     for sym in iso['symbol'].unique():
@@ -41,18 +41,18 @@ def test_isotope():
     assert exa.util.isotopes.H['1'].mass > 1.007
     assert exa.util.isotopes.H['1'].radius > 0.6
 
-#def test_count():
-#    """Check that all unit types have been created."""
-#    assert hasattr(exa.util.units, "Acceleration") == True
-#    assert hasattr(exa.util.units, "Energy") == True
-#    assert hasattr(exa.util.units, "Length") == True
-#    assert hasattr(exa.util.units, "Time") == True
-#    assert hasattr(exa.util.units, "Mass") == True
-#
-#def test_units():
-#    """Check attribute values."""
-#    assert np.isclose(exa.util.units.Energy['J'], 1.0)
-#    assert np.isclose(exa.util.units.Length['au', 'Angstrom'], 0.52918)
-#    assert np.isclose(exa.util.units.Length['Angstrom'], 1E-10)
+def test_count():
+    """Check that all unit types have been created."""
+    assert hasattr(exa.util.units, "Acceleration")
+    assert hasattr(exa.util.units, "Energy")
+    assert hasattr(exa.util.units, "Length")
+    assert hasattr(exa.util.units, "Time")
+    assert hasattr(exa.util.units, "Mass")
+
+def test_units():
+    """Check attribute values."""
+    assert np.isclose(exa.util.units.Energy['J'], 1.0)
+    assert np.isclose(exa.util.units.Length['au', 'Angstrom'], 0.52918)
+    assert np.isclose(exa.util.units.Length['Angstrom'], 1E-10)
 
 

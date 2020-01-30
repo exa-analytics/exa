@@ -113,4 +113,4 @@ from ._version import __version__
 from .core import (DataFrame, Series, Field3D, Field, Editor, Container,
                    TypedMeta, SparseDataFrame)
 
-from .core import Data, Isotopes, Constants
+from .core import Data, Isotopes, Constants, Units
