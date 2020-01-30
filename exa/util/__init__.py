@@ -6,8 +6,6 @@ Pythonic utility APIs.
 Dynamically generates modules derived from static data assets
 which can be used to write clear, verbose mathematical operations.
 """
-import os
-import sys
 from types import ModuleType
 
 import numpy as np
@@ -83,10 +81,6 @@ class Isotope(object):
         self.spin = spin
         self.symbol = symbol
         self.color = color
-
-    @property
-    def radius(self):
-        return self.cov_radius
 
     def __repr__(self):
         return str(self.A) + self.symbol
@@ -203,7 +197,7 @@ for _kws in Constants.data().to_dict(orient='records'):
 
 class Unit(object):
     """
-    Unit of measurement that provides a conversion getitem API. 
+    Unit of measurement that provides a conversion getitem API.
 
     .. code-block:: python
 
