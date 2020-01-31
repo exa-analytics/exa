@@ -3,6 +3,5 @@
 
 from .numerical import DataFrame, Series, Field, Field3D, SparseDataFrame
 from .editor import Editor
-from .container import Container, TypedMeta
-
+from .container import Container
 from .data import Data, Isotopes, Constants, Units
