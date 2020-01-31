@@ -5,4 +5,4 @@ from .numerical import DataFrame, Series, Field, Field3D, SparseDataFrame
 from .editor import Editor
 from .container import Container, TypedMeta
 
-from .data import Data, Isotopes, Constants
+from .data import Data, Isotopes, Constants, Units
