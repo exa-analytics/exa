@@ -86,7 +86,7 @@ def test_save_load(c):
     dirpath = mkdtemp()
     path = c.save(dirpath)
     assert os.path.exists(path)
-    _ = c.to_hdf(path)
+    c.to_hdf(path)
     assert os.path.exists(path)
     new = Container.load(path)
     assert hasattr(new, "df")

@@ -271,7 +271,6 @@ class Container(object):
         info['size'] *= 13000/info['size'].max()
         info['size'] += 2000
         node_size_dict = info['size'].to_dict()    # Pull all nodes from keys
-        node_class_name_dict = info['type'].to_dict()
         node_type_dict = {}    # Values are tup of "underlying" type and color
         node_conn_dict = {}    # Values are tup of connection type and color
         items = self._data().items()
