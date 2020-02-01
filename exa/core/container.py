@@ -19,7 +19,7 @@ import networkx as nx
 from sys import getsizeof
 from copy import deepcopy
 from collections import defaultdict
-from .numerical import check_key, Field, Series, DataFrame
+from .numerical import check_key, Field, Series, DataFrame, SparseDataFrame
 from exa.util.utility import convert_bytes
 
 
@@ -348,7 +348,7 @@ class Container(object):
                     store[name] = s
                 elif isinstance(data, DataFrame):
                     store[name] = pd.DataFrame(data)
-                elif isinstance(data, SparseSeries):
+                elif isinstance(data, pd.SparseSeries):
                     s = pd.SparseSeries(data)
                     if isinstance(data.dtype, pd.types.dtypes.CategoricalDtype):
                         s = s.astype('O')
@@ -416,7 +416,9 @@ class Container(object):
         """
         rel = {}
         for key, obj in vars(self).items():
-            if not isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFrame)) and not key.startswith('_'):
+            if (not isinstance(obj, (pd.Series, pd.DataFrame,
+                                     pd.SparseSeries, SparseDataFrame))
+                and not key.startswith('_')):
                 if copy and 'id' not in key:
                     rel[key] = deepcopy(obj)
                 else:
@@ -429,7 +431,8 @@ class Container(object):
         """
         data = {}
         for key, obj in vars(self).items():
-            if isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFrame)):
+            if isinstance(obj, (pd.Series, pd.DataFrame,
+                          pd.SparseSeries, SparseDataFrame)):
                 if copy:
                     data[key] = obj.copy(deep=True)
                 else:

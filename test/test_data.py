@@ -5,11 +5,8 @@
 Tests for :mod:`~exa.core.data`
 #######################################
 """
-
 import pytest
-import numpy as np
 import pandas as pd
-
 import exa
 from exa.core.error import RequiredColumnError
 
