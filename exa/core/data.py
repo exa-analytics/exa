@@ -9,32 +9,32 @@ import importlib
 from traitlets import List, Unicode, Dict, Any
 from traitlets import validate, default, observe
 from traitlets import TraitError
-from traitlets.config import Configurable
 import pandas as pd
-import yaml
 
 import exa
 from exa.core.error import RequiredColumnError
 
 
-# TODO: reintroduce the automated getattr(attr, getter_attr())
-#       with _getter_prefix behavior on a
-#       base class somewhere that providers
-#       inherit from
-
-
-class Data(exa.Base, Configurable):
+class Data(exa.Base):
     """An interface to separate data provider routing
     logic and simplify managing multiple data concepts
     in the container.
     """
     name = Unicode()
     source = Any(allow_none=True)
+    source_cfg = Unicode()
     source_args = List()
     source_kws = Dict()
     index = Unicode()
     columns = List()
     categories = Dict()
+
+    # TODO : comb through numerical.py
+    #        and find all useful attributes and
+    #        secret sauce and expose on Data.
+    #
+    #        also what to do about Field?
+    #        is it a subclass of data?
 
     @validate('source')
     def _validate_source(self, prop):
@@ -67,25 +67,28 @@ class Data(exa.Base, Configurable):
         file. The intent is not to store the actual
         data in the config, rather all the required
         metadata to source and validate the data for
-        itself.
+        itself. Also checks for a configuration file
+        specified for the Data's indended source.
         """
-        with open(path, 'r') as f:
-            cfg = yaml.safe_load(f.read())
-        ver = cfg.pop('version', None)
-        if ver != 1:
-            raise Exception("version {} not supported".format(ver))
+        # API loading can probably be generalized
+        # and moved to a base class staticmethod.
+        cfg = cls._from_yml(path)
         source = cfg.pop('source', None)
+        src_cfg = cfg.get('source_cfg', None)
         # Assume source is a path to a method_name or ClassName
         # and is fully qualified by an importable module
         if source is not None:
             try:
                 *mod, obj = source.split('.')
                 mod = importlib.import_module('.'.join(mod))
-                # TODO : do we also support providing init
-                #        args and kwargs in case source is class?
                 if obj.istitle(): # class to instantiate
-                    source = getattr(mod, obj)()
-                else: # assume this is a function
+                    # support loading source from a cfg file
+                    if src_cfg:
+                        source = getattr(mod, obj).from_yml(src_cfg)
+                    # otherwise empty class instantiation?
+                    else:
+                        source = getattr(mod, obj)()
+                else: # assume source is a function
                     source = getattr(mod, obj)
             except Exception as e:
                 self.log.error(f"attempt to import source failed: {e}")
