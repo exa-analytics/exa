@@ -163,9 +163,9 @@ class Container(object):
                     if child in kwargs:
                         continue
                     typ = g.edge_types[(parent, child)]
-                    if (self._cardinal in self[child].columns and 
-                        hasattr(self[child], 'slice_cardinal')):
-                        kwargs[child] = self[child].slice_cardinal(key)
+                    if (self._cardinal in self[child].columns and
+                            hasattr(self[child], 'slice_cardinal')):
+                        kwargs[child] = self[child].slice_cardinal(cardinal_indexes)
                     elif typ == 'index-index':
                         # Select from the child on the parent's index
                         # (the parent is in the kwargs already).
@@ -302,11 +302,6 @@ class Container(object):
         g = nx.Graph()
         g.add_nodes_from(node_size_dict.keys())
         g.add_edges_from(node_conn_dict.keys())
-        node_sizes = [node_size_dict[node] for node in g.nodes()]
-        node_labels = {n: ' {}\n({})'.format(n, node_class_name_dict[n])
-                       for n in g.nodes()}
-        node_colors = [node_type_dict[n][1] for n in g.nodes()]
-        edge_colors = [node_conn_dict[e][1] for e in g.edges()]
         # Attached connection information to network graph
         g.edge_types = {n: v[0] for n, v in node_conn_dict.items()}
         return g
@@ -420,7 +415,7 @@ class Container(object):
         for key, obj in vars(self).items():
             if (not isinstance(obj, (pd.Series, pd.DataFrame,
                                      pd.SparseSeries, SparseDataFrame))
-                and not key.startswith('_')):
+                    and not key.startswith('_')):
                 if copy and 'id' not in key:
                     rel[key] = deepcopy(obj)
                 else:

@@ -42,9 +42,9 @@ def test_simple_strings(arr, sig1, sca):
     """Test string functions."""
     fn = "sin(x)/x"
     func = numbafy(fn, "x", compiler="vectorize", signatures=sig1)
-    assert np.allclose(func(arr), np.sin(arr)/arr) 
+    assert np.allclose(func(arr), np.sin(arr)/arr)
     func = numbafy(fn, "x", compiler="jit")
-    assert np.isclose(func(sca), np.sin(sca)/sca) 
+    assert np.isclose(func(sca), np.sin(sca)/sca)
 
 
 @pytest.mark.skipif(NUMBA_DISABLE_JIT, reason="Numba compilation disabled")
@@ -63,11 +63,11 @@ def test_complex_strings(arr, sig3, sca):
     func = numbafy(fn, ("x", "y", "z"), compiler="vectorize", signatures=sig3)
     result = func(arr, arr, arr)
     check = np.arccos(arr)/arr + np.exp(-arr) + np.mod(arr, 2)
-    assert np.allclose(result, check) 
+    assert np.allclose(result, check)
     func = numbafy(fn, ("x", "y", "z"))
     result = func(sca, sca, sca)
     check = np.arccos(sca)/sca + np.exp(-sca) + np.mod(sca, 2)
-    assert np.isclose(result, check) 
+    assert np.isclose(result, check)
 
 
 @pytest.mark.skipif(NUMBA_DISABLE_JIT, reason="Numba compilation disabled")
@@ -78,7 +78,7 @@ def test_sympy(arr, sig3):
     func = numbafy(fn, (x, y, z), compiler="vectorize", signatures=sig3)
     result = func(arr, arr, arr)
     check = np.arccos(arr)/arr + np.exp(-arr) + np.mod(arr, 2)
-    assert np.allclose(result, check) 
+    assert np.allclose(result, check)
 
 
 @pytest.mark.skipif(NUMBA_DISABLE_JIT, reason="Numba compilation disabled")
@@ -91,7 +91,7 @@ def test_symengine(arr, sig3):
         func = numbafy(fn, (x, y, z), compiler="vectorize", signatures=sig3)
         result = func(arr, arr, arr)
         check = np.arccos(arr)/arr + np.exp(-arr)
-        assert np.allclose(result, check) 
+        assert np.allclose(result, check)
     except ImportError:
         pass
 
