@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2019, Exa Analytics Development Team
+# Copyright (c) 2015-2020, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Tests for :mod:`~exa.core.data`
 #######################################
 """
-
 import pytest
-import numpy as np
 import pandas as pd
-
 import exa
 from exa.core.error import RequiredColumnError
 
