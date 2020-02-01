@@ -5,6 +5,9 @@
 Tests for :mod:`~exa.core.container`
 #######################################
 """
+import os
+from tempfile import mkdtemp
+from shutil import rmtree
 from logging import Logger
 import pandas as pd
 from pytest import fixture
@@ -72,3 +75,30 @@ def test_network(c):
 def test_info(c):
     assert isinstance(c.info(), pd.DataFrame)
     assert c.info().shape == (4, 2)
+
+
+def test_memory_usage(c):
+    assert isinstance(c.memory_usage(), pd.Series)
+    assert isinstance(c.memory_usage(True), str)
+
+
+def test_save_load(c):
+    dirpath = mkdtemp()
+    path = c.save(dirpath)
+    assert os.path.exists(path)
+    _ = c.to_hdf(path)
+    assert os.path.exists(path)
+    new = Container.load(path)
+    assert hasattr(new, "df")
+    assert hasattr(new, "derived")
+    assert new.df.equals(c.df)
+    assert new.derived.equals(c.derived)
+    new = Container.from_hdf(path)
+    assert isinstance(new, Container)
+    rmtree(dirpath)
+
+
+def test_data(c):
+    d = c._data()
+    assert c.df is d['df']
+    assert c.derived is d['derived']

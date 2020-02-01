@@ -12,13 +12,14 @@ See Also:
     For a description of data objects see :mod:`~exa.core.numerical`.
 """
 import os
+from sys import getsizeof
+from copy import deepcopy
+from uuid import uuid4
+from collections import defaultdict
 import logging
 import numpy as np
 import pandas as pd
 import networkx as nx
-from sys import getsizeof
-from copy import deepcopy
-from collections import defaultdict
 from .numerical import check_key, Field, Series, DataFrame, SparseDataFrame
 from exa.util.utility import convert_bytes
 
@@ -365,10 +366,11 @@ class Container(object):
                     store[name] = data
                 if hasattr(data, '_set_categories'):
                     data._set_categories()
+        return path
 
     def to_hdf(self, *args, **kwargs):
-        """Alias of :func:`~exa.core.container.Container`."""
-        self.save(*args, **kwargs)
+        """Alias of :func:`~exa.core.container.Container.save`."""
+        return self.save(*args, **kwargs)
 
     @classmethod
     def load(cls, pkid_or_path=None):
@@ -463,3 +465,4 @@ class Container(object):
         self.name = name
         self.description = description
         self.meta = meta
+        self.hexuid = uuid4().hex
