@@ -100,6 +100,6 @@ logging.config.dictConfig(_log)
 
 from ._version import __version__
 from .core import (DataFrame, Series, Field3D, Field, Editor, Container,
-                   TypedMeta, SparseDataFrame)
+                   SparseDataFrame)
 
 from .core import Data, Isotopes, Constants, Units

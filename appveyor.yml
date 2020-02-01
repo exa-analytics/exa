@@ -44,7 +44,7 @@ install:
   - cmd: conda create -y -n test python=%CONDA_PY%
   - cmd: activate test
   - cmd: conda update -q -y --all
-  - cmd: conda install -q -y networkx traitlets numpy pandas numba sympy pyyaml six pytest
+  - cmd: conda install -q -y networkx traitlets numpy pandas numba sympy pyyaml six pytest pytables
   - cmd: python setup.py install
 
 build: false
