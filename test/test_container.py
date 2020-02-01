@@ -14,7 +14,7 @@ from pytest import fixture
 from exa import Container, DataFrame
 
 
-@fixture
+@fixture(scope="module")
 def c():
     df = DataFrame([[1, 4], [2, 5], [3, 6]],
                    columns=("i", "other")).set_index("i")
