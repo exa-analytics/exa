@@ -169,12 +169,6 @@ class Container(object):
                     elif typ == 'index-index':
                         # Select from the child on the parent's index
                         # (the parent is in the kwargs already).
-                        print("child: ", child)
-                        print("parent: ", parent)
-                        print("kwargs: ", kwargs)
-                        print(self[child].index)
-                        print(self[child].values)
-                        print(kwargs[parent].index.values)
                         kwargs[child] = self[child].loc[kwargs[parent].index.values]
                     elif typ == 'index-column':
                         # Select from the child where the column (of the same name as
