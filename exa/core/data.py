@@ -6,7 +6,7 @@ Data
 """
 import importlib
 
-from traitlets import List, Unicode, Dict, Any
+from traitlets import List, Unicode, Dict, Any, Tuple
 from traitlets import validate, default, observe
 from traitlets import TraitError
 import pandas as pd
@@ -21,12 +21,14 @@ class Data(exa.Base):
     in the container.
     """
     name = Unicode()
+    meta = Dict()
     source = Any(allow_none=True)
     source_cfg = Unicode()
     source_args = List()
     source_kws = Dict()
     index = Unicode()
     columns = List()
+    cardinal = Tuple()
     categories = Dict()
 
     # TODO : comb through numerical.py
@@ -94,6 +96,15 @@ class Data(exa.Base):
                 self.log.error(f"attempt to import source failed: {e}")
                 source = None
         return cls(source=source, **cfg)
+
+    def groupby(self):
+        pass
+
+    def slice(self):
+        pass
+
+    def memory(self):
+        pass
 
     def data(self, df=None, cache=True):
         """Return the currently stored data in the
