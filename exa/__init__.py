@@ -8,29 +8,16 @@ import os
 import sys
 import logging.config
 import yaml
-from traitlets import Unicode, default, validate
-from traitlets.config import Configurable, Application
+from traitlets import HasTraits, Unicode, default, validate
 
 
-_app = Application()
-try:
-    _app.parse_command_line(sys.argv)
-except SystemExit:
-    # _app fails to parse pytest command line
-    # so just pass the failure in this case.
-    pass
 _base = os.path.abspath(os.path.dirname(__file__))
-_path = os.path.join(_base, 'conf', 'config.py')
-_app.load_config_file(_path)
 
 
-class Base:
-    """This base mixin class provides a configured
-    log property and access to configuration
-    driven application settings without
-    forcing subclasses to be run explicitly
-    in the context of an application. It expects
-    to be mixed with a traitlets.config.Configurable
+class Base(HasTraits):
+    """A traitlets base class that provides configuration
+    and logging utilities. Subclasses define respective
+    traits and trait-based logic.
     """
 
     @property
@@ -39,6 +26,16 @@ class Base:
             self.__module__, self.__class__.__name__
         ])
         return logging.getLogger(name)
+
+    @classmethod
+    def from_yml(cls, path):
+        return cls(**cls._from_yml(path))
+
+    @staticmethod
+    def _from_yml(path):
+        with open(path, 'r') as f:
+            cfg = yaml.safe_load(f.read())
+        return cfg
 
     def traits(self, *args, **kws):
         # inherent to traitlets API and
@@ -52,18 +49,10 @@ class Base:
         return {k: getattr(self, k)
                 for k in self.traits()}
 
-    def __init__(self, *args, **kws):
-        # Allow over-writing config for dynamic
-        # classes at runtime
-        config = kws.pop('config', _app.config)
-        super().__init__(
-            *args, config=config, **kws
-        )
 
-
-class Cfg(Base, Configurable):
-    logdir = Unicode().tag(config=True)
-    logname = Unicode().tag(config=True)
+class Cfg(Base):
+    logdir = Unicode()
+    logname = Unicode()
     staticdir = Unicode()
 
     @validate('logdir')
@@ -101,10 +90,10 @@ class Cfg(Base, Configurable):
                 return os.path.abspath(os.path.join(path, name))
 
 
-cfg = Cfg()
+_path = os.path.join(_base, 'conf', 'config.yml')
+cfg = Cfg.from_yml(_path)
 _path = os.path.join(_base, 'conf', 'logging.yml')
-with open(_path, 'r') as f:
-    _log = yaml.safe_load(f.read())
+_log = Cfg._from_yml(_path)
 _path = os.path.join(cfg.logdir, cfg.logname)
 _log['handlers']['file']['filename'] = _path
 logging.config.dictConfig(_log)

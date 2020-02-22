@@ -1,4 +1,3 @@
-version: 1
 name: isotopes
 index: isotope
 source: exa.core.data.load_isotopes
