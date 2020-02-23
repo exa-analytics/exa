@@ -366,7 +366,7 @@ def test_dao_invalid_table_sqlite(sqlite_engine_wipe_base):
             related={'dne': {'entities': [], 'filters': []}})
 
 def load_exa_db(engine_wipe_base):
-    eng, wipe, base = engine_wipe_base
+    eng, wipe, _ = engine_wipe_base
     session = new_session(eng)
     iso = exa.Isotopes.data()
     con = exa.Constants.data()
