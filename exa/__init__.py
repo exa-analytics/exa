@@ -23,15 +23,19 @@ class Base(HasTraits):
 
     @staticmethod
     def right_now():
+        """Returns the current datetime"""
         return dt.datetime.now()
 
     @staticmethod
     def time_diff(start):
+        """Returns a formatted string of the time difference
+        between right now and the passed in datetime"""
         stop = dt.datetime.now()
         return '{:.2f}s'.format((stop - start).total_seconds())
 
     @property
     def log(self):
+        """A configured `logger` object"""
         name = '.'.join([
             self.__module__, self.__class__.__name__
         ])

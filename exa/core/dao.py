@@ -32,12 +32,14 @@ _raw_op_map = {
     'not': 'not', 'and': 'and', 'or': 'or'
 }
 
+class SQLInjectionError(Exception):
+    pass
 
 
 class RawDAO(Data):
     """The so-called database access object (DAO).
 
-    The DAO models a single table in a database. 
+    The DAO models a single table in a database.
     Specify a schema and table_name to obtain raw
     DAO functionality, a quick and dirty query
     builder for low-overhead pythonic database access.
@@ -49,47 +51,52 @@ class RawDAO(Data):
 
     .. code-block:: Python 
         
-        dao = exa.RawDAO(table_name='users')
+        dao = exa.core.dao.RawDAO(table_name='users')
+        # if not specified, fetches all columns
+        dao.entities = ['id', 'user']
+        # if not specified, fetches all rows
         dao.filters = {
             'id': [('gt', 1), ('lt', 10)],
             'user': [('eq', 'foo')]
         }
-        dao(engine=eng) # eng is a sqlalchemy engine
+        df = dao(session=sqlalchemy.Session())
 
     """
-    schema = Unicode()
-    table_name = Unicode()
-    entities = List()
-    filters = Dict()
+    schema = Unicode(help='schema name')
+    table_name = Unicode(help='table name')
+    entities = List(help='columns to pull')
+    filters = Dict(help='filters to apply')
 
     @default('entities')
     def _default_entities(self):
         return self.columns
 
     def _scan_sql(self, query):
+        self.log.debug("validating query against sql injection")
         if any((i in query for i in (';', '--'))):
-            raise Exception("; or -- found. abort")
+            raise SQLInjectionError("; or -- found. abort")
 
-    def _filter_builder(self):
+    def _filter_builder(self, query):
         filters = []
         for column, conditions in self.filters.items():
             for op, cond in conditions:
                 fil = "{} {} '{}'".format(column, _raw_op_map[op], cond)
                 self.log.debug("building filter {}".format(fil))
                 filters.append(fil)
-        return ' and '.join(filters)
-
-    def _query_builder(self):
-        entities = ', '.join(self.entities) or '*'
-        query = 'select {} from {}'.format(entities, self.fqtn())
-        filters = self._filter_builder()
+        filters = ' and '.join(filters)
         if filters:
             query += ' where {}'.format(filters)
+        return query
+
+    def _query_builder(self, query):
+        entities = ', '.join(self.entities) or '*'
+        query = 'select {} from {}'.format(entities, self.fqtn())
+        query = self._filter_builder(query)
         self._scan_sql(query)
         return query + ';'
 
     def __call__(self, session, query_only=False):
-        query = self._query_builder()
+        query = self._query_builder('')
         if query_only:
             return query
         self._data = pd.read_sql(query, session.bind)
@@ -113,13 +120,14 @@ class DAO(RawDAO):
     additionally a reserved key, 'links', which is where
     the table relationships are defined.
 
-    .. code-block:: Python 
-        
-        dao = exa.DAO(table_name='users')
+    .. code-block:: Python
+
+        dao = exa.core.dao.DAO(table_name='users')
         dao.filters = {
             'id': [('gt', 1), ('lt', 10)],
             'user': [('eq', 'foo')]
         }
+        # specify any number of related fields and links
         dao.related = {
             'orders': {
                 'entities': ['total_cost', 'date'],
@@ -128,17 +136,20 @@ class DAO(RawDAO):
                 }
             },
             'links': {
-                'users.id': [('eq', 'orders.user_id')]             
+                'users.id': [('eq', 'orders.user_id')]
             }
         }
         dao(session=sqlalchemy.Session())
     """
-    table_obj = Any()
-    related = Dict()
-    base = Any() # a sqlalchemy declarative base class
+    table_obj = Any(help='a sqlalchemy table')
+    related = Dict(help='relationships between tables')
+    base = Any(help='a sqlalchemy declarative base class')
 
     @validate('base')
     def _validate_base(self, prop):
+        """Validate that all tables mentioned in
+        the DAO attributes exist in the base table
+        class metadata."""
         base = prop['value']
         fqtn = self.fqtn()
         if fqtn not in base.metadata.tables.keys():
@@ -158,16 +169,33 @@ class DAO(RawDAO):
         return self.base.metadata.tables[self.fqtn()]
 
     def __call__(self, session, payload=None, query_only=False):
+        """Primary public API for the DAO. Default
+        behavior is to fetch data. If provided a payload,
+        will attempt to upload that data after validation.
+
+        Args:
+            session (session): a DB session (see :mod:`~sqlalchemy.orm.sessionmaker`)
+            payload (pd.DataFrame): data to upload (optional)
+            query_only (bool): if True, return the query unevaluated
+        """
         if payload is not None:
             return self._upload(session, payload)
         self._validate_base({'value': self.base})
-        query = self._query_builder(session)
+        query = self._query_builder(session.query(self.table_obj))
         if query_only:
             return query
         self._data = pd.read_sql(query.statement, session.bind)
         return self._data
 
     def _upload(self, session, payload, chunksize=_CHUNKSIZE):
+        """Use sqlalchemy's bulk insert to upload the
+        payload data in chunks after it has been validated.
+
+        Args:
+            session (session): a DB session (see :mod:`~sqlalchemy.orm.sessionmaker`)
+            payload (pd.DataFrame): data to upload
+            chunksize (int): number of records to load at a time
+        """
         payload = self._validate_data(payload, reverse=True)
         table = self.table_obj
         for _, group in payload.groupby(
@@ -180,8 +208,7 @@ class DAO(RawDAO):
                 self.fqtn(), len(group.index), self.time_diff(start)
             ))
 
-    def _query_builder(self, session):
-        query = session.query(self.table_obj)
+    def _query_builder(self, query):
         entities = self._entities_builder()
         if entities:
             query = query.with_entities(*entities)
@@ -211,6 +238,7 @@ class DAO(RawDAO):
         op = _op_map.get(operator, None)
         if op is None:
             self.log.warn(f"{operator} not understood. skipping")
+            return query
         return query.filter(op(column, condition))
 
     def _related_builder(self, query):
