@@ -331,7 +331,7 @@ def dao_related_entities(engine_wipe_base, base_data):
     q = foo(session=session, query_only=True)
     assert isinstance(q, sq.orm.Query)
     session.execute(wipe('foo'))
-    session.execute(wipe('exa_test_other.quu'))
+    session.execute(wipe(f'{SCHEMA2}.quu'))
     session.commit()
     session.close()
 
@@ -353,8 +353,8 @@ def test_fqtn(sqlite_engine_wipe_base):
     quu = DAO(schema=SCHEMA2, table_name='quu', base=base)
     assert qux.fqtn() == 'qux'
     assert foo.fqtn() == 'foo'
-    assert quu.fqtn() == 'exa_test_other.quu'
-    assert bar.fqtn() == 'exa_test_schema.bar'
+    assert bar.fqtn() == f'{SCHEMA1}.bar'
+    assert quu.fqtn() == f'{SCHEMA2}.quu'
 
 @sqla
 def test_dao_invalid_table_sqlite(sqlite_engine_wipe_base):
