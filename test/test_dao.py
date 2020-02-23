@@ -170,7 +170,7 @@ def test_raw_dao_postgres(empty_postgres_session):
     assert isinstance(q, str)
 
 def raw_dao_upload(engine_wipe_base, base_data):
-    eng, wipe, base = engine_wipe_base
+    eng, wipe, _ = engine_wipe_base
     bar = RawDAO(schema=SCHEMA1, table_name='bar')
     session = new_session(eng)
     bar(session=session, payload=base_data['bar'])

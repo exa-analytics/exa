@@ -74,6 +74,7 @@ class RawDAO(Data):
     @validate('schema', 'table_name')
     def _validate_sql(self, prop):
         sql = prop['value']
+        self.log.debug(f"validating {sql} against sql injection")
         if any((i in sql for i in (';', '--'))):
             raise SQLInjectionError("; or -- found. abort")
         return sql
@@ -102,7 +103,7 @@ class RawDAO(Data):
         self._scan_sql(query)
         return query + ';'
 
-    def _upload(self, session, payload):
+    def _upload(self, session, payload, chunksize=_CHUNKSIZE):
         if self.schema:
             try:
                 session.execute(
@@ -113,10 +114,16 @@ class RawDAO(Data):
                 self.log.error("could not create schema: {}".format(e))
         # TODO : implement and validate uniqueness constraints
         #        on the Data class before insertion
+        nrec = len(payload.index)
+        if nrec > chunksize:
+            self.log.warning(f"loading {nrec} records at once")
+        bt = self.right_now()
         payload.to_sql(
             self.table_name, session.bind, index=False,
             schema=self.schema, if_exists='append',
         )
+        self.log.info(f"loading {nrec} took {self.time_diff(bt)}")
+
 
     def __call__(self, session, payload=None, query_only=False):
         if payload is not None:
