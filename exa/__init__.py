@@ -6,6 +6,7 @@ Exa
 """
 import os
 import sys
+import datetime as dt
 import logging.config
 import yaml
 from traitlets import HasTraits, Unicode, default, validate
@@ -19,6 +20,15 @@ class Base(HasTraits):
     and logging utilities. Subclasses define respective
     traits and trait-based logic.
     """
+
+    @staticmethod
+    def right_now():
+        return dt.datetime.now()
+
+    @staticmethod
+    def time_diff(start):
+        stop = dt.datetime.now()
+        return '{:.2f}s'.format((stop - start).total_seconds())
 
     @property
     def log(self):
@@ -54,6 +64,10 @@ class Cfg(Base):
     logdir = Unicode()
     logname = Unicode()
     staticdir = Unicode()
+
+    @property
+    def db_conn(self):
+        return os.getenv('EXA_DB_CONN')
 
     @validate('logdir')
     def _validate_logdir(self, prop):

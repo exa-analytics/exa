@@ -11,3 +11,4 @@ def test_init():
     assert exa.cfg.logname
     assert hasattr(exa.cfg, 'log')
     assert hasattr(exa.cfg.log, 'info')
+    assert hasattr(exa.cfg, 'db_conn')
