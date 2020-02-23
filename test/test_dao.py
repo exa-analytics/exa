@@ -97,14 +97,10 @@ def test_base():
             Column('id', Integer, primary_key=True),
             Column('bar_name', String))
 
-    f = Foo()
-    b = Bar()
-    q = Quu()
-    x = Qux()
-    assert isinstance(f, Base)
-    assert isinstance(b, Base)
-    assert isinstance(q, Base)
-    assert isinstance(x, Base)
+    assert isinstance(Foo(), Base)
+    assert isinstance(Bar(), Base)
+    assert isinstance(Quu(), Base)
+    assert isinstance(Qux(), Base)
     return Base
 
 @psyc
@@ -115,20 +111,20 @@ def postgres_engine_wipe_base(test_base):
     assert d is not None
     eng = sq.create_engine(exa.cfg.db_conn)
     wipe = "truncate {};".format
-    eng.execute("create schema if not exists {};".format(SCHEMA1))
-    eng.execute("create schema if not exists {};".format(SCHEMA2))
+    eng.execute(f"create schema if not exists {SCHEMA1};")
+    eng.execute(f"create schema if not exists {SCHEMA2};")
     test_base.metadata.create_all(bind=eng)
     yield eng, wipe, test_base
-    eng.execute("drop schema if exists {} cascade;".format(SCHEMA1))
-    eng.execute("drop schema if exists {} cascade;".format(SCHEMA2))
+    eng.execute(f"drop schema if exists {SCHEMA1} cascade;")
+    eng.execute(f"drop schema if exists {SCHEMA2} cascade;")
 
 @sqla
 @pytest.fixture(scope='module')
 def sqlite_engine_wipe_base(test_base):
     eng = sq.create_engine('sqlite:///')
     wipe = "delete from {};".format
-    eng.execute("attach ':memory:' as {};".format(SCHEMA1))
-    eng.execute("attach ':memory:' as {};".format(SCHEMA2))
+    eng.execute(f"attach ':memory:' as {SCHEMA1};")
+    eng.execute(f"attach ':memory:' as {SCHEMA2};")
     test_base.metadata.create_all(bind=eng)
     yield eng, wipe, test_base
 
@@ -182,51 +178,39 @@ def test_raw_dao_no_sql_injection_sqlite(empty_sqlite_session):
 @pg_db_conn
 def test_raw_dao_no_sql_injection_postgres(empty_postgres_session):
     dao = RawDAO(schema='information_schema', table_name='columns')
-    dao.entities = ['; drop table students;']
+    dao.entities = ['; drop table bobby;']
     with pytest.raises(SQLInjectionError):
         dao(session=empty_postgres_session)
 
-@sqla
-def test_raw_dao_filter_builder_sqlite(sqlite_engine_wipe_base):
-    eng, wipe, _ = sqlite_engine_wipe_base
+def raw_dao_filter_builder(engine_wipe_base, sqlite=False):
+    eng, wipe, _ = engine_wipe_base
     session = new_session(eng)
     dao = RawDAO(table_name='foo')
+    pkey = "serial" if sqlite else "primary key"
     session.execute(
         "create table if not exists foo ( "
-        "id integer serial, name text );"
+        f"id integer {pkey}, name text );"
     )
     session.execute(
         "insert into foo (id, name) "
         "values (1, 'a'), (2, 'b'), (3, 'c');"
     )
+    session.commit()
     dao.filters = {'id': [('gt', 1)], 'name': [('eq', 'c')]}
     df = dao(session=session)
     assert df.shape == (1, 2)
     session.execute(wipe('foo'))
     session.commit()
     session.close()
+
+@sqla
+def test_raw_dao_filter_builder_sqlite(sqlite_engine_wipe_base):
+    raw_dao_filter_builder(sqlite_engine_wipe_base)
 
 @psyc
 @pg_db_conn
 def test_raw_dao_filter_builder_postgres(postgres_engine_wipe_base):
-    eng, wipe, _ = postgres_engine_wipe_base
-    session = new_session(eng)
-    dao = RawDAO(table_name='foo')
-    session.execute(
-        "create table if not exists foo ( "
-        "id integer primary key, name text );"
-    )
-    session.execute(
-        "insert into foo (id, name) "
-        "values (1, 'a'), (2, 'b'), (3, 'c');"
-    )
-    session.commit()
-    dao.filters = {'id': [('gt', 1)], 'name': [('eq', 'c')]}
-    df = dao(session=session)
-    assert df.shape == (1, 2)
-    session.execute(wipe('foo'))
-    session.commit()
-    session.close()
+    raw_dao_filter_builder(postgres_engine_wipe_base)
 
 def round_trip_bar(engine_wipe_base, data):
     eng, wipe, base = engine_wipe_base
@@ -236,7 +220,7 @@ def round_trip_bar(engine_wipe_base, data):
     session.commit()
     df = bar(session=session)
     assert df.shape == (3, 2)
-    session.execute(wipe('{}.bar'.format(SCHEMA1)))
+    session.execute(wipe(f'{SCHEMA1}.bar'))
     session.commit()
     df = bar(session=session)
     assert df.empty
@@ -283,12 +267,11 @@ def test_dao_entities_builder_sqlite(sqlite_engine_wipe_base, base_data):
     bar(session=session, payload=base_data['bar'])
     df = bar(session=session)
     assert df.shape == (3, 1)
-    session.execute(wipe('{}.bar'.format(SCHEMA1)))
+    session.execute(wipe(f'{SCHEMA1}.bar'))
     session.close()
 
-@sqla
-def test_dao_entities_sqlite(sqlite_engine_wipe_base, base_data):
-    eng, wipe, base = sqlite_engine_wipe_base
+def dao_related_entities(engine_wipe_base, base_data):
+    eng, wipe, base = engine_wipe_base
     session = new_session(eng)
     session.execute(wipe('foo'))
     foo = DAO(table_name='foo', base=base)
@@ -307,13 +290,13 @@ def test_dao_entities_sqlite(sqlite_engine_wipe_base, base_data):
     assert df.shape == (3, 2)
 
     foo.related = {
-        '{}.quu'.format(SCHEMA2): {
+        f'{SCHEMA2}.quu': {
             'entities': ['bar_name'],
             'filters': {},
         },
         'links': {
-            'foo.name': [('eq', '{}.quu.bar_name'.format(SCHEMA2)),
-                         ('dne', '{}.quu.foo_name'.format(SCHEMA2))]
+            'foo.name': [('eq', f'{SCHEMA2}.quu.bar_name'),
+                         ('dne', f'{SCHEMA2}.quu.foo_name')]
         }
     }
 
@@ -325,6 +308,15 @@ def test_dao_entities_sqlite(sqlite_engine_wipe_base, base_data):
     session.execute(wipe('exa_test_other.quu'))
     session.commit()
     session.close()
+
+@sqla
+def test_dao_related_entities_sqlite(sqlite_engine_wipe_base, base_data):
+    dao_related_entities(sqlite_engine_wipe_base, base_data)
+
+@psyc
+@pg_db_conn
+def test_dao_related_entities_postgres(postgres_engine_wipe_base, base_data):
+    dao_related_entities(postgres_engine_wipe_base, base_data)
 
 @sqla
 def test_fqtn(sqlite_engine_wipe_base):

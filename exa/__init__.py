@@ -77,7 +77,7 @@ class Cfg(Base):
 
     @property
     def db_conn(self):
-        return os.getenv('EXA_DB_CONN')
+        return os.environ.get('EXA_DB_CONN', '')
 
     @validate('logdir')
     def _validate_logdir(self, prop):
