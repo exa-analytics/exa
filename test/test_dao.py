@@ -2,7 +2,6 @@
 # Copyright (c) 2015-2020, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 
-import os
 import sys
 
 import pytest
@@ -96,12 +95,17 @@ def test_base():
             Column('id', Integer, primary_key=True),
             Column('bar_name', String))
 
+    f = Foo()
+    b = Bar()
+    q = Quu()
+    x = Qux()
     return Base
 
 @psyc
 @db_conn
 @pytest.fixture(scope='module')
 def postgres_engine_wipe_base(test_base):
+    d = psycopg2.Date
     eng = sq.create_engine(exa.cfg.db_conn)
     wipe = "truncate {};".format
     eng.execute("create schema if not exists {};".format(SCHEMA1))
@@ -177,7 +181,7 @@ def test_raw_dao_no_sql_injection_postgres(empty_postgres_session):
 
 @sqla
 def test_raw_dao_filter_builder_sqlite(sqlite_engine_wipe_base):
-    eng, wipe, base = sqlite_engine_wipe_base
+    eng, wipe, _ = sqlite_engine_wipe_base
     session = new_session(eng)
     dao = RawDAO(table_name='foo')
     session.execute(
@@ -198,7 +202,7 @@ def test_raw_dao_filter_builder_sqlite(sqlite_engine_wipe_base):
 @psyc
 @db_conn
 def test_raw_dao_filter_builder_postgres(postgres_engine_wipe_base):
-    eng, wipe, base = postgres_engine_wipe_base
+    eng, wipe, _ = postgres_engine_wipe_base
     session = new_session(eng)
     dao = RawDAO(table_name='foo')
     session.execute(
