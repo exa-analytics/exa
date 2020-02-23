@@ -49,8 +49,8 @@ class RawDAO(Data):
     filters is a well-formed dictionary with an
     expected schema:
 
-    .. code-block:: Python 
-        
+    .. code-block:: Python
+
         dao = exa.core.dao.RawDAO(table_name='users')
         # if not specified, fetches all columns
         dao.entities = ['id', 'user']
@@ -237,7 +237,7 @@ class DAO(RawDAO):
     def _filter_applier(self, query, column, operator, condition):
         op = _op_map.get(operator, None)
         if op is None:
-            self.log.warn(f"{operator} not understood. skipping")
+            self.log.warning(f"{operator} not understood. skipping")
             return query
         return query.filter(op(column, condition))
 
@@ -250,7 +250,7 @@ class DAO(RawDAO):
                 t2 = self.base.metadata.tables['.'.join(right_table)]
                 op = _op_map.get(operator, None)
                 if op is None:
-                    self.log.warn(f"{operator} not understood. skipping")
+                    self.log.warning(f"{operator} not understood. skipping")
                     continue
                 query = query.filter(op(t1.columns[left_column], t2.columns[right_column]))
         return query

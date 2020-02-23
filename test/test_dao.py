@@ -53,7 +53,6 @@ def empty_sqlite_session():
 @db_conn
 @pytest.fixture(scope='module')
 def empty_postgres_session():
-    psycopg2.Date
     eng = sq.create_engine(exa.cfg.db_conn)
     Session = sessionmaker()
     Session.configure(bind=eng)
@@ -97,7 +96,6 @@ def test_base():
             Column('id', Integer, primary_key=True),
             Column('bar_name', String))
 
-    Foo, Bar, Quu, Qux
     return Base
 
 @psyc
@@ -219,12 +217,11 @@ def test_raw_dao_filter_builder_postgres(postgres_engine_wipe_base):
     session.commit()
     session.close()
 
-@sqla
-def test_base_sqlite(sqlite_engine_wipe_base, base_data):
-    eng, wipe, base = sqlite_engine_wipe_base
+def load_pull_wipe_bar(engine_wipe_base, data):
+    eng, wipe, base = engine_wipe_base
     session = new_session(eng)
     bar = DAO(schema=SCHEMA1, table_name='bar', base=base)
-    bar(session=session, payload=base_data['bar'])
+    bar(session=session, payload=data)
     session.commit()
     df = bar(session=session)
     assert df.shape == (3, 2)
@@ -234,21 +231,14 @@ def test_base_sqlite(sqlite_engine_wipe_base, base_data):
     assert df.empty
     session.close()
 
+@sqla
+def test_base_sqlite(sqlite_engine_wipe_base, base_data):
+    load_pull_wipe_bar(sqlite_engine_wipe_base, base_data['bar'])
+
 @psyc
 @db_conn
 def test_base_postgres(postgres_engine_wipe_base, base_data):
-    eng, wipe, base = postgres_engine_wipe_base
-    session = new_session(eng)
-    bar = DAO(schema=SCHEMA1, table_name='bar', base=base)
-    bar(session=session, payload=base_data['bar'])
-    session.commit()
-    df = bar(session=session)
-    assert df.shape == (3, 2)
-    session.execute(wipe('{}.bar'.format(SCHEMA1)))
-    session.commit()
-    df = bar(session=session)
-    assert df.empty
-    session.close()
+    load_pull_wipe_bar(postgres_engine_wipe_base, base_data['bar'])
 
 @sqla
 def test_dao_filter_builder_sqlite(sqlite_engine_wipe_base, base_data):
@@ -283,40 +273,13 @@ def test_dao_filter_builder_postgres(postgres_engine_wipe_base, base_data):
     session.close()
 
 @sqla
-def test_dao_invalid_table_sqlite(sqlite_engine_wipe_base):
-    *_, base = sqlite_engine_wipe_base
-    with pytest.raises(TraitError):
-        DAO(table_name='dne', base=base)
-    with pytest.raises(TraitError):
-        DAO(table_name='foo', base=base,
-            related={'dne': {'entities': [], 'filters': []}})
-
-@psyc
-@db_conn
-def test_dao_invalid_table_postgres(postgres_engine_wipe_base):
-    *_, base = postgres_engine_wipe_base
-    with pytest.raises(TraitError):
-        DAO(table_name='dne', base=base)
-    with pytest.raises(TraitError):
-        DAO(table_name='foo', base=base,
-            related={'dne': {'entities': [], 'filters': []}})
-
-@sqla
 def test_dao_entities_builder_sqlite(sqlite_engine_wipe_base, base_data):
     eng, wipe, base = sqlite_engine_wipe_base
     session = new_session(eng)
-    bar = DAO(schema=SCHEMA1, table_name='bar', base=base)
+    bar = DAO(schema=SCHEMA1, entities=['id'], table_name='bar', base=base)
     bar(session=session, payload=base_data['bar'])
-    session.execute(wipe('{}.bar'.format(SCHEMA1)))
-    session.close()
-
-@psyc
-@db_conn
-def test_dao_entities_builder_postgres(postgres_engine_wipe_base, base_data):
-    eng, wipe, base = postgres_engine_wipe_base
-    session = new_session(eng)
-    bar = DAO(schema=SCHEMA1, table_name='bar', base=base)
-    bar(session=session, payload=base_data['bar'])
+    df = bar(session=session)
+    assert df.shape == (3, 1)
     session.execute(wipe('{}.bar'.format(SCHEMA1)))
     session.close()
 
@@ -371,3 +334,12 @@ def test_fqtn(sqlite_engine_wipe_base):
     assert foo.fqtn() == 'foo'
     assert quu.fqtn() == 'exa_test_other.quu'
     assert bar.fqtn() == 'exa_test_schema.bar'
+
+@sqla
+def test_dao_invalid_table_sqlite(sqlite_engine_wipe_base):
+    *_, base = sqlite_engine_wipe_base
+    with pytest.raises(TraitError):
+        DAO(table_name='dne', base=base)
+    with pytest.raises(TraitError):
+        DAO(table_name='foo', base=base,
+            related={'dne': {'entities': [], 'filters': []}})
