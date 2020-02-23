@@ -364,3 +364,29 @@ def test_dao_invalid_table_sqlite(sqlite_engine_wipe_base):
     with pytest.raises(TraitError):
         DAO(table_name='foo', base=base,
             related={'dne': {'entities': [], 'filters': []}})
+
+def load_exa_db(engine_wipe_base):
+    eng, wipe, base = engine_wipe_base
+    session = new_session(eng)
+    iso = exa.Isotopes.data()
+    con = exa.Constants.data()
+    idao = RawDAO(schema=SCHEMA1, table_name='isotope')
+    cdao = RawDAO(schema=SCHEMA1, table_name='constant')
+    idao(session=session, payload=iso)
+    cdao(session=session, payload=con)
+    session.commit()
+    assert not idao(session=session).empty
+    assert not cdao(session=session).empty
+    odao = RawDAO(schema=SCHEMA1, table_name='constant')
+    ldao = RawDAO.from_yml(exa.cfg.resource('isotopes.yml'))
+    ldao.schema = SCHEMA1
+    ldao.table_name = 'isotope'
+    assert not odao(session=session).empty
+    assert not ldao(session=session).empty
+    session.execute(wipe(f'{SCHEMA1}.isotope'))
+    session.execute(wipe(f'{SCHEMA1}.constant'))
+    session.commit()
+
+@sqla
+def test_load_exa_db_sqlite(sqlite_engine_wipe_base):
+    load_exa_db(sqlite_engine_wipe_base)
