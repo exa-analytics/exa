@@ -26,8 +26,10 @@ sqla = pytest.mark.skipif(
 psyc = pytest.mark.skipif(
     'psycopg2' not in sys.modules, reason='requires psycopg2'
 )
-db_conn = pytest.mark.skipif(
-    not bool(exa.cfg.db_conn), reason='requires DB connection string'
+pg_db_conn = pytest.mark.skipif(
+    not (exa.cfg.db_conn.startswith('postgres') or
+         exa.cfg.db_conn.startswith('psycopg')),
+    reason='requires DB connection string'
 )
 SCHEMA1 = 'exa_test_schema'
 SCHEMA2 = 'exa_test_other'
@@ -49,7 +51,7 @@ def empty_sqlite_session():
     session.close()
 
 @psyc
-@db_conn
+@pg_db_conn
 @pytest.fixture(scope='module')
 def empty_postgres_session():
     eng = sq.create_engine(exa.cfg.db_conn)
@@ -99,13 +101,18 @@ def test_base():
     b = Bar()
     q = Quu()
     x = Qux()
+    assert isinstance(f, Base)
+    assert isinstance(b, Base)
+    assert isinstance(q, Base)
+    assert isinstance(x, Base)
     return Base
 
 @psyc
-@db_conn
+@pg_db_conn
 @pytest.fixture(scope='module')
 def postgres_engine_wipe_base(test_base):
     d = psycopg2.Date
+    assert d is not None
     eng = sq.create_engine(exa.cfg.db_conn)
     wipe = "truncate {};".format
     eng.execute("create schema if not exists {};".format(SCHEMA1))
@@ -156,7 +163,7 @@ def test_raw_dao_sqlite(empty_sqlite_session):
     assert isinstance(q, str)
 
 @psyc
-@db_conn
+@pg_db_conn
 def test_raw_dao_postgres(empty_postgres_session):
     dao = RawDAO(schema='information_schema', table_name='columns')
     df = dao(session=empty_postgres_session)
@@ -172,7 +179,7 @@ def test_raw_dao_no_sql_injection_sqlite(empty_sqlite_session):
         dao(session=empty_sqlite_session)
 
 @psyc
-@db_conn
+@pg_db_conn
 def test_raw_dao_no_sql_injection_postgres(empty_postgres_session):
     dao = RawDAO(schema='information_schema', table_name='columns')
     dao.entities = ['; drop table students;']
@@ -200,7 +207,7 @@ def test_raw_dao_filter_builder_sqlite(sqlite_engine_wipe_base):
     session.close()
 
 @psyc
-@db_conn
+@pg_db_conn
 def test_raw_dao_filter_builder_postgres(postgres_engine_wipe_base):
     eng, wipe, _ = postgres_engine_wipe_base
     session = new_session(eng)
@@ -221,7 +228,7 @@ def test_raw_dao_filter_builder_postgres(postgres_engine_wipe_base):
     session.commit()
     session.close()
 
-def load_pull_wipe_bar(engine_wipe_base, data):
+def round_trip_bar(engine_wipe_base, data):
     eng, wipe, base = engine_wipe_base
     session = new_session(eng)
     bar = DAO(schema=SCHEMA1, table_name='bar', base=base)
@@ -236,45 +243,37 @@ def load_pull_wipe_bar(engine_wipe_base, data):
     session.close()
 
 @sqla
-def test_base_sqlite(sqlite_engine_wipe_base, base_data):
-    load_pull_wipe_bar(sqlite_engine_wipe_base, base_data['bar'])
+def test_round_trip_bar_sqlite(sqlite_engine_wipe_base, base_data):
+    round_trip_bar(sqlite_engine_wipe_base, base_data['bar'])
 
 @psyc
-@db_conn
-def test_base_postgres(postgres_engine_wipe_base, base_data):
-    load_pull_wipe_bar(postgres_engine_wipe_base, base_data['bar'])
+@pg_db_conn
+def test_round_trip_bar_postgres(postgres_engine_wipe_base, base_data):
+    round_trip_bar(postgres_engine_wipe_base, base_data['bar'])
+
+def dao_filter_builder_foo(engine_wipe_base, data):
+    eng, wipe, base = engine_wipe_base
+    session = new_session(eng)
+    dao = DAO(
+        table_name='foo', base=base,
+        filters={'id': [('gt', 1)], 'name': [('eq', 'c')]}
+    )
+    dao(session=session, payload=data)
+    session.commit()
+    df = dao(session=session)
+    assert df.shape == (1, 2)
+    session.execute(wipe('foo'))
+    session.commit()
+    session.close()
 
 @sqla
-def test_dao_filter_builder_sqlite(sqlite_engine_wipe_base, base_data):
-    eng, wipe, base = sqlite_engine_wipe_base
-    session = new_session(eng)
-    dao = DAO(
-        table_name='foo', base=base,
-        filters={'id': [('gt', 1)], 'name': [('eq', 'c')]}
-    )
-    dao(session=session, payload=base_data['foo'])
-    df = dao(session=session)
-    assert df.shape == (1, 2)
-    session.execute(wipe('foo'))
-    session.commit()
-    session.close()
+def test_dao_filter_builder_foo_sqlite(sqlite_engine_wipe_base, base_data):
+    dao_filter_builder_foo(sqlite_engine_wipe_base, base_data['foo'])
 
 @psyc
-@db_conn
-def test_dao_filter_builder_postgres(postgres_engine_wipe_base, base_data):
-    eng, wipe, base = postgres_engine_wipe_base
-    session = new_session(eng)
-    dao = DAO(
-        table_name='foo', base=base,
-        filters={'id': [('gt', 1)], 'name': [('eq', 'c')]}
-    )
-    dao(session=session, payload=base_data['foo'])
-    session.commit()
-    df = dao(session=session)
-    assert df.shape == (1, 2)
-    session.execute(wipe('foo'))
-    session.commit()
-    session.close()
+@pg_db_conn
+def test_dao_filter_builder_foo_postgres(postgres_engine_wipe_base, base_data):
+    dao_filter_builder_foo(postgres_engine_wipe_base, base_data['foo'])
 
 @sqla
 def test_dao_entities_builder_sqlite(sqlite_engine_wipe_base, base_data):

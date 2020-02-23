@@ -45,6 +45,7 @@ install:
   - cmd: activate test
   - cmd: conda update -q -y --all
   - cmd: conda install -q -y networkx traitlets numpy pandas numba sympy pyyaml six pytest pytables
+  - cmd: conda install -q -y sqlalchemy psycopg2
   - cmd: python setup.py install
 
 build: false

@@ -43,15 +43,18 @@ class Base(HasTraits):
 
     @classmethod
     def from_yml(cls, path):
+        """Load an object from a configuration file"""
         return cls(**cls._from_yml(path))
 
     @staticmethod
     def _from_yml(path):
+        """Load a configuration file"""
         with open(path, 'r') as f:
             cfg = yaml.safe_load(f.read())
         return cfg
 
     def traits(self, *args, **kws):
+        # inherit super.__doc__?
         # inherent to traitlets API and
         # of little concern to us here.
         skipme = ['parent', 'config']
@@ -59,12 +62,15 @@ class Base(HasTraits):
         return {k: v for k, v in traits.items()
                 if k not in skipme}
 
-    def trait_items(self):
-        return {k: getattr(self, k)
-                for k in self.traits()}
+    def trait_values(self):
+        """Return a dictionary of trait names and values"""
+        return {k: getattr(self, k) for k in self.traits()}
 
 
 class Cfg(Base):
+    """Exa library configuration object. Manages logging
+    configuration and the static asset resource API.
+    """
     logdir = Unicode()
     logname = Unicode()
     staticdir = Unicode()
