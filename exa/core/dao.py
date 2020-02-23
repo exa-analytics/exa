@@ -71,6 +71,13 @@ class RawDAO(Data):
     def _default_entities(self):
         return self.columns
 
+    @validate('schema', 'table_name')
+    def _validate_sql(self, prop):
+        sql = prop['value']
+        if any((i in sql for i in (';', '--'))):
+            raise SQLInjectionError("; or -- found. abort")
+        return sql
+
     def _scan_sql(self, query):
         self.log.debug("validating query against sql injection")
         if any((i in query for i in (';', '--'))):
@@ -95,13 +102,30 @@ class RawDAO(Data):
         self._scan_sql(query)
         return query + ';'
 
-    def __call__(self, session, query_only=False):
+    def _upload(self, session, payload):
+        if self.schema:
+            try:
+                session.execute(
+                    'create schema if not exists {};'.format(self.schema)
+                )
+                session.commit()
+            except Exception as e:
+                self.log.error("could not create schema: {}".format(e))
+        # TODO : implement and validate uniqueness constraints
+        #        on the Data class before insertion
+        payload.to_sql(
+            self.table_name, session.bind, index=False,
+            schema=self.schema, if_exists='append',
+        )
+
+    def __call__(self, session, payload=None, query_only=False):
+        if payload is not None:
+            return self._upload(session, payload)
         query = self._query_builder('')
         if query_only:
             return query
         self._data = pd.read_sql(query, session.bind)
         return self._data
-
 
     def fqtn(self):
         if not self.schema:

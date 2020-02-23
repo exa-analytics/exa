@@ -115,6 +115,8 @@ def postgres_engine_wipe_base(test_base):
     eng.execute(f"create schema if not exists {SCHEMA2};")
     test_base.metadata.create_all(bind=eng)
     yield eng, wipe, test_base
+    eng.execute("drop table if exists foo cascade;")
+    eng.execute("drop table if exists qux cascade;")
     eng.execute(f"drop schema if exists {SCHEMA1} cascade;")
     eng.execute(f"drop schema if exists {SCHEMA2} cascade;")
 
@@ -167,12 +169,36 @@ def test_raw_dao_postgres(empty_postgres_session):
     q = dao(session=empty_postgres_session, query_only=True)
     assert isinstance(q, str)
 
+def raw_dao_upload(engine_wipe_base, base_data):
+    eng, wipe, base = engine_wipe_base
+    bar = RawDAO(schema=SCHEMA1, table_name='bar')
+    session = new_session(eng)
+    bar(session=session, payload=base_data['bar'])
+    session.commit()
+    df = bar(session=session)
+    assert not df.empty
+    session.execute(wipe(f'{SCHEMA1}.bar'))
+    session.commit()
+    df = bar(session=session)
+    assert df.empty
+
+@sqla
+def test_raw_dao_upload_sqlite(sqlite_engine_wipe_base, base_data):
+    raw_dao_upload(sqlite_engine_wipe_base, base_data)
+
+@psyc
+@pg_db_conn
+def test_raw_dao_upload_postgres(postgres_engine_wipe_base, base_data):
+    raw_dao_upload(postgres_engine_wipe_base, base_data)
+
 @sqla
 def test_raw_dao_no_sql_injection_sqlite(empty_sqlite_session):
     dao = RawDAO(table_name='sqlite_master')
     dao.entities = ['; drop table students;']
     with pytest.raises(SQLInjectionError):
         dao(session=empty_sqlite_session)
+    with pytest.raises(SQLInjectionError):
+        dao.schema = '; drop table anything'
 
 @psyc
 @pg_db_conn
