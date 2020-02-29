@@ -37,7 +37,6 @@ class Data(exa.Base):
         """Provide a programmatic way to slice contained
         data without operating on the dataframe directly.
         """
-        pass
 
     def groupby(self, columns=None):
         """Convenience method for pandas groupby"""
