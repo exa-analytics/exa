@@ -7,6 +7,7 @@ Tests for :mod:`~exa.core.data`
 """
 import pytest
 import pandas as pd
+from traitlets import TraitError
 import exa
 from exa.core.error import RequiredColumnError
 
@@ -22,26 +23,59 @@ def test_data_simple(data):
     assert data.data() == 42
     data.source = None
     assert data.data() is None
+    with pytest.raises(TraitError):
+        data.source = ''
 
-def test_new_data_source_params():
-    d = exa.Data(source_args=['a', 'b'],
-                 source_kws={'a': 'b'})
-    assert d.source_args == ['a', 'b']
-    assert d.source_kws == {'a': 'b'}
+def test_new_data_call_params():
+    d = exa.Data(call_args=['a', 'b'],
+                 call_kws={'a': 'b'})
+    assert d.call_args == ['a', 'b']
+    assert d.call_kws == {'a': 'b'}
     assert d.data() is None
     fun = lambda *a, **kws: a
     d.source = fun
-    assert d.data() == tuple(d.source_args)
+    assert d.data() == tuple(d.call_args)
     fun = lambda *a, **kws: kws
     d.source = fun
-    assert d.data(cache=False) == d.source_kws
+    assert d.data(cache=False) == d.call_kws
 
 def test_data_setting_source(data):
     fun = lambda *a: a[0] if a else None
     data.source = fun
-    data.source_args = ['a', 'b']
+    data.call_args = ['a', 'b']
     assert data.data() == 'a'
     data.source = None
+
+def test_data_slice(data):
+    assert data.slice(None) is None
+
+def test_data_groupby(data):
+    df = pd.DataFrame.from_dict(
+        {'a': [1, 2], 'b': [3, 4]}
+    )
+    data.data(df=df)
+    data.indexes = []
+    assert data.groupby() is None
+    data.indexes = ['a']
+    grps = data.groupby()
+    assert grps.ngroups == 2
+    data.indexes = ['a', 'b']
+    grps = data.groupby()
+    assert grps.ngroups == 2
+    data.indexes = []
+    df[['a', 'b']] = 1
+    data.data(df=df)
+    grps = data.groupby(columns=['a', 'b'])
+    assert grps.ngroups == 1
+
+def test_data_memory(data):
+    data.data(cache=False)
+    assert not data.memory()
+    df = pd.DataFrame.from_dict(
+        {'a': [1, 2], 'b': [3, 4]}
+    )
+    data.data(df=df)
+    assert data.memory().sum()
 
 def test_data_validation(data):
     df = pd.DataFrame.from_dict(
@@ -53,9 +87,13 @@ def test_data_validation(data):
     with pytest.raises(RequiredColumnError):
         data.data(df=df)
     data.columns = []
-    data.categories = {'a': str, 'b': int}
+    data.categories = {'a': str, 'b': int, 'c': int}
     df = data.data(df=df)
     assert df['a'].dtype == 'category'
+    df['d'] = 1
+    data.indexes = ['d']
+    with pytest.raises(TraitError):
+        data.data(df=df)
 
 def test_from_yml(isotopes):
     d = exa.Data.from_yml(exa.cfg.resource('isotopes.yml'))
@@ -65,6 +103,24 @@ def test_from_yml(isotopes):
     assert df['Z'].dtype == 'category'
     assert not df.columns.difference(d.columns).any()
     assert df.shape == isotopes.data().shape
+
+def test_from_yml_fail(tmp_path):
+    f = tmp_path / "cfg.yml"
+    f.write_text("""\
+name: test
+source: os.path.isfile
+""")
+    dum = exa.Data.from_yml(f)
+    with pytest.raises(Exception):
+        dum.data()
+    f = tmp_path / "oth.yml"
+    f.write_text("""\
+name: test
+source: os.path.dne
+""")
+    dum = exa.Data.from_yml(f)
+    assert dum.source is None
+
 
 def test_isotopes():
     assert not exa.Isotopes.data().empty
