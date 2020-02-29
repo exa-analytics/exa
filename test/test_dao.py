@@ -296,54 +296,6 @@ def test_dao_entities_builder_sqlite(sqlite_engine_wipe_base, base_data):
     session.execute(wipe(f'{SCHEMA1}.bar'))
     session.close()
 
-def dao_related_entities(engine_wipe_base, base_data):
-    eng, wipe, base = engine_wipe_base
-    session = new_session(eng)
-    session.execute(wipe('foo'))
-    foo = DAO(table_name='foo', base=base)
-    foo(session=session, payload=base_data['foo'])
-    session.commit()
-    foo.entities = ['id']
-    foo.filters = {'id': [('dne', 0)]}
-    df = foo(session=session)
-    assert df.shape == (3, 1)
-
-    quu = DAO(schema=SCHEMA2, table_name='quu', base=base)
-    quu(session=session, payload=base_data['quu'])
-    session.commit()
-    quu.entities = ['id', 'foo_name']
-    df = quu(session=session)
-    assert df.shape == (3, 2)
-
-    foo.related = {
-        f'{SCHEMA2}.quu': {
-            'entities': ['bar_name'],
-            'filters': {},
-        },
-        'links': {
-            'foo.name': [('eq', f'{SCHEMA2}.quu.bar_name'),
-                         ('dne', f'{SCHEMA2}.quu.foo_name')]
-        }
-    }
-
-    df = foo(session=session)
-    assert df.shape == (2, 2)
-    q = foo(session=session, query_only=True)
-    assert isinstance(q, sq.orm.Query)
-    session.execute(wipe('foo'))
-    session.execute(wipe(f'{SCHEMA2}.quu'))
-    session.commit()
-    session.close()
-
-@sqla
-def test_dao_related_entities_sqlite(sqlite_engine_wipe_base, base_data):
-    dao_related_entities(sqlite_engine_wipe_base, base_data)
-
-@psyc
-@pg_db_conn
-def test_dao_related_entities_postgres(postgres_engine_wipe_base, base_data):
-    dao_related_entities(postgres_engine_wipe_base, base_data)
-
 @sqla
 def test_fqtn(sqlite_engine_wipe_base):
     *_, base = sqlite_engine_wipe_base
@@ -361,9 +313,6 @@ def test_dao_invalid_table_sqlite(sqlite_engine_wipe_base):
     *_, base = sqlite_engine_wipe_base
     with pytest.raises(TraitError):
         DAO(table_name='dne', base=base)
-    with pytest.raises(TraitError):
-        DAO(table_name='foo', base=base,
-            related={'dne': {'entities': [], 'filters': []}})
 
 def load_exa_db(engine_wipe_base):
     eng, wipe, _ = engine_wipe_base

@@ -145,36 +145,20 @@ class DAO(RawDAO):
     """
     When provided a sqlalchemy declarative
     class that contains Table definitions, the DAO can
-    provide richer functionality by use of the `related`
-    trait.  It is similar in spirit to the `filters` dictionary
-    but its outer keys are table names themselves, whose
-    values mimic the schema of filters itself. There is
-    additionally a reserved key, 'links', which is where
-    the table relationships are defined.
+    provide richer query and validation functionality.
 
     .. code-block:: Python
 
-        dao = exa.core.dao.DAO(table_name='users')
+        base = sqlalchemy.ext.declarative.declarative_base()
+        table = sqlalchemy.Table(..., base.metadata, ...)
+        dao = exa.core.dao.DAO(table_name='users', base=base)
         dao.filters = {
             'id': [('gt', 1), ('lt', 10)],
             'user': [('eq', 'foo')]
         }
-        # specify any number of related fields and links
-        dao.related = {
-            'orders': {
-                'entities': ['total_cost', 'date'],
-                'filters': {
-                    'order_date': [('ge', '2020-01-01')]
-                }
-            },
-            'links': {
-                'users.id': [('eq', 'orders.user_id')]
-            }
-        }
         dao(session=sqlalchemy.Session())
     """
     table_obj = Any(help='a sqlalchemy table')
-    related = Dict(help='relationships between tables')
     base = Any(help='a sqlalchemy declarative base class')
 
     @validate('base')
@@ -188,12 +172,6 @@ class DAO(RawDAO):
             raise TraitError(
                 "no table {} in base.metadata.tables".format(fqtn)
             )
-        for table in self.related:
-            if table == 'links': continue
-            if table not in base.metadata.tables.keys():
-                raise TraitError(
-                    "no table {} in base.metadata.tables".format(table)
-                )
         return base
 
     @default('table_obj')
@@ -244,17 +222,10 @@ class DAO(RawDAO):
         if entities:
             query = query.with_entities(*entities)
         query = self._filter_builder(query)
-        query = self._related_builder(query)
         return query
 
     def _entities_builder(self):
         entities = [self.table_obj.columns[col] for col in self.entities]
-        for table, params in self.related.items():
-            if table == 'links': continue
-            table = self.base.metadata.tables[table]
-            entities.extend([
-                table.columns[column] for column in params.get('entities', [])
-            ])
         return entities
 
     def _filter_builder(self, query):
@@ -271,17 +242,3 @@ class DAO(RawDAO):
             self.log.warning(f"{operator} not understood. skipping")
             return query
         return query.filter(op(column, condition))
-
-    def _related_builder(self, query):
-        for left, links in self.related.get('links', {}).items():
-            *left_table, left_column = left.split('.')
-            for operator, right in links:
-                *right_table, right_column = right.split('.')
-                t1 = self.base.metadata.tables['.'.join(left_table)]
-                t2 = self.base.metadata.tables['.'.join(right_table)]
-                op = _op_map.get(operator, None)
-                if op is None:
-                    self.log.warning(f"{operator} not understood. skipping")
-                    continue
-                query = query.filter(op(t1.columns[left_column], t2.columns[right_column]))
-        return query
