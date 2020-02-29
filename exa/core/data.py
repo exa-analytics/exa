@@ -56,7 +56,6 @@ class Data(exa.Base):
 
     def __call__(self, *args, **kws):
         self.log.warning("call not implemented")
-        pass
 
     @validate('source')
     def _validate_source(self, prop):
