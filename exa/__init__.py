@@ -62,7 +62,7 @@ class Base(HasTraits):
         return {k: v for k, v in traits.items()
                 if k not in skipme}
 
-    def trait_values(self):
+    def trait_items(self):
         """Return a dictionary of trait names and values"""
         return {k: getattr(self, k) for k in self.traits()}
 
