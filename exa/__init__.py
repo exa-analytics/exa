@@ -69,7 +69,8 @@ class Base(HasTraits):
 
 class Cfg(Base):
     """Exa library configuration object. Manages logging
-    configuration and the static asset resource API.
+    configuration and the static asset resource API and
+    external application integrations.
     """
     logdir = Unicode()
     logname = Unicode()
@@ -77,6 +78,15 @@ class Cfg(Base):
 
     @property
     def db_conn(self):
+        """Environment configured database connection string.
+
+        Note:
+            You must make sure your database is running
+
+        Examples of valid EXA_DB_CONN values:
+            EXA_DB_CONN='sqlite://'
+            EXA_DB_CONN='postgresql:username:password@localhost:5432/schema'
+        """
         return os.environ.get('EXA_DB_CONN', '')
 
     @validate('logdir')
