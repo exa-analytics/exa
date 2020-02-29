@@ -8,15 +8,13 @@ with or without a sqlalchemy ORM.
 """
 import operator
 
-from traitlets import Dict, List, Unicode, Any
+from traitlets import Dict, List, Unicode, Any, Integer
 from traitlets import default, validate, TraitError
 import numpy as np
 import pandas as pd
 
 from exa.core.data import Data
 
-
-_CHUNKSIZE = 50000
 
 _op_map = {
     k.rstrip('_'): getattr(operator, k) for k in [
@@ -66,23 +64,23 @@ class RawDAO(Data):
     table_name = Unicode(help='table name')
     entities = List(help='columns to pull')
     filters = Dict(help='filters to apply')
+    chunksize = Integer(50000, help='number of records to load at a time')
+    __invalid_tokens = [';', '--', '/*']
 
     @default('entities')
     def _default_entities(self):
         return self.columns
 
-    @validate('schema', 'table_name')
+    @validate('schema', 'table_name', 'entities')
     def _validate_sql(self, prop):
-        sql = prop['value']
-        self.log.debug(f"validating {sql} against sql injection")
-        if any((i in sql for i in (';', '--'))):
-            raise SQLInjectionError("; or -- found. abort")
-        return sql
+        self._scan_sql(prop['value'])
+        return prop['value']
 
     def _scan_sql(self, query):
-        self.log.debug("validating query against sql injection")
-        if any((i in query for i in (';', '--'))):
-            raise SQLInjectionError("; or -- found. abort")
+        self.log.debug(f'validating "{query}" against sql injection')
+        for token in self.__invalid_tokens:
+            if token in query:
+                raise SQLInjectionError("invalid token found. abort")
 
     def _filter_builder(self, query):
         filters = []
@@ -103,26 +101,29 @@ class RawDAO(Data):
         self._scan_sql(query)
         return query + ';'
 
-    def _upload(self, session, payload, chunksize=_CHUNKSIZE):
+    def _upload(self, session, payload):
         if self.schema:
             try:
                 session.execute(
-                    'create schema if not exists {};'.format(self.schema)
+                    f'create schema if not exists {self.schema};'
                 )
                 session.commit()
             except Exception as e:
                 self.log.error("could not create schema: {}".format(e))
         # TODO : implement and validate uniqueness constraints
         #        on the Data class before insertion
+        fqtn = self.fqtn()
         nrec = len(payload.index)
-        if nrec > chunksize:
-            self.log.warning(f"loading {nrec} records at once")
+        if nrec > self.chunksize:
+            chunks = -(-nrec // self.chunksize)
+            self.log.warning(f"{fqtn} loading {nrec} records in {chunks} chunks")
         bt = self.right_now()
         payload.to_sql(
             self.table_name, session.bind, index=False,
             schema=self.schema, if_exists='append',
+            chunksize=self.chunksize,
         )
-        self.log.info(f"loading {nrec} took {self.time_diff(bt)}")
+        self.log.info(f"{fqtn} loading {nrec} records took {self.time_diff(bt)}")
 
 
     def __call__(self, session, payload=None, query_only=False):
@@ -137,7 +138,7 @@ class RawDAO(Data):
     def fqtn(self):
         if not self.schema:
             return self.table_name
-        return '{self.schema}.{self.table_name}'.format(self=self)
+        return f'{self.schema}.{self.table_name}'
 
 
 class DAO(RawDAO):
@@ -218,26 +219,25 @@ class DAO(RawDAO):
         self._data = pd.read_sql(query.statement, session.bind)
         return self._data
 
-    def _upload(self, session, payload, chunksize=_CHUNKSIZE):
+    def _upload(self, session, payload):
         """Use sqlalchemy's bulk insert to upload the
         payload data in chunks after it has been validated.
 
         Args:
             session (session): a DB session (see :mod:`~sqlalchemy.orm.sessionmaker`)
             payload (pd.DataFrame): data to upload
-            chunksize (int): number of records to load at a time
         """
         payload = self._validate_data(payload, reverse=True)
+        fqtn = self.fqtn()
         table = self.table_obj
         for _, group in payload.groupby(
-                np.arange(len(payload.index)) // chunksize):
+                np.arange(len(payload.index)) // self.chunksize):
             start = self.right_now()
             session.execute(
                 table.insert(), group.to_dict(orient='records')
             )
-            self.log.info("{} loaded {} records in {}".format(
-                self.fqtn(), len(group.index), self.time_diff(start)
-            ))
+            dt = self.time_diff(start)
+            self.log.info(f"{fqtn} loaded {len(group.index)} records in {dt}")
 
     def _query_builder(self, query):
         entities = self._entities_builder()
