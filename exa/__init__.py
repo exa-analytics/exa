@@ -79,13 +79,14 @@ class Cfg(Base):
     @property
     def db_conn(self):
         """Environment configured database connection string.
+        Should be a valid sqlalchemy engine connection string.
 
         Note:
-            You must make sure your database is running
+            Make sure your database is running
 
         Examples of valid EXA_DB_CONN values:
             EXA_DB_CONN='sqlite://'
-            EXA_DB_CONN='postgresql:username:password@localhost:5432/schema'
+            EXA_DB_CONN='postgresql://username:password@localhost:5432/dbname'
         """
         return os.environ.get('EXA_DB_CONN', '')
 

@@ -12,7 +12,7 @@ try:
     import sqlalchemy as sq
     from sqlalchemy import Column, Integer, String, Table
     from sqlalchemy.ext.declarative import declarative_base
-    from sqlalchemy.orm import sessionmaker
+    from sqlalchemy.orm import sessionmaker, Query
     import psycopg2
 except ImportError:
     pass
@@ -159,6 +159,8 @@ def test_raw_dao_sqlite(empty_sqlite_session):
     assert isinstance(df, pd.DataFrame)
     q = dao(session=empty_sqlite_session, query_only=True)
     assert isinstance(q, str)
+    dao = RawDAO(schema=f'{SCHEMA1}', table_name='exa_test_dne')
+    dao.create_schema(session=empty_sqlite_session)
 
 @psyc
 @pg_db_conn
@@ -168,10 +170,13 @@ def test_raw_dao_postgres(empty_postgres_session):
     assert isinstance(df, pd.DataFrame)
     q = dao(session=empty_postgres_session, query_only=True)
     assert isinstance(q, str)
+    dao = RawDAO(schema=f'{SCHEMA1}', table_name='exa_test_dne')
+    dao.create_schema(session=empty_postgres_session)
 
 def raw_dao_upload(engine_wipe_base, base_data):
     eng, wipe, _ = engine_wipe_base
     bar = RawDAO(schema=SCHEMA1, table_name='bar')
+    bar.chunksize = 1
     session = new_session(eng)
     bar(session=session, payload=base_data['bar'])
     session.commit()
@@ -222,7 +227,7 @@ def raw_dao_filter_builder(engine_wipe_base, sqlite=False):
         "values (1, 'a'), (2, 'b'), (3, 'c');"
     )
     session.commit()
-    dao.filters = {'id': [('gt', 1)], 'name': [('eq', 'c')]}
+    dao.filters = {'id': [('gt', 1)], 'name': [('eq', 'c')], 'dne': [('is', None)]}
     df = dao(session=session)
     assert df.shape == (1, 2)
     session.execute(wipe('foo'))
@@ -246,6 +251,8 @@ def round_trip_bar(engine_wipe_base, data):
     session.commit()
     df = bar(session=session)
     assert df.shape == (3, 2)
+    q = bar(session=session, query_only=True)
+    assert isinstance(q, Query)
     session.execute(wipe(f'{SCHEMA1}.bar'))
     session.commit()
     df = bar(session=session)
@@ -266,7 +273,8 @@ def dao_filter_builder_foo(engine_wipe_base, data):
     session = new_session(eng)
     dao = DAO(
         table_name='foo', base=base,
-        filters={'id': [('gt', 1)], 'name': [('eq', 'c')]}
+        filters={'id': [('gt', 1), ('is', None)],
+                 'name': [('eq', 'c')]},
     )
     dao(session=session, payload=data)
     session.commit()

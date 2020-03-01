@@ -63,7 +63,12 @@ class RawDAO(Data):
     schema = Unicode(help='schema name')
     table_name = Unicode(help='table name')
     entities = List(help='columns to pull')
-    filters = Dict(help='filters to apply')
+    groupbys = List(help='columns to group by') # TODO
+    orderbys = List(help='columns to sort by') # TODO
+    order_dir = Unicode(help='sort direction') # TODO
+    filters = Dict(help='filters to apply per column')
+    functions = Dict(help='functions to apply per column') # TODO
+    havings = Dict(help='having conditions') # TODO
     chunksize = Integer(50000, help='number of records to load at a time')
     __invalid_tokens = [';', '--', '/*']
 
@@ -71,7 +76,8 @@ class RawDAO(Data):
     def _default_entities(self):
         return self.columns
 
-    @validate('schema', 'table_name', 'entities')
+    @validate('schema', 'table_name', 'entities',
+              'groupbys', 'orderbys', 'order_dir')
     def _validate_sql(self, prop):
         self._scan_sql(prop['value'])
         return prop['value']
@@ -86,32 +92,34 @@ class RawDAO(Data):
         filters = []
         for column, conditions in self.filters.items():
             for op, cond in conditions:
-                fil = "{} {} '{}'".format(column, _raw_op_map[op], cond)
-                self.log.debug("building filter {}".format(fil))
+                sql_op = _raw_op_map.get(op, None)
+                if sql_op is None:
+                    self.log.warning(f"{op} not understood. skipping")
+                    continue
+                fil = f"{column} {sql_op} '{cond}'"
+                self.log.debug(f"building filter {fil}")
                 filters.append(fil)
         filters = ' and '.join(filters)
         if filters:
-            query += ' where {}'.format(filters)
+            query += f' where {filters}'
         return query
 
     def _query_builder(self, query):
         entities = ', '.join(self.entities) or '*'
-        query = 'select {} from {}'.format(entities, self.fqtn())
+        query = f'select {entities} from {self.fqtn()}'
         query = self._filter_builder(query)
         self._scan_sql(query)
         return query + ';'
 
     def _upload(self, session, payload):
-        if self.schema:
-            try:
-                session.execute(
-                    f'create schema if not exists {self.schema};'
-                )
-                session.commit()
-            except Exception as e:
-                self.log.error("could not create schema: {}".format(e))
-        # TODO : implement and validate uniqueness constraints
-        #        on the Data class before insertion
+        """Use pd.DataFrame.to_sql to upload the
+        payload data in chunks after it has been validated.
+
+        Args:
+            session (session): a DB session (see :mod:`~sqlalchemy.orm.sessionmaker`)
+            payload (pd.DataFrame): data to upload
+        """
+        payload = self._validate_data(payload, reverse=True)
         fqtn = self.fqtn()
         nrec = len(payload.index)
         if nrec > self.chunksize:
@@ -125,8 +133,16 @@ class RawDAO(Data):
         )
         self.log.info(f"{fqtn} loading {nrec} records took {self.time_diff(bt)}")
 
-
     def __call__(self, session, payload=None, query_only=False):
+        """Primary public API for the RawDAO. Default
+        behavior is to fetch data. If provided a payload,
+        will attempt to upload that data after validation.
+
+        Args:
+            session (session): a DB session (see :mod:`~sqlalchemy.orm.sessionmaker`)
+            payload (pd.DataFrame): data to upload (optional)
+            query_only (bool): if True, return the query unevaluated
+        """
         if payload is not None:
             return self._upload(session, payload)
         query = self._query_builder('')
@@ -140,6 +156,15 @@ class RawDAO(Data):
             return self.table_name
         return f'{self.schema}.{self.table_name}'
 
+    def create_schema(self, session):
+        if self.schema:
+            try:
+                session.execute(
+                    f'create schema if not exists {self.schema};'
+                )
+                session.commit()
+            except Exception as e:
+                self.log.error(f"could not create schema: {e}")
 
 class DAO(RawDAO):
     """
@@ -170,7 +195,7 @@ class DAO(RawDAO):
         fqtn = self.fqtn()
         if fqtn not in base.metadata.tables.keys():
             raise TraitError(
-                "no table {} in base.metadata.tables".format(fqtn)
+                f"no table {fqtn} in base.metadata.tables"
             )
         return base
 
