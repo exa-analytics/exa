@@ -6,6 +6,7 @@ Exa
 """
 import os
 import sys
+import datetime as dt
 import logging.config
 import yaml
 from traitlets import HasTraits, Unicode, default, validate
@@ -20,8 +21,21 @@ class Base(HasTraits):
     traits and trait-based logic.
     """
 
+    @staticmethod
+    def right_now():
+        """Returns the current datetime"""
+        return dt.datetime.now()
+
+    @staticmethod
+    def time_diff(start):
+        """Returns a formatted string of the time difference
+        between right now and the passed in datetime"""
+        stop = dt.datetime.now()
+        return '{:.2f}s'.format((stop - start).total_seconds())
+
     @property
     def log(self):
+        """A configured `logger` object"""
         name = '.'.join([
             self.__module__, self.__class__.__name__
         ])
@@ -29,15 +43,18 @@ class Base(HasTraits):
 
     @classmethod
     def from_yml(cls, path):
+        """Load an object from a configuration file"""
         return cls(**cls._from_yml(path))
 
     @staticmethod
     def _from_yml(path):
+        """Load a configuration file"""
         with open(path, 'r') as f:
             cfg = yaml.safe_load(f.read())
         return cfg
 
     def traits(self, *args, **kws):
+        # inherit super.__doc__?
         # inherent to traitlets API and
         # of little concern to us here.
         skipme = ['parent', 'config']
@@ -46,14 +63,32 @@ class Base(HasTraits):
                 if k not in skipme}
 
     def trait_items(self):
-        return {k: getattr(self, k)
-                for k in self.traits()}
+        """Return a dictionary of trait names and values"""
+        return {k: getattr(self, k) for k in self.traits()}
 
 
 class Cfg(Base):
+    """Exa library configuration object. Manages logging
+    configuration and the static asset resource API and
+    external application integrations.
+    """
     logdir = Unicode()
     logname = Unicode()
     staticdir = Unicode()
+
+    @property
+    def db_conn(self):
+        """Environment configured database connection string.
+        Should be a valid sqlalchemy engine connection string.
+
+        Note:
+            Make sure your database is running
+
+        Examples of valid EXA_DB_CONN values:
+            EXA_DB_CONN='sqlite://'
+            EXA_DB_CONN='postgresql://username:password@localhost:5432/dbname'
+        """
+        return os.environ.get('EXA_DB_CONN', '')
 
     @validate('logdir')
     def _validate_logdir(self, prop):
