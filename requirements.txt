@@ -6,3 +6,5 @@ numba
 sympy
 pyyaml
 six
+sqlalchemy
+psycopg2

@@ -131,7 +131,7 @@ class Data(exa.Base):
         self._data = self._validate_data(_data)
         return self._data
 
-    def _validate_data(self, df):
+    def _validate_data(self, df, reverse=False):
         if not isinstance(df, pd.DataFrame):
             self.log.warning("data not a dataframe, skipping validation")
             return df
@@ -141,7 +141,7 @@ class Data(exa.Base):
         missing = set(self.columns).difference(df.columns)
         if missing:
             raise RequiredColumnError(missing, self.name)
-        return self._set_categories(df)
+        return self._set_categories(df, reverse=reverse)
 
     def _set_categories(self, df, reverse=False):
         """For specified categorical fields,
