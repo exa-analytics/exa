@@ -58,17 +58,22 @@ class Cfg(Base):
     @validate('logdir')
     def _validate_logdir(self, prop):
         logdir = prop['value']
+        self.log.debug(f"making sure {logdir} exists")
         os.makedirs(logdir, exist_ok=True)
         return prop['value']
 
     @default('logdir')
     def _default_logdir(self):
         base = os.path.expanduser('~')
-        return os.path.join(base, '.exa')
+        base = os.path.join(base, '.exa')
+        self.log.debug(f"initializing with logdir {base}")
+        return base
 
     @default('staticdir')
     def _default_staticdir(self):
-        return os.path.join(_base, "static")
+        base = os.path.join(_base, "static")
+        self.log.debug(f"initializing with staticdir {base}")
+        return base
 
     def resource(self, name):
         """Return the full path of a named resource

@@ -5,6 +5,7 @@ Data
 ########
 """
 import importlib
+from copy import deepcopy
 
 from traitlets import List, Unicode, Dict, Any, Tuple
 from traitlets import validate, default, observe
@@ -60,9 +61,11 @@ class Data(exa.Base):
     @validate('source')
     def _validate_source(self, prop):
         """source must implement __call__"""
-        if not callable(prop['value']):
+        source = prop['value']
+        self.log.debug(f"validating {source}")
+        if not callable(source):
             raise TraitError("source must be callable")
-        return prop['value']
+        return source
 
     @observe('source')
     def _observe_source(self, change):
@@ -76,7 +79,9 @@ class Data(exa.Base):
 
     @validate('name')
     def _validate_name(self, prop):
-        return prop['value'].lower()
+        name = prop['value']
+        self.log.debug(f"lowercasing {name}")
+        return name.lower()
 
     @default('name')
     def _default_name(self):
@@ -104,6 +109,17 @@ class Data(exa.Base):
             except Exception as e:
                 source = None
         return cls(source=source, **cfg)
+
+    def copy(self, *args, **kws):
+        """All args and kwargs are forwarded to
+        data().copy method and assumes a deepcopy
+        of the Data object itself."""
+        cls = self.__class__
+        if hasattr(self.data(), 'copy'):
+            return cls(data=self.data().copy(*args, **kws),
+                       **deepcopy(self.trait_items()))
+        return cls(data=deepcopy(self.data()),
+                   **deepcopy(self.trait_items()))
 
     def data(self, df=None, cache=True):
         """Return the currently stored data in the
@@ -160,6 +176,12 @@ class Data(exa.Base):
                     f"categorical {col} specified but not in data"
                 )
         return df
+
+    def __init__(self, *args, data=None, **kws):
+        super().__init__(*args, **kws)
+        # setting source invalidates _data so do it after
+        if data is not None:
+            self.data(df=data)
 
 
 def load_isotopes():

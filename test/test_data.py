@@ -94,6 +94,7 @@ def test_data_validation(data):
     data.indexes = ['d']
     with pytest.raises(TraitError):
         data.data(df=df)
+    data.indexes = []
 
 def test_from_yml(isotopes):
     d = exa.Data.from_yml(exa.cfg.resource('isotopes.yml'))
@@ -121,6 +122,14 @@ source: os.path.dne
     dum = exa.Data.from_yml(f)
     assert dum.source is None
 
+def test_copy(data):
+    data._data = None
+    n = data.copy()
+    assert id(n) != id(data)
+    df = pd.DataFrame()
+    n.data(df=df)
+    nn = n.copy()
+    assert id(nn) != id(n)
 
 def test_isotopes():
     assert not exa.Isotopes.data().empty
