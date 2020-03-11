@@ -5,6 +5,7 @@ Data
 ########
 """
 import importlib
+from copy import deepcopy
 
 from traitlets import List, Unicode, Dict, Any, Tuple
 from traitlets import validate, default, observe
@@ -20,30 +21,51 @@ class Data(exa.Base):
     logic and simplify managing multiple data concepts
     in the container.
     """
-    name = Unicode()
-    meta = Dict()
-    source = Any(allow_none=True)
-    source_cfg = Unicode()
-    source_args = List()
-    source_kws = Dict()
-    index = Unicode()
-    columns = List()
+    name = Unicode(help="string name of data")
+    meta = Dict(help="metadata dictionary")
+    source = Any(allow_none=True, help="a callable that takes priority over a __call__ method")
+    call_args = List(help="args to pass to call or source")
+    call_kws = Dict(help="kwargs to pass to call or source")
+    index = Unicode(help="index name") # is this required for Container.network?
+    indexes = List(help="columns that guarantee uniqueness")
+    columns = List(help="columns that must be present in the dataset")
+    # cardinal can maybe just be indexes (or indexes[0]?)
     cardinal = Tuple()
+    # generalize to dtypes?
     categories = Dict()
 
-    # TODO : comb through numerical.py
-    #        and find all useful attributes and
-    #        secret sauce and expose on Data.
-    #
-    #        also what to do about Field?
-    #        is it a subclass of data?
+    def slice(self, key):
+        """Provide a programmatic way to slice contained
+        data without operating on the dataframe directly.
+        """
+
+    def groupby(self, columns=None):
+        """Convenience method for pandas groupby"""
+        cols = columns or self.indexes
+        if cols:
+            return self.data().groupby(cols)
+        self.log.warning("nothing to group by")
+
+    def memory(self):
+        """Return the memory footprint of the underlying
+        data stored in Data"""
+        mem = 0
+        df = self.data()
+        if isinstance(df, pd.DataFrame):
+            mem = df.memory_usage()
+        return mem
+
+    def __call__(self, *args, **kws):
+        self.log.warning("call not implemented")
 
     @validate('source')
     def _validate_source(self, prop):
         """source must implement __call__"""
-        if not callable(prop['value']):
+        source = prop['value']
+        self.log.debug(f"validating {source}")
+        if not callable(source):
             raise TraitError("source must be callable")
-        return prop['value']
+        return source
 
     @observe('source')
     def _observe_source(self, change):
@@ -52,12 +74,14 @@ class Data(exa.Base):
         state of the Data object."""
         if change.new is None:
             self._data = None
-            self.source_args = []
-            self.sourcs_kws = {}
+            self.call_args = []
+            self.call_kws = {}
 
     @validate('name')
     def _validate_name(self, prop):
-        return prop['value'].lower()
+        name = prop['value']
+        self.log.debug(f"lowercasing {name}")
+        return name.lower()
 
     @default('name')
     def _default_name(self):
@@ -76,35 +100,26 @@ class Data(exa.Base):
         # and moved to a base class staticmethod.
         cfg = cls._from_yml(path)
         source = cfg.pop('source', None)
-        src_cfg = cfg.get('source_cfg', None)
-        # Assume source is a path to a method_name or ClassName
-        # and is fully qualified by an importable module
+        # Assume source is a path to a method_name
         if source is not None:
             try:
                 *mod, obj = source.split('.')
                 mod = importlib.import_module('.'.join(mod))
-                if obj.istitle(): # class to instantiate
-                    # support loading source from a cfg file
-                    if src_cfg:
-                        source = getattr(mod, obj).from_yml(src_cfg)
-                    # otherwise empty class instantiation?
-                    else:
-                        source = getattr(mod, obj)()
-                else: # assume source is a function
-                    source = getattr(mod, obj)
+                source = getattr(mod, obj)
             except Exception as e:
-                self.log.error(f"attempt to import source failed: {e}")
                 source = None
         return cls(source=source, **cfg)
 
-    def groupby(self):
-        pass
-
-    def slice(self):
-        pass
-
-    def memory(self):
-        pass
+    def copy(self, *args, **kws):
+        """All args and kwargs are forwarded to
+        data().copy method and assumes a deepcopy
+        of the Data object itself."""
+        cls = self.__class__
+        if hasattr(self.data(), 'copy'):
+            return cls(data=self.data().copy(*args, **kws),
+                       **deepcopy(self.trait_items()))
+        return cls(data=deepcopy(self.data()),
+                   **deepcopy(self.trait_items()))
 
     def data(self, df=None, cache=True):
         """Return the currently stored data in the
@@ -124,10 +139,9 @@ class Data(exa.Base):
             _data = None
         if df is not None:
             _data = df
-        if _data is None and self.source is not None:
-            _data = self.source(
-                *self.source_args, **self.source_kws
-            )
+        if _data is None:
+            f = self.source or self.__call__
+            _data = f(*self.call_args, **self.call_kws)
         self._data = self._validate_data(_data)
         return self._data
 
@@ -141,7 +155,10 @@ class Data(exa.Base):
         missing = set(self.columns).difference(df.columns)
         if missing:
             raise RequiredColumnError(missing, self.name)
-        return self._set_categories(df, reverse=reverse)
+        df = self._set_categories(df, reverse=reverse)
+        if self.indexes and df.duplicated(subset=self.indexes).any():
+            raise TraitError(f"duplicates in {self.indexes}")
+        return df
 
     def _set_categories(self, df, reverse=False):
         """For specified categorical fields,
@@ -156,9 +173,15 @@ class Data(exa.Base):
                 df[col] = df[col].astype(conv)
             else:
                 self.log.debug(
-                    "categorical {} specified but not in data".format(col)
+                    f"categorical {col} specified but not in data"
                 )
         return df
+
+    def __init__(self, *args, data=None, **kws):
+        super().__init__(*args, **kws)
+        # setting source invalidates _data so do it after
+        if data is not None:
+            self.data(df=data)
 
 
 def load_isotopes():
@@ -191,3 +214,7 @@ def load_units():
 Isotopes = Data(source=load_isotopes, name='isotopes')
 Constants = Data(source=load_constants, name='constants')
 Units = Data(source=load_units, name='units')
+
+
+class Field(Data):
+    field_values = List()
