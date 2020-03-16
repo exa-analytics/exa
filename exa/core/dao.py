@@ -66,8 +66,8 @@ class RawDAO(Data):
     groupbys = List(help='columns to group by') # TODO
     orderbys = List(help='columns to sort by') # TODO
     order_dir = Unicode(help='sort direction') # TODO
-    filters = Dict(help='filters to apply per column')
     functions = Dict(help='functions to apply per column') # TODO
+    filters = Dict(help='filters to apply per column')
     havings = Dict(help='having conditions') # TODO
     chunksize = Integer(50000, help='number of records to load at a time')
     __invalid_tokens = [';', '--', '/*']

@@ -27,10 +27,11 @@ class Data(exa.Base):
     call_args = List(help="args to pass to call or source")
     call_kws = Dict(help="kwargs to pass to call or source")
     index = Unicode(help="index name") # is this required for Container.network?
+    # cardinal can maybe just be indexes (or indexes[0]?)
+    cardinal = Unicode(help="cardinal slicing field")
+    # TODO : cardinal, index, indexes are related..
     indexes = List(help="columns that guarantee uniqueness")
     columns = List(help="columns that must be present in the dataset")
-    # cardinal can maybe just be indexes (or indexes[0]?)
-    cardinal = Tuple()
     # generalize to dtypes?
     categories = Dict()
 
@@ -86,6 +87,13 @@ class Data(exa.Base):
     @default('name')
     def _default_name(self):
         return self.__class__.__name__
+
+    @validate('cardinal')
+    def _validate_cardinal(self, prop):
+        c = prop['value']
+        if self.indexes and c not in self.indexes:
+            raise TraitError(f"{c} not in {self.indexes}")
+        return c
 
     @classmethod
     def from_yml(cls, path):
