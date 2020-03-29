@@ -17,7 +17,10 @@ _log['handlers']['file']['filename'] = os.path.join(tempfile.gettempdir(),
                                                     'exa.log')
 logging.config.dictConfig(_log)
 
-from ._version import __version__
 from .core import (DataFrame, Series, Field3D, Field, Editor, Container,
                    TypedMeta, SparseDataFrame)
 
+
+from ._version import get_versions
+__version__ = get_versions()['version']
+del get_versions
