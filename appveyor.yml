@@ -57,12 +57,10 @@ install:
   - cmd: activate test
   - cmd: conda update -q -y --all
   - cmd: conda install -q -y numba
-  - cmd: conda install -q -y -c conda-forge numpy scipy seaborn networkx pandas pyyaml
-  - cmd: conda install -q -y -c conda-forge pytest pytables six sympy
-  - cmd: pip install -e .
+  - cmd: conda install -q -y -c conda-forge numpy scipy seaborn networkx pandas pyyaml pytables six sympy pytest
+  - cmd: python setup.py install
 
 build: false
 
 test_script:
   - cmd: pytest
-
