@@ -16,19 +16,15 @@ or [pypi](https://pypi.python.org/pypi).
 
 
 # Getting Started
-[![gitter](https://badges.gitter.im/exa-analytics/exa.svg)](https://gitter.im/exa-analytics/exa)  
-
 See [docs](https://exa-analytics.github.io/exatomic/) for usage. 
 
 Building the docs requires [sphinx](http://www.sphinx-doc.org/en/stable). On Linux or Mac:
 
-    $ cd docs
-    $ make html
+    $ ./make-docs.sh
 
 On Windows:
 
-    $ cd docs
-    $ ./make.bat html
+    $ make-docs.bat
 
 
 # Development
@@ -55,4 +51,3 @@ For a development ready installation:
 [![Apache License 2.0](http://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0)  
 Copyright (c) 2015-2019, Exa Analytics Development Team  
 Distributed under the terms of the Apache License 2.0  
-
