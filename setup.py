@@ -7,7 +7,7 @@ NAME = "exa"
 DESCRIPTION = "A framework for data engineering and science"
 staticdir = "static"
 README = "README.md"
-REQUIREMENTS = "REQUIREMENTS.txt"
+REQUIREMENTS = "requirements.txt"
 try:
     import pypandoc
     LONG_DESCRIPTION = pypandoc.convert(README, "rst")
