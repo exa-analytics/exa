@@ -7,4 +7,5 @@ sympy
 pyyaml
 six
 sqlalchemy
-psycopg2
+psycopg2-binary
+pyarrow

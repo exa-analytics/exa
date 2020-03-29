@@ -119,8 +119,8 @@ source: os.path.isfile
 name: test
 source: os.path.dne
 """)
-    dum = exa.Data.from_yml(f)
-    assert dum.source is None
+    with pytest.raises(TraitError):
+        dum = exa.Data.from_yml(f)
 
 def test_copy(data):
     data._data = None

@@ -5,12 +5,14 @@ Data container
 ####################################
 An in-memory related data container.
 """
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import networkx as nx
 from traitlets import Unicode, Dict
 
+import exa
 from exa import Base
 from exa.core.data import Data
 
@@ -19,8 +21,8 @@ class Box(Base):
     meta = Dict(help="metadata dictionary")
     description = Unicode(help="container description")
 
-    def copy(self, name=None, description=None, meta=None):
-        pass
+    def copy(self, **kws):
+        return self.__class__(**kws)
 
     def slice(self, key):
         pass
@@ -37,8 +39,14 @@ class Box(Base):
     def network(self):
         pass
 
-    def save(self):
-        pass
+    def save(self, name=None, directory=None, parquet_backend='pyarrow'):
+        """Save a bundle of files to a tarball."""
+        name = name or self.hexuid
+        directory = Path(directory) or exa.cfg.savedir
+        bundle = directory / name
+        bundle.mkdir(parents=True, exist_ok=True)
+        for data in self._data.values():
+            data.save(bundle)
 
     def load(self):
         pass

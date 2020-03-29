@@ -9,7 +9,8 @@ import sys
 import datetime as dt
 import logging.config
 import yaml
-from traitlets import HasTraits, Unicode, default, validate
+from pathlib import Path
+from traitlets import HasTraits, Unicode, Instance, default, validate
 
 
 _base = os.path.abspath(os.path.dirname(__file__))
@@ -41,6 +42,10 @@ class Base(HasTraits):
         ])
         return logging.getLogger(name)
 
+    def to_yml(self, path):
+        with open(path, 'w') as f:
+            yaml.dump(self.traits(), f, default_flow_style=False)
+
     @classmethod
     def from_yml(cls, path):
         """Load an object from a configuration file"""
@@ -54,17 +59,18 @@ class Base(HasTraits):
         return cfg
 
     def traits(self, *args, **kws):
-        # inherit super.__doc__?
-        # inherent to traitlets API and
-        # of little concern to us here.
+        """Return the set of traits specified in exa"""
         skipme = ['parent', 'config']
         traits = super().traits(*args, **kws)
         return {k: v for k, v in traits.items()
                 if k not in skipme}
 
-    def trait_items(self):
+    def trait_items(self, include_falsy=False):
         """Return a dictionary of trait names and values"""
-        return {k: getattr(self, k) for k in self.traits()}
+        if include_falsy:
+            return {k: getattr(self, k) for k in self.traits()}
+        return {k: getattr(self, k) for k in self.traits()
+                if getattr(self, k)}
 
 
 class Cfg(Base):
@@ -73,6 +79,7 @@ class Cfg(Base):
     external application integrations.
     """
     logdir = Unicode()
+    savedir = Instance(Path)
     logname = Unicode()
     staticdir = Unicode()
 
@@ -103,6 +110,10 @@ class Cfg(Base):
         base = os.path.join(base, '.exa')
         self.log.debug(f"initializing with logdir {base}")
         return base
+
+    @default('savedir')
+    def _default_savedir(self):
+        return Path(self._default_logdir())
 
     @default('staticdir')
     def _default_staticdir(self):

@@ -4,8 +4,10 @@
 Data
 ########
 """
+import yaml
 import importlib
 from copy import deepcopy
+from pathlib import Path
 
 from traitlets import List, Unicode, Dict, Any, Tuple
 from traitlets import validate, default, observe
@@ -64,6 +66,15 @@ class Data(exa.Base):
         """source must implement __call__"""
         source = prop['value']
         self.log.debug(f"validating {source}")
+        if isinstance(source, str):
+            # Assume source is a namespace to a callable
+            try:
+                *mod, obj = source.split('.')
+                mod = importlib.import_module('.'.join(mod))
+                source = getattr(mod, obj)
+            except Exception as e:
+                self.log.error(f"could not import {obj} from {mod}")
+                raise TraitError("source must be importable")
         if not callable(source):
             raise TraitError("source must be callable")
         return source
@@ -95,29 +106,6 @@ class Data(exa.Base):
             raise TraitError(f"{c} not in {self.indexes}")
         return c
 
-    @classmethod
-    def from_yml(cls, path):
-        """Load a Data object from a configuration
-        file. The intent is not to store the actual
-        data in the config, rather all the required
-        metadata to source and validate the data for
-        itself. Also checks for a configuration file
-        specified for the Data's indended source.
-        """
-        # API loading can probably be generalized
-        # and moved to a base class staticmethod.
-        cfg = cls._from_yml(path)
-        source = cfg.pop('source', None)
-        # Assume source is a path to a method_name
-        if source is not None:
-            try:
-                *mod, obj = source.split('.')
-                mod = importlib.import_module('.'.join(mod))
-                source = getattr(mod, obj)
-            except Exception as e:
-                source = None
-        return cls(source=source, **cfg)
-
     def copy(self, *args, **kws):
         """All args and kwargs are forwarded to
         data().copy method and assumes a deepcopy
@@ -133,7 +121,7 @@ class Data(exa.Base):
         """Return the currently stored data in the
         Data object. If df is provided, store that
         as the current data and return it. Otherwise,
-        determine the provider to execute to obtain
+        determine the source to call to obtain
         the data, store it and return it.
 
         Note:
@@ -167,6 +155,38 @@ class Data(exa.Base):
         if self.indexes and df.duplicated(subset=self.indexes).any():
             raise TraitError(f"duplicates in {self.indexes}")
         return df
+
+    def load(self, name=None, directory=None):
+        name = name or self.name
+        directory = Path(directory) or exa.cfg.savedir
+        self.log.info(f"loading {directory / name}")
+        if (directory / f'{name}.yml').exists():
+            yml = self._from_yml(directory / f'{name}.yml')
+            for attr, vals in yml.items():
+                setattr(self, attr, vals)
+        if (directory / f'{name}.qet').exists():
+            self._data = pd.read_parquet(
+                directory / f'{name}.qet', columns=self.columns
+            )
+
+    def save(self, name=None, directory=None):
+        """Save the housed dataframe as a parquet file and related
+        metadata as a yml file with the same name."""
+        name = name or self.name
+        directory = Path(directory) or exa.cfg.savedir
+        directory.mkdir(parents=True, exist_ok=True)
+        data = self.data()
+        if isinstance(data, pd.DataFrame):
+            data.to_parquet(directory / f'{name}.qet')
+            self._data = None
+        save = self.trait_items()
+        source = save.pop('source', None)
+        if source is not None:
+            save['source'] = '.'.join((source.__module__, source.__name__))
+        with open(directory / f'{name}.yml', 'w') as f:
+            yaml.dump(save, f, default_flow_style=False)
+        if data is not None:
+            self.data(df=data)
 
     def _set_categories(self, df, reverse=False):
         """For specified categorical fields,
@@ -217,7 +237,7 @@ def load_constants():
 def load_units():
     """Same. Move these loaders somewhere else."""
     path = exa.cfg.resource('units.json')
-    return pd.read_json(path, orient='values')
+    return pd.read_json(path) #, orient='values')
 
 Isotopes = Data(source=load_isotopes, name='isotopes')
 Constants = Data(source=load_constants, name='constants')

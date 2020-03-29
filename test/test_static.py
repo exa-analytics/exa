@@ -15,5 +15,5 @@ def test_static_dir():
 
 
 def test_resource():
-    assert os.path.exists(static.resource("units.json.bz2"))
+    assert os.path.exists(static.resource("units.json"))
 
