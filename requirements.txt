@@ -2,7 +2,7 @@ numpy
 scipy
 pandas
 sympy
-networkx>=2.0
+networkx
 tables
 numba
 six
