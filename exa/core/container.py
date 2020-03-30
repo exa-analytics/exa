@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2015-2019, Exa Analytics Development Team
+# Copyright (c) 2015-2020, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Container
@@ -13,17 +12,16 @@ See Also:
     For a description of data objects see :mod:`~exa.core.numerical`.
 """
 import os
+from sys import getsizeof
+from copy import deepcopy
+from uuid import uuid4
+from collections import defaultdict
 import logging
 import numpy as np
 import pandas as pd
 import networkx as nx
-from sys import getsizeof
-from copy import deepcopy
-from collections import defaultdict
-from .numerical import check_key, Field, Series, DataFrame
+from .numerical import check_key, Field, Series, DataFrame, SparseDataFrame
 from exa.util.utility import convert_bytes
-from exa.util import mpl
-import matplotlib.pyplot as plt
 
 
 class Container(object):
@@ -121,8 +119,8 @@ class Container(object):
         if self._cardinal:
             cls = self.__class__
             key = check_key(self[self._cardinal], key, cardinal=True)
-            g = self.network(fig=False)
-            kwargs = {self._cardinal: self[self._cardinal].ix[key], 'name': self.name,
+            g = self.network()
+            kwargs = {self._cardinal: self[self._cardinal].loc[key], 'name': self.name,
                       'description': self.description, 'meta': self.meta}
             # Next traverse, breadth first, all data objects
             for parent, child in nx.bfs_edges(g, self._cardinal):
@@ -134,7 +132,7 @@ class Container(object):
                 elif typ == 'index-index':
                     # Select from the child on the parent's index (the parent is
                     # in the kwargs already).
-                    kwargs[child] = self[child].ix[kwargs[parent].index.values]
+                    kwargs[child] = self[child].loc[kwargs[parent].index.values]
                 elif typ == 'index-column':
                     # Select from the child where the column (of the same name as
                     # the parent) is in the parent's index values
@@ -155,22 +153,23 @@ class Container(object):
         Create an instance of this class for every step in the cardinal dimension.
         """
         if self._cardinal:
-            g = self.network(fig=False)
+            g = self.network()
             cardinal_indexes = self[self._cardinal].index.values
             selfs = {}
             cls = self.__class__
             for cardinal_index in cardinal_indexes:
-                kwargs = {self._cardinal: self[self._cardinal].ix[[cardinal_index]]}
-                for parent, child in nx.bfs_edges(g):
+                kwargs = {self._cardinal: self[self._cardinal].loc[[cardinal_index]]}
+                for parent, child in nx.bfs_edges(g, source=self._cardinal):
                     if child in kwargs:
                         continue
                     typ = g.edge_types[(parent, child)]
-                    if self._cardinal in self[child].columns and hasattr(self[child], 'slice_cardinal'):
-                        kwargs[child] = self[child].slice_cardinal(key)
+                    if (self._cardinal in self[child].columns and
+                            hasattr(self[child], 'slice_cardinal')):
+                        kwargs[child] = self[child].slice_cardinal(cardinal_indexes)
                     elif typ == 'index-index':
-                        # Select from the child on the parent's index (the parent is
-                        # in the kwargs already).
-                        kwargs[child] = self[child].ix[kwargs[parent].index.values]
+                        # Select from the child on the parent's index
+                        # (the parent is in the kwargs already).
+                        kwargs[child] = self[child].loc[kwargs[parent].index.values]
                     elif typ == 'index-column':
                         # Select from the child where the column (of the same name as
                         # the parent) is in the parent's index values
@@ -234,65 +233,40 @@ class Container(object):
             return ' '.join((str(s) for s in convert_bytes(n)))
         return self.info()['size']
 
-    def network(self, figsize=(14, 9), fig=True):
+    def network(self):
         """
-        Display information about the container's object relationships.
-
-        Nodes correspond to data objects. The size of the node corresponds
-        to the size of the table in memory. The color of the node corresponds
-        to its fundamental data type. Nodes are labeled by their container
-        name; class information is listed below. The color of the connections
-        correspond to the type of relationship; either an index of one table
-        corresponds to a column in another table or the two tables share an
-        index.
-
-        Args:
-            figsize (tuple): Tuple containing figure dimensions
-            fig (bool): Generate the figure (default true)
+        Generate a network of relationships between the data inside the
+        container.
 
         Returns:
             graph: Network graph object containing data relationships
         """
+        n = len(self._data())
         conn_types = ['index-index', 'index-column']
-        conn_colors = mpl.sns.color_palette('viridis', len(conn_types))
+        conn_colors = ([(0.275191,0.194905,0.496005),
+                       (0.212395,0.359683,0.55171),
+                       (0.153364,0.497,0.557724),
+                       (0.122312,0.633153,0.530398),
+                       (0.288921,0.758394,0.428426),
+                       (0.626579,0.854645,0.223353)]*n)[:n]
         conn = dict(zip(conn_types, conn_colors))
 
         def get_node_type_color(obj):
             """Gets the color of a node based on the node's (sub)type."""
-            cols = mpl.sns.color_palette('viridis', len(conn_types))
-            for col in cols:
-                if isinstance(obj, (pd.DataFrame, pd.Series, pd.SparseSeries, pd.SparseDataFrame)):
+            for col in conn_colors:
+                if isinstance(obj, (pd.DataFrame, pd.Series, pd.SparseSeries,
+                                    pd.SparseDataFrame)):
                     typ = type(obj)
                     return '.'.join((typ.__module__, typ.__name__)), col
             return 'other', 'gray'
-
-        def legend(items, name, loc, ax):
-            """Legend creation helper function."""
-            proxies = []
-            descriptions = []
-            for label, color in items:
-                if label == 'column-index':
-                    continue
-                if name == 'Data Type':
-                    line = mpl.sns.mpl.lines.Line2D([], [], linestyle='none', color=color, marker='o')
-                else:
-                    line = mpl.sns.mpl.lines.Line2D([], [], linestyle='-', color=color)
-                proxies.append(line)
-                descriptions.append(label)
-            lgnd = ax.legend(proxies, descriptions, title=name, loc=loc, frameon=True)
-            lgnd_frame = lgnd.get_frame()
-            lgnd_frame.set_facecolor('white')
-            lgnd_frame.set_edgecolor('black')
-            return lgnd, ax
 
         info = self.info()
         info = info[info['type'] != '-']
         info['size'] *= 13000/info['size'].max()
         info['size'] += 2000
-        node_size_dict = info['size'].to_dict()      # Can pull all nodes from keys
-        node_class_name_dict = info['type'].to_dict()
-        node_type_dict = {}    # Values are tuple of "underlying" type and color
-        node_conn_dict = {}    # Values are tuple of connection type and color
+        node_size_dict = info['size'].to_dict()    # Pull all nodes from keys
+        node_type_dict = {}    # Values are tup of "underlying" type and color
+        node_conn_dict = {}    # Values are tup of connection type and color
         items = self._data().items()
         for k0, v0 in items:
             n0 = k0[1:] if k0.startswith('_') else k0
@@ -301,7 +275,8 @@ class Container(object):
                 if v0 is v1:
                     continue
                 n1 = k1[1:] if k1.startswith('_') else k1
-                for name in v0.index.names:    # Check the index of data object 0 against the index
+                # Check the index of data object 0 against the index
+                for name in v0.index.names:
                     if name is None:           # and columns of data object 1
                         continue
                     if name in v1.index.names:
@@ -309,32 +284,19 @@ class Container(object):
                         node_conn_dict[(n0, n1)] = (contyp, conn[contyp])
                         node_conn_dict[(n1, n0)] = (contyp, conn[contyp])
                     for col in v1.columns:
-                        # Catches index "atom", column "atom1"; does not catch atom10
-                        if name == col or (name == col[:-1] and col[-1].isdigit()):
+                        # Catches index "atom", column "atom1";
+                        # does not catch atom10
+                        if name == col or (name == col[:-1] and
+                                           col[-1].isdigit()):
                             contyp = 'index-column'
                             node_conn_dict[(n0, n1)] = (contyp, conn[contyp])
-                            node_conn_dict[(n1, n0)] = ('column-index', conn[contyp])
+                            node_conn_dict[(n1, n0)] = ('column-index',
+                                                        conn[contyp])
         g = nx.Graph()
         g.add_nodes_from(node_size_dict.keys())
         g.add_edges_from(node_conn_dict.keys())
-        node_sizes = [node_size_dict[node] for node in g.nodes()]
-        node_labels = {node: ' {}\n({})'.format(node, node_class_name_dict[node]) for node in g.nodes()}
-        node_colors = [node_type_dict[node][1] for node in g.nodes()]
-        edge_colors = [node_conn_dict[edge][1] for edge in g.edges()]
-        # Build the figure and legends
-        if fig:
-            fig, ax = plt.subplots(1, figsize=figsize)
-            ax.axis('off')
-            pos = nx.spring_layout(g)
-            nx.draw_networkx_nodes(g, pos=pos, ax=ax, alpha=0.7, node_size=node_sizes,
-                                        node_color=node_colors)
-            nx.draw_networkx_labels(g, pos=pos, labels=node_labels, font_size=17,
-                                         font_weight='bold', ax=ax)
-            nx.draw_networkx_edges(g, pos=pos, edge_color=edge_colors, width=2, ax=ax)
-            l1, ax = legend(set(node_conn_dict.values()), 'Connection', (1, 0), ax)
-            _, ax = legend(set(node_type_dict.values()), 'Data Type', (1, 0.3), ax)
-            fig.gca().add_artist(l1)
-        g.edge_types = {node: value[0] for node, value in node_conn_dict.items()}  # Attached connection information to network graph
+        # Attached connection information to network graph
+        g.edge_types = {n: v[0] for n, v in node_conn_dict.items()}
         return g
 
     def save(self, path=None, complevel=1, complib='zlib'):
@@ -375,7 +337,7 @@ class Container(object):
                     store[name] = s
                 elif isinstance(data, DataFrame):
                     store[name] = pd.DataFrame(data)
-                elif isinstance(data, SparseSeries):
+                elif isinstance(data, pd.SparseSeries):
                     s = pd.SparseSeries(data)
                     if isinstance(data.dtype, pd.types.dtypes.CategoricalDtype):
                         s = s.astype('O')
@@ -392,10 +354,11 @@ class Container(object):
                     store[name] = data
                 if hasattr(data, '_set_categories'):
                     data._set_categories()
+        return path
 
     def to_hdf(self, *args, **kwargs):
-        """Alias of :func:`~exa.core.container.Container`."""
-        self.save(*args, **kwargs)
+        """Alias of :func:`~exa.core.container.Container.save`."""
+        return self.save(*args, **kwargs)
 
     @classmethod
     def load(cls, pkid_or_path=None):
@@ -443,7 +406,9 @@ class Container(object):
         """
         rel = {}
         for key, obj in vars(self).items():
-            if not isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFrame)) and not key.startswith('_'):
+            if (not isinstance(obj, (pd.Series, pd.DataFrame,
+                                     pd.SparseSeries, SparseDataFrame))
+                    and not key.startswith('_')):
                 if copy and 'id' not in key:
                     rel[key] = deepcopy(obj)
                 else:
@@ -456,7 +421,8 @@ class Container(object):
         """
         data = {}
         for key, obj in vars(self).items():
-            if isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFrame)):
+            if isinstance(obj, (pd.Series, pd.DataFrame,
+                          pd.SparseSeries, SparseDataFrame)):
                 if copy:
                     data[key] = obj.copy(deep=True)
                 else:
@@ -487,111 +453,4 @@ class Container(object):
         self.name = name
         self.description = description
         self.meta = meta
-
-
-class TypedMeta(type):
-    """
-    This metaclass creates statically typed class attributes using the property
-    framework.
-
-    .. code-block:: Python
-
-        class TestMeta(TypedMeta):
-            attr1 = (int, float)
-            attr2 = DataFrame
-
-        class TestClass(metaclass=TestMeta):
-            def __init__(self, attr1, attr2):
-                self.attr1 = attr1
-                self.attr2 = attr2
-
-    The above code dynamically creates code that looks like the following:
-
-    .. code-block:: Python
-
-        class TestClass:
-            @property
-            def attr1(self):
-                return self._attr1
-
-            @attr1.setter
-            def attr1(self, obj):
-                if not isinstance(obj, (int, float)):
-                    raise TypeError('attr1 must be int')
-                self._attr1 = obj
-
-            @attr1.deleter
-            def attr1(self):
-                del self._attr1
-
-            @property
-            def attr2(self):
-                return self._attr2
-
-            @attr2.setter
-            def attr2(self, obj):
-                if not isinstance(obj, DataFrame):
-                    raise TypeError('attr2 must be DataFrame')
-                self._attr2 = obj
-
-            @attr2.deleter
-            def attr2(self):
-                del self._attr2
-
-            def __init__(self, attr1, attr2):
-                self.attr1 = attr1
-                self.attr2 = attr2
-    """
-    @staticmethod
-    def create_property(name, ptype):
-        """
-        Creates a custom property with a getter that performs computing
-        functionality (if available) and raise a type error if setting
-        with the wrong type.
-
-        Note:
-            By default, the setter attempts to convert the object to the
-            correct type; a type error is raised if this fails.
-        """
-        pname = '_' + name
-        def getter(self):
-            # This will be where the data is store (e.g. self._name)
-            # This is the default property "getter" for container data objects.
-            # If the property value is None, this function will check for a
-            # convenience method with the signature, self.compute_name() and call
-            # it prior to returning the property value.
-            if not hasattr(self, pname) and hasattr(self, '{}{}'.format(self._getter_prefix, pname)):
-                self['{}{}'.format(self._getter_prefix, pname)]()
-            if not hasattr(self, pname):
-                raise AttributeError('Please compute or set {} first.'.format(name))
-            return getattr(self, pname)
-
-        def setter(self, obj):
-            # This is the default property "setter" for container data objects.
-            # Prior to setting a property value, this function checks that the
-            # object's type is correct.
-            if not isinstance(obj, ptype):
-                try:
-                    obj = ptype(obj)
-                except Exception:
-                    raise TypeError('Must be able to convert object {0} to {1} (or must be of type {1})'.format(name, ptype))
-            setattr(self, pname, obj)
-
-        def deleter(self):
-            # Deletes the property's value.
-            del self[pname]
-
-        return property(getter, setter, deleter)
-
-    def __new__(mcs, name, bases, clsdict):
-        """
-        Modification of the class definition occurs here; we iterate over all
-        statically typed attributes and attach their property (see
-        :func:`~exa.container.TypedMeta.create_property`) definition, returning
-        the new class definition.
-        """
-        for k, v in vars(mcs).items():
-            if isinstance(v, type) and not k.startswith('_'):
-                clsdict[k] = mcs.create_property(k, v)
-        return super(TypedMeta, mcs).__new__(mcs, name, bases, clsdict)
-
+        self.hexuid = uuid4().hex
