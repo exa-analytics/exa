@@ -45,9 +45,12 @@ class Data(exa.Base):
     def groupby(self, columns=None):
         """Convenience method for pandas groupby"""
         cols = columns or self.indexes
-        if cols:
-            return self.data().groupby(cols)
-        self.log.warning("nothing to group by")
+        df = self.data()
+        if isinstance(df, pd.DataFrame):
+            if cols:
+                return df.groupby(cols)
+            self.log.warning("nothing to group by")
+        self.log.warning("no dataframe to group by")
 
     def memory(self):
         """Return the memory footprint of the underlying
@@ -63,7 +66,10 @@ class Data(exa.Base):
 
     @validate('source')
     def _validate_source(self, prop):
-        """source must implement __call__"""
+        """source must implement __call__. If specified
+        as a namespace path in a config, it must be a
+        function. If provided dynamically, any callable
+        will do."""
         source = prop['value']
         self.log.debug(f"validating {source}")
         if isinstance(source, str):
