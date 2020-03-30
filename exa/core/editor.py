@@ -375,10 +375,11 @@ class Editor(object):
         # Backporting file check
         textobj = path_stream_or_string
         if (isinstance(textobj, six.string_types) and len(textobj.split("\n")) == 1
-            and ignore == False and not os.path.exists(textobj)):
+                and ignore == False and not os.path.exists(textobj)):
             warnings.warn("Possibly incorrect file path! {}".format(textobj))
-        #if len(path_stream_or_string) < 256 and os.path.exists(path_stream_or_string):
-        if isinstance(path_stream_or_string, six.string_types) and os.path.exists(path_stream_or_string):
+        if (isinstance(path_stream_or_string, six.string_types) and
+                len(path_stream_or_string) < 32760 and
+                os.path.exists(path_stream_or_string)):
             self._lines = lines_from_file(path_stream_or_string, as_interned, encoding)
         elif isinstance(path_stream_or_string, (list, tuple)):
             self._lines = path_stream_or_string
