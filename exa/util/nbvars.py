@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2015-2019, Exa Analytics Development Team
+# Copyright (c) 2015-2020, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Numba Extensions
@@ -93,4 +92,3 @@ def numbafy(fn, args, compiler="jit", **nbkws):
             kwargs['cache'] = False
             func = compiler(sig, **kwargs)(func)
     return func
-

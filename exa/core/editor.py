@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2015-2019, Exa Analytics Development Team
+# Copyright (c) 2015-2020, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Editor
@@ -375,7 +374,7 @@ class Editor(object):
         # Backporting file check
         textobj = path_stream_or_string
         if (isinstance(textobj, six.string_types) and len(textobj.split("\n")) == 1
-            and ignore == False and not os.path.exists(textobj)):
+                and ignore == False and not os.path.exists(textobj)):
             warnings.warn("Possibly incorrect file path! {}".format(textobj))
         #if len(path_stream_or_string) < 256 and os.path.exists(path_stream_or_string):
         if isinstance(path_stream_or_string, six.string_types) and os.path.exists(path_stream_or_string):
@@ -490,4 +489,3 @@ def lines_from_string(string, as_interned=False):
     if as_interned:
         return [sys.intern(line) for line in string.splitlines()]
     return string.splitlines()
-
