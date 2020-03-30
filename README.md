@@ -1,6 +1,6 @@
 [![exa logo](docs/source/static/logo.png)](https://exa-analytics.github.io) 
 
-*A framework for data science*
+*A framework for data engineering and science*
 
 
 # Installation
@@ -16,25 +16,21 @@ or [pypi](https://pypi.python.org/pypi).
 
 
 # Getting Started
-[![gitter](https://badges.gitter.im/exa-analytics/exa.svg)](https://gitter.im/exa-analytics/exa)  
-
-See [docs](https://exa-analytics.github.io/exatomic/) for usage. 
+See [docs](https://exa-analytics.github.io/exa/) for usage. 
 
 Building the docs requires [sphinx](http://www.sphinx-doc.org/en/stable). On Linux or Mac:
 
-    $ cd docs
-    $ make html
+    $ ./make-docs.sh
 
 On Windows:
 
-    $ cd docs
-    $ ./make.bat html
+    $ make-docs.bat
 
 
 # Development
 [![Travis-CI](https://travis-ci.org/exa-analytics/exa.svg?branch=master)](https://travis-ci.org/exa-analytics/exa)
 
-[![AppVeyor](https://ci.appveyor.com/api/projects/status/610bj35v7f5hu8n0/branch/master?svg=true)](https://ci.appveyor.com/project/avmarchenko/exa-qonos)
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/9ufeeu5p623sifmr/branch/master?svg=true)](https://ci.appveyor.com/project/avmarchenko/exa/branch/master)
 
 [![Coveralls](https://coveralls.io/repos/github/exa-analytics/exa/badge.svg)](https://coveralls.io/github/exa-analytics/exa)
 

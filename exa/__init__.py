@@ -138,8 +138,8 @@ _path = os.path.join(cfg.logdir, cfg.logname)
 _log['handlers']['file']['filename'] = _path
 logging.config.dictConfig(_log)
 
-from ._version import __version__
-from .core import (DataFrame, Series, Field3D, Field, Editor, Container,
-                   SparseDataFrame)
-
-from .core import Data, Isotopes, Constants, Units
+from .core import (Data, Isotopes, Constants, Units, Container, Editor,
+                   DataFrame, Series, Field3D, Field, SparseDataFrame)
+from ._version import get_versions
+__version__ = get_versions()['version']
+del get_versions
