@@ -70,7 +70,7 @@ class Data(exa.Base):
         as a namespace path in a config, it must be a
         function. If provided dynamically, any callable
         will do."""
-        source = prop['value']
+        source = prop.value
         self.log.debug(f"validating {source}")
         if isinstance(source, str):
             # Assume source is a namespace to a callable
@@ -97,7 +97,7 @@ class Data(exa.Base):
 
     @validate('name')
     def _validate_name(self, prop):
-        name = prop['value']
+        name = prop.value
         self.log.debug(f"lowercasing {name}")
         return name.lower()
 
@@ -107,7 +107,7 @@ class Data(exa.Base):
 
     @validate('cardinal')
     def _validate_cardinal(self, prop):
-        c = prop['value']
+        c = prop.value
         if self.indexes and c not in self.indexes:
             raise TraitError(f"{c} not in {self.indexes}")
         return c
@@ -213,11 +213,11 @@ class Data(exa.Base):
                 )
         return df
 
-    def __init__(self, *args, data=None, **kws):
+    def __init__(self, *args, df=None, **kws):
         super().__init__(*args, **kws)
         # setting source invalidates _data so do it after
-        if data is not None:
-            self.data(df=data)
+        if df is not None:
+            self.data(df=df)
 
 
 def load_isotopes():

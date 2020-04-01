@@ -105,17 +105,19 @@ def test_from_yml(isotopes):
     assert not df.columns.difference(d.columns).any()
     assert df.shape == isotopes.data().shape
 
-def test_from_yml_fail(tmp_path):
-    f = tmp_path / "cfg.yml"
-    f.write_text("""\
+def test_from_yml_fail(tmpdir):
+    d = tmpdir.mkdir('d')
+    f = d.join("cfg.yml")
+    f.write("""\
 name: test
 source: os.path.isfile
 """)
     dum = exa.Data.from_yml(f)
-    with pytest.raises(Exception):
+    # os.path.isfile requires an argument and throws
+    with pytest.raises(TypeError):
         dum.data()
-    f = tmp_path / "oth.yml"
-    f.write_text("""\
+    f = d.join("oth.yml")
+    f.write("""\
 name: test
 source: os.path.dne
 """)
@@ -140,8 +142,8 @@ def test_constants():
 def test_units():
     assert not exa.core.data.Units.data().empty
 
-def test_save(data, tmp_path):
+def test_save(data):
     pass
 
-def test_load(data, tmp_path):
+def test_load(data):
     pass
