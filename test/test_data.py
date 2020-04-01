@@ -139,3 +139,9 @@ def test_constants():
 
 def test_units():
     assert not exa.core.data.Units.data().empty
+
+def test_save(data, tmp_path):
+    pass
+
+def test_load(data, tmp_path):
+    pass
