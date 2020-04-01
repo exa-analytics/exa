@@ -163,6 +163,8 @@ class Data(exa.Base):
         return df
 
     def load(self, name=None, directory=None):
+        """Load a saved Data from its stored metadata yaml
+        and parquet data file."""
         name = name or self.name
         directory = Path(directory) or exa.cfg.savedir
         self.log.info(f"loading {directory / name}")
