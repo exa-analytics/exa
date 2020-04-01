@@ -49,7 +49,7 @@ class Data(exa.Base):
         if isinstance(df, pd.DataFrame):
             if cols:
                 return df.groupby(cols)
-            self.log.warning("nothing to group by")
+            self.log.warning("no columns to group by")
         self.log.warning("no dataframe to group by")
 
     def memory(self):
