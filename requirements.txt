@@ -2,10 +2,9 @@ networkx
 traitlets
 numpy
 pandas
-numba
 sympy
+tables
+numba
 pyyaml
 six
 sqlalchemy
-psycopg2-binary
-pyarrow
