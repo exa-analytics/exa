@@ -4,11 +4,6 @@ matrix:
     include:
         - os: linux
           language: python
-          python: 3.5
-          env: PYTHONVER=3.5
-
-        - os: linux
-          language: python
           python: 3.6
           env: PYTHONVER=3.6
 
@@ -17,10 +12,10 @@ matrix:
           python: 3.7
           env: PYTHONVER=3.7
 
-        - os: osx
-          language: generic
-          python: 3.5
-          env: PYTHONVER=3.5
+        - os: linux
+          language: python
+          python: 3.8
+          env: PYTHONVER=3.8
 
         - os: osx
           language: generic
@@ -31,6 +26,11 @@ matrix:
           language: generic
           python: 3.7
           env: PYTHONVER=3.7
+
+        - os: osx
+          language: generic
+          python: 3.8
+          env: PYTHONVER=3.8
 
 install:
     - if [[ $TRAVIS_OS_NAME == "osx" ]]; then
