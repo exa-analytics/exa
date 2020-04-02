@@ -5,7 +5,6 @@ Data container
 ####################################
 An in-memory related data container.
 """
-import sys
 import uuid
 from pathlib import Path
 

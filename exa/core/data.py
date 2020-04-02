@@ -9,8 +9,8 @@ import importlib
 from copy import deepcopy
 from pathlib import Path
 
-from traitlets import List, Unicode, Dict, Any, Tuple
-from traitlets import validate, default, observe
+from traitlets import List, Unicode, Dict, Any
+from traitlets import validate, observe
 from traitlets import TraitError
 import pandas as pd
 
