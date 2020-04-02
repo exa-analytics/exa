@@ -376,6 +376,7 @@ class Editor(object):
         if (isinstance(textobj, six.string_types) and len(textobj.split("\n")) == 1
                 and ignore == False and not os.path.exists(textobj)):
             warnings.warn("Possibly incorrect file path! {}".format(textobj))
+        #if len(path_stream_or_string) < 256 and os.path.exists(path_stream_or_string):
         if (isinstance(path_stream_or_string, six.string_types) and
                 len(path_stream_or_string) < 32760 and
                 os.path.exists(path_stream_or_string)):
