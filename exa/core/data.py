@@ -28,10 +28,8 @@ class Data(exa.Base):
     source = Any(allow_none=True, help="a callable that takes priority over a __call__ method")
     call_args = List(help="args to pass to call or source")
     call_kws = Dict(help="kwargs to pass to call or source")
-    index = Unicode(help="index name") # is this required for Container.network?
-    # cardinal can maybe just be indexes (or indexes[0]?)
     cardinal = Unicode(help="cardinal slicing field")
-    # TODO : cardinal, index, indexes are related..
+    index = Unicode(help="conceptual index on the data")
     indexes = List(help="columns that guarantee uniqueness")
     columns = List(help="columns that must be present in the dataset")
     # generalize to dtypes?
@@ -95,16 +93,6 @@ class Data(exa.Base):
             self.call_args = []
             self.call_kws = {}
 
-    @validate('name')
-    def _validate_name(self, prop):
-        name = prop.value
-        self.log.debug(f"lowercasing {name}")
-        return name.lower()
-
-    @default('name')
-    def _default_name(self):
-        return self.__class__.__name__
-
     @validate('cardinal')
     def _validate_cardinal(self, prop):
         c = prop.value
@@ -151,13 +139,12 @@ class Data(exa.Base):
         if not isinstance(df, pd.DataFrame):
             self.log.warning("data not a dataframe, skipping validation")
             return df
-        if self.index and df.index.name != self.index:
-            self.log.debug("setting index name {}".format(self.index))
-            df.index.name = self.index
         missing = set(self.columns).difference(df.columns)
         if missing:
             raise RequiredColumnError(missing, self.name)
         df = self._set_categories(df, reverse=reverse)
+        if self.index is not None:
+            df.index.name = self.index
         if self.indexes and df.duplicated(subset=self.indexes).any():
             raise TraitError(f"duplicates in {self.indexes}")
         return df

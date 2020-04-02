@@ -22,6 +22,16 @@ class Base(HasTraits):
     traits and trait-based logic.
     """
 
+    @default('name')
+    def _default_name(self):
+        return self.__class__.__name__
+
+    @validate('name')
+    def _validate_name(self, prop):
+        name = prop.value
+        self.log.debug(f"lowercasing {name}")
+        return name.lower()
+
     @staticmethod
     def right_now():
         """Returns the current datetime"""
