@@ -119,6 +119,7 @@ def test_data_cardinal(data):
     data.indexes = ['a', 'b']
     with pytest.raises(TraitError):
         data.cardinal = 'c'
+    data.indexes = []
 
 @pyar
 def test_data_save(isotopes, tmpdir):
