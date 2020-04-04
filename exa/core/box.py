@@ -115,7 +115,8 @@ class Box(Base):
     def load(self, name, directory=None):
         """Load a Container from a tar.gz created by the
         save method."""
-        '374fffc40f90497e83b6738e5608a258'
+        # TODO : box needs to additionally load its
+        #        own metadata like Data
         adir = exa.cfg.savedir
         if directory is not None:
             adir = Path(directory)

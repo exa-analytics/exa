@@ -64,7 +64,7 @@ class Base(HasTraits):
     @staticmethod
     def _from_yml(path_or_buf):
         """Load a configuration file"""
-        if isinstance(path_or_buf, str):
+        if isinstance(path_or_buf, (str, Path)):
             with open(path_or_buf, 'r') as f:
                 cfg = yaml.safe_load(f.read())
         else:
