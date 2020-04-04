@@ -62,10 +62,13 @@ class Base(HasTraits):
         return cls(**cls._from_yml(path))
 
     @staticmethod
-    def _from_yml(path):
+    def _from_yml(path_or_buf):
         """Load a configuration file"""
-        with open(path, 'r') as f:
-            cfg = yaml.safe_load(f.read())
+        if isinstance(path_or_buf, str):
+            with open(path_or_buf, 'r') as f:
+                cfg = yaml.safe_load(f.read())
+        else:
+            cfg = yaml.safe_load(path_or_buf.read())
         return cfg
 
     def traits(self, *args, **kws):

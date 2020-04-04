@@ -5,7 +5,9 @@ Data container
 ####################################
 An in-memory related data container.
 """
+import os
 import uuid
+import tarfile
 from pathlib import Path
 
 import pandas as pd
@@ -21,8 +23,20 @@ class Box(Base):
     meta = Dict(help="metadata dictionary")
     description = Unicode(help="container description")
 
-    def copy(self, **kws):
-        return self.__class__(**kws)
+    def copy(self, *args, **kws):
+        """Copy the box and all its Data. All args and kwargs
+        are forwarded to the underlying Data.data().copy()
+        method and assumes a deepcopy for each Data.
+
+        Warning:
+            If dataset is large, may impact performance.
+            Are you sure you need a copy?
+        """
+        copy = {}
+        for name, data in self._data.items():
+            # TODO : expose Data.copy args, kwargs?
+            copy[name] = data.copy(*args, **kws)
+        return self.__class__(**copy)
 
     def slice(self, key):
         pass
@@ -76,22 +90,47 @@ class Box(Base):
         g.edge_types = related
         return g
 
-    def save(self, name=None, directory=None, parquet_backend='pyarrow'):
-        """Save a bundle of files to a tarball."""
+    def save(self, name=None, directory=None):
+        """Save a bundle of files to a tarball. Not sure
+        how parquet will interact with tarfile buffer so
+        taking the easy way out for now."""
+        # TODO : box needs to additionally save its
+        #        own metadata like Data
         name = name or self.hexuid
-        directory = Path(directory) or exa.cfg.savedir
-        bundle = directory / name
+        adir = exa.cfg.savedir
+        if directory is not None:
+            adir = Path(directory)
+        bundle = adir / name
         bundle.mkdir(parents=True, exist_ok=True)
         for data in self._data.values():
-            data.save(bundle)
+            data.save(directory=bundle)
+        tarfl = (adir / name).as_posix() + '.tar.gz'
+        with tarfile.open(tarfl, 'w:gz') as tar:
+            for fl in bundle.iterdir():
+                tar.add(fl)
+                fl.unlink()
+        bundle.rmdir()
+        return tarfl
 
-    def load(self):
-        pass
-
-    def from_hdf(cls):
-        # Do we opt for parquet+pickle?
-        # Maybe easier/cleaner than HDF
-        pass
+    def load(self, name, directory=None):
+        """Load a Container from a tar.gz created by the
+        save method."""
+        '374fffc40f90497e83b6738e5608a258'
+        adir = exa.cfg.savedir
+        if directory is not None:
+            adir = Path(directory)
+        contents = {}
+        tarfl = (adir / name).as_posix() + '.tar.gz'
+        with tarfile.open(tarfl, 'r:gz') as tar:
+            for info in tar:
+                _, fl = os.path.split(info.name)
+                name, xt = os.path.splitext(fl)
+                contents.setdefault(name, {})
+                contents[name][xt.strip('.')] = tar.extractfile(info)
+            for name, buffers in contents.items():
+                data = exa.Data.from_tarball(**buffers)
+                self._data[data.name] = data
+                setattr(self, data.name, data)
 
     def __delitem__(self, key):
         if key in self._data:
@@ -100,7 +139,7 @@ class Box(Base):
     def __getitem__(self, key):
         pass
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, hexuid=None, **kwargs):
         self._data = {}
         for key, value in kwargs.items():
             if isinstance(value, Data):
@@ -111,4 +150,4 @@ class Box(Base):
             k: v for k, v in kwargs.items()
             if k not in self._data
         })
-        self.hexuid = uuid.uuid4().hex
+        self.hexuid = hexuid or uuid.uuid4().hex

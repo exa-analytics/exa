@@ -113,9 +113,9 @@ class Data(exa.Base):
         of the Data object itself."""
         cls = self.__class__
         if hasattr(self.data(), 'copy'):
-            return cls(data=self.data().copy(*args, **kws),
+            return cls(df=self.data().copy(*args, **kws),
                        **deepcopy(self.trait_items()))
-        return cls(data=deepcopy(self.data()),
+        return cls(df=deepcopy(self.data()),
                    **deepcopy(self.trait_items()))
 
     def data(self, df=None, cache=True):
@@ -160,9 +160,19 @@ class Data(exa.Base):
             raise TraitError(f"duplicates in {self.indexes}")
         return df
 
-    def load(self, name=None, directory=None):
+    @classmethod
+    def from_tarball(cls, yml=None, qet=None):
+        """Load a Data that was packed inside a Container tarball"""
+        yml = cls._from_yml(yml)
+        df = None
+        if qet is not None:
+            df = pd.read_parquet(qet)
+        return cls(df=df, **yml)
+
+    def load(self, name=None, directory=None, tarbuffer=False):
         """Load a saved Data from its stored metadata yaml
         and parquet data file."""
+        # TODO : should name set self.name? same for save?
         name = name or self.name
         directory = Path(directory) or exa.cfg.savedir
         self.log.info(f"loading {directory / name}")
@@ -170,29 +180,33 @@ class Data(exa.Base):
             yml = self._from_yml(directory / f'{name}.yml')
             for attr, vals in yml.items():
                 setattr(self, attr, vals)
+        else:
+            self.log.warn(f"{directory / name}.yml does not exist")
         if (directory / f'{name}.qet').exists():
             self._data = pd.read_parquet(
                 directory / f'{name}.qet', columns=self.columns
             )
+        else:
+            self.log.warn(f"{directory / name}.qet does not exist")
 
     def save(self, name=None, directory=None):
         """Save the housed dataframe as a parquet file and related
-        metadata as a yml file with the same name."""
+        metadata as a yml file with the same name.
+        Should optionally save into a Container's tarfile."""
         name = name or self.name
+        adir = exa.cfg.savedir
         if directory is not None:
-            directory = Path(directory)
-        else:
-            directory = exa.cfg.savedir
-        directory.mkdir(parents=True, exist_ok=True)
+            adir = Path(directory)
+        adir.mkdir(parents=True, exist_ok=True)
         data = self.data()
         if isinstance(data, pd.DataFrame):
-            data.to_parquet(directory / f'{name}.qet')
+            data.to_parquet(adir / f'{name}.qet')
             self._data = None
         save = self.trait_items()
         source = save.pop('source', None)
         if source is not None:
             save['source'] = '.'.join((source.__module__, source.__name__))
-        with open(directory / f'{name}.yml', 'w') as f:
+        with open(adir / f'{name}.yml', 'w') as f:
             yaml.dump(save, f, default_flow_style=False)
         if data is not None:
             self.data(df=data)
