@@ -58,6 +58,7 @@ def test_box_network():
     assert g.nodes
     assert g.edges
 
+@pyar
 def test_box_save_load(fullbox, tmpdir):
     d = tmpdir.mkdir('test_box_load')
     fullbox.save(directory=d)

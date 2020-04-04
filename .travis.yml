@@ -47,7 +47,7 @@ install:
     - source activate test
     - conda update -q -y --all
     - conda install -q -y numba
-    - conda install -q -y -c conda-forge numpy scipy seaborn networkx pandas pyyaml pytables six sympy sphinx sphinx_rtd_theme ply pandoc pypandoc nbsphinx ipython coveralls coverage pytest pytest-cov
+    - conda install -q -y -c conda-forge numpy scipy seaborn networkx pandas pyyaml pytables six sympy sphinx sphinx_rtd_theme ply pandoc pypandoc nbsphinx ipython coveralls coverage pytest pytest-cov pyarrow
     - pip install travis-sphinx codacy-coverage
     - python setup.py install
 
