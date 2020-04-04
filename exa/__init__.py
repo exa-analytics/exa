@@ -164,6 +164,7 @@ logging.config.dictConfig(_log)
 
 from .core import (Data, Isotopes, Constants, Units, Container, Editor,
                    DataFrame, Series, Field3D, Field, SparseDataFrame)
+from .core import Box
 from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions

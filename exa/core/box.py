@@ -63,10 +63,11 @@ class Box(Base):
 
     def network(self):
         """Build a network of the relationships between
-        data as specified by the container's metadata
+        data as specified by the container's metadata.
         """
         # TODO: log-scale sizes for nodes
         sizes = self.info()['size'].to_dict()
+        # TODO: there is a bug in this
         related = {}
         print("name0, name1, index0, data1.indexes, data1.columns")
         for name0, data0 in self._data.items():
@@ -132,6 +133,8 @@ class Box(Base):
                 data = exa.Data.from_tarball(**buffers)
                 self._data[data.name] = data
                 setattr(self, data.name, data)
+
+    # TODO : should __setitem__ inspect for Data and add to _data?
 
     def __delitem__(self, key):
         if key in self._data:

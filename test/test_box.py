@@ -5,15 +5,11 @@
 Tests for :mod:`~exa.core.data`
 #######################################
 """
-import os
 import sys
 
 import pytest
-import pandas as pd
-from traitlets import TraitError
 
 import exa
-from exa.core.error import RequiredColumnError
 
 try:
     import pyarrow
@@ -26,12 +22,14 @@ pyar = pytest.mark.skipif(
 
 @pytest.fixture(scope='module')
 def box():
-    return exa.core.box.Box()
+    i = pyarrow.int16()
+    assert i is not None
+    return exa.Box()
 
 @pytest.fixture(scope='module')
 def fullbox(isotopes, constants):
-    return exa.core.box.Box(isotopes=isotopes,
-                            constants=constants)
+    return exa.Box(isotopes=isotopes,
+                   constants=constants)
 
 def test_box_simple(box):
     assert box
@@ -40,8 +38,8 @@ def test_box_full(fullbox):
     assert fullbox
 
 def test_box_copy(fullbox):
-    notcopy = exa.core.box.Box(isotopes=fullbox.isotopes,
-                               constants=fullbox.constants)
+    notcopy = exa.Box(isotopes=fullbox.isotopes,
+                      constants=fullbox.constants)
     assert notcopy.isotopes.data() is fullbox.isotopes.data()
     assert notcopy.constants.data() is fullbox.constants.data()
     copy = fullbox.copy()
@@ -52,9 +50,20 @@ def test_box_info(fullbox):
     df = fullbox.info()
     assert df.index.name == 'name'
 
-def test_box_network(fullbox):
-    g = fullbox.network()
+def test_box_network():
+    d0 = exa.Data(name='foo', indexes=['a', 'b'], columns=['a', 'b', 'c', 'd'])
+    d1 = exa.Data(name='bar', indexes=['b', 'c'], columns=['b', 'c', 'd', 'e'])
+    box = exa.Box(foo=d0, bar=d1)
+    g = box.network()
+    assert g.nodes
+    assert g.edges
 
-def test_box_save(fullbox, tmpdir):
-    d = tmpdir.mkdir('test_box_save')
+def test_box_save_load(fullbox, tmpdir):
+    d = tmpdir.mkdir('test_box_load')
     fullbox.save(directory=d)
+    nbox = exa.Box()
+    nbox.load(name=fullbox.hexuid, directory=d)
+    assert not nbox.isotopes is fullbox.isotopes
+    assert not nbox.constants is fullbox.constants
+    assert nbox.isotopes.data().equals(fullbox.isotopes.data())
+    assert nbox.constants.data().equals(fullbox.constants.data())
