@@ -5,11 +5,24 @@
 Tests for :mod:`~exa.core.data`
 #######################################
 """
+import os
+import sys
+
 import pytest
 import pandas as pd
 from traitlets import TraitError
+
 import exa
 from exa.core.error import RequiredColumnError
+
+try:
+    import pyarrow
+except ImportError:
+    pass
+
+pyar = pytest.mark.skipif(
+    'pyarrow' not in sys.modules, reason='requires pyarrow'
+)
 
 
 @pytest.fixture(scope='module')
@@ -38,6 +51,11 @@ def test_new_data_call_params():
     fun = lambda *a, **kws: kws
     d.source = fun
     assert d.data(cache=False) == d.call_kws
+
+def test_new_data_df(isotopes):
+    d = exa.Data(df=isotopes.data())
+    assert isotopes.data().equals(d.data())
+    assert d.data() is isotopes.data()
 
 def test_data_setting_source(data):
     fun = lambda *a: a[0] if a else None
@@ -96,6 +114,31 @@ def test_data_validation(data):
         data.data(df=df)
     data.indexes = []
 
+def test_data_cardinal(data):
+    data.cardinal = 'a'
+    data.indexes = ['a', 'b']
+    with pytest.raises(TraitError):
+        data.cardinal = 'c'
+
+@pyar
+def test_data_save(isotopes, tmpdir):
+    d = tmpdir.mkdir('test_data_save')
+    isotopes.save(directory=d)
+    assert os.path.isfile(os.path.join(d, 'isotopes.yml'))
+    assert os.path.isfile(os.path.join(d, 'isotopes.qet'))
+    d = exa.Data(name='tmp_data')
+    d.save()
+    od = exa.cfg.savedir
+    assert os.path.isfile(os.path.join(od, 'tmp_data.yml'))
+    assert not os.path.isfile(os.path.join(od, 'data.qet'))
+    os.unlink(os.path.join(od, 'tmp_data.yml'))
+
+@pyar
+def test_data_load(data):
+    d = exa.Data(name='isotopes')
+    adir = exa.cfg.resource('isotopes.yml')
+    d.load(directory=os.path.dirname(adir))
+
 def test_from_yml(isotopes):
     d = exa.Data.from_yml(exa.cfg.resource('isotopes.yml'))
     df = d.data()
@@ -106,7 +149,7 @@ def test_from_yml(isotopes):
     assert df.shape == isotopes.data().shape
 
 def test_from_yml_fail(tmpdir):
-    d = tmpdir.mkdir('d')
+    d = tmpdir.mkdir('test_from_yml_fail')
     f = d.join("cfg.yml")
     f.write("""\
 name: test
@@ -123,6 +166,9 @@ source: os.path.dne
 """)
     with pytest.raises(TraitError):
         dum = exa.Data.from_yml(f)
+    d = exa.Data()
+    with pytest.raises(TraitError):
+        d.source = 1
 
 def test_copy(data):
     data._data = None
@@ -141,9 +187,3 @@ def test_constants():
 
 def test_units():
     assert not exa.core.data.Units.data().empty
-
-def test_save(data):
-    pass
-
-def test_load(data):
-    pass

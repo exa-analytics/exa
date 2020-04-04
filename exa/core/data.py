@@ -95,6 +95,13 @@ class Data(exa.Base):
 
     @validate('cardinal')
     def _validate_cardinal(self, prop):
+        """The cardinal concept refers to a "global" index
+        shared across multiple data objects. Perhaps its
+        API should live in and be controlled by the Container?
+        Here can serve as a pass-through to parent if it exists.
+        Should it need to be present in data? 
+        """
+        # TODO: should cardinal implicitly be in indexes
         c = prop.value
         if self.indexes and c not in self.indexes:
             raise TraitError(f"{c} not in {self.indexes}")
@@ -136,6 +143,10 @@ class Data(exa.Base):
         return self._data
 
     def _validate_data(self, df, reverse=False):
+        """Employ validations specified by the Data's
+        metadata. Assumes a pandas DataFrame is the
+        primary data object to be housed by an exa Data.
+        """
         if not isinstance(df, pd.DataFrame):
             self.log.warning("data not a dataframe, skipping validation")
             return df
@@ -168,7 +179,10 @@ class Data(exa.Base):
         """Save the housed dataframe as a parquet file and related
         metadata as a yml file with the same name."""
         name = name or self.name
-        directory = Path(directory) or exa.cfg.savedir
+        if directory is not None:
+            directory = Path(directory)
+        else:
+            directory = exa.cfg.savedir
         directory.mkdir(parents=True, exist_ok=True)
         data = self.data()
         if isinstance(data, pd.DataFrame):

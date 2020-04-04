@@ -105,7 +105,7 @@ class Cfg(Base):
             EXA_DB_CONN='sqlite://'
             EXA_DB_CONN='postgresql://username:password@localhost:5432/dbname'
         """
-        return os.environ.get('EXA_DB_CONN', '')
+        return os.getenv('EXA_DB_CONN', '')
 
     @validate('logdir')
     def _validate_logdir(self, prop):
