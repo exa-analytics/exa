@@ -99,7 +99,7 @@ class Data(exa.Base):
         shared across multiple data objects. Perhaps its
         API should live in and be controlled by the Container?
         Here can serve as a pass-through to parent if it exists.
-        Should it need to be present in data? 
+        Should it need to be present in data?
         """
         # TODO: should cardinal implicitly be in indexes
         c = prop.value

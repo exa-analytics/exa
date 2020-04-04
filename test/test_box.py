@@ -22,8 +22,6 @@ pyar = pytest.mark.skipif(
 
 @pytest.fixture(scope='module')
 def box():
-    i = pyarrow.int16()
-    assert i is not None
     return exa.Box()
 
 @pytest.fixture(scope='module')
@@ -60,6 +58,8 @@ def test_box_network():
 
 @pyar
 def test_box_save_load(fullbox, tmpdir):
+    i = pyarrow.int16()
+    assert i is not None
     d = tmpdir.mkdir('test_box_load')
     fullbox.save(directory=d)
     nbox = exa.Box()

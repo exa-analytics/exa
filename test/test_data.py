@@ -135,6 +135,8 @@ def test_data_save(isotopes, tmpdir):
 
 @pyar
 def test_data_load(data):
+    i = pyarrow.int16()
+    assert i is not None
     d = exa.Data(name='isotopes')
     adir = exa.cfg.resource('isotopes.yml')
     d.load(directory=os.path.dirname(adir))
