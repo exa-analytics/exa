@@ -26,9 +26,10 @@ sqla = pytest.mark.skipif(
 psyc = pytest.mark.skipif(
     'psycopg2' not in sys.modules, reason='requires psycopg2'
 )
-pg_db_conn = pytest.mark.skipif(
-    not (exa.cfg.db_conn.startswith('postgres') or
-         exa.cfg.db_conn.startswith('psycopg')),
+pg_db_conn = pytest.mark.skipif((
+    exa.cfg.db_conn is None or not
+    (exa.cfg.db_conn.startswith('postgres') or
+     exa.cfg.db_conn.startswith('psycopg2'))),
     reason='requires DB connection string'
 )
 SCHEMA1 = 'exa_test_schema'

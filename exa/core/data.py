@@ -32,7 +32,7 @@ class Data(exa.Base):
     index = Unicode(help="conceptual index on the data")
     indexes = List(help="columns that guarantee uniqueness")
     columns = List(help="columns that must be present in the dataset")
-    # generalize to dtypes?
+    # TODO : generalize to dtypes to allow pre-defined type-casting
     categories = Dict()
 
     def slice(self, key):

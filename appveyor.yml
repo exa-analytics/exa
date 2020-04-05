@@ -58,7 +58,7 @@ install:
   - cmd: conda update -q -y --all
   - cmd: conda install -q -y numba
   - cmd: conda install -q -y -c conda-forge numpy scipy seaborn networkx pandas pyyaml pytables six sympy pytest
-  - cmd: conda install -q -y sqlalchemy psycopg2 traitlets
+  - cmd: conda install -q -y sqlalchemy psycopg2 traitlets pyarrow
   - cmd: python setup.py install
 
 build: false

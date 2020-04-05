@@ -108,7 +108,7 @@ class Cfg(Base):
             EXA_DB_CONN='sqlite://'
             EXA_DB_CONN='postgresql://username:password@localhost:5432/dbname'
         """
-        return os.getenv('EXA_DB_CONN', '')
+        return os.getenv('EXA_DB_CONN')
 
     @validate('logdir')
     def _validate_logdir(self, prop):
@@ -168,3 +168,4 @@ from .core import Box
 from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions
+box = Box(isotopes=Isotopes, constants=Constants, units=Units)

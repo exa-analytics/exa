@@ -48,11 +48,11 @@ class Box(Base):
         info = []
         for name, data in self._data.items():
             df = data.data()
-            # TODO: prepend __module__?
+            dname = df.__class__.__name__
             if isinstance(df, pd.DataFrame):
-                info.append((name, type(data), df.memory_usage().sum(), df.shape))
+                info.append((name, dname, df.memory_usage().sum(), df.shape))
             elif isinstance(df, pd.Series):
-                info.append((name, type(data), df.memory_usage(), df.shape))
+                info.append((name, dname, df.memory_usage(), df.shape))
             else:
                 info.append((name, type(data), None, None))
         info = pd.DataFrame(info, columns=['name', 'type', 'size', 'shape'])
@@ -105,7 +105,7 @@ class Box(Base):
         bundle.mkdir(parents=True, exist_ok=True)
         for data in self._data.values():
             data.save(directory=bundle)
-        tarfl = (adir / name).as_posix() + '.tar.gz'
+        tarfl = bundle.as_posix() + '.tar.gz'
         with tarfile.open(tarfl, 'w:gz') as tar:
             for fl in bundle.iterdir():
                 tar.add(fl)
@@ -116,6 +116,9 @@ class Box(Base):
     def load(self, name, directory=None):
         """Load a Container from a tar.gz created by the
         save method."""
+        # TODO : if name is a hexuid, should it be
+        #        set on load to hexuid? or saved as
+        #        an "original_hexuid"?
         # TODO : box needs to additionally load its
         #        own metadata like Data
         adir = exa.cfg.savedir
@@ -134,7 +137,7 @@ class Box(Base):
                 self._data[data.name] = data
                 setattr(self, data.name, data)
 
-    # TODO : should __setitem__ inspect for Data and add to _data?
+    # TODO : __setitem__ should inspect for Data and add to _data
 
     def __delitem__(self, key):
         if key in self._data:
@@ -149,7 +152,7 @@ class Box(Base):
             if isinstance(value, Data):
                 self._data[key] = value
             setattr(self, key, value)
-        self.log.info('added {} attrs'.format(len(self._data)))
+        self.log.info('added {} data'.format(len(self._data)))
         super().__init__(*args, **{
             k: v for k, v in kwargs.items()
             if k not in self._data
