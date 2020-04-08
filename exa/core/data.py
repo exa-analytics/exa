@@ -4,11 +4,13 @@
 Data
 ########
 """
+import yaml
 import importlib
 from copy import deepcopy
+from pathlib import Path
 
-from traitlets import List, Unicode, Dict, Any, Tuple
-from traitlets import validate, default, observe
+from traitlets import List, Unicode, Dict, Any
+from traitlets import validate, observe
 from traitlets import TraitError
 import pandas as pd
 
@@ -26,12 +28,11 @@ class Data(exa.Base):
     source = Any(allow_none=True, help="a callable that takes priority over a __call__ method")
     call_args = List(help="args to pass to call or source")
     call_kws = Dict(help="kwargs to pass to call or source")
-    index = Unicode(help="index name") # is this required for Container.network?
+    cardinal = Unicode(help="cardinal slicing field")
+    index = Unicode(help="conceptual index on the data")
     indexes = List(help="columns that guarantee uniqueness")
     columns = List(help="columns that must be present in the dataset")
-    # cardinal can maybe just be indexes (or indexes[0]?)
-    cardinal = Tuple()
-    # generalize to dtypes?
+    # TODO : generalize to dtypes to allow pre-defined type-casting
     categories = Dict()
 
     def slice(self, key):
@@ -42,9 +43,12 @@ class Data(exa.Base):
     def groupby(self, columns=None):
         """Convenience method for pandas groupby"""
         cols = columns or self.indexes
-        if cols:
-            return self.data().groupby(cols)
-        self.log.warning("nothing to group by")
+        df = self.data()
+        if isinstance(df, pd.DataFrame):
+            if cols:
+                return df.groupby(cols)
+            self.log.warning("no columns to group by")
+        self.log.warning("no dataframe to group by")
 
     def memory(self):
         """Return the memory footprint of the underlying
@@ -60,9 +64,21 @@ class Data(exa.Base):
 
     @validate('source')
     def _validate_source(self, prop):
-        """source must implement __call__"""
-        source = prop['value']
+        """source must implement __call__. If specified
+        as a namespace path in a config, it must be a
+        function. If provided dynamically, any callable
+        will do."""
+        source = prop.value
         self.log.debug(f"validating {source}")
+        if isinstance(source, str):
+            # Assume source is a namespace to a callable
+            try:
+                *mod, obj = source.split('.')
+                mod = importlib.import_module('.'.join(mod))
+                source = getattr(mod, obj)
+            except Exception as e:
+                self.log.error(f"could not import {obj} from {mod}")
+                raise TraitError("source must be importable")
         if not callable(source):
             raise TraitError("source must be callable")
         return source
@@ -77,38 +93,19 @@ class Data(exa.Base):
             self.call_args = []
             self.call_kws = {}
 
-    @validate('name')
-    def _validate_name(self, prop):
-        name = prop['value']
-        self.log.debug(f"lowercasing {name}")
-        return name.lower()
-
-    @default('name')
-    def _default_name(self):
-        return self.__class__.__name__
-
-    @classmethod
-    def from_yml(cls, path):
-        """Load a Data object from a configuration
-        file. The intent is not to store the actual
-        data in the config, rather all the required
-        metadata to source and validate the data for
-        itself. Also checks for a configuration file
-        specified for the Data's indended source.
+    @validate('cardinal')
+    def _validate_cardinal(self, prop):
+        """The cardinal concept refers to a "global" index
+        shared across multiple data objects. Perhaps its
+        API should live in and be controlled by the Container?
+        Here can serve as a pass-through to parent if it exists.
+        Should it need to be present in data?
         """
-        # API loading can probably be generalized
-        # and moved to a base class staticmethod.
-        cfg = cls._from_yml(path)
-        source = cfg.pop('source', None)
-        # Assume source is a path to a method_name
-        if source is not None:
-            try:
-                *mod, obj = source.split('.')
-                mod = importlib.import_module('.'.join(mod))
-                source = getattr(mod, obj)
-            except Exception as e:
-                source = None
-        return cls(source=source, **cfg)
+        # TODO: should cardinal implicitly be in indexes
+        c = prop.value
+        if self.indexes and c not in self.indexes:
+            raise TraitError(f"{c} not in {self.indexes}")
+        return c
 
     def copy(self, *args, **kws):
         """All args and kwargs are forwarded to
@@ -116,16 +113,16 @@ class Data(exa.Base):
         of the Data object itself."""
         cls = self.__class__
         if hasattr(self.data(), 'copy'):
-            return cls(data=self.data().copy(*args, **kws),
+            return cls(df=self.data().copy(*args, **kws),
                        **deepcopy(self.trait_items()))
-        return cls(data=deepcopy(self.data()),
+        return cls(df=deepcopy(self.data()),
                    **deepcopy(self.trait_items()))
 
     def data(self, df=None, cache=True):
         """Return the currently stored data in the
         Data object. If df is provided, store that
         as the current data and return it. Otherwise,
-        determine the provider to execute to obtain
+        determine the source to call to obtain
         the data, store it and return it.
 
         Note:
@@ -146,19 +143,73 @@ class Data(exa.Base):
         return self._data
 
     def _validate_data(self, df, reverse=False):
+        """Employ validations specified by the Data's
+        metadata. Assumes a pandas DataFrame is the
+        primary data object to be housed by an exa Data.
+        """
         if not isinstance(df, pd.DataFrame):
             self.log.warning("data not a dataframe, skipping validation")
             return df
-        if self.index and df.index.name != self.index:
-            self.log.debug("setting index name {}".format(self.index))
-            df.index.name = self.index
         missing = set(self.columns).difference(df.columns)
         if missing:
             raise RequiredColumnError(missing, self.name)
         df = self._set_categories(df, reverse=reverse)
+        if self.index is not None:
+            df.index.name = self.index
         if self.indexes and df.duplicated(subset=self.indexes).any():
             raise TraitError(f"duplicates in {self.indexes}")
         return df
+
+    @classmethod
+    def from_tarball(cls, yml=None, qet=None):
+        """Load a Data that was packed inside a Container tarball"""
+        yml = cls._from_yml(yml)
+        df = None
+        if qet is not None:
+            df = pd.read_parquet(qet)
+        return cls(df=df, **yml)
+
+    def load(self, name=None, directory=None, tarbuffer=False):
+        """Load a saved Data from its stored metadata yaml
+        and parquet data file."""
+        # TODO : should name set self.name? same for save?
+        name = name or self.name
+        directory = Path(directory) or exa.cfg.savedir
+        self.log.info(f"loading {directory / name}")
+        if (directory / f'{name}.yml').exists():
+            yml = self._from_yml(directory / f'{name}.yml')
+            for attr, vals in yml.items():
+                setattr(self, attr, vals)
+        else:
+            self.log.warn(f"{directory / name}.yml does not exist")
+        if (directory / f'{name}.qet').exists():
+            self._data = pd.read_parquet(
+                directory / f'{name}.qet', columns=self.columns
+            )
+        else:
+            self.log.warn(f"{directory / name}.qet does not exist")
+
+    def save(self, name=None, directory=None):
+        """Save the housed dataframe as a parquet file and related
+        metadata as a yml file with the same name.
+        Should optionally save into a Container's tarfile."""
+        name = name or self.name
+        adir = exa.cfg.savedir
+        if directory is not None:
+            adir = Path(directory)
+        adir.mkdir(parents=True, exist_ok=True)
+        data = self.data()
+        if isinstance(data, pd.DataFrame):
+            data.to_parquet(adir / f'{name}.qet')
+            self._data = None
+        save = self.trait_items()
+        source = save.pop('source', None)
+        if source is not None:
+            save['source'] = '.'.join((source.__module__, source.__name__))
+        with open(adir / f'{name}.yml', 'w') as f:
+            yaml.dump(save, f, default_flow_style=False)
+        if data is not None:
+            self.data(df=data)
 
     def _set_categories(self, df, reverse=False):
         """For specified categorical fields,
@@ -177,11 +228,11 @@ class Data(exa.Base):
                 )
         return df
 
-    def __init__(self, *args, data=None, **kws):
+    def __init__(self, *args, df=None, **kws):
         super().__init__(*args, **kws)
         # setting source invalidates _data so do it after
-        if data is not None:
-            self.data(df=data)
+        if df is not None:
+            self.data(df=df)
 
 
 def load_isotopes():
@@ -209,7 +260,7 @@ def load_constants():
 def load_units():
     """Same. Move these loaders somewhere else."""
     path = exa.cfg.resource('units.json')
-    return pd.read_json(path, orient='values')
+    return pd.read_json(path) #, orient='values')
 
 Isotopes = Data(source=load_isotopes, name='isotopes')
 Constants = Data(source=load_constants, name='constants')

@@ -9,7 +9,8 @@ import sys
 import datetime as dt
 import logging.config
 import yaml
-from traitlets import HasTraits, Unicode, default, validate
+from pathlib import Path
+from traitlets import HasTraits, Unicode, Instance, default, validate
 
 
 _base = os.path.abspath(os.path.dirname(__file__))
@@ -20,6 +21,16 @@ class Base(HasTraits):
     and logging utilities. Subclasses define respective
     traits and trait-based logic.
     """
+
+    @default('name')
+    def _default_name(self):
+        return self.__class__.__name__
+
+    @validate('name')
+    def _validate_name(self, prop):
+        name = prop.value
+        self.log.debug(f"lowercasing {name}")
+        return name.lower()
 
     @staticmethod
     def right_now():
@@ -41,30 +52,38 @@ class Base(HasTraits):
         ])
         return logging.getLogger(name)
 
+    def to_yml(self, path):
+        with open(path, 'w') as f:
+            yaml.dump(self.traits(), f, default_flow_style=False)
+
     @classmethod
     def from_yml(cls, path):
         """Load an object from a configuration file"""
         return cls(**cls._from_yml(path))
 
     @staticmethod
-    def _from_yml(path):
+    def _from_yml(path_or_buf):
         """Load a configuration file"""
-        with open(path, 'r') as f:
-            cfg = yaml.safe_load(f.read())
+        if isinstance(path_or_buf, (str, Path)):
+            with open(path_or_buf, 'r') as f:
+                cfg = yaml.safe_load(f.read())
+        else:
+            cfg = yaml.safe_load(path_or_buf.read())
         return cfg
 
     def traits(self, *args, **kws):
-        # inherit super.__doc__?
-        # inherent to traitlets API and
-        # of little concern to us here.
+        """Return the set of traits specified in exa"""
         skipme = ['parent', 'config']
         traits = super().traits(*args, **kws)
         return {k: v for k, v in traits.items()
                 if k not in skipme}
 
-    def trait_items(self):
+    def trait_items(self, include_falsy=False):
         """Return a dictionary of trait names and values"""
-        return {k: getattr(self, k) for k in self.traits()}
+        if include_falsy:
+            return {k: getattr(self, k) for k in self.traits()}
+        return {k: getattr(self, k) for k in self.traits()
+                if getattr(self, k)}
 
 
 class Cfg(Base):
@@ -73,6 +92,7 @@ class Cfg(Base):
     external application integrations.
     """
     logdir = Unicode()
+    savedir = Instance(Path)
     logname = Unicode()
     staticdir = Unicode()
 
@@ -88,7 +108,7 @@ class Cfg(Base):
             EXA_DB_CONN='sqlite://'
             EXA_DB_CONN='postgresql://username:password@localhost:5432/dbname'
         """
-        return os.environ.get('EXA_DB_CONN', '')
+        return os.getenv('EXA_DB_CONN')
 
     @validate('logdir')
     def _validate_logdir(self, prop):
@@ -103,6 +123,10 @@ class Cfg(Base):
         base = os.path.join(base, '.exa')
         self.log.debug(f"initializing with logdir {base}")
         return base
+
+    @default('savedir')
+    def _default_savedir(self):
+        return Path(self._default_logdir())
 
     @default('staticdir')
     def _default_staticdir(self):
@@ -140,6 +164,8 @@ logging.config.dictConfig(_log)
 
 from .core import (Data, Isotopes, Constants, Units, Container, Editor,
                    DataFrame, Series, Field3D, Field, SparseDataFrame)
+from .core import Box
 from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions
+box = Box(isotopes=Isotopes, constants=Constants, units=Units)
