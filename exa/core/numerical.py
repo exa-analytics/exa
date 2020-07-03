@@ -28,8 +28,8 @@ class Numerical(object):
     """
     @property
     def log(self):
-        return logging.getLogger(self.name)
-
+        name = '.'.join([self.__module__, self.__class__.__name__])
+        return logging.getLogger(name)
 
     def slice_naive(self, key):
         """
@@ -47,13 +47,11 @@ class Numerical(object):
         return cls(self.loc[key])
 
     def __repr__(self):
-        return '{0}{1}'.format(self.name, self.shape)
+        name = '.'.join([self.__module__, self.__class__.__name__])
+        return '{0}{1}'.format(name, self.shape)
 
     def __str__(self):
         return self.__repr__()
-
-    def __init__(self, *args, **kwargs):
-        self.name = '.'.join([self.__module__, self.__class__.__name__])
 
 
 class BaseSeries(Numerical):
