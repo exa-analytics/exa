@@ -111,7 +111,7 @@ class Composer(Editor):
         print(modtmpl)
         dct = self.get_kwargs()
         dct.update(fkwargs)
-        return self._constructor(textobj=modtmpl.format(*self.args, **dct))
+        return self._constructor(modtmpl.format(*self.args, **dct))
 
     def get_kwargs(self):
         """Return kwargs from attached attributes."""

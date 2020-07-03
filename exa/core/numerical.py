@@ -28,10 +28,8 @@ class Numerical(object):
     """
     @property
     def log(self):
-        name = '.'.join([self.__module__,
-                         self.__class__.__name__])
+        name = '.'.join([self.__module__, self.__class__.__name__])
         return logging.getLogger(name)
-
 
     def slice_naive(self, key):
         """
@@ -49,7 +47,7 @@ class Numerical(object):
         return cls(self.loc[key])
 
     def __repr__(self):
-        name = self.__class__.__name__
+        name = '.'.join([self.__module__, self.__class__.__name__])
         return '{0}{1}'.format(name, self.shape)
 
     def __str__(self):
@@ -401,7 +399,7 @@ def check_key(data_object, key, cardinal=False):
     return key
 
 
-class SparseDataFrame(BaseDataFrame, pd.SparseDataFrame):
+class SparseDataFrame(BaseDataFrame):
     @property
     def _constructor(self):
         return SparseDataFrame

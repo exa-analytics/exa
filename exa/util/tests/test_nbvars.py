@@ -12,7 +12,10 @@ import pytest
 import platform
 import numpy as np
 import sympy as sy
-from numba.errors import TypingError
+try:
+    from numba.core.errors import TypingError
+except ImportError:
+    from numba.errors import TypingError
 from exa.util.nbvars import numbafy
 
 
