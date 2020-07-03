@@ -205,7 +205,7 @@ class Typed(object):
                 getattr(this, self.pre_set)()
             elif callable(self.pre_set):
                 self.pre_set(this)
-            if isinstance(this, (pd.DataFrame, pd.SparseDataFrame)):
+            if isinstance(this, (pd.DataFrame, )):
                 this[priv] = value
             else:
                 setattr(this, priv, value)    # Set the property value

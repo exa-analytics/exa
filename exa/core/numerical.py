@@ -401,7 +401,7 @@ def check_key(data_object, key, cardinal=False):
     return key
 
 
-class SparseDataFrame(BaseDataFrame, pd.SparseDataFrame):
+class SparseDataFrame(BaseDataFrame):
     @property
     def _constructor(self):
         return SparseDataFrame
