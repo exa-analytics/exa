@@ -379,7 +379,7 @@ class Editor(object):
             warnings.warn("Possibly incorrect file path! {}".format(textobj))
         #if len(path_stream_or_string) < 256 and os.path.exists(path_stream_or_string):
         if (isinstance(path_stream_or_string, six.string_types) and
-                len(path_stream_or_string) < 32760 and 
+                len(path_stream_or_string) < 32760 and
                 os.path.exists(path_stream_or_string)):
             self._lines = lines_from_file(path_stream_or_string, as_interned, encoding)
         elif isinstance(path_stream_or_string, (list, tuple)):

@@ -5,6 +5,7 @@
 Matplotlib Utilities
 ###############################
 """
+from copy import deepcopy
 import seaborn as sns
 import numpy as np
 #from mpl_toolkits.mplot3d import Axes3D
@@ -26,7 +27,7 @@ mpl_rc.update(mpl_save)
 
 
 def seaborn_set(context='poster', style='white', palette='colorblind',
-                font_scale=1.3, font='serif', rc=mpl_rc):
+                font_scale=1.3, font='serif', rc=deepcopy(mpl_rc)):
     """
     Perform `seaborn.set(**kwargs)`.
 
