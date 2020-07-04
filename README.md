@@ -34,7 +34,7 @@ On Windows:
 
 [![Coveralls](https://coveralls.io/repos/github/exa-analytics/exa/badge.svg)](https://coveralls.io/github/exa-analytics/exa)
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/d7f1c1b3e8f14153b67d54f7f7ccdd05)](https://www.codacy.com/app/exa-analytics/exa-org?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=exa-analytics/exa&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/ed53a521ec4f46fbb62abee528b8b4bc)](https://www.codacy.com/gh/exa-analytics/exa?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=exa-analytics/exa&amp;utm_campaign=Badge_Grade)
 
 For a development ready installation:
 
