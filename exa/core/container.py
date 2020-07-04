@@ -122,7 +122,7 @@ class Container(object):
             cls = self.__class__
             key = check_key(self[self._cardinal], key, cardinal=True)
             g = self.network(fig=False)
-            kwargs = {self._cardinal: self[self._cardinal].ix[key], 'name': self.name,
+            kwargs = {self._cardinal: self[self._cardinal].loc[key], 'name': self.name,
                       'description': self.description, 'meta': self.meta}
             # Next traverse, breadth first, all data objects
             for parent, child in nx.bfs_edges(g, self._cardinal):
@@ -134,7 +134,7 @@ class Container(object):
                 elif typ == 'index-index':
                     # Select from the child on the parent's index (the parent is
                     # in the kwargs already).
-                    kwargs[child] = self[child].ix[kwargs[parent].index.values]
+                    kwargs[child] = self[child].loc[kwargs[parent].index.values]
                 elif typ == 'index-column':
                     # Select from the child where the column (of the same name as
                     # the parent) is in the parent's index values
@@ -160,7 +160,7 @@ class Container(object):
             selfs = {}
             cls = self.__class__
             for cardinal_index in cardinal_indexes:
-                kwargs = {self._cardinal: self[self._cardinal].ix[[cardinal_index]]}
+                kwargs = {self._cardinal: self[self._cardinal].loc[[cardinal_index]]}
                 for parent, child in nx.bfs_edges(g):
                     if child in kwargs:
                         continue
@@ -170,7 +170,7 @@ class Container(object):
                     elif typ == 'index-index':
                         # Select from the child on the parent's index (the parent is
                         # in the kwargs already).
-                        kwargs[child] = self[child].ix[kwargs[parent].index.values]
+                        kwargs[child] = self[child].loc[kwargs[parent].index.values]
                     elif typ == 'index-column':
                         # Select from the child where the column (of the same name as
                         # the parent) is in the parent's index values
