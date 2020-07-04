@@ -53,7 +53,7 @@ install:
 
 script:
     - export PYTHONDONTWRITEBYTECODE=1
-    - pytest --doctest-modules --pep8 coveralls -v --cov coveralls --cov-report term-missing
+    - pytest --doctest-modules -v --cov coveralls --cov-report term-missing
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
           coverage run --source=exa setup.py test;
           rm -rf docs/source/*.txt;
