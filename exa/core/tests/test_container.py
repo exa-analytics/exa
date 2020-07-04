@@ -64,6 +64,3 @@ class TestContainer(TestCase):
     def test_slice_naive(self):
         c = self.container[[0]].copy()
         self.assertEquals(c.df.shape, (1, 5))
-
-    def test_slice_cardinal(self):
-
