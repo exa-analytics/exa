@@ -41,16 +41,19 @@ install:
       echo "DONE"
     - bash miniconda.sh -b -p $HOME/miniconda
     - export PATH="$HOME/miniconda/bin:$PATH"
+    - conda config --set show_channel_urls true
     - conda config --set always_yes yes --set changeps1 no
-    - conda update -q -y --all
+    - conda update -q --all
     - conda create -n test python=$PYTHONVER
     - source activate test
-    - conda update -q -y --all
-    - conda install -q -y numba>=0.50
-    - conda install -q -y -c conda-forge numpy>=1.0 pandas>=1.0 networkx>=2.0 matplotlib>=3.0 six>=1.0 pytest>=5.0 seaborn>=0.10 sympy>=1.5 pytables>=3.6
-    - conda install -q -y -c conda-forge sphinx sphinx_rtd_theme ply pandoc pypandoc nbsphinx 
-    - conda install -q -y -c conda-forge coveralls coverage pytest pytest-cov
-    - pip install travis-sphinx codacy-coverage
+    - conda update -q --all
+    - conda install -q numba>=0.50
+    - conda install -q -c conda-forge numpy>=1.0 pandas>=1.0 networkx>=2.0 matplotlib>=3.0 six>=1.0 pytest>=5.0 seaborn>=0.10 sympy>=1.5 pytables>=3.6
+    - conda install -q -c conda-forge coveralls coverage pytest pytest-cov
+    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
+          conda install -q -c conda-forge sphinx sphinx_rtd_theme ply pandoc pypandoc nbsphinx;
+          pip install travis-sphinx codacy-coverage;
+      fi
     - python setup.py install
 
 script:
@@ -64,8 +67,15 @@ script:
       fi
 
 after_success:
+    - coveralls
+    - bash <(curl -Ls https://coverage.codacy.com/get.sh) report -l Python -r report1.xml
+    - bash <(curl -Ls https://coverage.codacy.com/get.sh) final
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
-          coveralls;
-          python-codacy-coverage -r coverage.xml;
           travis-sphinx deploy;
+      fi
+    - if [[ $TRAVIS_BRANCH == "master" ]]; then
+          echo "maste!";
+      else
+          echo "branch";
+          echo $TRAVIS_BRANCH;
       fi

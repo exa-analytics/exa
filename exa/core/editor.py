@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2019, Exa Analytics Development Team
+# Copyright (c) 2015-2020, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Editor
@@ -258,7 +258,7 @@ class Editor(object):
         re.MULTILINE is not currently supported.
 
         Args:
-            \*patterns: Regular expressions to search each line for
+            patterns: Regular expressions to search each line for
             keys_only (bool): Only return keys
             flags (re.FLAG): flags passed to re.search
 

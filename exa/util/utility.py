@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2019, Exa Analytics Development Team
+# Copyright (c) 2015-2020, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Utilities
@@ -34,7 +34,7 @@ def mkp(*args, **kwargs):
         dirpath = mkp('root', 'path', 'folder', mk=True)
 
     Args:
-        \*args: File or directory path segments to be concatenated
+        args: File or directory path segments to be concatenated
         mk (bool): Make the directory (if it doesn't exist)
 
     Returns:

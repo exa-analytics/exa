@@ -10,7 +10,7 @@ README = "README.md"
 REQUIREMENTS = "requirements.txt"
 try:
     import pypandoc
-    LONG_DESCRIPTION = pypandoc.convert(README, "rst")
+    LONG_DESCRIPTION = pypandoc.convert_file(README, "rst")
 except ImportError:
     with open(README) as f:
         LONG_DESCRIPTION = f.read()

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2019, Exa Analytics Development Team
+# Copyright (c) 2015-2020, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Composers - ALPHA
@@ -42,7 +42,7 @@ class Composer(Editor):
 
     Note:
         Explicit vertical bar '|' characters, inside of special formatting strings,
-        should be escaped (i.e. '\|') to be respected.
+        should be escaped (i.e. '\\|') to be respected.
 
     Warning:
         The same criteria for named and positional formatters applies for the

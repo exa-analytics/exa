@@ -52,15 +52,15 @@ install:
 
   - cmd: conda config --set show_channel_urls true
   - cmd: conda config --set always_yes yes --set changeps1 no
-  - cmd: conda update -y -n base conda
+  - cmd: conda update -q --all
   - cmd: conda create -y -n test python=%CONDA_PY%
   - cmd: activate test
   - cmd: conda update -q -y --all
-  - cmd: conda install -q -y numba
-  - cmd: conda install -q -y -c conda-forge numpy scipy seaborn networkx pandas pyyaml pytables six sympy pytest
+  - cmd: conda install -q numba>=0.50
+  - cmd: conda install -q -c conda-forge numpy>=1.0 pandas>=1.0 networkx>=2.0 matplotlib>=3.0 six>=1.0 pytest>=5.0 seaborn>=0.10 sympy>=1.5 pytables>=3.6
   - cmd: python setup.py install
 
 build: false
 
 test_script:
-  - cmd: pytest
+  - cmd: pytest --doctest-modules -v --cov-report term-missing

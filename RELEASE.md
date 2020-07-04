@@ -1,19 +1,10 @@
 # Update Version Numbers
-Update `exa/_version.py` and `meta.yaml` version numbers.
-
-
-# Commit and Push Changes
-Push changes to your repository (fork).
-```bash
-git add -A
-git commit -m "message"
-git push
-```
-Make a pull request (PR). Once accepted the organization will be tag a new release.
+Tag the release.
 ```bash
 git tag -a X.X.X -m "message"
 git push --tags
 ```
+Update `meta.yaml` version number.
 
 
 # Remove existing builds (if present)
@@ -26,8 +17,8 @@ rm -r dist/*
 Publish to `TestPyPI`_ (~/.pypirc required).
 This requires `wheel` and `twine` to be installed.
 ```bash
-python setup.py sdist    #python setup.py bdist_wheel
-twine upload dist/*
+python setup.py sdist bdist_wheel
+twine upload --repository [which] dist/*
 ```
 The variable `which` refers to the alias for the testing or production
 repository listed in ~/.pypirc.
@@ -47,4 +38,3 @@ conda build .    # conda build . --output to see location
 conda convert -f --platform all /path/to/conda-bld/pltfrm/exa-...tar.bz2 -o /path/to/outputdir/
 anaconda upload /path/to/build/build.tar.bz2    # For each build
 ```
-
