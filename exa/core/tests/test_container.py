@@ -34,20 +34,28 @@ class DummyContainer(six.with_metaclass(DummyMeta, Container)):
 
 
 class TestContainer(TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         x = [0, 0, 0, 0, 0]
         y = [1.1, 2.2, 3.3, 4.4, 5.5]
         z = [0.5, 1.5, 2.5, 3.5, 4.5]
         cat = ['cube', 'sphere', 'cube', 'sphere', 'cube']
         group = [0, 0, 1, 1, 1]
-        self.container = DummyContainer()
-        self.container._test = False
-        self.container.s0 = DummySeries(y)
-        self.container.s1 = DummySeries(cat, dtype='category')
-        self.container.df = pd.DataFrame.from_dict({'x': x, 'y': y, 'z': z, 'cat': cat, 'group': group})
+        cls.container = DummyContainer()
+        cls.container._test = False
+        cls.container.s0 = DummySeries(y)
+        cls.container.s1 = DummySeries(cat, dtype='category')
+        cls.container.df = pd.DataFrame.from_dict({'x': x, 'y': y, 'z': z, 'cat': cat, 'group': group})
 
     def test_attributes(self):
         self.assertIsInstance(self.container.s0, DummySeries)
         self.assertIsInstance(self.container.s1.dtype, pd.api.types.CategoricalDtype)
         self.assertIsInstance(self.container.df, DummyDataFrame)
 
+    def test_copy(self):
+        cp = self.container.copy()
+        self.assertIsNot(self.container, cp)
+
+    def test_concat(self):
+        with self.assertRaises(NotImplementedError):
+            self.container()
