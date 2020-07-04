@@ -261,7 +261,7 @@ class Container(object):
             """Gets the color of a node based on the node's (sub)type."""
             cols = mpl.sns.color_palette('viridis', len(conn_types))
             for col in cols:
-                if isinstance(obj, (pd.DataFrame, pd.Series, pd.SparseSeries, pd.SparseDataFrame)):
+                if isinstance(obj, (pd.DataFrame, pd.Series)):
                     typ = type(obj)
                     return '.'.join((typ.__module__, typ.__name__)), col
             return 'other', 'gray'
@@ -375,13 +375,6 @@ class Container(object):
                     store[name] = s
                 elif isinstance(data, DataFrame):
                     store[name] = pd.DataFrame(data)
-                elif isinstance(data, SparseSeries):
-                    s = pd.SparseSeries(data)
-                    if isinstance(data.dtype, pd.types.dtypes.CategoricalDtype):
-                        s = s.astype('O')
-                    store[name] = s
-                elif isinstance(data, SparseDataFrame):
-                    store[name] = pd.SparseDataFrame(data)
                 else:
                     if hasattr(data, 'dtype') and isinstance(data.dtype, pd.types.dtypes.CategoricalDtype):
                         data = data.astype('O')
@@ -443,7 +436,7 @@ class Container(object):
         """
         rel = {}
         for key, obj in vars(self).items():
-            if not isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFrame)) and not key.startswith('_'):
+            if not isinstance(obj, (pd.Series, pd.DataFrame)) and not key.startswith('_'):
                 if copy and 'id' not in key:
                     rel[key] = deepcopy(obj)
                 else:
@@ -456,7 +449,7 @@ class Container(object):
         """
         data = {}
         for key, obj in vars(self).items():
-            if isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFrame)):
+            if isinstance(obj, (pd.Series, pd.DataFrame)):
                 if copy:
                     data[key] = obj.copy(deep=True)
                 else:

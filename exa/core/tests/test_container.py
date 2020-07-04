@@ -58,4 +58,8 @@ class TestContainer(TestCase):
 
     def test_concat(self):
         with self.assertRaises(NotImplementedError):
-            self.container()
+            self.container.concat()
+
+    def test_slice_naive(self):
+        c = self.container[[0]].copy()
+        self.assertEquals(c.df.shape, (1, 5))
