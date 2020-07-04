@@ -63,4 +63,4 @@ install:
 build: false
 
 test_script:
-  - cmd: pytest --doctest-modules -v
+  - cmd: pytest -v

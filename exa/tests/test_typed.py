@@ -7,8 +7,8 @@ Tests for Strong Typing
 See :mod:`~exa.typed` for more details on how typing works.
 """
 import six
-import pytest
 from itertools import product
+import pytest
 from exa.typed import Typed, typed, TypedClass, TypedMeta, yield_typed
 
 
@@ -84,6 +84,7 @@ def pre_del(obj):
 def post_del(obj):
     obj.post_del_called = True
 
+
 class Complete2(TypedClass):
     """Test advanced usage."""
     foo = Typed(int, doc="Test documentation", autoconv=False, allow_none=False,
@@ -154,4 +155,3 @@ def test_complex(cmplx):
     assert cmplx.pre_del_called == True
     assert cmplx.post_del_called == True
     assert "Test documentation" in cmplx.__class__.foo.__doc__
-
