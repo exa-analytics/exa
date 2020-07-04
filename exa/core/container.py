@@ -287,7 +287,7 @@ class Container(object):
 
         info = self.info()
         info = info[info['type'] != '-']
-        info['size'] *= 13000/info['size'].max()
+        #info['size'] *= 13000/info['size'].max()
         info['size'] += 2000
         node_size_dict = info['size'].to_dict()      # Can pull all nodes from keys
         node_class_name_dict = info['type'].to_dict()
@@ -308,17 +308,18 @@ class Container(object):
                         contyp = 'index-index'
                         node_conn_dict[(n0, n1)] = (contyp, conn[contyp])
                         node_conn_dict[(n1, n0)] = (contyp, conn[contyp])
-                    for col in v1.columns:
-                        # Catches index "atom", column "atom1"; does not catch atom10
-                        if name == col or (name == col[:-1] and col[-1].isdigit()):
-                            contyp = 'index-column'
-                            node_conn_dict[(n0, n1)] = (contyp, conn[contyp])
-                            node_conn_dict[(n1, n0)] = ('column-index', conn[contyp])
+                    if hasattr(v1, "columns"):
+                        for col in v1.columns:
+                            # Catches index "atom", column "atom1"; does not catch atom10
+                            if name == col or (name == col[:-1] and col[-1].isdigit()):
+                                contyp = 'index-column'
+                                node_conn_dict[(n0, n1)] = (contyp, conn[contyp])
+                                node_conn_dict[(n1, n0)] = ('column-index', conn[contyp])
         g = nx.Graph()
         g.add_nodes_from(node_size_dict.keys())
         g.add_edges_from(node_conn_dict.keys())
         node_sizes = [node_size_dict[node] for node in g.nodes()]
-        node_labels = {node: ' {}\n({})'.format(node, node_class_name_dict[node]) for node in g.nodes()}
+        node_labels = {node: '{}\n({}'.format(node, node_class_name_dict[node]) for node in g.nodes()}
         node_colors = [node_type_dict[node][1] for node in g.nodes()]
         edge_colors = [node_conn_dict[edge][1] for edge in g.edges()]
         # Build the figure and legends
@@ -327,9 +328,8 @@ class Container(object):
             ax.axis('off')
             pos = nx.spring_layout(g)
             nx.draw_networkx_nodes(g, pos=pos, ax=ax, alpha=0.7, node_size=node_sizes,
-                                        node_color=node_colors)
-            nx.draw_networkx_labels(g, pos=pos, labels=node_labels, font_size=17,
-                                         font_weight='bold', ax=ax)
+                                   node_color=node_colors)
+            nx.draw_networkx_labels(g, pos=pos, labels=node_labels, font_size=12, ax=ax)
             nx.draw_networkx_edges(g, pos=pos, edge_color=edge_colors, width=2, ax=ax)
             l1, ax = legend(set(node_conn_dict.values()), 'Connection', (1, 0), ax)
             _, ax = legend(set(node_type_dict.values()), 'Data Type', (1, 0.3), ax)

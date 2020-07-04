@@ -46,6 +46,7 @@ class TestContainer(TestCase):
         cls.container.s0 = DummySeries(y)
         cls.container.s1 = DummySeries(cat, dtype='category')
         cls.container.df = pd.DataFrame.from_dict({'x': x, 'y': y, 'z': z, 'cat': cat, 'group': group})
+        cls.container._cardinal = "df"
 
     def test_attributes(self):
         self.assertIsInstance(self.container.s0, DummySeries)
@@ -63,3 +64,6 @@ class TestContainer(TestCase):
     def test_slice_naive(self):
         c = self.container[[0]].copy()
         self.assertEquals(c.df.shape, (1, 5))
+
+    def test_slice_cardinal(self):
+
