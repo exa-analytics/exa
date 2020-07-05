@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 from setuptools import setup, find_packages
 from exa._version import __version__
 
