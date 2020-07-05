@@ -79,7 +79,7 @@ after_success:
           git tag $ver;
           git push --tags;
           sed -i "s/version = .* /version = \"$ver\"/" meta.yaml;
-          cat <<EOF > ~/.pypirc
+          cat <<EOF > ~/.pypirc;
 [distutils]
 index-servers =
     pypi
@@ -101,5 +101,5 @@ EOF
           anaconda login --username $anaconda_username --password $anaconda_password;
           conda build . --output;
           conda convert -f --platform all $HOME/miniconda/conda-bld/linux-64/exa-${ver/v/}-0.tar.bz2 -o dist/;
-          for i in $(ls -d dist/); do anaconda upload $i/*; done
+          for i in $(ls -d dist/); do anaconda upload $i/*; done;
       fi

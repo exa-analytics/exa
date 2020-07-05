@@ -39,7 +39,6 @@ triggering function calls before and after get, set, and delete, and attempts
 automatic conversion (as shown above) for all types supported for a given
 attribute.
 """
-import six
 import pandas as pd
 import warnings
 
@@ -88,7 +87,7 @@ def yield_typed(obj_or_cls):
         if hasattr(obj_or_cls, attrname):
             attr = getattr(obj_or_cls, attrname)
             # !!! Important hardcoded value here !!!
-            if (isinstance(attr, property) and isinstance(attr.__doc__, six.string_types)
+            if (isinstance(attr, property) and isinstance(attr.__doc__, str)
                 and "__typed__" in attr.__doc__):
                 yield attrname
 
@@ -251,7 +250,7 @@ class TypedMeta(type):
 
     .. code-block:: Python
 
-        class Foo(six.with_metaclass(TypedMeta, object)):
+        class Foo(metaclass=TypedMeta):
             bar = Typed(int, doc="Always an int")
 
     See Also:
@@ -262,7 +261,7 @@ class TypedMeta(type):
         return super(TypedMeta, mcs).__new__(mcs, name, bases, namespace)
 
 
-class TypedClass(six.with_metaclass(TypedMeta, object)):
+class TypedClass(metaclass=TypedMeta):
     """
     A mixin class which can be used to create a class with strongly typed
     attributes.

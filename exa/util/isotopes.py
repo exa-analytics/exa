@@ -35,7 +35,6 @@ Warning:
 
 .. _NIST: https://www.nist.gov/
 """
-#import six as _six
 import os as _os
 import sys as _sys
 import bz2 as _bz2

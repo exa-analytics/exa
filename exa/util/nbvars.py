@@ -16,7 +16,6 @@ See Also:
 .. _symengine: https://github.com/symengine/symengine
 .. _numba: http://numba.pydata.org/
 """
-import six
 import numpy as np
 import sympy as sy
 import numba as nb
@@ -61,7 +60,7 @@ def numbafy(fn, args, compiler="jit", **nbkws):
     if not isinstance(args, (tuple, list)):
         args = (args, )
     # Parameterize compiler
-    if isinstance(compiler, six.string_types):
+    if isinstance(compiler, str):
         compiler_ = getattr(nb, compiler, None)
         if compiler is None:
             raise AttributeError("No numba function with name {}.".format(compiler))
