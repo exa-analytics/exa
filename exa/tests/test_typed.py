@@ -159,8 +159,3 @@ def test_complex(cmplx):
     assert cmplx.post_del_called == True
     assert "Test documentation" in cmplx.__class__.foo.__doc__
     return True
-
-
-class Tester(TestCase):
-    def test_all(self):
-        pytest.main(["-x", "exa/tests"])

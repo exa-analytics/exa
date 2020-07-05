@@ -52,6 +52,7 @@ install:
     - conda install -q -c conda-forge coveralls coverage pytest pytest-cov
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
           conda install -q -c conda-forge sphinx sphinx_rtd_theme ply pandoc pypandoc nbsphinx ipython;
+          conda install -q conda-build conda-verify anaconda-client;
           pip install travis-sphinx codacy-coverage;
       fi
     - python setup.py install
@@ -74,8 +75,31 @@ after_success:
           travis-sphinx deploy;
       fi
     - if [[ $TRAVIS_BRANCH == "master" ]]; then
-          echo "maste!";
-      else
-          echo "branch";
-          echo $TRAVIS_BRANCH;
+          ver=`cat version.txt`;
+          git tag $ver;
+          git push --tags;
+          sed -i "s/version = .* /version = \"$ver\"/" meta.yaml;
+          cat <<EOF > ~/.pypirc
+[distutils]
+index-servers =
+    pypi
+    testpypi
+
+[pypi]
+repository = https://upload.pypi.org/legacy/
+username = __token__
+password = $pypi
+
+[testpypi]
+repository = https://test.pypi.org/legacy/
+username = __token__
+password = $testpypi
+EOF
+          python setup.py sdist bdist_wheel;
+          python -m twine upload --repository pypi dist/*;
+          rm -r dist/*;
+          anaconda login --username $anaconda_username --password $anaconda_password;
+          conda build . --output;
+          conda convert -f --platform all $HOME/miniconda/conda-bld/linux-64/exa-${ver/v/}-0.tar.bz2 -o dist/;
+          for i in $(ls -d dist/); do anaconda upload $i/*; done
       fi
