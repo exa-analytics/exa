@@ -8,7 +8,6 @@ See :mod:`~exa.typed` for more details on how typing works.
 """
 import six
 from itertools import product
-from unittest import TestCase
 import pytest
 from exa.typed import Typed, typed, TypedClass, TypedMeta, yield_typed
 
