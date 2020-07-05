@@ -57,17 +57,15 @@ install:
       fi
     - python setup.py install
 
-script:
-    - export PYTHONDONTWRITEBYTECODE=1
-    - pytest --doctest-modules -v --cov coveralls --cov-report term-missing
-    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
+script: |
+    export PYTHONDONTWRITEBYTECODE=1 && pytest --doctest-modules -v --cov coveralls --cov-report term-missing &&
+    if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
           coverage run --source=exa setup.py test;
           rm -rf docs/source/*.txt;
           SPHINX_APIDOC_OPTIONS=members,undoc-members,show-inheritance sphinx-apidoc -eM -s txt -o docs/source/ exa *test*;
           travis-sphinx build;
-      fi
-    - >
-      cat << EOF > $HOME/.pypirc;
+    fi &&
+    cat << EOF > $HOME/.pypirc;
 [distutils]
 index-servers =
     pypi
