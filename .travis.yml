@@ -74,8 +74,8 @@ after_success:
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
           travis-sphinx deploy;
       fi
-    - if [[ $TRAVIS_BRANCH == "master" ]]; then
-          echo "publishing exa";
+#    - if [[ $TRAVIS_BRANCH == "master" ]]; then
+#          echo "publishing exa";
 #          ver="cat version.txt";
 #          git tag $ver;
 #          git push --tags;
@@ -103,4 +103,4 @@ after_success:
 #          conda build . --output;
 #          conda convert -f --platform all $HOME/miniconda/conda-bld/linux-64/exa-${ver/v/}-0.tar.bz2 -o dist/;
 #          for i in $(ls -d dist/); do anaconda upload $i/*; done;
-      fi
+#      fi
