@@ -74,14 +74,15 @@ class BaseSeries(Numerical):
     def __init__(self, *args, **kwargs):
         meta = kwargs.pop('meta', None)
         super(BaseSeries, self).__init__(*args, **kwargs)
-        if self._sname is not None and self.name != self._sname:
-            if self.name is not None:
-                warnings.warn("Object's name changed")
-            self.name = self._sname
-        if self._iname is not None and self.index.name != self._iname:
-            if self.index.name is not None:
-                warnings.warn("Object's index name changed")
-            self.index.name = self._iname
+        if hasattr(self, "name"):
+            if self._sname is not None and self.name != self._sname:
+                if self.name is not None:
+                    warnings.warn("Object's name changed")
+                self.name = self._sname
+            if self._iname is not None and self.index.name != self._iname:
+                if self.index.name is not None:
+                    warnings.warn("Object's index name changed")
+                self.index.name = self._iname
         self.meta = meta
 
 
