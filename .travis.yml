@@ -59,7 +59,7 @@ install:
 
 script:
     - export PYTHONDONTWRITEBYTECODE=1
-    - pytest --doctest-modules -v --cov coveralls --cov-report term-missing
+    - pytest --doctest-modules -v --cov coveralls --cov-report term --cov=exa --cov-report xml
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
           coverage run --source=exa setup.py test;
           rm -rf docs/source/*.txt;
@@ -69,7 +69,7 @@ script:
 
 after_success:
     - coveralls
-    - bash <(curl -Ls https://coverage.codacy.com/get.sh) report --language Python -r report.xml
+    - bash <(curl -Ls https://coverage.codacy.com/get.sh) report --language Python -r coverage.xml
     - bash <(curl -Ls https://coverage.codacy.com/get.sh) final
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
           travis-sphinx deploy;
@@ -77,6 +77,7 @@ after_success:
     - if [[ $TRAVIS_BRANCH == "master" ]]; then
           echo "publishing exa";
           export ver=`cat version.txt`;
+          echo $ver;
           git remote set-url origin https://$GH_TOKEN@github.com/exa-analytics/exa.git;
           git tag $ver;
           git push --tags;
@@ -85,8 +86,9 @@ after_success:
           python setup.py sdist bdist_wheel;
           python -m twine upload --repository pypi dist/*;
           rm -r dist/*;
-          anaconda login --username $anaconda_username --password $anaconda_password;
           conda build . --output;
-          conda convert -f --platform all $HOME/minicondaenvs/test/conda-bld/linux-64/exa-$ver-0.tar.bz2 -o dist/;
+          conda convert -f --platform all $HOME/miniconda/envs/test/conda-bld/linux-64/exa-$ver-0.tar.bz2 -o dist/;
+          anaconda login --username $anaconda_username --password $anaconda_password;
+          anaconda upload $HOME/miniconda/envs/test/conda-bld/linux-64/exa-$ver-0.tar.bz2;
           for i in $(ls -d dist); do anaconda upload $i/exa-$ver-0.tar.bz2; done;
       fi
