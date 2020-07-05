@@ -57,30 +57,15 @@ install:
       fi
     - python setup.py install
 
-script: |
-    export PYTHONDONTWRITEBYTECODE=1 && pytest --doctest-modules -v --cov coveralls --cov-report term-missing &&
-    if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
+script:
+    - export PYTHONDONTWRITEBYTECODE=1
+    - pytest --doctest-modules -v --cov coveralls --cov-report term-missing
+    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
           coverage run --source=exa setup.py test;
           rm -rf docs/source/*.txt;
           SPHINX_APIDOC_OPTIONS=members,undoc-members,show-inheritance sphinx-apidoc -eM -s txt -o docs/source/ exa *test*;
           travis-sphinx build;
-    fi &&
-    cat << EOF > $HOME/.pypirc;
-[distutils]
-index-servers =
-    pypi
-    testpypi
-
-[pypi]
-repository = https://upload.pypi.org/legacy/
-username = __token__
-password = $pypi
-
-[testpypi]
-repository = https://test.pypi.org/legacy/
-username = __token__
-password = $testpypi
-EOF
+    fi
 
 after_success:
     - coveralls
@@ -95,6 +80,7 @@ after_success:
           git tag $ver;
           git push --tags;
           sed -i "s/version = .* /version = \"$ver\"/" meta.yaml;
+          printf "[distutils]\nindex-servers =\n    pypi\n    testpypi\n\n[pypi]\nrepository = https://upload.pypi.org/legacy/\nusername = __token__\npassword = $pypi\n\n[testpypi]\nrepository = https://test.pypi.org/legacy/\nusername = __token__\npassword = $testpypi" > $HOME/.pypirc;
       fi
 #          python setup.py sdist bdist_wheel;
 #          python -m twine upload --repository pypi dist/*;
