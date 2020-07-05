@@ -76,6 +76,7 @@ after_success:
       fi
     - if [[ $TRAVIS_BRANCH == "master" ]]; then
           echo "publishing exa";
+          export ver=`cat version.txt`;
       fi
 #    - if [[ $TRAVIS_BRANCH == "master" ]]; then
 #          echo "publishing exa";
