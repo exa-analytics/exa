@@ -65,7 +65,7 @@ script:
           rm -rf docs/source/*.txt;
           SPHINX_APIDOC_OPTIONS=members,undoc-members,show-inheritance sphinx-apidoc -eM -s txt -o docs/source/ exa *test*;
           travis-sphinx build;
-    fi
+      fi
 
 after_success:
     - coveralls
