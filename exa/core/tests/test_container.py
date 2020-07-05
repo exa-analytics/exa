@@ -5,9 +5,9 @@
 Tests for :mod:`~exa.core.container`
 #######################################
 """
-import six
-import pandas as pd
+import sys
 from unittest import TestCase
+import pandas as pd
 from exa import Container, TypedMeta, DataFrame, Series
 
 
@@ -29,7 +29,7 @@ class DummyMeta(TypedMeta):
     df = DummyDataFrame
 
 
-class DummyContainer(six.with_metaclass(DummyMeta, Container)):
+class DummyContainer(Container, metaclass=DummyMeta):
     pass
 
 
@@ -64,3 +64,8 @@ class TestContainer(TestCase):
     def test_slice_naive(self):
         c = self.container[[0]].copy()
         self.assertEquals(c.df.shape, (1, 5))
+
+    def test_getsizeof(self):
+        size_bytes = sys.getsizeof(self.container)
+        self.assertIsInstance(size_bytes, int)
+        self.assertTrue(size_bytes > 100)
