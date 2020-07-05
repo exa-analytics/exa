@@ -74,14 +74,14 @@ after_success:
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
           travis-sphinx deploy;
       fi
-#    - if [[ $TRAVIS_BRANCH == "master" ]]; then
-#          echo "publishing exa";
-#          export ver=`cat version.txt`;
-#          git tag $ver;
-#          git push --tags;
+    - if [[ $TRAVIS_BRANCH == "master" ]]; then
+          echo "publishing exa";
+          export ver=`cat version.txt`;
+          git tag $ver;
+          git push --tags;
 #          sed -i "s/version = .* /version = \"$ver\"/" meta.yaml;
 #          #          printf "[distutils]\nindex-servers =\n    pypi\n    testpypi\n\n[pypi]\nrepository = https://upload.pypi.org/legacy/\nusername = __token__\npassword = $pypi\n\n[testpypi]\nrepository = https://test.pypi.org/legacy/\nusername = __token__\npassword = $testpypi" > $HOME/.pypirc;
-#      fi
+      fi
 #          python setup.py sdist bdist_wheel;
 #          python -m twine upload --repository pypi dist/*;
 #          rm -r dist/*;
