@@ -81,12 +81,11 @@ after_success:
           git push --tags;
           sed -i "s/version = .* /version = \"$ver\"/" meta.yaml;
           printf "[distutils]\nindex-servers =\n    pypi\n    testpypi\n\n[pypi]\nrepository = https://upload.pypi.org/legacy/\nusername = __token__\npassword = $pypi\n\n[testpypi]\nrepository = https://test.pypi.org/legacy/\nusername = __token__\npassword = $testpypi" > $HOME/.pypirc;
+          python setup.py sdist bdist_wheel;
+          python -m twine upload --repository pypi dist/*;
+          rm -r dist/*;
+          anaconda login --username $anaconda_username --password $anaconda_password;
+          conda build . --output;
+          conda convert -f --platform all $HOME/miniconda/conda-bld/linux-64/exa-${ver/v/}-0.tar.bz2 -o dist/;
+          for i in $(ls -d dist/); do anaconda upload $i/*; done;
       fi
-#          python setup.py sdist bdist_wheel;
-#          python -m twine upload --repository pypi dist/*;
-#          rm -r dist/*;
-#          anaconda login --username $anaconda_username --password $anaconda_password;
-#          conda build . --output;
-#          conda convert -f --platform all $HOME/miniconda/conda-bld/linux-64/exa-${ver/v/}-0.tar.bz2 -o dist/;
-#          for i in $(ls -d dist/); do anaconda upload $i/*; done;
-#      fi
