@@ -66,21 +66,8 @@ script:
           SPHINX_APIDOC_OPTIONS=members,undoc-members,show-inheritance sphinx-apidoc -eM -s txt -o docs/source/ exa *test*;
           travis-sphinx build;
       fi
-
-after_success:
-    - coveralls
-    - bash <(curl -Ls https://coverage.codacy.com/get.sh) report -l Python -r report1.xml
-    - bash <(curl -Ls https://coverage.codacy.com/get.sh) final
-    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
-          travis-sphinx deploy;
-      fi
-    - if [[ $TRAVIS_BRANCH == "master" ]]; then
-          echo "publishing exa";
-          export ver=`cat version.txt`;
-          git tag $ver;
-          git push --tags;
-          sed -i "s/version = .* /version = \"$ver\"/" meta.yaml;
-          cat <<EOF > ~/.pypirc;
+    - |
+      cat <<EOF > $HOME/.pypirc;
 [distutils]
 index-servers =
     pypi
@@ -96,6 +83,20 @@ repository = https://test.pypi.org/legacy/
 username = __token__
 password = $testpypi
 EOF
+
+after_success:
+    - coveralls
+    - bash <(curl -Ls https://coverage.codacy.com/get.sh) report -l Python -r report1.xml
+    - bash <(curl -Ls https://coverage.codacy.com/get.sh) final
+    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
+          travis-sphinx deploy;
+      fi
+    - if [[ $TRAVIS_BRANCH == "master" ]]; then
+          echo "publishing exa";
+          export ver=`cat version.txt`;
+          git tag $ver;
+          git push --tags;
+          sed -i "s/version = .* /version = \"$ver\"/" meta.yaml;
       fi
 #          python setup.py sdist bdist_wheel;
 #          python -m twine upload --repository pypi dist/*;
