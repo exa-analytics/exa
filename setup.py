@@ -18,10 +18,9 @@ except ImportError:
 with open(REQUIREMENTS) as f:
     DEPENDENCIES = f.read().splitlines()
 with open("version.txt") as f:
-    version = f.read().replace("v", "")
-text = f"__version__ = \"{version}\""
+    version = f.read().replace("v", "").strip()
 with open(os.path.join("exa", "_version.py"), "w") as f:
-    f.write(text)
+    f.write(f"__version__ = \"{version}\"")
 
 setup(
     name=NAME,
