@@ -74,10 +74,10 @@ after_success:
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
           travis-sphinx deploy;
       fi
-    - if [[ $TRAVIS_BRANCH == "master" ]]; then
-          echo "publishing exa";
-          export ver=`cat version.txt`;
-          echo $ver;
+    - export
+    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]] && [[ $TRAVIS_BRANCH == "master" ]]; then
+          export ver=`cat exa/static/version.txt`;
+          echo "exa version: $ver";
           git remote set-url origin https://$GH_TOKEN@github.com/exa-analytics/exa.git;
           git tag $ver;
           git push --tags;
