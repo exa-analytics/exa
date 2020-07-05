@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2019, Exa Analytics Development Team
+# Copyright (c) 2015-2020, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Unit Conversions
@@ -19,7 +19,6 @@ import bz2 as _bz2
 import json as _json
 import os as _os
 import sys as _sys
-import six as _six
 import numpy as _np
 import pandas as _pd
 if not hasattr(_bz2, "open"):
@@ -35,7 +34,7 @@ class Unit(object):
         self._values[key] = value
 
     def __getitem__(self, key):
-        if isinstance(key, _six.string_types):
+        if isinstance(key, str):
             k = self._values[_np.isclose(self._values, 1.0)].index[0]
             return self._values[k]/self._values[key]
         elif isinstance(key, (list, tuple)):

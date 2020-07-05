@@ -41,20 +41,26 @@ install:
       echo "DONE"
     - bash miniconda.sh -b -p $HOME/miniconda
     - export PATH="$HOME/miniconda/bin:$PATH"
+    - conda config --set show_channel_urls true
     - conda config --set always_yes yes --set changeps1 no
-    - conda update -q -y --all
+    - conda update -q --all
     - conda create -n test python=$PYTHONVER
     - source activate test
-    - conda update -q -y --all
-    - conda install -q -y numba
-    - conda install -q -y -c conda-forge numpy scipy seaborn networkx pandas pyyaml pytables six sympy sphinx sphinx_rtd_theme ply pandoc pypandoc nbsphinx ipython coveralls coverage pytest pytest-cov
-    - pip install travis-sphinx codacy-coverage
+    - conda update -q --all
+    - conda install -q numba>=0.50
+    - conda install -q -c conda-forge numpy>=1.0 pandas>=1.0 networkx>=2.0 matplotlib>=3.0 pytest>=5.0 seaborn>=0.10 sympy>=1.5 pytables>=3.6 PyYAML>=5.3
+    - conda install -q -c conda-forge coveralls coverage pytest pytest-cov
+    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
+          conda install -q -c conda-forge sphinx sphinx_rtd_theme ply pandoc pypandoc nbsphinx ipython;
+          conda install -q conda-build conda-verify anaconda-client;
+          pip install travis-sphinx;
+      fi
     - python setup.py install
 
 script:
     - export PYTHONDONTWRITEBYTECODE=1
-    - pytest --cov
-    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.7 ]]; then
+    - pytest --doctest-modules -v --cov coveralls --cov-report term-missing
+    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
           coverage run --source=exa setup.py test;
           rm -rf docs/source/*.txt;
           SPHINX_APIDOC_OPTIONS=members,undoc-members,show-inheritance sphinx-apidoc -eM -s txt -o docs/source/ exa *test*;
@@ -62,8 +68,24 @@ script:
       fi
 
 after_success:
-    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.7 ]]; then
-          coveralls;
-          python-codacy-coverage -r coverage.xml;
+    - coveralls
+    - bash <(curl -Ls https://coverage.codacy.com/get.sh) report --language Python
+    - bash <(curl -Ls https://coverage.codacy.com/get.sh) final
+    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
           travis-sphinx deploy;
+      fi
+    - if [[ $TRAVIS_BRANCH == "master" ]]; then
+          echo "publishing exa";
+          export ver=`cat version.txt`;
+          git tag $ver;
+          git push --tags;
+          sed -i "s/version = .* /version = \"$ver\"/" meta.yaml;
+          printf "[distutils]\nindex-servers =\n    pypi\n    testpypi\n\n[pypi]\nrepository = https://upload.pypi.org/legacy/\nusername = __token__\npassword = $pypi\n\n[testpypi]\nrepository = https://test.pypi.org/legacy/\nusername = __token__\npassword = $testpypi" > $HOME/.pypirc;
+          python setup.py sdist bdist_wheel;
+          python -m twine upload --repository pypi dist/*;
+          rm -r dist/*;
+          anaconda login --username $anaconda_username --password $anaconda_password;
+          conda build . --output;
+          conda convert -f --platform all $HOME/miniconda/conda-bld/linux-64/exa-${ver/v/}-0.tar.bz2 -o dist/;
+          for i in $(ls -d dist/); do anaconda upload $i/*; done;
       fi

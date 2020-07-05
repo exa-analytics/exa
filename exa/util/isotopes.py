@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2019, Exa Analytics Development Team
+# Copyright (c) 2015-2020, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Periodic Table of Elements and Isotopes
@@ -35,7 +35,6 @@ Warning:
 
 .. _NIST: https://www.nist.gov/
 """
-#import six as _six
 import os as _os
 import sys as _sys
 import bz2 as _bz2

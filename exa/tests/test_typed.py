@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2019, Exa Analytics Development Team
+# Copyright (c) 2015-2020, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Tests for Strong Typing
@@ -7,8 +7,8 @@ Tests for Strong Typing
 See :mod:`~exa.typed` for more details on how typing works.
 """
 import six
-import pytest
 from itertools import product
+import pytest
 from exa.typed import Typed, typed, TypedClass, TypedMeta, yield_typed
 
 
@@ -84,6 +84,7 @@ def pre_del(obj):
 def post_del(obj):
     obj.post_del_called = True
 
+
 class Complete2(TypedClass):
     """Test advanced usage."""
     foo = Typed(int, doc="Test documentation", autoconv=False, allow_none=False,
@@ -127,11 +128,13 @@ def test_simple(simple):
     del simple._foo
     assert simple.foo is None
     assert len(list(yield_typed(simple))) == 1
+    return True
 
 
 def test_auto(auto):
     """Test automatic setting."""
     assert auto.foo == 42
+    return True
 
 
 def test_complex(cmplx):
@@ -154,4 +157,4 @@ def test_complex(cmplx):
     assert cmplx.pre_del_called == True
     assert cmplx.post_del_called == True
     assert "Test documentation" in cmplx.__class__.foo.__doc__
-
+    return True

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015-2019, Exa Analytics Development Team
+# Copyright (c) 2015-2020, Exa Analytics Development Team
 # Distributed under the terms of the Apache License 2.0
 """
 Container
@@ -122,7 +122,7 @@ class Container(object):
             cls = self.__class__
             key = check_key(self[self._cardinal], key, cardinal=True)
             g = self.network(fig=False)
-            kwargs = {self._cardinal: self[self._cardinal].ix[key], 'name': self.name,
+            kwargs = {self._cardinal: self[self._cardinal].loc[key], 'name': self.name,
                       'description': self.description, 'meta': self.meta}
             # Next traverse, breadth first, all data objects
             for parent, child in nx.bfs_edges(g, self._cardinal):
@@ -134,7 +134,7 @@ class Container(object):
                 elif typ == 'index-index':
                     # Select from the child on the parent's index (the parent is
                     # in the kwargs already).
-                    kwargs[child] = self[child].ix[kwargs[parent].index.values]
+                    kwargs[child] = self[child].loc[kwargs[parent].index.values]
                 elif typ == 'index-column':
                     # Select from the child where the column (of the same name as
                     # the parent) is in the parent's index values
@@ -160,7 +160,7 @@ class Container(object):
             selfs = {}
             cls = self.__class__
             for cardinal_index in cardinal_indexes:
-                kwargs = {self._cardinal: self[self._cardinal].ix[[cardinal_index]]}
+                kwargs = {self._cardinal: self[self._cardinal].loc[[cardinal_index]]}
                 for parent, child in nx.bfs_edges(g):
                     if child in kwargs:
                         continue
@@ -170,7 +170,7 @@ class Container(object):
                     elif typ == 'index-index':
                         # Select from the child on the parent's index (the parent is
                         # in the kwargs already).
-                        kwargs[child] = self[child].ix[kwargs[parent].index.values]
+                        kwargs[child] = self[child].loc[kwargs[parent].index.values]
                     elif typ == 'index-column':
                         # Select from the child where the column (of the same name as
                         # the parent) is in the parent's index values
@@ -261,7 +261,7 @@ class Container(object):
             """Gets the color of a node based on the node's (sub)type."""
             cols = mpl.sns.color_palette('viridis', len(conn_types))
             for col in cols:
-                if isinstance(obj, (pd.DataFrame, pd.Series, pd.SparseSeries, pd.SparseDataFrame)):
+                if isinstance(obj, (pd.DataFrame, pd.Series)):
                     typ = type(obj)
                     return '.'.join((typ.__module__, typ.__name__)), col
             return 'other', 'gray'
@@ -287,7 +287,7 @@ class Container(object):
 
         info = self.info()
         info = info[info['type'] != '-']
-        info['size'] *= 13000/info['size'].max()
+        #info['size'] *= 13000/info['size'].max()
         info['size'] += 2000
         node_size_dict = info['size'].to_dict()      # Can pull all nodes from keys
         node_class_name_dict = info['type'].to_dict()
@@ -308,17 +308,18 @@ class Container(object):
                         contyp = 'index-index'
                         node_conn_dict[(n0, n1)] = (contyp, conn[contyp])
                         node_conn_dict[(n1, n0)] = (contyp, conn[contyp])
-                    for col in v1.columns:
-                        # Catches index "atom", column "atom1"; does not catch atom10
-                        if name == col or (name == col[:-1] and col[-1].isdigit()):
-                            contyp = 'index-column'
-                            node_conn_dict[(n0, n1)] = (contyp, conn[contyp])
-                            node_conn_dict[(n1, n0)] = ('column-index', conn[contyp])
+                    if hasattr(v1, "columns"):
+                        for col in v1.columns:
+                            # Catches index "atom", column "atom1"; does not catch atom10
+                            if name == col or (name == col[:-1] and col[-1].isdigit()):
+                                contyp = 'index-column'
+                                node_conn_dict[(n0, n1)] = (contyp, conn[contyp])
+                                node_conn_dict[(n1, n0)] = ('column-index', conn[contyp])
         g = nx.Graph()
         g.add_nodes_from(node_size_dict.keys())
         g.add_edges_from(node_conn_dict.keys())
         node_sizes = [node_size_dict[node] for node in g.nodes()]
-        node_labels = {node: ' {}\n({})'.format(node, node_class_name_dict[node]) for node in g.nodes()}
+        node_labels = {node: '{}\n({}'.format(node, node_class_name_dict[node]) for node in g.nodes()}
         node_colors = [node_type_dict[node][1] for node in g.nodes()]
         edge_colors = [node_conn_dict[edge][1] for edge in g.edges()]
         # Build the figure and legends
@@ -327,9 +328,8 @@ class Container(object):
             ax.axis('off')
             pos = nx.spring_layout(g)
             nx.draw_networkx_nodes(g, pos=pos, ax=ax, alpha=0.7, node_size=node_sizes,
-                                        node_color=node_colors)
-            nx.draw_networkx_labels(g, pos=pos, labels=node_labels, font_size=17,
-                                         font_weight='bold', ax=ax)
+                                   node_color=node_colors)
+            nx.draw_networkx_labels(g, pos=pos, labels=node_labels, font_size=12, ax=ax)
             nx.draw_networkx_edges(g, pos=pos, edge_color=edge_colors, width=2, ax=ax)
             l1, ax = legend(set(node_conn_dict.values()), 'Connection', (1, 0), ax)
             _, ax = legend(set(node_type_dict.values()), 'Data Type', (1, 0.3), ax)
@@ -375,13 +375,6 @@ class Container(object):
                     store[name] = s
                 elif isinstance(data, DataFrame):
                     store[name] = pd.DataFrame(data)
-                elif isinstance(data, SparseSeries):
-                    s = pd.SparseSeries(data)
-                    if isinstance(data.dtype, pd.types.dtypes.CategoricalDtype):
-                        s = s.astype('O')
-                    store[name] = s
-                elif isinstance(data, SparseDataFrame):
-                    store[name] = pd.SparseDataFrame(data)
                 else:
                     if hasattr(data, 'dtype') and isinstance(data.dtype, pd.types.dtypes.CategoricalDtype):
                         data = data.astype('O')
@@ -443,7 +436,7 @@ class Container(object):
         """
         rel = {}
         for key, obj in vars(self).items():
-            if not isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFrame)) and not key.startswith('_'):
+            if not isinstance(obj, (pd.Series, pd.DataFrame)) and not key.startswith('_'):
                 if copy and 'id' not in key:
                     rel[key] = deepcopy(obj)
                 else:
@@ -456,7 +449,7 @@ class Container(object):
         """
         data = {}
         for key, obj in vars(self).items():
-            if isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFrame)):
+            if isinstance(obj, (pd.Series, pd.DataFrame)):
                 if copy:
                     data[key] = obj.copy(deep=True)
                 else:
