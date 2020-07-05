@@ -20,7 +20,7 @@ with open(REQUIREMENTS) as f:
 with open("version.txt") as f:
     version = f.read().replace("v", "")
 with open(os.path.join("exa", "_version.py"), "w") as f:
-    f.write(f"__version__ = '{version}'")
+    f.write(f"__version__ = \"{version}\"")
 
 
 setup(
