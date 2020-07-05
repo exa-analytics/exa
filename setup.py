@@ -19,9 +19,9 @@ with open(REQUIREMENTS) as f:
     DEPENDENCIES = f.read().splitlines()
 with open("version.txt") as f:
     version = f.read().replace("v", "")
+text = f"__version__ = \"{version}\""
 with open(os.path.join("exa", "_version.py"), "w") as f:
-    f.write(f"__version__ = \"{version}\"")
-
+    f.write(text)
 
 setup(
     name=NAME,
