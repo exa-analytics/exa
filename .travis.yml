@@ -88,5 +88,5 @@ after_success:
           anaconda login --username $anaconda_username --password $anaconda_password;
           conda build . --output;
           conda convert -f --platform all $HOME/minicondaenvs/test/conda-bld/linux-64/exa-$ver-0.tar.bz2 -o dist/;
-          for i in $(ls -d dist/); do anaconda upload $i/*; done;
+          for i in $(ls -d dist); do anaconda upload $i/exa-$ver-0.tar.bz2; done;
       fi
