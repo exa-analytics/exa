@@ -52,10 +52,10 @@ install:
     - conda install -q -c conda-forge coveralls coverage pytest pytest-cov
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
           conda install -q -c conda-forge sphinx sphinx_rtd_theme ply pandoc pypandoc nbsphinx ipython;
-          conda install -q conda-build conda-verify anaconda-client;
-          pip install travis-sphinx twine wheel;
+          conda install -q conda-build conda-verify anaconda-client twine;
+          pip install travis-sphinx;
       fi
-    - python setup.py install
+    - python setup.py develop
 
 script:
     - export PYTHONDONTWRITEBYTECODE=1
