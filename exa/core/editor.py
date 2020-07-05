@@ -11,7 +11,7 @@ replace, insert, etc. functionality.
 """
 from __future__ import print_function
 import logging
-import io, os, re, sys, six
+import io, os, re, sys
 import pandas as pd
 import warnings
 
@@ -99,8 +99,7 @@ class Editor(object):
         Args:
             n (int): Number of lines to display
         """
-        r = self.__repr__().split('\n')
-        print('\n'.join(r[:n]), end=' ')
+        print("".join(self._lines[:n]), end="")
 
     def tail(self, n=10):
         """
@@ -109,8 +108,7 @@ class Editor(object):
         Args:
             n (int): Number of lines to display
         """
-        r = self.__repr__().split('\n')
-        print('\n'.join(r[-n:]), end=' ')
+        print("".join(self._lines[-n:]), end="")
 
     def append(self, lines):
         """
@@ -123,7 +121,7 @@ class Editor(object):
             lines = lines.split('\n')
             self._lines = self._lines + lines
         else:
-            raise TypeError('Unsupported type {0} for lines.'.format(type(lines)))
+            raise TypeError(f"Unsupported type '{type(lines)}' for lines")
 
     def prepend(self, lines):
         """
@@ -136,7 +134,7 @@ class Editor(object):
             lines = lines.split('\n')
             self._lines = lines + self._lines
         else:
-            raise TypeError('Unsupported type {0} for lines.'.format(type(lines)))
+            raise TypeError(f"Unsupported type '{type(lines)}' for lines")
 
     def insert(self, lines=None):
         """
@@ -163,19 +161,6 @@ class Editor(object):
             if ln == '':
                 to_remove.append(i)
         self.delete_lines(to_remove)
-
-    def _data(self, copy=False):
-        """
-        Get all data associated with the container as key value pairs.
-        """
-        data = {}
-        for key, obj in self.__dict__.items():
-            if isinstance(obj, (pd.Series, pd.DataFrame, pd.SparseSeries, pd.SparseDataFrame)):
-                if copy:
-                    data[key] = obj.copy()
-                else:
-                    data[key] = obj
-        return data
 
     def delete_lines(self, lines):
         """
@@ -311,24 +296,16 @@ class Editor(object):
         Returns:
             pd.DataFrame: structured data
         """
-        try:
-            int(start)
-            int(stop)
-        except TypeError:
-            print('start and stop must be ints')
-        try:
-            ncol = int(ncol)
-            return pd.read_csv(six.StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=range(ncol), **kwargs)
-        except TypeError:
-            try:
-                ncol = list(ncol)
-                return pd.read_csv(six.StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=ncol, **kwargs)
-            except TypeError:
-                print('Cannot pandas_dataframe if ncol is {}, must be int or list'.format(type(ncol)))
+        if not (type(start) is type(stop) is int) or not isinstance(ncol, (int, list, tuple)):
+            raise TypeError("'start', 'stop' must be int; 'ncol' must be int, list, or tuple")
+        if isinstance(ncol, int):
+            return pd.read_csv(io.StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=range(ncol), **kwargs)
+        else:
+            return pd.read_csv(io.StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=ncol, **kwargs)
 
     def to_stream(self):
         """Create an StringIO object from the current editor text."""
-        return six.StringIO(str(self))
+        return io.StringIO(str(self))
 
     @property
     def variables(self):
@@ -374,19 +351,19 @@ class Editor(object):
                  name=None, description=None, meta=None, encoding=None, ignore=False):
         # Backporting file check
         textobj = path_stream_or_string
-        if (isinstance(textobj, six.string_types) and len(textobj.split("\n")) == 1
+        if (isinstance(textobj, str) and len(textobj.split("\n")) == 1
                 and ignore == False and not os.path.exists(textobj)):
             warnings.warn("Possibly incorrect file path! {}".format(textobj))
         #if len(path_stream_or_string) < 256 and os.path.exists(path_stream_or_string):
-        if (isinstance(path_stream_or_string, six.string_types) and
+        if (isinstance(path_stream_or_string, str) and
                 len(path_stream_or_string) < 32760 and
                 os.path.exists(path_stream_or_string)):
             self._lines = lines_from_file(path_stream_or_string, as_interned, encoding)
         elif isinstance(path_stream_or_string, (list, tuple)):
             self._lines = path_stream_or_string
-        elif isinstance(path_stream_or_string, (io.TextIOWrapper, six.StringIO)):
+        elif isinstance(path_stream_or_string, (io.TextIOWrapper, io.StringIO)):
             self._lines = lines_from_stream(path_stream_or_string, as_interned)
-        elif isinstance(path_stream_or_string, six.string_types):
+        elif isinstance(path_stream_or_string, str):
             self._lines = lines_from_string(path_stream_or_string, as_interned)
         else:
             raise TypeError('Unknown type for arg data: {}'.format(type(path_stream_or_string)))
@@ -401,7 +378,7 @@ class Editor(object):
         del self._lines[line]     # "line" is the line number minus one
 
     def __getitem__(self, key):
-        if isinstance(key, six.string_types):
+        if isinstance(key, str):
             return getattr(self, key)
         return self._lines[key]
 
@@ -492,4 +469,3 @@ def lines_from_string(string, as_interned=False):
     if as_interned:
         return [sys.intern(line) for line in string.splitlines()]
     return string.splitlines()
-
