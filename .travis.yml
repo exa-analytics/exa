@@ -71,10 +71,10 @@ after_success:
     - coveralls
     - bash <(curl -Ls https://coverage.codacy.com/get.sh) report --language Python -r coverage.xml
     - bash <(curl -Ls https://coverage.codacy.com/get.sh) final
+    - echo $TRAVIS_BRANCH
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
           travis-sphinx deploy;
       fi
-    - export
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]] && [[ $TRAVIS_BRANCH == "master" ]]; then
           export ver=`cat exa/static/version.txt`;
           echo "exa version: $ver";
