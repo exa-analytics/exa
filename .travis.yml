@@ -66,8 +66,8 @@ script:
           SPHINX_APIDOC_OPTIONS=members,undoc-members,show-inheritance sphinx-apidoc -eM -s txt -o docs/source/ exa *test*;
           travis-sphinx build;
       fi
-    - |
-      cat <<EOF > $HOME/.pypirc;
+    - >
+      cat << EOF > $HOME/.pypirc;
 [distutils]
 index-servers =
     pypi
