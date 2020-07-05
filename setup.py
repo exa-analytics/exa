@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages
-import versioneer
+from exa._version import __version__
 
 
 NAME = "exa"
@@ -20,8 +20,7 @@ with open(REQUIREMENTS) as f:
 
 setup(
     name=NAME,
-    version=versioneer.get_version(),
-    cmdclass=versioneer.get_cmdclass(),
+    version=__version__,
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     package_data={NAME: [staticdir + "/*"]},
@@ -31,7 +30,7 @@ setup(
     zip_safe=False,
     license="Apache License Version 2.0",
     author="The Exa Analytics development team",
-    autor_email="exa.data.analytics@gmail.com",
+    author_email="exa.data.analytics@gmail.com",
     project_urls={
         "Bug Tracker": "https://github.com/exa-analytics/exa/issues",
         "Documentation": "https://exa-analytics.github.io/exa/",
