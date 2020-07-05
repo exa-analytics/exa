@@ -77,13 +77,10 @@ after_success:
     - if [[ $TRAVIS_BRANCH == "master" ]]; then
           echo "publishing exa";
           export ver=`cat version.txt`;
+          git tag $ver;
+          git push --tags;
+          sed -i "s/version = .* /version = \"$ver\"/" meta.yaml;
       fi
-#    - if [[ $TRAVIS_BRANCH == "master" ]]; then
-#          echo "publishing exa";
-#          ver="cat version.txt";
-#          git tag $ver;
-#          git push --tags;
-#          sed -i "s/version = .* /version = \"$ver\"/" meta.yaml;
 #          cat <<EOF > ~/.pypirc;
 #[distutils]
 #index-servers =
