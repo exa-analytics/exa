@@ -31,6 +31,7 @@ setup(
     zip_safe=False,
     license="Apache License Version 2.0",
     author="The Exa Analytics development team",
+    autor_email="exa.data.analytics@gmail.com",
     project_urls={
         "Bug Tracker": "https://github.com/exa-analytics/exa/issues",
         "Documentation": "https://exa-analytics.github.io/exa/",
