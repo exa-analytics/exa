@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 from setuptools import setup, find_packages
+from exa._version import __version__
 
 
 NAME = "exa"
@@ -16,14 +17,11 @@ except ImportError:
         LONG_DESCRIPTION = f.read()
 with open(REQUIREMENTS) as f:
     DEPENDENCIES = f.read().splitlines()
-with open("version.txt") as f:
-    version = f.read().replace("v", "").strip()
-with open(os.path.join("exa", "_version.py"), "w") as f:
-    f.write(f"__version__ = \"{version}\"")
+
 
 setup(
     name=NAME,
-    version=version,
+    version=__version__,
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     package_data={NAME: [staticdir + "/*"]},
