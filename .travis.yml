@@ -74,6 +74,9 @@ after_success:
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
           travis-sphinx deploy;
       fi
+    - if [[ $TRAVIS_BRANCH == "master" ]]; then
+          echo "publishing exa";
+      fi
 #    - if [[ $TRAVIS_BRANCH == "master" ]]; then
 #          echo "publishing exa";
 #          ver="cat version.txt";
