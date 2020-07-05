@@ -77,7 +77,7 @@ after_success:
       fi
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]] && [[ $TRAVIS_BRANCH == "master" ]]; then
           export ver=`cat exa/static/version.txt`;
-          echo "exa version: $ver";
+          echo $ver;
           git remote set-url origin https://$GH_TOKEN@github.com/exa-analytics/exa.git;
           git tag $ver;
           git push --tags;
