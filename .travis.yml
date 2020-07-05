@@ -79,8 +79,8 @@ after_success:
           export ver=`cat version.txt`;
           git tag $ver;
           git push --tags;
+          sed -i "s/version = .* /version = \"$ver\"/" meta.yaml;
       fi
-#          sed -i "s/version = .* /version = \"$ver\"/" meta.yaml;
 #          #          printf "[distutils]\nindex-servers =\n    pypi\n    testpypi\n\n[pypi]\nrepository = https://upload.pypi.org/legacy/\nusername = __token__\npassword = $pypi\n\n[testpypi]\nrepository = https://test.pypi.org/legacy/\nusername = __token__\npassword = $testpypi" > $HOME/.pypirc;
 #          python setup.py sdist bdist_wheel;
 #          python -m twine upload --repository pypi dist/*;
