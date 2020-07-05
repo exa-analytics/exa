@@ -89,8 +89,9 @@ class TestEditor(TestCase):
         os.rmdir(dir_)
 
     def test_format_inplace(self):
-        ed = Editor("hello {name}")
+        ed = Editor("hello {name}", ignore=True)
         self.assertEqual(str(ed), "hello {name}")
+        self.assertEqual(ed.variables, ['{name}'])
         ed.format(inplace=True, name="world")
         self.assertEqual(str(ed), "hello world")
 
@@ -109,12 +110,12 @@ class TestEditor(TestCase):
         self.assertEqual("world", f.getvalue())
 
     def test_append(self):
-        ed = Editor("hello")
+        ed = Editor("hello", ignore=True)
         ed.append("world")
         self.assertEqual("hello\nworld", str(ed))
 
     def test_preappend(self):
-        ed = Editor("world")
+        ed = Editor("world", ignore=True)
         ed.prepend("hello")
         self.assertEqual("hello\nworld", str(ed))
 
@@ -131,7 +132,7 @@ class TestEditor(TestCase):
         self.assertTrue(len(keys) > 1)
 
     def test_replace(self):
-        ed = Editor("hello world")
+        ed = Editor("hello world", ignore=True)
         ed.replace("world", "universe")
         self.assertEqual(str(ed), "hello universe")
 
@@ -142,12 +143,26 @@ class TestEditor(TestCase):
         df = ed.pandas_dataframe(0, len(ed), ["text"])
         self.assertTrue(df.equals(pd.DataFrame([["hello"], ["world"]], columns=["text"])))
 
-    def text_dunder(self):
-        ed = Editor("hello world")
+    def test_dunder(self):
+        ed = Editor("hello world", ignore=True)
+        self.assertEqual(str(ed), "hello world")
+        self.assertEqual(len(ed), 1)
         self.assertTrue("hello" in ed)
         self.assertTrue(callable(ed["find"]))
         ed[0] = "hi"
-        self.assertEqual(str(ed), "hi world")
+        self.assertEqual(str(ed), "hi")
         for line in ed:
             pass
         self.assertEqual(line, str(ed))
+        del ed[0]
+        self.assertEqual(str(ed), "")
+
+    def test_insert(self):
+        ed = Editor("world", ignore=True)
+        ed.insert({0: "hello"})
+        self.assertEqual(str(ed), "hello\nworld")
+
+    def test_delete_lines(self):
+        ed = Editor("hello\nworld")
+        ed.delete_lines([0])
+        self.assertEqual(str(ed), "world")
