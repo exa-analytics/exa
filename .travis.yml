@@ -53,7 +53,7 @@ install:
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
           conda install -q -c conda-forge sphinx sphinx_rtd_theme ply pandoc pypandoc nbsphinx ipython;
           conda install -q conda-build conda-verify anaconda-client;
-          pip install travis-sphinx codacy-coverage;
+          pip install travis-sphinx;
       fi
     - python setup.py install
 
@@ -69,7 +69,7 @@ script:
 
 after_success:
     - coveralls
-    - bash <(curl -Ls https://coverage.codacy.com/get.sh) report -l Python -r report1.xml
+    - bash <(curl -Ls https://coverage.codacy.com/get.sh) report --language Python
     - bash <(curl -Ls https://coverage.codacy.com/get.sh) final
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
           travis-sphinx deploy;
