@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import os
 from setuptools import setup, find_packages
-from exa._version import __version__
 
 
 NAME = "exa"
@@ -24,7 +23,7 @@ with open(os.path.join("exa", "_version.py"), "w") as f:
 
 setup(
     name=NAME,
-    version=__version__,
+    version=version,
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     package_data={NAME: [staticdir + "/*"]},
