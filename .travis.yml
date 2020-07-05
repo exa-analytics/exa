@@ -80,23 +80,23 @@ after_success:
           git tag $ver;
           git push --tags;
           sed -i "s/version = .* /version = \"$ver\"/" meta.yaml;
+          cat <<EOF > ~/.pypirc;
+[distutils]
+index-servers =
+    pypi
+    testpypi
+
+[pypi]
+repository = https://upload.pypi.org/legacy/
+username = __token__
+password = $pypi
+
+[testpypi]
+repository = https://test.pypi.org/legacy/
+username = __token__
+password = $testpypi
+EOF
       fi
-#          cat <<EOF > ~/.pypirc;
-#[distutils]
-#index-servers =
-#    pypi
-#    testpypi
-#
-#[pypi]
-#repository = https://upload.pypi.org/legacy/
-#username = __token__
-#password = $pypi
-#
-#[testpypi]
-#repository = https://test.pypi.org/legacy/
-#username = __token__
-#password = $testpypi
-#EOF
 #          python setup.py sdist bdist_wheel;
 #          python -m twine upload --repository pypi dist/*;
 #          rm -r dist/*;
