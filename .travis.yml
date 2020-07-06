@@ -92,7 +92,7 @@ after_success:
           python setup.py sdist bdist_wheel;
           python -m twine upload --repository pypi dist/*;
           rm -r dist/*;
-          conda build . --output;
+          conda build .;
           conda convert -f --platform all $HOME/miniconda/envs/test/conda-bld/linux-64/exa-$ver-py${PYTHONVER/./}_0.tar.bz2 -o dist/;
           anaconda login --username $anaconda_username --password $anaconda_password;
           anaconda upload $HOME/miniconda/envs/test/conda-bld/linux-64/exa-$ver-py${PYTHONVER/./}_0.tar.bz2;
