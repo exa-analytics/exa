@@ -94,8 +94,10 @@ after_success:
           python setup.py sdist bdist_wheel;
           python -m twine upload --repository pypi dist/*;
           conda build .;
-          conda convert -f --platform all $HOME/miniconda/envs/test/conda-bld/linux-64/exa-$ver-py${PYTHONVER/./}_0.tar.bz2 -o dist1/;
+          export pyver=py${PYTHONVER/./};
+          conda convert -f --platform all $HOME/miniconda/envs/test/conda-bld/linux-64/exa-$ver-$pyver_0.tar.bz2 -o dist1/;
+          ls -lisah dist1;
           anaconda login --username $anaconda_username --password $anaconda_password;
-          anaconda upload $HOME/miniconda/envs/test/conda-bld/linux-64/exa-$ver-py${PYTHONVER/./}_0.tar.bz2;
-          for i in $(ls -d dist1/*/); do anaconda upload $iexa-$ver-py${PYTHONVER/./}_0.tar.bz2; done;
+          anaconda upload $HOME/miniconda/envs/test/conda-bld/linux-64/exa-$ver-$pyver_0.tar.bz2;
+          for i in $(ls -d dist1/*/); do echo "${i}exa-$ver-$pyver_0.tar.bz2"; anaconda upload ${i}exa-$ver-$pyver_0.tar.bz2; done;
       fi
