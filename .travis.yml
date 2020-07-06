@@ -75,14 +75,19 @@ after_success:
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]]; then
           travis-sphinx deploy;
       fi
-    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]] && [[ $TRAVIS_PULL_REQUEST == false ]]; then
+    - echo $TRAVIS_OS_NAME
+    - echo $PYTHONVER
+    - echo $TRAVIS_PULL_REQUEST
+    - echo $TRAVIS_PULL_REQUEST_BRANCH
+    - echo $TRAVIS_BRANCH
+    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]] && [[ $TRAVIS_PULL_REQUEST == false ]] && [[ $TRAVIS_PULL_REQUEST_BRANCH == "" ]]; then
           export ver=`cat exa/static/version.txt`;
           echo $ver;
           git remote set-url origin https://$GH_TOKEN@github.com/exa-analytics/exa.git;
           git tag $ver;
           git push --tags;
           sed -i "s/version = .* /version = \"$ver\"/" meta.yaml;
-          cat `meta.yaml`;
+          head -n 30 meta.yaml;
           printf "[distutils]\nindex-servers =\n    pypi\n    testpypi\n\n[pypi]\nrepository = https://upload.pypi.org/legacy/\nusername = __token__\npassword = $pypi\n\n[testpypi]\nrepository = https://test.pypi.org/legacy/\nusername = __token__\npassword = $testpypi" > $HOME/.pypirc;
           python setup.py sdist bdist_wheel;
           python -m twine upload --repository pypi dist/*;
