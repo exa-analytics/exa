@@ -38,7 +38,7 @@ def test_mkp():
     pth = path.join(dir_, "tmp")
     mkp(pth)
     assert path.exists(pth)
-    
+
 
 def test_datetime_header():
     assert isinstance(datetime_header(), str)

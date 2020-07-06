@@ -12,7 +12,7 @@ def test_tarball():
     archive_dir = path.join(tmpdir, "tmp")
     makedirs(archive_dir)
     with open(path.join(archive_dir, "file.txt"), "w") as f:
-        f.write("hello {value}")    
+        f.write("hello {value}")
     archive = path.join(tmpdir, "tmp.tar.gz")
     with tarfile.open(archive, "w:gz") as tar:
         tar.add(archive_dir)
@@ -21,3 +21,7 @@ def test_tarball():
     ed = eds["file.txt"]
     assert ed.variables == ["{value}"]
     assert str(ed) == "hello {value}"
+    remove(path.join(archive_dir, "file.txt"))
+    remove(archive)
+    rmdir(path.join(tmpdir, "tmp"))
+    rmdir(tmpdir)
