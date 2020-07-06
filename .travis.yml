@@ -80,7 +80,7 @@ after_success:
     - echo $TRAVIS_PULL_REQUEST
     - echo $TRAVIS_PULL_REQUEST_BRANCH
     - echo $TRAVIS_BRANCH
-    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHONVER == 3.8 ]] && [[ $TRAVIS_PULL_REQUEST == false ]] && [[ $TRAVIS_PULL_REQUEST_BRANCH == "" ]] && [[ $TRAVIS_BRANCH == "master" ]]; then
+    - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $TRAVIS_PULL_REQUEST == false ]] && [[ $TRAVIS_PULL_REQUEST_BRANCH == "" ]] && [[ $TRAVIS_BRANCH == "master" ]]; then
           export ver=`cat exa/static/version.txt`;
           echo $ver;
           git remote set-url origin https://$GH_TOKEN@github.com/exa-analytics/exa.git;
@@ -93,8 +93,8 @@ after_success:
           python -m twine upload --repository pypi dist/*;
           rm -r dist/*;
           conda build . --output;
-          conda convert -f --platform all $HOME/miniconda/envs/test/conda-bld/linux-64/exa-$ver-0.tar.bz2 -o dist/;
+          conda convert -f --platform all $HOME/miniconda/envs/test/conda-bld/linux-64/exa-$ver-py${PYTHONVER/./}_0.tar.bz2 -o dist/;
           anaconda login --username $anaconda_username --password $anaconda_password;
-          anaconda upload $HOME/miniconda/envs/test/conda-bld/linux-64/exa-$ver-0.tar.bz2;
-          for i in $(ls -d dist/); do anaconda upload $i/exa-$ver-0.tar.bz2; done;
+          anaconda upload $HOME/miniconda/envs/test/conda-bld/linux-64/exa-$ver-py${PYTHONVER/./}_0.tar.bz2;
+          for i in $(ls -d dist/); do anaconda upload $i/exa-$ver-py${PYTHONVER/./}_0.tar.bz2; done;
       fi
