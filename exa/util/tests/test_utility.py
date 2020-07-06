@@ -25,12 +25,6 @@ def test_convert_bytes():
     a, b = convert_bytes(10000000000000)
     assert a >= 9.0949
     assert b == "TiB"
-    a, b = convert_bytes(1000000000000000000)
-    assert a >= 888.1784
-    assert b == "PiB"
-    a, b = convert_bytes(1000000000000000000000)
-    assert a >= 867.3617
-    assert b ==  "EiB"
 
 
 def test_mkp():
