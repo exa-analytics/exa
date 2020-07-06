@@ -6,7 +6,7 @@ package:
   version: {{ version }}
 
 source:
-  url: dist/exa-{{ version }}.tar.gz
+  url: dist/{{ name }}-{{ version }}.tar.gz
 
 build:
   number: 0
@@ -31,7 +31,7 @@ requirements:
 
 test:
   imports:
-    - exa
+    - {{ name }}
 
 about:
     home: https://github.com/exa-analytics/{{ name }}.git

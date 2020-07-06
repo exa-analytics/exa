@@ -84,7 +84,7 @@ after_success:
           printf "[distutils]\nindex-servers =\n    pypi\n    testpypi\n\n[pypi]\nrepository = https://upload.pypi.org/legacy/\nusername = __token__\npassword = ${pypi}\n\n[testpypi]\nrepository = https://test.pypi.org/legacy/\nusername = __token__\npassword = ${testpypi}" > ${HOME}/.pypirc;
           python setup.py sdist;
           python -m twine upload --repository pypi dist/*;
-          conda build .;
+          conda build --no-include-recipe .;
           conda convert -f -p osx-64 ${HOME}/miniconda/envs/test/conda-bld/linux-64/exa-${ver}-${pyver}_0.tar.bz2 -o dist1/;
           conda convert -f -p linux-32 ${HOME}/miniconda/envs/test/conda-bld/linux-64/exa-${ver}-${pyver}_0.tar.bz2 -o dist1/;
           conda convert -f -p win-32 ${HOME}/miniconda/envs/test/conda-bld/linux-64/exa-${ver}-${pyver}_0.tar.bz2 -o dist1/;
