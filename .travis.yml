@@ -81,13 +81,15 @@ after_success:
     - echo $TRAVIS_PULL_REQUEST_BRANCH
     - echo $TRAVIS_BRANCH
     - if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $TRAVIS_PULL_REQUEST == false ]] && [[ $TRAVIS_PULL_REQUEST_BRANCH == "" ]] && [[ $TRAVIS_BRANCH == "master" ]]; then
-          export ver=`cat exa/static/version.txt`;
+          export vver=`cat exa/static/version.txt`;
+          export ver=${vver/v/};
+          echo $vver;
           echo $ver;
           git remote set-url origin https://$GH_TOKEN@github.com/exa-analytics/exa.git;
-          git tag $ver;
+          git tag $vver;
           git push --tags;
           sed -i "s/version = .* /version = \"$ver\"/" meta.yaml;
-          head -n 30 meta.yaml;
+          cat meta.yaml;
           printf "[distutils]\nindex-servers =\n    pypi\n    testpypi\n\n[pypi]\nrepository = https://upload.pypi.org/legacy/\nusername = __token__\npassword = $pypi\n\n[testpypi]\nrepository = https://test.pypi.org/legacy/\nusername = __token__\npassword = $testpypi" > $HOME/.pypirc;
           python setup.py sdist bdist_wheel;
           python -m twine upload --repository pypi dist/*;
