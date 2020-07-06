@@ -13,6 +13,7 @@ from __future__ import print_function
 import logging
 import io, os, re, sys
 import pandas as pd
+import numpy as np
 import warnings
 
 
@@ -296,9 +297,7 @@ class Editor(object):
         Returns:
             pd.DataFrame: structured data
         """
-        if not (type(start) is type(stop) is int) or not isinstance(ncol, (int, list, tuple)):
-            raise TypeError("'start', 'stop' must be int; 'ncol' must be int, list, or tuple")
-        if isinstance(ncol, int):
+        if isinstance(ncol, (int, np.int, np.int64, np.int32)):
             return pd.read_csv(io.StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=range(ncol), **kwargs)
         else:
             return pd.read_csv(io.StringIO('\n'.join(self[start:stop])), delim_whitespace=True, names=ncol, **kwargs)
