@@ -17,7 +17,7 @@ except ImportError:
 with open(REQUIREMENTS) as f:
     DEPENDENCIES = f.read().splitlines()
 with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "exa", "static", "version.txt"))) as f:
-    __version__ = f.read().replace("v", "").strip()
+    __version__ = f.read().strip()
 
 
 setup(
