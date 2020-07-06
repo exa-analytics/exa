@@ -45,6 +45,6 @@ def read_tarball(path, shortkey=False, classes=Editor):
                 cls = classes(name)
             else:
                 raise TypeError("Wrong type for classes argument (with type {})".format(type(classes)))
-            editors[name] = cls(f, name=name)
+            editors[name] = cls(f.read().decode(), name=name)
     return editors
 
