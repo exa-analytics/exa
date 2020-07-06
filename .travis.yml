@@ -93,10 +93,9 @@ after_success:
           printf "[distutils]\nindex-servers =\n    pypi\n    testpypi\n\n[pypi]\nrepository = https://upload.pypi.org/legacy/\nusername = __token__\npassword = $pypi\n\n[testpypi]\nrepository = https://test.pypi.org/legacy/\nusername = __token__\npassword = $testpypi" > $HOME/.pypirc;
           python setup.py sdist bdist_wheel;
           python -m twine upload --repository pypi dist/*;
-          rm -r dist/*;
           conda build .;
-          conda convert -f --platform all $HOME/miniconda/envs/test/conda-bld/linux-64/exa-$ver-py${PYTHONVER/./}_0.tar.bz2 -o dist/;
+          conda convert -f --platform all $HOME/miniconda/envs/test/conda-bld/linux-64/exa-$ver-py${PYTHONVER/./}_0.tar.bz2 -o dist1/;
           anaconda login --username $anaconda_username --password $anaconda_password;
           anaconda upload $HOME/miniconda/envs/test/conda-bld/linux-64/exa-$ver-py${PYTHONVER/./}_0.tar.bz2;
-          for i in $(ls -d dist/); do anaconda upload $i/exa-$ver-py${PYTHONVER/./}_0.tar.bz2; done;
+          for i in $(ls -d dist1/*/); do anaconda upload $iexa-$ver-py${PYTHONVER/./}_0.tar.bz2; done;
       fi

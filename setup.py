@@ -1,11 +1,11 @@
 #!/usr/bin/env python
+import os
 from setuptools import setup, find_packages
-from exa._version import __version__
 
 
 NAME = "exa"
 DESCRIPTION = "A framework for data engineering and science"
-staticdir = "static"
+STATIC = "static"
 README = "README.md"
 REQUIREMENTS = "requirements.txt"
 try:
@@ -16,6 +16,8 @@ except ImportError:
         LONG_DESCRIPTION = f.read()
 with open(REQUIREMENTS) as f:
     DEPENDENCIES = f.read().splitlines()
+with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "exa", "static", "version.txt"))) as f:
+    __version__ = f.read().replace("v", "").strip()
 
 
 setup(
@@ -23,7 +25,7 @@ setup(
     version=__version__,
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
-    package_data={NAME: [staticdir + "/*"]},
+    package_data={NAME: [STATIC + "/*"]},
     include_package_data=True,
     install_requires=DEPENDENCIES,
     packages=find_packages(),
