@@ -91,6 +91,6 @@ after_success:
           conda convert -f -p win-64 ${HOME}/miniconda/envs/test/conda-bld/linux-64/exa-${ver}-${pyver}_0.tar.bz2 -o dist1/;
           ls -lisah dist1;
           anaconda login --username ${anaconda_username} --password ${anaconda_password};
-          anaconda upload ${HOME}/miniconda/envs/test/conda-bld/linux-64/exa-${ver}-${pyver}_0.tar.bz2;
-          for i in $(ls -d dist1/*/); do echo "${i}exa-${ver}-${pyver}_0.tar.bz2"; anaconda upload ${i}exa-${ver}-${pyver}_0.tar.bz2; done;
+          anaconda upload --no-progress ${HOME}/miniconda/envs/test/conda-bld/linux-64/exa-${ver}-${pyver}_0.tar.bz2;
+          for i in $(ls -d dist1/*/); do echo "${i}exa-${ver}-${pyver}_0.tar.bz2"; anaconda upload --no-progress ${i}exa-${ver}-${pyver}_0.tar.bz2; done;
       fi
