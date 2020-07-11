@@ -27,7 +27,7 @@ requirements:
     - seaborn>=0.10
     - sympy>=1.5
     - pytables>=3.6
-    - PyYAML>=5.3
+    - PyYAML>=3.0
 
 test:
   imports:
