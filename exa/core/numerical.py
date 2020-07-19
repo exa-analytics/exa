@@ -387,16 +387,18 @@ def check_key(data_object, key, cardinal=False):
     keys = data_object.index.values
     if cardinal and data_object._cardinal is not None:
         keys = data_object[data_object._cardinal[0]].unique()
-    elif isinstance(key, itype) and key in keys:
-        key = list(sorted(data_object.index.values[key]))
-    elif isinstance(key, itype) and key < 0:
-        key = list(sorted(data_object.index.values[key]))
+    elif isinstance(key, itype) and (key in keys or key < 0):
+        key = keys[key]
+        if isinstance(key, itype):
+            key = [key]
+        else:
+            key = list(sorted(key))
     elif isinstance(key, itype):
         key = [key]
     elif isinstance(key, slice):
-        key = list(sorted(data_object.index.values[key]))
+        key = list(sorted(keys[key]))
     elif isinstance(key, (tuple, list, pd.Index)) and not np.all(k in keys for k in key):
-        key = list(sorted(data_object.index.values[key]))
+        key = list(sorted(keys[key]))
     return key
 
 
@@ -404,4 +406,3 @@ class SparseDataFrame(BaseDataFrame):
     @property
     def _constructor(self):
         return SparseDataFrame
-

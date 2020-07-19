@@ -10,7 +10,7 @@ from os import remove
 from unittest import TestCase
 from tempfile import mkdtemp
 import pandas as pd
-from exa import Container, TypedMeta, DataFrame, Series
+from exa import Container, TypedMeta, DataFrame, Series, Field
 
 
 class DummyDataFrame(DataFrame):
@@ -72,6 +72,12 @@ class TestContainer(TestCase):
         self.assertEqual(c.df.shape, (1, 5))
         c = self.container[1:]
         self.assertEqual(c.df.shape, (4, 5))
+        c = self.container.slice_naive([0])
+        self.assertEqual(c.df.shape, (1, 5))
+        c = self.container.slice_naive(0)
+        self.assertEqual(c.df.shape, (1, 5))
+        c = self.container.slice_naive(slice(0, 1))
+        self.assertEqual(c.df.shape, (1, 5))
 
     def test_getsizeof(self):
         size_bytes = sys.getsizeof(self.container)
@@ -81,6 +87,8 @@ class TestContainer(TestCase):
     def test_memory_usage(self):
         mem = self.container.memory_usage()
         self.assertEqual(mem.shape, (5, ))
+        mem = self.container.memory_usage(True)
+        self.assertIsInstance(mem, str)
 
     def test_save_load_to_hdf(self):
         tmpdir = mkdtemp()
