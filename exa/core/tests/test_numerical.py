@@ -99,7 +99,11 @@ class DF1Test(TestCase):
 
     def test_categories(self):
         """Test that categoricals are being handled correctly."""
-        self.assertIsInstance(self.df['type'].dtype, pd.api.types.CategoricalDtype)
+        self.assertIsInstance(self.df['type'].dtype, pd.CategoricalDtype)
+
+    def test_cardinal_groupby(self):
+        grps = self.df.cardinal_groupby()
+        self.assertEqual(list(grps.groups.keys()), [0, 1, 2, 3])
 
 
 class DF2Test(TestCase):
@@ -124,6 +128,13 @@ class DF2Test(TestCase):
 
     def test_categories(self):
         """Test that categoricals are being handled correctly."""
-        self.assertIsInstance(self.df['type'].dtype, pd.api.types.CategoricalDtype)
-        self.assertIsInstance(self.df['group'].dtype, pd.api.types.CategoricalDtype)
+        self.assertIsInstance(self.df['type'].dtype, pd.CategoricalDtype)
+        self.assertIsInstance(self.df['group'].dtype, pd.CategoricalDtype)
+        self.df._revert_categories()
+        self.assertNotIsInstance(self.df['type'].dtype, pd.CategoricalDtype)
+        self.assertNotIsInstance(self.df['group'].dtype, pd.CategoricalDtype)
+        self.df._set_categories()
 
+    def test_slice_cardinal(self):
+        df1 = slce = self.df.slice_cardinal(["A"])
+        self.assertEqual(df1.shape, (5, 5))

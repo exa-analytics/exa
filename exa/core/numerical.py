@@ -74,7 +74,7 @@ class BaseSeries(Numerical):
     def __init__(self, *args, **kwargs):
         meta = kwargs.pop('meta', None)
         super(BaseSeries, self).__init__(*args, **kwargs)
-        if hasattr(self, "name"):
+        if hasattr(self, "name") and hasattr(self, "_sname") and hasattr(self, "_iname"):
             if self._sname is not None and self.name != self._sname:
                 if self.name is not None:
                     warnings.warn("Object's name changed")
