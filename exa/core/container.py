@@ -483,6 +483,7 @@ class Container(object):
         self.name = name
         self.description = description
         self.meta = meta
+        self.uuid = uuid
         if uuid is None:
             self.uuid = str(uuid4())
 
