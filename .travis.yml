@@ -48,7 +48,7 @@ install:
     - source activate test
     - conda update -q --all
     - conda install -q numba>=0.50
-    - conda install -q -c conda-forge numpy>=1.0 pandas>=1.0 networkx>=2.0 matplotlib>=3.0 pytest>=5.0 seaborn>=0.10 sympy>=1.5 pytables>=3.6 PyYAML>=3.0
+    - conda install -q -c conda-forge numpy>=1.0 pandas>=1.0.5 networkx>=2.0 matplotlib>=3.0 pytest>=5.0 seaborn>=0.10 sympy>=1.5 pytables>=3.6 PyYAML>=3.0
     - conda install -q -c conda-forge coveralls coverage pytest pytest-cov
     - if [[ ${TRAVIS_OS_NAME} == "linux" ]] && [[ ${TRAVIS_PULL_REQUEST} == false ]] && [[ ${TRAVIS_PULL_REQUEST_BRANCH} == "" ]] && [[ ${TRAVIS_BRANCH} == "master" ]]; then
           conda install -q -c conda-forge sphinx sphinx_rtd_theme ply pandoc pypandoc nbsphinx ipython;

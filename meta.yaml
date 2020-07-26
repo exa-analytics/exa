@@ -20,7 +20,7 @@ requirements:
     - python
     - numba>=0.50
     - numpy>=1.0
-    - pandas>=1.0
+    - pandas>=1.0.5
     - networkx>=2.0
     - matplotlib>=3.0
     - pytest>=5.0

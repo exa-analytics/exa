@@ -5,9 +5,10 @@
 Tests for :mod:`~exa.core.numerical`
 #####################################
 """
+from unittest import TestCase
 import numpy as np
 import pandas as pd
-from unittest import TestCase
+from pandas.core.dtypes.dtypes import CategoricalDtype
 from exa.core.numerical import Numerical, Series, DataFrame
 
 
@@ -99,7 +100,11 @@ class DF1Test(TestCase):
 
     def test_categories(self):
         """Test that categoricals are being handled correctly."""
-        self.assertIsInstance(self.df['type'].dtype, pd.api.types.CategoricalDtype)
+        self.assertIsInstance(self.df['type'].dtype, CategoricalDtype)
+
+    def test_cardinal_groupby(self):
+        grps = self.df.cardinal_groupby()
+        self.assertEqual(list(grps.groups.keys()), [0, 1, 2, 3])
 
 
 class DF2Test(TestCase):
@@ -124,6 +129,13 @@ class DF2Test(TestCase):
 
     def test_categories(self):
         """Test that categoricals are being handled correctly."""
-        self.assertIsInstance(self.df['type'].dtype, pd.api.types.CategoricalDtype)
-        self.assertIsInstance(self.df['group'].dtype, pd.api.types.CategoricalDtype)
+        self.assertIsInstance(self.df['type'].dtype, CategoricalDtype)
+        self.assertIsInstance(self.df['group'].dtype, CategoricalDtype)
+        self.df._revert_categories()
+        self.assertNotIsInstance(self.df['type'].dtype, CategoricalDtype)
+        self.assertNotIsInstance(self.df['group'].dtype, CategoricalDtype)
+        self.df._set_categories()
 
+    def test_slice_cardinal(self):
+        df1 = self.df.slice_cardinal(["A"])
+        self.assertEqual(df1.shape, (5, 5))
