@@ -137,5 +137,5 @@ class DF2Test(TestCase):
         self.df._set_categories()
 
     def test_slice_cardinal(self):
-        df1 = slce = self.df.slice_cardinal(["A"])
+        df1 = self.df.slice_cardinal(["A"])
         self.assertEqual(df1.shape, (5, 5))
