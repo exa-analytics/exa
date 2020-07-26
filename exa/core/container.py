@@ -20,11 +20,12 @@ from copy import deepcopy
 from collections import defaultdict
 import numpy as np
 import pandas as pd
+from pandas.core.dtypes.dtypes import CategoricalDtype
 import networkx as nx
-from .numerical import check_key, Field, Series, DataFrame
+import matplotlib.pyplot as plt
 from exa.util.utility import convert_bytes
 from exa.util import mpl
-import matplotlib.pyplot as plt
+from .numerical import check_key, Field, Series, DataFrame
 
 
 class Container(object):
@@ -374,17 +375,17 @@ class Container(object):
                     fc += 1
                 elif isinstance(data, Series):
                     s = pd.Series(data)
-                    if isinstance(data.dtype, pd.CategoricalDtype):
+                    if isinstance(data.dtype, CategoricalDtype):
                         s = s.astype('O')
                     store[name] = s
                 elif isinstance(data, DataFrame):
                     store[name] = pd.DataFrame(data)
                 else:
-                    if hasattr(data, 'dtype') and isinstance(data.dtype, pd.types.dtypes.CategoricalDtype):
+                    if hasattr(data, 'dtype') and isinstance(data.dtype, CategoricalDtype):
                         data = data.astype('O')
                     else:
                         for col in data:
-                            if isinstance(data[col].dtype, pd.types.dtypes.CategoricalDtype):
+                            if isinstance(data[col].dtype, CategoricalDtype):
                                 data[col] = data[col].astype('O')
                     store[name] = data
                 if hasattr(data, '_set_categories'):

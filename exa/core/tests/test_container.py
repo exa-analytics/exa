@@ -10,6 +10,7 @@ from os import remove
 from unittest import TestCase
 from tempfile import mkdtemp
 import pandas as pd
+from pandas.core.dtypes.dtypes import CategoricalDtype
 from exa import Container, TypedMeta, DataFrame, Series, Field
 
 
@@ -52,7 +53,7 @@ class TestContainer(TestCase):
 
     def test_attributes(self):
         self.assertIsInstance(self.container.s0, DummySeries)
-        self.assertIsInstance(self.container.s1.dtype, pd.CategoricalDtype)
+        self.assertIsInstance(self.container.s1.dtype, CategoricalDtype)
         self.assertIsInstance(self.container.df, DummyDataFrame)
 
     def test_copy(self):
