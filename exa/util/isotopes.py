@@ -41,6 +41,7 @@ import bz2 as _bz2
 from pandas import read_json as _rj
 from exa import Editor as _E
 from exa import DataFrame as _DF
+from exa.static import resource as _resource
 if not hasattr(_bz2, "open"):
     _bz2.open = _bz2.BZ2File
 
@@ -146,11 +147,11 @@ def _create():
             setattr(ele, "_"+str(tope.A), tope)
         return ele
 
-    iso = _rj(_E(_path).to_stream())
-    iso.columns = _columns
-    setattr(_this, "iso", iso)
-    for element in iso.groupby("symbol").apply(creator):
-        setattr(_this, element.symbol, element)
+    #iso = _rj(_E(_path).to_stream())
+    #iso.columns = _columns
+    #setattr(_this, "iso", iso)
+    #for element in iso.groupby("symbol").apply(creator):
+    #    setattr(_this, element.symbol, element)
 
 
 def as_df():
@@ -165,7 +166,7 @@ def as_df():
 
 
 # Data order of isotopic (nuclear) properties:
-_resource = "../../static/isotopes.json"    # HARDCODED
+_resource = _resource("isotopes.json")
 _columns = ("A", "Z", "af", "afu", "cov_radius", "van_radius", "g", "mass", "massu", "name",
             "eneg", "quad", "spin", "symbol", "color")
 _this = _sys.modules[__name__]         # Reference to this module
