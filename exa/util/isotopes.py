@@ -147,11 +147,11 @@ def _create():
             setattr(ele, "_"+str(tope.A), tope)
         return ele
 
-    #iso = _rj(_E(_path).to_stream())
-    #iso.columns = _columns
-    #setattr(_this, "iso", iso)
-    #for element in iso.groupby("symbol").apply(creator):
-    #    setattr(_this, element.symbol, element)
+    iso = _rj(_E(_path).to_stream())
+    iso.columns = _columns
+    setattr(_this, "iso", iso)
+    for element in iso.groupby("symbol").apply(creator):
+        setattr(_this, element.symbol, element)
 
 
 def as_df():
@@ -173,4 +173,3 @@ _this = _sys.modules[__name__]         # Reference to this module
 _path = _os.path.abspath(_os.path.join(_os.path.abspath(__file__), _resource))
 if not hasattr(_this, "H"):
     _create()
-
