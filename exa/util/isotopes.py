@@ -39,8 +39,7 @@ import os as _os
 import sys as _sys
 import bz2 as _bz2
 from pandas import read_json as _rj
-from exa import Editor as _E
-from exa import DataFrame as _DF
+from exa.static import resource as _resource
 if not hasattr(_bz2, "open"):
     _bz2.open = _bz2.BZ2File
 
@@ -137,7 +136,7 @@ def _create():
         van_radius = group['van_radius'].mean()
         try:
             color = group.loc[group['af'].idxmax(), 'color']
-        except TypeError:
+        except (TypeError, KeyError):
             color = group['color'].values[0]
         name = group['name'].values[0]
         ele = Element(symbol, name, mass, znum, cov_radius, van_radius, color)
@@ -146,7 +145,7 @@ def _create():
             setattr(ele, "_"+str(tope.A), tope)
         return ele
 
-    iso = _rj(_E(_path).to_stream())
+    iso = _rj(_path)
     iso.columns = _columns
     setattr(_this, "iso", iso)
     for element in iso.groupby("symbol").apply(creator):
@@ -155,21 +154,14 @@ def _create():
 
 def as_df():
     """Return a dataframe of isotopes."""
-    records = []
-    for sym, ele in vars(_this).items():
-        if sym not in ["Element", "Isotope"] and not sym.startswith("_"):
-            for k, v in vars(ele).items():
-                if k.startswith("_") and k[1].isdigit():
-                    records.append({kk: vv for kk, vv in vars(v).items() if not kk.startswith("_")})
-    return _DF.from_records(records)
+    return _this.iso
 
 
 # Data order of isotopic (nuclear) properties:
-_resource = "../../static/isotopes.json"    # HARDCODED
+_resource = _resource("isotopes.json")
 _columns = ("A", "Z", "af", "afu", "cov_radius", "van_radius", "g", "mass", "massu", "name",
             "eneg", "quad", "spin", "symbol", "color")
 _this = _sys.modules[__name__]         # Reference to this module
 _path = _os.path.abspath(_os.path.join(_os.path.abspath(__file__), _resource))
 if not hasattr(_this, "H"):
     _create()
-
