@@ -14,16 +14,18 @@ See Also:
 """
 import os
 import logging
-import numpy as np
-import pandas as pd
-import networkx as nx
+from uuid import uuid4
 from sys import getsizeof
 from copy import deepcopy
 from collections import defaultdict
-from .numerical import check_key, Field, Series, DataFrame
+import numpy as np
+import pandas as pd
+from pandas.core.dtypes.dtypes import CategoricalDtype
+import networkx as nx
+import matplotlib.pyplot as plt
 from exa.util.utility import convert_bytes
 from exa.util import mpl
-import matplotlib.pyplot as plt
+from .numerical import check_key, Field, Series, DataFrame
 
 
 class Container(object):
@@ -343,11 +345,14 @@ class Container(object):
 
         Args:
             path (str): Path where to save the container
+
+        Returns:
+            savepath (str): Path where the container was saved
         """
         if path is None:
-            path = self.hexuid + '.hdf5'
+            path = self.uuid + '.hdf5'
         elif os.path.isdir(path):
-            path += os.sep + self.hexuid + '.hdf5'
+            path += os.sep + self.uuid + '.hdf5'
         elif not (path.endswith('.hdf5') or path.endswith('.hdf')):
             raise ValueError('File path must have a ".hdf5" or ".hdf" extension.')
         with pd.HDFStore(path, 'w', complevel=complevel, complib=complib) as store:
@@ -370,21 +375,22 @@ class Container(object):
                     fc += 1
                 elif isinstance(data, Series):
                     s = pd.Series(data)
-                    if isinstance(data.dtype, pd.types.dtypes.CategoricalDtype):
+                    if isinstance(data.dtype, CategoricalDtype):
                         s = s.astype('O')
                     store[name] = s
                 elif isinstance(data, DataFrame):
                     store[name] = pd.DataFrame(data)
                 else:
-                    if hasattr(data, 'dtype') and isinstance(data.dtype, pd.types.dtypes.CategoricalDtype):
+                    if hasattr(data, 'dtype') and isinstance(data.dtype, CategoricalDtype):
                         data = data.astype('O')
                     else:
                         for col in data:
-                            if isinstance(data[col].dtype, pd.types.dtypes.CategoricalDtype):
+                            if isinstance(data[col].dtype, CategoricalDtype):
                                 data[col] = data[col].astype('O')
                     store[name] = data
                 if hasattr(data, '_set_categories'):
                     data._set_categories()
+        return path
 
     def to_hdf(self, *args, **kwargs):
         """Alias of :func:`~exa.core.container.Container`."""
@@ -402,9 +408,7 @@ class Container(object):
             container: The saved container object
         """
         path = pkid_or_path
-        if isinstance(path, (int, np.int32, np.int64)):
-            raise NotImplementedError('Lookup via CMS not implemented.')
-        elif not os.path.isfile(path):
+        if not os.path.isfile(path):
             raise FileNotFoundError('File {} not found.'.format(path))
         kwargs = {}
         fields = defaultdict(dict)
@@ -473,13 +477,16 @@ class Container(object):
             return self.slice_cardinal(key)
         raise KeyError()
 
-    def __init__(self, name=None, description=None, meta=None, **kwargs):
+    def __init__(self, name=None, description=None, meta=None, uuid=None, **kwargs):
         self.log.info('adding {} attrs'.format(len(kwargs)))
         for key, value in kwargs.items():
             setattr(self, key, value)
         self.name = name
         self.description = description
         self.meta = meta
+        self.uuid = uuid
+        if uuid is None:
+            self.uuid = str(uuid4())
 
 
 class TypedMeta(type):
@@ -553,10 +560,10 @@ class TypedMeta(type):
             # If the property value is None, this function will check for a
             # convenience method with the signature, self.compute_name() and call
             # it prior to returning the property value.
-            if not hasattr(self, pname) and hasattr(self, '{}{}'.format(self._getter_prefix, pname)):
-                self['{}{}'.format(self._getter_prefix, pname)]()
+            if not hasattr(self, pname) and hasattr(self, f'{self._getter_prefix}{pname}'):
+                self[f'{self._getter_prefix}{pname}']()
             if not hasattr(self, pname):
-                raise AttributeError('Please compute or set {} first.'.format(name))
+                raise AttributeError(f'Please compute or set {name} first.')
             return getattr(self, pname)
 
         def setter(self, obj):

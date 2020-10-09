@@ -74,7 +74,7 @@ class BaseSeries(Numerical):
     def __init__(self, *args, **kwargs):
         meta = kwargs.pop('meta', None)
         super(BaseSeries, self).__init__(*args, **kwargs)
-        if hasattr(self, "name"):
+        if hasattr(self, "name") and hasattr(self, "_sname") and hasattr(self, "_iname"):
             if self._sname is not None and self.name != self._sname:
                 if self.name is not None:
                     warnings.warn("Object's name changed")
@@ -387,16 +387,18 @@ def check_key(data_object, key, cardinal=False):
     keys = data_object.index.values
     if cardinal and data_object._cardinal is not None:
         keys = data_object[data_object._cardinal[0]].unique()
-    elif isinstance(key, itype) and key in keys:
-        key = list(sorted(data_object.index.values[key]))
-    elif isinstance(key, itype) and key < 0:
-        key = list(sorted(data_object.index.values[key]))
+    elif isinstance(key, itype) and (key in keys or key < 0):
+        key = keys[key]
+        if isinstance(key, itype):
+            key = [key]
+        else:
+            key = list(sorted(key))
     elif isinstance(key, itype):
         key = [key]
     elif isinstance(key, slice):
-        key = list(sorted(data_object.index.values[key]))
+        key = list(sorted(keys[key]))
     elif isinstance(key, (tuple, list, pd.Index)) and not np.all(k in keys for k in key):
-        key = list(sorted(data_object.index.values[key]))
+        key = list(sorted(keys[key]))
     return key
 
 
@@ -404,4 +406,3 @@ class SparseDataFrame(BaseDataFrame):
     @property
     def _constructor(self):
         return SparseDataFrame
-

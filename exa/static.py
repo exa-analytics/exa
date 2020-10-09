@@ -31,4 +31,3 @@ def resource(name):
     for path, _, files in os.walk(staticdir()):
         if name in files:
             return os.path.abspath(os.path.join(path, name))
-
