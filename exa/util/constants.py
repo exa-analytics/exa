@@ -45,7 +45,10 @@ class Constant(float):
         self.value = value
 
     def __repr__(self):
-        return "{}({} ±{})".format(self.name, self.value, self.error)
+        if self.units.strip() != '':
+            return "{}({} ±{} / {})".format(self.name, self.value, self.error, self.units)
+        else:
+            return "{}({} ±{})".format(self.name, self.value, self.error)
 
 
 def _create():
