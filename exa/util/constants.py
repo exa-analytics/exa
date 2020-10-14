@@ -18,7 +18,6 @@ for each value.
 .. _NIST: https://www.nist.gov/
 """
 import sys as _sys
-import json as _json
 import pandas as _pd
 from exa import Editor as _Editor
 from exa.static import resource as _resource
