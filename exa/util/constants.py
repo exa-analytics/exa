@@ -30,7 +30,7 @@ class Constant(float):
 
     .. code-block:: python
 
-        constants.Planck_constant         # Planck_constant(6.62607004e-34 ±8.1e-42)
+        constants.Planck_constant         # Planck_constant(6.62607004e-34 ±8.1e-42 / J s)
         constants.Planck_constant.unit    # J s
         constants.Planck_constant.error   # 9.1e-42
     """
