@@ -19,7 +19,6 @@ units provided by `NIST`_ and they are listed by a hardcoded acronym value.
 """
 import sys as _sys
 import pandas as _pd
-from exa import Editor as _Editor
 from exa.static import resource as _resource
 
 
