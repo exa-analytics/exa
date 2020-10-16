@@ -9,7 +9,7 @@ All of the entries that end with relationship are taken to be the conversion
 units provided by `NIST`_ and they are listed by a hardcoded acronym value.
 
 .. code-block:: python
-
+    >>> from exa.util import conversions
     >>> conversions.Ha2eV
     27.211386245988002
     >>> conversions.Ha2eV.error
