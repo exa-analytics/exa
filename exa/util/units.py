@@ -35,8 +35,7 @@ class Unit(object):
 
     def __getitem__(self, key):
         if isinstance(key, str):
-            k = self._values[_np.isclose(self._values, 1.0)].index[0]
-            return self._values[k]/self._values[key]
+            return self._values[self._values['base_unit']]/self._values[key]
         elif isinstance(key, (list, tuple)):
             return self._values[key[1]]/self._values[key[0]]
 

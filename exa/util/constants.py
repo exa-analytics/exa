@@ -18,8 +18,7 @@ for each value.
 .. _NIST: https://www.nist.gov/
 """
 import sys as _sys
-import json as _json
-from exa import Editor as _Editor
+import pandas as _pd
 from exa.static import resource as _resource
 
 
@@ -29,7 +28,7 @@ class Constant(float):
 
     .. code-block:: python
 
-        constants.Planck_constant         # Planck_constant(6.62607004e-34 ±8.1e-42)
+        constants.Planck_constant         # Planck_constant(6.62607004e-34 ±8.1e-42 / J s)
         constants.Planck_constant.unit    # J s
         constants.Planck_constant.error   # 9.1e-42
     """
@@ -44,15 +43,21 @@ class Constant(float):
         self.value = value
 
     def __repr__(self):
-        return "{}({} ±{})".format(self.name, self.value, self.error)
+        if self.units.strip() != '':
+            return "{}({} ±{} / {})".format(self.name, self.value, self.error, self.units)
+        else:
+            return "{}({} ±{})".format(self.name, self.value, self.error)
 
 
 def _create():
-    for kwargs in _json.load(_Editor(_path).to_stream()):
-        setattr(_this, kwargs['name'], Constant(**kwargs))
+    df = _pd.read_csv(_path)
+    for quan, unit, err, val in zip(df['quantity'], df['unit'],
+                                    df['uncertainty'], df['value']):
+        setattr(_this, quan, Constant(name=quan, units=unit, value=val,
+                                      error=err))
 
 _this = _sys.modules[__name__]
-_path = _resource("constants.json")
+_path = _resource("nist-constants-2018.csv")
 if not hasattr(_this, "Planck_constant"):
     _create()
 
