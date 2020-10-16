@@ -79,6 +79,6 @@ def _create():
 
 _this = _sys.modules[__name__]
 _path = _resource("nist-constants-2018.csv")
-if not hasattr(_this, "Planck_constant"):
+if not hasattr(_this, "Ha2inv_m"):
     _create()
 
