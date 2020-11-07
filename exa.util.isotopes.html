@@ -1,0 +1,337 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>exa.util.isotopes module &mdash; exa 0.5.26 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="exa.util.mpl module" href="exa.util.mpl.html" />
+    <link rel="prev" title="exa.util.io module" href="exa.util.io.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> exa
+          
+
+          
+            
+            <img src="_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.5.26
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Sitemap</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contrib.html">Development</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="exa.html">exa package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="exa.html#exa">Exa</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="exa.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="exa.core.html">exa.core package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="exa.util.html">exa.util package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="exa.util.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="exa.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">exa</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="exa.html">exa package</a> &raquo;</li>
+        
+          <li><a href="exa.util.html">exa.util package</a> &raquo;</li>
+        
+      <li>exa.util.isotopes module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/exa.util.isotopes.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-exa.util.isotopes">
+<span id="exa-util-isotopes-module"></span><h1>exa.util.isotopes module<a class="headerlink" href="#module-exa.util.isotopes" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="periodic-table-of-elements-and-isotopes">
+<h2>Periodic Table of Elements and Isotopes<a class="headerlink" href="#periodic-table-of-elements-and-isotopes" title="Permalink to this headline">¶</a></h2>
+<p>This module provides a database of the atomic elements and their isotopes.
+Visualization parameters are also provided. Data is provided and maintained
+by <a class="reference external" href="https://www.nist.gov/">NIST</a>. The full api is given in the code example below. Note that not
+all attributes that are present on isotopes are present on elements (and vice
+versa).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">exa.util</span> <span class="kn">import</span> <span class="n">isotopes</span>
+<span class="n">isotopes</span><span class="o">.</span><span class="n">H</span>            <span class="c1"># Hydrogen element</span>
+<span class="n">isotopes</span><span class="o">.</span><span class="n">H</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>         <span class="c1"># Hydrogen isotopes 2 (deuterium)</span>
+<span class="n">isotopes</span><span class="o">.</span><span class="n">H</span><span class="o">.</span><span class="n">cov_radius</span> <span class="c1"># Empirical covalent radius (a.u. - Bohr)</span>
+<span class="n">isotopes</span><span class="o">.</span><span class="n">H</span><span class="o">.</span><span class="n">van_radius</span> <span class="c1"># Empirical Van der Waals radius (a.u. - Bohr)</span>
+<span class="n">isotopes</span><span class="o">.</span><span class="n">H</span><span class="o">.</span><span class="n">af</span>         <span class="c1"># Abundance fraction</span>
+<span class="n">isotopes</span><span class="o">.</span><span class="n">H</span><span class="o">.</span><span class="n">afu</span>        <span class="c1"># Abundance fraction uncertainty</span>
+<span class="n">isotopes</span><span class="o">.</span><span class="n">H</span><span class="o">.</span><span class="n">mass</span>       <span class="c1"># Atomic mass (g/mol)</span>
+<span class="n">isotopes</span><span class="o">.</span><span class="n">H</span><span class="o">.</span><span class="n">massu</span>      <span class="c1"># Atomic mass uncertainty (g/mol)</span>
+<span class="n">isotopes</span><span class="o">.</span><span class="n">H</span><span class="o">.</span><span class="n">eneg</span>       <span class="c1"># Electronegativity (Pauling scale)</span>
+<span class="n">isotopes</span><span class="o">.</span><span class="n">H</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">quad</span>    <span class="c1"># Nuclear quadrupole moment (eb - electron-barn - e10^(-28)m^2)</span>
+<span class="n">isotopes</span><span class="o">.</span><span class="n">H</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">A</span>       <span class="c1"># Atomic mass number (g/mol)</span>
+<span class="n">isotopes</span><span class="o">.</span><span class="n">H</span><span class="o">.</span><span class="n">Z</span>          <span class="c1"># Proton number</span>
+<span class="n">isotopes</span><span class="o">.</span><span class="n">H</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">g</span>       <span class="c1"># Nuclear g-factor (dimensionless magnetic moment)</span>
+<span class="n">isotopes</span><span class="o">.</span><span class="n">H</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">spin</span>    <span class="c1"># Nuclear spin</span>
+<span class="n">isotopes</span><span class="o">.</span><span class="n">H</span><span class="o">.</span><span class="n">color</span>      <span class="c1"># Traditional atomic color (HTML)</span>
+<span class="n">isotopes</span><span class="o">.</span><span class="n">H</span><span class="o">.</span><span class="n">name</span>       <span class="c1"># Full element name</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Isotopes are provided as part of the static data directory.</p>
+</div>
+<dl class="py class">
+<dt id="exa.util.isotopes.Element">
+<em class="property">class </em><code class="sig-prename descclassname">exa.util.isotopes.</code><code class="sig-name descname">Element</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">symbol</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">mass</span></em>, <em class="sig-param"><span class="n">znum</span></em>, <em class="sig-param"><span class="n">cov_radius</span></em>, <em class="sig-param"><span class="n">van_radius</span></em>, <em class="sig-param"><span class="n">color</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/util/isotopes.html#Element"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.util.isotopes.Element" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>An element from Mendeleev’s periodic table.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">exa.util</span> <span class="kn">import</span> <span class="n">isotopes</span>
+<span class="n">H</span> <span class="o">=</span> <span class="n">isotopes</span><span class="o">.</span><span class="n">H</span>         <span class="c1"># Hydrogen element (isotope averaged)</span>
+<span class="n">D</span> <span class="o">=</span> <span class="n">isotopes</span><span class="o">.</span><span class="n">H</span><span class="p">[</span><span class="s1">&#39;2&#39;</span><span class="p">]</span>    <span class="c1"># Deuterium (2H, a specific isotope)</span>
+<span class="n">isotopes</span><span class="o">.</span><span class="n">H</span><span class="o">.</span><span class="n">isotopes</span>    <span class="c1"># List of available isotopes</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt id="exa.util.isotopes.Element.isotopes">
+<em class="property">property </em><code class="sig-name descname">isotopes</code><a class="headerlink" href="#exa.util.isotopes.Element.isotopes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="exa.util.isotopes.Element.radius">
+<em class="property">property </em><code class="sig-name descname">radius</code><a class="headerlink" href="#exa.util.isotopes.Element.radius" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="exa.util.isotopes.Isotope">
+<em class="property">class </em><code class="sig-prename descclassname">exa.util.isotopes.</code><code class="sig-name descname">Isotope</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">anum</span></em>, <em class="sig-param"><span class="n">znum</span></em>, <em class="sig-param"><span class="n">af</span></em>, <em class="sig-param"><span class="n">afu</span></em>, <em class="sig-param"><span class="n">cov_radius</span></em>, <em class="sig-param"><span class="n">van_radius</span></em>, <em class="sig-param"><span class="n">g</span></em>, <em class="sig-param"><span class="n">mass</span></em>, <em class="sig-param"><span class="n">massu</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">eneg</span></em>, <em class="sig-param"><span class="n">quad</span></em>, <em class="sig-param"><span class="n">spin</span></em>, <em class="sig-param"><span class="n">symbol</span></em>, <em class="sig-param"><span class="n">color</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/util/isotopes.html#Isotope"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.util.isotopes.Isotope" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A specific atomic isotope (the physical manifestation of an element).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">exa.util</span> <span class="kn">import</span> <span class="n">isotopes</span>
+<span class="n">isotopes</span><span class="o">.</span><span class="n">U</span><span class="p">[</span><span class="s1">&#39;235&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mass</span>    <span class="c1"># Mass of 235-U</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt id="exa.util.isotopes.Isotope.radius">
+<em class="property">property </em><code class="sig-name descname">radius</code><a class="headerlink" href="#exa.util.isotopes.Isotope.radius" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="exa.util.isotopes.as_df">
+<code class="sig-prename descclassname">exa.util.isotopes.</code><code class="sig-name descname">as_df</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/util/isotopes.html#as_df"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.util.isotopes.as_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dataframe of isotopes.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="exa.util.mpl.html" class="btn btn-neutral float-right" title="exa.util.mpl module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="exa.util.io.html" class="btn btn-neutral float-left" title="exa.util.io module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 
+      <span class="lastupdated">
+        Last updated on Nov 07, 2020.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

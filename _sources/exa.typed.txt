@@ -1,0 +1,7 @@
+exa.typed module
+================
+
+.. automodule:: exa.typed
+   :members:
+   :undoc-members:
+   :show-inheritance:

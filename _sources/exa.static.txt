@@ -1,0 +1,7 @@
+exa.static module
+=================
+
+.. automodule:: exa.static
+   :members:
+   :undoc-members:
+   :show-inheritance:

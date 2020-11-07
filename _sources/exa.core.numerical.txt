@@ -1,0 +1,7 @@
+exa.core.numerical module
+=========================
+
+.. automodule:: exa.core.numerical
+   :members:
+   :undoc-members:
+   :show-inheritance:

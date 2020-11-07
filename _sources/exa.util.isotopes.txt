@@ -1,0 +1,7 @@
+exa.util.isotopes module
+========================
+
+.. automodule:: exa.util.isotopes
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,287 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>exa.util.conversions module &mdash; exa 0.5.26 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="exa.util.io module" href="exa.util.io.html" />
+    <link rel="prev" title="exa.util.constants module" href="exa.util.constants.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> exa
+          
+
+          
+            
+            <img src="_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.5.26
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Sitemap</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contrib.html">Development</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="exa.html">exa package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="exa.html#exa">Exa</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="exa.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="exa.core.html">exa.core package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="exa.util.html">exa.util package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="exa.util.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="exa.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">exa</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="exa.html">exa package</a> &raquo;</li>
+        
+          <li><a href="exa.util.html">exa.util package</a> &raquo;</li>
+        
+      <li>exa.util.conversions module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/exa.util.conversions.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-exa.util.conversions">
+<span id="exa-util-conversions-module"></span><h1>exa.util.conversions module<a class="headerlink" href="#module-exa.util.conversions" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="common-conversion-factors">
+<h2>Common conversion factors<a class="headerlink" href="#common-conversion-factors" title="Permalink to this headline">¶</a></h2>
+<p>Conversion factors from the tabulated physical constants from <a href="#id1"><span class="problematic" id="id2">`NIST`_</span></a>.
+All of the entries that end with relationship are taken to be the conversion
+units provided by <a href="#id3"><span class="problematic" id="id4">`NIST`_</span></a> and they are listed by a hardcoded acronym value.</p>
+<dl class="py class">
+<dt id="exa.util.conversions.Conversion">
+<em class="property">class </em><code class="sig-prename descclassname">exa.util.conversions.</code><code class="sig-name descname">Conversion</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">units</span></em>, <em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">error</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/util/conversions.html#Conversion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.util.conversions.Conversion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></p>
+<p>Conversion factors taken from the NIST constants table. Only those
+that end with relationship are taken to be the conversion factors.</p>
+<p>Acronyms are as follows:</p>
+<ul class="simple">
+<li><p>‘u’: Unified atomic mass unit (Dalton)</p></li>
+<li><p>‘amu’: Atomic unit of mass</p></li>
+<li><p>‘eV’: Electron volt</p></li>
+<li><p>‘J’: Joule</p></li>
+<li><p>‘Ha’: Hartree</p></li>
+<li><p>‘inv_m’: Inverse meter</p></li>
+<li><p>‘K’: Kelvin</p></li>
+<li><p>‘Kg’: Kilogram</p></li>
+<li><p>‘Hz’: Hertz</p></li>
+</ul>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="exa.util.io.html" class="btn btn-neutral float-right" title="exa.util.io module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="exa.util.constants.html" class="btn btn-neutral float-left" title="exa.util.constants module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 
+      <span class="lastupdated">
+        Last updated on Nov 07, 2020.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

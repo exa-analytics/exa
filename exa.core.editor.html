@@ -1,0 +1,651 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>exa.core.editor module &mdash; exa 0.5.26 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="exa.core.error module" href="exa.core.error.html" />
+    <link rel="prev" title="exa.core.container module" href="exa.core.container.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> exa
+          
+
+          
+            
+            <img src="_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.5.26
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Sitemap</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contrib.html">Development</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="exa.html">exa package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="exa.html#exa">Exa</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="exa.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="exa.core.html">exa.core package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="exa.core.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="exa.util.html">exa.util package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="exa.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">exa</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="exa.html">exa package</a> &raquo;</li>
+        
+          <li><a href="exa.core.html">exa.core package</a> &raquo;</li>
+        
+      <li>exa.core.editor module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/exa.core.editor.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-exa.core.editor">
+<span id="exa-core-editor-module"></span><h1>exa.core.editor module<a class="headerlink" href="#module-exa.core.editor" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="editor">
+<h2>Editor<a class="headerlink" href="#editor" title="Permalink to this headline">¶</a></h2>
+<p>Text-editor-like functionality for programatically manipulating raw text input
+and output data and converting this data into container objects. This class
+does not behave like a fully fledged text editor but does have some basic find,
+replace, insert, etc. functionality.</p>
+<dl class="py class">
+<dt id="exa.core.editor.Editor">
+<em class="property">class </em><code class="sig-prename descclassname">exa.core.editor.</code><code class="sig-name descname">Editor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_stream_or_string</span></em>, <em class="sig-param"><span class="n">as_interned</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">nprint</span><span class="o">=</span><span class="default_value">30</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">description</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">meta</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ignore</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#Editor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.Editor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>An editor is a representation of a text file on disk that can be
+programmatically manipulated.</p>
+<p>Text lines are stored in memory; no files remain open. This class does not
+strive to be a fully fledged text editor rather a base class for converting
+input and output data from text on disk to some type of (exa framework)
+container object (and vice versa).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;Hello World!</span><span class="se">\n</span><span class="s2">Hello </span><span class="si">{user}</span><span class="s2">&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">editor</span> <span class="o">=</span> <span class="n">Editor</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">editor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">&#39;Hello World!&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">editor</span><span class="p">)</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">del</span> <span class="n">editor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">editor</span><span class="p">)</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">editor</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fullpath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">&#39;Alice&#39;</span><span class="p">)</span>
+<span class="go">Hello Alice</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Editor line numbers use a 0 base index. To increase the number of lines
+displayed by the repr, increase the value of the <strong>nprint</strong> attribute.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>For large text with repeating strings be sure to use the <strong>as_interned</strong>
+argument.</p>
+</div>
+<dl class="py attribute">
+<dt id="exa.core.editor.Editor.name">
+<code class="sig-name descname">name</code><a class="headerlink" href="#exa.core.editor.Editor.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data/file/misc name</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="exa.core.editor.Editor.description">
+<code class="sig-name descname">description</code><a class="headerlink" href="#exa.core.editor.Editor.description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data/file/misc description</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="exa.core.editor.Editor.meta">
+<code class="sig-name descname">meta</code><a class="headerlink" href="#exa.core.editor.Editor.meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Additional metadata as key, value pairs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="exa.core.editor.Editor.nrpint">
+<code class="sig-name descname">nrpint</code><a class="headerlink" href="#exa.core.editor.Editor.nrpint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of lines to display when printing</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="exa.core.editor.Editor.cursor">
+<code class="sig-name descname">cursor</code><a class="headerlink" href="#exa.core.editor.Editor.cursor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Line number position of the cusor (see <a class="reference internal" href="#exa.core.editor.Editor.find_next" title="exa.core.editor.Editor.find_next"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_next()</span></code></a>)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="exa.core.editor.Editor.log">
+<em class="property">property </em><code class="sig-name descname">log</code><a class="headerlink" href="#exa.core.editor.Editor.log" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="exa.core.editor.Editor.write">
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#Editor.write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.Editor.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform formatting and write the formatted string to a file or stdout.</p>
+<p>Optional arguments can be used to format the editor’s contents. If no
+file path is given, prints to standard output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Full file path (default None, prints to stdout)</p></li>
+<li><p><strong>*args</strong> – Positional arguments to format the editor with</p></li>
+<li><p><strong>**kwargs</strong> – Keyword arguments to format the editor with</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="exa.core.editor.Editor.format">
+<code class="sig-name descname">format</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#Editor.format"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.Editor.format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format the string representation of the editor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>inplace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – If True, overwrite editor’s contents with formatted contents</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="exa.core.editor.Editor.head">
+<code class="sig-name descname">head</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">10</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#Editor.head"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.Editor.head" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display the top of the file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Number of lines to display</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="exa.core.editor.Editor.tail">
+<code class="sig-name descname">tail</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">10</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#Editor.tail"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.Editor.tail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display the bottom of the file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Number of lines to display</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="exa.core.editor.Editor.append">
+<code class="sig-name descname">append</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lines</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#Editor.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.Editor.append" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>lines</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – List of line strings to append to the end of the editor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="exa.core.editor.Editor.prepend">
+<code class="sig-name descname">prepend</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lines</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#Editor.prepend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.Editor.prepend" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>lines</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – List of line strings to insert at the beginning of the editor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="exa.core.editor.Editor.insert">
+<code class="sig-name descname">insert</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lines</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#Editor.insert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.Editor.insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert lines into the editor.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To insert before the first line, use <code class="xref py py-func docutils literal notranslate"><span class="pre">preappend()</span></code>
+(or key 0); to insert after the last line use <a class="reference internal" href="#exa.core.editor.Editor.append" title="exa.core.editor.Editor.append"><code class="xref py py-func docutils literal notranslate"><span class="pre">append()</span></code></a>.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>lines</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – Dictionary of lines of form (lineno, string) pairs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="exa.core.editor.Editor.remove_blank_lines">
+<code class="sig-name descname">remove_blank_lines</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#Editor.remove_blank_lines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.Editor.remove_blank_lines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all blank lines (blank lines are those with zero characters).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="exa.core.editor.Editor.delete_lines">
+<code class="sig-name descname">delete_lines</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lines</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#Editor.delete_lines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.Editor.delete_lines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete all lines with given line numbers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>lines</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – List of integers corresponding to line numbers to delete</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="exa.core.editor.Editor.find">
+<code class="sig-name descname">find</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">strings</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#Editor.find"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.Editor.find" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search the entire editor for lines that match the string.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">string</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;word one</span>
+<span class="s1">word two</span>
+<span class="s1">three&#39;&#39;&#39;</span>
+<span class="n">ed</span> <span class="o">=</span> <span class="n">Editor</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+<span class="n">ed</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;word&#39;</span><span class="p">)</span>          <span class="c1"># [(0, &quot;word one&quot;), (1, &quot;word two&quot;)]</span>
+<span class="n">ed</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;word&#39;</span><span class="p">,</span> <span class="s1">&#39;three&#39;</span><span class="p">)</span> <span class="c1"># {&#39;word&#39;: [...], &#39;three&#39;: [(2, &quot;three&quot;)]}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>strings</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Any number of strings to search for</p></li>
+<li><p><strong>keys_only</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Only return keys</p></li>
+<li><p><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Optional line to start searching on</p></li>
+<li><p><strong>stop</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Optional line to stop searching on</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>results</em> – If multiple strings searched a dictionary of string key, (line number, line) values (else just values)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="exa.core.editor.Editor.find_next">
+<code class="sig-name descname">find_next</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">strings</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#Editor.find_next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.Editor.find_next" title="Permalink to this definition">¶</a></dt>
+<dd><p>From the editor’s current cursor position find the next instance of the
+given string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>strings</strong> (<em>iterable</em>) – String or strings to search for</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>tup (tuple)</em> – Tuple of cursor position and line or None if not found</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function cycles the entire editor (i.e. cursor to length of
+editor to zero and back to cursor position).</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="exa.core.editor.Editor.regex">
+<code class="sig-name descname">regex</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">patterns</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#Editor.regex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.Editor.regex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search the editor for lines matching the regular expression.
+re.MULTILINE is not currently supported.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>patterns</strong> – Regular expressions to search each line for</p></li>
+<li><p><strong>keys_only</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Only return keys</p></li>
+<li><p><strong>flags</strong> (<em>re.FLAG</em>) – flags passed to re.search</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>results (dict)</em> – Dictionary of pattern keys, line values (or groups - default)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="exa.core.editor.Editor.replace">
+<code class="sig-name descname">replace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pattern</span></em>, <em class="sig-param"><span class="n">replacement</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#Editor.replace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.Editor.replace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace all instances of a pattern with a replacement.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pattern</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Pattern to replace</p></li>
+<li><p><strong>replacement</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Text to insert</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="exa.core.editor.Editor.pandas_dataframe">
+<code class="sig-name descname">pandas_dataframe</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">start</span></em>, <em class="sig-param"><span class="n">stop</span></em>, <em class="sig-param"><span class="n">ncol</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#Editor.pandas_dataframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.Editor.pandas_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the result of tab-separated pandas.read_csv on
+a subset of the file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – line number where structured data starts</p></li>
+<li><p><strong>stop</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – line number where structured data stops</p></li>
+<li><p><strong>ncol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – the number of columns in the structured
+data or a list of that length with column names</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>pd.DataFrame</em> – structured data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="exa.core.editor.Editor.to_stream">
+<code class="sig-name descname">to_stream</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#Editor.to_stream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.Editor.to_stream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an StringIO object from the current editor text.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="exa.core.editor.Editor.variables">
+<em class="property">property </em><code class="sig-name descname">variables</code><a class="headerlink" href="#exa.core.editor.Editor.variables" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display a list of templatable variables present in the file.</p>
+<p>Templating is accomplished by creating a bracketed object in the same
+way that Python performs <a class="reference external" href="https://docs.python.org/3.6/library/string.html">string formatting</a>. The editor is able to
+replace the placeholder value of the template. Integer templates are
+positional arguments.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="exa.core.editor.Editor.from_file">
+<em class="property">classmethod </em><code class="sig-name descname">from_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#Editor.from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.Editor.from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an editor instance from a file on disk.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="exa.core.editor.Editor.from_stream">
+<em class="property">classmethod </em><code class="sig-name descname">from_stream</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#Editor.from_stream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.Editor.from_stream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an editor instance from a file stream.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="exa.core.editor.Editor.from_string">
+<em class="property">classmethod </em><code class="sig-name descname">from_string</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">string</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#Editor.from_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.Editor.from_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an editor instance from a string template.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="exa.core.editor.lines_from_file">
+<code class="sig-prename descclassname">exa.core.editor.</code><code class="sig-name descname">lines_from_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="n">as_interned</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#lines_from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.lines_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a list of file lines from a given filepath.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – File path</p></li>
+<li><p><strong>as_interned</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – List of “interned” strings (default False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>strings (list)</em> – File line list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="exa.core.editor.lines_from_stream">
+<code class="sig-prename descclassname">exa.core.editor.</code><code class="sig-name descname">lines_from_stream</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em>, <em class="sig-param"><span class="n">as_interned</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#lines_from_stream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.lines_from_stream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a list of file lines from a given file stream.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f</strong> (<a class="reference external" href="https://docs.python.org/3/library/io.html#io.TextIOWrapper" title="(in Python v3.9)"><em>io.TextIOWrapper</em></a>) – File stream</p></li>
+<li><p><strong>as_interned</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – List of “interned” strings (default False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>strings (list)</em> – File line list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="exa.core.editor.lines_from_string">
+<code class="sig-prename descclassname">exa.core.editor.</code><code class="sig-name descname">lines_from_string</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">string</span></em>, <em class="sig-param"><span class="n">as_interned</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/core/editor.html#lines_from_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.core.editor.lines_from_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a list of file lines from a given string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – File string</p></li>
+<li><p><strong>as_interned</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – List of “interned” strings (default False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>strings (list)</em> – File line list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="exa.core.error.html" class="btn btn-neutral float-right" title="exa.core.error module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="exa.core.container.html" class="btn btn-neutral float-left" title="exa.core.container module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 
+      <span class="lastupdated">
+        Last updated on Nov 07, 2020.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+exa.core.error module
+=====================
+
+.. automodule:: exa.core.error
+   :members:
+   :undoc-members:
+   :show-inheritance:

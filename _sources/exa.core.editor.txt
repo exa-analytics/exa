@@ -1,0 +1,7 @@
+exa.core.editor module
+======================
+
+.. automodule:: exa.core.editor
+   :members:
+   :undoc-members:
+   :show-inheritance:

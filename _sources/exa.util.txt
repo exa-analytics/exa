@@ -1,0 +1,22 @@
+exa.util package
+================
+
+.. automodule:: exa.util
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   exa.util.constants
+   exa.util.conversions
+   exa.util.io
+   exa.util.isotopes
+   exa.util.mpl
+   exa.util.nbvars
+   exa.util.units
+   exa.util.utility

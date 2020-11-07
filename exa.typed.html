@@ -1,0 +1,402 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>exa.typed module &mdash; exa 0.5.26 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="exa.static module" href="exa.static.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> exa
+          
+
+          
+            
+            <img src="_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.5.26
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Sitemap</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contrib.html">Development</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="exa.html">exa package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="exa.html#exa">Exa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="exa.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="exa.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="exa.static.html">exa.static module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">exa.typed module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#strongly-typed-class-attributes">Strongly Typed Class Attributes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">exa</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="exa.html">exa package</a> &raquo;</li>
+        
+      <li>exa.typed module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/exa.typed.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-exa.typed">
+<span id="exa-typed-module"></span><h1>exa.typed module<a class="headerlink" href="#module-exa.typed" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="strongly-typed-class-attributes">
+<h2>Strongly Typed Class Attributes<a class="headerlink" href="#strongly-typed-class-attributes" title="Permalink to this headline">¶</a></h2>
+<p>This module provides a typed attribute class and class decorator/base class for
+creating classes with type enforced attributes. Enforcing an attribute’s type is
+handled by Python’s property mechanism (the property’s set function checks the
+value’s type). A simple usage example follows.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nd">@typed</span>
+<span class="k">class</span> <span class="nc">Foo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">bar</span> <span class="o">=</span> <span class="n">Typed</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s2">&quot;Always an integer type&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The simple code example generates code similar to the following when the module
+is executed (i.e. imported).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Foo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bar</span>
+
+    <span class="nd">@bar</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">bar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Cannot convert value&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bar</span> <span class="o">=</span> <span class="n">value</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="#exa.typed.Typed" title="exa.typed.Typed"><code class="xref py py-class docutils literal notranslate"><span class="pre">Typed</span></code></a> object additionally provides mechanisms for
+triggering function calls before and after get, set, and delete, and attempts
+automatic conversion (as shown above) for all types supported for a given
+attribute.</p>
+<dl class="py function">
+<dt id="exa.typed.typed">
+<code class="sig-prename descclassname">exa.typed.</code><code class="sig-name descname">typed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cls</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/typed.html#typed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.typed.typed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class decorator that updates a class definition with strongly typed
+property attributes.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>If the class will be inherited, use <a class="reference internal" href="#exa.typed.TypedClass" title="exa.typed.TypedClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypedClass</span></code></a>.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="exa.typed.yield_typed">
+<code class="sig-prename descclassname">exa.typed.</code><code class="sig-name descname">yield_typed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj_or_cls</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/typed.html#yield_typed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.typed.yield_typed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator that yields typed object names of the class (or object’s class).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>obj_or_cls</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><em>object</em></a>) – Class object or instance of class</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>name (array)</em> – Names of class attributes that are strongly typed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="exa.typed.Typed">
+<em class="property">class </em><code class="sig-prename descclassname">exa.typed.</code><code class="sig-name descname">Typed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">types</span></em>, <em class="sig-param"><span class="n">doc</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">autoconv</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">pre_set</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">allow_none</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">post_set</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pre_get</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pre_del</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">post_del</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/typed.html#Typed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.typed.Typed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A representation of a strongly typed class attribute.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nd">@typed</span>
+<span class="k">class</span> <span class="nc">Strong</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">foo</span> <span class="o">=</span> <span class="n">Typed</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s2">&quot;my int&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The above example creates a class object that has a property-like attribute
+which requires its value to be of type int. Additional arguments provide
+the ability to have the property’s getter, setter, and deleter functions call
+other functions or methods of the class. If provided by the class, strongly
+typed attributes created by here automatically attempt to to set themselves
+(see below).</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nd">@typed</span>
+<span class="k">class</span> <span class="nc">Strong</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">_setters</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;_set&quot;</span><span class="p">,</span> <span class="p">)</span>
+    <span class="n">foo</span> <span class="o">=</span> <span class="n">Typed</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s2">&quot;my int&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_set_foo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">foo</span> <span class="o">=</span> <span class="mi">42</span>
+</pre></div>
+</div>
+<p>By defining a <cite>_getters</cite> class attribute the strongly typed property knows that,
+if the foo attribute’s value (i.e. <cite>_foo</cite>) is not defined (or is defined as None),
+that the property getter should first call the <cite>_set_foo</cite> class method, and after
+it should proceed with getting the property value. Note that <cite>_set_foo</cite> cannot
+accept arguments (it must be ‘automatic’).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>types</strong> (<em>iterable</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.9)"><em>type</em></a>) – Iterable of types or type</p></li>
+<li><p><strong>doc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Documentation</p></li>
+<li><p><strong>autoconv</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Attempt automatic type conversion when setting (default true)</p></li>
+<li><p><strong>allow_none</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – As an additional type, allow None (default true)</p></li>
+<li><p><strong>pre_set</strong> (<em>callable</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Callable or class method name called before setter</p></li>
+<li><p><strong>post_set</strong> (<em>callable</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Callabel or class method name called after setter</p></li>
+<li><p><strong>pre_get</strong> (<em>callable</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Callable or class method name called before getter</p></li>
+<li><p><strong>pre_del</strong> (<em>callable</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Callable or class method name called before setter</p></li>
+<li><p><strong>post_del</strong> (<em>callable</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Callabel or class method name called after setter</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Automatic type conversion (autoconv = true) is not guaranteed to work in
+all cases and is known to fail for non-Python objects such as numpy
+ndarray types: Setting <strong>autoconv</strong> to false is recommened for these cases.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Typed</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">autoconv</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>    <span class="c1"># Do not attempt auto conversion</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt id="exa.typed.TypedMeta">
+<em class="property">class </em><code class="sig-prename descclassname">exa.typed.</code><code class="sig-name descname">TypedMeta</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">bases</span></em>, <em class="sig-param"><span class="n">namespace</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exa/typed.html#TypedMeta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.typed.TypedMeta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></a></p>
+<p>A metaclass for creating typed attributes which can be used instead of
+the class decorator.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Foo</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">TypedMeta</span><span class="p">):</span>
+    <span class="n">bar</span> <span class="o">=</span> <span class="n">Typed</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s2">&quot;Always an int&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#exa.typed.typed" title="exa.typed.typed"><code class="xref py py-func docutils literal notranslate"><span class="pre">typed()</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">data</span></code></p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt id="exa.typed.TypedClass">
+<em class="property">class </em><code class="sig-prename descclassname">exa.typed.</code><code class="sig-name descname">TypedClass</code><a class="reference internal" href="_modules/exa/typed.html#TypedClass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#exa.typed.TypedClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A mixin class which can be used to create a class with strongly typed
+attributes.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Foo</span><span class="p">(</span><span class="n">TypedClass</span><span class="p">):</span>
+    <span class="n">bar</span> <span class="o">=</span> <span class="n">Typed</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s2">&quot;Still an int&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#exa.typed.typed" title="exa.typed.typed"><code class="xref py py-func docutils literal notranslate"><span class="pre">typed()</span></code></a></p>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="exa.static.html" class="btn btn-neutral float-left" title="exa.static module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 
+      <span class="lastupdated">
+        Last updated on Nov 07, 2020.
+      </span>
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,25 @@
+exa package
+===========
+
+.. automodule:: exa
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   exa.core
+   exa.util
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   exa.static
+   exa.typed

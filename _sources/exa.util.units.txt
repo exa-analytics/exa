@@ -1,0 +1,7 @@
+exa.util.units module
+=====================
+
+.. automodule:: exa.util.units
+   :members:
+   :undoc-members:
+   :show-inheritance:
