@@ -1,7 +1,7 @@
 networkx
 traitlets
 numpy
-pandas
+pandas<1.1
 sympy
 tables
 numba

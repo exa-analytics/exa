@@ -173,6 +173,17 @@ source: os.path.dne
     with pytest.raises(TraitError):
         d.source = 1
 
+def test_read_csv(tmpdir):
+    d = tmpdir.mkdir('test_read_csv')
+    f = d.join("tmp.csv")
+    f.write("""\
+foo, bar
+0, 1
+2, 3
+""")
+    dum = exa.Data.read_csv(f)
+    assert isinstance(dum, exa.Data)
+
 def test_copy(data):
     data._data = None
     n = data.copy()
